@@ -1,0 +1,5 @@
+/zenbudget.apk  /zenbudget.apk  200!
+/version.json   /version.json   200!
+/download       /download.html  200!
+/api/*          /.netlify/functions/:splat  200
+/*              /index.html                 200

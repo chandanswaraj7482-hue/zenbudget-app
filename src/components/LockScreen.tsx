@@ -1,0 +1,1589 @@
+import React, { useState, useEffect } from 'react';
+import { Delete, AlertCircle, CheckCircle, Mail, KeyRound, Loader2, LogOut, ArrowLeft, User, Download, Fingerprint, X, Gift, Eye, EyeOff } from 'lucide-react';
+import { supabase } from '../supabaseClient';
+import { playNotificationSound } from '../utils/audio';
+import { Capacitor } from '@capacitor/core';
+import { Device } from '@capacitor/device';
+
+interface LockScreenProps {
+  onUnlock: (userId: string, username: string, tier: string, trialStart: string, pin: string, premiumExpiresAt: string | null, trialExpireDate?: string | null) => void;
+}
+
+export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+
+  // Lockscreen steps: 'auth' | 'onboard-pin' | 'onboard-confirm' | 'unlock'
+  const [step, setStep] = useState<'auth' | 'onboard-pin' | 'onboard-confirm' | 'unlock'>('auth');
+  const [userId, setUserId] = useState('');
+  const [username, setUsername] = useState('');
+  const [pin, setPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
+  const [referralCodeInput, setReferralCodeInput] = useState('');
+  
+  // Verification variables
+  const [enteredPin, setEnteredPin] = useState('');
+  const [isIncorrect, setIsIncorrect] = useState(false);
+  
+  // Loaded user profile reference
+  const [dbProfile, setDbProfile] = useState<{ 
+    name: string; 
+    pin: string; 
+    subscription_tier: string; 
+    trial_start_date: string; 
+    premium_expires_at: string | null;
+    trial_expire_date?: string | null;
+    referral_code?: string;
+    referred_by?: string;
+  } | null>(null);
+  
+  // Biometric authentication states
+  const [biometricsAvailable, setBiometricsAvailable] = useState(false);
+  
+  // iOS Safari PWA setup state
+  const [showIOSInstructions, setShowIOSInstructions] = useState(false);
+
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
+
+  useEffect(() => {
+    // Silently detect location for currency — IP is NOT displayed to user
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.country_code) {
+          const detectedCurrency = data.country_code === 'IN' ? 'INR' : 'USD';
+          localStorage.setItem('zb_default_currency', detectedCurrency);
+          const profileId = localStorage.getItem('zb_profile_id');
+          if (profileId) {
+            localStorage.setItem(`zb_currency_${profileId}`, detectedCurrency);
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Check if session already exists on load & listen to redirect events
+  useEffect(() => {
+    console.log("LockScreen: Initializing session checks and listeners");
+    checkCurrentSession();
+
+    // Check if biometric authentication is available
+    if (Capacitor.isNativePlatform()) {
+      import('@capgo/capacitor-native-biometric')
+        .then(({ NativeBiometric }) => {
+          return NativeBiometric.isAvailable();
+        })
+        .then((result) => {
+          if (result && result.isAvailable) {
+            setBiometricsAvailable(true);
+          }
+        })
+        .catch((err) => {
+          console.warn('LockScreen: Biometrics isAvailable check failed:', err);
+        });
+    } else {
+      // Web/PWA: Check WebAuthn (fingerprint/face on mobile browsers)
+      if (window.PublicKeyCredential) {
+        PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+          .then((available) => {
+            if (available) {
+              setBiometricsAvailable(true);
+              console.log('LockScreen: Web biometric (WebAuthn) available');
+            }
+          })
+          .catch((err) => {
+            console.warn('LockScreen: WebAuthn check failed:', err);
+          });
+      }
+    }
+
+    // Setup deep link listener for Capacitor native app
+    let urlListener: any = null;
+    if (Capacitor.isNativePlatform()) {
+      import('@capacitor/app').then(({ App }) => {
+        App.addListener('appUrlOpen', async (eventData: any) => {
+          console.log('LockScreen: App opened with deep link URL:', eventData.url);
+          try {
+            // The URL looks like: com.zenbudget.app://login#access_token=...&refresh_token=...
+            const urlStr = eventData.url;
+            if (urlStr.includes('access_token=') && urlStr.includes('refresh_token=')) {
+              const hashIndex = urlStr.indexOf('#');
+              if (hashIndex !== -1) {
+                const hash = urlStr.substring(hashIndex + 1);
+                const params = new URLSearchParams(hash);
+                const accessToken = params.get('access_token');
+                const refreshToken = params.get('refresh_token');
+                if (accessToken && refreshToken) {
+                  setIsLoading(true);
+                  const { error } = await supabase.auth.setSession({
+                    access_token: accessToken,
+                    refresh_token: refreshToken
+                  });
+                  if (error) throw error;
+                  
+                  // Close native browser overlay
+                  const { Browser } = await import('@capacitor/browser');
+                  await Browser.close();
+                }
+              }
+            }
+          } catch (err: any) {
+            console.error('LockScreen: Error handling deep link session:', err);
+            setErrorMsg(err.message || 'Failed to complete login redirect.');
+            setIsLoading(false);
+          }
+        }).then(listener => {
+          urlListener = listener;
+        });
+      });
+    }
+
+    // Setup active state change listener (critical for OAuth redirects)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("LockScreen: supabase.auth.onAuthStateChange triggered", event, session?.user?.email);
+      
+      // IMPORTANT FIX: Ignore SIGNED_OUT event if user has a valid local cached session
+      // This prevents random auto-logouts when Supabase token refreshes or expires
+      if (event === 'SIGNED_OUT') {
+        const localCached = localStorage.getItem('zb_local_session_profile');
+        if (localCached) {
+          console.log('LockScreen: Ignoring SIGNED_OUT — using cached local session to prevent auto-logout.');
+          return;
+        }
+      }
+      
+      if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user) {
+        setUserId(session.user.id);
+        if (session.user.email) {
+          localStorage.setItem('zb_user_email', session.user.email);
+        }
+        const metadata = session.user.user_metadata;
+        const name = metadata?.full_name || metadata?.name || session.user.email?.split('@')[0] || 'User';
+        setUsername(name);
+        await fetchUserProfile(session.user.id);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      if (urlListener) {
+        urlListener.remove();
+      }
+    };
+  }, []);
+
+  // Effect to auto-trigger biometric unlock prompt on mount or step change
+  useEffect(() => {
+    if (step === 'unlock' && biometricsAvailable && dbProfile) {
+      triggerBiometricUnlock();
+    }
+  }, [step, biometricsAvailable, dbProfile]);
+
+  const getOrCreateDeviceId = async (): Promise<string> => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const idResult = await Device.getId();
+        return idResult.identifier;
+      } catch (e) {
+        console.warn('Failed to get Capacitor hardware device ID, falling back to localStorage UUID:', e);
+      }
+    }
+    let webId = localStorage.getItem('zb_device_id');
+    if (!webId) {
+      webId = 'web-' + Math.random().toString(36).substring(2, 15) + '-' + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('zb_device_id', webId);
+    }
+    return webId;
+  };
+
+  const getDeviceName = async (): Promise<string> => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const info = await Device.getInfo();
+        return `${info.operatingSystem.toUpperCase()} - ${info.model}`;
+      } catch (e) {}
+    }
+    return 'Web - ' + navigator.userAgent.substring(0, 40);
+  };
+
+  const checkCurrentSession = async () => {
+    setIsLoading(true);
+
+    // Safety timeout: Ensure loading spinner never stays stuck on "Securing access..." for more than 5 seconds
+    const safetyTimer = setTimeout(() => {
+      setIsLoading(false);
+    }, 5000);
+
+    try {
+      console.log("LockScreen: Running checkCurrentSession()");
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log("LockScreen: getSession() result", session?.user?.email);
+      if (session?.user) {
+        // Verify profile exists in Supabase (check if user was deleted)
+        const { data: profileCheck, error: checkErr } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', session.user.id)
+          .maybeSingle();
+
+        if (!checkErr && !profileCheck) {
+          // If profile is missing, it could be a brand new OAuth user who hasn't completed onboarding.
+          // Or a deleted user. Let's check if they had a cached profile to know if they were deleted.
+          const hadProfile = localStorage.getItem('zb_local_session_profile');
+          if (hadProfile) {
+            console.log("LockScreen: Active user profile deleted from Supabase. Wiping session.");
+            await supabase.auth.signOut();
+            localStorage.clear(); // WIPE ALL local storage
+            setUserId('');
+            setUsername('');
+            setDbProfile(null);
+            setStep('auth');
+            setIsLoading(false);
+            return;
+          } else {
+            console.log("LockScreen: New OAuth user detected, proceeding to onboarding.");
+          }
+        }
+
+        // Run persistent device registration check
+        const currentDeviceId = await getOrCreateDeviceId();
+        const currentDeviceName = await getDeviceName();
+        const isMobile = Capacitor.isNativePlatform();
+
+        // ─── WHITELISTED DEVICES / IPs ─────────────────────────────────────
+        // These hostnames/IPs bypass ALL device-limit checks (admin/testing devices)
+        const WHITELISTED_HOSTS = ['10.121.201.39', 'localhost', '127.0.0.1'];
+        const currentHost = window.location.hostname;
+        const isWhitelisted = WHITELISTED_HOSTS.some(h => currentHost === h || currentHost.startsWith(h));
+        if (isWhitelisted) {
+          console.log('ZenBudget: Whitelisted host detected (' + currentHost + ') — skipping all device checks.');
+        }
+
+        if (!isWhitelisted) {
+          // 1. Anti-abuse: Check if this device is claimed by another email profile
+          const { data: claimCheck, error: claimCheckErr } = await supabase
+            .from('device_sessions')
+            .select('user_id')
+            .eq('device_id', currentDeviceId)
+            .neq('user_id', session.user.id)
+            .limit(1);
+
+          if (!claimCheckErr && claimCheck && claimCheck.length > 0) {
+            console.warn("LockScreen: Device already registered to another account.");
+            await supabase.auth.signOut();
+            setErrorMsg('This device is registered to another user profile. Only the registered user of this device can login.');
+            setStep('auth');
+            setIsLoading(false);
+            return;
+          }
+
+          // 2. Multi-device limits: Count active sessions (excl. current device)
+          const { data: activeSessions, error: activeErr } = await supabase
+            .from('device_sessions')
+            .select('device_id, device_type')
+            .eq('user_id', session.user.id)
+            .neq('device_id', currentDeviceId);
+
+          if (!activeErr && activeSessions) {
+            const mobileCount = activeSessions.filter(s => s.device_type === 'mobile').length;
+            const desktopCount = activeSessions.filter(s => s.device_type === 'desktop').length;
+
+            if (isMobile && mobileCount >= 1) {
+              console.warn("LockScreen: Max phone limits reached.");
+              await supabase.auth.signOut();
+              setErrorMsg('This account is already logged into another phone. You can only log in on one phone at a time.');
+              setStep('auth');
+              setIsLoading(false);
+              return;
+            }
+
+            if (!isMobile && desktopCount >= 3) {
+              console.warn("LockScreen: Max desktop limits reached.");
+              await supabase.auth.signOut();
+              setErrorMsg('This account is already logged into 3 other computers/browsers. Please log out from other sessions first.');
+              setStep('auth');
+              setIsLoading(false);
+              return;
+            }
+          }
+        }
+
+        // 3. Upsert current device session
+        try {
+          await supabase
+            .from('device_sessions')
+            .upsert({
+              user_id: session.user.id,
+              device_id: currentDeviceId,
+              device_name: currentDeviceName,
+              device_type: isMobile ? 'mobile' : 'desktop',
+              last_active: new Date().toISOString()
+            }, { onConflict: 'user_id,device_id' });
+        } catch (dbErr) {
+          console.warn('LockScreen: Failed to upsert device session:', dbErr);
+        }
+
+        // Device ownership is verified via Supabase device_sessions (below)
+        setUserId(session.user.id);
+        const metadata = session.user.user_metadata;
+        const name = metadata?.full_name || metadata?.name || session.user.email?.split('@')[0] || 'User';
+        setUsername(name);
+        await fetchUserProfile(session.user.id);
+      } else {
+        // Fallback check: If there is a cached local session profile, check if they exist in Supabase
+        const localCached = localStorage.getItem('zb_local_session_profile');
+        if (localCached) {
+          const cachedData = JSON.parse(localCached);
+          
+          // Verify profile still exists in Supabase
+          const { data: profileCheck, error: checkErr } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('id', cachedData.userId)
+            .maybeSingle();
+
+          if (!checkErr && !profileCheck) {
+            console.log("LockScreen: Cached user profile deleted from Supabase. Wiping cache.");
+            localStorage.clear(); // WIPE ALL
+            setUserId('');
+            setUsername('');
+            setDbProfile(null);
+            setStep('auth');
+            setIsLoading(false);
+            return;
+          }
+
+          console.log("LockScreen: Using cached local session profile fallback");
+          setUserId(cachedData.userId);
+          setDbProfile(cachedData.profile);
+          setUsername(cachedData.profile.name);
+          setStep('unlock');
+        } else {
+          setStep('auth');
+        }
+      }
+    } catch (err) {
+      console.error('LockScreen: Session check error:', err);
+      // Fallback in case of network issue
+      const localCached = localStorage.getItem('zb_local_session_profile');
+      if (localCached) {
+        const cachedData = JSON.parse(localCached);
+        setUserId(cachedData.userId);
+        setDbProfile(cachedData.profile);
+        setUsername(cachedData.profile.name);
+        setStep('unlock');
+      } else {
+        setStep('auth');
+      }
+    } finally {
+      clearTimeout(safetyTimer);
+      setIsLoading(false);
+    }
+  };
+
+  const fetchUserProfile = async (uid: string) => {
+    try {
+      console.log("LockScreen: fetchUserProfile() starting for uid", uid);
+      let userProf: any = null;
+
+      // 1. Try fetching profile by id
+      const { data, error } = await supabase.from('profiles').select('*').eq('id', uid).maybeSingle();
+      if (error) {
+        console.error("LockScreen: fetchUserProfile database query error:", error);
+        throw error;
+      }
+      userProf = data;
+
+      // 2. If not found by id, try matching by email for multi-device sync
+      const storedEmail = (email || localStorage.getItem('zb_user_email') || '').trim().toLowerCase();
+      if (!userProf && storedEmail) {
+        try {
+          const { data: emailMatch } = await supabase.from('profiles').select('*').ilike('email', storedEmail).maybeSingle();
+          if (emailMatch) {
+            userProf = emailMatch;
+            // Update profile id to link to current auth uid
+            await supabase.from('profiles').update({ id: uid }).eq('id', emailMatch.id);
+          }
+        } catch (eMatch) {
+          console.warn('Email profile matching check failed:', eMatch);
+        }
+      }
+
+      console.log("LockScreen: fetchUserProfile database query result:", userProf);
+      if (userProf) {
+        setDbProfile(userProf);
+        setUsername(userProf.name);
+        setStep('unlock');
+        // Store profile details locally to avoid logouts
+        localStorage.setItem('zb_local_session_profile', JSON.stringify({ userId: uid, profile: userProf }));
+        localStorage.setItem('zb_profile_id', userProf.id || uid);
+        console.log("LockScreen: Profile found, state set to unlock");
+      } else {
+        // Logged in but profile data is missing, prompt onboarding (PIN setup)
+        setStep('onboard-pin');
+        console.log("LockScreen: Profile not found, state set to onboard-pin");
+      }
+    } catch (err: any) {
+      console.error("LockScreen: fetchUserProfile caught error:", err);
+      // Fallback to cache even on db failure
+      const localCached = localStorage.getItem('zb_local_session_profile');
+      if (localCached) {
+        const cachedData = JSON.parse(localCached);
+        setDbProfile(cachedData.profile);
+        setUsername(cachedData.profile.name);
+        setStep('unlock');
+        return;
+      }
+      let msg = err.message || 'Error fetching user profile';
+      if (typeof msg === 'string' && (msg.includes('relation') || msg.includes('does not exist') || msg.includes('profiles'))) {
+        msg = 'Database tables are missing! Please copy the code from "supabase_schema.sql" and run it in your Supabase SQL Editor first.';
+      }
+      setErrorMsg(msg);
+      setStep('auth');
+    }
+  };
+
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !password.trim() || (authMode === 'signup' && !username.trim())) {
+      setErrorMsg('Please fill in all fields.');
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMsg('');
+
+    try {
+      const cleanEmail = email.trim().toLowerCase();
+      if (cleanEmail) {
+        localStorage.setItem('zb_user_email', cleanEmail);
+      }
+      if (authMode === 'signup') {
+        // ─── WHITELISTED HOSTS bypass all device restrictions ───────────────
+        const WHITELISTED_HOSTS = ['10.121.201.39', 'localhost', '127.0.0.1'];
+        const isWhitelistedSignup = WHITELISTED_HOSTS.some(h => window.location.hostname === h || window.location.hostname.startsWith(h));
+
+        if (!isWhitelistedSignup) {
+          // Anti-abuse: check device isn't already registered to another user
+          const currentDeviceId = await getOrCreateDeviceId();
+          const { data: deviceCheck } = await supabase
+            .from('device_sessions')
+            .select('user_id')
+            .eq('device_id', currentDeviceId)
+            .limit(1);
+          if (deviceCheck && deviceCheck.length > 0) {
+            setErrorMsg('This device is already registered to another ZenBudget account.');
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        // Prevent duplicate profiles for 1 email
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('id, email, name')
+          .eq('email', cleanEmail)
+          .maybeSingle();
+
+        if (existingProfile) {
+          setErrorMsg(`An account already exists for ${cleanEmail}! Switched to Login tab.`);
+          setAuthMode('login');
+          playNotificationSound('info');
+          setIsLoading(false);
+          return;
+        }
+
+        const { data, error } = await supabase.auth.signUp({ email: cleanEmail, password });
+        if (error) throw error;
+        if (data.user) {
+          setUserId(data.user.id);
+          setStep('onboard-pin');
+        }
+      } else {
+        const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
+        if (error) throw error;
+        if (data.user) {
+          setUserId(data.user.id);
+          await fetchUserProfile(data.user.id);
+        }
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Authentication failed. Please check credentials.');
+      playNotificationSound('warning');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSocialLogin = async (provider: 'google' | 'apple') => {
+    if (provider === 'apple') {
+      setErrorMsg('Apple Sign-In is coming soon! Please use "Continue with Google" or Email to sign in for free.');
+      playNotificationSound('info');
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMsg('');
+
+    // Safety timeout: auto-reset loading state after 6 seconds if OAuth popup or redirect is delayed
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 6000);
+
+    try {
+      if (Capacitor.isNativePlatform()) {
+        // Native OAuth flow using Capacitor Browser
+        const { data, error } = await supabase.auth.signInWithOAuth({ 
+          provider,
+          options: {
+            redirectTo: 'com.zenbudget.app://login',
+            skipBrowserRedirect: true
+          }
+        });
+        if (error) throw error;
+        if (data?.url) {
+          const { Browser } = await import('@capacitor/browser');
+          await Browser.open({ url: data.url, windowName: '_self' });
+        } else {
+          throw new Error('OAuth authentication URL was not generated.');
+        }
+      } else {
+        // Web OAuth flow
+        const { error } = await supabase.auth.signInWithOAuth({ 
+          provider,
+          options: {
+            redirectTo: window.location.origin
+          }
+        });
+        if (error) throw error;
+      }
+    } catch (err: any) {
+      clearTimeout(timer);
+      setErrorMsg(err.message || `Failed to authenticate with ${provider}.`);
+      playNotificationSound('warning');
+      setIsLoading(false);
+    }
+  };
+
+  const triggerBiometricUnlock = async (overrideProfile?: typeof dbProfile) => {
+    try {
+      const activeProfile = overrideProfile || dbProfile;
+      if (!activeProfile) return;
+
+      if (Capacitor.isNativePlatform()) {
+        // Native biometric via Capacitor plugin
+        const { NativeBiometric } = await import('@capgo/capacitor-native-biometric');
+        await NativeBiometric.verifyIdentity({
+          reason: "Unlock ZenBudget",
+          title: "Biometric Unlock",
+          subtitle: "Use fingerprint or Face ID to unlock your account",
+          description: "Confirm your identity to log in."
+        });
+      } else {
+        // Web/PWA biometric via WebAuthn
+        const storedCredId = localStorage.getItem('zb_webauthn_cred_id');
+        
+        if (storedCredId) {
+          // Use existing credential for biometric verification
+          const credIdBuffer = Uint8Array.from(atob(storedCredId), c => c.charCodeAt(0));
+          await navigator.credentials.get({
+            publicKey: {
+              challenge: crypto.getRandomValues(new Uint8Array(32)),
+              timeout: 60000,
+              userVerification: 'required',
+              allowCredentials: [{
+                type: 'public-key',
+                id: credIdBuffer,
+                transports: ['internal']
+              }],
+              rpId: window.location.hostname
+            }
+          });
+        } else {
+          // First time: Register a new biometric credential
+          const credential = await navigator.credentials.create({
+            publicKey: {
+              challenge: crypto.getRandomValues(new Uint8Array(32)),
+              rp: { name: 'ZenBudget', id: window.location.hostname },
+              user: {
+                id: new TextEncoder().encode(userId || 'zenbudget-user'),
+                name: activeProfile.name || 'ZenBudget User',
+                displayName: activeProfile.name || 'ZenBudget User'
+              },
+              pubKeyCredParams: [{ alg: -7, type: 'public-key' }],
+              authenticatorSelection: {
+                authenticatorAttachment: 'platform',
+                userVerification: 'required'
+              },
+              timeout: 60000
+            }
+          }) as PublicKeyCredential | null;
+          
+          if (credential) {
+            // Store credential ID for future biometric unlocks
+            const credId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
+            localStorage.setItem('zb_webauthn_cred_id', credId);
+          } else {
+            throw new Error('Biometric registration cancelled');
+          }
+        }
+      }
+      
+      if (activeProfile.referral_code) {
+        localStorage.setItem('zb_invite_code', activeProfile.referral_code);
+      }
+      playNotificationSound('success');
+      onUnlock(
+        userId,
+        activeProfile.name,
+        activeProfile.subscription_tier,
+        activeProfile.trial_start_date,
+        activeProfile.pin,
+        activeProfile.premium_expires_at,
+        activeProfile.trial_expire_date
+      );
+    } catch (err: any) {
+      console.warn('LockScreen: Biometric unlock failed or cancelled:', err);
+    }
+  };
+
+  const getDeviceId = async (): Promise<string> => {
+    try {
+      const { Device } = await import('@capacitor/device');
+      const info = await Device.getId();
+      return info.identifier;
+    } catch (e) {
+      let localId = localStorage.getItem('zb_fallback_device_id');
+      if (!localId) {
+        localId = typeof crypto.randomUUID === 'function' 
+          ? crypto.randomUUID() 
+          : Math.random().toString(36).substring(2) + Date.now().toString(36);
+        localStorage.setItem('zb_fallback_device_id', localId);
+      }
+      return localId;
+    }
+  };
+
+  const handlePinConfirmSubmit = async () => {
+    if (confirmPin !== pin) {
+      setErrorMsg('PINs do not match. Start over.');
+      playNotificationSound('warning');
+      setPin('');
+      setConfirmPin('');
+      setStep('onboard-pin');
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMsg('');
+
+    try {
+      const devId = await getDeviceId();
+      const myReferralCode = 'ZB-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+      const pendingReferral = localStorage.getItem('zb_pending_referral') || null;
+
+      // Check if this device ID is already associated with any profile
+      const { data: existingProfile, error: checkError } = await supabase
+        .from('profiles')
+        .select('id, name')
+        .eq('device_id', devId)
+        .maybeSingle();
+
+      if (checkError) {
+        console.error('LockScreen: Device ID check failed:', checkError);
+      }
+
+      if (existingProfile && existingProfile.id !== userId) {
+        throw new Error('Only one free trial account is allowed per phone/device. Please log in to your existing account.');
+      }
+
+      // Check for Premium Restoration by email
+      let restoredTier = 'trial';
+      let restoredExpiry = null;
+      try {
+        const { data: verifiedPayments, error: payErr } = await supabase
+          .from('payment_history')
+          .select('*')
+          .eq('email', email.trim().toLowerCase())
+          .eq('payment_status', 'success');
+
+        if (!payErr && verifiedPayments && verifiedPayments.length > 0) {
+          // Sort payments by purchase date desc
+          const sorted = verifiedPayments.sort((a: any, b: any) => new Date(b.purchase_date).getTime() - new Date(a.purchase_date).getTime());
+          const latestPayment = sorted[0];
+
+          if (latestPayment.plan_type === 'lifetime' || latestPayment.plan_type === 'premium_lifetime') {
+            restoredTier = 'premium_lifetime';
+            restoredExpiry = null;
+          } else if (latestPayment.plan_type === 'monthly' || latestPayment.plan_type === 'premium_monthly') {
+            const purchaseTime = new Date(latestPayment.purchase_date).getTime();
+            const expiryTime = purchaseTime + 30 * 24 * 60 * 60 * 1000;
+            if (expiryTime > Date.now()) {
+              restoredTier = 'premium_monthly';
+              restoredExpiry = new Date(expiryTime).toISOString();
+            }
+          }
+
+          // Link old payments to new user ID
+          await supabase
+            .from('payment_history')
+            .update({ user_id: userId })
+            .eq('email', email.trim().toLowerCase());
+
+          // Insert active subscription row
+          await supabase
+            .from('subscriptions')
+            .insert([{
+              user_id: userId,
+              plan_type: restoredTier,
+              purchase_date: new Date().toISOString(),
+              expiry_date: restoredExpiry,
+              payment_id: 'restored_' + Date.now(),
+              payment_status: 'success',
+              payment_provider: 'cashfree'
+            }]);
+        }
+      } catch (restoreErr) {
+        console.warn('LockScreen: Premium restoration check failed:', restoreErr);
+      }
+
+      const newProfile: any = {
+        id: userId,
+        name: username.trim() || 'User',
+        pin: pin,
+        subscription_tier: restoredTier,
+        trial_start_date: new Date().toISOString(),
+        premium_expires_at: restoredExpiry,
+        device_id: devId,
+        referral_code: myReferralCode,
+        referred_by: pendingReferral
+      };
+
+      let { error } = await supabase.from('profiles').upsert(newProfile);
+      
+      // If table lacks referral_code columns, fallback to basic schema
+      if (error && (error.message.includes('column') || error.message.includes('referral_code') || error.message.includes('referred_by'))) {
+        console.warn('LockScreen: Referral columns missing, retrying basic upsert...');
+        const basicProfile = {
+          id: userId,
+          name: username.trim() || 'User',
+          pin: pin,
+          subscription_tier: restoredTier,
+          trial_start_date: newProfile.trial_start_date,
+          device_id: devId
+        };
+        const retryResult = await supabase.from('profiles').upsert(basicProfile);
+        if (retryResult.error) throw retryResult.error;
+      } else if (error) {
+        console.error('LockScreen: Profile upsert error:', error);
+        if (error.code === '23503' || (error.message && error.message.includes('foreign key'))) {
+          throw new Error('Account setup error: This email is already registered or unconfirmed. If you already have an account, click "Back to Login" and log in instead!');
+        }
+        throw error;
+      }
+
+      // Store generated invite code for local UI referral sharing
+      localStorage.setItem('zb_invite_code', myReferralCode);
+
+      playNotificationSound('success');
+      onUnlock(userId, newProfile.name, restoredTier, newProfile.trial_start_date, pin, restoredExpiry, null);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Failed to create profile. Try again.');
+      playNotificationSound('warning');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeypadPress = (num: string) => {
+    setErrorMsg('');
+    if (step === 'onboard-pin' || step === 'onboard-confirm') {
+      const current = step === 'onboard-pin' ? pin : confirmPin;
+      const setter = step === 'onboard-pin' ? setPin : setConfirmPin;
+      
+      if (current.length < 4) {
+        setter(prev => prev + num);
+      }
+    } else if (step === 'unlock' && dbProfile) {
+      if (enteredPin.length < 4) {
+        const nextPin = enteredPin + num;
+        setEnteredPin(nextPin);
+        
+        if (nextPin.length === 4) {
+          if (nextPin === dbProfile.pin) {
+            if (dbProfile.referral_code) {
+              localStorage.setItem('zb_invite_code', dbProfile.referral_code);
+            }
+            playNotificationSound('success');
+            onUnlock(userId, dbProfile.name, dbProfile.subscription_tier, dbProfile.trial_start_date, dbProfile.pin, dbProfile.premium_expires_at, dbProfile.trial_expire_date);
+          } else {
+            setIsIncorrect(true);
+            setErrorMsg('Incorrect PIN. Please try again.');
+            playNotificationSound('warning');
+            setTimeout(() => {
+              setIsIncorrect(false);
+              setEnteredPin('');
+            }, 600);
+          }
+        }
+      }
+    }
+  };
+
+  const handleBackspace = () => {
+    if (step === 'onboard-pin') {
+      setPin(prev => prev.slice(0, -1));
+    } else if (step === 'onboard-confirm') {
+      setConfirmPin(prev => prev.slice(0, -1));
+    } else if (step === 'unlock') {
+      setEnteredPin(prev => prev.slice(0, -1));
+    }
+  };
+
+  const handleSignOut = async () => {
+    setIsLoading(true);
+    try {
+      await supabase.auth.signOut();
+      localStorage.removeItem('zb_local_session_profile');
+      setUserId('');
+      setUsername('');
+      setDbProfile(null);
+      setEmail('');
+      setPassword('');
+      setStep('auth');
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getDotsCount = () => {
+    if (step === 'onboard-pin') return pin.length;
+    if (step === 'onboard-confirm') return confirmPin.length;
+    return enteredPin.length;
+  };
+
+  return (
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      minHeight: '100%',
+      height: '100%',
+      width: '100%',
+      padding: '24px 24px 80px 24px',
+      overflowY: 'auto',
+      WebkitOverflowScrolling: 'touch',
+      boxSizing: 'border-box',
+      background: 'radial-gradient(circle at 50% 30%, rgba(34, 197, 94, 0.18) 0%, rgba(9, 9, 15, 0) 70%)',
+      animation: 'fadeIn 0.5s ease-out'
+    }}>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        margin: 'auto 0',
+        minHeight: 'max-content',
+        gap: '20px'
+      }}>
+      {isLoading && (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', margin: '20px 0' }}>
+          <Loader2 size={36} className="animate-spin" style={{ color: 'var(--primary)' }} />
+          <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Securing access...</span>
+        </div>
+      )}
+
+      {/* STEP: Sign In / Sign Up Auth Screen */}
+      {!isLoading && step === 'auth' && (
+        <div
+          className="glass-panel"
+          style={{
+            width: '100%',
+            maxWidth: '360px',
+            padding: '32px 24px 24px',
+            borderRadius: '28px',
+            border: '1px solid rgba(255,255,255,0.08)',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0px'
+          }}
+        >
+          {/* ── Logo & Branding ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '28px' }}>
+            <div style={{
+              width: '72px', height: '72px', borderRadius: '22px',
+              background: 'linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(6,182,212,0.1) 100%)',
+              border: '1px solid rgba(34,197,94,0.25)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 8px 32px rgba(34,197,94,0.2)',
+              marginBottom: '14px', overflow: 'hidden'
+            }}>
+              <img src="/favicon.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+            <h1 style={{ fontSize: '30px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
+              <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
+            </h1>
+            <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', margin: 0, fontWeight: 700 }}>
+              Claim Your Money
+            </p>
+          </div>
+
+          {/* ── Login / Sign Up Tab ── */}
+          <div style={{
+            display: 'flex', background: 'var(--bg-input)', padding: '4px',
+            borderRadius: '14px', border: '1px solid var(--border-input)', marginBottom: '24px'
+          }}>
+            <button type="button" onClick={() => { setAuthMode('login'); setErrorMsg(''); }} style={{
+              flex: 1, padding: '10px', borderRadius: '10px', border: 'none', cursor: 'pointer',
+              fontSize: '13px', fontWeight: 800,
+              background: authMode === 'login' ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'transparent',
+              color: authMode === 'login' ? '#ffffff' : 'var(--text-secondary)',
+              boxShadow: authMode === 'login' ? '0 4px 12px rgba(34,197,94,0.35)' : 'none',
+              transition: 'all 0.2s ease'
+            }}>Login</button>
+            <button type="button" onClick={() => { setAuthMode('signup'); setErrorMsg(''); }} style={{
+              flex: 1, padding: '10px', borderRadius: '10px', border: 'none', cursor: 'pointer',
+              fontSize: '13px', fontWeight: 800,
+              background: authMode === 'signup' ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'transparent',
+              color: authMode === 'signup' ? '#ffffff' : 'var(--text-secondary)',
+              boxShadow: authMode === 'signup' ? '0 4px 12px rgba(34,197,94,0.35)' : 'none',
+              transition: 'all 0.2s ease'
+            }}>Sign Up</button>
+          </div>
+
+          {/* ── Social Login Buttons ── */}
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+            <button type="button" onClick={() => handleSocialLogin('google')} style={{
+              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+              padding: '11px 8px', borderRadius: '12px', border: '1px solid var(--border-input)',
+              background: 'var(--bg-input)', color: 'var(--text-primary)',
+              fontSize: '12px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s ease'
+            }}>
+              <svg viewBox="0 0 24 24" width="15" height="15"><path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.62 14.98 1 12 1 7.35 1 3.37 3.65 1.42 7.54l3.86 3C6.26 7.56 8.9 5.04 12 5.04z"/><path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.44h6.44c-.28 1.48-1.12 2.74-2.38 3.58l3.69 2.87c2.16-1.99 3.74-4.92 3.74-8.55z"/><path fill="#FBBC05" d="M5.28 14.54c-.24-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29L1.42 6.96C.52 8.76 0 10.78 0 12.92s.52 4.16 1.42 5.96l3.86-3.34z"/><path fill="#34A853" d="M12 22.88c3.24 0 5.97-1.07 7.96-2.91l-3.69-2.87c-1.02.68-2.33 1.09-4.27 1.09-3.1 0-5.74-2.52-6.68-5.5l-3.86 3C3.37 20.23 7.35 22.88 12 22.88z"/></svg>
+              Google
+            </button>
+            <button type="button" onClick={() => handleSocialLogin('apple')} style={{
+              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+              padding: '11px 8px', borderRadius: '12px', border: '1px solid var(--border-input)',
+              background: 'var(--bg-input)', color: 'var(--text-primary)',
+              fontSize: '12px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s ease'
+            }}>
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.21.67-2.93 1.49-.62.69-1.16 1.84-1.01 2.96 1.12.09 2.27-.58 2.95-1.39"/></svg>
+              Apple
+            </button>
+          </div>
+
+          {/* ── Divider ── */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+            <div style={{ flex: 1, height: '1px', background: 'var(--border-input)' }} />
+            <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>OR WITH EMAIL</span>
+            <div style={{ flex: 1, height: '1px', background: 'var(--border-input)' }} />
+          </div>
+
+          {/* ── Form ── */}
+          <form onSubmit={handleAuthSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+
+            {authMode === 'signup' && (
+              <>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Full Name</label>
+                  <div style={{ position: 'relative' }}>
+                    <User size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+                    <input type="text" required value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Your full name" className="glass-input" style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px' }} />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Referral Code <span style={{ color: 'var(--text-muted)', textTransform: 'none', fontWeight: 600 }}>(optional)</span></label>
+                  <div style={{ position: 'relative' }}>
+                    <Gift size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+                    <input type="text" value={referralCodeInput} onChange={(e) => setReferralCodeInput(e.target.value.toUpperCase())} placeholder="ZB-XXXX-XXXX" className="glass-input" style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px', textTransform: 'uppercase' }} />
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              <label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Email Address</label>
+              <div style={{ position: 'relative' }}>
+                <Mail size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@email.com" className="glass-input" style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px' }} />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              <label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Password</label>
+              <div style={{ position: 'relative' }}>
+                <KeyRound size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+                <input type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="glass-input" style={{ paddingLeft: '38px', paddingRight: '40px', fontSize: '13px', padding: '11px 40px 11px 38px', width: '100%', boxSizing: 'border-box' }} />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', padding: 0 }}>
+                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Remember Me & Forgot Password */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>
+                <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '13px', height: '13px', margin: 0 }} />
+                Remember Me
+              </label>
+              <button type="button" onClick={async () => {
+                if (!email.trim()) { setErrorMsg('Please enter your email first.'); return; }
+                setIsLoading(true);
+                try {
+                  const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: window.location.origin });
+                  if (error) throw error;
+                  setSuccessMsg(`Reset link sent to ${email.trim()}!`);
+                  setErrorMsg('');
+                } catch (err: any) {
+                  setErrorMsg(err.message || 'Failed to send reset link.');
+                } finally { setIsLoading(false); }
+              }} style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: '11px' }}>
+                Forgot Password?
+              </button>
+            </div>
+
+            {successMsg && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#16a34a', fontSize: '12px', fontWeight: 700, background: 'rgba(34,197,94,0.12)', padding: '10px 14px', borderRadius: '12px', border: '1px solid rgba(34,197,94,0.3)' }}>
+                <CheckCircle size={15} style={{ flexShrink: 0 }} /> <span>{successMsg}</span>
+              </div>
+            )}
+            {errorMsg && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--danger)', fontSize: '11px', background: 'var(--danger-glow)', padding: '9px 12px', borderRadius: '10px', border: '1px solid rgba(244,63,94,0.2)' }}>
+                <AlertCircle size={14} style={{ flexShrink: 0 }} /> <span>{errorMsg}</span>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button type="submit" style={{
+              padding: '13px', borderRadius: '14px', fontSize: '14px', fontWeight: 800, marginTop: '4px',
+              background: 'linear-gradient(135deg, #22c55e 0%, #06b6d4 100%)',
+              color: '#ffffff', border: 'none',
+              boxShadow: '0 6px 20px rgba(34,197,94,0.35)',
+              cursor: 'pointer', transition: 'all 0.2s ease', letterSpacing: '0.01em'
+            }}>
+              {authMode === 'login' ? '🔓 Login to ZenBudget' : '🚀 Create Account'}
+            </button>
+          </form>
+
+          {/* ── Footer: Download Cards ── */}
+          <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-input)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '0.03em' }}>🔒 256-bit Encrypted • Privacy First</span>
+            {!Capacitor.isNativePlatform() && (
+              <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
+                {/* APK / iOS Card */}
+                {/iPad|iPhone|iPod|macintosh|mac os x/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowIOSInstructions(true)}
+                    style={{
+                      flex: 1,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+                      padding: '11px 10px',
+                      borderRadius: '14px',
+                      border: '1px solid rgba(34,197,94,0.25)',
+                      background: 'rgba(34,197,94,0.06)',
+                      color: 'var(--primary)',
+                      fontSize: '12px', fontWeight: 700,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <Download size={14} />
+                    Install iOS App
+                  </button>
+                ) : (
+                  <a
+                    href="https://zenbudget-tracker.vercel.app/zenbudget.apk"
+                    download="ZenBudget.apk"
+                    style={{
+                      flex: 1,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+                      padding: '11px 10px',
+                      borderRadius: '14px',
+                      border: '1px solid rgba(34,197,94,0.25)',
+                      background: 'rgba(34,197,94,0.06)',
+                      color: 'var(--primary)',
+                      fontSize: '12px', fontWeight: 700,
+                      textDecoration: 'none',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <Download size={14} />
+                    Android APK
+                  </a>
+                )}
+                {/* Web App Card */}
+                <a
+                  href="https://zenbudget-tracker.vercel.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    flex: 1,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+                    padding: '11px 10px',
+                    borderRadius: '14px',
+                    border: '1px solid rgba(99,102,241,0.25)',
+                    background: 'rgba(99,102,241,0.06)',
+                    color: '#818cf8',
+                    fontSize: '12px', fontWeight: 700,
+                    textDecoration: 'none',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  🌐 Open Web App
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+
+      {/* STEP: Onboarding PIN Setup (Choose & Confirm) */}
+      {!isLoading && (step === 'onboard-pin' || step === 'onboard-confirm') && (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', width: '100%', maxWidth: '320px', textAlign: 'center' }} className="animate-slide-up">
+          <div>
+            <h2 style={{ fontSize: '22px', fontWeight: 800 }}>
+              {step === 'onboard-pin' ? 'Create PIN' : 'Confirm PIN'}
+            </h2>
+            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+              {step === 'onboard-pin' ? `Choose a 4-digit security PIN for locks` : 'Type your passcode again to verify'}
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: '16px', margin: '15px 0' }}>
+            {[0, 1, 2, 3].map((index) => {
+              const active = getDotsCount() > index;
+              return (
+                <div
+                  key={index}
+                  style={{
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '50%',
+                    border: '2px solid var(--primary)',
+                    backgroundColor: active ? 'var(--primary)' : 'transparent',
+                    boxShadow: active ? '0 0 10px var(--primary)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                />
+              );
+            })}
+          </div>
+
+          {errorMsg && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--danger)', fontSize: '13px' }}>
+              <AlertCircle size={14} /> {errorMsg}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* STEP: Verify PIN for unlock */}
+      {!isLoading && step === 'unlock' && dbProfile && (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', width: '100%', maxWidth: '320px', textAlign: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '20px',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-card)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 8px 24px rgba(34, 197, 94, 0.15)',
+              marginBottom: '16px',
+              overflow: 'hidden'
+            }}>
+              <img 
+                src="/favicon.png" 
+                alt="ZenBudget Logo" 
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  objectFit: 'cover' 
+                }} 
+              />
+            </div>
+            <h2 style={{ fontSize: '28px', fontWeight: 800, letterSpacing: '-0.03em', fontFamily: "'Manrope', sans-serif" }}>
+              <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
+            </h2>
+            <div style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--text-primary)', marginTop: '2px', fontWeight: 800 }}>
+              Calm Your Money
+            </div>
+            <p style={{ fontSize: '14px', color: 'var(--text-primary)', marginTop: '8px', marginBottom: '14px', fontWeight: 700 }}>Welcome back, {dbProfile.name}</p>
+            
+            {/* Custom Quote & Today's Goal lock reminder */}
+            <div style={{ 
+              background: 'var(--bg-card)', 
+              border: '1px solid var(--border-card)', 
+              padding: '16px', 
+              borderRadius: '20px', 
+              textAlign: 'center',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.06)'
+            }}>
+              <p style={{ fontSize: '13px', fontStyle: 'italic', color: 'var(--text-primary)', marginBottom: '10px', lineHeight: 1.4, fontWeight: 600 }}>
+                "A budget is telling your money where to go instead of wondering where it went."
+              </p>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--primary)', fontWeight: 800, fontSize: '12px', background: 'rgba(34, 197, 94, 0.12)', border: '1px solid rgba(34, 197, 94, 0.25)', padding: '6px 14px', borderRadius: '99px' }}>
+                <span>
+                  Today's Limit: Stay under {(() => {
+                    const activeUserId = userId || localStorage.getItem('zb_registered_device_user_id');
+                    const symbol = '₹';
+                    if (!activeUserId) return '₹500';
+                    const cachedLimit = localStorage.getItem('zb_today_smart_limit') || localStorage.getItem(`zb_daily_limit_${activeUserId}`);
+                    const limitVal = cachedLimit ? parseInt(cachedLimit, 10) : 500;
+                    return `${symbol}${limitVal.toLocaleString()}`;
+                  })()} 🤝
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Dots */}
+          <div 
+            style={{ 
+              display: 'flex', 
+              gap: '16px', 
+              margin: '15px 0',
+              animation: isIncorrect ? 'shake 0.5s ease-in-out' : 'none'
+            }}
+          >
+            {[0, 1, 2, 3].map((index) => {
+              const active = getDotsCount() > index;
+              return (
+                <div
+                  key={index}
+                  style={{
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '50%',
+                    border: '2px solid',
+                    borderColor: isIncorrect ? 'var(--danger)' : 'var(--primary)',
+                    backgroundColor: isIncorrect ? 'var(--danger)' : active ? 'var(--primary)' : 'transparent',
+                    boxShadow: isIncorrect ? '0 0 10px var(--danger)' : active ? '0 0 10px var(--primary)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                />
+              );
+            })}
+          </div>
+
+          {errorMsg && (
+            <div style={{ color: 'var(--danger)', fontSize: '13px', fontWeight: 700 }}>
+              {errorMsg}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Numeric Keypad */}
+      {!isLoading && step !== 'auth' && (
+        <div 
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '16px',
+            width: '100%',
+            maxWidth: '300px',
+            marginTop: '10px'
+          }}
+          className="animate-slide-up"
+        >
+          {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((num) => (
+            <button
+              key={num}
+              onClick={() => handleKeypadPress(num)}
+              style={{
+                height: '60px',
+                borderRadius: '50%',
+                border: '1px solid var(--border-card)',
+                background: 'var(--bg-card)',
+                color: 'var(--text-primary)',
+                fontSize: '22px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                transition: 'all 0.2s ease-out'
+              }}
+              onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.25)'}
+              onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
+            >
+              {num}
+            </button>
+          ))}
+          
+           {/* Left Keypad Column: Biometrics button or empty spacer */}
+          {step === 'unlock' && biometricsAvailable ? (
+            <button
+              onClick={() => triggerBiometricUnlock()}
+              style={{
+                height: '60px',
+                borderRadius: '50%',
+                border: '1px solid rgba(34, 197, 94, 0.3)',
+                background: 'rgba(34, 197, 94, 0.12)',
+                color: 'var(--primary)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(34, 197, 94, 0.15)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.3)'}
+              onMouseUp={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.12)'}
+            >
+              <Fingerprint size={24} />
+            </button>
+          ) : (
+            <div style={{ height: '60px', width: '60px' }} />
+          )}
+
+          {/* Center Column: 0 */}
+          <button
+            onClick={() => handleKeypadPress('0')}
+            style={{
+              height: '60px',
+              borderRadius: '50%',
+              border: '1px solid var(--border-card)',
+              background: 'var(--bg-card)',
+              color: 'var(--text-primary)',
+              fontSize: '22px',
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.25)'}
+            onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
+          >
+            0
+          </button>
+
+          {/* Right Column: Delete Backspace */}
+          <button
+            onClick={handleBackspace}
+            style={{
+              height: '60px',
+              borderRadius: '50%',
+              border: '1px solid var(--border-card)',
+              background: 'var(--bg-card)',
+              color: 'var(--text-primary)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseDown={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
+            onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
+          >
+            <Delete size={22} />
+          </button>
+        </div>
+      )}
+
+      {/* Secondary Bottom Footer Actions (Back / Sign Out link) */}
+      {!isLoading && (
+        <div style={{ marginTop: '24px', zIndex: 10 }}>
+          {step === 'unlock' ? (
+            <>
+              <button
+                onClick={() => setShowSignOutConfirm(true)}
+                style={{
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.25)',
+                  color: 'var(--danger)',
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '8px 16px',
+                  borderRadius: '99px'
+                }}
+              >
+                <LogOut size={13} /> Sign Out of Account
+              </button>
+
+              {/* Sign Out Confirmation Popup */}
+              {showSignOutConfirm && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
+                  <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)', borderRadius: '24px', padding: '28px', maxWidth: '300px', width: '100%', textAlign: 'center', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
+                    <div style={{ fontSize: '36px', marginBottom: '12px' }}>👋</div>
+                    <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>Sign Out?</h3>
+                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '24px' }}>Are you sure you want to sign out? Your data is saved securely.</p>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <button onClick={() => setShowSignOutConfirm(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid var(--border-input)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
+                      <button onClick={() => { setShowSignOutConfirm(false); handleSignOut(); }} style={{ flex: 1, padding: '12px', borderRadius: '12px', border: 'none', background: 'var(--danger)', color: '#ffffff', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Yes, Sign Out</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (step === 'onboard-pin' || step === 'onboard-confirm') && (
+            <button
+              onClick={() => {
+                if (step === 'onboard-pin' || step === 'onboard-confirm') {
+                  setStep('auth');
+                }
+                setPin('');
+                setConfirmPin('');
+                setErrorMsg('');
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-secondary)',
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <ArrowLeft size={14} /> Back to Login / SignUp
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Onboarding On-Screen Confirmation Buttons (Keypad Bottom) */}
+      {!isLoading && step === 'onboard-pin' && pin.length === 4 && (
+        <div style={{ width: '100%', maxWidth: '300px', marginTop: '20px' }}>
+          <button onClick={() => setStep('onboard-confirm')} className="glass-button active animate-fade-in" style={{ width: '100%', padding: '14px', borderRadius: '16px', fontWeight: 700, background: 'linear-gradient(to right, var(--primary), #06b6d4)', border: 'none', boxShadow: '0 4px 15px rgba(34, 197, 94, 0.3)' }}>
+            Next Step
+          </button>
+        </div>
+      )}
+      
+      {!isLoading && step === 'onboard-confirm' && confirmPin.length === 4 && (
+        <div style={{ width: '100%', maxWidth: '300px', marginTop: '20px' }}>
+          <button onClick={handlePinConfirmSubmit} className="glass-button active animate-fade-in" style={{ width: '100%', padding: '14px', borderRadius: '16px', fontWeight: 700, background: 'linear-gradient(to right, var(--primary), #06b6d4)', border: 'none', boxShadow: '0 4px 15px rgba(34, 197, 94, 0.3)' }}>
+            Create Profile
+          </button>
+        </div>
+      )}
+
+      {/* iOS Standalone App Installation Instructions Modal */}
+      {showIOSInstructions && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.85)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1200,
+          padding: '20px',
+          animation: 'fadeIn 0.2s ease'
+        }} onClick={() => setShowIOSInstructions(false)}>
+          <div style={{
+            width: '100%',
+            maxWidth: '340px',
+            background: 'rgba(20, 20, 30, 0.95)',
+            border: '1px solid rgba(34, 197, 94, 0.25)',
+            boxShadow: '0 0 30px rgba(34, 197, 94, 0.15)',
+            borderRadius: '24px',
+            padding: '24px',
+            position: 'relative'
+          }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#fff' }}>Install on iPhone / iOS</h3>
+              <button
+                onClick={() => setShowIOSInstructions(false)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '28px',
+                  height: '28px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: 'var(--text-secondary)'
+                }}
+              >
+                <X size={14} />
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'var(--primary)', fontWeight: 700, fontSize: '11px', flexShrink: 0 }}>1</span>
+                <span>Open this website in the <strong>Safari</strong> browser on your iPhone.</span>
+              </div>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'var(--primary)', fontWeight: 700, fontSize: '11px', flexShrink: 0 }}>2</span>
+                <span>Tap the <strong>Share</strong> button (box with an up arrow <span style={{ fontSize: '14px' }}>⎋</span> at the bottom).</span>
+              </div>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'var(--primary)', fontWeight: 700, fontSize: '11px', flexShrink: 0 }}>3</span>
+                <span>Scroll down the share sheet and tap <strong>"Add to Home Screen"</strong>.</span>
+              </div>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'var(--primary)', fontWeight: 700, fontSize: '11px', flexShrink: 0 }}>4</span>
+                <span>Tap <strong>"Add"</strong> in the top-right corner to complete the installation.</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowIOSInstructions(false)}
+              className="glass-button active"
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '12px',
+                background: 'linear-gradient(to right, var(--primary), var(--secondary))',
+                border: 'none',
+                color: '#fff',
+                fontWeight: 700,
+                fontSize: '13px',
+                marginTop: '20px',
+                cursor: 'pointer'
+              }}
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Styles */}
+      <style>{`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          20%, 60% { transform: translateX(-8px); }
+          40%, 80% { transform: translateX(8px); }
+        }
+      `}</style>
+      </div>
+    </div>
+  );
+};

@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+
+# Sitemap location
+Sitemap: https://zenbudget-tracker.vercel.app/sitemap.xml
+
+# Crawl delay (be nice to small servers)
+Crawl-delay: 10

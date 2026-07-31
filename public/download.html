@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download ZenBudget Android App (.apk)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Manrope', sans-serif; }
+    body { background: #09090f; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; text-align: center; }
+    .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 32px 24px; max-width: 380px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+    .icon { font-size: 56px; margin-bottom: 16px; }
+    h1 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+    p { font-size: 13px; color: #94a3b8; line-height: 1.5; margin-bottom: 24px; }
+    .btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 16px; border-radius: 16px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; font-size: 15px; font-weight: 800; text-decoration: none; box-shadow: 0 10px 25px rgba(16,185,129,0.3); transition: transform 0.2s ease; }
+    .btn:active { transform: scale(0.98); }
+    .note { margin-top: 16px; font-size: 11px; color: #64748b; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">📦</div>
+    <h1>ZenBudget Android App</h1>
+    <p>Downloading official ZenBudget.apk (v1.0.1 - 23MB)...</p>
+    
+    <a href="/zenbudget.apk" download="ZenBudget.apk" target="_self" class="btn" id="downloadBtn">
+      ⬇️ Tap Here to Download APK
+    </a>
+
+    <div class="note">If download doesn't start automatically, tap the green button above.</div>
+  </div>
+
+  <script>
+    // Auto-trigger download on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        const btn = document.getElementById('downloadBtn');
+        if (btn) btn.click();
+      }, 500);
+    });
+  </script>
+</body>
+</html>

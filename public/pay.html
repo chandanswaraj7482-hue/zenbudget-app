@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZenBudget Payment Checkout</title>
+  <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background-color: #09090f;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-left-color: #10b981;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #ffffff;
+    }
+    .msg {
+      font-size: 0.95rem;
+      color: #94a3b8;
+      max-width: 320px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="spinner"></div>
+  <div class="title">ZenBudget Checkout</div>
+  <div class="msg" id="status-msg">Connecting to Cashfree Payment Gateway...</div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+
+    if (!sessionId) {
+      document.getElementById('status-msg').innerText = 'Error: Invalid or missing payment session.';
+    } else {
+      try {
+        const cf = Cashfree({ mode: 'production' });
+        cf.checkout({
+          paymentSessionId: sessionId,
+          redirectTarget: '_self'
+        });
+      } catch (err) {
+        document.getElementById('status-msg').innerText = 'Payment launch error: ' + (err.message || 'Could not connect.');
+      }
+    }
+  </script>
+</body>
+</html>

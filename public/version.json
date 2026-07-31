@@ -1,0 +1,8 @@
+{
+  "version": "1.0.3",
+  "versionCode": 3,
+  "apkUrl": "https://zenbudget-tracker.vercel.app/zenbudget.apk",
+  "releaseNotes": "✅ Language & currency sync fixed everywhere\n✅ Login screen redesigned — cleaner & premium\n✅ Back to Login/SignUp bug fixed\n✅ Background ambient glow added\n✅ Download APK & Web App links added",
+  "forceUpdate": false,
+  "minVersionCode": 1
+}

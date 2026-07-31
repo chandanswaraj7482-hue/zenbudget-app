@@ -1,0 +1,16 @@
+{
+  "short_name": "ZenBudget",
+  "name": "ZenBudget Tracker",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ],
+  "start_url": ".",
+  "background_color": "#0d0e12",
+  "theme_color": "#863bff",
+  "display": "standalone",
+  "orientation": "portrait"
+}
