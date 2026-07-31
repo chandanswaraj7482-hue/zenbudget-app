@@ -149,7 +149,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
   const processReceiptBase64 = async (base64Data: string) => {
     setScanMessage({ text: '🔍 Analyzing receipt with AI Vision...', type: 'info' });
-    const apiKey = '';
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
@@ -258,7 +258,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     setQrScanError(null);
     setScannedUpiInfo(null);
     try {
-      const apiKey = '';
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
 
       let image;
       try {

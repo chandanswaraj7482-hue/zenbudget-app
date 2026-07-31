@@ -120,7 +120,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
     }
 
     let botResponseText = '';
-    const apiKey = '';
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
     try {
       const activeLang = localStorage.getItem('zb_language') || 'en';
       const langNames: Record<string, string> = {
