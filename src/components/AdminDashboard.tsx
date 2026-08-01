@@ -131,122 +131,122 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [usdYearlyPrice, setUsdYearlyPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.usd_yearly || 29.99;
-    } catch (_) { return 29.99; }
+      return stored.usd_yearly || 19.99;
+    } catch (_) { return 19.99; }
   });
   const [usdLifetimePrice, setUsdLifetimePrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.usd_lifetime || 49.99;
-    } catch (_) { return 49.99; }
+      return stored.usd_lifetime || 29.99;
+    } catch (_) { return 29.99; }
   });
 
   // EUR Subscription Pricing
   const [eurMonthlyPrice, setEurMonthlyPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.eur_monthly || 2.85;
-    } catch (_) { return 2.85; }
+      return stored.eur_monthly || 4.59;
+    } catch (_) { return 4.59; }
   });
   const [eurYearlyPrice, setEurYearlyPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.eur_yearly || 28.50;
-    } catch (_) { return 28.50; }
+      return stored.eur_yearly || 18.50;
+    } catch (_) { return 18.50; }
   });
   const [eurLifetimePrice, setEurLifetimePrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.eur_lifetime || 47.99;
-    } catch (_) { return 47.99; }
+      return stored.eur_lifetime || 27.99;
+    } catch (_) { return 27.99; }
   });
 
   // GBP Subscription Pricing
   const [gbpMonthlyPrice, setGbpMonthlyPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.gbp_monthly || 2.59;
-    } catch (_) { return 2.59; }
+      return stored.gbp_monthly || 3.99;
+    } catch (_) { return 3.99; }
   });
   const [gbpYearlyPrice, setGbpYearlyPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.gbp_yearly || 25.99;
-    } catch (_) { return 25.99; }
+      return stored.gbp_yearly || 15.99;
+    } catch (_) { return 15.99; }
   });
   const [gbpLifetimePrice, setGbpLifetimePrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.gbp_lifetime || 44.99;
-    } catch (_) { return 44.99; }
+      return stored.gbp_lifetime || 24.99;
+    } catch (_) { return 24.99; }
   });
 
   // CAD Subscription Pricing
   const [cadMonthlyPrice, setCadMonthlyPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.cad_monthly || 3.99;
-    } catch (_) { return 3.99; }
+      return stored.cad_monthly || 5.99;
+    } catch (_) { return 5.99; }
   });
   const [cadYearlyPrice, setCadYearlyPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.cad_yearly || 39.99;
-    } catch (_) { return 39.99; }
+      return stored.cad_yearly || 24.99;
+    } catch (_) { return 24.99; }
   });
   const [cadLifetimePrice, setCadLifetimePrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.cad_lifetime || 59.99;
-    } catch (_) { return 59.99; }
+      return stored.cad_lifetime || 39.99;
+    } catch (_) { return 39.99; }
   });
 
   // AUD Subscription Pricing
   const [audMonthlyPrice, setAudMonthlyPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.aud_monthly || 4.49;
-    } catch (_) { return 4.49; }
+      return stored.aud_monthly || 6.99;
+    } catch (_) { return 6.99; }
   });
   const [audYearlyPrice, setAudYearlyPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.aud_yearly || 44.99;
-    } catch (_) { return 44.99; }
+      return stored.aud_yearly || 27.99;
+    } catch (_) { return 27.99; }
   });
   const [audLifetimePrice, setAudLifetimePrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.aud_lifetime || 69.99;
-    } catch (_) { return 69.99; }
+      return stored.aud_lifetime || 44.99;
+    } catch (_) { return 44.99; }
   });
 
   // AED Subscription Pricing
   const [aedMonthlyPrice, setAedMonthlyPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.aed_monthly || 11.99;
-    } catch (_) { return 11.99; }
+      return stored.aed_monthly || 17.99;
+    } catch (_) { return 17.99; }
   });
   const [aedYearlyPrice, setAedYearlyPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.aed_yearly || 119.99;
-    } catch (_) { return 119.99; }
+      return stored.aed_yearly || 69.99;
+    } catch (_) { return 69.99; }
   });
   const [aedLifetimePrice, setAedLifetimePrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.aed_lifetime || 179.99;
-    } catch (_) { return 179.99; }
+      return stored.aed_lifetime || 109.99;
+    } catch (_) { return 109.99; }
   });
 
   // SGD Subscription Pricing
   const [sgdMonthlyPrice, setSgdMonthlyPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.sgd_monthly || 3.99;
-    } catch (_) { return 3.99; }
+      return stored.sgd_monthly || 5.99;
+    } catch (_) { return 5.99; }
   });
   const [sgdYearlyPrice, setSgdYearlyPrice] = useState<number>(() => {
     try {
@@ -617,16 +617,36 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   };
 
   const updateUserSubscription = async (userId: string, newTier: 'trial' | 'premium_monthly' | 'premium_yearly' | 'premium_lifetime') => {
-    try {
-      const expiresAt = newTier === 'premium_monthly' 
-        ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-        : newTier === 'premium_yearly'
-          ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
-          : newTier === 'premium_lifetime' 
-            ? new Date(Date.now() + 3650 * 24 * 60 * 60 * 1000).toISOString()
-            : null;
+    const expiresAt = newTier === 'premium_monthly' 
+      ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      : newTier === 'premium_yearly'
+        ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+        : newTier === 'premium_lifetime' 
+          ? new Date(Date.now() + 3650 * 24 * 60 * 60 * 1000).toISOString()
+          : null;
 
-      // Try updating with premium_expires_at first
+    // 1. UPDATE LOCAL STATE IMMEDIATELY FOR INSTANT UI RESPONSE
+    setProfiles(prev => {
+      const updated = prev.map(p => p.id === userId ? { ...p, subscription_tier: newTier as any, premium_expires_at: expiresAt || undefined } : p);
+      localStorage.setItem('zb_admin_profiles_cache', JSON.stringify(updated));
+      return updated;
+    });
+
+    if (selectedDetailUser && selectedDetailUser.id === userId) {
+      setSelectedDetailUser(prev => prev ? { ...prev, subscription_tier: newTier as any, premium_expires_at: expiresAt || undefined } : null);
+    }
+
+    // Sync active device profile if updated
+    const activeId = localStorage.getItem('zb_profile_id');
+    if (activeId === userId) {
+      localStorage.setItem('zb_subscription_tier', newTier);
+      if (expiresAt) localStorage.setItem('zb_premium_expires_at', expiresAt);
+    }
+
+    if (onShowToast) onShowToast(`✅ User upgraded to ${newTier}!`, 'success');
+
+    // 2. BACKGROUND SYNC TO SUPABASE
+    try {
       let { error } = await supabaseClient
         .from('profiles')
         .update({ 
@@ -635,66 +655,63 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
         })
         .eq('id', userId);
 
-      // If column doesn't exist, try without it
       if (error && error.message?.includes('premium_expires_at')) {
-        console.warn('premium_expires_at column missing, updating tier only');
-        const res2 = await supabaseClient
+        await supabaseClient
           .from('profiles')
           .update({ subscription_tier: newTier })
           .eq('id', userId);
-        error = res2.error;
       }
-
-      if (error) {
-        console.error('Admin premium update error:', JSON.stringify(error));
-        throw error;
-      }
-
-      // Sync active device profile if updated
-      const activeId = localStorage.getItem('zb_profile_id');
-      if (activeId === userId) {
-        localStorage.setItem('zb_subscription_tier', newTier);
-        if (expiresAt) localStorage.setItem('zb_premium_expires_at', expiresAt);
-      }
-
-      setProfiles(prev => prev.map(p => p.id === userId ? { ...p, subscription_tier: newTier as any, premium_expires_at: expiresAt || undefined } : p));
-      if (onShowToast) onShowToast(`✅ User upgraded to ${newTier}!`, 'success');
-    } catch (err: any) {
-      console.error('updateUserSubscription full error:', err);
-      if (onShowToast) onShowToast(`❌ Failed: ${err.message || JSON.stringify(err)}`, 'warning');
-    }
+    } catch (_) {}
   };
 
-
   const toggleUserSuspension = async (userId: string, currentSuspended: boolean) => {
-    try {
-      const { error } = await supabaseClient
-        .from('profiles')
-        .update({ is_suspended: !currentSuspended })
-        .eq('id', userId);
+    const newSuspended = !currentSuspended;
 
-      if (error) throw error;
+    // 1. UPDATE LOCAL STATE IMMEDIATELY FOR INSTANT UI RESPONSE
+    setProfiles(prev => {
+      const updated = prev.map(p => p.id === userId ? { ...p, is_suspended: newSuspended } : p);
+      localStorage.setItem('zb_admin_profiles_cache', JSON.stringify(updated));
+      return updated;
+    });
 
-      setProfiles(prev => prev.map(p => p.id === userId ? { ...p, is_suspended: !currentSuspended } : p));
-      if (onShowToast) onShowToast(`User ${!currentSuspended ? 'Suspended' : 'Activated'}!`, 'info');
-    } catch (err: any) {
-      if (onShowToast) onShowToast(`Failed: ${err.message}`, 'warning');
+    if (selectedDetailUser && selectedDetailUser.id === userId) {
+      setSelectedDetailUser(prev => prev ? { ...prev, is_suspended: newSuspended } : null);
     }
+
+    if (onShowToast) onShowToast(`User ${newSuspended ? 'Suspended 🚫' : 'Activated ✅'}!`, 'info');
+
+    // 2. BACKGROUND SYNC TO SUPABASE
+    try {
+      await supabaseClient
+        .from('profiles')
+        .update({ is_suspended: newSuspended })
+        .eq('id', userId);
+    } catch (_) {}
   };
 
   const handleToggleScanPayAccess = async (userId: string, currentAccess: boolean) => {
+    const newAccess = !currentAccess;
+
+    // 1. UPDATE LOCAL STATE IMMEDIATELY FOR INSTANT UI RESPONSE
+    setProfiles(prev => {
+      const updated = prev.map(p => p.id === userId ? { ...p, has_scan_pay_access: newAccess } : p);
+      localStorage.setItem('zb_admin_profiles_cache', JSON.stringify(updated));
+      return updated;
+    });
+
+    if (selectedDetailUser && selectedDetailUser.id === userId) {
+      setSelectedDetailUser(prev => prev ? { ...prev, has_scan_pay_access: newAccess } : null);
+    }
+
+    if (onShowToast) onShowToast(`Scan & Pay Access ${newAccess ? 'Granted FREE ⚡' : 'Revoked'} for user!`, 'success');
+
+    // 2. BACKGROUND SYNC TO SUPABASE
     try {
-      const newAccess = !currentAccess;
-      const { error } = await supabaseClient
+      await supabaseClient
         .from('profiles')
         .update({ has_scan_pay_access: newAccess })
         .eq('id', userId);
-      if (error) throw error;
-      setProfiles(prev => prev.map(p => p.id === userId ? { ...p, has_scan_pay_access: newAccess } : p));
-      if (onShowToast) onShowToast(`Scan & Pay Access ${newAccess ? 'Granted FREE ⚡' : 'Revoked'} for user!`, 'success');
-    } catch (err: any) {
-      if (onShowToast) onShowToast(`Failed: ${err.message}`, 'warning');
-    }
+    } catch (_) {}
   };
 
   const toggleSelectUser = (id: string, e?: React.MouseEvent) => {

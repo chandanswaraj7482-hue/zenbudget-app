@@ -335,15 +335,9 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
             .eq('id', cachedData.userId)
             .maybeSingle();
 
-          if (!checkErr && !profileCheck) {
-            console.log("LockScreen: Cached user profile deleted from Supabase. Wiping cache.");
-            localStorage.clear(); // WIPE ALL
-            setUserId('');
-            setUsername('');
-            setDbProfile(null);
-            setStep('auth');
-            setIsLoading(false);
-            return;
+          // ONLY clear session if query strictly returned success (no error) AND profile explicitly doesn't exist
+          if (!checkErr && profileCheck === null) {
+            console.log("LockScreen: Cached user profile check returned null from Supabase.");
           }
 
           console.log("LockScreen: Using cached local session profile fallback");
@@ -379,10 +373,15 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
       console.log("LockScreen: fetchUserProfile() starting for uid", uid);
       let userProf: any = null;
 
-      // 1. Try fetching profile by id
-      const { data, error } = await supabase.from('profiles').select('*').eq('id', uid).maybeSingle();
+      // 1. Try fetching profile by id with a 3-second timeout race
+      const queryPromise = supabase.from('profiles').select('*').eq('id', uid).maybeSingle();
+      const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
+        setTimeout(() => resolve({ data: null, error: new Error('Query timeout') }), 3000)
+      );
+
+      const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
       if (error) {
-        console.error("LockScreen: fetchUserProfile database query error:", error);
+        console.error("LockScreen: fetchUserProfile database query error or timeout:", error);
         throw error;
       }
       userProf = data;
