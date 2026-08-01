@@ -971,9 +971,11 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   // Analytics Metrics
   const totalUsers = profiles.length;
   const premiumMonthlyCount = profiles.filter(p => p.subscription_tier === 'premium_monthly' || p.subscription_tier === 'premium').length;
+  const premiumYearlyCount = profiles.filter(p => p.subscription_tier === 'premium_yearly').length;
   const premiumLifetimeCount = profiles.filter(p => p.subscription_tier === 'premium_lifetime').length;
-  const trialCount = totalUsers - (premiumMonthlyCount + premiumLifetimeCount);
-  const estimatedRevenue = (premiumMonthlyCount * 149) + (premiumLifetimeCount * 499);
+  const totalPremiumUsers = premiumMonthlyCount + premiumYearlyCount + premiumLifetimeCount;
+  const trialCount = Math.max(0, totalUsers - totalPremiumUsers);
+  const estimatedRevenue = (premiumMonthlyCount * (monthlyPrice || 149)) + (premiumYearlyCount * (yearlyPrice || 1499)) + (premiumLifetimeCount * (lifetimePrice || 2499));
 
   if (!isOpen) return null;
 
@@ -1270,10 +1272,10 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                         <Crown size={20} color="#f59e0b" />
                       </div>
                       <div style={{ fontSize: '1.8rem', fontWeight: 800 }}>
-                        {premiumMonthlyCount + premiumLifetimeCount}
+                        {totalPremiumUsers}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: '#f59e0b', marginTop: '0.25rem' }}>
-                        {premiumMonthlyCount} Monthly | {premiumLifetimeCount} Lifetime
+                        {premiumMonthlyCount} Monthly | {premiumYearlyCount} Yearly | {premiumLifetimeCount} Lifetime
                       </div>
                     </div>
 
