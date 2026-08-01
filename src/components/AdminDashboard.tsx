@@ -66,6 +66,17 @@ interface CouponRecord {
   target_plan?: string;
 }
 
+interface SlotPurchaseRecord {
+  id?: string;
+  user_id: string;
+  user_name: string;
+  user_email: string;
+  slot_count: number;
+  price_paid: number;
+  currency: string;
+  created_at: string;
+}
+
 interface AdminDashboardProps {
   isOpen: boolean;
   onClose: () => void;
@@ -148,17 +159,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     localStorage.setItem('zb_dynamic_prices', JSON.stringify(pricingObj));
     if (onShowToast) onShowToast('Live Multi-Currency Prices updated successfully!', 'success');
   };
-  
-interface SlotPurchaseRecord {
-  id?: string;
-  user_id: string;
-  user_name: string;
-  user_email: string;
-  slot_count: number;
-  price_paid: number;
-  currency: string;
-  created_at: string;
-}
 
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing' | 'slots'>('overview');
 

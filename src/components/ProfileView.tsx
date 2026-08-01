@@ -28,6 +28,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const [name, setName] = useState(currentName);
   const [email, setEmail] = useState(currentEmail || localStorage.getItem('zb_user_email') || '');
   const [phone, setPhone] = useState(() => localStorage.getItem('zb_user_phone') || '');
+  const [phoneCode, setPhoneCode] = useState(() => localStorage.getItem('zb_user_phone_code') || '+91');
   const [pin, setPin] = useState(currentPin);
   const [currency, setCurrency] = useState(currentCurrency);
   const [language, setLanguage] = useState(currentLanguage);
@@ -84,6 +85,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     try {
       localStorage.setItem('zb_user_avatar', avatarUrl);
       localStorage.setItem('zb_user_phone', phone.trim());
+      localStorage.setItem('zb_user_phone_code', phoneCode);
       window.dispatchEvent(new Event('profile_avatar_updated'));
       await onSaveProfile(name.trim(), pin, currency, language, email.trim());
       setSuccessMsg('Profile settings updated successfully!');
@@ -244,22 +246,69 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             </div>
           </div>
 
-          {/* Phone Number */}
+          {/* Phone Number with Country Code */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Mobile Phone Number (Cashfree Sync)
             </label>
-            <div style={{ position: 'relative' }}>
-              <User size={15} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="e.g. 9876543210"
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {/* Country Code Selector */}
+              <select
+                value={phoneCode}
+                onChange={(e) => setPhoneCode(e.target.value)}
                 className="glass-input"
-                style={{ paddingLeft: '40px', fontSize: '13px', padding: '12px 14px 12px 40px' }}
-              />
+                style={{ width: '110px', fontSize: '13px', padding: '12px 8px', appearance: 'none', textAlign: 'center', fontWeight: 700, flexShrink: 0 }}
+              >
+                <option value="+91" style={{ color: '#000' }}>🇮🇳 +91</option>
+                <option value="+1" style={{ color: '#000' }}>🇺🇸 +1</option>
+                <option value="+44" style={{ color: '#000' }}>🇬🇧 +44</option>
+                <option value="+61" style={{ color: '#000' }}>🇦🇺 +61</option>
+                <option value="+971" style={{ color: '#000' }}>🇦🇪 +971</option>
+                <option value="+966" style={{ color: '#000' }}>🇸🇦 +966</option>
+                <option value="+81" style={{ color: '#000' }}>🇯🇵 +81</option>
+                <option value="+86" style={{ color: '#000' }}>🇨🇳 +86</option>
+                <option value="+49" style={{ color: '#000' }}>🇩🇪 +49</option>
+                <option value="+33" style={{ color: '#000' }}>🇫🇷 +33</option>
+                <option value="+39" style={{ color: '#000' }}>🇮🇹 +39</option>
+                <option value="+55" style={{ color: '#000' }}>🇧🇷 +55</option>
+                <option value="+7" style={{ color: '#000' }}>🇷🇺 +7</option>
+                <option value="+82" style={{ color: '#000' }}>🇰🇷 +82</option>
+                <option value="+65" style={{ color: '#000' }}>🇸🇬 +65</option>
+                <option value="+60" style={{ color: '#000' }}>🇲🇾 +60</option>
+                <option value="+63" style={{ color: '#000' }}>🇵🇭 +63</option>
+                <option value="+234" style={{ color: '#000' }}>🇳🇬 +234</option>
+                <option value="+27" style={{ color: '#000' }}>🇿🇦 +27</option>
+                <option value="+62" style={{ color: '#000' }}>🇮🇩 +62</option>
+                <option value="+90" style={{ color: '#000' }}>🇹🇷 +90</option>
+                <option value="+52" style={{ color: '#000' }}>🇲🇽 +52</option>
+                <option value="+48" style={{ color: '#000' }}>🇵🇱 +48</option>
+                <option value="+31" style={{ color: '#000' }}>🇳🇱 +31</option>
+                <option value="+46" style={{ color: '#000' }}>🇸🇪 +46</option>
+                <option value="+41" style={{ color: '#000' }}>🇨🇭 +41</option>
+                <option value="+34" style={{ color: '#000' }}>🇪🇸 +34</option>
+                <option value="+880" style={{ color: '#000' }}>🇧🇩 +880</option>
+                <option value="+92" style={{ color: '#000' }}>🇵🇰 +92</option>
+                <option value="+94" style={{ color: '#000' }}>🇱🇰 +94</option>
+                <option value="+977" style={{ color: '#000' }}>🇳🇵 +977</option>
+              </select>
+              {/* Masked Phone Number Input */}
+              <div style={{ position: 'relative', flex: 1 }}>
+                <input
+                  type="password"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                  placeholder="Enter your number"
+                  maxLength={15}
+                  className="glass-input"
+                  style={{ fontSize: '13px', padding: '12px 14px', width: '100%', letterSpacing: '2px' }}
+                />
+              </div>
             </div>
+            {phone && (
+              <p style={{ fontSize: '10px', color: 'var(--text-secondary)', margin: '2px 0 0 0', fontStyle: 'italic' }}>
+                📞 Saved: {phoneCode} {'•'.repeat(Math.max(0, phone.length - 2))}{phone.slice(-2)}
+              </p>
+            )}
           </div>
 
           {/* App Theme Toggle (Dark / Light) */}

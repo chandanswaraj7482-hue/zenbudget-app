@@ -33,6 +33,15 @@ export const LoansView: React.FC<LoansViewProps> = ({
   const [repayModalLoan, setRepayModalLoan] = useState<LoanRecord | null>(null);
 
   const [interestRate, setInterestRate] = useState('');
+  const [personName, setPersonName] = useState('');
+  const [totalAmount, setTotalAmount] = useState('');
+  const [dueDate, setDueDate] = useState(new Date().toISOString().split('T')[0]);
+  const [frequency, setFrequency] = useState<'one_time' | 'daily' | 'weekly' | 'monthly' | 'custom'>('one_time');
+  const [customFrequencyText, setCustomFrequencyText] = useState('');
+  const [notes, setNotes] = useState('');
+  const [selectedAccountId, setSelectedAccountId] = useState(accounts[0]?.id || '');
+  const [repayAmount, setRepayAmount] = useState('');
+  const [repayAccountId, setRepayAccountId] = useState(accounts[0]?.id || '');
 
   const handleSubmitAdd = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,6 +83,12 @@ export const LoansView: React.FC<LoansViewProps> = ({
     setRepayModalLoan(null);
     setRepayAmount('');
   };
+
+  const borrowedLoans = loans.filter(l => l.type === 'borrowed');
+  const lentLoans = loans.filter(l => l.type === 'lent');
+  const totalBorrowed = borrowedLoans.reduce((sum, l) => sum + (l.totalAmount - l.paidAmount), 0);
+  const totalLent = lentLoans.reduce((sum, l) => sum + (l.totalAmount - l.paidAmount), 0);
+  const filteredLoans = loans.filter(l => l.type === activeTab);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '80px' }} className="animate-fade-in">
