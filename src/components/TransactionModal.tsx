@@ -1089,7 +1089,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               onClick={() => {
                 const parsedAmount = parseFloat(amount);
                 if (isNaN(parsedAmount) || parsedAmount <= 0) {
-                  alert('Please enter a valid expense amount (e.g. ₹500).');
+                  setScanMessage({ text: 'Please enter a valid expense amount (e.g. ₹500).', type: 'error' });
                   return;
                 }
                 const payTitle = title.trim() || 'Expense Payment';

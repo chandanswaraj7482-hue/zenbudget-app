@@ -50,6 +50,12 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
   const [scanResult, setScanResult] = useState('');
   const [isPaying, setIsPaying] = useState(false);
   const [step, setStep] = useState<'details' | 'payment'>('details');
+  const [validationError, setValidationError] = useState('');
+
+  const showErr = (msg: string) => {
+    setValidationError(msg);
+    setTimeout(() => setValidationError(''), 4500);
+  };
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const requestRef = useRef<number | null>(null);
@@ -484,7 +490,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
 
   const handleLogOnly = async () => {
     if (!amount || parseFloat(amount) <= 0) {
-      alert('Please enter a valid amount.');
+      showErr('Please enter a valid expense amount.');
       return;
     }
     const profileId = localStorage.getItem('zb_profile_id');
@@ -520,7 +526,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
 
   const handleProceedToPayment = () => {
     if (!amount || parseFloat(amount) <= 0) {
-      alert('Please enter a valid amount.');
+      showErr('Please enter a valid expense amount.');
       return;
     }
     if (activePayTab === 'Scan QR' && !recipientId) {
@@ -532,15 +538,15 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
       }
     }
     if (activePayTab === 'Mobile' && payMobile.replace(/\D/g, '').length !== 10) {
-      alert('Please enter a valid 10-digit mobile number.');
+      showErr('Please enter a valid 10-digit mobile number.');
       return;
     }
     if (activePayTab === 'Bank A/c' && (!payAccNum.trim() || !payIfsc.trim())) {
-      alert('Please enter Bank Account Number and IFSC Code.');
+      showErr('Please enter Bank Account Number and IFSC Code.');
       return;
     }
     if (activePayTab === 'UPI ID' && !payUpiIdDirect.includes('@')) {
-      alert('Please enter a valid UPI ID (e.g. user@okaxis).');
+      showErr('Please enter a valid UPI ID (e.g. user@okaxis).');
       return;
     }
     setStep('payment');
@@ -631,6 +637,28 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
 
         {step === 'details' && (
           <div style={{ padding: '20px' }}>
+            {/* Custom Glassmorphic Validation Error Banner */}
+            {validationError && (
+              <div style={{
+                background: 'rgba(239, 68, 68, 0.15)',
+                border: '1px solid rgba(239, 68, 68, 0.4)',
+                color: '#f87171',
+                borderRadius: '14px',
+                padding: '12px 14px',
+                fontSize: '12px',
+                fontWeight: 700,
+                marginBottom: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                animation: 'fadeIn 0.2s ease-out',
+                boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)'
+              }}>
+                <span style={{ fontSize: '14px' }}>⚠️</span>
+                <span>{validationError}</span>
+              </div>
+            )}
+
             {/* Payment method tabs */}
             <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', background: 'var(--bg-input)', padding: '4px', borderRadius: '12px', border: '1px solid var(--border-input)' }}>
               {PAYMENT_TABS.map(tab => (
@@ -900,7 +928,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                 onClick={() => {
                   const numAmt = parseFloat(amount);
                   if (isNaN(numAmt) || numAmt <= 0) {
-                    alert('Please enter a valid amount (e.g. ₹100) to proceed with payment.');
+                    showErr('Please enter a valid payment amount (e.g. ₹100).');
                     return;
                   }
                   if (onPayViaCashfree) {
