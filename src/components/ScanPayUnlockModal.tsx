@@ -30,10 +30,10 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
       numPrice = stored.usd_scan_pay_price || 1.99;
       priceFormatted = `$${numPrice}`;
     } else if (currencySymbol === '€') {
-      numPrice = stored.eur_scan_pay_price || 1.85;
+      numPrice = stored.eur_scan_pay_price || 1.79;
       priceFormatted = `€${numPrice}`;
     } else if (currencySymbol === '£') {
-      numPrice = stored.gbp_scan_pay_price || 1.59;
+      numPrice = stored.gbp_scan_pay_price || 1.49;
       priceFormatted = `£${numPrice}`;
     } else {
       numPrice = stored.inr_scan_pay_price || 79;
