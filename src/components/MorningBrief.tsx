@@ -173,15 +173,39 @@ export const MorningBrief: React.FC<MorningBriefProps> = ({
             </h1>
           </div>
 
-          {/* Yesterday summary */}
-          <div style={{ background: 'var(--bg-input)', padding: '20px', borderRadius: '20px', display: 'flex', flexDirection: 'column', gap: '12px', border: '1px solid var(--border-card)' }}>
+          {/* Yesterday summary & Visual Progress Bar */}
+          <div style={{ background: 'var(--bg-input)', padding: '20px', borderRadius: '20px', display: 'flex', flexDirection: 'column', gap: '14px', border: '1px solid var(--border-card)' }}>
             <div>
-              <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Yesterday you spent</span>
-              <p style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-primary)' }}>{currencySymbol}{Math.round(spentYesterday).toLocaleString()}</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Yesterday you spent</span>
+                <span style={{ fontSize: '12px', color: spentYesterday > todaysLimit ? '#ef4444' : '#22c55e', fontWeight: 700 }}>
+                  {spentYesterday > todaysLimit ? 'Over Limit' : 'Within Limit'}
+                </span>
+              </div>
+              <p style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-primary)', margin: '4px 0 8px 0' }}>{currencySymbol}{Math.round(spentYesterday).toLocaleString()}</p>
+            </div>
+
+            {/* Visual Progress Bar Graph */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '6px', fontWeight: 600 }}>
+                <span>Daily Limit Progress</span>
+                <span>{Math.min(100, Math.round((spentYesterday / (todaysLimit || 1)) * 100))}% Used</span>
+              </div>
+              <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.08)', borderRadius: '99px', overflow: 'hidden' }}>
+                <div style={{
+                  width: `${Math.min(100, (spentYesterday / (todaysLimit || 1)) * 100)}%`,
+                  height: '100%',
+                  background: spentYesterday > todaysLimit 
+                    ? 'linear-gradient(90deg, #f59e0b 0%, #ef4444 100%)' 
+                    : 'linear-gradient(90deg, #22c55e 0%, #14b8a6 100%)',
+                  borderRadius: '99px',
+                  transition: 'width 0.8s ease-out'
+                }} />
+              </div>
             </div>
 
             {topCat && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--warning)', fontSize: '13px', fontWeight: 600 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--warning)', fontSize: '13px', fontWeight: 600, paddingTop: '4px' }}>
                 <AlertTriangle size={16} />
                 <span style={{ textTransform: 'capitalize' }}>Highest: {topCat[0]} ({currencySymbol}{Math.round(topCat[1])})</span>
               </div>
@@ -201,13 +225,15 @@ export const MorningBrief: React.FC<MorningBriefProps> = ({
             )}
           </div>
 
-          {/* Budget prediction */}
+          {/* Budget prediction & Visual Bar */}
           {budgetEndDate && (
-            <div style={{ background: 'rgba(239, 68, 68, 0.06)', padding: '12px 16px', borderRadius: '14px', border: '1px solid rgba(239, 68, 68, 0.2)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <TrendingDown size={16} color="var(--danger)" style={{ flexShrink: 0 }} />
-              <p style={{ fontSize: '12px', color: 'var(--danger)', fontWeight: 600 }}>
-                At current pace, budget ends by <strong>{budgetEndDate}</strong>. Slow down to last the month!
-              </p>
+            <div style={{ background: 'rgba(239, 68, 68, 0.06)', padding: '12px 16px', borderRadius: '14px', border: '1px solid rgba(239, 68, 68, 0.2)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <TrendingDown size={16} color="var(--danger)" style={{ flexShrink: 0 }} />
+                <p style={{ fontSize: '12px', color: 'var(--danger)', fontWeight: 600, margin: 0 }}>
+                  At current pace, budget ends by <strong>{budgetEndDate}</strong>. Slow down to last the month!
+                </p>
+              </div>
             </div>
           )}
 

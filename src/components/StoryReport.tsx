@@ -165,14 +165,15 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
     ctx.fillStyle = bgGrad;
     ctx.fillRect(24, 24, 672, 1232);
 
-    // Status Bar Header (Real Phone Look)
-    ctx.font = 'bold 16px sans-serif';
-    ctx.fillStyle = '#94a3b8';
+    // Status Bar Header (Real Dynamic Phone Look)
+    const currentTimeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    ctx.font = '600 15px sans-serif';
+    ctx.fillStyle = '#cbd5e1';
     ctx.textAlign = 'left';
-    ctx.fillText('11:22 AM', 54, 62);
+    ctx.fillText(currentTimeStr, 54, 62);
 
     ctx.textAlign = 'right';
-    ctx.fillText('5G ⚡ 84% 🔋', 666, 62);
+    ctx.fillText('5G ⚡ 92% 🔋', 666, 62);
 
     // Camera Punch Hole Notch
     ctx.beginPath();
@@ -228,55 +229,67 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
     ctx.textAlign = 'left';
     ctx.font = 'bold 13px sans-serif';
     ctx.fillStyle = '#94a3b8';
-    ctx.fillText('TOTAL SPENT THIS WEEK', 90, 540);
-    ctx.fillText('TOTAL SAVED THIS WEEK', 380, 540);
+    ctx.fillText('TOTAL SPENT THIS WEEK', 90, 535);
+    ctx.fillText('TOTAL SAVED THIS WEEK', 380, 535);
 
     ctx.font = 'bold 28px sans-serif';
     ctx.fillStyle = '#ef4444';
-    ctx.fillText(`${currencySymbol}${spent.toLocaleString()}`, 90, 580);
+    ctx.fillText(`${currencySymbol}${spent.toLocaleString()}`, 90, 575);
 
     ctx.fillStyle = '#22c55e';
-    ctx.fillText(`${currencySymbol}${saved.toLocaleString()}`, 380, 580);
+    ctx.fillText(`${currencySymbol}${saved.toLocaleString()}`, 380, 575);
+
+    // Visual Progress Bar on Canvas Card
+    const spendRatio = earned > 0 ? Math.min(1, spent / earned) : (spent > 0 ? 1 : 0);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.beginPath();
+    ctx.roundRect(90, 600, 540, 10, 5);
+    ctx.fill();
+
+    ctx.fillStyle = spendRatio > 0.8 ? '#ef4444' : '#22c55e';
+    ctx.beginPath();
+    ctx.roundRect(90, 600, Math.max(15, Math.min(540, 540 * spendRatio)), 10, 5);
+    ctx.fill();
 
     // Divider Line
     ctx.beginPath();
-    ctx.moveTo(90, 620);
-    ctx.lineTo(630, 620);
+    ctx.moveTo(90, 635);
+    ctx.lineTo(630, 635);
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
     ctx.stroke();
 
     // Row 2: Best Day & Top Category
     ctx.font = 'bold 13px sans-serif';
     ctx.fillStyle = '#94a3b8';
-    ctx.fillText('BEST DAY (LEAST SPENT)', 90, 665);
-    ctx.fillText('TOP SPENDING CATEGORY', 380, 665);
+    ctx.fillText('BEST DAY (LEAST SPENT)', 90, 675);
+    ctx.fillText('TOP SPENDING CATEGORY', 380, 675);
 
     ctx.font = 'bold 22px sans-serif';
     ctx.fillStyle = '#fbbf24';
-    ctx.fillText(bestDay, 90, 705);
+    ctx.fillText(bestDay, 90, 715);
 
     ctx.fillStyle = '#f87171';
-    ctx.fillText(worstCategory, 380, 705);
+    ctx.fillText(worstCategory, 380, 715);
 
     // Divider Line 2
     ctx.beginPath();
-    ctx.moveTo(90, 745);
-    ctx.lineTo(630, 745);
+    ctx.moveTo(90, 755);
+    ctx.lineTo(630, 755);
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
     ctx.stroke();
 
     // Row 3: Potential Saving & Habit Tip
     ctx.font = 'bold 13px sans-serif';
     ctx.fillStyle = '#94a3b8';
-    ctx.fillText('SMART POTENTIAL SAVING', 90, 790);
+    ctx.fillText('SMART POTENTIAL SAVING', 90, 800);
 
     ctx.font = 'bold 24px sans-serif';
     ctx.fillStyle = '#06b6d4';
-    ctx.fillText(`${currencySymbol}${potentialSaving.toLocaleString()}`, 90, 830);
+    ctx.fillText(`${currencySymbol}${potentialSaving.toLocaleString()}`, 90, 840);
 
     ctx.font = 'bold 14px sans-serif';
     ctx.fillStyle = '#34d399';
-    ctx.fillText('💡 Tip: Cut discretionary spending by 20%', 90, 875);
+    ctx.fillText('💡 Tip: Cut discretionary spending by 20%', 90, 885);
 
     // Bottom Watermark App Badge
     ctx.textAlign = 'center';

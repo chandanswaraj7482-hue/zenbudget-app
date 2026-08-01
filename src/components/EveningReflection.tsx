@@ -194,14 +194,34 @@ export const EveningReflection: React.FC<EveningReflectionProps> = ({
             </div>
           </div>
 
-          {/* Score */}
-          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '16px 24px', borderRadius: '20px', width: '100%', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>Money Score</span>
-            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '2px', marginTop: '4px' }}>
+          {/* Score & Visual Bar Chart */}
+          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '18px 24px', borderRadius: '20px', width: '100%', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>Money Score</span>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: score >= 70 ? '#22c55e' : score >= 40 ? '#f59e0b' : '#ef4444' }}>
+                {score >= 70 ? 'Excellent 🌟' : score >= 40 ? 'Fair ⚖️' : 'Needs Care ⚠️'}
+              </span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '2px' }}>
               <span style={{ fontSize: '48px', fontWeight: 800, fontFamily: "'Manrope', sans-serif", background: score >= 70 ? 'linear-gradient(135deg, #22C55E 0%, #14B8A6 100%)' : score >= 40 ? 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 {score}
               </span>
               <span style={{ fontSize: '16px', color: 'var(--text-secondary)', fontWeight: 600 }}>/100</span>
+            </div>
+
+            {/* Score Visual Progress Bar */}
+            <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.08)', borderRadius: '99px', overflow: 'hidden', marginTop: '2px' }}>
+              <div style={{
+                width: `${score}%`,
+                height: '100%',
+                background: score >= 70 
+                  ? 'linear-gradient(90deg, #22c55e 0%, #14b8a6 100%)' 
+                  : score >= 40 
+                  ? 'linear-gradient(90deg, #f59e0b 0%, #ef4444 100%)' 
+                  : 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)',
+                borderRadius: '99px',
+                transition: 'width 1s ease-out'
+              }} />
             </div>
           </div>
 
