@@ -232,23 +232,10 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           .eq('id', session.user.id)
           .maybeSingle();
 
-        if (!checkErr && !profileCheck) {
-          // If profile is missing, it could be a brand new OAuth user who hasn't completed onboarding.
-          // Or a deleted user. Let's check if they had a cached profile to know if they were deleted.
-          const hadProfile = localStorage.getItem('zb_local_session_profile');
-          if (hadProfile) {
-            console.log("LockScreen: Active user profile deleted from Supabase. Wiping session.");
-            await supabase.auth.signOut();
-            localStorage.clear(); // WIPE ALL local storage
-            setUserId('');
-            setUsername('');
-            setDbProfile(null);
-            setStep('auth');
-            setIsLoading(false);
-            return;
-          } else {
-            console.log("LockScreen: New OAuth user detected, proceeding to onboarding.");
-          }
+        // ONLY trigger deletion if query strictly returned success (no error) AND profile explicitly doesn't exist
+        if (!checkErr && profileCheck === null) {
+          console.log("LockScreen: Profile not found in database for session.");
+          // Do NOT clear localStorage — preserve local user data
         }
 
         // Run persistent device registration check

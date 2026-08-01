@@ -470,8 +470,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         .select('*')
         .order('updated_at', { ascending: false });
 
-      if (!profErr && profData) {
+      if (!profErr && profData && profData.length > 0) {
         setProfiles(profData);
+        localStorage.setItem('zb_admin_profiles_cache', JSON.stringify(profData));
+      } else {
+        const cached = localStorage.getItem('zb_admin_profiles_cache');
+        if (cached) {
+          try { setProfiles(JSON.parse(cached)); } catch (_) {}
+        }
       }
 
       // Fetch Broadcasts
