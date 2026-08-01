@@ -504,7 +504,8 @@ const App: React.FC = () => {
       return;
     }
 
-    const hasScanPayAccess = localStorage.getItem(`zb_scan_pay_access_${currentProfileId}`) === 'true';
+    const isPremium = subscriptionTier === 'premium' || subscriptionTier === 'premium_monthly' || subscriptionTier === 'premium_yearly' || subscriptionTier === 'premium_lifetime';
+    const hasScanPayAccess = isPremium || localStorage.getItem(`zb_scan_pay_access_${currentProfileId}`) === 'true';
 
     if (!hasScanPayAccess && !title.startsWith('loan_')) {
       setIsScanPayUnlockOpen(true);
