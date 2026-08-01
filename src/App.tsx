@@ -487,9 +487,7 @@ const App: React.FC = () => {
       return;
     }
 
-    const hasScanPayAccess = subscriptionTier === 'premium_lifetime' || 
-                             localStorage.getItem('zb_is_admin') === 'true' || 
-                             localStorage.getItem(`zb_scan_pay_access_${currentProfileId}`) === 'true';
+    const hasScanPayAccess = localStorage.getItem(`zb_scan_pay_access_${currentProfileId}`) === 'true';
 
     if (!hasScanPayAccess && !title.startsWith('loan_')) {
       setIsScanPayUnlockOpen(true);
@@ -1241,6 +1239,11 @@ const App: React.FC = () => {
         localStorage.setItem('zb_subscription_tier', profData.subscription_tier);
         localStorage.setItem('zb_trial_start_date', profData.trial_start_date);
         localStorage.setItem('zb_user_pin', profData.pin);
+        if (profData.has_scan_pay_access) {
+          localStorage.setItem(`zb_scan_pay_access_${currentProfileId}`, 'true');
+        } else {
+          localStorage.removeItem(`zb_scan_pay_access_${currentProfileId}`);
+        }
         if (profData.premium_expires_at) {
           localStorage.setItem('zb_premium_expires_at', profData.premium_expires_at);
         } else {
