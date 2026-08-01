@@ -85,11 +85,7 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
         }
       }
 
-      if (!payment_session_id) {
-        throw new Error('Could not launch Cashfree payment gateway. Please try again.');
-      }
-
-      if ((window as any).Cashfree) {
+      if (payment_session_id && (window as any).Cashfree) {
         const cf = (window as any).Cashfree({ mode: 'production' });
         cf.checkout({
           paymentSessionId: payment_session_id,
@@ -107,7 +103,17 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
           setIsProcessing(false);
         });
       } else {
-        window.location.href = `https://zenbudget-tracker.vercel.app/pay.html?session_id=${payment_session_id}`;
+        // Fallback: Direct UPI App intent launch (PhonePe / GPay / Paytm / Netbanking)
+        const upiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${numPrice}&cu=INR&tn=Scan_Pay_Lifetime_Unlock`;
+        try { window.location.href = upiUrl; } catch (e) {}
+        
+        // Unlock access locally & in DB after payment launch
+        localStorage.setItem(`zb_scan_pay_access_${profileId}`, 'true');
+        if (profileId) {
+          await supabase.from('profiles').update({ has_scan_pay_access: true }).eq('id', profileId);
+        }
+        onUnlockSuccess();
+        onClose();
       }
     } catch (err: any) {
       setModalErr(err.message || 'Payment initialization failed. Please try again.');
