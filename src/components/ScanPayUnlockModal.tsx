@@ -53,27 +53,36 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
       const userPhone = localStorage.getItem('zb_user_phone') || '';
 
       let payment_session_id = '';
-      try {
-        const res = await fetch('https://admin-portal-zenbudget.vercel.app/api/create-payment-session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            amount: numPrice,
-            planType: 'scan_pay_lifetime',
-            userId: profileId,
-            email: userEmail,
-            phone: userPhone
-          })
-        });
+      const endpoints = [
+        '/api/create-payment-session',
+        'https://zenbudget-tracker.vercel.app/api/create-payment-session',
+        'https://admin-portal-zenbudget.vercel.app/api/create-payment-session'
+      ];
 
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.payment_session_id) {
-            payment_session_id = data.payment_session_id;
+      for (const url of endpoints) {
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              amount: numPrice,
+              planType: 'scan_pay_lifetime',
+              userId: profileId,
+              email: userEmail,
+              phone: userPhone
+            })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.payment_session_id) {
+              payment_session_id = data.payment_session_id;
+              break;
+            }
           }
+        } catch (e) {
+          console.warn('Cashfree payment session creation error for', url, e);
         }
-      } catch (e) {
-        console.warn('Cashfree payment session creation error:', e);
       }
 
       if (!payment_session_id) {

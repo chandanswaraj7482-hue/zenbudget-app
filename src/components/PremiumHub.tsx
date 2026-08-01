@@ -607,7 +607,6 @@ export const PremiumHub: React.FC<PremiumHubProps> = ({
               <button 
                 onClick={() => {
                   navigator.clipboard.writeText(`My Zen Money Score is ${wrapped.score}/100! Calculated by ZenBudget.`);
-                  alert('Score copied! Opening Instagram to share story...');
                   window.open('https://instagram.com', '_blank');
                 }}
                 style={{ padding: '12px 24px', borderRadius: '24px', border: 'none', background: 'linear-gradient(to right, var(--primary), var(--secondary))', color: '#000', fontWeight: 900, fontSize: '13px', cursor: 'pointer' }}

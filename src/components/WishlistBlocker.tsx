@@ -108,7 +108,7 @@ export const WishlistBlocker: React.FC<WishlistBlockerProps> = ({
     e.preventDefault();
     const amount = parseFloat(newItemAmount);
     if (!newItemName.trim() || isNaN(amount) || amount <= 0) {
-      alert('Please enter a valid item name and price.');
+      if (onShowToast) onShowToast('Please enter a valid item name and price.', 'warning');
       return;
     }
 
@@ -145,7 +145,7 @@ export const WishlistBlocker: React.FC<WishlistBlockerProps> = ({
   const handleSaveEdit = (id: string) => {
     const amt = parseFloat(editingItemAmount);
     if (!editingItemName.trim() || isNaN(amt) || amt <= 0) {
-      alert('Please enter a valid item name and price.');
+      if (onShowToast) onShowToast('Please enter a valid item name and price.', 'warning');
       return;
     }
 
@@ -191,8 +191,6 @@ export const WishlistBlocker: React.FC<WishlistBlockerProps> = ({
     const successMsg = `🎉 Awesome! You saved ${currencySymbol}${item.amount.toLocaleString()} by waiting! +100 Zen Points awarded to your Companion.`;
     if (onShowToast) {
       onShowToast(successMsg, 'success');
-    } else {
-      alert(successMsg);
     }
     
     // Remove from wishlist

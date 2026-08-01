@@ -69,7 +69,6 @@ export const Budgets: React.FC<BudgetsProps> = ({
   const handleSave = (cat: CategoryType) => {
     const val = parseFloat(limitInput);
     if (isNaN(val) || val < 0) {
-      alert('Please enter a valid budget amount.');
       return;
     }
     onSaveBudget(cat, val);

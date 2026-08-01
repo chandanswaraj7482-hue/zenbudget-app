@@ -383,12 +383,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     }
 
     if (!accounts || accounts.length === 0) {
-      alert('Please add a Wallet/Account first before adding transactions!');
+      setScanMessage({ text: 'Please add a Wallet/Account first before adding transactions!', type: 'error' });
       return;
     }
 
     if (!title.trim() || isNaN(parsedAmount) || parsedAmount <= 0) {
-      alert('Please fill out all required fields with valid values.');
+      setScanMessage({ text: 'Please fill out all required fields with valid values.', type: 'error' });
       return;
     }
 
@@ -1359,7 +1359,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 onClick={() => {
                     const parsedAmount = parseFloat(amount);
                     if (!parsedAmount || parsedAmount <= 0) {
-                      alert('Please enter a valid amount first.');
+                      setScanMessage({ text: 'Please enter a valid amount first.', type: 'error' });
                       return;
                     }
 
@@ -1378,7 +1378,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       }
                     } else if (paymentType === 'phone') {
                       if (payMobile.length !== 10) {
-                        alert('Please enter a valid 10-digit mobile number.');
+                        setScanMessage({ text: 'Please enter a valid 10-digit mobile number.', type: 'error' });
                         return;
                       }
                       const handle = (mobileUpiSuffix || 'upi').trim().replace(/^@/, '');
@@ -1386,13 +1386,13 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       finalPayeeName = payHolderName.trim() || 'User';
                     } else if (paymentType === 'upi_id') {
                       if (!payUpiIdDirect.includes('@')) {
-                        alert('Please enter a valid UPI ID (must contain @).');
+                        setScanMessage({ text: 'Please enter a valid UPI ID (must contain @).', type: 'error' });
                         return;
                       }
                       finalUpiAddress = payUpiIdDirect.trim();
                     } else if (paymentType === 'bank') {
                       if (!payAccNum || !payIfsc) {
-                        alert('Please fill Bank Account Number and IFSC Code.');
+                        setScanMessage({ text: 'Please fill Bank Account Number and IFSC Code.', type: 'error' });
                         return;
                       }
                       finalUpiAddress = `${payAccNum.trim()}@${payIfsc.trim().toUpperCase()}.ifsc.npci`;

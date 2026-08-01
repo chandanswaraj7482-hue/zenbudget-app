@@ -1681,7 +1681,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   } else {
                     try {
                       await navigator.clipboard.writeText(shareText);
-                      alert('Share invitation text copied to clipboard!');
+                      triggerToast('Share invitation text copied to clipboard!', 'success');
                     } catch (e) {
                       prompt('Copy invitation link:', shareText);
                     }
@@ -1710,7 +1710,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   }
                   try {
                     await navigator.clipboard.writeText(inviteCode);
-                    alert(`Referral code "${inviteCode}" copied to clipboard!`);
+                    triggerToast(`Referral code "${inviteCode}" copied to clipboard!`, 'success');
                   } catch (e) {
                     prompt('Copy referral code:', inviteCode);
                   }
@@ -2069,7 +2069,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 onAddNewGoal(newGoalName.trim(), parsedTarget, newGoalColor);
                 setShowAddGoalModal(false);
               } else {
-                alert("Please enter a valid goal name and target amount.");
+                triggerToast("Please enter a valid goal name and target amount.", "warning");
               }
             }} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
 
@@ -2192,7 +2192,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 }
                 setEditingGoalId(null);
               } else {
-                alert("Please enter a valid goal name and target amount.");
+                triggerToast("Please enter a valid goal name and target amount.", "warning");
               }
             }} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
 

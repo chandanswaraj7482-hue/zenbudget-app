@@ -517,27 +517,35 @@ const App: React.FC = () => {
       triggerToast(`Launching Cashfree PhonePe payment for ₹${amount}...`, 'info');
 
       let payment_session_id = '';
-      try {
-        const res = await fetch('https://admin-portal-zenbudget.vercel.app/api/create-payment-session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            amount: amount,
-            planType: `pay_${Date.now()}`,
-            userId: currentProfileId,
-            email: userEmail,
-            phone: userPhone
-          })
-        });
+      const endpoints = [
+        '/api/create-payment-session',
+        'https://zenbudget-tracker.vercel.app/api/create-payment-session',
+        'https://admin-portal-zenbudget.vercel.app/api/create-payment-session'
+      ];
 
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.payment_session_id) {
-            payment_session_id = data.payment_session_id;
+      for (const url of endpoints) {
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              amount: amount,
+              planType: `pay_${Date.now()}`,
+              userId: currentProfileId,
+              email: userEmail,
+              phone: userPhone
+            })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.payment_session_id) {
+              payment_session_id = data.payment_session_id;
+              break;
+            }
           }
+        } catch (e) {
+          console.warn('Payment session fetch error for', url, e);
         }
-      } catch (e) {
-        console.warn('Payment session creation skipped/failed:', e);
       }
 
       if (payment_session_id && (window as any).Cashfree) {
@@ -1880,24 +1888,35 @@ const App: React.FC = () => {
     try {
       triggerToast(`Initializing Cashfree payment (${priceDisplay})...`, 'info');
       let payment_session_id = '';
-      try {
-        const response = await fetch(`https://admin-portal-zenbudget.vercel.app/api/create-payment-session`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            amount: amountNum,
-            planType: 'extra_budget_slot',
-            email: localStorage.getItem('zb_user_email') || 'user@zenbudget.app',
-            userId: currentProfileId
-          })
-        });
-        const text = await response.text();
-        if (text && !text.startsWith('<')) {
-          const data = JSON.parse(text);
-          if (data.payment_session_id) payment_session_id = data.payment_session_id;
+      const endpoints = [
+        '/api/create-payment-session',
+        'https://zenbudget-tracker.vercel.app/api/create-payment-session',
+        'https://admin-portal-zenbudget.vercel.app/api/create-payment-session'
+      ];
+
+      for (const url of endpoints) {
+        try {
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              amount: amountNum,
+              planType: 'extra_budget_slot',
+              email: localStorage.getItem('zb_user_email') || 'user@zenbudget.app',
+              userId: currentProfileId
+            })
+          });
+          const text = await response.text();
+          if (text && !text.startsWith('<')) {
+            const data = JSON.parse(text);
+            if (data.payment_session_id) {
+              payment_session_id = data.payment_session_id;
+              break;
+            }
+          }
+        } catch (fetchErr) {
+          console.warn('Payment session fetch error for', url, fetchErr);
         }
-      } catch (fetchErr) {
-        console.warn('Payment session fetch error:', fetchErr);
       }
 
       if (!payment_session_id) {

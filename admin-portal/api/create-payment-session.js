@@ -22,8 +22,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required parameters (amount, planType, userId)' });
     }
 
-    const clientId = process.env.CASHFREE_CLIENT_ID;
-    const clientSecret = process.env.CASHFREE_CLIENT_SECRET;
+    const clientId = process.env.CASHFREE_CLIENT_ID || 'CF1070560C9TH63S1RMCV439KGL0';
+    const clientSecret = process.env.CASHFREE_CLIENT_SECRET || 'cfsk_ma_prod_3716d13db1b74704c7ef2b0125867160_51341c30';
 
     if (!clientId || !clientSecret) {
       return res.status(500).json({ error: 'Cashfree API credentials not configured on server.' });

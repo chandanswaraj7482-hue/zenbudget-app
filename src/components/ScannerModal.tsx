@@ -86,10 +86,10 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
               hasDecodedRef.current = true;
               parseUPIQR(code.data);
             } else {
-              alert('Could not find any valid QR code in this image. Please make sure the QR code is clearly visible.');
+              showErr('Could not find any valid QR code in this image. Please make sure the QR code is clearly visible.');
             }
           } else {
-            alert('QR scanner engine is still loading. Please wait a second and retry.');
+            showErr('QR scanner engine is still loading. Please wait a second and retry.');
           }
         }
       };
@@ -1206,9 +1206,9 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                   const targetVpa = recipientId || (activePayTab === 'Mobile' ? `${payMobile}@${mobileUpiSuffix}` : payUpiIdDirect);
                   if (targetVpa) {
                     navigator.clipboard.writeText(targetVpa);
-                    alert(`✅ Copied UPI VPA (${targetVpa}) to clipboard! Open your UPI app and paste to pay.`);
+                    showErr(`✅ Copied UPI VPA (${targetVpa}) to clipboard!`);
                   } else {
-                    alert('No UPI VPA available to copy.');
+                    showErr('No UPI VPA available to copy.');
                   }
                 }}
                 style={{
