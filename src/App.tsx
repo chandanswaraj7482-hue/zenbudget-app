@@ -479,6 +479,59 @@ const App: React.FC = () => {
     }
   };
 
+  const handleDirectCashfreePayment = async (amount: number, title: string) => {
+    if (!amount || amount <= 0) {
+      triggerToast('Please enter a valid payment amount.', 'warning');
+      return;
+    }
+    try {
+      const userEmail = localStorage.getItem('zb_user_email') || '';
+      const userPhone = localStorage.getItem('zb_user_phone') || '';
+      triggerToast(`Launching Cashfree PhonePe payment for ₹${amount}...`, 'info');
+
+      const res = await fetch('https://admin-portal-zenbudget.vercel.app/api/create-payment-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: amount,
+          planType: `pay_${Date.now()}`,
+          userId: currentProfileId,
+          email: userEmail,
+          phone: userPhone
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.payment_session_id) {
+        throw new Error(data.error || 'Could not launch Cashfree payment gateway');
+      }
+
+      const { payment_session_id } = data;
+      if ((window as any).Cashfree) {
+        const cf = (window as any).Cashfree({ mode: 'production' });
+        cf.checkout({
+          paymentSessionId: payment_session_id,
+          redirectTarget: '_modal'
+        }).then(async (result: any) => {
+          if (result && result.paymentDetails) {
+            handleSaveTransaction({
+              title: title || 'UPI Payment via Cashfree',
+              amount: amount,
+              category: 'shopping',
+              date: new Date().toISOString().split('T')[0],
+              type: 'expense',
+              notes: 'Paid via Cashfree PhonePe/UPI Intent'
+            });
+            triggerToast(`Payment of ₹${amount} completed via Cashfree PhonePe! 🎉`, 'success');
+            try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
+          }
+        });
+      }
+    } catch (err: any) {
+      triggerToast(err.message || 'Payment failed to initialize.', 'warning');
+    }
+  };
+
   const [currency, setCurrency] = useState<string>(() => {
     const profileId = localStorage.getItem('zb_profile_id') || '';
     const savedCurrency = profileId ? localStorage.getItem(`zb_currency_${profileId}`) : null;
@@ -2906,6 +2959,7 @@ const App: React.FC = () => {
         accounts={accounts}
         onOpenTransfer={() => setIsTransferOpen(true)}
         onTransfer={handleTransfer}
+        onPayViaUPI={handleDirectCashfreePayment}
       />
 
       {/* Custom Confirmation Glassmorphic Modal */}
@@ -3241,6 +3295,7 @@ const App: React.FC = () => {
             setIsScannerOpen(false);
             fetchDataFromSupabase();
           }}
+          onPayViaCashfree={handleDirectCashfreePayment}
         />
       )}
 

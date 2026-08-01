@@ -31,6 +31,7 @@ interface TransactionModalProps {
   accounts?: Account[];
   onOpenTransfer?: () => void;
   onTransfer?: (fromAccountId: string, toAccountId: string, amount: number, notes?: string) => void;
+  onPayViaUPI?: (amount: number, title: string) => void;
 }
 
 const CATEGORIES = [

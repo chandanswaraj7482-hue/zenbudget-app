@@ -8,6 +8,7 @@ interface ScannerModalProps {
   onClose: () => void;
   onSuccess: () => void;
   referralCount?: number;
+  onPayViaCashfree?: (amount: number, title: string) => void;
 }
 
 const CATEGORIES = [
@@ -25,7 +26,7 @@ const FEELINGS = [
 
 const PAYMENT_TABS = ['Scan QR', 'Mobile', 'Bank A/c', 'UPI ID'];
 
-export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onSuccess }) => {
+export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onSuccess, onPayViaCashfree }) => {
   if (!isOpen) return null;
 
   const [activePayTab, setActivePayTab] = useState<'Scan QR' | 'Mobile' | 'Bank A/c' | 'UPI ID'>('Scan QR');
@@ -977,6 +978,40 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                 }}
               >
                 📝 Save Transaction to Budget Only (No App)
+              </button>
+
+              {/* Cashfree Direct Gateway (PhonePe Intent / Netbanking / Cards) */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (onPayViaCashfree) {
+                    const payTitle = description.trim() || `Pay to ${merchantName || recipientId || 'Merchant'}`;
+                    onPayViaCashfree(parseFloat(amount) || 0, payTitle);
+                    onClose();
+                  } else {
+                    handlePay();
+                  }
+                }}
+                disabled={isPaying}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  borderRadius: '14px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  color: '#ffffff',
+                  fontSize: '13px',
+                  fontWeight: 800,
+                  cursor: isPaying ? 'wait' : 'pointer',
+                  boxShadow: '0 4px 16px rgba(16, 185, 129, 0.35)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  marginBottom: '10px'
+                }}
+              >
+                ⚡ Pay via Cashfree (PhonePe / Cards / Netbanking)
               </button>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
