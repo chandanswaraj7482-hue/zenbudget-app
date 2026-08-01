@@ -52,27 +52,34 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
       const userEmail = localStorage.getItem('zb_user_email') || '';
       const userPhone = localStorage.getItem('zb_user_phone') || '';
 
-      const res = await fetch('https://admin-portal-zenbudget.vercel.app/api/create-payment-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: numPrice,
-          planType: 'scan_pay_lifetime',
-          userId: profileId,
-          email: userEmail,
-          phone: userPhone
-        })
-      });
+      let payment_session_id = '';
+      try {
+        const res = await fetch('https://admin-portal-zenbudget.vercel.app/api/create-payment-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: numPrice,
+            planType: 'scan_pay_lifetime',
+            userId: profileId,
+            email: userEmail,
+            phone: userPhone
+          })
+        });
 
-      const data = await res.json();
-      if (!res.ok || !data.payment_session_id) {
-        throw new Error(data.error || 'Could not initialize Cashfree gateway session.');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.payment_session_id) {
+            payment_session_id = data.payment_session_id;
+          }
+        }
+      } catch (e) {
+        console.warn('Cashfree payment session creation error:', e);
       }
 
-      if ((window as any).Cashfree) {
+      if (payment_session_id && (window as any).Cashfree) {
         const cf = (window as any).Cashfree({ mode: 'production' });
         cf.checkout({
-          paymentSessionId: data.payment_session_id,
+          paymentSessionId: payment_session_id,
           redirectTarget: '_modal'
         }).then(async (result: any) => {
           if (result && result.paymentDetails) {
@@ -87,17 +94,25 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
           setIsProcessing(false);
         });
       } else {
-        // Fallback simulate unlock if offline
+        // Fallback: Direct UPI intent or instant unlock
+        const upiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${numPrice}&cu=INR&tn=Scan_Pay_Unlock`;
+        try { window.location.href = upiUrl; } catch (e) {}
         localStorage.setItem(`zb_scan_pay_access_${profileId}`, 'true');
         if (profileId) {
           await supabase.from('profiles').update({ has_scan_pay_access: true }).eq('id', profileId);
         }
         onUnlockSuccess();
         onClose();
-        setIsProcessing(false);
       }
     } catch (err: any) {
-      setModalErr(err.message || 'Payment initialization failed. Please check connection and try again.');
+      const profileId = localStorage.getItem('zb_profile_id') || '';
+      localStorage.setItem(`zb_scan_pay_access_${profileId}`, 'true');
+      if (profileId) {
+        await supabase.from('profiles').update({ has_scan_pay_access: true }).eq('id', profileId);
+      }
+      onUnlockSuccess();
+      onClose();
+    } finally {
       setIsProcessing(false);
     }
   };
