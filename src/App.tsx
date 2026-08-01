@@ -28,6 +28,7 @@ import { ReferralView } from './components/ReferralView';
 import { LoansView } from './components/LoansView';
 import { BankSyncView } from './components/BankSyncView';
 import { BankSyncModal } from './components/BankSyncModal';
+import { ScanPayUnlockModal } from './components/ScanPayUnlockModal';
 import { WidgetModal } from './components/WidgetModal';
 import { TransferModal } from './components/TransferModal';
 import { AddAccountModal } from './components/AddAccountModal';
@@ -133,6 +134,7 @@ const App: React.FC = () => {
     return localStorage.getItem('zb_trial_start_date') || new Date().toISOString();
   });
   const [isSubModalOpen, setIsSubModalOpen] = useState(false);
+  const [isScanPayUnlockOpen, setIsScanPayUnlockOpen] = useState(false);
   const [isSubBlocker, setIsSubBlocker] = useState(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [showTrialUrgencyModal, setShowTrialUrgencyModal] = useState(false);
@@ -482,6 +484,15 @@ const App: React.FC = () => {
   const handleDirectCashfreePayment = async (amount: number, title: string) => {
     if (!amount || amount <= 0) {
       triggerToast('Please enter a valid payment amount.', 'warning');
+      return;
+    }
+
+    const hasScanPayAccess = subscriptionTier === 'premium_lifetime' || 
+                             localStorage.getItem('zb_is_admin') === 'true' || 
+                             localStorage.getItem(`zb_scan_pay_access_${currentProfileId}`) === 'true';
+
+    if (!hasScanPayAccess && !title.startsWith('loan_')) {
+      setIsScanPayUnlockOpen(true);
       return;
     }
     try {
@@ -3240,6 +3251,17 @@ const App: React.FC = () => {
           rates={rates}
         />
       )}
+
+      {/* Scan & Pay Feature Unlock Modal Paywall */}
+      <ScanPayUnlockModal
+        isOpen={isScanPayUnlockOpen}
+        onClose={() => setIsScanPayUnlockOpen(false)}
+        currencySymbol={currencySymbol}
+        onUnlockSuccess={() => {
+          triggerToast('Scan & Pay Lifetime Feature Unlocked! 🎉', 'success');
+          try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
+        }}
+      />
 
 
 

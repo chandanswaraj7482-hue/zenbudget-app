@@ -142,6 +142,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     } catch (_) { return 1.59; }
   });
 
+  // Multi-Currency Scan & Pay Lifetime Feature Pricing State
+  const [inrScanPayPrice, setInrScanPayPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.inr_scan_pay_price || 49;
+    } catch (_) { return 49; }
+  });
+  const [usdScanPayPrice, setUsdScanPayPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.usd_scan_pay_price || 0.99;
+    } catch (_) { return 0.99; }
+  });
+  const [eurScanPayPrice, setEurScanPayPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.eur_scan_pay_price || 0.99;
+    } catch (_) { return 0.99; }
+  });
+  const [gbpScanPayPrice, setGbpScanPayPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.gbp_scan_pay_price || 0.59;
+    } catch (_) { return 0.59; }
+  });
+
   const handleSavePricing = async (e: React.FormEvent) => {
     e.preventDefault();
     const pricingObj = { 
@@ -151,7 +177,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       inr_slot_price: Number(inrSlotPrice),
       usd_slot_price: Number(usdSlotPrice),
       eur_slot_price: Number(eurSlotPrice),
-      gbp_slot_price: Number(gbpSlotPrice)
+      gbp_slot_price: Number(gbpSlotPrice),
+      inr_scan_pay_price: Number(inrScanPayPrice),
+      usd_scan_pay_price: Number(usdScanPayPrice),
+      eur_scan_pay_price: Number(eurScanPayPrice),
+      gbp_scan_pay_price: Number(gbpScanPayPrice)
     };
     try {
       await supabaseClient.from('app_config').upsert([{ id: 'subscription_pricing', data: pricingObj }]);
@@ -328,6 +358,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       setProfiles(prev => prev.map(p => p.id === userId ? { ...p, is_suspended: !currentSuspended } : p));
       if (onShowToast) onShowToast(`User ${!currentSuspended ? 'Suspended' : 'Activated'}!`, 'info');
+    } catch (err: any) {
+      if (onShowToast) onShowToast(`Failed: ${err.message}`, 'warning');
+    }
+  };
+
+  const handleToggleScanPayAccess = async (userId: string, currentAccess: boolean) => {
+    try {
+      const newAccess = !currentAccess;
+      const { error } = await supabaseClient
+        .from('profiles')
+        .update({ has_scan_pay_access: newAccess })
+        .eq('id', userId);
+      if (error) throw error;
+      setProfiles(prev => prev.map(p => p.id === userId ? { ...p, has_scan_pay_access: newAccess } : p));
+      if (onShowToast) onShowToast(`Scan & Pay Access ${newAccess ? 'Granted FREE ⚡' : 'Revoked'} for user!`, 'success');
     } catch (err: any) {
       if (onShowToast) onShowToast(`Failed: ${err.message}`, 'warning');
     }
@@ -1118,6 +1163,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                         }}
                                       >
                                         Lifetime
+                                      </button>
+
+                                      <button
+                                        onClick={() => handleToggleScanPayAccess(p.id, !!(p as any).has_scan_pay_access)}
+                                        title="Grant Free Scan & Pay Access"
+                                        style={{
+                                          padding: '0.35rem 0.6rem',
+                                          borderRadius: '6px',
+                                          backgroundColor: (p as any).has_scan_pay_access ? 'rgba(16, 185, 129, 0.25)' : 'rgba(255, 255, 255, 0.05)',
+                                          border: (p as any).has_scan_pay_access ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(255, 255, 255, 0.1)',
+                                          color: (p as any).has_scan_pay_access ? '#34d399' : '#94a3b8',
+                                          fontSize: '0.75rem',
+                                          fontWeight: 700,
+                                          cursor: 'pointer'
+                                        }}
+                                      >
+                                        ⚡ Scan: {(p as any).has_scan_pay_access ? 'UNLOCKED' : 'LOCKED'}
                                       </button>
 
                                       <button
@@ -2227,6 +2289,70 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                             value={gbpSlotPrice}
                             onChange={(e) => setGbpSlotPrice(Number(e.target.value))}
                             placeholder="1.59"
+                            style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#c084fc', fontWeight: 800, outline: 'none' }}
+                          />
+                        </div>
+                      </div>
+
+                      <hr style={{ border: 'none', borderTop: '1px dashed rgba(255,255,255,0.1)', margin: '8px 0' }} />
+
+                      <h5 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#10b981', margin: 0 }}>
+                        ⚡ Scan &amp; Pay Lifetime Feature Price (One-Time Unlock)
+                      </h5>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 700, marginBottom: '4px', display: 'block' }}>
+                            India (INR ₹)
+                          </label>
+                          <input
+                            type="number"
+                            step="1"
+                            value={inrScanPayPrice}
+                            onChange={(e) => setInrScanPayPrice(Number(e.target.value))}
+                            placeholder="49"
+                            style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#34d399', fontWeight: 800, outline: 'none' }}
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 700, marginBottom: '4px', display: 'block' }}>
+                            United States / Global (USD $)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={usdScanPayPrice}
+                            onChange={(e) => setUsdScanPayPrice(Number(e.target.value))}
+                            placeholder="0.99"
+                            style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#38bdf8', fontWeight: 800, outline: 'none' }}
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 700, marginBottom: '4px', display: 'block' }}>
+                            Europe (EUR €)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={eurScanPayPrice}
+                            onChange={(e) => setEurScanPayPrice(Number(e.target.value))}
+                            placeholder="0.99"
+                            style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#fbbf24', fontWeight: 800, outline: 'none' }}
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 700, marginBottom: '4px', display: 'block' }}>
+                            United Kingdom (GBP £)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={gbpScanPayPrice}
+                            onChange={(e) => setGbpScanPayPrice(Number(e.target.value))}
+                            placeholder="0.59"
                             style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#c084fc', fontWeight: 800, outline: 'none' }}
                           />
                         </div>
