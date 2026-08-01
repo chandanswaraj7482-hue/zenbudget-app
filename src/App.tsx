@@ -560,33 +560,10 @@ const App: React.FC = () => {
           }
         });
       } else {
-        // Fallback: Direct UPI App intent launch on Mobile only
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        if (isMobile) {
-          const upiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${amount}&cu=INR&tn=${encodeURIComponent(title || 'ZenBudget Payment')}`;
-          try { window.location.href = upiUrl; } catch (e) {}
-        }
-        handleSaveTransaction({
-          title: title || 'UPI Payment',
-          amount: amount,
-          category: 'shopping',
-          date: new Date().toISOString().split('T')[0],
-          type: 'expense',
-          notes: 'Paid via UPI'
-        });
-        triggerToast(`Payment of ₹${amount} processed! 🎉`, 'success');
-        try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
+        triggerToast('Could not launch Cashfree payment gateway. Please try again.', 'warning');
       }
     } catch (err: any) {
-      handleSaveTransaction({
-        title: title || 'UPI Payment',
-        amount: amount,
-        category: 'shopping',
-        date: new Date().toISOString().split('T')[0],
-        type: 'expense',
-        notes: 'Paid via UPI'
-      });
-      triggerToast(`Payment of ₹${amount} processed! 🎉`, 'success');
+      triggerToast(err.message || 'Payment failed to initialize.', 'warning');
     }
   };
 

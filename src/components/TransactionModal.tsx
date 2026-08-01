@@ -382,6 +382,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       return;
     }
 
+    if (!accounts || accounts.length === 0) {
+      alert('Please add a Wallet/Account first before adding transactions!');
+      return;
+    }
+
     if (!title.trim() || isNaN(parsedAmount) || parsedAmount <= 0) {
       alert('Please fill out all required fields with valid values.');
       return;
@@ -1087,6 +1092,10 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             <button
               type="button"
               onClick={() => {
+                if (!accounts || accounts.length === 0) {
+                  setScanMessage({ text: 'Please add a Wallet/Account first before processing payments!', type: 'error' });
+                  return;
+                }
                 const parsedAmount = parseFloat(amount);
                 if (isNaN(parsedAmount) || parsedAmount <= 0) {
                   setScanMessage({ text: 'Please enter a valid expense amount (e.g. ₹500).', type: 'error' });

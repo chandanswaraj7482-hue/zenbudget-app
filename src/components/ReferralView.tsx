@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Gift, Copy, Check } from 'lucide-react';
+import { supabase } from '../supabaseClient';
 
 interface ReferralViewProps {
   onBack: () => void;
@@ -22,6 +23,23 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
   const [claimCode, setClaimCode] = useState('');
   const [isClaiming, setIsClaiming] = useState(false);
   const [claimMsg, setClaimMsg] = useState<{ text: string; success: boolean } | null>(null);
+  const [referralHistory, setReferralHistory] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!userReferralCode) return;
+    const fetchHistory = async () => {
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('id, name, email, subscription_tier, trial_start_date, updated_at')
+          .eq('referred_by', userReferralCode);
+        if (data) setReferralHistory(data);
+      } catch (e) {
+        console.warn('Referral history fetch error:', e);
+      }
+    };
+    fetchHistory();
+  }, [userReferralCode]);
 
   const handleCopyCode = () => {
     if (!userReferralCode) return;
@@ -247,6 +265,64 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '12px', color: 'var(--text-primary)' }}>
           <Check size={16} color="var(--success)" /> You automatically unlock 1 Month Free Premium!
         </div>
+      </div>
+
+      {/* Referrals History List */}
+      <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', background: 'var(--bg-card)', border: '1px solid var(--border-card)', borderRadius: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
+            👥 Your Referral History
+          </h4>
+          <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--primary)' }}>
+            {referralCount} Paid / {referralHistory.length} Total Invited
+          </span>
+        </div>
+
+        {referralHistory.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '24px 12px', color: 'var(--text-secondary)', fontSize: '13px' }}>
+            <p style={{ margin: 0, fontWeight: 600 }}>No friends linked with your referral code yet.</p>
+            <p style={{ margin: '4px 0 0 0', fontSize: '11px', opacity: 0.8 }}>Share code <strong>{userReferralCode}</strong> to start earning rewards!</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {referralHistory.map((refUser, idx) => {
+              const isPaid = refUser.subscription_tier && refUser.subscription_tier.startsWith('premium');
+              return (
+                <div key={refUser.id || idx} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px 14px',
+                  borderRadius: '14px',
+                  background: 'var(--bg-input)',
+                  border: isPaid ? '1px solid rgba(34, 197, 94, 0.3)' : '1px solid var(--border-input)'
+                }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)' }}>
+                      {refUser.name || `User ${idx + 1}`}
+                    </span>
+                    <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                      {refUser.email || 'Registered User'}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+                    <span style={{
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      padding: '4px 8px',
+                      borderRadius: '8px',
+                      background: isPaid ? 'rgba(34, 197, 94, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                      color: isPaid ? '#34d399' : 'var(--text-secondary)',
+                      border: isPaid ? '1px solid rgba(34, 197, 94, 0.3)' : '1px solid rgba(255,255,255,0.1)'
+                    }}>
+                      {isPaid ? '⭐ Paid Member (+1 Qualification)' : '⏳ Joined / Trial'}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
     </div>
