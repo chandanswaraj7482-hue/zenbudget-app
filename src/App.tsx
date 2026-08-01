@@ -437,6 +437,48 @@ const App: React.FC = () => {
     });
   };
 
+  const handlePayLoanViaUPI = async (loan: LoanRecord, amount: number) => {
+    try {
+      const userEmail = localStorage.getItem('zb_user_email') || '';
+      const userPhone = localStorage.getItem('zb_user_phone') || '';
+      triggerToast(`Launching Cashfree PhonePe payment for ₹${amount}...`, 'info');
+
+      const res = await fetch('https://admin-portal-zenbudget.vercel.app/api/create-payment-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: amount,
+          planType: `loan_${loan.id}`,
+          userId: currentProfileId,
+          email: userEmail,
+          phone: userPhone
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.payment_session_id) {
+        throw new Error(data.error || 'Could not launch Cashfree payment gateway');
+      }
+
+      const { payment_session_id } = data;
+      if ((window as any).Cashfree) {
+        const cf = (window as any).Cashfree({ mode: 'production' });
+        cf.checkout({
+          paymentSessionId: payment_session_id,
+          redirectTarget: '_modal'
+        }).then(async (result: any) => {
+          if (result && result.paymentDetails) {
+            handleRepayLoan(loan.id, amount, accounts[0]?.id || '1');
+            triggerToast(`Loan repayment of ₹${amount} to ${loan.personName} completed via PhonePe! 🎉`, 'success');
+            try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
+          }
+        });
+      }
+    } catch (err: any) {
+      triggerToast(err.message || 'Payment failed to initialize.', 'warning');
+    }
+  };
+
   const [currency, setCurrency] = useState<string>(() => {
     const profileId = localStorage.getItem('zb_profile_id') || '';
     const savedCurrency = profileId ? localStorage.getItem(`zb_currency_${profileId}`) : null;
@@ -2583,6 +2625,7 @@ const App: React.FC = () => {
             currencySymbol={currencySymbol}
             onAddLoan={handleAddLoan}
             onRepayLoan={handleRepayLoan}
+            onPayLoanViaUPI={handlePayLoanViaUPI}
           />
         )}
         {activeView === 'forest' && (

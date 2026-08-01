@@ -18,6 +18,7 @@ interface LoansViewProps {
   currencySymbol: string;
   onAddLoan: (loan: Omit<LoanRecord, 'id' | 'paidAmount' | 'status'>) => void;
   onRepayLoan: (loanId: string, repayAmount: number, accountId: string) => void;
+  onPayLoanViaUPI?: (loan: LoanRecord, amount: number) => void;
 }
 
 export const LoansView: React.FC<LoansViewProps> = ({
@@ -26,7 +27,8 @@ export const LoansView: React.FC<LoansViewProps> = ({
   accounts,
   currencySymbol,
   onAddLoan,
-  onRepayLoan
+  onRepayLoan,
+  onPayLoanViaUPI
 }) => {
   const [activeTab, setActiveTab] = useState<'borrowed' | 'lent'>('borrowed');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -245,29 +247,53 @@ export const LoansView: React.FC<LoansViewProps> = ({
                 </div>
 
                 {!isCompleted && (
-                  <button
-                    onClick={() => {
-                      setRepayModalLoan(loan);
-                      setRepayAmount(remaining.toString());
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      borderRadius: '10px',
-                      border: '1px solid var(--border-button)',
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      color: 'var(--text-primary)',
-                      fontSize: '12px',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    <CheckCircle size={14} /> {t('repay_loan')}
-                  </button>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '4px' }}>
+                    <button
+                      onClick={() => {
+                        setRepayModalLoan(loan);
+                        setRepayAmount(remaining.toString());
+                      }}
+                      style={{
+                        padding: '10px',
+                        borderRadius: '10px',
+                        border: '1px solid var(--border-button)',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        color: 'var(--text-primary)',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <CheckCircle size={14} /> Record Cash
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        if (onPayLoanViaUPI) onPayLoanViaUPI(loan, remaining);
+                      }}
+                      style={{
+                        padding: '10px',
+                        borderRadius: '10px',
+                        border: 'none',
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        color: '#fff',
+                        fontSize: '12px',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)'
+                      }}
+                    >
+                      <span>⚡ Pay via PhonePe</span>
+                    </button>
+                  </div>
                 )}
               </div>
             );
