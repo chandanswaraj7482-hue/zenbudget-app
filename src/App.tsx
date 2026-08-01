@@ -1141,8 +1141,19 @@ const App: React.FC = () => {
         }
         if (profData.referred_by) {
           localStorage.setItem('zb_referred_by', profData.referred_by);
+          try {
+            const { data: inviterData } = await supabase
+              .from('profiles')
+              .select('name')
+              .eq('referral_code', profData.referred_by)
+              .maybeSingle();
+            if (inviterData && inviterData.name) {
+              localStorage.setItem('zb_inviter_name', inviterData.name);
+            }
+          } catch (e) {}
         } else {
           localStorage.removeItem('zb_referred_by');
+          localStorage.removeItem('zb_inviter_name');
         }
         localStorage.setItem('zb_user_referral_code', profData.referral_code || '');
 
@@ -2073,6 +2084,10 @@ const App: React.FC = () => {
       if (updateErr) throw updateErr;
 
       setReferredBy(dbReferralCode);
+      localStorage.setItem('zb_referred_by', dbReferralCode);
+      if (inviter && inviter.name) {
+        localStorage.setItem('zb_inviter_name', inviter.name);
+      }
       triggerToast(`Referral claimed successfully! Invited by ${inviter.name}`, 'success');
       addNotification(
         "Referral Code Claimed! 🎁",
@@ -2084,6 +2099,7 @@ const App: React.FC = () => {
       console.warn('Claim Referral database sync deferred:', err);
       // Fallback
       setReferredBy(cleanCode);
+      localStorage.setItem('zb_referred_by', cleanCode);
       triggerToast(`Referral code saved!`, 'success');
       return true;
     }
