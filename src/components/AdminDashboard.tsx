@@ -97,6 +97,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [authError, setAuthError] = useState('');
 
   // Dynamic Pricing Control state
+  // Active Pricing Currency Tab/Dropdown ('INR' | 'USD' | 'EUR' | 'GBP')
+  const [selectedPricingCurrency, setSelectedPricingCurrency] = useState<'INR' | 'USD' | 'EUR' | 'GBP'>('INR');
+
+  // INR Subscription Pricing
   const [monthlyPrice, setMonthlyPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
@@ -116,7 +120,67 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     } catch (_) { return 2499; }
   });
 
-  // Multi-Currency Extra Slot Pricing State
+  // USD Subscription Pricing
+  const [usdMonthlyPrice, setUsdMonthlyPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.usd_monthly || 1.99;
+    } catch (_) { return 1.99; }
+  });
+  const [usdYearlyPrice, setUsdYearlyPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.usd_yearly || 19.99;
+    } catch (_) { return 19.99; }
+  });
+  const [usdLifetimePrice, setUsdLifetimePrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.usd_lifetime || 29.99;
+    } catch (_) { return 29.99; }
+  });
+
+  // EUR Subscription Pricing
+  const [eurMonthlyPrice, setEurMonthlyPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.eur_monthly || 1.85;
+    } catch (_) { return 1.85; }
+  });
+  const [eurYearlyPrice, setEurYearlyPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.eur_yearly || 18.50;
+    } catch (_) { return 18.50; }
+  });
+  const [eurLifetimePrice, setEurLifetimePrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.eur_lifetime || 27.99;
+    } catch (_) { return 27.99; }
+  });
+
+  // GBP Subscription Pricing
+  const [gbpMonthlyPrice, setGbpMonthlyPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.gbp_monthly || 1.59;
+    } catch (_) { return 1.59; }
+  });
+  const [gbpYearlyPrice, setGbpYearlyPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.gbp_yearly || 15.99;
+    } catch (_) { return 15.99; }
+  });
+  const [gbpLifetimePrice, setGbpLifetimePrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.gbp_lifetime || 24.99;
+    } catch (_) { return 24.99; }
+  });
+
+  // Multi-Currency Extra Slot Pricing State (For Trial Users)
   const [inrSlotPrice, setInrSlotPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
@@ -174,6 +238,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       monthly: Number(monthlyPrice), 
       yearly: Number(yearlyPrice), 
       lifetime: Number(lifetimePrice),
+      usd_monthly: Number(usdMonthlyPrice),
+      usd_yearly: Number(usdYearlyPrice),
+      usd_lifetime: Number(usdLifetimePrice),
+      eur_monthly: Number(eurMonthlyPrice),
+      eur_yearly: Number(eurYearlyPrice),
+      eur_lifetime: Number(eurLifetimePrice),
+      gbp_monthly: Number(gbpMonthlyPrice),
+      gbp_yearly: Number(gbpYearlyPrice),
+      gbp_lifetime: Number(gbpLifetimePrice),
       inr_slot_price: Number(inrSlotPrice),
       usd_slot_price: Number(usdSlotPrice),
       eur_slot_price: Number(eurSlotPrice),
@@ -187,7 +260,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       await supabaseClient.from('app_config').upsert([{ id: 'subscription_pricing', data: pricingObj }]);
     } catch (err) {}
     localStorage.setItem('zb_dynamic_prices', JSON.stringify(pricingObj));
-    if (onShowToast) onShowToast('Live Multi-Currency Prices updated successfully!', 'success');
+    if (onShowToast) onShowToast(`Live Multi-Currency Prices updated for ${selectedPricingCurrency}!`, 'success');
   };
 
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing' | 'slots'>('overview');
@@ -1298,6 +1371,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                             <button onClick={() => updateUserSubscription(selectedDetailUser.id, 'premium_monthly')} style={{ padding: '8px 14px', borderRadius: '8px', background: 'rgba(16,185,129,0.2)', border: '1px solid rgba(16,185,129,0.4)', color: '#34d399', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}>+1 Month Premium</button>
                                             <button onClick={() => updateUserSubscription(selectedDetailUser.id, 'premium_lifetime')} style={{ padding: '8px 14px', borderRadius: '8px', background: 'rgba(245,158,11,0.2)', border: '1px solid rgba(245,158,11,0.4)', color: '#fbbf24', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}>Lifetime Premium</button>
                                             <button onClick={() => updateUserSubscription(selectedDetailUser.id, 'trial')} style={{ padding: '8px 14px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}>Reset Trial</button>
+                                            <button 
+                                              onClick={async () => {
+                                                await handleToggleScanPayAccess(selectedDetailUser.id, !!(selectedDetailUser as any).has_scan_pay_access);
+                                                setSelectedDetailUser(prev => prev ? { ...prev, has_scan_pay_access: !(prev as any).has_scan_pay_access } : null);
+                                              }} 
+                                              style={{ 
+                                                padding: '8px 14px', borderRadius: '8px', 
+                                                background: (selectedDetailUser as any).has_scan_pay_access ? 'rgba(52, 211, 153, 0.25)' : 'rgba(239, 68, 68, 0.2)', 
+                                                border: (selectedDetailUser as any).has_scan_pay_access ? '1px solid rgba(52, 211, 153, 0.5)' : '1px solid rgba(239, 68, 68, 0.4)', 
+                                                color: (selectedDetailUser as any).has_scan_pay_access ? '#34d399' : '#f87171', 
+                                                fontWeight: 800, cursor: 'pointer', fontSize: '0.8rem' 
+                                              }}
+                                            >
+                                              ⚡ Scan &amp; Pay: {(selectedDetailUser as any).has_scan_pay_access ? 'UNLOCKED (FREE)' : 'LOCKED'}
+                                            </button>
                                             <button onClick={() => toggleUserSuspension(selectedDetailUser.id, !!selectedDetailUser.is_suspended)} style={{ padding: '8px 14px', borderRadius: '8px', background: selectedDetailUser.is_suspended ? 'rgba(52,211,153,0.15)' : 'rgba(239,68,68,0.15)', border: 'none', color: selectedDetailUser.is_suspended ? '#34d399' : '#f87171', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}>
                                               {selectedDetailUser.is_suspended ? 'Unsuspend' : 'Suspend Account'}
                                             </button>
