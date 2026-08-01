@@ -1204,9 +1204,15 @@ const App: React.FC = () => {
               await supabase.from('profiles').update({ email: userEmail }).eq('id', currentProfileId);
               localStorage.setItem('zb_user_email', userEmail);
             }
-            if (googleAvatar && (!localStorage.getItem('zb_user_avatar') || localStorage.getItem('zb_user_avatar')?.includes('ui-avatars.com'))) {
-              setUserAvatar(googleAvatar);
-              localStorage.setItem('zb_user_avatar', googleAvatar);
+            if (googleAvatar) {
+              // Always save Google avatar as the dedicated google avatar key
+              // so it appears as the first preset option in ProfileView picker
+              localStorage.setItem('zb_google_avatar', googleAvatar);
+              // Also set as primary user avatar if not manually changed yet
+              if (!localStorage.getItem('zb_user_avatar') || localStorage.getItem('zb_user_avatar')?.includes('ui-avatars.com')) {
+                setUserAvatar(googleAvatar);
+                localStorage.setItem('zb_user_avatar', googleAvatar);
+              }
             }
           }
         } catch (e) {}

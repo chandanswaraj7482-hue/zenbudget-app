@@ -166,6 +166,16 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         const metadata = session.user.user_metadata;
         const name = metadata?.full_name || metadata?.name || session.user.email?.split('@')[0] || 'User';
         setUsername(name);
+
+        // Save Google OAuth avatar as a persistent preset in profile picker
+        const googleAvatar = metadata?.avatar_url || metadata?.picture || metadata?.photo_url;
+        if (googleAvatar) {
+          localStorage.setItem('zb_google_avatar', googleAvatar);
+          if (!localStorage.getItem('zb_user_avatar') || localStorage.getItem('zb_user_avatar')?.includes('ui-avatars.com')) {
+            localStorage.setItem('zb_user_avatar', googleAvatar);
+          }
+        }
+
         await fetchUserProfile(session.user.id);
       }
     });
@@ -252,6 +262,16 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         const metadata = session.user.user_metadata;
         const name = metadata?.full_name || metadata?.name || session.user.email?.split('@')[0] || 'User';
         setUsername(name);
+
+        // Save Google OAuth avatar on every session check so it persists in profile picker
+        const googleAvatar = metadata?.avatar_url || metadata?.picture || metadata?.photo_url;
+        if (googleAvatar) {
+          localStorage.setItem('zb_google_avatar', googleAvatar);
+          if (!localStorage.getItem('zb_user_avatar') || localStorage.getItem('zb_user_avatar')?.includes('ui-avatars.com')) {
+            localStorage.setItem('zb_user_avatar', googleAvatar);
+          }
+        }
+
         await fetchUserProfile(session.user.id);
       } else {
         // Fallback check: If there is a cached local session profile, use it directly

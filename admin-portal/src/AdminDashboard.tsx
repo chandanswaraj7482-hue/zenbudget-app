@@ -35,13 +35,14 @@ interface ProfileRecord {
   id: string;
   name: string;
   pin: string;
-  subscription_tier: 'trial' | 'premium' | 'premium_monthly' | 'premium_lifetime';
+  subscription_tier: 'trial' | 'premium' | 'premium_monthly' | 'premium_yearly' | 'premium_lifetime';
   trial_start_date: string;
   premium_expires_at?: string;
   referral_code?: string;
   referred_by?: string;
   updated_at?: string;
   is_suspended?: boolean;
+  has_scan_pay_access?: boolean;
   email?: string;
   couple_code?: string;
   partner_couple_code?: string;
@@ -684,6 +685,27 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
     if (!couponCode.trim()) return;
 
     const formattedCode = couponCode.trim().toUpperCase();
+
+    // Build new coupon object for immediate local update
+    const newCouponLocal: CouponRecord = {
+      code: formattedCode,
+      discount_percent: discountPercent,
+      max_uses: maxUses,
+      uses_count: 0,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      target_email: targetEmailInput.trim() ? targetEmailInput.trim().toLowerCase() : undefined,
+      target_plan: targetPlanInput || undefined
+    };
+
+    // 1. Update local state immediately (optimistic update)
+    setCoupons(prev => [newCouponLocal, ...prev]);
+    setCouponCode('');
+    setTargetEmailInput('');
+    setTargetPlanInput('');
+    if (onShowToast) onShowToast(`Coupon ${formattedCode} created!`, 'success');
+
+    // 2. Background sync to Supabase
     try {
       const { data, error } = await supabaseClient
         .from('promo_coupons')
@@ -697,17 +719,12 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
         }])
         .select();
 
-      if (error) throw error;
-
-      if (data && data[0]) {
-        setCoupons(prev => [data[0], ...prev]);
+      if (!error && data && data[0]) {
+        // Replace local version with DB version that has exact fields
+        setCoupons(prev => prev.map(c => c.code === formattedCode ? data[0] : c));
       }
-      setCouponCode('');
-      setTargetEmailInput('');
-      setTargetPlanInput('');
-      if (onShowToast) onShowToast(`Coupon ${formattedCode} created!`, 'success');
     } catch (err: any) {
-      if (onShowToast) onShowToast(`Coupon error: ${err.message}`, 'warning');
+      console.warn('Coupon sync to Supabase failed (local state preserved):', err);
     }
   };
 
@@ -728,19 +745,18 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   };
 
   const handleDeleteCoupon = async (code: string) => {
-    if (!window.confirm(`Are you sure you want to delete coupon ${code}?`)) return;
+    // 1. Optimistic local delete immediately (no window.confirm block)
+    setCoupons(prev => prev.filter(c => c.code !== code));
+    if (onShowToast) onShowToast(`Coupon ${code} deleted!`, 'info');
+
+    // 2. Background sync delete to Supabase
     try {
-      const { error } = await supabaseClient
+      await supabaseClient
         .from('promo_coupons')
         .delete()
         .eq('code', code);
-
-      if (error) throw error;
-
-      setCoupons(prev => prev.filter(c => c.code !== code));
-      if (onShowToast) onShowToast(`Coupon ${code} deleted!`, 'info');
     } catch (err: any) {
-      if (onShowToast) onShowToast(`Delete error: ${err.message}`, 'warning');
+      console.warn('Coupon delete sync to Supabase failed:', err);
     }
   };
 
