@@ -64,16 +64,12 @@ const App: React.FC = () => {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          const cleaned = parsed.filter((a: any) => !['acc_cash', 'acc_phonepe', 'acc_sbi'].includes(a.id));
-          if (profileId) {
-            localStorage.setItem(`zb_accounts_${profileId}`, JSON.stringify(cleaned));
-          }
-          return cleaned;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
         }
       } catch (e) {}
     }
-    return [];
+    return [{ id: 'acc_main_wallet', name: 'Main Wallet 💳', type: 'wallet', balance: 10000, isDefault: true }];
   });
 
   const handleDeleteAccount = (accId: string) => {

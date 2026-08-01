@@ -110,6 +110,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       setNavDate(new Date());
       setMood('');
     }
+    setScanMessage(null);
     setShowCalendar(false);
   }, [editingTransaction, isOpen]);
 
@@ -379,11 +380,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         onTransfer(fromId, toId, parsedAmount, notes.trim());
       }
       onClose();
-      return;
-    }
-
-    if (!accounts || accounts.length === 0) {
-      setScanMessage({ text: 'Please add a Wallet/Account first before adding transactions!', type: 'error' });
       return;
     }
 
@@ -1092,10 +1088,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             <button
               type="button"
               onClick={() => {
-                if (!accounts || accounts.length === 0) {
-                  setScanMessage({ text: 'Please add a Wallet/Account first before processing payments!', type: 'error' });
-                  return;
-                }
                 const parsedAmount = parseFloat(amount);
                 if (isNaN(parsedAmount) || parsedAmount <= 0) {
                   setScanMessage({ text: 'Please enter a valid expense amount (e.g. ₹500).', type: 'error' });
