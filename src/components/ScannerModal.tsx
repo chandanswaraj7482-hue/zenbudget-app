@@ -894,15 +894,44 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
               </div>
             </div>
 
-            {/* Proceed Button */}
-            <button onClick={handleProceedToPayment} style={{
-              width: '100%', padding: '16px', borderRadius: '16px', border: 'none',
-              background: 'linear-gradient(to right, var(--primary), var(--secondary))',
-              color: '#000', fontSize: '15px', fontWeight: 800, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
-            }}>
-              <Send size={16} /> Proceed to Payment ({amount ? `₹${amount}` : '₹0'}) 💸
-            </button>
+            {/* Action Buttons: Cashfree Direct Pay & Standard UPI Proceed */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button 
+                onClick={() => {
+                  const numAmt = parseFloat(amount);
+                  if (isNaN(numAmt) || numAmt <= 0) {
+                    alert('Please enter a valid amount (e.g. ₹100) to proceed with payment.');
+                    return;
+                  }
+                  if (onPayViaCashfree) {
+                    const payTitle = description.trim() || `Scan & Pay (${merchantName || recipientId || 'Merchant'})`;
+                    onPayViaCashfree(numAmt, payTitle);
+                    stopCamera();
+                    onClose();
+                  } else {
+                    handleProceedToPayment();
+                  }
+                }} 
+                style={{
+                  width: '100%', padding: '16px', borderRadius: '16px', border: 'none',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  color: '#fff', fontSize: '15px', fontWeight: 800, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                  boxShadow: '0 4px 16px rgba(16, 185, 129, 0.35)'
+                }}
+              >
+                <span>⚡ Pay via Cashfree (PhonePe / Cards / Netbanking)</span>
+              </button>
+
+              <button onClick={handleProceedToPayment} style={{
+                width: '100%', padding: '14px', borderRadius: '14px', border: '1px solid var(--border-input)',
+                background: 'rgba(255, 255, 255, 0.05)',
+                color: 'var(--text-primary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+              }}>
+                <Send size={15} /> Standard UPI App Redirect ({amount ? `₹${amount}` : '₹0'})
+              </button>
+            </div>
           </div>
         )}
 

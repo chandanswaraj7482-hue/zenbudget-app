@@ -1087,12 +1087,13 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               type="button"
               onClick={() => {
                 const parsedAmount = parseFloat(amount);
-                if (!title.trim() || isNaN(parsedAmount) || parsedAmount <= 0) {
-                  alert('Please enter description and amount first.');
+                if (isNaN(parsedAmount) || parsedAmount <= 0) {
+                  alert('Please enter a valid expense amount (e.g. ₹500).');
                   return;
                 }
+                const payTitle = title.trim() || 'Expense Payment';
                 if (onPayViaUPI) {
-                  onPayViaUPI(parsedAmount, title.trim());
+                  onPayViaUPI(parsedAmount, payTitle);
                   onClose();
                 } else {
                   setShowPaymentOptions(true);
