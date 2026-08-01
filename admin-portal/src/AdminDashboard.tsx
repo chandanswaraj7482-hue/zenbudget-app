@@ -629,40 +629,27 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
       created_at: new Date().toISOString()
     };
 
-    try {
-      // 1. Insert into Supabase broadcast_notifications
-      const { error } = await supabaseClient
-        .from('broadcast_notifications')
-        .insert([{
-          id: newId,
-          title: bcTitle.trim(),
-          message: bcMessage.trim(),
-          type: bcType
-        }])
-        .select();
-
-      if (error) {
-        // Fallback insert without explicit ID if DB auto-generates UUID
-        await supabaseClient.from('broadcast_notifications').insert([{
-          title: bcTitle.trim(),
-          message: bcMessage.trim(),
-          type: bcType
-        }]);
-      }
-    } catch (err) {
-      console.warn('Supabase broadcast insert fallback:', err);
-    }
-
-    // Always update local state & mirror storage immediately
+    // 1. OPTIMISTIC UPDATE: Update local state IMMEDIATELY before Supabase call
     setBroadcasts(prev => [newBc, ...prev]);
     try {
       const stored = JSON.parse(localStorage.getItem('zb_admin_broadcasts') || '[]');
       localStorage.setItem('zb_admin_broadcasts', JSON.stringify([newBc, ...stored]));
     } catch (_) {}
-
     setBcTitle('');
     setBcMessage('');
-    if (onShowToast) onShowToast('Broadcast announcement published to all users!', 'success');
+    if (onShowToast) onShowToast('Broadcast announcement published to all users! 📣', 'success');
+
+    // 2. BACKGROUND SYNC: Try to persist in Supabase (fire-and-forget)
+    (async () => {
+      try {
+        const { error } = await supabaseClient
+          .from('broadcast_notifications')
+          .insert([{ title: newBc.title, message: newBc.message, type: newBc.type }]);
+        if (error) console.warn('Broadcast Supabase insert error (local state preserved):', error);
+      } catch (err) {
+        console.warn('Broadcast Supabase sync failed (local state preserved):', err);
+      }
+    })();
   };
 
   const handleDeleteBroadcast = async (id: string) => {

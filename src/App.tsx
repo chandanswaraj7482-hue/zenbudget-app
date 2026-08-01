@@ -1399,36 +1399,58 @@ const App: React.FC = () => {
 
       // 1. Fetch transactions (including partner transactions if linked)
       const userIds = cachedPartnerId ? [currentProfileId, cachedPartnerId] : [currentProfileId];
-      const { data: txData, error: txErr } = await supabase
-        .from('transactions')
-        .select('*')
-        .in('user_id', userIds)
-        .order('date', { ascending: false });
+      let annotatedTx: any[] = [];
+      try {
+        const { data: txData, error: txErr } = await supabase
+          .from('transactions')
+          .select('*')
+          .in('user_id', userIds)
+          .order('date', { ascending: false });
 
-      if (txErr) throw txErr;
-      // Annotate partner transactions with the partner's name for badge display
-      const annotatedTx = (txData || []).map(t => ({
-        ...t,
-        partnerName: cachedPartnerId && t.user_id === cachedPartnerId
-          ? (localStorage.getItem(`zb_partner_name_${currentProfileId}`) || 'Partner')
-          : undefined
-      }));
+        if (!txErr && txData) {
+          annotatedTx = txData.map(t => ({
+            ...t,
+            partnerName: cachedPartnerId && t.user_id === cachedPartnerId
+              ? (localStorage.getItem(`zb_partner_name_${currentProfileId}`) || 'Partner')
+              : undefined
+          }));
+          // Cache transactions locally for offline fallback
+          localStorage.setItem(`zb_tx_cache_${currentProfileId}`, JSON.stringify(annotatedTx));
+        } else {
+          // Fallback to cached transactions on Supabase error
+          const cached = localStorage.getItem(`zb_tx_cache_${currentProfileId}`);
+          if (cached) annotatedTx = JSON.parse(cached);
+        }
+      } catch (_fetchErr) {
+        // Network error — silently use local cache
+        const cached = localStorage.getItem(`zb_tx_cache_${currentProfileId}`);
+        if (cached) annotatedTx = JSON.parse(cached);
+      }
       setTransactions(annotatedTx);
 
-
       // 2. Fetch budgets
-      const { data: bgtData, error: bgtErr } = await supabase
-        .from('budgets')
-        .select('*')
-        .eq('user_id', currentProfileId);
+      try {
+        const { data: bgtData, error: bgtErr } = await supabase
+          .from('budgets')
+          .select('*')
+          .eq('user_id', currentProfileId);
 
-      if (bgtErr) throw bgtErr;
-      
-      const mappedBudgets: CategoryBudget[] = (bgtData || []).map(b => ({
-        category: b.category as CategoryType,
-        limit: parseFloat(b.limit_amount)
-      }));
-      setBudgets(mappedBudgets);
+        if (!bgtErr && bgtData) {
+          const mappedBudgets: CategoryBudget[] = bgtData.map(b => ({
+            category: b.category as CategoryType,
+            limit: parseFloat(b.limit_amount)
+          }));
+          setBudgets(mappedBudgets);
+          localStorage.setItem(`zb_budgets_cache_${currentProfileId}`, JSON.stringify(mappedBudgets));
+        } else {
+          // Fallback to cached budgets
+          const cachedBgt = localStorage.getItem(`zb_budgets_cache_${currentProfileId}`);
+          if (cachedBgt) setBudgets(JSON.parse(cachedBgt));
+        }
+      } catch (_bgtErr) {
+        const cachedBgt = localStorage.getItem(`zb_budgets_cache_${currentProfileId}`);
+        if (cachedBgt) setBudgets(JSON.parse(cachedBgt));
+      }
 
       // 3. Goals (Stored locally per profile id)
       const savedGoals = localStorage.getItem(`zb_goals_${currentProfileId}`);
@@ -1475,7 +1497,14 @@ const App: React.FC = () => {
       }
 
     } catch (err: any) {
-      triggerToast(err.message || 'Error syncing with cloud server.', 'warning');
+      // Only show user-visible errors for non-network issues
+      const msg = err?.message || '';
+      const isNetworkError = msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('network') || msg.includes('fetch') || msg.includes('timeout') || msg.includes('ERR_NETWORK');
+      if (!isNetworkError) {
+        triggerToast(msg || 'Error syncing with cloud server.', 'warning');
+      }
+      // Always log for debugging
+      console.warn('fetchUserData error (silenced from UI):', err);
     }
   };
 
