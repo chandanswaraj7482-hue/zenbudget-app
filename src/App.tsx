@@ -2034,8 +2034,10 @@ const App: React.FC = () => {
 
   const handleSaveProfile = async (newName: string, newPin: string, newCurrency: string, newLanguage: string, newEmail?: string) => {
     try {
+      const userPhone = localStorage.getItem('zb_user_phone') || '';
       const updateData: any = { name: newName, pin: newPin };
       if (newEmail) updateData.email = newEmail;
+      if (userPhone) updateData.phone = userPhone;
 
       const { error } = await supabase
         .from('profiles')
