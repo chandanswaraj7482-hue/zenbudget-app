@@ -1736,7 +1736,7 @@ const App: React.FC = () => {
           cf.checkout({
             paymentSessionId: payment_session_id,
             redirectTarget: '_modal'
-          }).then((result: any) => {
+          }).then(async (result: any) => {
             if (result && result.paymentDetails) {
               const currentSlots = parseInt(localStorage.getItem(`zb_extra_budget_slots_${currentProfileId}`) || '0');
               const newSlots = currentSlots + 1;

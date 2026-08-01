@@ -85,8 +85,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   });
   const [authError, setAuthError] = useState('');
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing'>('overview');
-
   // Dynamic Pricing Control state
   const [monthlyPrice, setMonthlyPrice] = useState<number>(() => {
     try {

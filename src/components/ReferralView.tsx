@@ -175,7 +175,7 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
 
           return (
             <form onSubmit={handleClaim} style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderTop: '1px solid var(--border-card)', paddingTop: '16px' }}>
-              <label style={{ fontSize: '11px', fontWeight 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+              <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
                 Got a Friend's Referral Code?
               </label>
 

@@ -824,8 +824,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px'
                 }}
+              >
                 {getCtaText()} ({currency === 'INR' ? `₹${upiAmountINR}` : `${priceInfo.symbol}${priceInfo.amount}`})
               </button>
 
