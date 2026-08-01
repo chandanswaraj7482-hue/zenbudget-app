@@ -76,14 +76,18 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
         console.warn('Cashfree payment session creation error:', e);
       }
 
-      if (payment_session_id && (window as any).Cashfree) {
+      if (!payment_session_id) {
+        throw new Error('Could not launch Cashfree payment gateway. Please try again.');
+      }
+
+      if ((window as any).Cashfree) {
         const cf = (window as any).Cashfree({ mode: 'production' });
         cf.checkout({
           paymentSessionId: payment_session_id,
           redirectTarget: '_modal'
         }).then(async (result: any) => {
           if (result && result.paymentDetails) {
-            // Unlock access locally & in DB
+            // Unlock access locally & in DB after payment in Cashfree
             localStorage.setItem(`zb_scan_pay_access_${profileId}`, 'true');
             if (profileId) {
               await supabase.from('profiles').update({ has_scan_pay_access: true }).eq('id', profileId);
@@ -94,27 +98,10 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
           setIsProcessing(false);
         });
       } else {
-        // Fallback: Direct UPI intent on Mobile or instant unlock
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        if (isMobile) {
-          const upiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${numPrice}&cu=INR&tn=Scan_Pay_Unlock`;
-          try { window.location.href = upiUrl; } catch (e) {}
-        }
-        localStorage.setItem(`zb_scan_pay_access_${profileId}`, 'true');
-        if (profileId) {
-          await supabase.from('profiles').update({ has_scan_pay_access: true }).eq('id', profileId);
-        }
-        onUnlockSuccess();
-        onClose();
+        window.location.href = `https://zenbudget-tracker.vercel.app/pay.html?session_id=${payment_session_id}`;
       }
     } catch (err: any) {
-      const profileId = localStorage.getItem('zb_profile_id') || '';
-      localStorage.setItem(`zb_scan_pay_access_${profileId}`, 'true');
-      if (profileId) {
-        await supabase.from('profiles').update({ has_scan_pay_access: true }).eq('id', profileId);
-      }
-      onUnlockSuccess();
-      onClose();
+      setModalErr(err.message || 'Payment initialization failed. Please try again.');
     } finally {
       setIsProcessing(false);
     }

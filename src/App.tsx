@@ -1901,7 +1901,7 @@ const App: React.FC = () => {
     const priceDisplay = getExtraSlotPriceDisplay();
     const amountNum = getExtraSlotAmountNumber();
     try {
-      triggerToast(`Initializing micro-payment (${priceDisplay})...`, 'info');
+      triggerToast(`Initializing Cashfree payment (${priceDisplay})...`, 'info');
       let payment_session_id = '';
       try {
         const response = await fetch(`https://admin-portal-zenbudget.vercel.app/api/create-payment-session`, {
@@ -1919,68 +1919,48 @@ const App: React.FC = () => {
           const data = JSON.parse(text);
           if (data.payment_session_id) payment_session_id = data.payment_session_id;
         }
-      } catch (e) {
-        console.warn('Payment session creation failed, fallback to direct slot unlock:', e);
+      } catch (fetchErr) {
+        console.warn('Payment session fetch error:', fetchErr);
       }
 
-      if (payment_session_id) {
-        const payUrl = `https://zenbudget-tracker.vercel.app/pay.html?session_id=${payment_session_id}`;
-        if ((window as any).Cashfree) {
-          const cf = (window as any).Cashfree({ mode: 'production' });
-          cf.checkout({
-            paymentSessionId: payment_session_id,
-            redirectTarget: '_modal'
-          }).then(async (result: any) => {
-            if (result && result.paymentDetails) {
-              const currentSlots = parseInt(localStorage.getItem(`zb_extra_budget_slots_${currentProfileId}`) || '0');
-              const newSlots = currentSlots + 1;
-              localStorage.setItem(`zb_extra_budget_slots_${currentProfileId}`, newSlots.toString());
-              triggerToast(`Extra budget slot unlocked for ${priceDisplay}! 🎉`, 'success');
-              try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
+      if (!payment_session_id) {
+        triggerToast('Could not launch Cashfree payment gateway. Please try again.', 'warning');
+        return;
+      }
 
-              // Track slot purchase in Supabase for Admin Portal analytics
-              try {
-                const userEmail = localStorage.getItem('zb_user_email') || '';
-                await supabase.from('slot_purchases').insert([{
-                  user_id: currentProfileId,
-                  user_name: userName || 'ZenBudget User',
-                  user_email: userEmail,
-                  slot_count: 1,
-                  price_paid: getExtraSlotAmountNumber(),
-                  currency: currency,
-                  created_at: new Date().toISOString()
-                }]);
-              } catch (err) {
-                console.warn('Slot purchase DB logging:', err);
-              }
+      const payUrl = `https://zenbudget-tracker.vercel.app/pay.html?session_id=${payment_session_id}`;
+      if ((window as any).Cashfree) {
+        const cf = (window as any).Cashfree({ mode: 'production' });
+        cf.checkout({
+          paymentSessionId: payment_session_id,
+          redirectTarget: '_modal'
+        }).then(async (result: any) => {
+          if (result && result.paymentDetails) {
+            const currentSlots = parseInt(localStorage.getItem(`zb_extra_budget_slots_${currentProfileId}`) || '0');
+            const newSlots = currentSlots + 1;
+            localStorage.setItem(`zb_extra_budget_slots_${currentProfileId}`, newSlots.toString());
+            triggerToast(`Extra budget slot unlocked for ${priceDisplay}! 🎉`, 'success');
+            try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
+
+            // Track slot purchase in Supabase for Admin Portal analytics
+            try {
+              const userEmail = localStorage.getItem('zb_user_email') || '';
+              await supabase.from('slot_purchases').insert([{
+                user_id: currentProfileId,
+                user_name: userName || 'ZenBudget User',
+                user_email: userEmail,
+                slot_count: 1,
+                price_paid: getExtraSlotAmountNumber(),
+                currency: currency,
+                created_at: new Date().toISOString()
+              }]);
+            } catch (err) {
+              console.warn('Slot purchase DB logging:', err);
             }
-          });
-        } else {
-          window.location.href = payUrl;
-        }
+          }
+        });
       } else {
-        // Direct slot unlock fallback
-        const currentSlots = parseInt(localStorage.getItem(`zb_extra_budget_slots_${currentProfileId}`) || '0');
-        const newSlots = currentSlots + 1;
-        localStorage.setItem(`zb_extra_budget_slots_${currentProfileId}`, newSlots.toString());
-        triggerToast(`Extra budget slot unlocked for ${priceDisplay}! 🎉`, 'success');
-        try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
-
-        // Track slot purchase in Supabase for Admin Portal analytics
-        try {
-          const userEmail = localStorage.getItem('zb_user_email') || '';
-          await supabase.from('slot_purchases').insert([{
-            user_id: currentProfileId,
-            user_name: userName || 'ZenBudget User',
-            user_email: userEmail,
-            slot_count: 1,
-            price_paid: getExtraSlotAmountNumber(),
-            currency: currency,
-            created_at: new Date().toISOString()
-          }]);
-        } catch (err) {
-          console.warn('Slot purchase DB logging:', err);
-        }
+        window.location.href = payUrl;
       }
     } catch (err: any) {
       triggerToast(err.message || 'Payment failed', 'warning');
