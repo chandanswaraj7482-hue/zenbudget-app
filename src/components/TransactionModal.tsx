@@ -1078,38 +1078,45 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               marginTop: '10px'
             }}
           >
-            {editingTransaction ? 'Save Changes' : 'Add Transaction'}
+            {editingTransaction ? 'Save Changes' : 'Save Transaction Only'}
           </button>
 
-          {/* UPI Pay & Log button (only for new expense transactions) */}
-          {!editingTransaction && type === 'expense' && !showPaymentOptions && (
+          {/* Direct Cashfree PhonePe Payment Button */}
+          {!editingTransaction && type === 'expense' && (
             <button
               type="button"
               onClick={() => {
                 const parsedAmount = parseFloat(amount);
                 if (!title.trim() || isNaN(parsedAmount) || parsedAmount <= 0) {
-                  setScanMessage({ text: 'Fill in the amount and description first, then pay via UPI.', type: 'error' });
+                  alert('Please enter description and amount first.');
                   return;
                 }
-                setShowPaymentOptions(true);
+                if (onPayViaUPI) {
+                  onPayViaUPI(parsedAmount, title.trim());
+                  onClose();
+                } else {
+                  setShowPaymentOptions(true);
+                }
               }}
               style={{
+                width: '100%',
                 padding: '14px',
                 borderRadius: '16px',
                 fontSize: '13px',
-                fontWeight: 700,
-                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                border: 'none',
+                fontWeight: 800,
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                 color: '#fff',
+                border: 'none',
+                boxShadow: '0 4px 16px rgba(16, 185, 129, 0.35)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '6px',
-                width: '100%'
+                gap: '8px',
+                marginTop: '4px'
               }}
             >
-              💸 Pay via UPI & Log Transaction
+              <span>⚡ Pay via Cashfree (PhonePe / Cards / Netbanking)</span>
             </button>
           )}
 
