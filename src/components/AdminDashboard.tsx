@@ -125,8 +125,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [usdMonthlyPrice, setUsdMonthlyPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.usd_monthly || 2.99;
-    } catch (_) { return 2.99; }
+      return stored.usd_monthly || 4.99;
+    } catch (_) { return 4.99; }
   });
   const [usdYearlyPrice, setUsdYearlyPrice] = useState<number>(() => {
     try {
@@ -321,8 +321,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [usdScanPayPrice, setUsdScanPayPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.usd_scan_pay_price || 4.99;
-    } catch (_) { return 4.99; }
+      return stored.usd_scan_pay_price || 1.99;
+    } catch (_) { return 1.99; }
   });
   const [eurScanPayPrice, setEurScanPayPrice] = useState<number>(() => {
     try {
