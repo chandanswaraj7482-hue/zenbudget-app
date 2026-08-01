@@ -1739,9 +1739,26 @@ const App: React.FC = () => {
           }).then((result: any) => {
             if (result && result.paymentDetails) {
               const currentSlots = parseInt(localStorage.getItem(`zb_extra_budget_slots_${currentProfileId}`) || '0');
-              localStorage.setItem(`zb_extra_budget_slots_${currentProfileId}`, (currentSlots + 1).toString());
+              const newSlots = currentSlots + 1;
+              localStorage.setItem(`zb_extra_budget_slots_${currentProfileId}`, newSlots.toString());
               triggerToast(`Extra budget slot unlocked for ${priceDisplay}! 🎉`, 'success');
               try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
+
+              // Track slot purchase in Supabase for Admin Portal analytics
+              try {
+                const userEmail = localStorage.getItem('zb_user_email') || '';
+                await supabase.from('slot_purchases').insert([{
+                  user_id: currentProfileId,
+                  user_name: userName || 'ZenBudget User',
+                  user_email: userEmail,
+                  slot_count: 1,
+                  price_paid: getExtraSlotAmountNumber(),
+                  currency: currency,
+                  created_at: new Date().toISOString()
+                }]);
+              } catch (err) {
+                console.warn('Slot purchase DB logging:', err);
+              }
             }
           });
         } else {
@@ -1750,9 +1767,26 @@ const App: React.FC = () => {
       } else {
         // Direct slot unlock fallback
         const currentSlots = parseInt(localStorage.getItem(`zb_extra_budget_slots_${currentProfileId}`) || '0');
-        localStorage.setItem(`zb_extra_budget_slots_${currentProfileId}`, (currentSlots + 1).toString());
+        const newSlots = currentSlots + 1;
+        localStorage.setItem(`zb_extra_budget_slots_${currentProfileId}`, newSlots.toString());
         triggerToast(`Extra budget slot unlocked for ${priceDisplay}! 🎉`, 'success');
         try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
+
+        // Track slot purchase in Supabase for Admin Portal analytics
+        try {
+          const userEmail = localStorage.getItem('zb_user_email') || '';
+          await supabase.from('slot_purchases').insert([{
+            user_id: currentProfileId,
+            user_name: userName || 'ZenBudget User',
+            user_email: userEmail,
+            slot_count: 1,
+            price_paid: getExtraSlotAmountNumber(),
+            currency: currency,
+            created_at: new Date().toISOString()
+          }]);
+        } catch (err) {
+          console.warn('Slot purchase DB logging:', err);
+        }
       }
     } catch (err: any) {
       triggerToast(err.message || 'Payment failed', 'warning');

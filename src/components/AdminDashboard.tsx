@@ -151,11 +151,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     if (onShowToast) onShowToast('Live Multi-Currency Prices updated successfully!', 'success');
   };
   
+interface SlotPurchaseRecord {
+  id?: string;
+  user_id: string;
+  user_name: string;
+  user_email: string;
+  slot_count: number;
+  price_paid: number;
+  currency: string;
+  created_at: string;
+}
+
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing' | 'slots'>('overview');
+
   // Data states
   const [profiles, setProfiles] = useState<ProfileRecord[]>([]);
   const [broadcasts, setBroadcasts] = useState<BroadcastRecord[]>([]);
   const [coupons, setCoupons] = useState<CouponRecord[]>([]);
   const [ratings, setRatings] = useState<RatingRecord[]>([]);
+  const [slotPurchases, setSlotPurchases] = useState<SlotPurchaseRecord[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
@@ -231,6 +245,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         .order('created_at', { ascending: false });
 
       if (ratingData) setRatings(ratingData);
+
+      // Fetch Slot Purchases
+      const { data: slotData } = await supabaseClient
+        .from('slot_purchases')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (slotData) setSlotPurchases(slotData);
 
       // Fetch Payment History
       const { data: payData } = await supabaseClient
@@ -2234,6 +2256,66 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <Check size={18} /> Save Live Subscription Prices
                       </button>
                     </form>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 9: EXTRA SLOTS REVENUE & USER BREAKDOWN */}
+              {activeTab === 'slots' && (
+                <div>
+                  <h4 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <DollarSign size={18} color="#38bdf8" /> Extra Budget Limit Slots Revenue & User Breakdown ({slotPurchases.length})
+                  </h4>
+
+                  {/* Stat Summary Cards */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+                    <div style={{ padding: '1.25rem', backgroundColor: 'rgba(30, 41, 59, 0.6)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '16px' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Total Extra Slots Sold</span>
+                      <p style={{ fontSize: '1.75rem', fontWeight: 800, color: '#38bdf8', margin: '4px 0 0 0' }}>
+                        {slotPurchases.reduce((sum, s) => sum + (s.slot_count || 1), 0)} Slots
+                      </p>
+                    </div>
+
+                    <div style={{ padding: '1.25rem', backgroundColor: 'rgba(30, 41, 59, 0.6)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '16px' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Total Slot Revenue</span>
+                      <p style={{ fontSize: '1.75rem', fontWeight: 800, color: '#34d399', margin: '4px 0 0 0' }}>
+                        ₹{slotPurchases.reduce((sum, s) => sum + (s.price_paid || 10), 0)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Slot Purchase Table */}
+                  <div style={{ overflowX: 'auto', backgroundColor: 'rgba(30, 41, 59, 0.6)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '16px' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', background: 'rgba(15, 23, 42, 0.6)', color: '#94a3b8', textAlign: 'left' }}>
+                          <th style={{ padding: '12px 16px' }}>User Name</th>
+                          <th style={{ padding: '12px 16px' }}>Email</th>
+                          <th style={{ padding: '12px 16px' }}>Slots Bought</th>
+                          <th style={{ padding: '12px 16px' }}>Amount Paid</th>
+                          <th style={{ padding: '12px 16px' }}>Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {slotPurchases.length === 0 ? (
+                          <tr>
+                            <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
+                              No extra budget limit slots purchased yet.
+                            </td>
+                          </tr>
+                        ) : (
+                          slotPurchases.map((sp, idx) => (
+                            <tr key={sp.id || idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                              <td style={{ padding: '12px 16px', fontWeight: 700, color: '#fff' }}>{sp.user_name || 'ZenBudget User'}</td>
+                              <td style={{ padding: '12px 16px', color: '#94a3b8' }}>{sp.user_email || 'N/A'}</td>
+                              <td style={{ padding: '12px 16px', color: '#38bdf8', fontWeight: 800 }}>+{sp.slot_count || 1} Slot</td>
+                              <td style={{ padding: '12px 16px', color: '#34d399', fontWeight: 800 }}>{sp.currency === 'USD' ? '$' : '₹'}{sp.price_paid || 10}</td>
+                              <td style={{ padding: '12px 16px', color: '#64748b', fontSize: '0.75rem' }}>{new Date(sp.created_at).toLocaleString()}</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               )}
