@@ -806,9 +806,12 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   } catch (sdkErr: any) {
                     console.warn('Cashfree payment launch fallback to direct UPI:', sdkErr);
                     setPaymentStep('details');
-                    // Direct UPI Fallback intent
-                    const rawUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${upiAmountINR}&cu=INR&tn=ZenBudget_Subscription`;
-                    window.location.href = rawUrl;
+                    // Direct UPI Fallback intent on Mobile only
+                    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+                    if (isMobile) {
+                      const rawUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${upiAmountINR}&cu=INR&tn=ZenBudget_Subscription`;
+                      try { window.location.href = rawUrl; } catch (e) {}
+                    }
                   }
                 }}
                 style={{

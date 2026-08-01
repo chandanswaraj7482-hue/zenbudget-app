@@ -94,9 +94,12 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
           setIsProcessing(false);
         });
       } else {
-        // Fallback: Direct UPI intent or instant unlock
-        const upiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${numPrice}&cu=INR&tn=Scan_Pay_Unlock`;
-        try { window.location.href = upiUrl; } catch (e) {}
+        // Fallback: Direct UPI intent on Mobile or instant unlock
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isMobile) {
+          const upiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${numPrice}&cu=INR&tn=Scan_Pay_Unlock`;
+          try { window.location.href = upiUrl; } catch (e) {}
+        }
         localStorage.setItem(`zb_scan_pay_access_${profileId}`, 'true');
         if (profileId) {
           await supabase.from('profiles').update({ has_scan_pay_access: true }).eq('id', profileId);

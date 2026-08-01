@@ -482,9 +482,12 @@ const App: React.FC = () => {
           }
         });
       } else {
-        // Fallback: Direct UPI App intent launch & process loan repayment
-        const upiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${amount}&cu=INR&tn=${encodeURIComponent(`Loan Repayment: ${loan.personName}`)}`;
-        try { window.location.href = upiUrl; } catch (e) {}
+        // Fallback: Direct UPI App intent launch on Mobile only
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isMobile) {
+          const upiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${amount}&cu=INR&tn=${encodeURIComponent(`Loan Repayment: ${loan.personName}`)}`;
+          try { window.location.href = upiUrl; } catch (e) {}
+        }
         handleRepayLoan(loan.id, amount, accounts[0]?.id || '1');
         triggerToast(`Loan repayment of ₹${amount} to ${loan.personName} processed! 🎉`, 'success');
         try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
@@ -556,9 +559,12 @@ const App: React.FC = () => {
           }
         });
       } else {
-        // Fallback: Direct UPI App intent launch & save transaction
-        const upiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${amount}&cu=INR&tn=${encodeURIComponent(title || 'ZenBudget Payment')}`;
-        try { window.location.href = upiUrl; } catch (e) {}
+        // Fallback: Direct UPI App intent launch on Mobile only
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isMobile) {
+          const upiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${amount}&cu=INR&tn=${encodeURIComponent(title || 'ZenBudget Payment')}`;
+          try { window.location.href = upiUrl; } catch (e) {}
+        }
         handleSaveTransaction({
           title: title || 'UPI Payment',
           amount: amount,
