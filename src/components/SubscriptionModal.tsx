@@ -661,6 +661,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                           amount: upiAmountINR,
                           planType: billingCycle,
                           email: userEmail,
+                          phone: localStorage.getItem('zb_user_phone') || '',
                           userId: currentProfileId
                         })
                       });
@@ -679,6 +680,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                             amount: upiAmountINR,
                             planType: billingCycle,
                             email: userEmail,
+                            phone: localStorage.getItem('zb_user_phone') || '',
                             userId: currentProfileId
                           })
                         });
@@ -824,8 +826,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   justifyContent: 'center',
                   gap: '8px'
                 }}
-              >
-                {getCtaText()} (₹{upiAmountINR})
+                {getCtaText()} ({currency === 'INR' ? `₹${upiAmountINR}` : `${priceInfo.symbol}${priceInfo.amount}`})
               </button>
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '11px', color: '#94a3b8' }}>

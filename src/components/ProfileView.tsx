@@ -27,6 +27,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 }) => {
   const [name, setName] = useState(currentName);
   const [email, setEmail] = useState(currentEmail || localStorage.getItem('zb_user_email') || '');
+  const [phone, setPhone] = useState(() => localStorage.getItem('zb_user_phone') || '');
   const [pin, setPin] = useState(currentPin);
   const [currency, setCurrency] = useState(currentCurrency);
   const [language, setLanguage] = useState(currentLanguage);
@@ -82,6 +83,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     setSuccessMsg('');
     try {
       localStorage.setItem('zb_user_avatar', avatarUrl);
+      localStorage.setItem('zb_user_phone', phone.trim());
       window.dispatchEvent(new Event('profile_avatar_updated'));
       await onSaveProfile(name.trim(), pin, currency, language, email.trim());
       setSuccessMsg('Profile settings updated successfully!');
@@ -236,6 +238,24 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="user@example.com"
+                className="glass-input"
+                style={{ paddingLeft: '40px', fontSize: '13px', padding: '12px 14px 12px 40px' }}
+              />
+            </div>
+          </div>
+
+          {/* Phone Number */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Mobile Phone Number (Cashfree Sync)
+            </label>
+            <div style={{ position: 'relative' }}>
+              <User size={15} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="e.g. 9876543210"
                 className="glass-input"
                 style={{ paddingLeft: '40px', fontSize: '13px', padding: '12px 14px 12px 40px' }}
               />

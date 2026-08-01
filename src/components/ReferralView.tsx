@@ -143,57 +143,89 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
           </div>
         </div>
 
-        {/* Link Friend's Code */}
-        <form onSubmit={handleClaim} style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderTop: '1px solid var(--border-card)', paddingTop: '16px' }}>
-          <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
-            Got a Friend's Referral Code?
-          </label>
+        {/* Link Friend's Code / Locked Status */}
+        {(() => {
+          const linkedCode = referredBy || localStorage.getItem('zb_referred_by') || '';
+          const storedInviter = inviterName || localStorage.getItem('zb_inviter_name') || '';
 
-          {claimMsg && (
-            <p style={{ fontSize: '12px', fontWeight: 600, color: claimMsg.success ? 'var(--success)' : 'var(--danger)', margin: 0 }}>
-              {claimMsg.text}
-            </p>
-          )}
+          if (linkedCode) {
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid var(--border-card)', paddingTop: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+                    Linked Referral Code (Locked 🔒)
+                  </label>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#34d399' }}>
+                    ✅ Permanently Claimed
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: '140px', padding: '12px 14px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', fontSize: '14px', fontWeight: 800, color: 'var(--text-secondary)', letterSpacing: '1px' }}>
+                    {linkedCode}
+                  </div>
+                  {storedInviter && (
+                    <div style={{ padding: '10px 14px', borderRadius: '12px', background: 'rgba(139, 92, 246, 0.15)', border: '1px solid rgba(139, 92, 246, 0.3)', color: '#c084fc', fontSize: '12px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      🤝 Invited by {storedInviter}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          }
 
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <input
-              type="text"
-              required
-              value={claimCode}
-              onChange={(e) => setClaimCode(e.target.value)}
-              placeholder="ZB-XXXX-XXXX"
-              style={{
-                flex: 1,
-                padding: '12px 14px',
-                borderRadius: '12px',
-                background: 'var(--bg-input)',
-                border: '1px solid var(--border-input)',
-                color: 'var(--text-primary)',
-                fontSize: '14px',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                outline: 'none'
-              }}
-            />
-            <button
-              type="submit"
-              disabled={isClaiming || !claimCode.trim()}
-              style={{
-                padding: '12px 18px',
-                borderRadius: '12px',
-                border: 'none',
-                background: 'linear-gradient(135deg, #ec4899, #8b5cf6)',
-                color: '#fff',
-                fontSize: '13px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                opacity: claimCode.trim() ? 1 : 0.5
-              }}
-            >
-              {isClaiming ? 'Linking...' : 'Link Code'}
-            </button>
-          </div>
-        </form>
+          return (
+            <form onSubmit={handleClaim} style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderTop: '1px solid var(--border-card)', paddingTop: '16px' }}>
+              <label style={{ fontSize: '11px', fontWeight 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+                Got a Friend's Referral Code?
+              </label>
+
+              {claimMsg && (
+                <p style={{ fontSize: '12px', fontWeight: 600, color: claimMsg.success ? 'var(--success)' : 'var(--danger)', margin: 0 }}>
+                  {claimMsg.text}
+                </p>
+              )}
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <input
+                  type="text"
+                  required
+                  value={claimCode}
+                  onChange={(e) => setClaimCode(e.target.value)}
+                  placeholder="ZB-XXXX-XXXX"
+                  style={{
+                    flex: 1,
+                    padding: '12px 14px',
+                    borderRadius: '12px',
+                    background: 'var(--bg-input)',
+                    border: '1px solid var(--border-input)',
+                    color: 'var(--text-primary)',
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    outline: 'none'
+                  }}
+                />
+                <button
+                  type="submit"
+                  disabled={isClaiming || !claimCode.trim()}
+                  style={{
+                    padding: '12px 18px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #ec4899, #8b5cf6)',
+                    color: '#fff',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    opacity: claimCode.trim() ? 1 : 0.5
+                  }}
+                >
+                  {isClaiming ? 'Linking...' : 'Link Code'}
+                </button>
+              </div>
+            </form>
+          );
+        })()}
 
       </div>
 

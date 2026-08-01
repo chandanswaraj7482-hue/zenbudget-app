@@ -1064,6 +1064,23 @@ const App: React.FC = () => {
         setReferredBy(profData.referred_by || null);
         setUserReferralCode(profData.referral_code || '');
         setUserPin(profData.pin);
+
+        // Auto sync Google OAuth Avatar & Email
+        try {
+          const { data: authUserData } = await supabase.auth.getUser();
+          if (authUserData && authUserData.user) {
+            const googleAvatar = authUserData.user.user_metadata?.avatar_url || authUserData.user.user_metadata?.picture || authUserData.user.user_metadata?.photo_url;
+            const userEmail = authUserData.user.email || profData.email || '';
+            if (userEmail && (!profData.email || profData.email !== userEmail)) {
+              await supabase.from('profiles').update({ email: userEmail }).eq('id', currentProfileId);
+              localStorage.setItem('zb_user_email', userEmail);
+            }
+            if (googleAvatar && (!localStorage.getItem('zb_user_avatar') || localStorage.getItem('zb_user_avatar')?.includes('ui-avatars.com'))) {
+              setUserAvatar(googleAvatar);
+              localStorage.setItem('zb_user_avatar', googleAvatar);
+            }
+          }
+        } catch (e) {}
         
         // Auto sync active currency from local settings or database settings
         const isIndia = Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Kolkata' || 
@@ -1634,16 +1651,21 @@ const App: React.FC = () => {
   };
 
   const getExtraSlotAmountNumber = () => {
-    if (currency === 'INR') return 10;
-    if (currency === 'USD') return 1.99;
-    return parseFloat((1.99 * (rates[currency] || 1)).toFixed(2));
+    let dynamicPrices: any = {};
+    try { dynamicPrices = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}'); } catch (_) {}
+    if (currency === 'INR') return dynamicPrices.inr_slot_price || 10;
+    if (currency === 'USD') return dynamicPrices.usd_slot_price || 1.99;
+    if (currency === 'EUR') return dynamicPrices.eur_slot_price || 1.85;
+    if (currency === 'GBP') return dynamicPrices.gbp_slot_price || 1.59;
+    if (currency === 'CAD') return dynamicPrices.cad_slot_price || 2.49;
+    if (currency === 'AUD') return dynamicPrices.aud_slot_price || 2.79;
+    const baseUSD = dynamicPrices.usd_slot_price || 1.99;
+    return parseFloat((baseUSD * (rates[currency] || 1)).toFixed(2));
   };
 
   const getExtraSlotPriceDisplay = () => {
-    if (currency === 'INR') return '₹10';
-    if (currency === 'USD') return '$1.99';
-    const activeSlotPrice = 1.99 * (rates[currency] || 1);
-    return `${currencySymbol}${activeSlotPrice.toFixed(2)}`;
+    const amount = getExtraSlotAmountNumber();
+    return `${currencySymbol}${amount}`;
   };
 
   const handleBuyExtraBudgetSlot = async () => {
@@ -1718,9 +1740,9 @@ const App: React.FC = () => {
         setConfirmDialog({
           isOpen: true,
           title: '🔒 Budget Limit Slot Required',
-          message: `You've used all ${maxAllowed} budget slots (${freeSlots} free${purchasedSlots > 0 ? ` + ${purchasedSlots} purchased` : ''}). Buy an extra slot for just ${priceDisplay}, or upgrade to Premium for unlimited limits!`,
+          message: `You've used all ${maxAllowed} budget limit slots (${freeSlots} free${purchasedSlots > 0 ? ` + ${purchasedSlots} extra` : ''}). Buy +1 Extra Budget Limit Slot for ${priceDisplay} (per limit slot price), or upgrade to Premium!`,
           type: 'warning',
-          confirmText: `💳 Buy Slot (${priceDisplay})`,
+          confirmText: `💳 Buy Extra Slot (${priceDisplay})`,
           cancelText: '⭐ Go Premium',
           onConfirm: () => {
             setConfirmDialog(null);
@@ -1932,13 +1954,13 @@ const App: React.FC = () => {
 
   const convertedBudgets = budgets.map(b => ({
     ...b,
-    limit: b.limit * activeRate
+    limit: currency === 'INR' ? Math.round(b.limit * activeRate) : Number((b.limit * activeRate).toFixed(2))
   }));
 
   const convertedGoals = goals.map(g => ({
     ...g,
-    targetAmount: g.targetAmount * activeRate,
-    currentAmount: g.currentAmount * activeRate
+    targetAmount: currency === 'INR' ? Math.round(g.targetAmount * activeRate) : Number((g.targetAmount * activeRate).toFixed(2)),
+    currentAmount: currency === 'INR' ? Math.round(g.currentAmount * activeRate) : Number((g.currentAmount * activeRate).toFixed(2))
   }));
 
   const handleSaveProfile = async (newName: string, newPin: string, newCurrency: string, newLanguage: string, newEmail?: string) => {

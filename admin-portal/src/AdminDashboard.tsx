@@ -242,7 +242,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <input type="number" value={inrSlotPrice} onChange={(e) => setInrSlotPrice(Number(e.target.value))} style={{ width: '100%', padding: '8px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: '#34d399', border: '1px solid rgba(255,255,255,0.1)' }} />
                   </div>
                   <div>
-                    <label style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 700 }}>US Extra Slot Price (USD $)</label>
+                    <label style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 700 }}>US & Global Extra Slot Price (USD $)</label>
                     <input type="number" step="0.01" value={usdSlotPrice} onChange={(e) => setUsdSlotPrice(Number(e.target.value))} style={{ width: '100%', padding: '8px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', color: '#38bdf8', border: '1px solid rgba(255,255,255,0.1)' }} />
                   </div>
                   <div>
@@ -255,8 +255,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   </div>
                 </div>
 
+                <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: '4px 0 0', fontStyle: 'italic' }}>
+                  ℹ️ Note: These prices represent individual per-limit-slot fees.
+                </p>
+
                 <button type="submit" style={{ padding: '12px', borderRadius: '12px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', border: 'none', fontWeight: 800, cursor: 'pointer' }}>
-                  Save Multi-Currency Prices
+                  Save Live Multi-Currency Prices
                 </button>
               </form>
             </div>
