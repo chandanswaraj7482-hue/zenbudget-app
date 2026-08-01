@@ -331,7 +331,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             </div>
             {phone && (
               <p style={{ fontSize: '10px', color: 'var(--text-secondary)', margin: '2px 0 0 0', fontStyle: 'italic' }}>
-                📞 Saved: {phoneCode} {'•'.repeat(Math.max(0, phone.length - 2))}{phone.slice(-2)}
+                📞 Encrypted &amp; Saved: {phoneCode} {'•'.repeat(phone.length || 10)}
               </p>
             )}
           </div>
