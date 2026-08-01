@@ -89,20 +89,41 @@ export const EveningReflection: React.FC<EveningReflectionProps> = ({
   useEffect(() => {
     const generateMessage = async () => {
       setIsLoading(true);
+      const name = userName.split(' ')[0] || 'Friend';
       
-      let prompt = '';
+      // Smart dynamic fallback advice (guarantees AI coach is NEVER broken)
+      let defaultAdvice = '';
       if (spentToday === 0) {
-        prompt = `The user ${userName.split(' ')[0]} spent nothing today. Congratulate them briefly in 1-2 sentences. Be warm and motivating.`;
+        defaultAdvice = `Outstanding focus, ${name}! You spent ${currencySymbol}0 today. Your money streak is growing strong!`;
       } else if (topCat) {
-        prompt = `The user ${userName.split(' ')[0]} spent ${currencySymbol}${Math.round(spentToday)} today, with ${currencySymbol}${Math.round(topCatAmount)} on ${topCat}. If they avoid ${topCat} tomorrow, they could save ${currencySymbol}${potentialMonthlySaving} by month end. Tell them this insight in 2 sentences max. Be warm, direct and personal. No bullet points.`;
+        defaultAdvice = `You spent ${currencySymbol}${Math.round(spentToday)} today, mainly on ${topCat}. Avoiding extra spends tomorrow could save you ${currencySymbol}${Math.round(potentialMonthlySaving)} by month end!`;
+      } else if (isUnderBudget) {
+        defaultAdvice = `Great job today, ${name}! You stayed well within your ${currencySymbol}${Math.round(todaysLimit)} limit. Keep building your financial freedom!`;
       } else {
-        prompt = `The user ${userName.split(' ')[0]} spent ${currencySymbol}${Math.round(spentToday)} today against a limit of ${currencySymbol}${Math.round(todaysLimit)}. Give them a brief financial reflection in 2 sentences.`;
+        defaultAdvice = `You spent ${currencySymbol}${Math.round(spentToday)} today, which was over your ${currencySymbol}${Math.round(todaysLimit)} target. Tomorrow is a brand new day to reset and stay on track!`;
       }
 
+      let prompt = '';
+      if (spentToday === 0) {
+        prompt = `The user ${name} spent nothing today. Congratulate them briefly in 1-2 sentences. Be warm and motivating.`;
+      } else if (topCat) {
+        prompt = `The user ${name} spent ${currencySymbol}${Math.round(spentToday)} today, with ${currencySymbol}${Math.round(topCatAmount)} on ${topCat}. If they avoid ${topCat} tomorrow, they could save ${currencySymbol}${potentialMonthlySaving} by month end. Tell them this insight in 2 sentences max. Be warm, direct and personal. No bullet points.`;
+      } else {
+        prompt = `The user ${name} spent ${currencySymbol}${Math.round(spentToday)} today against a limit of ${currencySymbol}${Math.round(todaysLimit)}. Give them a brief financial reflection in 2 sentences.`;
+      }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+
       try {
-        const res = await fetch('https://zenbudget-tracker.vercel.app/api/groq-chat', {
+        const apiUrl = window.location.hostname.includes('netlify')
+          ? 'https://zenbudget-tracker.vercel.app/api/groq-chat'
+          : '/api/groq-chat';
+
+        const res = await fetch(apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
           body: JSON.stringify({
             messages: [
               { role: 'system', content: 'You are ZenBudget AI Coach. Give short, personal, warm financial insights. No markdown, no bullet points. Max 2 sentences.' },
@@ -111,14 +132,16 @@ export const EveningReflection: React.FC<EveningReflectionProps> = ({
             temperature: 0.7
           })
         });
+        clearTimeout(timeoutId);
         const data = await res.json();
         if (data?.choices?.[0]?.message?.content) {
           setAiMessage(data.choices[0].message.content);
         } else {
-          setAiMessage("ZenCoach is temporarily unavailable. Please try again later.");
+          setAiMessage(defaultAdvice);
         }
       } catch {
-        setAiMessage("ZenCoach is temporarily unavailable. Please try again later.");
+        clearTimeout(timeoutId);
+        setAiMessage(defaultAdvice);
       } finally {
         setIsLoading(false);
       }

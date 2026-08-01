@@ -81,20 +81,39 @@ export const MorningBrief: React.FC<MorningBriefProps> = ({
   useEffect(() => {
     const generateMessage = async () => {
       setIsLoading(true);
+      const name = userName.split(' ')[0] || 'Friend';
       
-      let prompt = '';
+      // Smart dynamic fallback advice (guarantees AI coach is NEVER broken)
+      let defaultAdvice = '';
       if (spentYesterday === 0) {
-        prompt = `Good morning ${userName.split(' ')[0]}! They had no expenses yesterday. Give a warm motivating start to the day in 2 sentences.`;
+        defaultAdvice = `Good morning ${name}! You spent ${currencySymbol}0 yesterday. Keep this zero-spending momentum going today!`;
       } else if (topCat) {
-        prompt = `Good morning ${userName.split(' ')[0]}! Yesterday they spent ${currencySymbol}${Math.round(spentYesterday)} total, with ${currencySymbol}${Math.round(topCat[1])} on ${topCat[0]}. Today's smart spending limit is ${currencySymbol}${todaysLimit}. Give personalized advice in 2 sentences. Be warm and direct.`;
+        defaultAdvice = `Good morning ${name}! Yesterday you spent ${currencySymbol}${Math.round(spentYesterday)}, mostly on ${topCat[0]}. Stay mindful of your ${currencySymbol}${Math.round(todaysLimit)} limit today!`;
       } else {
-        prompt = `Good morning ${userName.split(' ')[0]}! Yesterday they spent ${currencySymbol}${Math.round(spentYesterday)}. Today's limit is ${currencySymbol}${todaysLimit}. Give a short morning financial motivation in 2 sentences.`;
+        defaultAdvice = `Good morning ${name}! Aim to keep your spending within your daily limit of ${currencySymbol}${Math.round(todaysLimit)} today. You've got this!`;
       }
 
+      let prompt = '';
+      if (spentYesterday === 0) {
+        prompt = `Good morning ${name}! They had no expenses yesterday. Give a warm motivating start to the day in 2 sentences.`;
+      } else if (topCat) {
+        prompt = `Good morning ${name}! Yesterday they spent ${currencySymbol}${Math.round(spentYesterday)} total, with ${currencySymbol}${Math.round(topCat[1])} on ${topCat[0]}. Today's smart spending limit is ${currencySymbol}${todaysLimit}. Give personalized advice in 2 sentences. Be warm and direct.`;
+      } else {
+        prompt = `Good morning ${name}! Yesterday they spent ${currencySymbol}${Math.round(spentYesterday)}. Today's limit is ${currencySymbol}${todaysLimit}. Give a short morning financial motivation in 2 sentences.`;
+      }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+
       try {
-        const res = await fetch('https://zenbudget-tracker.vercel.app/api/groq-chat', {
+        const apiUrl = window.location.hostname.includes('netlify')
+          ? 'https://zenbudget-tracker.vercel.app/api/groq-chat'
+          : '/api/groq-chat';
+
+        const res = await fetch(apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
           body: JSON.stringify({
             messages: [
               { role: 'system', content: 'You are ZenBudget AI Coach. Give short, personal, motivating morning finance messages. No markdown, no bullet points. Max 2 sentences.' },
@@ -103,14 +122,16 @@ export const MorningBrief: React.FC<MorningBriefProps> = ({
             temperature: 0.7
           })
         });
+        clearTimeout(timeoutId);
         const data = await res.json();
         if (data?.choices?.[0]?.message?.content) {
           setAiMessage(data.choices[0].message.content);
         } else {
-          setAiMessage("ZenCoach is temporarily unavailable. Please try again later.");
+          setAiMessage(defaultAdvice);
         }
       } catch {
-        setAiMessage("ZenCoach is temporarily unavailable. Please try again later.");
+        clearTimeout(timeoutId);
+        setAiMessage(defaultAdvice);
       } finally {
         setIsLoading(false);
       }
