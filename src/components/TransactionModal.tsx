@@ -52,7 +52,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   currencySymbol,
   accounts = [],
   onOpenTransfer: _onOpenTransfer,
-  onTransfer
+  onTransfer,
+  onPayViaUPI
 }) => {
   const [type, setType] = useState<'income' | 'expense' | 'transfer'>('expense');
   const [selectedAccountId, setSelectedAccountId] = useState<string>(accounts[0]?.id || '');
