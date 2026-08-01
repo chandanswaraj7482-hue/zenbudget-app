@@ -990,6 +990,30 @@ const App: React.FC = () => {
     }
   }, [currentProfileId, isLocked]);
 
+  // Automatic Scheduled Loan Repayment Reminder Popups
+  useEffect(() => {
+    if (isLocked || !currentProfileId || loans.length === 0) return;
+    const todayStr = new Date().toISOString().split('T')[0];
+    const reminderKey = `zb_loan_reminded_${currentProfileId}_${todayStr}`;
+    if (localStorage.getItem(reminderKey)) return;
+
+    const dueLoans = loans.filter(l => l.status === 'active' && l.dueDate <= todayStr);
+    if (dueLoans.length > 0) {
+      localStorage.setItem(reminderKey, 'true');
+      const firstDue = dueLoans[0];
+      const remaining = firstDue.totalAmount - firstDue.paidAmount;
+      const label = firstDue.type === 'borrowed' ? 'Repayment Due' : 'Collection Due';
+      setTimeout(() => {
+        addNotification(
+          `⏰ ZenBudget Loan Reminder: ${label}`,
+          `Reminder: ${firstDue.personName} loan of ${currencySymbol}${remaining} is due today!`,
+          'warning'
+        );
+        triggerToast(`⏰ Loan Reminder: ${firstDue.personName} (${currencySymbol}${remaining}) is due today!`, 'warning');
+      }, 4000);
+    }
+  }, [currentProfileId, isLocked, loans, currencySymbol]);
+
   const fetchDataFromSupabase = async () => {
     try {
 

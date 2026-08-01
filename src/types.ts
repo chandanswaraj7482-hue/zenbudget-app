@@ -26,6 +26,8 @@ export interface LoanRecord {
   type: 'borrowed' | 'lent';
   personName: string;
   totalAmount: number;
+  principalAmount?: number;
+  interestRate?: number;
   paidAmount: number;
   dueDate: string;
   frequency: 'one_time' | 'weekly' | 'monthly' | 'yearly' | 'custom' | string;

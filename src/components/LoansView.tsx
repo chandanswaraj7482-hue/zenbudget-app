@@ -32,32 +32,23 @@ export const LoansView: React.FC<LoansViewProps> = ({
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [repayModalLoan, setRepayModalLoan] = useState<LoanRecord | null>(null);
 
-  // Form states for adding loan
-  const [personName, setPersonName] = useState('');
-  const [totalAmount, setTotalAmount] = useState('');
-  const [dueDate, setDueDate] = useState(new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0]);
-  const [frequency, setFrequency] = useState<'one_time' | 'weekly' | 'monthly' | 'yearly' | 'custom'>('monthly');
-  const [customFrequencyText, setCustomFrequencyText] = useState('');
-  const [selectedAccountId, setSelectedAccountId] = useState(accounts[0]?.id || '');
-  const [notes, setNotes] = useState('');
-
-  // Repay modal states
-  const [repayAmount, setRepayAmount] = useState('');
-  const [repayAccountId, setRepayAccountId] = useState(accounts[0]?.id || '');
-
-  const filteredLoans = loans.filter(l => l.type === activeTab);
-  const totalBorrowed = loans.filter(l => l.type === 'borrowed' && l.status === 'active').reduce((sum, l) => sum + (l.totalAmount - l.paidAmount), 0);
-  const totalLent = loans.filter(l => l.type === 'lent' && l.status === 'active').reduce((sum, l) => sum + (l.totalAmount - l.paidAmount), 0);
+  const [interestRate, setInterestRate] = useState('');
 
   const handleSubmitAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    const amountNum = parseFloat(totalAmount);
-    if (!personName.trim() || isNaN(amountNum) || amountNum <= 0) return;
+    const principalNum = parseFloat(totalAmount);
+    const ratePct = parseFloat(interestRate) || 0;
+    if (!personName.trim() || isNaN(principalNum) || principalNum <= 0) return;
+
+    const interestAmt = (principalNum * ratePct) / 100;
+    const finalTotal = principalNum + interestAmt;
 
     onAddLoan({
       type: activeTab,
       personName: personName.trim(),
-      totalAmount: amountNum,
+      totalAmount: finalTotal,
+      principalAmount: principalNum,
+      interestRate: ratePct > 0 ? ratePct : undefined,
       dueDate,
       frequency,
       customFrequencyText: frequency === 'custom' ? (customFrequencyText.trim() || 'Custom') : undefined,
@@ -67,6 +58,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
 
     setPersonName('');
     setTotalAmount('');
+    setInterestRate('');
     setCustomFrequencyText('');
     setNotes('');
     setIsAddModalOpen(false);
@@ -302,26 +294,49 @@ export const LoansView: React.FC<LoansViewProps> = ({
                   required
                   value={personName}
                   onChange={e => setPersonName(e.target.value)}
-                  placeholder="e.g. Rahul Sharma"
+                  placeholder="e.g. Alex Morgan"
                   className="glass-input"
                   style={{ marginTop: '4px', width: '100%' }}
                 />
               </div>
 
-              <div>
-                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{t('total_amount')} ({currencySymbol})</label>
-                <input
-                  type="number"
-                  required
-                  min="1"
-                  step="any"
-                  value={totalAmount}
-                  onChange={e => setTotalAmount(e.target.value)}
-                  placeholder="5000"
-                  className="glass-input"
-                  style={{ marginTop: '4px', width: '100%' }}
-                />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Principal ({currencySymbol})</label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    step="any"
+                    value={totalAmount}
+                    onChange={e => setTotalAmount(e.target.value)}
+                    placeholder="5000"
+                    className="glass-input"
+                    style={{ marginTop: '4px', width: '100%' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Interest Rate (% p.a.)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={interestRate}
+                    onChange={e => setInterestRate(e.target.value)}
+                    placeholder="e.g. 10%"
+                    className="glass-input"
+                    style={{ marginTop: '4px', width: '100%' }}
+                  />
+                </div>
               </div>
+
+              {/* Interest calculation breakdown badge */}
+              {parseFloat(interestRate) > 0 && parseFloat(totalAmount) > 0 && (
+                <div style={{ padding: '8px 12px', borderRadius: '10px', background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.2)', fontSize: '11px', color: '#38bdf8', fontWeight: 700 }}>
+                  💡 Breakdown: Principal {currencySymbol}{parseFloat(totalAmount)} + Interest ({parseFloat(interestRate)}%): {currencySymbol}{((parseFloat(totalAmount) * parseFloat(interestRate)) / 100).toFixed(0)} = Total Repayable: {currencySymbol}{(parseFloat(totalAmount) + (parseFloat(totalAmount) * parseFloat(interestRate)) / 100).toFixed(0)}
+                </div>
+              )}
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>

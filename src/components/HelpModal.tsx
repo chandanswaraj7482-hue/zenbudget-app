@@ -537,15 +537,21 @@ User Message: ${rawText}`
                       // Save rating to Supabase (admin panel me dikhega)
                       try {
                         const { data: { user } } = await supabase.auth.getUser();
-                        await supabase.from('app_ratings').insert({
+                        const userName = localStorage.getItem('zb_user_name') || user?.user_metadata?.full_name || user?.user_metadata?.name || 'ZenBudget User';
+                        const userEmail = user?.email || localStorage.getItem('zb_user_email') || 'user@example.com';
+
+                        await supabase.from('app_ratings').insert([{
                           user_id: user?.id || null,
-                          user_email: user?.email || localStorage.getItem('zb_user_email') || 'anonymous',
+                          user_name: userName,
+                          user_email: userEmail,
+                          rating_stars: rating,
                           rating: rating,
+                          feedback: comment || `${rating} Star rating submitted`,
                           comment: comment || null,
                           month: `${curMonth} ${curYear}`,
                           platform: navigator.userAgent.includes('Android') ? 'Android APK' : 'Web',
                           created_at: new Date().toISOString()
-                        });
+                        }]);
                         console.log('✅ Rating saved to Supabase admin panel');
                       } catch (err) {
                         console.warn('Rating save to Supabase failed (table may not exist yet):', err);
