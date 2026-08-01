@@ -2274,176 +2274,145 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   </h4>
 
                   <div style={{ maxWidth: '520px', backgroundColor: 'rgba(30, 41, 59, 0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px', padding: '1.5rem', textAlign: 'left' }}>
-                    <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1.2rem', lineHeight: 1.5 }}>
-                      Set live subscription prices across the ZenBudget app. Changes updated here will reflect instantly on all user devices!
+                    <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1rem', lineHeight: 1.5 }}>
+                      Set live subscription & feature prices across the ZenBudget app. Select currency at the top to switch & edit prices dynamically!
                     </p>
 
+                    {/* 🌐 Top Currency Switcher */}
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '1.25rem', padding: '6px', borderRadius: '14px', background: 'rgba(15,23,42,0.9)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                      {(['INR', 'USD', 'EUR', 'GBP'] as const).map(curr => {
+                        const symbolMap = { INR: '🇮🇳 INR (₹)', USD: '🇺🇸 USD ($)', EUR: '🇪🇺 EUR (€)', GBP: '🇬🇧 GBP (£)' };
+                        const isActive = selectedPricingCurrency === curr;
+                        return (
+                          <button
+                            key={curr}
+                            type="button"
+                            onClick={() => setSelectedPricingCurrency(curr)}
+                            style={{
+                              flex: 1, padding: '9px 10px', borderRadius: '10px', border: 'none',
+                              background: isActive ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : 'transparent',
+                              color: isActive ? '#fff' : '#94a3b8',
+                              fontWeight: 800, fontSize: '0.78rem', cursor: 'pointer',
+                              boxShadow: isActive ? '0 4px 12px rgba(99, 102, 241, 0.4)' : 'none',
+                              transition: 'all 0.2s ease'
+                            }}
+                          >
+                            {symbolMap[curr]}
+                          </button>
+                        );
+                      })}
+                    </div>
+
                     <form onSubmit={handleSavePricing} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#a5b4fc', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                        <span>🌐</span> Setting Prices for: <span style={{ color: '#38bdf8' }}>{selectedPricingCurrency === 'INR' ? '🇮🇳 Indian Rupee (INR ₹)' : selectedPricingCurrency === 'USD' ? '🇺🇸 US Dollar (USD $)' : selectedPricingCurrency === 'EUR' ? '🇪🇺 Euro (EUR €)' : '🇬🇧 British Pound (GBP £)'}</span>
+                      </div>
+
+                      {/* 1. Monthly Plan Price */}
                       <div>
                         <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 700, marginBottom: '6px', display: 'block' }}>
-                          Monthly Plan Price (INR ₹)
+                          Monthly Plan Price ({selectedPricingCurrency === 'INR' ? '₹' : selectedPricingCurrency === 'USD' ? '$' : selectedPricingCurrency === 'EUR' ? '€' : '£'})
                         </label>
                         <input
                           type="number"
-                          value={monthlyPrice}
-                          onChange={(e) => setMonthlyPrice(Number(e.target.value))}
-                          placeholder="149"
+                          step={selectedPricingCurrency === 'INR' ? '1' : '0.01'}
+                          value={selectedPricingCurrency === 'INR' ? monthlyPrice : selectedPricingCurrency === 'USD' ? usdMonthlyPrice : selectedPricingCurrency === 'EUR' ? eurMonthlyPrice : gbpMonthlyPrice}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            if (selectedPricingCurrency === 'INR') setMonthlyPrice(val);
+                            else if (selectedPricingCurrency === 'USD') setUsdMonthlyPrice(val);
+                            else if (selectedPricingCurrency === 'EUR') setEurMonthlyPrice(val);
+                            else if (selectedPricingCurrency === 'GBP') setGbpMonthlyPrice(val);
+                          }}
+                          placeholder={selectedPricingCurrency === 'INR' ? '149' : '1.99'}
                           style={{ width: '100%', padding: '11px 14px', borderRadius: '10px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#34d399', fontWeight: 800, fontSize: '1rem', outline: 'none' }}
                         />
                       </div>
 
+                      {/* 2. Yearly Plan Price */}
                       <div>
                         <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 700, marginBottom: '6px', display: 'block' }}>
-                          Yearly Plan Price (INR ₹)
+                          Yearly Plan Price ({selectedPricingCurrency === 'INR' ? '₹' : selectedPricingCurrency === 'USD' ? '$' : selectedPricingCurrency === 'EUR' ? '€' : '£'})
                         </label>
                         <input
                           type="number"
-                          value={yearlyPrice}
-                          onChange={(e) => setYearlyPrice(Number(e.target.value))}
-                          placeholder="1499"
+                          step={selectedPricingCurrency === 'INR' ? '1' : '0.01'}
+                          value={selectedPricingCurrency === 'INR' ? yearlyPrice : selectedPricingCurrency === 'USD' ? usdYearlyPrice : selectedPricingCurrency === 'EUR' ? eurYearlyPrice : gbpYearlyPrice}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            if (selectedPricingCurrency === 'INR') setYearlyPrice(val);
+                            else if (selectedPricingCurrency === 'USD') setUsdYearlyPrice(val);
+                            else if (selectedPricingCurrency === 'EUR') setEurYearlyPrice(val);
+                            else if (selectedPricingCurrency === 'GBP') setGbpYearlyPrice(val);
+                          }}
+                          placeholder={selectedPricingCurrency === 'INR' ? '1499' : '19.99'}
                           style={{ width: '100%', padding: '11px 14px', borderRadius: '10px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#fbbf24', fontWeight: 800, fontSize: '1rem', outline: 'none' }}
                         />
                       </div>
 
+                      {/* 3. Lifetime Plan Price */}
                       <div>
                         <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 700, marginBottom: '6px', display: 'block' }}>
-                          Lifetime Founding Member Price (INR ₹)
+                          Lifetime Founding Member Price ({selectedPricingCurrency === 'INR' ? '₹' : selectedPricingCurrency === 'USD' ? '$' : selectedPricingCurrency === 'EUR' ? '€' : '£'})
                         </label>
                         <input
                           type="number"
-                          value={lifetimePrice}
-                          onChange={(e) => setLifetimePrice(Number(e.target.value))}
-                          placeholder="2499"
+                          step={selectedPricingCurrency === 'INR' ? '1' : '0.01'}
+                          value={selectedPricingCurrency === 'INR' ? lifetimePrice : selectedPricingCurrency === 'USD' ? usdLifetimePrice : selectedPricingCurrency === 'EUR' ? eurLifetimePrice : gbpLifetimePrice}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            if (selectedPricingCurrency === 'INR') setLifetimePrice(val);
+                            else if (selectedPricingCurrency === 'USD') setUsdLifetimePrice(val);
+                            else if (selectedPricingCurrency === 'EUR') setEurLifetimePrice(val);
+                            else if (selectedPricingCurrency === 'GBP') setGbpLifetimePrice(val);
+                          }}
+                          placeholder={selectedPricingCurrency === 'INR' ? '2499' : '29.99'}
                           style={{ width: '100%', padding: '11px 14px', borderRadius: '10px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#a5b4fc', fontWeight: 800, fontSize: '1rem', outline: 'none' }}
                         />
                       </div>
 
-                      <hr style={{ border: 'none', borderTop: '1px dashed rgba(255,255,255,0.1)', margin: '8px 0' }} />
+                      <hr style={{ border: 'none', borderTop: '1px dashed rgba(255,255,255,0.1)', margin: '4px 0' }} />
 
-                      <h5 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#38bdf8', margin: 0 }}>
-                        🌐 Extra Budget Slot Price (Per Slot)
-                      </h5>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                        <div>
-                          <label style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 700, marginBottom: '4px', display: 'block' }}>
-                            India (INR ₹)
-                          </label>
-                          <input
-                            type="number"
-                            step="1"
-                            value={inrSlotPrice}
-                            onChange={(e) => setInrSlotPrice(Number(e.target.value))}
-                            placeholder="10"
-                            style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#34d399', fontWeight: 800, outline: 'none' }}
-                          />
-                        </div>
-
-                        <div>
-                          <label style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 700, marginBottom: '4px', display: 'block' }}>
-                            United States / Global (USD $)
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={usdSlotPrice}
-                            onChange={(e) => setUsdSlotPrice(Number(e.target.value))}
-                            placeholder="1.99"
-                            style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#38bdf8', fontWeight: 800, outline: 'none' }}
-                          />
-                        </div>
-
-                        <div>
-                          <label style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 700, marginBottom: '4px', display: 'block' }}>
-                            Europe (EUR €)
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={eurSlotPrice}
-                            onChange={(e) => setEurSlotPrice(Number(e.target.value))}
-                            placeholder="1.85"
-                            style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#fbbf24', fontWeight: 800, outline: 'none' }}
-                          />
-                        </div>
-
-                        <div>
-                          <label style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 700, marginBottom: '4px', display: 'block' }}>
-                            United Kingdom (GBP £)
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={gbpSlotPrice}
-                            onChange={(e) => setGbpSlotPrice(Number(e.target.value))}
-                            placeholder="1.59"
-                            style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#c084fc', fontWeight: 800, outline: 'none' }}
-                          />
-                        </div>
+                      {/* 4. Extra Slot Price (Trial Users Only) */}
+                      <div>
+                        <label style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 700, marginBottom: '6px', display: 'block' }}>
+                          Extra Budget Slot Price (Trial Users Only) ({selectedPricingCurrency === 'INR' ? '₹' : selectedPricingCurrency === 'USD' ? '$' : selectedPricingCurrency === 'EUR' ? '€' : '£'})
+                        </label>
+                        <input
+                          type="number"
+                          step={selectedPricingCurrency === 'INR' ? '1' : '0.01'}
+                          value={selectedPricingCurrency === 'INR' ? inrSlotPrice : selectedPricingCurrency === 'USD' ? usdSlotPrice : selectedPricingCurrency === 'EUR' ? eurSlotPrice : gbpSlotPrice}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            if (selectedPricingCurrency === 'INR') setInrSlotPrice(val);
+                            else if (selectedPricingCurrency === 'USD') setUsdSlotPrice(val);
+                            else if (selectedPricingCurrency === 'EUR') setEurSlotPrice(val);
+                            else if (selectedPricingCurrency === 'GBP') setGbpSlotPrice(val);
+                          }}
+                          placeholder={selectedPricingCurrency === 'INR' ? '10' : '1.99'}
+                          style={{ width: '100%', padding: '11px 14px', borderRadius: '10px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#38bdf8', fontWeight: 800, fontSize: '1rem', outline: 'none' }}
+                        />
                       </div>
 
-                      <hr style={{ border: 'none', borderTop: '1px dashed rgba(255,255,255,0.1)', margin: '8px 0' }} />
-
-                      <h5 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#10b981', margin: 0 }}>
-                        ⚡ Scan &amp; Pay Lifetime Feature Price (One-Time Unlock)
-                      </h5>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                        <div>
-                          <label style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 700, marginBottom: '4px', display: 'block' }}>
-                            India (INR ₹)
-                          </label>
-                          <input
-                            type="number"
-                            step="1"
-                            value={inrScanPayPrice}
-                            onChange={(e) => setInrScanPayPrice(Number(e.target.value))}
-                            placeholder="49"
-                            style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#34d399', fontWeight: 800, outline: 'none' }}
-                          />
-                        </div>
-
-                        <div>
-                          <label style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 700, marginBottom: '4px', display: 'block' }}>
-                            United States / Global (USD $)
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={usdScanPayPrice}
-                            onChange={(e) => setUsdScanPayPrice(Number(e.target.value))}
-                            placeholder="0.99"
-                            style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#38bdf8', fontWeight: 800, outline: 'none' }}
-                          />
-                        </div>
-
-                        <div>
-                          <label style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 700, marginBottom: '4px', display: 'block' }}>
-                            Europe (EUR €)
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={eurScanPayPrice}
-                            onChange={(e) => setEurScanPayPrice(Number(e.target.value))}
-                            placeholder="0.99"
-                            style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#fbbf24', fontWeight: 800, outline: 'none' }}
-                          />
-                        </div>
-
-                        <div>
-                          <label style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 700, marginBottom: '4px', display: 'block' }}>
-                            United Kingdom (GBP £)
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={gbpScanPayPrice}
-                            onChange={(e) => setGbpScanPayPrice(Number(e.target.value))}
-                            placeholder="0.59"
-                            style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#c084fc', fontWeight: 800, outline: 'none' }}
-                          />
-                        </div>
+                      {/* 5. Scan & Pay Lifetime Feature Price */}
+                      <div>
+                        <label style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 700, marginBottom: '6px', display: 'block' }}>
+                          ⚡ Scan &amp; Pay Lifetime Feature Price (One-Time Unlock) ({selectedPricingCurrency === 'INR' ? '₹' : selectedPricingCurrency === 'USD' ? '$' : selectedPricingCurrency === 'EUR' ? '€' : '£'})
+                        </label>
+                        <input
+                          type="number"
+                          step={selectedPricingCurrency === 'INR' ? '1' : '0.01'}
+                          value={selectedPricingCurrency === 'INR' ? inrScanPayPrice : selectedPricingCurrency === 'USD' ? usdScanPayPrice : selectedPricingCurrency === 'EUR' ? eurScanPayPrice : gbpScanPayPrice}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            if (selectedPricingCurrency === 'INR') setInrScanPayPrice(val);
+                            else if (selectedPricingCurrency === 'USD') setUsdScanPayPrice(val);
+                            else if (selectedPricingCurrency === 'EUR') setEurScanPayPrice(val);
+                            else if (selectedPricingCurrency === 'GBP') setGbpScanPayPrice(val);
+                          }}
+                          placeholder={selectedPricingCurrency === 'INR' ? '79' : '1.99'}
+                          style={{ width: '100%', padding: '11px 14px', borderRadius: '10px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#34d399', fontWeight: 800, fontSize: '1rem', outline: 'none' }}
+                        />
                       </div>
 
                       <button
