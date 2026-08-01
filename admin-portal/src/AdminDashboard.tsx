@@ -146,26 +146,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [inrScanPayPrice, setInrScanPayPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.inr_scan_pay_price || 49;
-    } catch (_) { return 49; }
+      return stored.inr_scan_pay_price || 79;
+    } catch (_) { return 79; }
   });
   const [usdScanPayPrice, setUsdScanPayPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.usd_scan_pay_price || 0.99;
-    } catch (_) { return 0.99; }
+      return stored.usd_scan_pay_price || 1.99;
+    } catch (_) { return 1.99; }
   });
   const [eurScanPayPrice, setEurScanPayPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.eur_scan_pay_price || 0.99;
-    } catch (_) { return 0.99; }
+      return stored.eur_scan_pay_price || 1.85;
+    } catch (_) { return 1.85; }
   });
   const [gbpScanPayPrice, setGbpScanPayPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.gbp_scan_pay_price || 0.59;
-    } catch (_) { return 0.59; }
+      return stored.gbp_scan_pay_price || 1.59;
+    } catch (_) { return 1.59; }
   });
 
   const handleSavePricing = async (e: React.FormEvent) => {
