@@ -1374,6 +1374,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                       </button>
 
                                       <button
+                                        onClick={() => updateUserSubscription(p.id, 'premium_yearly')}
+                                        title="Grant 1 Year Premium"
+                                        style={{
+                                          padding: '0.35rem 0.6rem',
+                                          borderRadius: '6px',
+                                          backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                                          border: '1px solid rgba(99, 102, 241, 0.4)',
+                                          color: '#818cf8',
+                                          fontSize: '0.75rem',
+                                          cursor: 'pointer'
+                                        }}
+                                      >
+                                        +1 Year
+                                      </button>
+
+                                      <button
                                         onClick={() => updateUserSubscription(p.id, 'premium_lifetime')}
                                         title="Grant Lifetime Premium"
                                         style={{
@@ -1520,6 +1536,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                           <div style={{ fontWeight: 700, color: '#e2e8f0', fontSize: '0.85rem' }}>Manage Subscription & Account Status</div>
                                           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                                             <button onClick={() => updateUserSubscription(selectedDetailUser.id, 'premium_monthly')} style={{ padding: '8px 14px', borderRadius: '8px', background: 'rgba(16,185,129,0.2)', border: '1px solid rgba(16,185,129,0.4)', color: '#34d399', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}>+1 Month Premium</button>
+                                            <button onClick={() => updateUserSubscription(selectedDetailUser.id, 'premium_yearly')} style={{ padding: '8px 14px', borderRadius: '8px', background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#818cf8', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}>+1 Year Premium</button>
                                             <button onClick={() => updateUserSubscription(selectedDetailUser.id, 'premium_lifetime')} style={{ padding: '8px 14px', borderRadius: '8px', background: 'rgba(245,158,11,0.2)', border: '1px solid rgba(245,158,11,0.4)', color: '#fbbf24', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}>Lifetime Premium</button>
                                             <button onClick={() => updateUserSubscription(selectedDetailUser.id, 'trial')} style={{ padding: '8px 14px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}>Reset Trial</button>
                                             <button 
