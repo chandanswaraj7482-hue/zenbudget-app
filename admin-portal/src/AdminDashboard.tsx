@@ -101,265 +101,79 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // Active Pricing Currency Tab/Dropdown
   const [selectedPricingCurrency, setSelectedPricingCurrency] = useState<'INR' | 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'AED' | 'SGD'>('INR');
 
+  const getInitialPrice = (key: string, defaultVal: number): number => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      const val = stored[key];
+      if (typeof val === 'number' && val > 0) {
+        if (key.includes('monthly') && !key.startsWith('inr') && val < 3.0) return defaultVal;
+        return val;
+      }
+      return defaultVal;
+    } catch (_) {
+      return defaultVal;
+    }
+  };
+
   // INR Subscription Pricing
-  const [monthlyPrice, setMonthlyPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.monthly || 149;
-    } catch (_) { return 149; }
-  });
-  const [yearlyPrice, setYearlyPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.yearly || 1499;
-    } catch (_) { return 1499; }
-  });
-  const [lifetimePrice, setLifetimePrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.lifetime || 2499;
-    } catch (_) { return 2499; }
-  });
+  const [monthlyPrice, setMonthlyPrice] = useState<number>(() => getInitialPrice('monthly', 149));
+  const [yearlyPrice, setYearlyPrice] = useState<number>(() => getInitialPrice('yearly', 1499));
+  const [lifetimePrice, setLifetimePrice] = useState<number>(() => getInitialPrice('lifetime', 2499));
 
   // USD Subscription Pricing
-  const [usdMonthlyPrice, setUsdMonthlyPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.usd_monthly || 4.99;
-    } catch (_) { return 4.99; }
-  });
-  const [usdYearlyPrice, setUsdYearlyPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.usd_yearly || 19.99;
-    } catch (_) { return 19.99; }
-  });
-  const [usdLifetimePrice, setUsdLifetimePrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.usd_lifetime || 29.99;
-    } catch (_) { return 29.99; }
-  });
+  const [usdMonthlyPrice, setUsdMonthlyPrice] = useState<number>(() => getInitialPrice('usd_monthly', 4.99));
+  const [usdYearlyPrice, setUsdYearlyPrice] = useState<number>(() => getInitialPrice('usd_yearly', 19.99));
+  const [usdLifetimePrice, setUsdLifetimePrice] = useState<number>(() => getInitialPrice('usd_lifetime', 29.99));
 
   // EUR Subscription Pricing
-  const [eurMonthlyPrice, setEurMonthlyPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.eur_monthly || 4.99;
-    } catch (_) { return 4.99; }
-  });
-  const [eurYearlyPrice, setEurYearlyPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.eur_yearly || 19.99;
-    } catch (_) { return 19.99; }
-  });
-  const [eurLifetimePrice, setEurLifetimePrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.eur_lifetime || 29.99;
-    } catch (_) { return 29.99; }
-  });
+  const [eurMonthlyPrice, setEurMonthlyPrice] = useState<number>(() => getInitialPrice('eur_monthly', 4.99));
+  const [eurYearlyPrice, setEurYearlyPrice] = useState<number>(() => getInitialPrice('eur_yearly', 19.99));
+  const [eurLifetimePrice, setEurLifetimePrice] = useState<number>(() => getInitialPrice('eur_lifetime', 29.99));
 
   // GBP Subscription Pricing
-  const [gbpMonthlyPrice, setGbpMonthlyPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.gbp_monthly || 4.99;
-    } catch (_) { return 4.99; }
-  });
-  const [gbpYearlyPrice, setGbpYearlyPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.gbp_yearly || 19.99;
-    } catch (_) { return 19.99; }
-  });
-  const [gbpLifetimePrice, setGbpLifetimePrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.gbp_lifetime || 24.99;
-    } catch (_) { return 24.99; }
-  });
+  const [gbpMonthlyPrice, setGbpMonthlyPrice] = useState<number>(() => getInitialPrice('gbp_monthly', 4.99));
+  const [gbpYearlyPrice, setGbpYearlyPrice] = useState<number>(() => getInitialPrice('gbp_yearly', 19.99));
+  const [gbpLifetimePrice, setGbpLifetimePrice] = useState<number>(() => getInitialPrice('gbp_lifetime', 24.99));
 
   // CAD Subscription Pricing
-  const [cadMonthlyPrice, setCadMonthlyPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.cad_monthly || 6.99;
-    } catch (_) { return 6.99; }
-  });
-  const [cadYearlyPrice, setCadYearlyPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.cad_yearly || 26.99;
-    } catch (_) { return 26.99; }
-  });
-  const [cadLifetimePrice, setCadLifetimePrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.cad_lifetime || 39.99;
-    } catch (_) { return 39.99; }
-  });
+  const [cadMonthlyPrice, setCadMonthlyPrice] = useState<number>(() => getInitialPrice('cad_monthly', 6.99));
+  const [cadYearlyPrice, setCadYearlyPrice] = useState<number>(() => getInitialPrice('cad_yearly', 26.99));
+  const [cadLifetimePrice, setCadLifetimePrice] = useState<number>(() => getInitialPrice('cad_lifetime', 39.99));
 
   // AUD Subscription Pricing
-  const [audMonthlyPrice, setAudMonthlyPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.aud_monthly || 7.99;
-    } catch (_) { return 7.99; }
-  });
-  const [audYearlyPrice, setAudYearlyPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.aud_yearly || 29.99;
-    } catch (_) { return 29.99; }
-  });
-  const [audLifetimePrice, setAudLifetimePrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.aud_lifetime || 44.99;
-    } catch (_) { return 44.99; }
-  });
+  const [audMonthlyPrice, setAudMonthlyPrice] = useState<number>(() => getInitialPrice('aud_monthly', 7.99));
+  const [audYearlyPrice, setAudYearlyPrice] = useState<number>(() => getInitialPrice('aud_yearly', 29.99));
+  const [audLifetimePrice, setAudLifetimePrice] = useState<number>(() => getInitialPrice('aud_lifetime', 44.99));
 
   // AED Subscription Pricing
-  const [aedMonthlyPrice, setAedMonthlyPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.aed_monthly || 19.99;
-    } catch (_) { return 19.99; }
-  });
-  const [aedYearlyPrice, setAedYearlyPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.aed_yearly || 79.99;
-    } catch (_) { return 79.99; }
-  });
-  const [aedLifetimePrice, setAedLifetimePrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.aed_lifetime || 119.99;
-    } catch (_) { return 119.99; }
-  });
+  const [aedMonthlyPrice, setAedMonthlyPrice] = useState<number>(() => getInitialPrice('aed_monthly', 19.99));
+  const [aedYearlyPrice, setAedYearlyPrice] = useState<number>(() => getInitialPrice('aed_yearly', 79.99));
+  const [aedLifetimePrice, setAedLifetimePrice] = useState<number>(() => getInitialPrice('aed_lifetime', 119.99));
 
   // SGD Subscription Pricing
-  const [sgdMonthlyPrice, setSgdMonthlyPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.sgd_monthly || 6.99;
-    } catch (_) { return 6.99; }
-  });
-  const [sgdYearlyPrice, setSgdYearlyPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.sgd_yearly || 26.99;
-    } catch (_) { return 26.99; }
-  });
-  const [sgdLifetimePrice, setSgdLifetimePrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.sgd_lifetime || 39.99;
-    } catch (_) { return 39.99; }
-  });
+  const [sgdMonthlyPrice, setSgdMonthlyPrice] = useState<number>(() => getInitialPrice('sgd_monthly', 6.99));
+  const [sgdYearlyPrice, setSgdYearlyPrice] = useState<number>(() => getInitialPrice('sgd_yearly', 26.99));
+  const [sgdLifetimePrice, setSgdLifetimePrice] = useState<number>(() => getInitialPrice('sgd_lifetime', 39.99));
 
   // Multi-Currency Extra Slot Pricing State (For Trial Users)
-  const [inrSlotPrice, setInrSlotPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.inr_slot_price || 10;
-    } catch (_) { return 10; }
-  });
-  const [usdSlotPrice, setUsdSlotPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.usd_slot_price || 1.99;
-    } catch (_) { return 1.99; }
-  });
-  const [eurSlotPrice, setEurSlotPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.eur_slot_price || 1.99;
-    } catch (_) { return 1.99; }
-  });
-  const [gbpSlotPrice, setGbpSlotPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.gbp_slot_price || 1.99;
-    } catch (_) { return 1.99; }
-  });
-  const [cadSlotPrice, setCadSlotPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.cad_slot_price || 2.99;
-    } catch (_) { return 2.99; }
-  });
-  const [audSlotPrice, setAudSlotPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.aud_slot_price || 2.99;
-    } catch (_) { return 2.99; }
-  });
-  const [aedSlotPrice, setAedSlotPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.aed_slot_price || 7.99;
-    } catch (_) { return 7.99; }
-  });
-  const [sgdSlotPrice, setSgdSlotPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.sgd_slot_price || 2.99;
-    } catch (_) { return 2.99; }
-  });
+  const [inrSlotPrice, setInrSlotPrice] = useState<number>(() => getInitialPrice('inr_slot_price', 10));
+  const [usdSlotPrice, setUsdSlotPrice] = useState<number>(() => getInitialPrice('usd_slot_price', 1.99));
+  const [eurSlotPrice, setEurSlotPrice] = useState<number>(() => getInitialPrice('eur_slot_price', 1.99));
+  const [gbpSlotPrice, setGbpSlotPrice] = useState<number>(() => getInitialPrice('gbp_slot_price', 1.99));
+  const [cadSlotPrice, setCadSlotPrice] = useState<number>(() => getInitialPrice('cad_slot_price', 2.99));
+  const [audSlotPrice, setAudSlotPrice] = useState<number>(() => getInitialPrice('aud_slot_price', 2.99));
+  const [aedSlotPrice, setAedSlotPrice] = useState<number>(() => getInitialPrice('aed_slot_price', 7.99));
+  const [sgdSlotPrice, setSgdSlotPrice] = useState<number>(() => getInitialPrice('sgd_slot_price', 2.99));
 
   // Multi-Currency Scan & Pay Lifetime Feature Pricing State
-  const [inrScanPayPrice, setInrScanPayPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.inr_scan_pay_price || 79;
-    } catch (_) { return 79; }
-  });
-  const [usdScanPayPrice, setUsdScanPayPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.usd_scan_pay_price || 1.99;
-    } catch (_) { return 1.99; }
-  });
-  const [eurScanPayPrice, setEurScanPayPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.eur_scan_pay_price || 1.99;
-    } catch (_) { return 1.99; }
-  });
-  const [gbpScanPayPrice, setGbpScanPayPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.gbp_scan_pay_price || 1.99;
-    } catch (_) { return 1.99; }
-  });
-  const [cadScanPayPrice, setCadScanPayPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.cad_scan_pay_price || 2.99;
-    } catch (_) { return 2.99; }
-  });
-  const [audScanPayPrice, setAudScanPayPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.aud_scan_pay_price || 2.99;
-    } catch (_) { return 2.99; }
-  });
-  const [aedScanPayPrice, setAedScanPayPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.aed_scan_pay_price || 7.99;
-    } catch (_) { return 7.99; }
-  });
-  const [sgdScanPayPrice, setSgdScanPayPrice] = useState<number>(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.sgd_scan_pay_price || 2.99;
-    } catch (_) { return 2.99; }
-  });
+  const [inrScanPayPrice, setInrScanPayPrice] = useState<number>(() => getInitialPrice('inr_scan_pay_price', 79));
+  const [usdScanPayPrice, setUsdScanPayPrice] = useState<number>(() => getInitialPrice('usd_scan_pay_price', 1.99));
+  const [eurScanPayPrice, setEurScanPayPrice] = useState<number>(() => getInitialPrice('eur_scan_pay_price', 1.99));
+  const [gbpScanPayPrice, setGbpScanPayPrice] = useState<number>(() => getInitialPrice('gbp_scan_pay_price', 1.99));
+  const [cadScanPayPrice, setCadScanPayPrice] = useState<number>(() => getInitialPrice('cad_scan_pay_price', 2.99));
+  const [audScanPayPrice, setAudScanPayPrice] = useState<number>(() => getInitialPrice('aud_scan_pay_price', 2.99));
+  const [aedScanPayPrice, setAedScanPayPrice] = useState<number>(() => getInitialPrice('aed_scan_pay_price', 7.99));
+  const [sgdScanPayPrice, setSgdScanPayPrice] = useState<number>(() => getInitialPrice('sgd_scan_pay_price', 2.99));
 
   const handleSavePricing = async (e: React.FormEvent) => {
     e.preventDefault();
