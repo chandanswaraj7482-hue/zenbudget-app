@@ -414,10 +414,97 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     if (onShowToast) onShowToast(`Live Multi-Currency Prices updated for ${selectedPricingCurrency}!`, 'success');
   };
 
+const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
+  {
+    id: 'user_1',
+    name: 'Chandan Swaraj',
+    email: 'chandanswaraj7482@gmail.com',
+    pin: '1234',
+    subscription_tier: 'premium_lifetime',
+    trial_start_date: new Date().toISOString(),
+    referral_code: 'OP8WBNU7',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    has_scan_pay_access: true,
+    is_suspended: false
+  },
+  {
+    id: 'user_2',
+    name: 'testing',
+    email: 'testing@gmail.com',
+    pin: '0000',
+    subscription_tier: 'trial',
+    trial_start_date: new Date().toISOString(),
+    referral_code: 'ZB-C01CYZ6B',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    has_scan_pay_access: false,
+    is_suspended: false
+  },
+  {
+    id: 'user_3',
+    name: 'user',
+    email: 'user@example.com',
+    pin: '0000',
+    subscription_tier: 'trial',
+    trial_start_date: new Date().toISOString(),
+    referral_code: 'ZB-4BSP00S9',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    has_scan_pay_access: false,
+    is_suspended: false
+  },
+  {
+    id: 'user_4',
+    name: 'Graphic Designer',
+    email: 'graphicdesigner7667@gmail.com',
+    pin: '0000',
+    subscription_tier: 'trial',
+    trial_start_date: new Date().toISOString(),
+    referral_code: 'ZB-47E76890',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    has_scan_pay_access: false,
+    is_suspended: false
+  },
+  {
+    id: 'user_5',
+    name: 'anshugumo27',
+    email: 'anshugumo27@gmail.com',
+    pin: '0000',
+    subscription_tier: 'trial',
+    trial_start_date: new Date().toISOString(),
+    referral_code: 'ZB-420W6UL7',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    has_scan_pay_access: false,
+    is_suspended: false
+  },
+  {
+    id: 'user_6',
+    name: 'krish',
+    email: 'krish@gmail.com',
+    pin: '0000',
+    subscription_tier: 'trial',
+    trial_start_date: new Date().toISOString(),
+    referral_code: 'ZB-OJZCQIQU',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    has_scan_pay_access: false,
+    is_suspended: false
+  }
+];
+
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing' | 'slots'>('overview');
 
   // Data states
-  const [profiles, setProfiles] = useState<ProfileRecord[]>([]);
+  const [profiles, setProfiles] = useState<ProfileRecord[]>(() => {
+    try {
+      const cached = localStorage.getItem('zb_admin_profiles_cache');
+      if (cached) return JSON.parse(cached);
+    } catch (_) {}
+    return DEFAULT_FALLBACK_PROFILES;
+  });
   const [broadcasts, setBroadcasts] = useState<BroadcastRecord[]>([]);
   const [coupons, setCoupons] = useState<CouponRecord[]>([]);
   const [ratings, setRatings] = useState<RatingRecord[]>([]);
@@ -476,7 +563,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       } else {
         const cached = localStorage.getItem('zb_admin_profiles_cache');
         if (cached) {
-          try { setProfiles(JSON.parse(cached)); } catch (_) {}
+          try { setProfiles(JSON.parse(cached)); } catch (_) { setProfiles(DEFAULT_FALLBACK_PROFILES); }
+        } else {
+          setProfiles(DEFAULT_FALLBACK_PROFILES);
         }
       }
 
