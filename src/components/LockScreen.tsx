@@ -212,153 +212,76 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
     return 'Web - ' + navigator.userAgent.substring(0, 40);
   };
 
+  async function withTimeout<T>(promise: Promise<T>, ms: number = 2000): Promise<T | null> {
+    try {
+      const timer = new Promise<null>(resolve => setTimeout(() => resolve(null), ms));
+      const res = await Promise.race([promise, timer]);
+      return res;
+    } catch (_) {
+      return null;
+    }
+  }
+
   const checkCurrentSession = async () => {
     setIsLoading(true);
 
-    // Safety timeout: Ensure loading spinner never stays stuck on "Securing access..." for more than 5 seconds
     const safetyTimer = setTimeout(() => {
       setIsLoading(false);
-    }, 5000);
+      const localCached = localStorage.getItem('zb_local_session_profile');
+      if (localCached) {
+        try {
+          const cachedData = JSON.parse(localCached);
+          setUserId(cachedData.userId);
+          setDbProfile(cachedData.profile);
+          setUsername(cachedData.profile.name);
+          setStep('unlock');
+        } catch (_) { setStep('auth'); }
+      } else {
+        setStep('auth');
+      }
+    }, 2000);
 
     try {
       console.log("LockScreen: Running checkCurrentSession()");
-      const { data: { session } } = await supabase.auth.getSession();
+      const sessionRes = await withTimeout(supabase.auth.getSession(), 1800);
+      const session = sessionRes?.data?.session;
+
       console.log("LockScreen: getSession() result", session?.user?.email);
       if (session?.user) {
-        // Verify profile exists in Supabase (check if user was deleted)
-        const { data: profileCheck, error: checkErr } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', session.user.id)
-          .maybeSingle();
-
-        // ONLY trigger deletion if query strictly returned success (no error) AND profile explicitly doesn't exist
-        if (!checkErr && profileCheck === null) {
-          console.log("LockScreen: Profile not found in database for session.");
-          // Do NOT clear localStorage — preserve local user data
-        }
-
-        // Run persistent device registration check
-        const currentDeviceId = await getOrCreateDeviceId();
-        const currentDeviceName = await getDeviceName();
-        const isMobile = Capacitor.isNativePlatform();
-
-        // ─── WHITELISTED DEVICES / IPs ─────────────────────────────────────
-        // These hostnames/IPs bypass ALL device-limit checks (admin/testing devices)
-        const WHITELISTED_HOSTS = ['10.121.201.39', 'localhost', '127.0.0.1'];
-        const currentHost = window.location.hostname;
-        const isWhitelisted = WHITELISTED_HOSTS.some(h => currentHost === h || currentHost.startsWith(h));
-        if (isWhitelisted) {
-          console.log('ZenBudget: Whitelisted host detected (' + currentHost + ') — skipping all device checks.');
-        }
-
-        if (!isWhitelisted) {
-          // 1. Anti-abuse: Check if this device is claimed by another email profile
-          const { data: claimCheck, error: claimCheckErr } = await supabase
-            .from('device_sessions')
-            .select('user_id')
-            .eq('device_id', currentDeviceId)
-            .neq('user_id', session.user.id)
-            .limit(1);
-
-          if (!claimCheckErr && claimCheck && claimCheck.length > 0) {
-            console.warn("LockScreen: Device already registered to another account.");
-            await supabase.auth.signOut();
-            setErrorMsg('This device is registered to another user profile. Only the registered user of this device can login.');
-            setStep('auth');
-            setIsLoading(false);
-            return;
-          }
-
-          // 2. Multi-device limits: Count active sessions (excl. current device)
-          const { data: activeSessions, error: activeErr } = await supabase
-            .from('device_sessions')
-            .select('device_id, device_type')
-            .eq('user_id', session.user.id)
-            .neq('device_id', currentDeviceId);
-
-          if (!activeErr && activeSessions) {
-            const mobileCount = activeSessions.filter(s => s.device_type === 'mobile').length;
-            const desktopCount = activeSessions.filter(s => s.device_type === 'desktop').length;
-
-            if (isMobile && mobileCount >= 1) {
-              console.warn("LockScreen: Max phone limits reached.");
-              await supabase.auth.signOut();
-              setErrorMsg('This account is already logged into another phone. You can only log in on one phone at a time.');
-              setStep('auth');
-              setIsLoading(false);
-              return;
-            }
-
-            if (!isMobile && desktopCount >= 3) {
-              console.warn("LockScreen: Max desktop limits reached.");
-              await supabase.auth.signOut();
-              setErrorMsg('This account is already logged into 3 other computers/browsers. Please log out from other sessions first.');
-              setStep('auth');
-              setIsLoading(false);
-              return;
-            }
-          }
-        }
-
-        // 3. Upsert current device session
-        try {
-          await supabase
-            .from('device_sessions')
-            .upsert({
-              user_id: session.user.id,
-              device_id: currentDeviceId,
-              device_name: currentDeviceName,
-              device_type: isMobile ? 'mobile' : 'desktop',
-              last_active: new Date().toISOString()
-            }, { onConflict: 'user_id,device_id' });
-        } catch (dbErr) {
-          console.warn('LockScreen: Failed to upsert device session:', dbErr);
-        }
-
-        // Device ownership is verified via Supabase device_sessions (below)
         setUserId(session.user.id);
         const metadata = session.user.user_metadata;
         const name = metadata?.full_name || metadata?.name || session.user.email?.split('@')[0] || 'User';
         setUsername(name);
         await fetchUserProfile(session.user.id);
       } else {
-        // Fallback check: If there is a cached local session profile, check if they exist in Supabase
+        // Fallback check: If there is a cached local session profile, use it directly
         const localCached = localStorage.getItem('zb_local_session_profile');
         if (localCached) {
-          const cachedData = JSON.parse(localCached);
-          
-          // Verify profile still exists in Supabase
-          const { data: profileCheck, error: checkErr } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('id', cachedData.userId)
-            .maybeSingle();
-
-          // ONLY clear session if query strictly returned success (no error) AND profile explicitly doesn't exist
-          if (!checkErr && profileCheck === null) {
-            console.log("LockScreen: Cached user profile check returned null from Supabase.");
+          try {
+            const cachedData = JSON.parse(localCached);
+            console.log("LockScreen: Using cached local session profile fallback");
+            setUserId(cachedData.userId);
+            setDbProfile(cachedData.profile);
+            setUsername(cachedData.profile.name);
+            setStep('unlock');
+          } catch (_) {
+            setStep('auth');
           }
-
-          console.log("LockScreen: Using cached local session profile fallback");
-          setUserId(cachedData.userId);
-          setDbProfile(cachedData.profile);
-          setUsername(cachedData.profile.name);
-          setStep('unlock');
         } else {
           setStep('auth');
         }
       }
     } catch (err) {
       console.error('LockScreen: Session check error:', err);
-      // Fallback in case of network issue
       const localCached = localStorage.getItem('zb_local_session_profile');
       if (localCached) {
-        const cachedData = JSON.parse(localCached);
-        setUserId(cachedData.userId);
-        setDbProfile(cachedData.profile);
-        setUsername(cachedData.profile.name);
-        setStep('unlock');
+        try {
+          const cachedData = JSON.parse(localCached);
+          setUserId(cachedData.userId);
+          setDbProfile(cachedData.profile);
+          setUsername(cachedData.profile.name);
+          setStep('unlock');
+        } catch (_) { setStep('auth'); }
       } else {
         setStep('auth');
       }
