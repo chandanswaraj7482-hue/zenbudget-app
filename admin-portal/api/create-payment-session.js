@@ -22,8 +22,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required parameters (amount, planType, userId)' });
     }
 
-    const clientId = clientCustomId || process.env.CASHFREE_CLIENT_ID || 'CF1070560C9TH63S1RMCV439KGL0';
-    const clientSecret = clientCustomSecret || process.env.CASHFREE_CLIENT_SECRET || 'cfsk_ma_prod_3716d13db1b74704c7ef2b0125867160_51341c30';
+    const clientId = clientCustomId || process.env.CASHFREE_CLIENT_ID || '133552174c102e641875b3c58081255331';
+    const clientSecret = clientCustomSecret || process.env.CASHFREE_CLIENT_SECRET || 'cfsk_ma_prod_2f2dfec6d9bee0b9de4e2e5c5748224a_3e69c5ff';
 
     const cleanUserId = String(userId).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40) || `usr_${Date.now()}`;
     const orderId = `order_${planType}_${cleanUserId.slice(0, 8)}_${Date.now()}`;
@@ -67,7 +67,7 @@ export default async function handler(req, res) {
 
     let cfData = await cfResponse.json();
 
-    // 2. If Production returns auth error, fallback to Cashfree Sandbox API
+    // 2. If Production returns error, try Sandbox fallback
     if (!cfResponse.ok || !cfData.payment_session_id) {
       console.warn('Production Cashfree error, trying Sandbox...', cfData);
       const sandboxResponse = await fetch('https://sandbox.cashfree.com/pg/orders', {
