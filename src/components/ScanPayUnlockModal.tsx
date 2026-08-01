@@ -17,6 +17,8 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const [modalErr, setModalErr] = useState('');
+
   if (!isOpen) return null;
 
   // Resolve dynamic multi-currency price
@@ -25,7 +27,7 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
   try {
     const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
     if (currencySymbol === '$') {
-      numPrice = stored.usd_scan_pay_price || 1.99;
+      numPrice = stored.usd_scan_pay_price || 4.99;
       priceFormatted = `$${numPrice}`;
     } else if (currencySymbol === '€') {
       numPrice = stored.eur_scan_pay_price || 1.85;
@@ -44,6 +46,7 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
 
   const handleUnlockPayment = async () => {
     setIsProcessing(true);
+    setModalErr('');
     try {
       const profileId = localStorage.getItem('zb_profile_id') || '';
       const userEmail = localStorage.getItem('zb_user_email') || '';
@@ -94,7 +97,7 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
         setIsProcessing(false);
       }
     } catch (err: any) {
-      alert(err.message || 'Payment initialization failed.');
+      setModalErr(err.message || 'Payment initialization failed. Please check connection and try again.');
       setIsProcessing(false);
     }
   };
@@ -136,6 +139,12 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
           }}>
             <QrCode size={32} color="#fff" />
           </div>
+
+          {modalErr && (
+            <div style={{ padding: '10px 14px', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#f87171', fontSize: '0.8rem', fontWeight: 700, marginBottom: '14px', textAlign: 'center' }}>
+              ⚠️ {modalErr}
+            </div>
+          )}
           <span style={{
             fontSize: '11px', fontWeight: 800, textTransform: 'uppercase',
             letterSpacing: '0.1em', background: 'rgba(16, 185, 129, 0.2)',

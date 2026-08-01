@@ -97,8 +97,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [authError, setAuthError] = useState('');
 
   // Dynamic Pricing Control state
-  // Active Pricing Currency Tab/Dropdown ('INR' | 'USD' | 'EUR' | 'GBP')
-  const [selectedPricingCurrency, setSelectedPricingCurrency] = useState<'INR' | 'USD' | 'EUR' | 'GBP'>('INR');
+  // Dynamic Pricing Control state
+  // Active Pricing Currency Tab/Dropdown
+  const [selectedPricingCurrency, setSelectedPricingCurrency] = useState<'INR' | 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'AED' | 'SGD'>('INR');
 
   // INR Subscription Pricing
   const [monthlyPrice, setMonthlyPrice] = useState<number>(() => {
@@ -124,60 +125,140 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [usdMonthlyPrice, setUsdMonthlyPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.usd_monthly || 1.99;
-    } catch (_) { return 1.99; }
+      return stored.usd_monthly || 2.99;
+    } catch (_) { return 2.99; }
   });
   const [usdYearlyPrice, setUsdYearlyPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.usd_yearly || 19.99;
-    } catch (_) { return 19.99; }
+      return stored.usd_yearly || 29.99;
+    } catch (_) { return 29.99; }
   });
   const [usdLifetimePrice, setUsdLifetimePrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.usd_lifetime || 29.99;
-    } catch (_) { return 29.99; }
+      return stored.usd_lifetime || 49.99;
+    } catch (_) { return 49.99; }
   });
 
   // EUR Subscription Pricing
   const [eurMonthlyPrice, setEurMonthlyPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.eur_monthly || 1.85;
-    } catch (_) { return 1.85; }
+      return stored.eur_monthly || 2.85;
+    } catch (_) { return 2.85; }
   });
   const [eurYearlyPrice, setEurYearlyPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.eur_yearly || 18.50;
-    } catch (_) { return 18.50; }
+      return stored.eur_yearly || 28.50;
+    } catch (_) { return 28.50; }
   });
   const [eurLifetimePrice, setEurLifetimePrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.eur_lifetime || 27.99;
-    } catch (_) { return 27.99; }
+      return stored.eur_lifetime || 47.99;
+    } catch (_) { return 47.99; }
   });
 
   // GBP Subscription Pricing
   const [gbpMonthlyPrice, setGbpMonthlyPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.gbp_monthly || 1.59;
-    } catch (_) { return 1.59; }
+      return stored.gbp_monthly || 2.59;
+    } catch (_) { return 2.59; }
   });
   const [gbpYearlyPrice, setGbpYearlyPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.gbp_yearly || 15.99;
-    } catch (_) { return 15.99; }
+      return stored.gbp_yearly || 25.99;
+    } catch (_) { return 25.99; }
   });
   const [gbpLifetimePrice, setGbpLifetimePrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.gbp_lifetime || 24.99;
-    } catch (_) { return 24.99; }
+      return stored.gbp_lifetime || 44.99;
+    } catch (_) { return 44.99; }
+  });
+
+  // CAD Subscription Pricing
+  const [cadMonthlyPrice, setCadMonthlyPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.cad_monthly || 3.99;
+    } catch (_) { return 3.99; }
+  });
+  const [cadYearlyPrice, setCadYearlyPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.cad_yearly || 39.99;
+    } catch (_) { return 39.99; }
+  });
+  const [cadLifetimePrice, setCadLifetimePrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.cad_lifetime || 59.99;
+    } catch (_) { return 59.99; }
+  });
+
+  // AUD Subscription Pricing
+  const [audMonthlyPrice, setAudMonthlyPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.aud_monthly || 4.49;
+    } catch (_) { return 4.49; }
+  });
+  const [audYearlyPrice, setAudYearlyPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.aud_yearly || 44.99;
+    } catch (_) { return 44.99; }
+  });
+  const [audLifetimePrice, setAudLifetimePrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.aud_lifetime || 69.99;
+    } catch (_) { return 69.99; }
+  });
+
+  // AED Subscription Pricing
+  const [aedMonthlyPrice, setAedMonthlyPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.aed_monthly || 11.99;
+    } catch (_) { return 11.99; }
+  });
+  const [aedYearlyPrice, setAedYearlyPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.aed_yearly || 119.99;
+    } catch (_) { return 119.99; }
+  });
+  const [aedLifetimePrice, setAedLifetimePrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.aed_lifetime || 179.99;
+    } catch (_) { return 179.99; }
+  });
+
+  // SGD Subscription Pricing
+  const [sgdMonthlyPrice, setSgdMonthlyPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.sgd_monthly || 3.99;
+    } catch (_) { return 3.99; }
+  });
+  const [sgdYearlyPrice, setSgdYearlyPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.sgd_yearly || 39.99;
+    } catch (_) { return 39.99; }
+  });
+  const [sgdLifetimePrice, setSgdLifetimePrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.sgd_lifetime || 59.99;
+    } catch (_) { return 59.99; }
   });
 
   // Multi-Currency Extra Slot Pricing State (For Trial Users)
@@ -205,8 +286,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       return stored.gbp_slot_price || 1.59;
     } catch (_) { return 1.59; }
   });
+  const [cadSlotPrice, setCadSlotPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.cad_slot_price || 2.49;
+    } catch (_) { return 2.49; }
+  });
+  const [audSlotPrice, setAudSlotPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.aud_slot_price || 2.79;
+    } catch (_) { return 2.79; }
+  });
+  const [aedSlotPrice, setAedSlotPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.aed_slot_price || 6.99;
+    } catch (_) { return 6.99; }
+  });
+  const [sgdSlotPrice, setSgdSlotPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.sgd_slot_price || 2.49;
+    } catch (_) { return 2.49; }
+  });
 
-  // Multi-Currency Scan & Pay Lifetime Feature Pricing State
+  // Multi-Currency Scan & Pay Lifetime Feature Pricing State (USD Default = 4.99)
   const [inrScanPayPrice, setInrScanPayPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
@@ -216,20 +321,44 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [usdScanPayPrice, setUsdScanPayPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.usd_scan_pay_price || 1.99;
-    } catch (_) { return 1.99; }
+      return stored.usd_scan_pay_price || 4.99;
+    } catch (_) { return 4.99; }
   });
   const [eurScanPayPrice, setEurScanPayPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.eur_scan_pay_price || 1.85;
-    } catch (_) { return 1.85; }
+      return stored.eur_scan_pay_price || 4.49;
+    } catch (_) { return 4.49; }
   });
   const [gbpScanPayPrice, setGbpScanPayPrice] = useState<number>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-      return stored.gbp_scan_pay_price || 1.59;
-    } catch (_) { return 1.59; }
+      return stored.gbp_scan_pay_price || 3.99;
+    } catch (_) { return 3.99; }
+  });
+  const [cadScanPayPrice, setCadScanPayPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.cad_scan_pay_price || 5.99;
+    } catch (_) { return 5.99; }
+  });
+  const [audScanPayPrice, setAudScanPayPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.aud_scan_pay_price || 6.99;
+    } catch (_) { return 6.99; }
+  });
+  const [aedScanPayPrice, setAedScanPayPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.aed_scan_pay_price || 17.99;
+    } catch (_) { return 17.99; }
+  });
+  const [sgdScanPayPrice, setSgdScanPayPrice] = useState<number>(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+      return stored.sgd_scan_pay_price || 5.99;
+    } catch (_) { return 5.99; }
   });
 
   const handleSavePricing = async (e: React.FormEvent) => {
@@ -247,14 +376,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       gbp_monthly: Number(gbpMonthlyPrice),
       gbp_yearly: Number(gbpYearlyPrice),
       gbp_lifetime: Number(gbpLifetimePrice),
+      cad_monthly: Number(cadMonthlyPrice),
+      cad_yearly: Number(cadYearlyPrice),
+      cad_lifetime: Number(cadLifetimePrice),
+      aud_monthly: Number(audMonthlyPrice),
+      aud_yearly: Number(audYearlyPrice),
+      aud_lifetime: Number(audLifetimePrice),
+      aed_monthly: Number(aedMonthlyPrice),
+      aed_yearly: Number(aedYearlyPrice),
+      aed_lifetime: Number(aedLifetimePrice),
+      sgd_monthly: Number(sgdMonthlyPrice),
+      sgd_yearly: Number(sgdYearlyPrice),
+      sgd_lifetime: Number(sgdLifetimePrice),
+
       inr_slot_price: Number(inrSlotPrice),
       usd_slot_price: Number(usdSlotPrice),
       eur_slot_price: Number(eurSlotPrice),
       gbp_slot_price: Number(gbpSlotPrice),
+      cad_slot_price: Number(cadSlotPrice),
+      aud_slot_price: Number(audSlotPrice),
+      aed_slot_price: Number(aedSlotPrice),
+      sgd_slot_price: Number(sgdSlotPrice),
+
       inr_scan_pay_price: Number(inrScanPayPrice),
       usd_scan_pay_price: Number(usdScanPayPrice),
       eur_scan_pay_price: Number(eurScanPayPrice),
-      gbp_scan_pay_price: Number(gbpScanPayPrice)
+      gbp_scan_pay_price: Number(gbpScanPayPrice),
+      cad_scan_pay_price: Number(cadScanPayPrice),
+      aud_scan_pay_price: Number(audScanPayPrice),
+      aed_scan_pay_price: Number(aedScanPayPrice),
+      sgd_scan_pay_price: Number(sgdScanPayPrice)
     };
     try {
       await supabaseClient.from('app_config').upsert([{ id: 'subscription_pricing', data: pricingObj }]);
@@ -2279,9 +2430,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     </p>
 
                     {/* 🌐 Top Currency Switcher */}
-                    <div style={{ display: 'flex', gap: '8px', marginBottom: '1.25rem', padding: '6px', borderRadius: '14px', background: 'rgba(15,23,42,0.9)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                      {(['INR', 'USD', 'EUR', 'GBP'] as const).map(curr => {
-                        const symbolMap = { INR: '🇮🇳 INR (₹)', USD: '🇺🇸 USD ($)', EUR: '🇪🇺 EUR (€)', GBP: '🇬🇧 GBP (£)' };
+                    <div style={{ display: 'flex', gap: '6px', marginBottom: '1.25rem', padding: '6px', borderRadius: '14px', background: 'rgba(15,23,42,0.9)', border: '1px solid rgba(255,255,255,0.12)', flexWrap: 'wrap' }}>
+                      {(['INR', 'USD', 'EUR', 'GBP', 'CAD', 'AUD', 'AED', 'SGD'] as const).map(curr => {
+                        const symbolMap = { 
+                          INR: '🇮🇳 INR', USD: '🇺🇸 USD', EUR: '🇪🇺 EUR', GBP: '🇬🇧 GBP',
+                          CAD: '🇨🇦 CAD', AUD: '🇦🇺 AUD', AED: '🇦🇪 AED', SGD: '🇸🇬 SGD'
+                        };
                         const isActive = selectedPricingCurrency === curr;
                         return (
                           <button
@@ -2289,10 +2443,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                             type="button"
                             onClick={() => setSelectedPricingCurrency(curr)}
                             style={{
-                              flex: 1, padding: '9px 10px', borderRadius: '10px', border: 'none',
+                              flex: '1 0 20%', padding: '8px 6px', borderRadius: '8px', border: 'none',
                               background: isActive ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : 'transparent',
                               color: isActive ? '#fff' : '#94a3b8',
-                              fontWeight: 800, fontSize: '0.78rem', cursor: 'pointer',
+                              fontWeight: 800, fontSize: '0.75rem', cursor: 'pointer',
                               boxShadow: isActive ? '0 4px 12px rgba(99, 102, 241, 0.4)' : 'none',
                               transition: 'all 0.2s ease'
                             }}
@@ -2305,26 +2459,38 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
                     <form onSubmit={handleSavePricing} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                       <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#a5b4fc', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-                        <span>🌐</span> Setting Prices for: <span style={{ color: '#38bdf8' }}>{selectedPricingCurrency === 'INR' ? '🇮🇳 Indian Rupee (INR ₹)' : selectedPricingCurrency === 'USD' ? '🇺🇸 US Dollar (USD $)' : selectedPricingCurrency === 'EUR' ? '🇪🇺 Euro (EUR €)' : '🇬🇧 British Pound (GBP £)'}</span>
+                        <span>🌐</span> Setting Prices for: <span style={{ color: '#38bdf8' }}>{selectedPricingCurrency} ({selectedPricingCurrency === 'INR' ? '₹' : selectedPricingCurrency === 'EUR' ? '€' : selectedPricingCurrency === 'GBP' ? '£' : selectedPricingCurrency === 'AED' ? 'AED' : '$'})</span>
                       </div>
 
                       {/* 1. Monthly Plan Price */}
                       <div>
                         <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 700, marginBottom: '6px', display: 'block' }}>
-                          Monthly Plan Price ({selectedPricingCurrency === 'INR' ? '₹' : selectedPricingCurrency === 'USD' ? '$' : selectedPricingCurrency === 'EUR' ? '€' : '£'})
+                          Monthly Plan Price ({selectedPricingCurrency === 'INR' ? '₹' : selectedPricingCurrency === 'EUR' ? '€' : selectedPricingCurrency === 'GBP' ? '£' : selectedPricingCurrency === 'AED' ? 'AED' : '$'})
                         </label>
                         <input
                           type="number"
                           step={selectedPricingCurrency === 'INR' ? '1' : '0.01'}
-                          value={selectedPricingCurrency === 'INR' ? monthlyPrice : selectedPricingCurrency === 'USD' ? usdMonthlyPrice : selectedPricingCurrency === 'EUR' ? eurMonthlyPrice : gbpMonthlyPrice}
+                          value={
+                            selectedPricingCurrency === 'INR' ? monthlyPrice :
+                            selectedPricingCurrency === 'USD' ? usdMonthlyPrice :
+                            selectedPricingCurrency === 'EUR' ? eurMonthlyPrice :
+                            selectedPricingCurrency === 'GBP' ? gbpMonthlyPrice :
+                            selectedPricingCurrency === 'CAD' ? cadMonthlyPrice :
+                            selectedPricingCurrency === 'AUD' ? audMonthlyPrice :
+                            selectedPricingCurrency === 'AED' ? aedMonthlyPrice : sgdMonthlyPrice
+                          }
                           onChange={(e) => {
                             const val = Number(e.target.value);
                             if (selectedPricingCurrency === 'INR') setMonthlyPrice(val);
                             else if (selectedPricingCurrency === 'USD') setUsdMonthlyPrice(val);
                             else if (selectedPricingCurrency === 'EUR') setEurMonthlyPrice(val);
                             else if (selectedPricingCurrency === 'GBP') setGbpMonthlyPrice(val);
+                            else if (selectedPricingCurrency === 'CAD') setCadMonthlyPrice(val);
+                            else if (selectedPricingCurrency === 'AUD') setAudMonthlyPrice(val);
+                            else if (selectedPricingCurrency === 'AED') setAedMonthlyPrice(val);
+                            else if (selectedPricingCurrency === 'SGD') setSgdMonthlyPrice(val);
                           }}
-                          placeholder={selectedPricingCurrency === 'INR' ? '149' : '1.99'}
+                          placeholder={selectedPricingCurrency === 'INR' ? '149' : '2.99'}
                           style={{ width: '100%', padding: '11px 14px', borderRadius: '10px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#34d399', fontWeight: 800, fontSize: '1rem', outline: 'none' }}
                         />
                       </div>
@@ -2332,20 +2498,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       {/* 2. Yearly Plan Price */}
                       <div>
                         <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 700, marginBottom: '6px', display: 'block' }}>
-                          Yearly Plan Price ({selectedPricingCurrency === 'INR' ? '₹' : selectedPricingCurrency === 'USD' ? '$' : selectedPricingCurrency === 'EUR' ? '€' : '£'})
+                          Yearly Plan Price ({selectedPricingCurrency === 'INR' ? '₹' : selectedPricingCurrency === 'EUR' ? '€' : selectedPricingCurrency === 'GBP' ? '£' : selectedPricingCurrency === 'AED' ? 'AED' : '$'})
                         </label>
                         <input
                           type="number"
                           step={selectedPricingCurrency === 'INR' ? '1' : '0.01'}
-                          value={selectedPricingCurrency === 'INR' ? yearlyPrice : selectedPricingCurrency === 'USD' ? usdYearlyPrice : selectedPricingCurrency === 'EUR' ? eurYearlyPrice : gbpYearlyPrice}
+                          value={
+                            selectedPricingCurrency === 'INR' ? yearlyPrice :
+                            selectedPricingCurrency === 'USD' ? usdYearlyPrice :
+                            selectedPricingCurrency === 'EUR' ? eurYearlyPrice :
+                            selectedPricingCurrency === 'GBP' ? gbpYearlyPrice :
+                            selectedPricingCurrency === 'CAD' ? cadYearlyPrice :
+                            selectedPricingCurrency === 'AUD' ? audYearlyPrice :
+                            selectedPricingCurrency === 'AED' ? aedYearlyPrice : sgdYearlyPrice
+                          }
                           onChange={(e) => {
                             const val = Number(e.target.value);
                             if (selectedPricingCurrency === 'INR') setYearlyPrice(val);
                             else if (selectedPricingCurrency === 'USD') setUsdYearlyPrice(val);
                             else if (selectedPricingCurrency === 'EUR') setEurYearlyPrice(val);
                             else if (selectedPricingCurrency === 'GBP') setGbpYearlyPrice(val);
+                            else if (selectedPricingCurrency === 'CAD') setCadYearlyPrice(val);
+                            else if (selectedPricingCurrency === 'AUD') setAudYearlyPrice(val);
+                            else if (selectedPricingCurrency === 'AED') setAedYearlyPrice(val);
+                            else if (selectedPricingCurrency === 'SGD') setSgdYearlyPrice(val);
                           }}
-                          placeholder={selectedPricingCurrency === 'INR' ? '1499' : '19.99'}
+                          placeholder={selectedPricingCurrency === 'INR' ? '1499' : '29.99'}
                           style={{ width: '100%', padding: '11px 14px', borderRadius: '10px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#fbbf24', fontWeight: 800, fontSize: '1rem', outline: 'none' }}
                         />
                       </div>
@@ -2353,20 +2531,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       {/* 3. Lifetime Plan Price */}
                       <div>
                         <label style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: 700, marginBottom: '6px', display: 'block' }}>
-                          Lifetime Founding Member Price ({selectedPricingCurrency === 'INR' ? '₹' : selectedPricingCurrency === 'USD' ? '$' : selectedPricingCurrency === 'EUR' ? '€' : '£'})
+                          Lifetime Founding Member Price ({selectedPricingCurrency === 'INR' ? '₹' : selectedPricingCurrency === 'EUR' ? '€' : selectedPricingCurrency === 'GBP' ? '£' : selectedPricingCurrency === 'AED' ? 'AED' : '$'})
                         </label>
                         <input
                           type="number"
                           step={selectedPricingCurrency === 'INR' ? '1' : '0.01'}
-                          value={selectedPricingCurrency === 'INR' ? lifetimePrice : selectedPricingCurrency === 'USD' ? usdLifetimePrice : selectedPricingCurrency === 'EUR' ? eurLifetimePrice : gbpLifetimePrice}
+                          value={
+                            selectedPricingCurrency === 'INR' ? lifetimePrice :
+                            selectedPricingCurrency === 'USD' ? usdLifetimePrice :
+                            selectedPricingCurrency === 'EUR' ? eurLifetimePrice :
+                            selectedPricingCurrency === 'GBP' ? gbpLifetimePrice :
+                            selectedPricingCurrency === 'CAD' ? cadLifetimePrice :
+                            selectedPricingCurrency === 'AUD' ? audLifetimePrice :
+                            selectedPricingCurrency === 'AED' ? aedLifetimePrice : sgdLifetimePrice
+                          }
                           onChange={(e) => {
                             const val = Number(e.target.value);
                             if (selectedPricingCurrency === 'INR') setLifetimePrice(val);
                             else if (selectedPricingCurrency === 'USD') setUsdLifetimePrice(val);
                             else if (selectedPricingCurrency === 'EUR') setEurLifetimePrice(val);
                             else if (selectedPricingCurrency === 'GBP') setGbpLifetimePrice(val);
+                            else if (selectedPricingCurrency === 'CAD') setCadLifetimePrice(val);
+                            else if (selectedPricingCurrency === 'AUD') setAudLifetimePrice(val);
+                            else if (selectedPricingCurrency === 'AED') setAedLifetimePrice(val);
+                            else if (selectedPricingCurrency === 'SGD') setSgdLifetimePrice(val);
                           }}
-                          placeholder={selectedPricingCurrency === 'INR' ? '2499' : '29.99'}
+                          placeholder={selectedPricingCurrency === 'INR' ? '2499' : '49.99'}
                           style={{ width: '100%', padding: '11px 14px', borderRadius: '10px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#a5b4fc', fontWeight: 800, fontSize: '1rem', outline: 'none' }}
                         />
                       </div>
@@ -2376,18 +2566,30 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       {/* 4. Extra Slot Price (Trial Users Only) */}
                       <div>
                         <label style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 700, marginBottom: '6px', display: 'block' }}>
-                          Extra Budget Slot Price (Trial Users Only) ({selectedPricingCurrency === 'INR' ? '₹' : selectedPricingCurrency === 'USD' ? '$' : selectedPricingCurrency === 'EUR' ? '€' : '£'})
+                          Extra Budget Slot Price (Trial Users Only) ({selectedPricingCurrency === 'INR' ? '₹' : selectedPricingCurrency === 'EUR' ? '€' : selectedPricingCurrency === 'GBP' ? '£' : selectedPricingCurrency === 'AED' ? 'AED' : '$'})
                         </label>
                         <input
                           type="number"
                           step={selectedPricingCurrency === 'INR' ? '1' : '0.01'}
-                          value={selectedPricingCurrency === 'INR' ? inrSlotPrice : selectedPricingCurrency === 'USD' ? usdSlotPrice : selectedPricingCurrency === 'EUR' ? eurSlotPrice : gbpSlotPrice}
+                          value={
+                            selectedPricingCurrency === 'INR' ? inrSlotPrice :
+                            selectedPricingCurrency === 'USD' ? usdSlotPrice :
+                            selectedPricingCurrency === 'EUR' ? eurSlotPrice :
+                            selectedPricingCurrency === 'GBP' ? gbpSlotPrice :
+                            selectedPricingCurrency === 'CAD' ? cadSlotPrice :
+                            selectedPricingCurrency === 'AUD' ? audSlotPrice :
+                            selectedPricingCurrency === 'AED' ? aedSlotPrice : sgdSlotPrice
+                          }
                           onChange={(e) => {
                             const val = Number(e.target.value);
                             if (selectedPricingCurrency === 'INR') setInrSlotPrice(val);
                             else if (selectedPricingCurrency === 'USD') setUsdSlotPrice(val);
                             else if (selectedPricingCurrency === 'EUR') setEurSlotPrice(val);
                             else if (selectedPricingCurrency === 'GBP') setGbpSlotPrice(val);
+                            else if (selectedPricingCurrency === 'CAD') setCadSlotPrice(val);
+                            else if (selectedPricingCurrency === 'AUD') setAudSlotPrice(val);
+                            else if (selectedPricingCurrency === 'AED') setAedSlotPrice(val);
+                            else if (selectedPricingCurrency === 'SGD') setSgdSlotPrice(val);
                           }}
                           placeholder={selectedPricingCurrency === 'INR' ? '10' : '1.99'}
                           style={{ width: '100%', padding: '11px 14px', borderRadius: '10px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#38bdf8', fontWeight: 800, fontSize: '1rem', outline: 'none' }}
@@ -2397,20 +2599,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       {/* 5. Scan & Pay Lifetime Feature Price */}
                       <div>
                         <label style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 700, marginBottom: '6px', display: 'block' }}>
-                          ⚡ Scan &amp; Pay Lifetime Feature Price (One-Time Unlock) ({selectedPricingCurrency === 'INR' ? '₹' : selectedPricingCurrency === 'USD' ? '$' : selectedPricingCurrency === 'EUR' ? '€' : '£'})
+                          ⚡ Scan &amp; Pay Lifetime Feature Price (One-Time Unlock) ({selectedPricingCurrency === 'INR' ? '₹' : selectedPricingCurrency === 'EUR' ? '€' : selectedPricingCurrency === 'GBP' ? '£' : selectedPricingCurrency === 'AED' ? 'AED' : '$'})
                         </label>
                         <input
                           type="number"
                           step={selectedPricingCurrency === 'INR' ? '1' : '0.01'}
-                          value={selectedPricingCurrency === 'INR' ? inrScanPayPrice : selectedPricingCurrency === 'USD' ? usdScanPayPrice : selectedPricingCurrency === 'EUR' ? eurScanPayPrice : gbpScanPayPrice}
+                          value={
+                            selectedPricingCurrency === 'INR' ? inrScanPayPrice :
+                            selectedPricingCurrency === 'USD' ? usdScanPayPrice :
+                            selectedPricingCurrency === 'EUR' ? eurScanPayPrice :
+                            selectedPricingCurrency === 'GBP' ? gbpScanPayPrice :
+                            selectedPricingCurrency === 'CAD' ? cadScanPayPrice :
+                            selectedPricingCurrency === 'AUD' ? audScanPayPrice :
+                            selectedPricingCurrency === 'AED' ? aedScanPayPrice : sgdScanPayPrice
+                          }
                           onChange={(e) => {
                             const val = Number(e.target.value);
                             if (selectedPricingCurrency === 'INR') setInrScanPayPrice(val);
                             else if (selectedPricingCurrency === 'USD') setUsdScanPayPrice(val);
                             else if (selectedPricingCurrency === 'EUR') setEurScanPayPrice(val);
                             else if (selectedPricingCurrency === 'GBP') setGbpScanPayPrice(val);
+                            else if (selectedPricingCurrency === 'CAD') setCadScanPayPrice(val);
+                            else if (selectedPricingCurrency === 'AUD') setAudScanPayPrice(val);
+                            else if (selectedPricingCurrency === 'AED') setAedScanPayPrice(val);
+                            else if (selectedPricingCurrency === 'SGD') setSgdScanPayPrice(val);
                           }}
-                          placeholder={selectedPricingCurrency === 'INR' ? '79' : '1.99'}
+                          placeholder={selectedPricingCurrency === 'INR' ? '79' : '4.99'}
                           style={{ width: '100%', padding: '11px 14px', borderRadius: '10px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#34d399', fontWeight: 800, fontSize: '1rem', outline: 'none' }}
                         />
                       </div>

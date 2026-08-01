@@ -85,7 +85,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     reader.readAsDataURL(file);
   };
 
+  const googleAvatarSaved = localStorage.getItem('zb_google_avatar');
+
   const PRESET_AVATARS = [
+    ...(googleAvatarSaved ? [googleAvatarSaved] : []),
     `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=22c55e&color=fff&rounded=true`,
     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
     'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
