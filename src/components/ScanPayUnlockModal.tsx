@@ -92,28 +92,27 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
           redirectTarget: '_modal'
         }).then(async (result: any) => {
           if (result && result.paymentDetails) {
-            // Unlock access locally & in DB after payment in Cashfree
+            // Unlock access locally & in DB after verified payment in Cashfree
             localStorage.setItem(`zb_scan_pay_access_${profileId}`, 'true');
             if (profileId) {
               await supabase.from('profiles').update({ has_scan_pay_access: true }).eq('id', profileId);
             }
             onUnlockSuccess();
             onClose();
+          } else {
+            setModalErr('Payment incomplete or cancelled. Please try again.');
           }
           setIsProcessing(false);
         });
       } else {
-        // Fallback: Direct UPI App intent launch (PhonePe / GPay / Paytm / Netbanking)
-        const upiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${numPrice}&cu=INR&tn=Scan_Pay_Lifetime_Unlock`;
-        try { window.location.href = upiUrl; } catch (e) {}
-        
-        // Unlock access locally & in DB after payment launch
-        localStorage.setItem(`zb_scan_pay_access_${profileId}`, 'true');
-        if (profileId) {
-          await supabase.from('profiles').update({ has_scan_pay_access: true }).eq('id', profileId);
+        // Fallback: Direct UPI App intent launch on Mobile only (PhonePe / GPay / Paytm / Netbanking)
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isMobile) {
+          const upiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${numPrice}&cu=INR&tn=Scan_Pay_Lifetime_Unlock`;
+          try { window.location.href = upiUrl; } catch (e) {}
+        } else {
+          setModalErr('Could not initialize Cashfree payment gateway session. Please try again.');
         }
-        onUnlockSuccess();
-        onClose();
       }
     } catch (err: any) {
       setModalErr(err.message || 'Payment initialization failed. Please try again.');
