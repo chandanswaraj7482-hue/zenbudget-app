@@ -1472,7 +1472,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                                   <td style={{ padding: '1rem', textAlign: 'right' }} onClick={(e) => e.stopPropagation()}>
                                     <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end', alignItems: 'center' }}>
                                       <button
-                                        onClick={() => updateUserSubscription(p.id, 'premium_monthly')}
+                                        onClick={(e) => { e.stopPropagation(); updateUserSubscription(p.id, 'premium_monthly'); }}
                                         title="Grant Monthly Premium"
                                         style={{
                                           padding: '0.35rem 0.6rem',
@@ -1488,7 +1488,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                                       </button>
 
                                       <button
-                                        onClick={() => updateUserSubscription(p.id, 'premium_yearly')}
+                                        onClick={(e) => { e.stopPropagation(); updateUserSubscription(p.id, 'premium_yearly'); }}
                                         title="Grant 1 Year Premium"
                                         style={{
                                           padding: '0.35rem 0.6rem',
@@ -1504,7 +1504,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                                       </button>
 
                                       <button
-                                        onClick={() => updateUserSubscription(p.id, 'premium_lifetime')}
+                                        onClick={(e) => { e.stopPropagation(); updateUserSubscription(p.id, 'premium_lifetime'); }}
                                         title="Grant Lifetime Premium"
                                         style={{
                                           padding: '0.35rem 0.6rem',
@@ -1520,7 +1520,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                                       </button>
 
                                       <button
-                                        onClick={() => handleToggleScanPayAccess(p.id, !!(p as any).has_scan_pay_access)}
+                                        onClick={(e) => { e.stopPropagation(); handleToggleScanPayAccess(p.id, !!(p as any).has_scan_pay_access); }}
                                         title="Grant Free Scan & Pay Access"
                                         style={{
                                           padding: '0.35rem 0.6rem',
@@ -1537,7 +1537,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                                       </button>
 
                                       <button
-                                        onClick={() => updateUserSubscription(p.id, 'trial')}
+                                        onClick={(e) => { e.stopPropagation(); updateUserSubscription(p.id, 'trial'); }}
                                         title="Revert to Trial"
                                         style={{
                                           padding: '0.35rem 0.6rem',
@@ -1553,7 +1553,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                                       </button>
 
                                       <button
-                                        onClick={() => toggleUserSuspension(p.id, !!p.is_suspended)}
+                                        onClick={(e) => { e.stopPropagation(); toggleUserSuspension(p.id, !!p.is_suspended); }}
                                         title={p.is_suspended ? 'Unsuspend User' : 'Suspend User'}
                                         style={{
                                           padding: '0.35rem 0.5rem',
