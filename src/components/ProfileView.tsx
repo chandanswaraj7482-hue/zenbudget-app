@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { User, KeyRound, Check, Eye, EyeOff, Globe, Banknote, ArrowLeft, Mail, Moon, Sun, Upload } from 'lucide-react';
 import { t } from '../utils/i18n';
 
@@ -37,6 +37,31 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+
+  // Auto-detect country calling code by IP location and timezone
+  useEffect(() => {
+    if (localStorage.getItem('zb_user_phone_code')) return;
+
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    if (tz.includes('Kolkata') || tz.includes('Calcutta') || navigator.language.includes('IN')) {
+      setPhoneCode('+91');
+    } else if (tz.includes('America') || tz.includes('US') || navigator.language.includes('US')) {
+      setPhoneCode('+1');
+    } else if (tz.includes('London') || tz.includes('GB') || navigator.language.includes('GB')) {
+      setPhoneCode('+44');
+    }
+
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.country_calling_code) {
+          const code = data.country_calling_code.startsWith('+') ? data.country_calling_code : `+${data.country_calling_code}`;
+          setPhoneCode(code);
+          localStorage.setItem('zb_user_phone_code', code);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const avatarFileRef = useRef<HTMLInputElement>(null);
 

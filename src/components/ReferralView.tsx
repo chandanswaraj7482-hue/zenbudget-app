@@ -5,6 +5,8 @@ interface ReferralViewProps {
   onBack: () => void;
   userReferralCode?: string;
   referralCount?: number;
+  referredBy?: string | null;
+  inviterName?: string | null;
   onClaimReferral?: (code: string) => Promise<boolean>;
 }
 
@@ -12,6 +14,8 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
   onBack,
   userReferralCode = '',
   referralCount = 0,
+  referredBy = '',
+  inviterName = '',
   onClaimReferral
 }) => {
   const [copied, setCopied] = useState(false);
