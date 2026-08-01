@@ -997,6 +997,7 @@ const App: React.FC = () => {
     const reminderKey = `zb_loan_reminded_${currentProfileId}_${todayStr}`;
     if (localStorage.getItem(reminderKey)) return;
 
+    const sym = currency === 'INR' ? '₹' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : currency === 'JPY' ? '¥' : '$';
     const dueLoans = loans.filter(l => l.status === 'active' && l.dueDate <= todayStr);
     if (dueLoans.length > 0) {
       localStorage.setItem(reminderKey, 'true');
@@ -1006,13 +1007,13 @@ const App: React.FC = () => {
       setTimeout(() => {
         addNotification(
           `⏰ ZenBudget Loan Reminder: ${label}`,
-          `Reminder: ${firstDue.personName} loan of ${currencySymbol}${remaining} is due today!`,
+          `Reminder: ${firstDue.personName} loan of ${sym}${remaining} is due today!`,
           'warning'
         );
-        triggerToast(`⏰ Loan Reminder: ${firstDue.personName} (${currencySymbol}${remaining}) is due today!`, 'warning');
+        triggerToast(`⏰ Loan Reminder: ${firstDue.personName} (${sym}${remaining}) is due today!`, 'warning');
       }, 4000);
     }
-  }, [currentProfileId, isLocked, loans, currencySymbol]);
+  }, [currentProfileId, isLocked, loans, currency]);
 
   const fetchDataFromSupabase = async () => {
     try {
