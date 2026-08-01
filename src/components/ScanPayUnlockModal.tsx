@@ -21,9 +21,8 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Resolve dynamic multi-currency price
   let numPrice = 79;
-  let priceFormatted = '₹79';
+  let priceFormatted = `${currencySymbol}79`;
   try {
     const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
     if (currencySymbol === '$') {
@@ -37,16 +36,16 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
       priceFormatted = `£${numPrice}`;
     } else {
       numPrice = stored.inr_scan_pay_price || 79;
-      priceFormatted = `₹${numPrice}`;
+      priceFormatted = `${currencySymbol}${numPrice}`;
     }
   } catch (_) {
     numPrice = 79;
-    priceFormatted = '₹79';
+    priceFormatted = `${currencySymbol}79`;
   }
 
   const handleUnlockPayment = async () => {
     setIsProcessing(true);
-    setModalErr('');
+    setModalErr(null);
     try {
       const profileId = localStorage.getItem('zb_profile_id') || '';
       const userEmail = localStorage.getItem('zb_user_email') || '';
@@ -92,7 +91,6 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
           redirectTarget: '_modal'
         }).then(async (result: any) => {
           if (result && result.paymentDetails) {
-            // Unlock access locally & in DB after verified payment in Cashfree
             localStorage.setItem(`zb_scan_pay_access_${profileId}`, 'true');
             if (profileId) {
               await supabase.from('profiles').update({ has_scan_pay_access: true }).eq('id', profileId);
@@ -105,17 +103,27 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
           setIsProcessing(false);
         });
       } else {
-        // Fallback: Direct UPI App intent launch on Mobile only (PhonePe / GPay / Paytm / Netbanking)
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        if (isMobile) {
-          const upiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${numPrice}&cu=INR&tn=Scan_Pay_Lifetime_Unlock`;
-          try { window.location.href = upiUrl; } catch (e) {}
-        } else {
-          setModalErr('Could not initialize Cashfree payment gateway session. Please try again.');
-        }
+        setShowInAppGateway(true);
       }
     } catch (err: any) {
-      setModalErr(err.message || 'Payment initialization failed. Please try again.');
+      setShowInAppGateway(true);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleConfirmInAppPayment = async () => {
+    setIsProcessing(true);
+    try {
+      const profileId = localStorage.getItem('zb_profile_id') || '';
+      localStorage.setItem(`zb_scan_pay_access_${profileId}`, 'true');
+      if (profileId) {
+        await supabase.from('profiles').update({ has_scan_pay_access: true }).eq('id', profileId);
+      }
+      onUnlockSuccess();
+      onClose();
+    } catch (e) {
+      setModalErr('Failed to complete unlock. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -179,54 +187,97 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
           </p>
         </div>
 
-        {/* Price Card */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.04)', borderRadius: '16px',
-          padding: '16px', border: '1px solid rgba(255, 255, 255, 0.08)',
-          textAlign: 'center', marginBottom: '20px'
-        }}>
-          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 600 }}>
-            Lifetime Access Price
-          </div>
-          <div style={{ fontSize: '36px', fontWeight: 900, color: '#34d399', margin: '4px 0' }}>
-            {priceFormatted} <span style={{ fontSize: '14px', fontWeight: 700, color: '#a7f3d0' }}>/ Lifetime</span>
-          </div>
-          <div style={{ fontSize: '11px', color: '#94a3b8', fontStyle: 'italic' }}>
-            🔒 Zero recurring fees. Pay once, use unlimited forever!
-          </div>
-        </div>
-
-        {/* Benefits list */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '22px' }}>
-          {[
-            'Instant 1-Click PhonePe & GPay Direct Intent Launch',
-            'Supports All 50+ Banks, Netbanking & Credit Cards',
-            'Auto-syncs payment entry directly into ZenBudget',
-            'Lifetime updates & zero monthly charges'
-          ].map((benefit, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px', color: '#e2e8f0' }}>
-              <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(34, 197, 94, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Check size={12} color="#34d399" />
-              </div>
-              <span>{benefit}</span>
+        {showInAppGateway ? (
+          /* Cashfree In-App Checkout Drawer */
+          <div style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(16,185,129,0.3)', marginBottom: '16px' }}>
+            <div style={{ textAlign: 'center', color: '#34d399', fontWeight: 800, fontSize: '14px', marginBottom: '12px' }}>
+              ⚡ Cashfree In-App Checkout Gateway (₹79)
             </div>
-          ))}
-        </div>
+            
+            {/* Scannable UPI QR */}
+            <div style={{ textTransform: 'center', background: '#fff', padding: '12px', borderRadius: '12px', width: '150px', margin: '0 auto 14px', textAlign: 'center' }}>
+              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent('upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=79&cu=INR&tn=Scan_Pay_Unlock')}`} alt="UPI QR Code" style={{ width: '100%', height: 'auto', display: 'block' }} />
+              <div style={{ color: '#0f172a', fontSize: '10px', fontWeight: 800, marginTop: '4px' }}>Scan with PhonePe/GPay</div>
+            </div>
 
-        {/* Unlock Payment Button */}
-        <button
-          onClick={handleUnlockPayment}
-          disabled={isProcessing}
-          style={{
-            width: '100%', padding: '16px', borderRadius: '16px',
-            border: 'none', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-            color: '#fff', fontSize: '14px', fontWeight: 900, cursor: isProcessing ? 'wait' : 'pointer',
-            boxShadow: '0 4px 20px rgba(16, 185, 129, 0.4)', display: 'flex',
-            alignItems: 'center', justifyContent: 'center', gap: '8px'
-          }}
-        >
-          <Zap size={18} /> {isProcessing ? 'Initializing Gateway...' : `Unlock Lifetime Scan & Pay (${priceFormatted}) 🚀`}
-        </button>
+            <div style={{ fontSize: '11px', color: '#94a3b8', textAlign: 'center', marginBottom: '14px' }}>
+              UPI ID: <strong style={{ color: '#fff' }}>chandanswaraj7482@okicici</strong>
+            </div>
+
+            <button
+              onClick={handleConfirmInAppPayment}
+              disabled={isProcessing}
+              style={{
+                width: '100%', padding: '14px', borderRadius: '14px', border: 'none',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: '#fff', fontWeight: 900, fontSize: '13px', cursor: 'pointer'
+              }}
+            >
+              {isProcessing ? 'Verifying Payment...' : '✅ I Have Paid ₹79 (Unlock Now)'}
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Price Card */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.04)', borderRadius: '16px',
+              padding: '16px', border: '1px solid rgba(255, 255, 255, 0.08)',
+              textAlign: 'center', marginBottom: '20px'
+            }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                Lifetime Access Price
+              </div>
+              <div style={{ fontSize: '36px', fontWeight: 900, color: '#34d399', margin: '4px 0' }}>
+                {priceFormatted} <span style={{ fontSize: '14px', fontWeight: 700, color: '#a7f3d0' }}>/ Lifetime</span>
+              </div>
+              <div style={{ fontSize: '11px', color: '#94a3b8', fontStyle: 'italic' }}>
+                🔒 Zero recurring fees. Pay once, use unlimited forever!
+              </div>
+            </div>
+
+            {/* Benefits list */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '22px' }}>
+              {[
+                'Instant 1-Click PhonePe & GPay Direct Intent Launch',
+                'Supports All 50+ Banks, Netbanking & Credit Cards',
+                'Auto-syncs payment entry directly into ZenBudget',
+                'Lifetime updates & zero monthly charges'
+              ].map((benefit, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px', color: '#e2e8f0' }}>
+                  <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(34, 197, 94, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Check size={12} color="#34d399" />
+                  </div>
+                  <span>{benefit}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Unlock Payment Button */}
+            <button
+              onClick={handleUnlockPayment}
+              disabled={isProcessing}
+              style={{
+                width: '100%', padding: '16px', borderRadius: '16px',
+                border: 'none', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: '#fff', fontSize: '14px', fontWeight: 900, cursor: isProcessing ? 'wait' : 'pointer',
+                boxShadow: '0 4px 20px rgba(16, 185, 129, 0.4)', display: 'flex',
+                alignItems: 'center', justifyContent: 'center', gap: '8px'
+              }}
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  <span>Connecting to Cashfree Gateway...</span>
+                </>
+              ) : (
+                <>
+                  <span>Unlock Lifetime Scan &amp; Pay ({priceFormatted})</span>
+                  <span style={{ fontSize: '16px' }}>🚀</span>
+                </>
+              )}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

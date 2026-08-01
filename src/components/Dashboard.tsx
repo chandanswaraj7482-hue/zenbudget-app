@@ -597,7 +597,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <span style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-secondary)', fontWeight: 600 }}>{t('total_balance')}</span>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', margin: '8px 0 16px 0', color: 'var(--text-balance)' }}>
           <span style={{ fontSize: '36px', fontWeight: 800, letterSpacing: '-0.02em' }}>
-            {formatCurrency(totalBalance, currencySymbol, 2)}
+            {formatCurrency(totalBalance, currencySymbol, 0)}
           </span>
         </div>
 
