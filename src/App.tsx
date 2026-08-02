@@ -69,7 +69,7 @@ const App: React.FC = () => {
         }
       } catch (e) {}
     }
-    return [{ id: 'acc_main_wallet', name: 'Main Wallet 💳', type: 'wallet', balance: 10000, isDefault: true }];
+    return [];
   });
 
   const handleDeleteAccount = (accId: string) => {

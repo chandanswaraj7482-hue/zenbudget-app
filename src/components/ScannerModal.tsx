@@ -994,62 +994,14 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
               ))}
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <label style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>Choose App to Pay:</label>
-
-              <button
-                type="button"
-                onClick={() => handlePay()}
-                disabled={isPaying}
-                style={{
-                  width: '100%',
-                  padding: '14px',
-                  borderRadius: '14px',
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                  color: '#fff',
-                  fontSize: '14px',
-                  fontWeight: 800,
-                  cursor: isPaying ? 'wait' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  boxShadow: '0 4px 15px rgba(16,185,129,0.3)'
-                }}
-              >
-                🚀 Pay via UPI & Save to Budget
-              </button>
-
-              <button
-                type="button"
-                onClick={handleLogOnly}
-                style={{
-                  width: '100%',
-                  padding: '14px',
-                  borderRadius: '14px',
-                  border: '1px solid rgba(99, 102, 241, 0.4)',
-                  background: 'rgba(99, 102, 241, 0.15)',
-                  color: '#818cf8',
-                  fontSize: '14px',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px'
-                }}
-              >
-                📝 Save Transaction to Budget Only (No App)
-              </button>
-
-              {/* Cashfree Direct Gateway (PhonePe Intent / Netbanking / Cards) */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <button
                 type="button"
                 onClick={() => {
                   if (onPayViaCashfree) {
                     const payTitle = description.trim() || `Pay to ${merchantName || recipientId || 'Merchant'}`;
                     onPayViaCashfree(parseFloat(amount) || 0, payTitle);
+                    stopCamera();
                     onClose();
                   } else {
                     handlePay();
@@ -1058,152 +1010,24 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                 disabled={isPaying}
                 style={{
                   width: '100%',
-                  padding: '14px',
-                  borderRadius: '14px',
+                  padding: '16px',
+                  borderRadius: '16px',
                   border: 'none',
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  background: 'linear-gradient(135deg, #6366f1 0%, #3b82f6 50%, #10b981 100%)',
                   color: '#ffffff',
-                  fontSize: '13px',
-                  fontWeight: 800,
+                  fontSize: '14px',
+                  fontWeight: 900,
                   cursor: isPaying ? 'wait' : 'pointer',
-                  boxShadow: '0 4px 16px rgba(16, 185, 129, 0.35)',
+                  boxShadow: '0 6px 20px rgba(99, 102, 241, 0.4)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px',
-                  marginBottom: '10px'
+                  gap: '8px'
                 }}
               >
                 ⚡ Pay via Cashfree (PhonePe / Cards / Netbanking)
               </button>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                <button
-                  type="button"
-                  onClick={() => handlePay(undefined, 'tez://upi/pay?')}
-                  disabled={isPaying}
-                  style={{
-                    padding: '12px 6px',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(66,133,244,0.3)',
-                    background: 'rgba(66,133,244,0.15)',
-                    color: '#60a5fa',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    cursor: isPaying ? 'wait' : 'pointer'
-                  }}
-                >
-                  🔵 Google Pay
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handlePay(undefined, 'phonepe://pay?')}
-                  disabled={isPaying}
-                  style={{
-                    padding: '12px 6px',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(138,43,226,0.3)',
-                    background: 'rgba(138,43,226,0.15)',
-                    color: '#c084fc',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    cursor: isPaying ? 'wait' : 'pointer'
-                  }}
-                >
-                  🟣 PhonePe
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handlePay(undefined, 'paytmmp://pay?')}
-                  disabled={isPaying}
-                  style={{
-                    padding: '12px 6px',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(0,185,245,0.3)',
-                    background: 'rgba(0,185,245,0.15)',
-                    color: '#38bdf8',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    cursor: isPaying ? 'wait' : 'pointer'
-                  }}
-                >
-                  🟦 Paytm
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handlePay(undefined, 'bhim://pay?')}
-                  disabled={isPaying}
-                  style={{
-                    padding: '12px 6px',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(34,197,94,0.3)',
-                    background: 'rgba(34,197,94,0.15)',
-                    color: '#22c55e',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    cursor: isPaying ? 'wait' : 'pointer'
-                  }}
-                >
-                  🇮🇳 BHIM UPI
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handlePay(undefined, 'cred://pay?')}
-                  disabled={isPaying}
-                  style={{
-                    padding: '12px 6px',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(245,158,11,0.3)',
-                    background: 'rgba(245,158,11,0.15)',
-                    color: '#f59e0b',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    cursor: isPaying ? 'wait' : 'pointer'
-                  }}
-                >
-                  🖤 CRED UPI
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handlePay()}
-                  disabled={isPaying}
-                  style={{
-                    padding: '12px 6px',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    background: 'rgba(255,255,255,0.08)',
-                    color: '#ffffff',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    cursor: isPaying ? 'wait' : 'pointer'
-                  }}
-                >
-                  ⚡ All UPI Apps
-                </button>
-              </div>
-
-              {/* Official NPCI Compliance Security Badge */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                padding: '8px 12px',
-                borderRadius: '12px',
-                background: 'rgba(34, 197, 94, 0.08)',
-                border: '1px solid rgba(34, 197, 94, 0.2)',
-                color: '#22c55e',
-                fontSize: '11px',
-                fontWeight: 700,
-                textAlign: 'center'
-              }}>
-                🇮🇳 NPCI ⚡ Official Unified Payments Interface (UPI) Certified Spec
-              </div>
+            </div>
 
               {/* Copy VPA Fallback */}
               <button
@@ -1232,7 +1056,6 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
               >
                 📋 Copy Payee UPI ID / VPA
               </button>
-            </div>
 
             <button onClick={() => setStep('details')} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline' }}>
               ← Edit Details

@@ -100,7 +100,7 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
             >
               <option value="bank">🏦 Bank Account</option>
               <option value="upi">📱 PhonePe / GPay / Paytm / UPI</option>
-              <option value="cash">💵 Cash (Nakad)</option>
+              <option value="cash">💵 Cash</option>
               <option value="credit">💳 Credit Card</option>
               <option value="wallet">👛 Wallet / Digital</option>
               <option value="custom">✨ Custom Account Type...</option>
