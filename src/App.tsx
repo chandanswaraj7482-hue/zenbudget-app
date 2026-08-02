@@ -409,6 +409,12 @@ const App: React.FC = () => {
     const targetLoan = loans.find(l => l.id === loanId);
     if (!targetLoan) return;
 
+    if (accounts.length === 0) {
+      triggerToast('Please create a Wallet Account first in "My Accounts in Wallet" before recording loan payments!', 'warning');
+      setIsAddAccountOpen(true);
+      return;
+    }
+
     const updatedLoans = loans.map(l => {
       if (l.id === loanId) {
         const newPaid = l.paidAmount + repayAmount;
@@ -1027,32 +1033,63 @@ const App: React.FC = () => {
     fetchDataFromSupabase();
   }, [currentProfileId, isLocked]);
 
-  // 10-Minute / Due Date Loan Repayment Reminder Check
+  // Smart Loan Repayment & Money Collection Reminder Check (Strict User Frequency)
   useEffect(() => {
     if (isLocked || loans.length === 0) return;
 
     const checkLoanReminders = () => {
       const now = new Date();
-      const borrowed = loans.filter(l => l.type === 'borrowed' && l.status !== 'completed');
-      for (const loan of borrowed) {
+      const todayStr = now.toISOString().split('T')[0];
+      const tenMinSlot = Math.floor(now.getMinutes() / 10);
+      const activeLoans = loans.filter(l => l.status !== 'completed');
+
+      for (const loan of activeLoans) {
         const remaining = loan.totalAmount - loan.paidAmount;
         if (remaining <= 0) continue;
+
         const due = new Date(loan.dueDate);
-        const isOverdue = now > due;
-        const overdueDays = isOverdue ? Math.floor((now.getTime() - due.getTime()) / (1000 * 60 * 60 * 24)) + 1 : 0;
-        
-        // Every 10 min or daily check key
-        const tenMinSlot = Math.floor(now.getMinutes() / 10);
-        const promptKey = `zb_loan_reminded_${loan.id}_${now.toISOString().split('T')[0]}_${tenMinSlot}`;
-        if (!localStorage.getItem(promptKey)) {
-          localStorage.setItem(promptKey, 'true');
-          setActiveLoanReminderModal({
-            loan,
-            overdueDays,
-            remainingAmount: remaining
-          });
-          setLoanReminderAccountId(accounts[0]?.id || 'acc_main_wallet');
-          break;
+        const dueStr = due.toISOString().split('T')[0];
+        const isOverdue = now > due && todayStr !== dueStr;
+        const overdueDays = isOverdue ? Math.max(1, Math.floor((now.getTime() - due.getTime()) / (1000 * 60 * 60 * 24))) : 0;
+
+        // Determine if reminder should trigger based on selected frequency
+        const freq = loan.frequency || 'one_time';
+        let shouldTrigger = false;
+
+        if (freq === 'every_10_min') {
+          shouldTrigger = true;
+        } else if (isOverdue) {
+          shouldTrigger = true; // Overdue loans trigger daily reminder!
+        } else if (freq === 'daily') {
+          shouldTrigger = true;
+        } else if (freq === 'one_time') {
+          shouldTrigger = todayStr === dueStr;
+        } else if (freq === 'weekly') {
+          const diffDays = Math.floor((now.getTime() - due.getTime()) / (1000 * 60 * 60 * 24));
+          shouldTrigger = diffDays >= 0 && diffDays % 7 === 0;
+        } else if (freq === 'monthly') {
+          shouldTrigger = now.getDate() === due.getDate();
+        } else if (freq === 'yearly') {
+          shouldTrigger = now.getDate() === due.getDate() && now.getMonth() === due.getMonth();
+        } else {
+          shouldTrigger = todayStr === dueStr;
+        }
+
+        if (shouldTrigger) {
+          const promptKey = freq === 'every_10_min'
+            ? `zb_loan_reminded_${loan.id}_${todayStr}_${tenMinSlot}`
+            : `zb_loan_reminded_${loan.id}_${todayStr}`;
+
+          if (!localStorage.getItem(promptKey)) {
+            localStorage.setItem(promptKey, 'true');
+            setActiveLoanReminderModal({
+              loan,
+              overdueDays,
+              remainingAmount: remaining
+            });
+            setLoanReminderAccountId(accounts[0]?.id || '');
+            break;
+          }
         }
       }
     };
@@ -3859,24 +3896,42 @@ const App: React.FC = () => {
               </p>
             )}
 
-            {/* Wallet Selection Dropdown */}
-            <div style={{ textAlign: 'left', marginBottom: '16px' }}>
-              <label style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
-                {activeLoanReminderModal.loan.type === 'lent' ? 'Select Wallet To Deposit Money Into:' : 'Select Wallet / Account To Pay From:'}
-              </label>
-              <select
-                value={loanReminderAccountId}
-                onChange={e => setLoanReminderAccountId(e.target.value)}
-                className="glass-input"
-                style={{ width: '100%', fontSize: '13px', padding: '12px', fontWeight: 700, borderRadius: '12px' }}
-              >
-                {accounts.map(acc => (
-                  <option key={acc.id} value={acc.id} style={{ color: '#000' }}>
-                    💳 {acc.name} ({formatCurrency(acc.balance, currencySymbol, 0)})
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Wallet Selection Dropdown or No-Account Warning */}
+            {accounts.length === 0 ? (
+              <div style={{ background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '12px', borderRadius: '14px', marginBottom: '16px', textAlign: 'center' }}>
+                <p style={{ color: '#f87171', fontSize: '12px', fontWeight: 700, margin: '0 0 8px 0' }}>
+                  ⚠️ No Wallet Account Found! Add a wallet or bank account first to record repayments/deposits.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveLoanReminderModal(null);
+                    setIsAddAccountOpen(true);
+                  }}
+                  style={{ width: '100%', padding: '10px', borderRadius: '10px', background: '#3b82f6', color: '#fff', fontWeight: 800, border: 'none', cursor: 'pointer', fontSize: '12px' }}
+                >
+                  + Add Wallet Account Now
+                </button>
+              </div>
+            ) : (
+              <div style={{ textAlign: 'left', marginBottom: '16px' }}>
+                <label style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+                  {activeLoanReminderModal.loan.type === 'lent' ? 'Select Wallet To Deposit Money Into:' : 'Select Wallet / Account To Pay From:'}
+                </label>
+                <select
+                  value={loanReminderAccountId}
+                  onChange={e => setLoanReminderAccountId(e.target.value)}
+                  className="glass-input"
+                  style={{ width: '100%', fontSize: '13px', padding: '12px', fontWeight: 700, borderRadius: '12px' }}
+                >
+                  {accounts.map(acc => (
+                    <option key={acc.id} value={acc.id} style={{ color: '#000' }}>
+                      💳 {acc.name} ({formatCurrency(acc.balance, currencySymbol, 0)})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>

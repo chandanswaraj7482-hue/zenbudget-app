@@ -1120,7 +1120,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
       )}
 
       {/* STEP: Verify PIN for unlock */}
-      {!isLoading && step === 'unlock' && dbProfile && (
+      {!isLoading && step === 'unlock' && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', width: '100%', maxWidth: '320px', textAlign: 'center' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{
@@ -1152,7 +1152,9 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
             <div style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--text-primary)', marginTop: '2px', fontWeight: 800 }}>
               Calm Your Money
             </div>
-            <p style={{ fontSize: '14px', color: 'var(--text-primary)', marginTop: '8px', marginBottom: '14px', fontWeight: 700 }}>Welcome back, {dbProfile.name}</p>
+            <p style={{ fontSize: '14px', color: 'var(--text-primary)', marginTop: '8px', marginBottom: '14px', fontWeight: 700 }}>
+              Welcome back, {dbProfile?.name || username || localStorage.getItem('zb_user_name') || 'User'}
+            </p>
             
             {/* Custom Quote & Today's Goal lock reminder */}
             <div style={{ 

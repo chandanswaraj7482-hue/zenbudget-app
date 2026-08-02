@@ -32,9 +32,8 @@ export default async function handler(req, res) {
       ? email.trim().toLowerCase() 
       : `user_${cleanUserId.slice(0, 8)}@zenbudget.app`;
 
-    const validPhone = (phone && typeof phone === 'string' && phone.replace(/\D/g, '').length === 10)
-      ? phone.replace(/\D/g, '')
-      : '9876543210';
+    const digits = (phone && typeof phone === 'string') ? phone.replace(/\D/g, '') : '';
+    const validPhone = digits.length >= 10 ? digits.slice(-10) : '9876543210';
 
     const payload = JSON.stringify({
       order_id: orderId,
