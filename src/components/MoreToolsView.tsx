@@ -12,7 +12,8 @@ import {
   LogOut,
   ChevronRight,
   Landmark,
-  HandCoins
+  HandCoins,
+  Share2
 } from 'lucide-react';
 import { t } from '../utils/i18n';
 import { supabase } from '../supabaseClient';
