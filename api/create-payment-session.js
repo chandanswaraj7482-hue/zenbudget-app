@@ -22,8 +22,12 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required parameters (amount, planType, userId)' });
     }
 
-    const clientId = clientCustomId || process.env.CASHFREE_CLIENT_ID || '133552174c102e641875b3c58081255331';
-    const clientSecret = clientCustomSecret || process.env.CASHFREE_CLIENT_SECRET || 'cfsk_ma_prod_2f2dfec6d9bee0b9de4e2e5c5748224a_3e69c5ff';
+    const clientId = clientCustomId || process.env.CASHFREE_CLIENT_ID;
+    const clientSecret = clientCustomSecret || process.env.CASHFREE_CLIENT_SECRET;
+
+    if (!clientId || !clientSecret) {
+      return res.status(500).json({ error: 'Payment credentials not configured. Please contact support.' });
+    }
 
     const cleanUserId = String(userId).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40) || `usr_${Date.now()}`;
     const orderId = `order_${planType}_${cleanUserId.slice(0, 8)}_${Date.now()}`;
