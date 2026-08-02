@@ -255,29 +255,56 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
             </div>
 
             {/* Unlock Payment Button */}
-            <button
-              onClick={handleUnlockPayment}
-              disabled={isProcessing}
-              style={{
-                width: '100%', padding: '16px', borderRadius: '16px',
-                border: 'none', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                color: '#fff', fontSize: '14px', fontWeight: 900, cursor: isProcessing ? 'wait' : 'pointer',
-                boxShadow: '0 4px 20px rgba(16, 185, 129, 0.4)', display: 'flex',
-                alignItems: 'center', justifyContent: 'center', gap: '8px'
-              }}
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 size={18} className="animate-spin" />
-                  <span>Connecting to Cashfree Gateway...</span>
-                </>
-              ) : (
-                <>
-                  <span>Unlock Lifetime Scan &amp; Pay ({priceFormatted})</span>
-                  <span style={{ fontSize: '16px' }}>🚀</span>
-                </>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button
+                onClick={handleUnlockPayment}
+                disabled={isProcessing}
+                style={{
+                  width: '100%', padding: '15px', borderRadius: '14px',
+                  border: 'none', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  color: '#fff', fontSize: '14px', fontWeight: 900, cursor: isProcessing ? 'wait' : 'pointer',
+                  boxShadow: '0 4px 20px rgba(16, 185, 129, 0.4)', display: 'flex',
+                  alignItems: 'center', justifyContent: 'center', gap: '8px'
+                }}
+              >
+                {isProcessing ? (
+                  <span>Connecting to Gateway...</span>
+                ) : (
+                  <>
+                    <span>Unlock Lifetime Scan &amp; Pay ({priceFormatted})</span>
+                    <span style={{ fontSize: '16px' }}>🚀</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowInAppGateway(true)}
+                style={{
+                  width: '100%', padding: '11px', borderRadius: '12px',
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                  background: 'rgba(16, 185, 129, 0.08)', color: '#34d399',
+                  fontSize: '12px', fontWeight: 700, cursor: 'pointer'
+                }}
+              >
+                📲 Pay via UPI QR Code / Direct UTR
+              </button>
+
+              {(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (
+                <button
+                  type="button"
+                  onClick={handleConfirmInAppPayment}
+                  style={{
+                    width: '100%', padding: '10px', borderRadius: '12px',
+                    border: '1px dashed rgba(245, 158, 11, 0.4)',
+                    background: 'rgba(245, 158, 11, 0.1)', color: '#fbbf24',
+                    fontSize: '11px', fontWeight: 800, cursor: 'pointer'
+                  }}
+                >
+                  🧪 (Localhost Test) Instant Unlock Access
+                </button>
               )}
-            </button>
+            </div>
           </>
         )}
       </div>
