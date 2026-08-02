@@ -776,12 +776,13 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                       if ((window as any).Cashfree) {
                         const mode = 'production';
                         const cf = (window as any).Cashfree({ mode });
+                        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
                         console.log(`Launching Cashfree ${mode} Checkout for session ${payment_session_id}`);
 
                         cf.checkout({
                           paymentSessionId: payment_session_id,
-                          redirectTarget: '_modal'
+                          redirectTarget: isLocal ? '_blank' : '_modal'
                         }).then((result: any) => {
                           if (result && result.paymentDetails) {
                             console.log('Payment successful! Unlocking premium tier:', billingCycle);

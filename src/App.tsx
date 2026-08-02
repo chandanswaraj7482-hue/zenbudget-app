@@ -565,9 +565,10 @@ const App: React.FC = () => {
 
       if (payment_session_id && (window as any).Cashfree) {
         const cf = (window as any).Cashfree({ mode: 'production' });
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         cf.checkout({
           paymentSessionId: payment_session_id,
-          redirectTarget: '_modal'
+          redirectTarget: isLocal ? '_blank' : '_modal'
         }).then(async (result: any) => {
           if (result && result.paymentDetails) {
             handleSaveTransaction({
