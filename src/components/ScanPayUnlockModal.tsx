@@ -86,9 +86,13 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
 
       if (payment_session_id && (window as any).Cashfree) {
         const cf = (window as any).Cashfree({ mode: 'production' });
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const isMobileOrApp = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window as any).Capacitor;
+        const redirectTarget = (isLocalhost && !isMobileOrApp) ? '_blank' : '_modal';
+
         cf.checkout({
           paymentSessionId: payment_session_id,
-          redirectTarget: '_modal'
+          redirectTarget: redirectTarget
         }).then(async (result: any) => {
           if (result && result.paymentDetails) {
             localStorage.setItem(`zb_scan_pay_access_${profileId}`, 'true');
