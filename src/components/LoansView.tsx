@@ -35,6 +35,8 @@ export const LoansView: React.FC<LoansViewProps> = ({
   const [repayModalLoan, setRepayModalLoan] = useState<LoanRecord | null>(null);
 
   const [interestRate, setInterestRate] = useState('');
+  const [interestType, setInterestType] = useState<'monthly' | 'yearly' | 'weekly'>('monthly');
+  const [modalErr, setModalErr] = useState<string | null>(null);
   const [personName, setPersonName] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
   const [dueDate, setDueDate] = useState(new Date().toISOString().split('T')[0]);
@@ -45,21 +47,56 @@ export const LoansView: React.FC<LoansViewProps> = ({
   const [repayAmount, setRepayAmount] = useState('');
   const [repayAccountId, setRepayAccountId] = useState(accounts[0]?.id || '');
 
+  const calcEmiDetails = () => {
+    const P = parseFloat(totalAmount) || 0;
+    const R = parseFloat(interestRate) || 0;
+    if (P <= 0) return { P: 0, R: 0, totalInterest: 0, totalPayable: 0, emiInstallment: 0, months: 1 };
+
+    const start = new Date();
+    const due = new Date(dueDate);
+    const diffTime = due.getTime() - start.getTime();
+    const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+    const months = Math.max(1, Math.ceil(diffDays / 30));
+
+    let totalInterest = 0;
+    if (interestType === 'monthly') {
+      totalInterest = P * (R / 100) * months;
+    } else if (interestType === 'yearly') {
+      totalInterest = P * (R / 100) * (months / 12);
+    } else if (interestType === 'weekly') {
+      const weeks = Math.max(1, Math.ceil(diffDays / 7));
+      totalInterest = P * (R / 100) * weeks;
+    }
+
+    const totalPayable = P + totalInterest;
+    const emiInstallment = totalPayable / months;
+
+    return { P, R, totalInterest, totalPayable, emiInstallment, months };
+  };
+
   const handleSubmitAdd = (e: React.FormEvent) => {
     e.preventDefault();
+    setModalErr(null);
+
+    if (!accounts || accounts.length === 0) {
+      setModalErr('⚠️ No Wallet Account Found! Please add a wallet/bank account in "My Accounts in Wallet" before adding loan entries.');
+      return;
+    }
+
     const principalNum = parseFloat(totalAmount);
     const ratePct = parseFloat(interestRate) || 0;
     if (!personName.trim() || isNaN(principalNum) || principalNum <= 0) return;
 
-    const interestAmt = (principalNum * ratePct) / 100;
-    const finalTotal = principalNum + interestAmt;
+    const { totalPayable, emiInstallment } = calcEmiDetails();
 
     onAddLoan({
       type: activeTab,
       personName: personName.trim(),
-      totalAmount: finalTotal,
+      totalAmount: Math.round(totalPayable),
       principalAmount: principalNum,
       interestRate: ratePct > 0 ? ratePct : undefined,
+      interestType: ratePct > 0 ? interestType : undefined,
+      emiInstallment: Math.round(emiInstallment),
       dueDate,
       frequency,
       customFrequencyText: frequency === 'custom' ? (customFrequencyText.trim() || 'Custom') : undefined,
@@ -327,6 +364,12 @@ export const LoansView: React.FC<LoansViewProps> = ({
               </button>
             </div>
 
+            {modalErr && (
+              <div style={{ padding: '10px 14px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#f87171', fontSize: '12px', fontWeight: 700, lineHeight: 1.4 }}>
+                {modalErr}
+              </div>
+            )}
+
             <form onSubmit={handleSubmitAdd} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{t('person_name')}</label>
@@ -358,26 +401,47 @@ export const LoansView: React.FC<LoansViewProps> = ({
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Interest Rate (% p.a.)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={interestRate}
-                    onChange={e => setInterestRate(e.target.value)}
-                    placeholder="e.g. 10%"
-                    className="glass-input"
-                    style={{ marginTop: '4px', width: '100%' }}
-                  />
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Interest Rate &amp; Period</label>
+                  <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={interestRate}
+                      onChange={e => setInterestRate(e.target.value)}
+                      placeholder="e.g. 3%"
+                      className="glass-input"
+                      style={{ flex: 1, fontSize: '12px', padding: '10px 8px' }}
+                    />
+                    <select
+                      value={interestType}
+                      onChange={e => setInterestType(e.target.value as any)}
+                      className="glass-input"
+                      style={{ width: '90px', fontSize: '11px', padding: '10px 4px', fontWeight: 700, background: 'var(--bg-input)' }}
+                    >
+                      <option value="monthly">%/Month</option>
+                      <option value="yearly">%/Year</option>
+                      <option value="weekly">%/Week</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              {/* Interest calculation breakdown badge */}
-              {parseFloat(interestRate) > 0 && parseFloat(totalAmount) > 0 && (
-                <div style={{ padding: '8px 12px', borderRadius: '10px', background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.2)', fontSize: '11px', color: '#38bdf8', fontWeight: 700 }}>
-                  💡 Breakdown: Principal {currencySymbol}{parseFloat(totalAmount)} + Interest ({parseFloat(interestRate)}%): {currencySymbol}{((parseFloat(totalAmount) * parseFloat(interestRate)) / 100).toFixed(0)} = Total Repayable: {currencySymbol}{(parseFloat(totalAmount) + (parseFloat(totalAmount) * parseFloat(interestRate)) / 100).toFixed(0)}
-                </div>
-              )}
+              {/* Live Interest & Monthly EMI Calculation Breakdown */}
+              {parseFloat(totalAmount) > 0 && (() => {
+                const { P, R, totalInterest, totalPayable, emiInstallment, months } = calcEmiDetails();
+                return (
+                  <div style={{ padding: '10px 14px', borderRadius: '12px', background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.25)', fontSize: '11px', color: '#38bdf8', fontWeight: 700, display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    <div style={{ fontSize: '12px', color: '#fff', fontWeight: 800 }}>💡 Live Repayment &amp; EMI Breakdown:</div>
+                    <div>• Principal: {currencySymbol}{Math.round(P).toLocaleString()}</div>
+                    {R > 0 && <div>• Interest ({R}% per {interestType === 'monthly' ? 'month' : interestType === 'yearly' ? 'year' : 'week'}): {currencySymbol}{Math.round(totalInterest).toLocaleString()} ({months} Months Duration)</div>}
+                    <div>• Total Repayable: <strong>{currencySymbol}{Math.round(totalPayable).toLocaleString()}</strong></div>
+                    <div style={{ color: '#34d399', fontSize: '12px', fontWeight: 900, marginTop: '2px' }}>
+                      💳 Calculated EMI: {currencySymbol}{Math.round(emiInstallment).toLocaleString()} / month
+                    </div>
+                  </div>
+                );
+              })()}
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
@@ -400,7 +464,6 @@ export const LoansView: React.FC<LoansViewProps> = ({
                     className="glass-input"
                     style={{ marginTop: '4px', width: '100%', background: 'var(--bg-input)' }}
                   >
-                    <option value="every_10_min">⚡ Every 10 Minutes (Reminder Test)</option>
                     <option value="one_time">{t('one_time')}</option>
                     <option value="weekly">{t('weekly')}</option>
                     <option value="monthly">{t('monthly')}</option>

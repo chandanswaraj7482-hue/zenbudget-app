@@ -32,6 +32,7 @@ interface TransactionModalProps {
   onOpenTransfer?: () => void;
   onTransfer?: (fromAccountId: string, toAccountId: string, amount: number, notes?: string) => void;
   onPayViaUPI?: (amount: number, title: string) => void;
+  onOpenAddAccount?: () => void;
 }
 
 const CATEGORIES = [
@@ -53,9 +54,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   accounts = [],
   onOpenTransfer: _onOpenTransfer,
   onTransfer,
-  onPayViaUPI
+  onPayViaUPI,
+  onOpenAddAccount
 }) => {
   const [type, setType] = useState<'income' | 'expense' | 'transfer'>('expense');
+  const [showNoAccountModal, setShowNoAccountModal] = useState(false);
   const [selectedAccountId, setSelectedAccountId] = useState<string>(accounts[0]?.id || '');
   const [fromAccountId, setFromAccountId] = useState<string>(accounts[0]?.id || '');
   const [toAccountId, setToAccountId] = useState<string>(accounts[1]?.id || accounts[0]?.id || '');
@@ -384,7 +387,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     }
 
     if (!accounts || accounts.length === 0) {
-      setScanMessage({ text: '⚠️ No Wallet Account Found! Please add a wallet/bank account in "My Accounts in Wallet" before saving transactions.', type: 'error' });
+      setShowNoAccountModal(true);
       return;
     }
 
@@ -1640,6 +1643,46 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 ⏩ Override Lock &amp; Log Expense Anyway
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* No Account Found Warning Pop-Up Modal */}
+      {showNoAccountModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(10px)',
+          display: 'flex', justifyContent: 'center', alignItems: 'center',
+          zIndex: 999999, padding: '20px'
+        }}>
+          <div className="glass-panel animate-scale-up" style={{
+            width: '100%', maxWidth: '340px', padding: '24px', borderRadius: '24px',
+            background: 'rgba(15, 23, 42, 0.98)', border: '1px solid rgba(239, 68, 68, 0.5)',
+            textAlign: 'center', color: '#fff', boxShadow: '0 20px 50px rgba(239, 68, 68, 0.3)'
+          }}>
+            <div style={{ fontSize: '42px', marginBottom: '10px' }}>⚠️</div>
+            <h3 style={{ fontSize: '18px', fontWeight: 900, color: '#f87171', margin: '0 0 8px 0' }}>
+              No Wallet Account Found!
+            </h3>
+            <p style={{ fontSize: '13px', color: '#cbd5e1', lineHeight: 1.5, marginBottom: '20px' }}>
+              Pehle ek Wallet / Bank Account add kijiye ("My Accounts in Wallet" me) tabhi aap transactions save kar sakte hain!
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setShowNoAccountModal(false);
+                if (onOpenAddAccount) onOpenAddAccount();
+                onClose();
+              }}
+              style={{
+                width: '100%', padding: '14px', borderRadius: '14px', border: 'none',
+                background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                color: '#fff', fontWeight: 900, fontSize: '14px', cursor: 'pointer',
+                boxShadow: '0 4px 16px rgba(59, 130, 246, 0.4)'
+              }}
+            >
+              + Add Wallet Account Now
+            </button>
           </div>
         </div>
       )}

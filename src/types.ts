@@ -28,6 +28,8 @@ export interface LoanRecord {
   totalAmount: number;
   principalAmount?: number;
   interestRate?: number;
+  interestType?: 'monthly' | 'yearly' | 'weekly';
+  emiInstallment?: number;
   paidAmount: number;
   dueDate: string;
   frequency: 'one_time' | 'weekly' | 'monthly' | 'yearly' | 'custom' | string;

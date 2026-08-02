@@ -3123,6 +3123,7 @@ const App: React.FC = () => {
         onOpenTransfer={() => setIsTransferOpen(true)}
         onTransfer={handleTransfer}
         onPayViaUPI={handleDirectCashfreePayment}
+        onOpenAddAccount={() => setIsAddAccountOpen(true)}
       />
 
       {/* Custom Confirmation Glassmorphic Modal */}
