@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Sparkles, Check, Hourglass, Loader2, ShieldCheck } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { supabase } from '../supabaseClient';
+import { launchCashfreeCheckout } from '../utils/cashfreeHelper';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 
@@ -769,25 +770,11 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                         });
                       } catch (e) {
                         console.warn('Browser listener setup failed:', e);
-                      }
-
-                    } else {
-                      // Web: Try Cashfree SDK Drop-in modal or redirect
-                      if ((window as any).Cashfree) {
-                        const mode = 'production';
-                        const cf = (window as any).Cashfree({ mode });
-                        
-                        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                        const isMobileOrApp = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window as any).Capacitor;
-                        const redirectTarget = (isLocalhost && !isMobileOrApp) ? '_blank' : '_modal';
-
-                        console.log(`Launching Cashfree ${mode} Checkout for session ${payment_session_id}`);
-
-                        cf.checkout({
-                          paymentSessionId: payment_session_id,
-                          redirectTarget: redirectTarget
-                        }).then((result: any) => {
-                          if (result && result.paymentDetails) {
+                         // Web: Try Cashfree SDK Drop-in modal or redirect
+                      if (payment_session_id) {
+                        launchCashfreeCheckout(
+                          payment_session_id,
+                          (result: any) => {
                             console.log('Payment successful! Unlocking premium tier:', billingCycle);
                             if (appliedCoupon) {
                               supabase.from('promo_coupons').select('uses_count').eq('code', appliedCoupon.code).maybeSingle()
@@ -797,13 +784,15 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                             }
                             onUpgradeSuccess(billingCycle);
                             onClose();
-                          } else {
-                            // Fallback to direct UPI options if modal dismissed
+                          },
+                          (err: any) => {
+                            console.warn('Cashfree payment failed or incomplete:', err);
                             setPaymentStep('details');
                           }
-                        });
+                        );
                       } else {
-                        window.location.href = payUrl;
+                        setPaymentStep('details');
+                      }
                       }
                       setPaymentStep('details');
                     }

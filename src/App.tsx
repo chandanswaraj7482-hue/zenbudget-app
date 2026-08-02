@@ -30,6 +30,7 @@ import { BankSyncView } from './components/BankSyncView';
 import { FollowUsView } from './components/FollowUsView';
 import { BankSyncModal } from './components/BankSyncModal';
 import { ScanPayUnlockModal } from './components/ScanPayUnlockModal';
+import { launchCashfreeCheckout } from './utils/cashfreeHelper';
 import { WidgetModal } from './components/WidgetModal';
 import { TransferModal } from './components/TransferModal';
 import { AddAccountModal } from './components/AddAccountModal';
@@ -564,17 +565,10 @@ const App: React.FC = () => {
         }
       }
 
-      if (payment_session_id && (window as any).Cashfree) {
-        const cf = (window as any).Cashfree({ mode: 'production' });
-        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const isMobileOrApp = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window as any).Capacitor;
-        const redirectTarget = (isLocalhost && !isMobileOrApp) ? '_blank' : '_modal';
-
-        cf.checkout({
-          paymentSessionId: payment_session_id,
-          redirectTarget: redirectTarget
-        }).then(async (result: any) => {
-          if (result && result.paymentDetails) {
+      if (payment_session_id) {
+        launchCashfreeCheckout(
+          payment_session_id,
+          (result: any) => {
             handleSaveTransaction({
               title: title || 'UPI Payment via Cashfree',
               amount: amount,
@@ -585,10 +579,11 @@ const App: React.FC = () => {
             });
             triggerToast(`Payment of ₹${amount} completed via Cashfree! 🎉`, 'success');
             try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
-          } else {
+          },
+          (err: any) => {
             triggerToast('Payment cancelled or incomplete.', 'warning');
           }
-        });
+        );
       } else {
         // Fallback: Direct UPI App intent launch on Mobile only (PhonePe / GPay / Paytm / Netbanking)
         const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);

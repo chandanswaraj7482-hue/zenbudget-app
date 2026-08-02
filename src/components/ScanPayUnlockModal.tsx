@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, QrCode, Zap, Check, Lock, ShieldCheck } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import { launchCashfreeCheckout } from '../utils/cashfreeHelper';
 
 interface ScanPayUnlockModalProps {
   isOpen: boolean;
@@ -84,30 +85,27 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
         }
       }
 
-      if (payment_session_id && (window as any).Cashfree) {
-        const cf = (window as any).Cashfree({ mode: 'production' });
-        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const isMobileOrApp = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (window as any).Capacitor;
-        const redirectTarget = (isLocalhost && !isMobileOrApp) ? '_blank' : '_modal';
-
-        cf.checkout({
-          paymentSessionId: payment_session_id,
-          redirectTarget: redirectTarget
-        }).then(async (result: any) => {
-          if (result && result.paymentDetails) {
+      if (payment_session_id) {
+        launchCashfreeCheckout(
+          payment_session_id,
+          async (result: any) => {
             localStorage.setItem(`zb_scan_pay_access_${profileId}`, 'true');
             if (profileId) {
               await supabase.from('profiles').update({ has_scan_pay_access: true }).eq('id', profileId);
             }
             onUnlockSuccess();
             onClose();
-          } else {
-            setModalErr('Payment incomplete or cancelled. Please try again.');
+            setIsProcessing(false);
+          },
+          (err: any) => {
+            console.warn('ScanPay unlock Cashfree failure/fallback:', err);
+            setShowInAppGateway(true);
+            setIsProcessing(false);
           }
-          setIsProcessing(false);
-        });
+        );
       } else {
         setShowInAppGateway(true);
+        setIsProcessing(false);
       }
     } catch (err: any) {
       setShowInAppGateway(true);
