@@ -17,8 +17,8 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
   currencySymbol
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
-
-  const [modalErr, setModalErr] = useState('');
+  const [showInAppGateway, setShowInAppGateway] = useState(false);
+  const [modalErr, setModalErr] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
