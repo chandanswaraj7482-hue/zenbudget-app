@@ -3841,12 +3841,12 @@ const App: React.FC = () => {
               <span style={{ fontSize: '28px' }}>⏰</span>
             </div>
 
-            <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', padding: '4px 12px', borderRadius: '20px', display: 'inline-block' }}>
-              Loan Repayment Due!
+            <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', background: activeLoanReminderModal.loan.type === 'lent' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)', color: activeLoanReminderModal.loan.type === 'lent' ? '#34d399' : '#f87171', padding: '4px 12px', borderRadius: '20px', display: 'inline-block' }}>
+              {activeLoanReminderModal.loan.type === 'lent' ? '💰 Money Collection Due!' : '⏰ Loan Repayment Due!'}
             </span>
 
             <h3 style={{ fontSize: '20px', fontWeight: 900, color: '#fff', margin: '12px 0 4px 0' }}>
-              Pay Loan for {activeLoanReminderModal.loan.personName}
+              {activeLoanReminderModal.loan.type === 'lent' ? `Collect Money from ${activeLoanReminderModal.loan.personName}` : `Pay Loan for ${activeLoanReminderModal.loan.personName}`}
             </h3>
 
             {activeLoanReminderModal.overdueDays > 0 ? (
@@ -3855,14 +3855,14 @@ const App: React.FC = () => {
               </p>
             ) : (
               <p style={{ fontSize: '13px', color: '#cbd5e1', margin: '4px 0 16px 0' }}>
-                Remaining Loan Balance: <strong style={{ color: '#34d399' }}>₹{activeLoanReminderModal.remainingAmount}</strong>
+                {activeLoanReminderModal.loan.type === 'lent' ? 'Remaining Amount To Collect:' : 'Remaining Loan Balance:'} <strong style={{ color: '#34d399' }}>₹{activeLoanReminderModal.remainingAmount}</strong>
               </p>
             )}
 
             {/* Wallet Selection Dropdown */}
             <div style={{ textAlign: 'left', marginBottom: '16px' }}>
               <label style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
-                Select Wallet / Account To Pay From:
+                {activeLoanReminderModal.loan.type === 'lent' ? 'Select Wallet To Deposit Money Into:' : 'Select Wallet / Account To Pay From:'}
               </label>
               <select
                 value={loanReminderAccountId}
@@ -3880,43 +3880,84 @@ const App: React.FC = () => {
 
             {/* Action Buttons */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <button
-                type="button"
-                onClick={() => {
-                  const friendName = activeLoanReminderModal.loan.personName;
-                  const upiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=${encodeURIComponent(friendName)}&am=${activeLoanReminderModal.remainingAmount}&cu=INR&tn=${encodeURIComponent('Loan Repayment to ' + friendName)}`;
-                  try { window.location.href = upiUrl; } catch (e) {}
-                  handleRepayLoan(activeLoanReminderModal.loan.id, activeLoanReminderModal.remainingAmount, loanReminderAccountId || accounts[0]?.id || '1');
-                  setActiveLoanReminderModal(null);
-                  triggerToast(`Loan repayment to ${friendName} processed via UPI! 🎉`, 'success');
-                  try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
-                }}
-                style={{
-                  width: '100%', padding: '14px', borderRadius: '14px', border: 'none',
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                  color: '#fff', fontWeight: 900, fontSize: '14px', cursor: 'pointer',
-                  boxShadow: '0 4px 16px rgba(16, 185, 129, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
-                }}
-              >
-                <span>⚡ Pay &amp; Send via PhonePe / UPI</span>
-              </button>
+              {activeLoanReminderModal.loan.type === 'lent' ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const friendName = activeLoanReminderModal.loan.personName;
+                      const msg = `Hi ${friendName}, a friendly reminder regarding the ₹${activeLoanReminderModal.remainingAmount} payment due on ZenBudget. Thanks!`;
+                      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+                      triggerToast(`Opening WhatsApp reminder for ${friendName}...`, 'info');
+                    }}
+                    style={{
+                      width: '100%', padding: '14px', borderRadius: '14px', border: 'none',
+                      background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)',
+                      color: '#fff', fontWeight: 900, fontSize: '14px', cursor: 'pointer',
+                      boxShadow: '0 4px 16px rgba(37, 211, 102, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                    }}
+                  >
+                    <span>💬 Remind Friend on WhatsApp</span>
+                  </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  handleRepayLoan(activeLoanReminderModal.loan.id, activeLoanReminderModal.remainingAmount, loanReminderAccountId || accounts[0]?.id || '1');
-                  setActiveLoanReminderModal(null);
-                  triggerToast(`Recorded ₹${activeLoanReminderModal.remainingAmount} loan repayment! 🎉`, 'success');
-                  try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
-                }}
-                style={{
-                  width: '100%', padding: '12px', borderRadius: '14px',
-                  border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.06)',
-                  color: '#fff', fontWeight: 700, fontSize: '13px', cursor: 'pointer'
-                }}
-              >
-                ✅ Mark as Paid from Wallet
-              </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleRepayLoan(activeLoanReminderModal.loan.id, activeLoanReminderModal.remainingAmount, loanReminderAccountId || accounts[0]?.id || '1');
+                      setActiveLoanReminderModal(null);
+                      triggerToast(`Collected ₹${activeLoanReminderModal.remainingAmount} & deposited to wallet! 🎉`, 'success');
+                      try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
+                    }}
+                    style={{
+                      width: '100%', padding: '12px', borderRadius: '14px',
+                      border: '1px solid rgba(34,197,94,0.3)', background: 'rgba(34,197,94,0.15)',
+                      color: '#34d399', fontWeight: 800, fontSize: '13px', cursor: 'pointer'
+                    }}
+                  >
+                    ✅ Mark as Received (Deposit)
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const friendName = activeLoanReminderModal.loan.personName;
+                      const upiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=${encodeURIComponent(friendName)}&am=${activeLoanReminderModal.remainingAmount}&cu=INR&tn=${encodeURIComponent('Loan Repayment to ' + friendName)}`;
+                      try { window.location.href = upiUrl; } catch (e) {}
+                      handleRepayLoan(activeLoanReminderModal.loan.id, activeLoanReminderModal.remainingAmount, loanReminderAccountId || accounts[0]?.id || '1');
+                      setActiveLoanReminderModal(null);
+                      triggerToast(`Loan repayment to ${friendName} processed via UPI! 🎉`, 'success');
+                      try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
+                    }}
+                    style={{
+                      width: '100%', padding: '14px', borderRadius: '14px', border: 'none',
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      color: '#fff', fontWeight: 900, fontSize: '14px', cursor: 'pointer',
+                      boxShadow: '0 4px 16px rgba(16, 185, 129, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                    }}
+                  >
+                    <span>⚡ Pay &amp; Send via PhonePe / UPI</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleRepayLoan(activeLoanReminderModal.loan.id, activeLoanReminderModal.remainingAmount, loanReminderAccountId || accounts[0]?.id || '1');
+                      setActiveLoanReminderModal(null);
+                      triggerToast(`Recorded ₹${activeLoanReminderModal.remainingAmount} loan repayment! 🎉`, 'success');
+                      try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
+                    }}
+                    style={{
+                      width: '100%', padding: '12px', borderRadius: '14px',
+                      border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.06)',
+                      color: '#fff', fontWeight: 700, fontSize: '13px', cursor: 'pointer'
+                    }}
+                  >
+                    ✅ Mark as Paid from Wallet
+                  </button>
+                </>
+              )}
 
               <button
                 type="button"

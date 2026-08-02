@@ -400,6 +400,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
                     className="glass-input"
                     style={{ marginTop: '4px', width: '100%', background: 'var(--bg-input)' }}
                   >
+                    <option value="every_10_min">⚡ Every 10 Minutes (Reminder Test)</option>
                     <option value="one_time">{t('one_time')}</option>
                     <option value="weekly">{t('weekly')}</option>
                     <option value="monthly">{t('monthly')}</option>
