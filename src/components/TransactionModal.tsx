@@ -383,6 +383,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       return;
     }
 
+    if (!accounts || accounts.length === 0) {
+      setScanMessage({ text: '⚠️ No Wallet Account Found! Please add a wallet/bank account in "My Accounts in Wallet" before saving transactions.', type: 'error' });
+      return;
+    }
+
     if (!title.trim() || isNaN(parsedAmount) || parsedAmount <= 0) {
       setScanMessage({ text: 'Please fill out all required fields with valid values.', type: 'error' });
       return;
