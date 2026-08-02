@@ -86,10 +86,9 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
 
       if (payment_session_id && (window as any).Cashfree) {
         const cf = (window as any).Cashfree({ mode: 'production' });
-        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         cf.checkout({
           paymentSessionId: payment_session_id,
-          redirectTarget: isLocal ? '_blank' : '_modal'
+          redirectTarget: '_modal'
         }).then(async (result: any) => {
           if (result && result.paymentDetails) {
             localStorage.setItem(`zb_scan_pay_access_${profileId}`, 'true');

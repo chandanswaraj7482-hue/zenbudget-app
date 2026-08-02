@@ -1010,22 +1010,26 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                 disabled={isPaying}
                 style={{
                   width: '100%',
-                  padding: '16px',
-                  borderRadius: '16px',
+                  padding: '14px 18px',
+                  borderRadius: '14px',
                   border: 'none',
-                  background: 'linear-gradient(135deg, #6366f1 0%, #3b82f6 50%, #10b981 100%)',
+                  background: 'linear-gradient(135deg, #4f46e5 0%, #0284c7 100%)',
                   color: '#ffffff',
-                  fontSize: '14px',
-                  fontWeight: 900,
                   cursor: isPaying ? 'wait' : 'pointer',
-                  boxShadow: '0 6px 20px rgba(99, 102, 241, 0.4)',
+                  boxShadow: '0 4px 16px rgba(79, 70, 229, 0.35)',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px'
+                  gap: '3px'
                 }}
               >
-                ⚡ Pay via Cashfree (PhonePe / Cards / Netbanking)
+                <div style={{ fontSize: '15px', fontWeight: 800, letterSpacing: '0.01em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>⚡ Pay via Cashfree</span>
+                </div>
+                <div style={{ fontSize: '11px', fontWeight: 500, opacity: 0.9 }}>
+                  PhonePe • GPay • Paytm • Cards • Netbanking
+                </div>
               </button>
             </div>
 

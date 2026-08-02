@@ -35,6 +35,7 @@ interface MoreToolsViewProps {
   onNavigateToLoans?: () => void;
   onOpenBankSync?: () => void;
   onOpenWidgetModal?: () => void;
+  onNavigateToFollowUs?: () => void;
 }
 
 export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
@@ -54,7 +55,8 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
   referralCount = 0,
   onNavigateToLoans,
   onOpenBankSync,
-  onOpenWidgetModal: _onOpenWidgetModal
+  onOpenWidgetModal: _onOpenWidgetModal,
+  onNavigateToFollowUs
 }) => {
   const [socialLinks, setSocialLinks] = useState<Array<{ platform: string; icon: string; url: string; color: string; is_active: boolean }>>([]);
 
@@ -349,6 +351,36 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
             <ChevronRight size={18} color="#94a3b8" />
           </button>
 
+          {/* Follow Us */}
+          {onNavigateToFollowUs && (
+            <button
+              onClick={onNavigateToFollowUs}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '14px',
+                borderRadius: '14px',
+                border: 'none',
+                background: 'rgba(255,255,255,0.02)',
+                cursor: 'pointer',
+                color: 'var(--text-primary)',
+                textAlign: 'left'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(225, 48, 108, 0.15)', color: '#e1306c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Share2 size={20} />
+                </div>
+                <div>
+                  <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>Follow Us</p>
+                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Instagram, Facebook, YouTube &amp; Social Links</span>
+                </div>
+              </div>
+              <ChevronRight size={18} color="#94a3b8" />
+            </button>
+          )}
+
           {/* Premium Subscription */}
           <button
             onClick={onOpenSubscriptionModal}
@@ -454,49 +486,6 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
             <ChevronRight size={18} color="var(--danger)" />
           </button>
 
-        </div>
-      </div>
-
-      {/* SECTION: FOLLOW US */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <h3 style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
-          📲 Follow Us
-        </h3>
-        <div className="glass-panel" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-            Stay updated with the latest ZenBudget tips, updates &amp; money-saving tricks!
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {socialLinks.map(social => (
-              <a
-                key={social.platform}
-                href={social.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '12px 14px',
-                  borderRadius: '12px',
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.07)',
-                  textDecoration: 'none',
-                  color: 'var(--text-primary)',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ fontSize: '20px' }}>{social.icon}</span>
-                  <div>
-                    <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>{social.platform}</p>
-                    <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>@zenbudget</span>
-                  </div>
-                </div>
-                <span style={{ fontSize: '11px', color: social.color, fontWeight: 700 }}>Follow →</span>
-              </a>
-            ))}
-          </div>
         </div>
       </div>
 

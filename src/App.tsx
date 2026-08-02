@@ -27,6 +27,7 @@ import { SharedBudgetView } from './components/SharedBudgetView';
 import { ReferralView } from './components/ReferralView';
 import { LoansView } from './components/LoansView';
 import { BankSyncView } from './components/BankSyncView';
+import { FollowUsView } from './components/FollowUsView';
 import { BankSyncModal } from './components/BankSyncModal';
 import { ScanPayUnlockModal } from './components/ScanPayUnlockModal';
 import { WidgetModal } from './components/WidgetModal';
@@ -53,7 +54,7 @@ const App: React.FC = () => {
   const [budgets, setBudgets] = useState<CategoryBudget[]>([]);
   const [goals, setGoals] = useState<SavingsGoal[]>([]);
   
-  const [activeView, setActiveView] = useState<'dashboard' | 'transactions' | 'budgets' | 'analytics' | 'profile' | 'forest' | 'wishlist' | 'simulator' | 'more' | 'shared_budget' | 'referral' | 'loans' | 'bank_sync'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'transactions' | 'budgets' | 'analytics' | 'profile' | 'forest' | 'wishlist' | 'simulator' | 'more' | 'shared_budget' | 'referral' | 'loans' | 'bank_sync' | 'follow_us'>('dashboard');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
@@ -2958,6 +2959,7 @@ const App: React.FC = () => {
             onLogout={() => setShowLogoutConfirm(true)}
             userReferralCode={userReferralCode}
             referralCount={referralCount}
+            onNavigateToFollowUs={() => setActiveView('follow_us')}
           />
         )}
         {activeView === 'shared_budget' && (
@@ -2988,6 +2990,12 @@ const App: React.FC = () => {
             accounts={accounts}
             onAddAccount={handleAddAccount}
             currencySymbol={currencySymbol}
+          />
+        )}
+        {activeView === 'follow_us' && (
+          <FollowUsView
+            key={langKey}
+            onBack={() => setActiveView('more')}
           />
         )}
       </main>
