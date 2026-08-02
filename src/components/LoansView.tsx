@@ -56,7 +56,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
   const calcEmiDetails = () => {
     const P = parseFloat(totalAmount) || 0;
     const R = parseFloat(interestRate) || 0;
-    if (P <= 0) return { P: 0, R: 0, totalInterest: 0, totalPayable: 0, emiInstallment: 0, installmentCount: 1, installmentLabel: 'month', durationMonths: 1 };
+    if (P <= 0) return { P: 0, R: 0, totalInterest: 0, totalPayable: 0, emiInstallment: 0, installmentCount: 1, installmentLabel: 'month', durationMonths: 1, remainderDiff: 0, baseEmi: 0, finalEmi: 0 };
 
     const start = new Date();
     start.setHours(0, 0, 0, 0);
@@ -65,13 +65,22 @@ export const LoansView: React.FC<LoansViewProps> = ({
 
     const diffTime = due.getTime() - start.getTime();
     let diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-    if (diffDays < 7) diffDays = 30; // default to 1 month if due date is today or past
+    if (diffDays < 7) diffDays = 30; // default 1 month if due date is today or past
 
     const durationMonths = Math.max(1, Math.round(diffDays / 30));
 
-    // Simple Interest: P * (R/100) * (durationMonths / 12)
-    const totalInterest = R > 0 ? P * (R / 100) * (durationMonths / 12) : 0;
-    const totalPayable = P + totalInterest;
+    // Calculate Simple Interest based on Interest Type (% p.a. vs % per month)
+    let totalInterest = 0;
+    if (R > 0) {
+      if (interestType === 'monthly') {
+        totalInterest = P * (R / 100) * durationMonths;
+      } else {
+        // yearly / p.a. (Per Annum)
+        totalInterest = P * (R / 100) * (durationMonths / 12);
+      }
+    }
+
+    const totalPayable = Math.round(P + totalInterest);
 
     // Calculate installment count + label based on user-selected frequency
     let installmentCount = 1;
@@ -94,9 +103,13 @@ export const LoansView: React.FC<LoansViewProps> = ({
       installmentLabel = 'lump sum';
     }
 
+    const baseEmi = Math.floor(totalPayable / installmentCount);
     const emiInstallment = totalPayable / installmentCount;
+    const totalPaidBase = baseEmi * installmentCount;
+    const remainderDiff = totalPayable - totalPaidBase;
+    const finalEmi = baseEmi + remainderDiff;
 
-    return { P, R, totalInterest, totalPayable, emiInstallment, installmentCount, installmentLabel, durationMonths };
+    return { P, R, totalInterest, totalPayable, emiInstallment, installmentCount, installmentLabel, durationMonths, remainderDiff, baseEmi, finalEmi };
   };
 
   const handleSubmitAdd = (e: React.FormEvent) => {
@@ -426,23 +439,35 @@ export const LoansView: React.FC<LoansViewProps> = ({
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Interest Rate (% p.a.)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={interestRate}
-                    onChange={e => setInterestRate(e.target.value)}
-                    placeholder="e.g. 10%"
-                    className="glass-input"
-                    style={{ marginTop: '4px', width: '100%' }}
-                  />
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Interest Rate & Unit</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '6px', marginTop: '4px' }}>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={interestRate}
+                      onChange={e => setInterestRate(e.target.value)}
+                      placeholder="e.g. 2"
+                      className="glass-input"
+                      style={{ width: '100%' }}
+                    />
+                    <select
+                      value={interestType}
+                      onChange={e => setInterestType(e.target.value as any)}
+                      className="glass-input"
+                      style={{ width: '100%', background: 'var(--bg-input)' }}
+                    >
+                      <option value="yearly">% p.a.</option>
+                      <option value="monthly">% / mo</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
               {/* Live Repayment & Installment Breakdown */}
               {parseFloat(totalAmount) > 0 && (() => {
-                const { P, R, totalInterest, totalPayable, emiInstallment, installmentCount, installmentLabel, durationMonths } = calcEmiDetails();
+                const { P, R, totalInterest, totalPayable, emiInstallment, installmentCount, installmentLabel, durationMonths, remainderDiff, baseEmi, finalEmi } = calcEmiDetails();
+                const rateLabel = interestType === 'monthly' ? '% / mo' : '% p.a.';
                 return (
                   <div style={{ padding: '12px 14px', borderRadius: '14px', background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.3)', fontSize: '12px', color: '#e2e8f0', fontWeight: 600, display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <div style={{ fontSize: '13px', color: '#38bdf8', fontWeight: 800, marginBottom: '4px' }}>💡 Repayment Breakdown ({durationMonths} Mo Duration)</div>
@@ -452,7 +477,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
                     </div>
                     {R > 0 && (
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: '#94a3b8' }}>Interest ({R}% p.a.)</span>
+                        <span style={{ color: '#94a3b8' }}>Interest ({R}{rateLabel})</span>
                         <span style={{ fontWeight: 700, color: '#fbbf24' }}>+{currencySymbol}{Math.round(totalInterest).toLocaleString()}</span>
                       </div>
                     )}
@@ -465,8 +490,13 @@ export const LoansView: React.FC<LoansViewProps> = ({
                         {frequency === 'one_time' ? 'One-time Full Repayment' : `Pay per ${installmentLabel} (${installmentCount} installment${installmentCount > 1 ? 's' : ''})`}
                       </div>
                       <div style={{ fontSize: '18px', fontWeight: 900, color: '#34d399' }}>
-                        {currencySymbol}{Math.round(emiInstallment).toLocaleString()}
+                        {currencySymbol}{Math.round(emiInstallment).toLocaleString()} <span style={{ fontSize: '12px', fontWeight: 600, color: '#94a3b8' }}>/ {installmentLabel}</span>
                       </div>
+                      {remainderDiff > 0 && installmentCount > 1 && (
+                        <div style={{ fontSize: '10px', color: '#fbbf24', marginTop: '4px', fontStyle: 'italic' }}>
+                          📌 ({installmentCount - 1} installments of {currencySymbol}{baseEmi} + 1 final installment of {currencySymbol}{finalEmi})
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
