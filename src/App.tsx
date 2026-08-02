@@ -533,9 +533,9 @@ const App: React.FC = () => {
 
       let payment_session_id = '';
       const endpoints = [
-        '/api/create-payment-session',
+        'https://admin-portal-zenbudget.vercel.app/api/create-payment-session',
         'https://zenbudget-tracker.vercel.app/api/create-payment-session',
-        'https://admin-portal-zenbudget.vercel.app/api/create-payment-session'
+        '/api/create-payment-session'
       ];
 
       for (const url of endpoints) {

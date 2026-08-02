@@ -58,15 +58,8 @@ export const LoansView: React.FC<LoansViewProps> = ({
     const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
     const months = Math.max(1, Math.ceil(diffDays / 30));
 
-    let totalInterest = 0;
-    if (interestType === 'monthly') {
-      totalInterest = P * (R / 100) * months;
-    } else if (interestType === 'yearly') {
-      totalInterest = P * (R / 100) * (months / 12);
-    } else if (interestType === 'weekly') {
-      const weeks = Math.max(1, Math.ceil(diffDays / 7));
-      totalInterest = P * (R / 100) * weeks;
-    }
+    // Standard Simple Interest calculation: P * (R/100) * (Years)
+    const totalInterest = P * (R / 100) * (months / 12);
 
     const totalPayable = P + totalInterest;
     const emiInstallment = totalPayable / months;
@@ -401,29 +394,17 @@ export const LoansView: React.FC<LoansViewProps> = ({
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Interest Rate &amp; Period</label>
-                  <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      value={interestRate}
-                      onChange={e => setInterestRate(e.target.value)}
-                      placeholder="e.g. 3%"
-                      className="glass-input"
-                      style={{ flex: 1, fontSize: '12px', padding: '10px 8px' }}
-                    />
-                    <select
-                      value={interestType}
-                      onChange={e => setInterestType(e.target.value as any)}
-                      className="glass-input"
-                      style={{ width: '90px', fontSize: '11px', padding: '10px 4px', fontWeight: 700, background: 'var(--bg-input)' }}
-                    >
-                      <option value="monthly">%/Month</option>
-                      <option value="yearly">%/Year</option>
-                      <option value="weekly">%/Week</option>
-                    </select>
-                  </div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Interest Rate (% p.a.)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={interestRate}
+                    onChange={e => setInterestRate(e.target.value)}
+                    placeholder="e.g. 10%"
+                    className="glass-input"
+                    style={{ marginTop: '4px', width: '100%' }}
+                  />
                 </div>
               </div>
 
@@ -434,7 +415,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
                   <div style={{ padding: '10px 14px', borderRadius: '12px', background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.25)', fontSize: '11px', color: '#38bdf8', fontWeight: 700, display: 'flex', flexDirection: 'column', gap: '3px' }}>
                     <div style={{ fontSize: '12px', color: '#fff', fontWeight: 800 }}>💡 Live Repayment &amp; EMI Breakdown:</div>
                     <div>• Principal: {currencySymbol}{Math.round(P).toLocaleString()}</div>
-                    {R > 0 && <div>• Interest ({R}% per {interestType === 'monthly' ? 'month' : interestType === 'yearly' ? 'year' : 'week'}): {currencySymbol}{Math.round(totalInterest).toLocaleString()} ({months} Months Duration)</div>}
+                    {R > 0 && <div>• Interest ({R}% p.a.): {currencySymbol}{Math.round(totalInterest).toLocaleString()} ({months} Month(s) Duration)</div>}
                     <div>• Total Repayable: <strong>{currencySymbol}{Math.round(totalPayable).toLocaleString()}</strong></div>
                     <div style={{ color: '#34d399', fontSize: '12px', fontWeight: 900, marginTop: '2px' }}>
                       💳 Calculated EMI: {currencySymbol}{Math.round(emiInstallment).toLocaleString()} / month
