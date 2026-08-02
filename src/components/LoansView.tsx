@@ -50,7 +50,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
   const calcEmiDetails = () => {
     const P = parseFloat(totalAmount) || 0;
     const R = parseFloat(interestRate) || 0;
-    if (P <= 0) return { P: 0, R: 0, totalInterest: 0, totalPayable: 0, emiInstallment: 0, months: 1 };
+    if (P <= 0) return { P: 0, R: 0, totalInterest: 0, totalPayable: 0, emiInstallment: 0, installmentCount: 1, installmentLabel: 'month' };
 
     const start = new Date();
     const due = new Date(dueDate);
@@ -58,13 +58,30 @@ export const LoansView: React.FC<LoansViewProps> = ({
     const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
     const months = Math.max(1, Math.ceil(diffDays / 30));
 
-    // Standard Simple Interest calculation: P * (R/100) * (Years)
+    // Simple Interest: P * R/100 * T(years)
     const totalInterest = P * (R / 100) * (months / 12);
-
     const totalPayable = P + totalInterest;
-    const emiInstallment = totalPayable / months;
 
-    return { P, R, totalInterest, totalPayable, emiInstallment, months };
+    // Calculate installment count + label based on user-selected frequency
+    let installmentCount = 1;
+    let installmentLabel = 'lump sum';
+    if (frequency === 'monthly') {
+      installmentCount = months;
+      installmentLabel = 'month';
+    } else if (frequency === 'weekly') {
+      installmentCount = Math.max(1, Math.ceil(diffDays / 7));
+      installmentLabel = 'week';
+    } else if (frequency === 'daily') {
+      installmentCount = diffDays;
+      installmentLabel = 'day';
+    } else {
+      installmentCount = 1;
+      installmentLabel = 'lump sum';
+    }
+
+    const emiInstallment = totalPayable / installmentCount;
+
+    return { P, R, totalInterest, totalPayable, emiInstallment, installmentCount, installmentLabel };
   };
 
   const handleSubmitAdd = (e: React.FormEvent) => {
@@ -408,17 +425,29 @@ export const LoansView: React.FC<LoansViewProps> = ({
                 </div>
               </div>
 
-              {/* Live Interest & Monthly EMI Calculation Breakdown */}
+              {/* Live Repayment & Installment Breakdown */}
               {parseFloat(totalAmount) > 0 && (() => {
-                const { P, R, totalInterest, totalPayable, emiInstallment, months } = calcEmiDetails();
+                const { P, R, totalInterest, totalPayable, emiInstallment, installmentCount, installmentLabel } = calcEmiDetails();
                 return (
-                  <div style={{ padding: '10px 14px', borderRadius: '12px', background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.25)', fontSize: '11px', color: '#38bdf8', fontWeight: 700, display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                    <div style={{ fontSize: '12px', color: '#fff', fontWeight: 800 }}>💡 Live Repayment &amp; EMI Breakdown:</div>
-                    <div>• Principal: {currencySymbol}{Math.round(P).toLocaleString()}</div>
-                    {R > 0 && <div>• Interest ({R}% p.a.): {currencySymbol}{Math.round(totalInterest).toLocaleString()} ({months} Month(s) Duration)</div>}
-                    <div>• Total Repayable: <strong>{currencySymbol}{Math.round(totalPayable).toLocaleString()}</strong></div>
-                    <div style={{ color: '#34d399', fontSize: '12px', fontWeight: 900, marginTop: '2px' }}>
-                      💳 Calculated EMI: {currencySymbol}{Math.round(emiInstallment).toLocaleString()} / month
+                  <div style={{ padding: '12px 14px', borderRadius: '14px', background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.3)', fontSize: '12px', color: '#e2e8f0', fontWeight: 600, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ fontSize: '13px', color: '#38bdf8', fontWeight: 800, marginBottom: '4px' }}>💡 Repayment Breakdown</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: '#94a3b8' }}>Principal Amount</span>
+                      <span style={{ fontWeight: 700 }}>{currencySymbol}{Math.round(P).toLocaleString()}</span>
+                    </div>
+                    {R > 0 && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: '#94a3b8' }}>Interest ({R}% p.a.)</span>
+                        <span style={{ fontWeight: 700, color: '#fbbf24' }}>+{currencySymbol}{Math.round(totalInterest).toLocaleString()}</span>
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(56,189,248,0.2)', paddingTop: '6px', marginTop: '2px' }}>
+                      <span style={{ color: '#94a3b8' }}>Total Payable</span>
+                      <span style={{ fontWeight: 800, color: '#fff' }}>{currencySymbol}{Math.round(totalPayable).toLocaleString()}</span>
+                    </div>
+                    <div style={{ background: 'rgba(52, 211, 153, 0.12)', borderRadius: '10px', padding: '8px 12px', marginTop: '4px', textAlign: 'center' }}>
+                      <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '2px' }}>Pay per {installmentLabel} ({installmentCount} installment{installmentCount > 1 ? 's' : ''})</div>
+                      <div style={{ fontSize: '18px', fontWeight: 900, color: '#34d399' }}>{currencySymbol}{Math.round(emiInstallment).toLocaleString()}</div>
                     </div>
                   </div>
                 );

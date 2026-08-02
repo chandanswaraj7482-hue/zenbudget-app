@@ -85,7 +85,160 @@ interface AdminDashboardProps {
   onShowToast?: (msg: string, type: 'success' | 'warning' | 'info') => void;
 }
 
+// ───────────────────────────────────────────────────────────────────
+// Social Links Manager Component
+// ───────────────────────────────────────────────────────────────────
+const PRESET_SOCIALS = [
+  { platform: 'Instagram', icon: '📸', color: '#e1306c' },
+  { platform: 'Facebook', icon: '👥', color: '#1877f2' },
+  { platform: 'YouTube', icon: '▶️', color: '#ff0000' },
+  { platform: 'TikTok', icon: '🎵', color: '#69c9d0' },
+  { platform: 'Twitter/X', icon: '🐦', color: '#1da1f2' },
+];
+
+interface SocialLink {
+  id?: string;
+  platform: string;
+  url: string;
+  icon: string;
+  color: string;
+  is_active: boolean;
+}
+
+const SocialLinksManager: React.FC<{ supabaseClient: any }> = ({ supabaseClient }) => {
+  const [links, setLinks] = useState<SocialLink[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [editingLink, setEditingLink] = useState<SocialLink | null>(null);
+  const [newLink, setNewLink] = useState<Partial<SocialLink>>({ platform: 'Instagram', icon: '📸', color: '#e1306c', url: '', is_active: true });
+
+  const fetchLinks = async () => {
+    setLoading(true);
+    try {
+      const { data } = await supabaseClient.from('social_links').select('*').order('created_at', { ascending: true });
+      if (data) setLinks(data);
+    } catch (e) { console.warn('social_links fetch failed:', e); }
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchLinks(); }, []);
+
+  const saveLink = async () => {
+    if (!newLink.url?.trim()) { setMsg('❌ URL required'); return; }
+    setSaving(true);
+    const preset = PRESET_SOCIALS.find(p => p.platform === newLink.platform) || PRESET_SOCIALS[0];
+    const payload = { platform: newLink.platform || 'Instagram', url: newLink.url.trim(), icon: preset.icon, color: preset.color, is_active: true };
+    try {
+      await supabaseClient.from('social_links').insert([payload]);
+      setMsg('✅ Social link added!');
+      setNewLink({ platform: 'Instagram', icon: '📸', color: '#e1306c', url: '', is_active: true });
+      fetchLinks();
+    } catch (e) { setMsg('❌ Save failed'); }
+    setSaving(false);
+    setTimeout(() => setMsg(''), 3000);
+  };
+
+  const updateLink = async () => {
+    if (!editingLink) return;
+    setSaving(true);
+    try {
+      await supabaseClient.from('social_links').update({ url: editingLink.url, is_active: editingLink.is_active }).eq('id', editingLink.id);
+      setMsg('✅ Link updated!');
+      setEditingLink(null);
+      fetchLinks();
+    } catch (e) { setMsg('❌ Update failed'); }
+    setSaving(false);
+    setTimeout(() => setMsg(''), 3000);
+  };
+
+  const deleteLink = async (id: string) => {
+    if (!confirm('Delete this link?')) return;
+    await supabaseClient.from('social_links').delete().eq('id', id);
+    setMsg('🗑️ Deleted');
+    fetchLinks();
+    setTimeout(() => setMsg(''), 2000);
+  };
+
+  const toggleActive = async (link: SocialLink) => {
+    await supabaseClient.from('social_links').update({ is_active: !link.is_active }).eq('id', link.id);
+    fetchLinks();
+  };
+
+  const inputStyle: React.CSSProperties = { background: 'rgba(30,41,59,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '13px', outline: 'none', width: '100%' };
+
+  return (
+    <div>
+      <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff' }}>
+        <Share2 size={18} color="#6366f1" /> Social Links Manager
+      </h4>
+      {msg && <div style={{ padding: '10px 14px', borderRadius: '10px', background: msg.startsWith('✅') ? 'rgba(52,211,153,0.1)' : 'rgba(239,68,68,0.1)', border: `1px solid ${msg.startsWith('✅') ? 'rgba(52,211,153,0.3)' : 'rgba(239,68,68,0.3)'}`, color: '#e2e8f0', fontSize: '13px', marginBottom: '1rem' }}>{msg}</div>}
+      
+      {/* Add New Link */}
+      <div style={{ background: 'rgba(30,41,59,0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '1.2rem', marginBottom: '1.5rem' }}>
+        <h5 style={{ fontSize: '13px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '12px' }}>➕ Add New Social Link</h5>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr auto', gap: '10px', alignItems: 'end' }}>
+          <div>
+            <label style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>Platform</label>
+            <select value={newLink.platform} onChange={e => { const p = PRESET_SOCIALS.find(x => x.platform === e.target.value); setNewLink(prev => ({ ...prev, platform: e.target.value, icon: p?.icon || '🔗', color: p?.color || '#6366f1' })); }} style={{ ...inputStyle }}>
+              {PRESET_SOCIALS.map(p => <option key={p.platform} value={p.platform}>{p.icon} {p.platform}</option>)}
+              <option value="Other">🔗 Other</option>
+            </select>
+          </div>
+          <div>
+            <label style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>URL</label>
+            <input type="url" placeholder="https://..." value={newLink.url || ''} onChange={e => setNewLink(prev => ({ ...prev, url: e.target.value }))} style={inputStyle} />
+          </div>
+          <button onClick={saveLink} disabled={saving} style={{ padding: '8px 18px', borderRadius: '8px', background: '#6366f1', border: 'none', color: '#fff', fontWeight: 700, fontSize: '13px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            {saving ? '...' : 'Add Link'}
+          </button>
+        </div>
+      </div>
+
+      {/* Existing Links */}
+      {loading ? (
+        <div style={{ textAlign: 'center', color: '#94a3b8', padding: '2rem' }}>Loading...</div>
+      ) : links.length === 0 ? (
+        <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8', background: 'rgba(30,41,59,0.3)', borderRadius: '12px' }}>No social links yet. Add one above!</div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {links.map(link => (
+            <div key={link.id} style={{ padding: '1rem 1.2rem', borderRadius: '12px', background: 'rgba(30,41,59,0.6)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontSize: '22px' }}>{link.icon}</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                {editingLink?.id === link.id ? (
+                  <input type="url" value={editingLink.url} onChange={e => setEditingLink({ ...editingLink, url: e.target.value })} style={{ ...inputStyle, width: '100%' }} />
+                ) : (
+                  <>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>{link.platform}</div>
+                    <a href={link.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: '#64748b', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{link.url}</a>
+                  </>
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
+                <button onClick={() => toggleActive(link)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', background: link.is_active ? 'rgba(52,211,153,0.15)' : 'rgba(100,116,139,0.15)', color: link.is_active ? '#34d399' : '#64748b', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>
+                  {link.is_active ? 'Active' : 'Hidden'}
+                </button>
+                {editingLink?.id === link.id ? (
+                  <>
+                    <button onClick={updateLink} style={{ padding: '4px 12px', borderRadius: '6px', border: 'none', background: '#6366f1', color: '#fff', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>{saving ? '...' : '✓ Save'}</button>
+                    <button onClick={() => setEditingLink(null)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', background: 'rgba(255,255,255,0.08)', color: '#94a3b8', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
+                  </>
+                ) : (
+                  <button onClick={() => setEditingLink(link)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', background: 'rgba(255,255,255,0.06)', color: '#94a3b8', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}><Edit2 size={12} /></button>
+                )}
+                <button onClick={() => deleteLink(link.id!)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', background: 'rgba(239,68,68,0.1)', color: '#f87171', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}><Trash2 size={12} /></button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
+
   isOpen,
   onClose,
   supabaseClient,
@@ -310,7 +463,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   }
 ];
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing' | 'slots'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing' | 'slots' | 'social_links'>('overview');
 
   // Data states
   const [profiles, setProfiles] = useState<ProfileRecord[]>(() => {
@@ -961,7 +1114,8 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                 { id: 'broadcasts', label: 'Broadcast Center', icon: Bell },
                 { id: 'coupons', label: 'Discount Coupons', icon: Gift },
                 { id: 'pricing', label: 'Pricing Control', icon: DollarSign },
-                { id: 'ratings', label: `App Ratings (${ratings.length})`, icon: Star }
+                { id: 'ratings', label: `App Ratings (${ratings.length})`, icon: Star },
+                { id: 'social_links', label: 'Social Links', icon: Share2 }
               ].map(tab => {
                 const IconComponent = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -2364,7 +2518,12 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                     )}
                   </div>
                 </div>
+              )}\n
+              {/* TAB: SOCIAL LINKS MANAGEMENT */}
+              {activeTab === 'social_links' && (
+                <SocialLinksManager supabaseClient={supabaseClient} />
               )}
+
               {/* TAB 8: PRICING CONTROL */}
               {activeTab === 'pricing' && (
                 <div>
