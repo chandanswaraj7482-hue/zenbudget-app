@@ -39,8 +39,10 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
   const weeklyExpenses = weeklyTransactions.filter(t => t.type === 'expense');
   const weeklyIncome = weeklyTransactions.filter(t => t.type === 'income');
 
-  const spent = weeklyExpenses.reduce((sum, t) => sum + t.amount, 0);
-  const earned = weeklyIncome.reduce((sum, t) => sum + t.amount, 0);
+  const spentRaw = weeklyExpenses.reduce((sum, t) => sum + t.amount, 0);
+  const earnedRaw = weeklyIncome.reduce((sum, t) => sum + t.amount, 0);
+  const spent = (currencySymbol === '₹' || currencySymbol === 'INR') ? Math.round(spentRaw) : Math.round(spentRaw * 100) / 100;
+  const earned = (currencySymbol === '₹' || currencySymbol === 'INR') ? Math.round(earnedRaw) : Math.round(earnedRaw * 100) / 100;
   const saved = Math.max(0, earned - spent);
 
   // Best day (least spending)
@@ -465,7 +467,7 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
                 </div>
                 <div>
                   <span style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)', textTransform: 'uppercase', fontWeight: 700 }}>Top Spending Category</span>
-                  <p style={{ fontSize: '20px', fontWeight: 700, color: '#ffffff', margin: 0 }}>{worstCategory} ({currencySymbol}{maxCatSpend.toLocaleString()})</p>
+                  <p style={{ fontSize: '20px', fontWeight: 700, color: '#ffffff', margin: 0 }}>{worstCategory} ({currencySymbol}{((currencySymbol === '₹' || currencySymbol === 'INR') ? Math.round(maxCatSpend) : maxCatSpend).toLocaleString()})</p>
                 </div>
               </div>
               

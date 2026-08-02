@@ -210,9 +210,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const totalBalance = transactions.reduce((sum, t) => {
-    return t.type === 'income' ? sum + t.amount : sum - t.amount;
-  }, 0);
+  const totalAccountBalance = accounts && accounts.length > 0
+    ? accounts.reduce((sum, a) => sum + (a.balance || 0), 0)
+    : transactions.reduce((sum, t) => t.type === 'income' ? sum + t.amount : sum - t.amount, 0);
+
+  const totalBalance = totalAccountBalance;
 
   const savingsRate = income > 0 ? Math.round(((income - expenses) / income) * 100) : 0;
   const totalSaved = Math.max(0, income - expenses);

@@ -319,22 +319,22 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 <option value="+94" style={{ color: '#000' }}>🇱🇰 +94</option>
                 <option value="+977" style={{ color: '#000' }}>🇳🇵 +977</option>
               </select>
-              {/* Masked Phone Number Input */}
+              {/* Phone Number Input */}
               <div style={{ position: 'relative', flex: 1 }}>
                 <input
-                  type="password"
+                  type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                  placeholder="Enter your number"
+                  placeholder="Enter your mobile number"
                   maxLength={15}
                   className="glass-input"
-                  style={{ fontSize: '13px', padding: '12px 14px', width: '100%', letterSpacing: '2px' }}
+                  style={{ fontSize: '13px', padding: '12px 14px', width: '100%', letterSpacing: '1px', fontWeight: 700 }}
                 />
               </div>
             </div>
             {phone && (
-              <p style={{ fontSize: '10px', color: 'var(--text-secondary)', margin: '2px 0 0 0', fontStyle: 'italic' }}>
-                📞 Encrypted &amp; Saved: {phoneCode} {'•'.repeat(phone.length || 10)}
+              <p style={{ fontSize: '11px', color: '#34d399', margin: '4px 0 0 0', fontWeight: 600 }}>
+                📞 Saved Mobile Number: {phoneCode} {phone}
               </p>
             )}
           </div>

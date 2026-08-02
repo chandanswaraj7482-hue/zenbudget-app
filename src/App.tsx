@@ -164,6 +164,13 @@ const App: React.FC = () => {
     const profileId = localStorage.getItem('zb_profile_id') || '';
     return profileId ? localStorage.getItem(`zb_couple_code_${profileId}`) : null;
   });
+
+  // App Rating & Review Feedback States
+  const [ratingStars, setRatingStars] = useState<number>(5);
+  const [reviewFeedback, setReviewFeedback] = useState<string>('');
+  const [hasSubmittedReview, setHasSubmittedReview] = useState<boolean>(() => {
+    return localStorage.getItem('zb_has_submitted_review') === 'true';
+  });
   const [partnerId, setPartnerId] = useState<string | null>(null);
   const [partnerName, setPartnerName] = useState<string | null>(() => {
     const profileId = localStorage.getItem('zb_profile_id') || '';
@@ -175,6 +182,12 @@ const App: React.FC = () => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState<boolean>(false);
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
   const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false);
+  const [activeLoanReminderModal, setActiveLoanReminderModal] = useState<{
+    loan: any;
+    overdueDays: number;
+    remainingAmount: number;
+  } | null>(null);
+  const [loanReminderAccountId, setLoanReminderAccountId] = useState<string>('');
   const [showUpdatePopup, setShowUpdatePopup] = useState<boolean>(false);
   const [updateVersion, setUpdateVersion] = useState<string>('');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState<boolean>(false);
@@ -1014,7 +1027,40 @@ const App: React.FC = () => {
     fetchDataFromSupabase();
   }, [currentProfileId, isLocked]);
 
-  // Trial Urgency & Smart 5-Star Rating Prompt Check
+  // 10-Minute / Due Date Loan Repayment Reminder Check
+  useEffect(() => {
+    if (isLocked || loans.length === 0) return;
+
+    const checkLoanReminders = () => {
+      const now = new Date();
+      const borrowed = loans.filter(l => l.type === 'borrowed' && l.status !== 'completed');
+      for (const loan of borrowed) {
+        const remaining = loan.totalAmount - loan.paidAmount;
+        if (remaining <= 0) continue;
+        const due = new Date(loan.dueDate);
+        const isOverdue = now > due;
+        const overdueDays = isOverdue ? Math.floor((now.getTime() - due.getTime()) / (1000 * 60 * 60 * 24)) + 1 : 0;
+        
+        // Every 10 min or daily check key
+        const tenMinSlot = Math.floor(now.getMinutes() / 10);
+        const promptKey = `zb_loan_reminded_${loan.id}_${now.toISOString().split('T')[0]}_${tenMinSlot}`;
+        if (!localStorage.getItem(promptKey)) {
+          localStorage.setItem(promptKey, 'true');
+          setActiveLoanReminderModal({
+            loan,
+            overdueDays,
+            remainingAmount: remaining
+          });
+          setLoanReminderAccountId(accounts[0]?.id || 'acc_main_wallet');
+          break;
+        }
+      }
+    };
+
+    checkLoanReminders();
+    const interval = setInterval(checkLoanReminders, 60 * 1000);
+    return () => clearInterval(interval);
+  }, [loans, isLocked, accounts]);
   useEffect(() => {
     if (isLocked) return;
 
@@ -3518,9 +3564,81 @@ const App: React.FC = () => {
               Only {getRemainingDays()} Days Left in Trial!
             </h3>
 
-            <p style={{ fontSize: '0.875rem', color: '#cbd5e1', lineHeight: '1.5', marginBottom: '1.5rem' }}>
+            <p style={{ fontSize: '0.875rem', color: '#cbd5e1', lineHeight: '1.5', marginBottom: '1.25rem' }}>
               Your ZenBudget free trial will expire soon. Upgrade to Premium now to keep unlimited category budgets, AI financial coach, and partner sync unlocked!
             </p>
+
+            {/* Interactive Rating & Review Feedback Section */}
+            {!hasSubmittedReview && (
+              <div style={{ background: 'rgba(255, 255, 255, 0.04)', borderRadius: '16px', padding: '14px', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '16px', textAlign: 'left' }}>
+                <div style={{ fontSize: '11px', fontWeight: 800, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
+                  ⭐ Rate & Review Your Trial Experience
+                </div>
+                
+                {/* 5-Star Selection */}
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRatingStars(star)}
+                      style={{
+                        background: 'none', border: 'none', cursor: 'pointer', fontSize: '22px',
+                        transform: star <= ratingStars ? 'scale(1.15)' : 'scale(1)',
+                        filter: star <= ratingStars ? 'drop-shadow(0 0 6px rgba(251, 191, 36, 0.6))' : 'grayscale(1)',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      ⭐
+                    </button>
+                  ))}
+                </div>
+
+                <input
+                  type="text"
+                  value={reviewFeedback}
+                  onChange={(e) => setReviewFeedback(e.target.value)}
+                  placeholder="Tell us what you like or how we can improve..."
+                  className="glass-input"
+                  style={{ width: '100%', fontSize: '12px', padding: '8px 12px', marginBottom: '10px' }}
+                />
+
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const userName = userNameInput.trim() || 'ZenBudget User';
+                      const userEmail = localStorage.getItem('zb_user_email') || `${currentProfileId.slice(0, 8)}@zenbudget.app`;
+                      const feedback = reviewFeedback.trim() || `${ratingStars} Star rating submitted`;
+
+                      await supabase.from('app_reviews').insert({
+                        user_name: userName,
+                        user_email: userEmail,
+                        rating_stars: ratingStars,
+                        feedback: feedback,
+                        created_at: new Date().toISOString()
+                      });
+
+                      localStorage.setItem('zb_has_submitted_review', 'true');
+                      setHasSubmittedReview(true);
+                      triggerToast('Thank you for your rating & feedback! ❤️', 'success');
+                      try { confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } }); } catch (e) {}
+                    } catch (e) {
+                      localStorage.setItem('zb_has_submitted_review', 'true');
+                      setHasSubmittedReview(true);
+                      triggerToast('Thank you for your feedback! ❤️', 'success');
+                    }
+                  }}
+                  style={{
+                    width: '100%', padding: '8px', borderRadius: '10px', border: 'none',
+                    background: 'rgba(251, 191, 36, 0.2)', color: '#fbbf24', fontWeight: 800,
+                    fontSize: '11px', cursor: 'pointer', border: '1px solid rgba(251, 191, 36, 0.4)'
+                  }}
+                >
+                  Submit Rating &amp; Review 🚀
+                </button>
+              </div>
+            )}
 
             <button
               onClick={() => {
@@ -3691,6 +3809,126 @@ const App: React.FC = () => {
         onClose={() => setIsWidgetModalOpen(false)}
         currencySymbol={currencySymbol}
       />
+
+      {/* ⏰ Loan Repayment Glass Popup Reminder Modal */}
+      {activeLoanReminderModal && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(12px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px',
+          animation: 'fadeIn 0.2s ease-out'
+        }}>
+          <div className="glass-panel" style={{
+            maxWidth: '400px', width: '100%',
+            background: 'linear-gradient(180deg, rgba(239, 68, 68, 0.15) 0%, rgba(15, 23, 42, 0.98) 100%)',
+            borderRadius: '24px', border: '1px solid rgba(239, 68, 68, 0.4)',
+            padding: '24px', textAlign: 'center', boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setActiveLoanReminderModal(null)}
+              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '18px' }}
+            >
+              ✕
+            </button>
+
+            <div style={{
+              width: '60px', height: '60px', borderRadius: '50%',
+              background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 14px', boxShadow: '0 8px 24px rgba(239, 68, 68, 0.4)'
+            }}>
+              <span style={{ fontSize: '28px' }}>⏰</span>
+            </div>
+
+            <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', padding: '4px 12px', borderRadius: '20px', display: 'inline-block' }}>
+              Loan Repayment Due!
+            </span>
+
+            <h3 style={{ fontSize: '20px', fontWeight: 900, color: '#fff', margin: '12px 0 4px 0' }}>
+              Pay Loan for {activeLoanReminderModal.loan.personName}
+            </h3>
+
+            {activeLoanReminderModal.overdueDays > 0 ? (
+              <p style={{ fontSize: '13px', color: '#ef4444', fontWeight: 800, margin: '4px 0 16px 0' }}>
+                ⚠️ {activeLoanReminderModal.overdueDays} Day(s) Overdue! (Amount: ₹{activeLoanReminderModal.remainingAmount})
+              </p>
+            ) : (
+              <p style={{ fontSize: '13px', color: '#cbd5e1', margin: '4px 0 16px 0' }}>
+                Remaining Loan Balance: <strong style={{ color: '#34d399' }}>₹{activeLoanReminderModal.remainingAmount}</strong>
+              </p>
+            )}
+
+            {/* Wallet Selection Dropdown */}
+            <div style={{ textAlign: 'left', marginBottom: '16px' }}>
+              <label style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+                Select Wallet / Account To Pay From:
+              </label>
+              <select
+                value={loanReminderAccountId}
+                onChange={e => setLoanReminderAccountId(e.target.value)}
+                className="glass-input"
+                style={{ width: '100%', fontSize: '13px', padding: '12px', fontWeight: 700, borderRadius: '12px' }}
+              >
+                {accounts.map(acc => (
+                  <option key={acc.id} value={acc.id} style={{ color: '#000' }}>
+                    💳 {acc.name} ({formatCurrency(acc.balance, currencySymbol, 0)})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  const friendName = activeLoanReminderModal.loan.personName;
+                  const upiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=${encodeURIComponent(friendName)}&am=${activeLoanReminderModal.remainingAmount}&cu=INR&tn=${encodeURIComponent('Loan Repayment to ' + friendName)}`;
+                  try { window.location.href = upiUrl; } catch (e) {}
+                  handleRepayLoan(activeLoanReminderModal.loan.id, activeLoanReminderModal.remainingAmount, loanReminderAccountId || accounts[0]?.id || '1');
+                  setActiveLoanReminderModal(null);
+                  triggerToast(`Loan repayment to ${friendName} processed via UPI! 🎉`, 'success');
+                  try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
+                }}
+                style={{
+                  width: '100%', padding: '14px', borderRadius: '14px', border: 'none',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  color: '#fff', fontWeight: 900, fontSize: '14px', cursor: 'pointer',
+                  boxShadow: '0 4px 16px rgba(16, 185, 129, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                }}
+              >
+                <span>⚡ Pay &amp; Send via PhonePe / UPI</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  handleRepayLoan(activeLoanReminderModal.loan.id, activeLoanReminderModal.remainingAmount, loanReminderAccountId || accounts[0]?.id || '1');
+                  setActiveLoanReminderModal(null);
+                  triggerToast(`Recorded ₹${activeLoanReminderModal.remainingAmount} loan repayment! 🎉`, 'success');
+                  try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
+                }}
+                style={{
+                  width: '100%', padding: '12px', borderRadius: '14px',
+                  border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.06)',
+                  color: '#fff', fontWeight: 700, fontSize: '13px', cursor: 'pointer'
+                }}
+              >
+                ✅ Mark as Paid from Wallet
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveLoanReminderModal(null)}
+                style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '12px', cursor: 'pointer', marginTop: '4px' }}
+              >
+                ⏰ Remind Me Later
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
