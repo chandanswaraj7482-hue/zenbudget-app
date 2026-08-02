@@ -56,7 +56,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
   const calcEmiDetails = () => {
     const P = parseFloat(totalAmount) || 0;
     const R = parseFloat(interestRate) || 0;
-    if (P <= 0) return { P: 0, R: 0, totalInterest: 0, totalPayable: 0, emiInstallment: 0, installmentCount: 1, installmentLabel: 'month', durationMonths: 1, remainderDiff: 0, baseEmi: 0, finalEmi: 0 };
+    if (P <= 0) return { P: 0, R: 0, totalInterest: 0, totalPayable: 0, emiInstallment: 0, installmentCount: 1, installmentLabel: 'month', durationMonths: 1 };
 
     const start = new Date();
     start.setHours(0, 0, 0, 0);
@@ -65,35 +65,39 @@ export const LoansView: React.FC<LoansViewProps> = ({
 
     const diffTime = due.getTime() - start.getTime();
     let diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-    if (diffDays < 7) diffDays = 30; // default 1 month if due date is today or past
+    if (diffDays <= 1) diffDays = 30; // default 1 month if due date is today or invalid
 
-    const durationMonths = Math.max(1, Math.round(diffDays / 30));
+    // Calculate exact duration in months (e.g., 30 days = 1 month)
+    const durationMonths = Math.max(1, diffDays / 30);
 
-    // Calculate Simple Interest based on Interest Type (% p.a. vs % per month)
+    // Calculate Simple Interest (Interest = (P * R * T) / 100)
     let totalInterest = 0;
     if (R > 0) {
       if (interestType === 'monthly') {
-        totalInterest = P * (R / 100) * durationMonths;
+        totalInterest = (P * R * durationMonths) / 100;
       } else {
-        // yearly / p.a. (Per Annum)
-        totalInterest = P * (R / 100) * (durationMonths / 12);
+        // % p.a. (Time in years = durationMonths / 12)
+        const timeInYears = durationMonths / 12;
+        totalInterest = (P * R * timeInYears) / 100;
       }
     }
 
-    const totalPayable = Math.round(P + totalInterest);
+    const totalPayable = P + totalInterest;
 
     // Calculate installment count + label based on user-selected frequency
     let installmentCount = 1;
     let installmentLabel = 'lump sum';
 
+    const roundedMonths = Math.max(1, Math.round(durationMonths));
+
     if (frequency === 'monthly') {
-      installmentCount = Math.max(1, durationMonths);
+      installmentCount = roundedMonths;
       installmentLabel = 'month';
     } else if (frequency === 'weekly') {
       installmentCount = Math.max(1, Math.round(diffDays / 7));
       installmentLabel = 'week';
     } else if (frequency === 'daily') {
-      installmentCount = Math.max(1, diffDays);
+      installmentCount = Math.max(1, Math.round(diffDays));
       installmentLabel = 'day';
     } else if (frequency === 'yearly') {
       installmentCount = Math.max(1, Math.round(durationMonths / 12));
@@ -103,13 +107,18 @@ export const LoansView: React.FC<LoansViewProps> = ({
       installmentLabel = 'lump sum';
     }
 
-    const baseEmi = Math.floor(totalPayable / installmentCount);
     const emiInstallment = totalPayable / installmentCount;
-    const totalPaidBase = baseEmi * installmentCount;
-    const remainderDiff = totalPayable - totalPaidBase;
-    const finalEmi = baseEmi + remainderDiff;
 
-    return { P, R, totalInterest, totalPayable, emiInstallment, installmentCount, installmentLabel, durationMonths, remainderDiff, baseEmi, finalEmi };
+    return { 
+      P, 
+      R, 
+      totalInterest: Number(totalInterest.toFixed(2)), 
+      totalPayable: Number(totalPayable.toFixed(2)), 
+      emiInstallment: Number(emiInstallment.toFixed(2)), 
+      installmentCount, 
+      installmentLabel, 
+      durationMonths: roundedMonths 
+    };
   };
 
   const handleSubmitAdd = (e: React.FormEvent) => {
@@ -466,37 +475,37 @@ export const LoansView: React.FC<LoansViewProps> = ({
 
               {/* Live Repayment & Installment Breakdown */}
               {parseFloat(totalAmount) > 0 && (() => {
-                const { P, R, totalInterest, totalPayable, emiInstallment, installmentCount, installmentLabel, durationMonths, remainderDiff, baseEmi, finalEmi } = calcEmiDetails();
+                const { P, R, totalInterest, totalPayable, emiInstallment, installmentCount, installmentLabel, durationMonths } = calcEmiDetails();
                 const rateLabel = interestType === 'monthly' ? '% / mo' : '% p.a.';
+                
+                const formatCurr = (val: number) => {
+                  return val % 1 === 0 ? val.toLocaleString() : val.toFixed(2);
+                };
+
                 return (
                   <div style={{ padding: '12px 14px', borderRadius: '14px', background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.3)', fontSize: '12px', color: '#e2e8f0', fontWeight: 600, display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <div style={{ fontSize: '13px', color: '#38bdf8', fontWeight: 800, marginBottom: '4px' }}>💡 Repayment Breakdown ({durationMonths} Mo Duration)</div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span style={{ color: '#94a3b8' }}>Principal Amount</span>
-                      <span style={{ fontWeight: 700 }}>{currencySymbol}{Math.round(P).toLocaleString()}</span>
+                      <span style={{ fontWeight: 700 }}>{currencySymbol}{formatCurr(P)}</span>
                     </div>
                     {R > 0 && (
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ color: '#94a3b8' }}>Interest ({R}{rateLabel})</span>
-                        <span style={{ fontWeight: 700, color: '#fbbf24' }}>+{currencySymbol}{Math.round(totalInterest).toLocaleString()}</span>
+                        <span style={{ fontWeight: 700, color: '#fbbf24' }}>+{currencySymbol}{formatCurr(totalInterest)}</span>
                       </div>
                     )}
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(56,189,248,0.2)', paddingTop: '6px', marginTop: '2px' }}>
                       <span style={{ color: '#94a3b8' }}>Total Payable Amount</span>
-                      <span style={{ fontWeight: 800, color: '#fff' }}>{currencySymbol}{Math.round(totalPayable).toLocaleString()}</span>
+                      <span style={{ fontWeight: 800, color: '#fff' }}>{currencySymbol}{formatCurr(totalPayable)}</span>
                     </div>
                     <div style={{ background: 'rgba(52, 211, 153, 0.12)', borderRadius: '10px', padding: '8px 12px', marginTop: '4px', textAlign: 'center' }}>
                       <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '2px' }}>
                         {frequency === 'one_time' ? 'One-time Full Repayment' : `Pay per ${installmentLabel} (${installmentCount} installment${installmentCount > 1 ? 's' : ''})`}
                       </div>
                       <div style={{ fontSize: '18px', fontWeight: 900, color: '#34d399' }}>
-                        {currencySymbol}{Math.round(emiInstallment).toLocaleString()} <span style={{ fontSize: '12px', fontWeight: 600, color: '#94a3b8' }}>/ {installmentLabel}</span>
+                        {currencySymbol}{formatCurr(emiInstallment)} <span style={{ fontSize: '12px', fontWeight: 600, color: '#94a3b8' }}>/ {installmentLabel}</span>
                       </div>
-                      {remainderDiff > 0 && installmentCount > 1 && (
-                        <div style={{ fontSize: '10px', color: '#fbbf24', marginTop: '4px', fontStyle: 'italic' }}>
-                          📌 ({installmentCount - 1} installments of {currencySymbol}{baseEmi} + 1 final installment of {currencySymbol}{finalEmi})
-                        </div>
-                      )}
                     </div>
                   </div>
                 );
