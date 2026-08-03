@@ -1,4 +1,8 @@
 {
+  "buildCommand": "vite build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
+  "framework": "vite",
   "redirects": [
     { "source": "/zenbudget.apk", "destination": "https://zenbudget-tracker.netlify.app/zenbudget.apk", "permanent": false },
     { "source": "/download", "destination": "https://zenbudget-tracker.netlify.app/zenbudget.apk", "permanent": false }
