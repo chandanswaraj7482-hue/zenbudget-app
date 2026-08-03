@@ -126,6 +126,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onDeleteAccount
 }) => {
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showAllAccountsModal, setShowAllAccountsModal] = useState(false);
   const [showAllBadges, setShowAllBadges] = useState(false);
   const [showMonthlyLetter, setShowMonthlyLetter] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -663,29 +664,50 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <Wallet size={18} style={{ color: 'var(--primary)' }} />
             {t('my_accounts')}
           </h3>
-          <button
-            onClick={onAddAccountClick}
-            style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: '50%',
-              border: '1px solid var(--border-card)',
-              background: 'rgba(255, 255, 255, 0.08)',
-              color: 'var(--text-primary)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer'
-            }}
-          >
-            <ChevronRight size={16} />
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={() => setShowAllAccountsModal(true)}
+              style={{
+                background: 'rgba(34,197,94,0.1)',
+                border: '1px solid rgba(34,197,94,0.25)',
+                borderRadius: '20px',
+                padding: '4px 12px',
+                color: 'var(--primary)',
+                fontSize: '12px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              See All ({accounts.length}) <ChevronRight size={13} />
+            </button>
+            <button
+              onClick={onAddAccountClick}
+              style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                border: '1px solid var(--border-card)',
+                background: 'rgba(255, 255, 255, 0.08)',
+                color: 'var(--text-primary)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer'
+              }}
+              title="Add account"
+            >
+              <Plus size={16} />
+            </button>
+          </div>
         </div>
 
-        {/* Accounts Grid (Matching Screenshot 1) */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-          {accounts.slice(0, 3).map((acc, index) => {
-            const defaultColors = ['#0284c7', '#ea580c', '#7c3aed', '#22c55e', '#06b6d4'];
+        {/* Accounts Grid - Renders All Accounts */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px' }}>
+          {accounts.map((acc, index) => {
+            const defaultColors = ['#0284c7', '#ea580c', '#7c3aed', '#22c55e', '#06b6d4', '#ec4899', '#f59e0b'];
             const cardBg = acc.color || defaultColors[index % defaultColors.length];
             return (
               <div
@@ -698,7 +720,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  minHeight: '68px',
+                  minHeight: '72px',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                   position: 'relative',
                   overflow: 'hidden'
@@ -2361,6 +2383,85 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 {activeBadgeModal.isClaimed ? 'Badge Collected! ✨' : 'Got it! 👍'}
               </button>
             )}
+          </div>
+        </div>
+      )}
+      {/* All Accounts & Wallets See All Modal */}
+      {showAllAccountsModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }} onClick={() => setShowAllAccountsModal(false)}>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)', borderRadius: '24px', padding: '24px', maxWidth: '440px', width: '100%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 20px 40px rgba(0,0,0,0.6)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Wallet size={20} style={{ color: 'var(--primary)' }} />
+                <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>All Accounts & Wallets ({accounts.length})</h3>
+              </div>
+              <button onClick={() => setShowAllAccountsModal(false)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%', width: '30px', height: '30px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Total Balance Summary Header */}
+            <div style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(6,182,212,0.1) 100%)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: '16px', padding: '16px', marginBottom: '18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <span style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '0.05em' }}>Total Wallet Balance</span>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--primary)', marginTop: '2px' }}>
+                  {formatCurrency(accounts.reduce((sum, a) => sum + (a.balance || 0), 0), currencySymbol)}
+                </div>
+              </div>
+              <button
+                onClick={() => { setShowAllAccountsModal(false); if (onAddAccountClick) onAddAccountClick(); }}
+                style={{ background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '12px', padding: '8px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Plus size={14} /> Add Account
+              </button>
+            </div>
+
+            {/* Account List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {accounts.map((acc, index) => {
+                const defaultColors = ['#0284c7', '#ea580c', '#7c3aed', '#22c55e', '#06b6d4', '#ec4899', '#f59e0b'];
+                const cardBg = acc.color || defaultColors[index % defaultColors.length];
+                return (
+                  <div
+                    key={acc.id}
+                    style={{
+                      background: cardBg,
+                      borderRadius: '16px',
+                      padding: '14px 18px',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ fontSize: '24px', width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {acc.type === 'cash' ? '🪙' : acc.type === 'upi' ? '📱' : acc.type === 'credit' ? '💳' : acc.type === 'wallet' ? '👛' : acc.type === 'custom' ? '✨' : '🏦'}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '14px', fontWeight: 800 }}>{acc.name}</div>
+                        <div style={{ fontSize: '11px', opacity: 0.8, textTransform: 'uppercase', fontWeight: 600 }}>{acc.type} account</div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontSize: '18px', fontWeight: 800 }}>
+                        {formatCurrency(acc.balance, currencySymbol)}
+                      </span>
+                      {onDeleteAccount && (
+                        <button
+                          onClick={() => onDeleteAccount(acc.id)}
+                          style={{ background: 'rgba(0,0,0,0.25)', border: 'none', borderRadius: '50%', width: '24px', height: '24px', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                          title="Delete account"
+                        >
+                          <X size={13} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

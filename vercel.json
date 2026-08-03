@@ -3,10 +3,7 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "framework": "vite",
-  "redirects": [
-    { "source": "/zenbudget.apk", "destination": "https://zenbudget-tracker.netlify.app/zenbudget.apk", "permanent": false },
-    { "source": "/download", "destination": "https://zenbudget-tracker.netlify.app/zenbudget.apk", "permanent": false }
-  ],
+  "redirects": [],
   "rewrites": [
     { "source": "/admin", "destination": "/admin.html" },
     { "source": "/admin/", "destination": "/admin.html" },
