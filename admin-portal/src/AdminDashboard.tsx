@@ -117,7 +117,18 @@ const SocialLinksManager: React.FC<{ supabaseClient: any }> = ({ supabaseClient 
     setLoading(true);
     try {
       const { data } = await supabaseClient.from('social_links').select('*').order('created_at', { ascending: true });
-      if (data) setLinks(data);
+      if (data && data.length > 0) {
+        setLinks(data);
+      } else {
+        const defaultLinks = [
+          { platform: 'Instagram', icon: '📸', url: 'https://www.instagram.com/zenbudget_tracker/', color: '#e1306c', is_active: true },
+          { platform: 'Facebook', icon: '👥', url: 'https://www.facebook.com/people/ZenBudget/61592667931013/', color: '#1877f2', is_active: true },
+          { platform: 'YouTube', icon: '▶️', url: 'https://www.youtube.com/channel/UCa2ewl3C6Q3qGTXjbAMeAtA', color: '#ff0000', is_active: true }
+        ];
+        const { data: insertedData } = await supabaseClient.from('social_links').insert(defaultLinks).select();
+        if (insertedData && insertedData.length > 0) setLinks(insertedData);
+        else setLinks(defaultLinks as any);
+      }
     } catch (e) { console.warn('social_links fetch failed:', e); }
     setLoading(false);
   };
@@ -2282,6 +2293,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                           }}
                         >
                           <option value="">All Plan Types (Universal)</option>
+                          <option value="subscription_all">All Subscription Plans (Monthly + Yearly + Lifetime)</option>
                           <option value="monthly">Monthly Plan (₹149)</option>
                           <option value="yearly">Yearly Plan (₹1,499)</option>
                           <option value="lifetime">Lifetime Founding Member (₹2,499)</option>
@@ -2405,6 +2417,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                                           style={{ width: '180px', padding: '4px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: '#0f172a', color: '#fff', fontSize: '0.8rem' }}
                                         >
                                           <option value="">All Plan Types</option>
+                                          <option value="subscription_all">All Subscriptions (Monthly, Yearly &amp; Lifetime)</option>
                                           <option value="monthly">Monthly Plan Only</option>
                                           <option value="yearly">Yearly Plan Only</option>
                                           <option value="lifetime">Lifetime Plan Only</option>
@@ -2527,7 +2540,8 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                     )}
                   </div>
                 </div>
-              )}\n
+              )}
+
               {/* TAB: SOCIAL LINKS MANAGEMENT */}
               {activeTab === 'social_links' && (
                 <SocialLinksManager supabaseClient={supabaseClient} />

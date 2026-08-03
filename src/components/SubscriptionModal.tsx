@@ -123,11 +123,20 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         return;
       }
 
-      if (data.target_plan && data.target_plan !== billingCycle) {
-        setCouponError(true);
-        setCouponMessage(`This coupon is only valid for the ${data.target_plan} plan.`);
-        setAppliedCoupon(null);
-        return;
+      if (data.target_plan) {
+        const isSubscriptionAll = data.target_plan === 'subscription_all';
+        const isValid = isSubscriptionAll 
+          ? ['monthly', 'yearly', 'lifetime'].includes(billingCycle)
+          : data.target_plan === billingCycle;
+
+        if (!isValid) {
+          setCouponError(true);
+          setCouponMessage(isSubscriptionAll 
+            ? 'This coupon is only valid for Monthly, Yearly, or Lifetime subscription plans.' 
+            : `This coupon is only valid for the ${data.target_plan} plan.`);
+          setAppliedCoupon(null);
+          return;
+        }
       }
 
       setAppliedCoupon({ code: data.code, discount_percent: data.discount_percent });
@@ -192,10 +201,19 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         .eq('code', appliedCoupon.code)
         .maybeSingle()
         .then(({ data }) => {
-          if (data && data.target_plan && data.target_plan !== billingCycle) {
-            setAppliedCoupon(null);
-            setCouponMessage(`Coupon cleared: Only valid for the ${data.target_plan} plan.`);
-            setCouponError(true);
+          if (data && data.target_plan) {
+            const isSubscriptionAll = data.target_plan === 'subscription_all';
+            const isValid = isSubscriptionAll 
+              ? ['monthly', 'yearly', 'lifetime'].includes(billingCycle)
+              : data.target_plan === billingCycle;
+
+            if (!isValid) {
+              setAppliedCoupon(null);
+              setCouponMessage(isSubscriptionAll 
+                ? 'Coupon cleared: Only valid for Monthly, Yearly, or Lifetime subscription plans.' 
+                : `Coupon cleared: Only valid for the ${data.target_plan} plan.`);
+              setCouponError(true);
+            }
           }
         });
     }

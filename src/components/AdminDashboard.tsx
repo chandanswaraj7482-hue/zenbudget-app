@@ -2251,6 +2251,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                                           style={{ width: '180px', padding: '4px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: '#0f172a', color: '#fff', fontSize: '0.8rem' }}
                                         >
                                           <option value="">All Plan Types</option>
+                                          <option value="subscription_all">All Subscriptions (Monthly, Yearly &amp; Lifetime)</option>
                                           <option value="monthly">Monthly Plan Only</option>
                                           <option value="yearly">Yearly Plan Only</option>
                                           <option value="lifetime">Lifetime Plan Only</option>
