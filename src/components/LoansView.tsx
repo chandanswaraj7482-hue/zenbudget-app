@@ -70,15 +70,14 @@ export const LoansView: React.FC<LoansViewProps> = ({
     // Calculate exact duration in months (e.g., 30 days = 1 month)
     const durationMonths = Math.max(1, diffDays / 30);
 
-    // Calculate Simple Interest (Interest = (P * R * T) / 100)
+    // Calculate Simple Interest based on frequency (yearly -> % p.a., monthly/custom -> % per month)
     let totalInterest = 0;
     if (R > 0) {
-      if (interestType === 'monthly') {
-        totalInterest = (P * R * durationMonths) / 100;
-      } else {
-        // % p.a. (Time in years = durationMonths / 12)
+      if (frequency === 'yearly') {
         const timeInYears = durationMonths / 12;
         totalInterest = (P * R * timeInYears) / 100;
+      } else {
+        totalInterest = (P * R * durationMonths) / 100;
       }
     }
 
@@ -305,7 +304,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px', fontSize: '12px', color: 'var(--text-secondary)' }}>
                       <span><Calendar size={12} style={{ display: 'inline', marginRight: '4px' }} /> {t('due_date')}: {loan.dueDate}</span>
-                      {loan.notes && <span>• {loan.notes}</span>}
+                      <span>• Principal: {formatCurrency(loan.totalAmount, currencySymbol)}</span>
                     </div>
                   </div>
 
@@ -313,8 +312,8 @@ export const LoansView: React.FC<LoansViewProps> = ({
                     <span style={{ fontSize: '18px', fontWeight: 800, color: activeTab === 'borrowed' ? '#ef4444' : '#22c55e' }}>
                       {formatCurrency(remaining, currencySymbol)}
                     </span>
-                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                      Total: {formatCurrency(loan.totalAmount, currencySymbol)}
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                      Total Payable: {formatCurrency(loan.totalAmount, currencySymbol)}
                     </div>
                   </div>
                 </div>
@@ -417,15 +416,15 @@ export const LoansView: React.FC<LoansViewProps> = ({
               </div>
             )}
 
-            <form onSubmit={handleSubmitAdd} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <form onSubmit={handleSubmitAdd} style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxHeight: '80vh', overflowY: 'auto', paddingRight: '4px' }}>
               <div>
-                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{t('person_name')}</label>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Lender / Person Name</label>
                 <input
                   type="text"
                   required
                   value={personName}
                   onChange={e => setPersonName(e.target.value)}
-                  placeholder="e.g. Alex Morgan"
+                  placeholder="e.g. Alex Morgan / HDFC Bank"
                   className="glass-input"
                   style={{ marginTop: '4px', width: '100%' }}
                 />
@@ -448,35 +447,24 @@ export const LoansView: React.FC<LoansViewProps> = ({
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Interest Rate & Unit</label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '6px', marginTop: '4px' }}>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      value={interestRate}
-                      onChange={e => setInterestRate(e.target.value)}
-                      placeholder="e.g. 2"
-                      className="glass-input"
-                      style={{ width: '100%' }}
-                    />
-                    <select
-                      value={interestType}
-                      onChange={e => setInterestType(e.target.value as any)}
-                      className="glass-input"
-                      style={{ width: '100%', background: 'var(--bg-input)' }}
-                    >
-                      <option value="yearly">% p.a.</option>
-                      <option value="monthly">% / mo</option>
-                    </select>
-                  </div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Interest Rate (%)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={interestRate}
+                    onChange={e => setInterestRate(e.target.value)}
+                    placeholder="e.g. 2"
+                    className="glass-input"
+                    style={{ marginTop: '4px', width: '100%' }}
+                  />
                 </div>
               </div>
 
               {/* Live Repayment & Installment Breakdown */}
               {parseFloat(totalAmount) > 0 && (() => {
                 const { P, R, totalInterest, totalPayable, emiInstallment, installmentCount, installmentLabel, durationMonths } = calcEmiDetails();
-                const rateLabel = interestType === 'monthly' ? '% / mo' : '% p.a.';
+                const rateLabel = frequency === 'yearly' ? '% p.a.' : '% / mo';
                 
                 const formatCurr = (val: number) => {
                   return val % 1 === 0 ? val.toLocaleString() : val.toFixed(2);
@@ -519,7 +507,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
                     required
                     value={dueDate}
                     onChange={e => setDueDate(e.target.value)}
-                    className="glass-input"
+                    className="glass-input custom-dark-datepicker"
                     style={{ marginTop: '4px', width: '100%' }}
                   />
                 </div>
@@ -533,7 +521,6 @@ export const LoansView: React.FC<LoansViewProps> = ({
                     style={{ marginTop: '4px', width: '100%', background: 'var(--bg-input)' }}
                   >
                     <option value="one_time">{t('one_time')}</option>
-                    <option value="weekly">{t('weekly')}</option>
                     <option value="monthly">{t('monthly')}</option>
                     <option value="yearly">{t('yearly')}</option>
                     <option value="custom">✨ Custom Frequency...</option>

@@ -126,6 +126,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onDeleteAccount
 }) => {
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showAllBadges, setShowAllBadges] = useState(false);
   const [showMonthlyLetter, setShowMonthlyLetter] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [activeGoalInput, setActiveGoalInput] = useState<string | null>(null);
@@ -238,7 +239,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const recentTransactions = [...transactions]
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 4);
+    .slice(0, 3);
 
   const getCategoryIcon = (category: string, type: 'income' | 'expense' | 'transfer') => {
     if (type === 'income') return <TrendingUp size={18} />;
@@ -558,14 +559,38 @@ export const Dashboard: React.FC<DashboardProps> = ({
             />
           </div>
 
-          <div>
-            <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 600, display: 'block' }}>
-              {t('hello_user').replace('{{name}}', userName || 'User')}
-            </span>
-            <h1 style={{ fontSize: '22px', fontWeight: 800, fontFamily: "'Manrope', sans-serif", letterSpacing: '-0.02em', margin: 0 }}>
-              <span style={{ background: 'linear-gradient(135deg, #22C55E 0%, #14B8A6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Zen</span>
-              <span style={{ color: 'var(--text-primary)' }}>Budget</span>
+          <div style={{ maxWidth: 'calc(100vw - 120px)' }}>
+            {/* Line 1: Dynamic Greeting & User Name */}
+            <h1 style={{ fontSize: '18px', fontWeight: 900, color: '#ffffff', margin: 0, fontFamily: "'Manrope', sans-serif", letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {(() => {
+                const hour = new Date().getHours();
+                const name = userName || 'User';
+                if (hour >= 5 && hour < 12) return `Good Morning ☀️, ${name}`;
+                if (hour >= 12 && hour < 17) return `Good Afternoon 🌤️, ${name}`;
+                if (hour >= 17 && hour < 21) return `Good Evening 🌆, ${name}`;
+                return `Good Night 🌙, ${name}`;
+              })()}
             </h1>
+
+            {/* Line 2: Rotating Financial Tagline */}
+            <div style={{ fontSize: '11.5px', color: '#34d399', fontWeight: 700, marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {(() => {
+                const taglines = [
+                  'Track smart, live mindfully 🌿',
+                  'Your Daily Financial Companion 💰',
+                  'Master your money, one day at a time 🎯',
+                  'Every rupee saved is a step toward freedom 🚀',
+                  'Plan today, prosper tomorrow ✨',
+                  'Small savings today, big dreams tomorrow 🌟',
+                  'Control your expenses, empower your future 🛡️',
+                  'Financial peace of mind begins here 🧘‍♂️',
+                  'Smart tracking, stress-free living 🍀',
+                  'Build wealth quietly, enjoy life fully 💎'
+                ];
+                const dayOfYear = Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+                return taglines[dayOfYear % taglines.length];
+              })()}
+            </div>
           </div>
         </div>
 
@@ -659,7 +684,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {/* Accounts Grid (Matching Screenshot 1) */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-          {accounts.map((acc, index) => {
+          {accounts.slice(0, 3).map((acc, index) => {
             const defaultColors = ['#0284c7', '#ea580c', '#7c3aed', '#22c55e', '#06b6d4'];
             const cardBg = acc.color || defaultColors[index % defaultColors.length];
             return (
@@ -809,26 +834,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      {/* Weekly Story Banner */}
-      <button
-        onClick={onOpenStory}
-        className="weekly-wrapup-banner"
-        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', cursor: 'pointer', border: 'none', textAlign: 'left', background: 'linear-gradient(135deg, #7c3aed 0%, #db2777 100%)', borderRadius: '20px', position: 'relative', overflow: 'hidden', boxShadow: '0 8px 24px rgba(124, 58, 237, 0.25)' }}
-      >
-        <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '100px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.15))', transform: 'skewX(-20deg) translateX(50px)' }} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', zIndex: 1 }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.4)', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'linear-gradient(135deg, #a78bfa 0%, #f472b6 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff' }}>
-              <Sparkles size={16} />
-            </div>
-          </div>
-          <div>
-            <h4 style={{ fontSize: '14px', fontWeight: 800, color: '#ffffff', margin: 0 }}>{t('weekly_wrapup')}</h4>
-            <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.95)', fontWeight: 600, display: 'block', marginTop: '2px' }}>{t('money_story_sub')}</span>
-          </div>
-        </div>
-        <ChevronRight size={20} color="#ffffff" style={{ zIndex: 1 }} />
-      </button>
+
 
       <PremiumHub
         transactions={transactions}
@@ -1022,7 +1028,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>Tap "+ Add" to create your first challenge!</p>
             </div>
           )}
-          {challenges.map((ch: any) => (
+          {challenges.slice(0, 3).map((ch: any) => (
             <div
               key={ch.id}
               className="glass-panel glass-panel-hover"
@@ -1155,21 +1161,40 @@ export const Dashboard: React.FC<DashboardProps> = ({
           }] : [])
         ];
 
+        const visibleBadgesList = showAllBadges ? allBadgesList : allBadgesList.slice(0, 3);
         const unlockedCount = allBadgesList.filter(b => b.isUnlocked).length;
 
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                ACHIEVEMENT BADGES 🏆
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  ACHIEVEMENT BADGES 🏆
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowAllBadges(!showAllBadges)}
+                  style={{
+                    background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: '8px',
+                    padding: '2px 8px',
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    color: '#38bdf8',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {showAllBadges ? 'Show Less' : `See All (${allBadgesList.length})`}
+                </button>
+              </div>
               <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--primary)', background: 'rgba(34,197,94,0.12)', padding: '2px 8px', borderRadius: '12px', border: '1px solid rgba(34,197,94,0.2)' }}>
                 {unlockedCount}/{allBadgesList.length} Unlocked
               </span>
             </div>
             
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', textAlign: 'center' }}>
-              {allBadgesList.map(b => {
+              {visibleBadgesList.map(b => {
                 const isClaimed = claimedBadges.includes(b.id);
                 const canClaim = b.isUnlocked && !isClaimed;
 
@@ -1308,7 +1333,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </button>
         </div>
         {goals.length > 0 ? (
-          goals.map((g) => {
+          goals.slice(0, 3).map((g) => {
             const percent = Math.min(100, Math.round((g.currentAmount / g.targetAmount) * 100));
             return (
               <div key={g.id} className="glass-panel" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -1453,7 +1478,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* Recent Transactions List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('recent_activity')}</span>
+          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Recent Activity &amp; Ledger</span>
           <button
             onClick={onViewAllTransactionsClick}
             style={{
@@ -1471,12 +1496,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </button>
         </div>
 
-        {recentTransactions.length === 0 ? (
-          <div className="glass-panel" style={{ padding: '30px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '28px' }}>🌿</span>
-            <span style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>{t('empty_ledger')}</span>
-          </div>
-        ) : (
+        {recentTransactions.length === 0 ? null : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {recentTransactions.map((t) => {
               const meta = categoryMeta[t.category] || categoryMeta.other;

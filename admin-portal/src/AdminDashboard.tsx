@@ -2281,10 +2281,12 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                             outline: 'none'
                           }}
                         >
-                          <option value="">All Plan Types</option>
-                          <option value="monthly">Monthly Plan Only</option>
-                          <option value="yearly">Yearly Plan Only</option>
-                          <option value="lifetime">Lifetime Plan Only</option>
+                          <option value="">All Plan Types (Universal)</option>
+                          <option value="monthly">Monthly Plan (₹149)</option>
+                          <option value="yearly">Yearly Plan (₹1,499)</option>
+                          <option value="lifetime">Lifetime Founding Member (₹2,499)</option>
+                          <option value="scan_pay_unlock">Scan &amp; Pay Lifetime Unlock (₹79)</option>
+                          <option value="extra_budget_slot">Extra Budget Slot (Trial Users Only) (₹10)</option>
                         </select>
                       </div>
 
@@ -2502,9 +2504,16 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                                 ({r.user_email || 'N/A'})
                               </span>
                             </div>
-                            <div style={{ fontSize: '0.85rem', color: '#cbd5e1', marginBottom: '0.35rem', fontWeight: 500 }}>
-                              {r.feedback || (r as any).comment || (r as any).review_text || (r as any).message || (r as any).notes || `${r.rating_stars || 5} Star rating submitted`}
-                            </div>
+                            {/* Review Comment Text */}
+                            {((r.comment && r.comment.trim()) || (r.feedback && r.feedback.trim() && !r.feedback.includes('rating submitted')) || (r as any).review_text) ? (
+                              <div style={{ fontSize: '0.85rem', color: '#e2e8f0', backgroundColor: 'rgba(15, 23, 42, 0.6)', padding: '8px 12px', borderRadius: '8px', borderLeft: '3px solid #38bdf8', marginBottom: '0.35rem', fontStyle: 'italic', fontWeight: 500 }}>
+                                💬 "{r.comment || r.feedback || (r as any).review_text}"
+                              </div>
+                            ) : (
+                              <div style={{ fontSize: '0.82rem', color: '#94a3b8', marginBottom: '0.35rem', fontWeight: 500 }}>
+                                {r.feedback || `${r.rating_stars || 5} Star rating submitted`}
+                              </div>
+                            )}
                             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
                               {new Date(r.created_at).toLocaleString()}
                             </div>

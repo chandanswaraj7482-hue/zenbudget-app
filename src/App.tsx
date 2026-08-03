@@ -1893,6 +1893,16 @@ const App: React.FC = () => {
   };
 
   const handleSaveTransaction = async (txData: Omit<Transaction, 'id'> & { id?: string }) => {
+    // Insufficient Balance Validation
+    if (!txData.id && txData.type === 'expense' && accounts && accounts.length > 0) {
+      const selectedAcc = accounts.find(a => a.id === txData.accountId);
+      const accBalance = selectedAcc ? (selectedAcc.balance || 0) : accounts.reduce((s, a) => s + (a.balance || 0), 0);
+      if (accBalance <= 0 || accBalance < txData.amount) {
+        triggerToast('⚠️ Insufficient Balance in Account! Please add funds or select another wallet.', 'danger');
+        return;
+      }
+    }
+
     // Budget limit urgency check BEFORE saving (only for new expense transactions)
     if (!txData.id && txData.type === 'expense') {
       const categoryLimit = budgets.find(b => b.category === txData.category);
@@ -1927,6 +1937,13 @@ const App: React.FC = () => {
   };
 
   const handleDeleteTransactionRequest = (id: string) => {
+    // Non-Premium / Free Trial Delete Restriction:
+    if (subscriptionTier === 'trial') {
+      triggerToast('🔒 Deleting transactions requires ZenBudget Premium!', 'info');
+      setShowSubscriptionModal(true);
+      return;
+    }
+
     setConfirmDialog({
       isOpen: true,
       title: 'Delete Transaction?',
@@ -3755,34 +3772,25 @@ const App: React.FC = () => {
               Enjoying ZenBudget?
             </h3>
 
-            <p style={{ fontSize: '0.85rem', color: '#cbd5e1', marginBottom: '1.5rem', lineHeight: '1.5' }}>
-              If ZenBudget is helping you manage your money and save budgets, please support us with a 5-star rating!
+            <p style={{ fontSize: '0.85rem', color: '#cbd5e1', marginBottom: '1.2rem', lineHeight: '1.5' }}>
+              How would you rate your experience? Leave a review to help us improve!
             </p>
 
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+            {/* Interactive Stars */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
-                  onClick={async () => {
-                    setShowRatingModal(false);
-                    localStorage.setItem('zb_rating_dismissed', 'true');
-                    triggerToast(`Thank you for rating ZenBudget ${star} Stars! ⭐`, 'success');
-                    try {
-                      await supabase.from('app_ratings').insert([{
-                        user_name: userName || 'Anonymous',
-                        user_email: localStorage.getItem('zb_user_email') || 'user@zenbudget.app',
-                        rating_stars: star,
-                        feedback: `${star} Star rating submitted`
-                      }]);
-                    } catch (err) {
-                      console.error('Error saving rating:', err);
-                    }
-                  }}
+                  type="button"
+                  onClick={() => setRatingStars(star)}
                   style={{
                     fontSize: '28px',
                     background: 'none',
                     border: 'none',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    opacity: star <= ratingStars ? 1 : 0.3,
+                    transform: star <= ratingStars ? 'scale(1.1)' : 'scale(0.95)',
+                    transition: 'all 0.15s ease'
                   }}
                 >
                   ⭐
@@ -3790,21 +3798,82 @@ const App: React.FC = () => {
               ))}
             </div>
 
-            <button
-              onClick={() => {
-                setShowRatingModal(false);
-                localStorage.setItem('zb_rating_dismissed', 'true');
-              }}
+            {/* Written Review Textarea */}
+            <textarea
+              value={reviewFeedback}
+              onChange={(e) => setReviewFeedback(e.target.value)}
+              placeholder="Write your review / feedback here (optional)..."
               style={{
-                background: 'none',
-                border: 'none',
-                color: '#94a3b8',
-                fontSize: '0.85rem',
-                cursor: 'pointer'
+                width: '100%',
+                height: '70px',
+                background: 'rgba(15, 23, 42, 0.8)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                borderRadius: '12px',
+                padding: '10px 12px',
+                color: '#fff',
+                fontSize: '12px',
+                outline: 'none',
+                resize: 'none',
+                marginBottom: '1rem',
+                fontFamily: 'inherit'
               }}
-            >
-              Maybe Later
-            </button>
+            />
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={async () => {
+                  setShowRatingModal(false);
+                  localStorage.setItem('zb_rating_dismissed', 'true');
+                  triggerToast(`Thank you for your rating & review! ⭐`, 'success');
+                  try {
+                    const textFeedback = reviewFeedback.trim() ? reviewFeedback.trim() : `${ratingStars} Star rating submitted`;
+                    await supabase.from('app_ratings').insert([{
+                      user_name: userName || 'Anonymous',
+                      user_email: localStorage.getItem('zb_user_email') || 'user@zenbudget.app',
+                      rating_stars: ratingStars,
+                      feedback: textFeedback,
+                      comment: reviewFeedback.trim() || null
+                    }]);
+                  } catch (err) {
+                    console.error('Error saving rating:', err);
+                  }
+                  setReviewFeedback('');
+                }}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  color: '#fff',
+                  fontWeight: 800,
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)'
+                }}
+              >
+                Submit Rating &amp; Review ⭐
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowRatingModal(false);
+                  localStorage.setItem('zb_rating_dismissed', 'true');
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#94a3b8',
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                  padding: '4px'
+                }}
+              >
+                Maybe Later
+              </button>
+            </div>
           </div>
         </div>
       )}

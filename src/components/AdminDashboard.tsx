@@ -2127,10 +2127,12 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                             outline: 'none'
                           }}
                         >
-                          <option value="">All Plan Types</option>
-                          <option value="monthly">Monthly Plan Only</option>
-                          <option value="yearly">Yearly Plan Only</option>
-                          <option value="lifetime">Lifetime Plan Only</option>
+                          <option value="">All Plan Types (Universal)</option>
+                          <option value="monthly">Monthly Plan (₹149)</option>
+                          <option value="yearly">Yearly Plan (₹1,499)</option>
+                          <option value="lifetime">Lifetime Founding Member (₹2,499)</option>
+                          <option value="scan_pay_unlock">Scan &amp; Pay Lifetime Unlock (₹79)</option>
+                          <option value="extra_budget_slot">Extra Budget Slot (Trial Users Only) (₹10)</option>
                         </select>
                       </div>
 

@@ -717,94 +717,48 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                     const isNative = Capacitor.isNativePlatform();
                     const payUrl = `https://zenbudget-tracker.vercel.app/pay.html?session_id=${payment_session_id}`;
 
-                    setPaymentStep('details');
-
                     if (isNative) {
-                      // Native APK: Open pay.html via Browser plugin with window fallbacks
+                      // Native APK: Open pay.html via Browser plugin
                       try {
                         await Browser.open({ url: payUrl });
                       } catch (browserErr) {
-                        console.warn('Browser.open failed, attempting fallback window launch:', browserErr);
-                        try {
-                          window.open(payUrl, '_system');
-                        } catch (e) {
-                          window.location.href = payUrl;
-                        }
-                      }
-
-                      // Listen for browser close — poll Supabase to verify payment status
-                      try {
-                        const browserListener = await Browser.addListener('browserFinished', async () => {
-                          browserListener.remove();
-                          setPaymentStep('processing');
-
-                          const currentProfileId = localStorage.getItem('zb_profile_id');
-                          if (!currentProfileId) { setPaymentStep('details'); return; }
-
-                          let verified = false;
-                          for (let i = 0; i < 15; i++) {
-                            await new Promise(r => setTimeout(r, 2000));
-                            const { data: profile } = await supabase
-                              .from('profiles')
-                              .select('subscription_tier')
-                              .eq('id', currentProfileId)
-                              .maybeSingle();
-
-                            if (profile && profile.subscription_tier && profile.subscription_tier.startsWith('premium')) {
-                              verified = true;
-                              if (appliedCoupon) {
-                                supabase.from('promo_coupons').select('uses_count').eq('code', appliedCoupon.code).maybeSingle()
-                                  .then(({ data }) => {
-                                    if (data) supabase.from('promo_coupons').update({ uses_count: (data.uses_count || 0) + 1 }).eq('code', appliedCoupon.code).then(() => {});
-                                  });
-                              }
-                              onUpgradeSuccess(billingCycle);
-                              onClose();
-                              break;
-                            }
-                          }
-
-                          if (!verified) {
-                            setPaymentStep('details');
-                          }
-                        });
-                      } catch (e) {
-                        console.warn('Browser listener setup failed:', e);
-                         // Web: Try Cashfree SDK Drop-in modal or redirect
-                      if (payment_session_id) {
-                        launchCashfreeCheckout(
-                          payment_session_id,
-                          (result: any) => {
-                            console.log('Payment successful! Unlocking premium tier:', billingCycle);
-                            if (appliedCoupon) {
-                              supabase.from('promo_coupons').select('uses_count').eq('code', appliedCoupon.code).maybeSingle()
-                                .then(({ data }) => {
-                                  if (data) supabase.from('promo_coupons').update({ uses_count: (data.uses_count || 0) + 1 }).eq('code', appliedCoupon.code).then(() => {});
-                                });
-                            }
-                            onUpgradeSuccess(billingCycle);
-                            onClose();
-                          },
-                          (err: any) => {
-                            console.warn('Cashfree payment failed or incomplete:', err);
-                            setPaymentStep('details');
-                          }
-                        );
-                      } else {
-                        setPaymentStep('details');
-                      }
+                        console.warn('Browser.open failed, launching window fallback:', browserErr);
+                        try { window.open(payUrl, '_system'); } catch (e) { window.location.href = payUrl; }
                       }
                       setPaymentStep('details');
+                    } else {
+                      // Web / Mobile Browser: Launch Cashfree Drop-in Checkout Modal directly!
+                      launchCashfreeCheckout(
+                        payment_session_id,
+                        (result: any) => {
+                          console.log('Payment successful! Unlocking premium tier:', billingCycle);
+                          if (appliedCoupon) {
+                            supabase.from('promo_coupons').select('uses_count').eq('code', appliedCoupon.code).maybeSingle()
+                              .then(({ data }) => {
+                                if (data) supabase.from('promo_coupons').update({ uses_count: (data.uses_count || 0) + 1 }).eq('code', appliedCoupon.code).then(() => {});
+                              });
+                          }
+                          onUpgradeSuccess(billingCycle);
+                          onClose();
+                        },
+                        (err: any) => {
+                          console.warn('Cashfree payment modal dismissed/failed:', err);
+                          setPaymentStep('details');
+                          if (err && typeof err === 'string' && err.includes('Cashfree SDK')) {
+                            // Direct UPI Fallback intent if SDK not loaded
+                            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+                            if (isMobile) {
+                              const rawUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${upiAmountINR}&cu=INR&tn=ZenBudget_Subscription`;
+                              try { window.location.href = rawUrl; } catch (e) {}
+                            }
+                          }
+                        }
+                      );
                     }
                   } catch (sdkErr: any) {
-                    console.warn('Cashfree payment launch fallback to direct UPI:', sdkErr);
+                    console.error('Cashfree checkout session error:', sdkErr);
                     setPaymentStep('details');
-                    // Direct UPI Fallback intent on Mobile only
-                    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-                    if (isMobile) {
-                      const rawUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${upiAmountINR}&cu=INR&tn=ZenBudget_Subscription`;
-                      try { window.location.href = rawUrl; } catch (e) {}
-                    }
+                    alert(sdkErr.message || 'Payment Gateway connection failed. Please try again.');
                   }
                 }}
                 style={{

@@ -343,7 +343,9 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <Settings size={20} color="var(--primary)" />
+              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(34, 197, 94, 0.15)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Settings size={20} />
+              </div>
               <div>
                 <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>Profile &amp; Preferences</p>
                 <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Username, passcode, currency &amp; language settings.</span>
@@ -370,7 +372,7 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(225, 48, 108, 0.15)', color: '#e1306c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(225, 48, 108, 0.15)', color: '#e1306c', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Share2 size={20} />
                 </div>
                 <div>
@@ -399,7 +401,9 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <Sparkles size={20} color="#fbbf24" />
+              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(251, 191, 36, 0.15)', color: '#fbbf24', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Sparkles size={20} />
+              </div>
               <div>
                 <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>ZenBudget Premium</p>
                 <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Monthly ₹149 | Yearly ₹1,499 | Lifetime Founding Member</span>
@@ -425,7 +429,9 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <Download size={20} color="var(--secondary)" />
+              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(20, 184, 166, 0.15)', color: '#14b8a6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Download size={20} />
+              </div>
               <div>
                 <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>Export CSV Report</p>
                 <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Download full transaction history as CSV file.</span>
@@ -451,7 +457,9 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <RefreshCw size={20} color="var(--warning)" />
+              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <RefreshCw size={20} />
+              </div>
               <div>
                 <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>Reset Workspace Data</p>
                 <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Clear local cache or start fresh.</span>
@@ -469,18 +477,20 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
               justifyContent: 'space-between',
               padding: '14px',
               borderRadius: '14px',
-              border: '1px solid rgba(239, 68, 68, 0.2)',
+              border: '1px solid rgba(239, 68, 68, 0.25)',
               background: 'rgba(239, 68, 68, 0.05)',
               cursor: 'pointer',
-              color: 'var(--danger)',
+              color: 'var(--text-primary)',
               textAlign: 'left',
               marginTop: '4px'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <LogOut size={20} color="var(--danger)" />
+              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <LogOut size={20} />
+              </div>
               <div>
-                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>Sign Out Account</p>
+                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--danger)' }}>Sign Out Account</p>
                 <span style={{ fontSize: '11px', color: 'rgba(239, 68, 68, 0.7)' }}>Lock app session.</span>
               </div>
             </div>

@@ -680,14 +680,25 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions, currencySymb
               />
             )}
 
-            {/* Glowing Points */}
+            {/* Glowing Points & Dynamic Amount Badges Above Dots */}
             {points.map((p, i) => (
               <g key={i}>
+                <text
+                  x={p.x}
+                  y={Math.max(12, p.y - 9)}
+                  fill="#ffffff"
+                  fontSize="8.5"
+                  fontWeight="800"
+                  textAnchor="middle"
+                  style={{ textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}
+                >
+                  {currencySymbol}{Math.round(p.value).toLocaleString()}
+                </text>
                 <circle 
                   cx={p.x} 
                   cy={p.y} 
-                  r="6" 
-                  fill="var(--bg-dark)" 
+                  r="5" 
+                  fill="#0b0f19" 
                   stroke="var(--primary)" 
                   strokeWidth="2.5" 
                 />
