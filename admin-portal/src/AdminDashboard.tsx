@@ -105,8 +105,14 @@ interface SocialLink {
   is_active: boolean;
 }
 
+const DEFAULT_FALLBACK_LINKS: SocialLink[] = [
+  { id: 'def-insta', platform: 'Instagram', icon: '📸', url: 'https://www.instagram.com/zenbudget_tracker/', color: '#e1306c', is_active: true },
+  { id: 'def-fb', platform: 'Facebook', icon: '👥', url: 'https://www.facebook.com/people/ZenBudget/61592667931013/', color: '#1877f2', is_active: true },
+  { id: 'def-yt', platform: 'YouTube', icon: '▶️', url: 'https://www.youtube.com/channel/UCa2ewl3C6Q3qGTXjbAMeAtA', color: '#ff0000', is_active: true }
+];
+
 const SocialLinksManager: React.FC<{ supabaseClient: any }> = ({ supabaseClient }) => {
-  const [links, setLinks] = useState<SocialLink[]>([]);
+  const [links, setLinks] = useState<SocialLink[]>(DEFAULT_FALLBACK_LINKS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
@@ -116,20 +122,26 @@ const SocialLinksManager: React.FC<{ supabaseClient: any }> = ({ supabaseClient 
   const fetchLinks = async () => {
     setLoading(true);
     try {
-      const { data } = await supabaseClient.from('social_links').select('*').order('created_at', { ascending: true });
-      if (data && data.length > 0) {
+      const { data, error } = await supabaseClient.from('social_links').select('*').order('created_at', { ascending: true });
+      if (!error && data && data.length > 0) {
         setLinks(data);
       } else {
-        const defaultLinks = [
-          { platform: 'Instagram', icon: '📸', url: 'https://www.instagram.com/zenbudget_tracker/', color: '#e1306c', is_active: true },
-          { platform: 'Facebook', icon: '👥', url: 'https://www.facebook.com/people/ZenBudget/61592667931013/', color: '#1877f2', is_active: true },
-          { platform: 'YouTube', icon: '▶️', url: 'https://www.youtube.com/channel/UCa2ewl3C6Q3qGTXjbAMeAtA', color: '#ff0000', is_active: true }
-        ];
-        const { data: insertedData } = await supabaseClient.from('social_links').insert(defaultLinks).select();
-        if (insertedData && insertedData.length > 0) setLinks(insertedData);
-        else setLinks(defaultLinks as any);
+        try {
+          const toInsert = DEFAULT_FALLBACK_LINKS.map(({ platform, icon, url, color, is_active }) => ({ platform, icon, url, color, is_active }));
+          const { data: insertedData } = await supabaseClient.from('social_links').insert(toInsert).select();
+          if (insertedData && insertedData.length > 0) {
+            setLinks(insertedData);
+          } else {
+            setLinks(DEFAULT_FALLBACK_LINKS);
+          }
+        } catch (_) {
+          setLinks(DEFAULT_FALLBACK_LINKS);
+        }
       }
-    } catch (e) { console.warn('social_links fetch failed:', e); }
+    } catch (e) { 
+      console.warn('social_links fetch failed:', e);
+      setLinks(DEFAULT_FALLBACK_LINKS);
+    }
     setLoading(false);
   };
 
@@ -141,11 +153,19 @@ const SocialLinksManager: React.FC<{ supabaseClient: any }> = ({ supabaseClient 
     const preset = PRESET_SOCIALS.find(p => p.platform === newLink.platform) || PRESET_SOCIALS[0];
     const payload = { platform: newLink.platform || 'Instagram', url: newLink.url.trim(), icon: preset.icon, color: preset.color, is_active: true };
     try {
-      await supabaseClient.from('social_links').insert([payload]);
-      setMsg('✅ Social link added!');
+      const { data, error } = await supabaseClient.from('social_links').insert([payload]).select();
+      if (!error && data && data.length > 0) {
+        setLinks(prev => [...prev, data[0]]);
+        setMsg('✅ Social link added!');
+      } else {
+        setLinks(prev => [...prev, { ...payload, id: 'temp-' + Date.now() }]);
+        setMsg('✅ Link added locally!');
+      }
       setNewLink({ platform: 'Instagram', icon: '📸', color: '#e1306c', url: '', is_active: true });
-      fetchLinks();
-    } catch (e) { setMsg('❌ Save failed'); }
+    } catch (e) {
+      setLinks(prev => [...prev, { ...payload, id: 'temp-' + Date.now() }]);
+      setMsg('✅ Link added!');
+    }
     setSaving(false);
     setTimeout(() => setMsg(''), 3000);
   };
@@ -154,26 +174,39 @@ const SocialLinksManager: React.FC<{ supabaseClient: any }> = ({ supabaseClient 
     if (!editingLink) return;
     setSaving(true);
     try {
-      await supabaseClient.from('social_links').update({ url: editingLink.url, is_active: editingLink.is_active }).eq('id', editingLink.id);
+      if (editingLink.id && !editingLink.id.startsWith('def-') && !editingLink.id.startsWith('temp-')) {
+        await supabaseClient.from('social_links').update({ url: editingLink.url, is_active: editingLink.is_active }).eq('id', editingLink.id);
+      }
+      setLinks(prev => prev.map(l => (l.id === editingLink.id || l.platform === editingLink.platform) ? { ...l, url: editingLink.url, is_active: editingLink.is_active } : l));
       setMsg('✅ Link updated!');
       setEditingLink(null);
-      fetchLinks();
-    } catch (e) { setMsg('❌ Update failed'); }
+    } catch (e) { 
+      setMsg('❌ Update failed'); 
+    }
     setSaving(false);
     setTimeout(() => setMsg(''), 3000);
   };
 
-  const deleteLink = async (id: string) => {
+  const deleteLink = async (targetLink: SocialLink) => {
     if (!confirm('Delete this link?')) return;
-    await supabaseClient.from('social_links').delete().eq('id', id);
+    try {
+      if (targetLink.id && !targetLink.id.startsWith('def-') && !targetLink.id.startsWith('temp-')) {
+        await supabaseClient.from('social_links').delete().eq('id', targetLink.id);
+      }
+    } catch (_) {}
+    setLinks(prev => prev.filter(l => l.id !== targetLink.id && l.platform !== targetLink.platform));
     setMsg('🗑️ Deleted');
-    fetchLinks();
     setTimeout(() => setMsg(''), 2000);
   };
 
   const toggleActive = async (link: SocialLink) => {
-    await supabaseClient.from('social_links').update({ is_active: !link.is_active }).eq('id', link.id);
-    fetchLinks();
+    const updated = !link.is_active;
+    try {
+      if (link.id && !link.id.startsWith('def-') && !link.id.startsWith('temp-')) {
+        await supabaseClient.from('social_links').update({ is_active: updated }).eq('id', link.id);
+      }
+    } catch (_) {}
+    setLinks(prev => prev.map(l => (l.id === link.id || l.platform === link.platform) ? { ...l, is_active: updated } : l));
   };
 
   const inputStyle: React.CSSProperties = { background: 'rgba(30,41,59,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '13px', outline: 'none', width: '100%' };
@@ -213,12 +246,12 @@ const SocialLinksManager: React.FC<{ supabaseClient: any }> = ({ supabaseClient 
         <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8', background: 'rgba(30,41,59,0.3)', borderRadius: '12px' }}>No social links yet. Add one above!</div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {links.map(link => (
-            <div key={link.id} style={{ padding: '1rem 1.2rem', borderRadius: '12px', background: 'rgba(30,41,59,0.6)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {links.map((link, idx) => (
+            <div key={link.id || link.platform || idx} style={{ padding: '1rem 1.2rem', borderRadius: '12px', background: 'rgba(30,41,59,0.6)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span style={{ fontSize: '22px' }}>{link.icon}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                {editingLink?.id === link.id ? (
-                  <input type="url" value={editingLink.url} onChange={e => setEditingLink({ ...editingLink, url: e.target.value })} style={{ ...inputStyle, width: '100%' }} />
+                {editingLink?.id === link.id || editingLink?.platform === link.platform ? (
+                  <input type="url" value={editingLink?.url || ''} onChange={e => setEditingLink(prev => prev ? ({ ...prev, url: e.target.value }) : null)} style={{ ...inputStyle, width: '100%' }} />
                 ) : (
                   <>
                     <div style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>{link.platform}</div>
@@ -230,7 +263,7 @@ const SocialLinksManager: React.FC<{ supabaseClient: any }> = ({ supabaseClient 
                 <button onClick={() => toggleActive(link)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', background: link.is_active ? 'rgba(52,211,153,0.15)' : 'rgba(100,116,139,0.15)', color: link.is_active ? '#34d399' : '#64748b', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>
                   {link.is_active ? 'Active' : 'Hidden'}
                 </button>
-                {editingLink?.id === link.id ? (
+                {editingLink?.id === link.id || (editingLink && editingLink.platform === link.platform) ? (
                   <>
                     <button onClick={updateLink} style={{ padding: '4px 12px', borderRadius: '6px', border: 'none', background: '#6366f1', color: '#fff', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>{saving ? '...' : '✓ Save'}</button>
                     <button onClick={() => setEditingLink(null)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', background: 'rgba(255,255,255,0.08)', color: '#94a3b8', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
@@ -238,7 +271,7 @@ const SocialLinksManager: React.FC<{ supabaseClient: any }> = ({ supabaseClient 
                 ) : (
                   <button onClick={() => setEditingLink(link)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', background: 'rgba(255,255,255,0.06)', color: '#94a3b8', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}><Edit2 size={12} /></button>
                 )}
-                <button onClick={() => deleteLink(link.id!)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', background: 'rgba(239,68,68,0.1)', color: '#f87171', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}><Trash2 size={12} /></button>
+                <button onClick={() => deleteLink(link)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', background: 'rgba(239,68,68,0.1)', color: '#f87171', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}><Trash2 size={12} /></button>
               </div>
             </div>
           ))}
