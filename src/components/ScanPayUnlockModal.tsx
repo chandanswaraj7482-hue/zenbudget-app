@@ -16,6 +16,31 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
   onUnlockSuccess,
   currencySymbol
 }) => {
+  let numPrice = 79;
+  let priceFormatted = `${currencySymbol}79`;
+  try {
+    const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+    if (currencySymbol === '$') {
+      numPrice = stored.usd_scan_pay_price || 1.99;
+      priceFormatted = `$${numPrice}`;
+    } else if (currencySymbol === '€') {
+      numPrice = stored.eur_scan_pay_price || 1.79;
+      priceFormatted = `€${numPrice}`;
+    } else if (currencySymbol === '£') {
+      numPrice = stored.gbp_scan_pay_price || 1.49;
+      priceFormatted = `£${numPrice}`;
+    } else {
+      numPrice = stored.inr_scan_pay_price || 79;
+      priceFormatted = `${currencySymbol}${numPrice}`;
+    }
+  } catch (_) {
+    numPrice = 79;
+    priceFormatted = `${currencySymbol}79`;
+  }
+
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showInAppGateway, setShowInAppGateway] = useState(false);
+  const [modalErr, setModalErr] = useState<string | null>(null);
   const [couponCode, setCouponCode] = useState('');
   const [couponMessage, setCouponMessage] = useState('');
   const [couponError, setCouponError] = useState(false);
