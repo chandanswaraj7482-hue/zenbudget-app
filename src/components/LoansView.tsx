@@ -35,7 +35,8 @@ export const LoansView: React.FC<LoansViewProps> = ({
   const [repayModalLoan, setRepayModalLoan] = useState<LoanRecord | null>(null);
 
   const [interestRate, setInterestRate] = useState('');
-  const [interestType, setInterestType] = useState<'monthly' | 'yearly' | 'weekly'>('monthly');
+  const [interestType, setInterestType] = useState<'monthly' | 'yearly'>('monthly');
+  const [interestCalcMode, setInterestCalcMode] = useState<'simple' | 'compound'>('simple');
   const [modalErr, setModalErr] = useState<string | null>(null);
   const [personName, setPersonName] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
@@ -75,17 +76,29 @@ export const LoansView: React.FC<LoansViewProps> = ({
       monthDiff -= 1;
     }
 
-    // Default to at least 1 month if due date is same month or valid range
     const durationMonths = Math.max(1, monthDiff > 0 ? monthDiff : Math.round(diffDays / 30));
 
-    // Calculate Pure Simple Interest based on frequency (yearly -> % p.a., monthly/custom -> % per month)
+    // Calculate Interest based on rate unit (monthly vs yearly) and calculation mode (simple vs compound)
     let totalInterest = 0;
+    const isYearlyMode = interestType === 'yearly' || frequency === 'yearly';
+
     if (R > 0) {
-      if (frequency === 'yearly') {
-        const timeInYears = durationMonths / 12;
-        totalInterest = (P * R * timeInYears) / 100;
+      if (isYearlyMode) {
+        // Time in years (1 year minimum for yearly calculations)
+        const timeInYears = Math.max(1, Math.round(durationMonths / 12));
+        if (interestCalcMode === 'compound') {
+          totalInterest = P * (Math.pow(1 + R / 100, timeInYears) - 1);
+        } else {
+          // Pure Simple Yearly Interest Formula: P * (R / 100) * Years
+          totalInterest = P * (R / 100) * timeInYears;
+        }
       } else {
-        totalInterest = (P * R * durationMonths) / 100;
+        // Pure Monthly Interest Formula: P * (R / 100) * Months
+        if (interestCalcMode === 'compound') {
+          totalInterest = P * (Math.pow(1 + R / 100, durationMonths) - 1);
+        } else {
+          totalInterest = P * (R / 100) * durationMonths;
+        }
       }
     }
 
@@ -124,7 +137,8 @@ export const LoansView: React.FC<LoansViewProps> = ({
       emiInstallment: Number(emiInstallment.toFixed(2)), 
       installmentCount, 
       installmentLabel, 
-      durationMonths: roundedMonths 
+      durationMonths: roundedMonths,
+      isYearlyMode
     };
   };
 
@@ -408,7 +422,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
           padding: '20px',
           zIndex: 1000
         }}>
-          <div className="glass-panel" style={{ width: '100%', maxWidth: '400px', padding: '24px' }}>
+          <div className="glass-panel" style={{ width: '100%', maxWidth: '460px', padding: '24px', boxShadow: '0 20px 60px rgba(0,0,0,0.6)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>
                 {activeTab === 'borrowed' ? `${t('add_loan')} (${t('borrowed_loans')})` : `${t('add_loan')} (${t('lent_loans')})`}
@@ -448,31 +462,82 @@ export const LoansView: React.FC<LoansViewProps> = ({
                     step="any"
                     value={totalAmount}
                     onChange={e => setTotalAmount(e.target.value)}
-                    placeholder="5000"
+                    placeholder="10000"
                     className="glass-input"
                     style={{ marginTop: '4px', width: '100%' }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Interest Rate (%)</label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Interest Rate (%)</label>
+                    <select
+                      value={interestType}
+                      onChange={e => setInterestType(e.target.value as any)}
+                      style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
+                    >
+                      <option value="monthly">% / mo</option>
+                      <option value="yearly">% p.a.</option>
+                    </select>
+                  </div>
                   <input
                     type="number"
                     min="0"
                     step="0.1"
                     value={interestRate}
                     onChange={e => setInterestRate(e.target.value)}
-                    placeholder="e.g. 2"
+                    placeholder="e.g. 3"
                     className="glass-input"
                     style={{ marginTop: '4px', width: '100%' }}
                   />
                 </div>
               </div>
 
+              {/* Simple vs Compound Interest Toggle */}
+              {parseFloat(interestRate) > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-input)', padding: '6px 12px', borderRadius: '12px', border: '1px solid var(--border-input)' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Calculation Math:</span>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setInterestCalcMode('simple')}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        background: interestCalcMode === 'simple' ? 'var(--primary)' : 'transparent',
+                        color: interestCalcMode === 'simple' ? '#fff' : 'var(--text-secondary)'
+                      }}
+                    >
+                      Simple 📐
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setInterestCalcMode('compound')}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        background: interestCalcMode === 'compound' ? 'var(--primary)' : 'transparent',
+                        color: interestCalcMode === 'compound' ? '#fff' : 'var(--text-secondary)'
+                      }}
+                    >
+                      Compound 📈
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Live Repayment & Installment Breakdown */}
               {parseFloat(totalAmount) > 0 && (() => {
-                const { P, R, totalInterest, totalPayable, emiInstallment, installmentCount, installmentLabel, durationMonths } = calcEmiDetails();
-                const rateLabel = frequency === 'yearly' ? '% p.a.' : '% / mo';
+                const { P, R, totalInterest, totalPayable, emiInstallment, installmentCount, installmentLabel, durationMonths, isYearlyMode } = calcEmiDetails();
+                const rateLabel = isYearlyMode ? '% p.a.' : '% / mo';
                 
                 const formatCurr = (val: number) => {
                   return val % 1 === 0 ? val.toLocaleString() : val.toFixed(2);
@@ -487,7 +552,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
                     </div>
                     {R > 0 && (
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: '#94a3b8' }}>Interest ({R}{rateLabel})</span>
+                        <span style={{ color: '#94a3b8' }}>Interest ({R}{rateLabel} - {interestCalcMode === 'simple' ? 'Simple' : 'Compound'})</span>
                         <span style={{ fontWeight: 700, color: '#fbbf24' }}>+{currencySymbol}{formatCurr(totalInterest)}</span>
                       </div>
                     )}
@@ -524,7 +589,12 @@ export const LoansView: React.FC<LoansViewProps> = ({
                   <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{t('frequency')}</label>
                   <select
                     value={frequency}
-                    onChange={e => setFrequency(e.target.value as any)}
+                    onChange={e => {
+                      const val = e.target.value as any;
+                      setFrequency(val);
+                      if (val === 'yearly') setInterestType('yearly');
+                      if (val === 'monthly') setInterestType('monthly');
+                    }}
                     className="glass-input"
                     style={{ marginTop: '4px', width: '100%', background: 'var(--bg-input)' }}
                   >
