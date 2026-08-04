@@ -2530,39 +2530,35 @@ const App: React.FC = () => {
 
   if (isLocked) {
     return <LockScreen onUnlock={(profileId, name, tier, trialStart, pin, premiumExpires) => {
-      const activeId = profileId || localStorage.getItem('zb_profile_id') || 'user_default';
-      const activeName = name || localStorage.getItem('zb_user_name') || 'User';
-      const activeTier = tier || localStorage.getItem('zb_subscription_tier') || 'trial';
-      const activeStart = trialStart || localStorage.getItem('zb_trial_start_date') || new Date().toISOString();
-      const activePin = pin || localStorage.getItem('zb_user_pin') || '1234';
-
-      setCurrentProfileId(activeId);
-      setUserName(activeName);
-      setSubscriptionTier(activeTier);
-      setTrialStartDate(activeStart);
-      setUserPin(activePin);
+      setCurrentProfileId(profileId);
+      setUserName(name);
+      setSubscriptionTier(tier);
+      setTrialStartDate(trialStart);
+      setUserPin(pin);
       setPremiumExpiresAt(premiumExpires);
 
-      localStorage.setItem('zb_profile_id', activeId);
-      localStorage.setItem('zb_user_name', activeName);
-      localStorage.setItem('zb_subscription_tier', activeTier);
-      localStorage.setItem('zb_trial_start_date', activeStart);
-      localStorage.setItem('zb_user_pin', activePin);
+      localStorage.setItem('zb_profile_id', profileId);
+      localStorage.setItem('zb_user_name', name);
+      localStorage.setItem('zb_subscription_tier', tier);
+      localStorage.setItem('zb_trial_start_date', trialStart);
+      localStorage.setItem('zb_user_pin', pin);
       if (premiumExpires) {
         localStorage.setItem('zb_premium_expires_at', premiumExpires);
       } else {
         localStorage.removeItem('zb_premium_expires_at');
       }
+      
 
       // Check onboarding
-      if (!localStorage.getItem(`zb_onboarded_${activeId}`)) {
+      if (!localStorage.getItem(`zb_onboarded_${profileId}`)) {
         setShowOnboarding(true);
       } else {
+        // Trigger Proactive AI Briefs if already onboarded
         const todayStr = new Date().toISOString().split('T')[0];
         const hour = new Date().getHours();
         
-        const morningKey = `zb_morning_shown_${activeId}_${todayStr}`;
-        const eveningKey = `zb_evening_shown_${activeId}_${todayStr}`;
+        const morningKey = `zb_morning_shown_${profileId}_${todayStr}`;
+        const eveningKey = `zb_evening_shown_${profileId}_${todayStr}`;
         
         if (hour >= 6 && hour < 12 && !localStorage.getItem(morningKey)) {
           setShowMorningBrief(true);

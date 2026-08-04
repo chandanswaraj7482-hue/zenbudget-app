@@ -16,6 +16,10 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
   onUnlockSuccess,
   currencySymbol
 }) => {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showInAppGateway, setShowInAppGateway] = useState(false);
+  const [modalErr, setModalErr] = useState<string | null>(null);
+
   let numPrice = 79;
   let priceFormatted = `${currencySymbol}79`;
   try {
@@ -38,9 +42,6 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
     priceFormatted = `${currencySymbol}79`;
   }
 
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [showInAppGateway, setShowInAppGateway] = useState(false);
-  const [modalErr, setModalErr] = useState<string | null>(null);
   const [couponCode, setCouponCode] = useState('');
   const [couponMessage, setCouponMessage] = useState('');
   const [couponError, setCouponError] = useState(false);

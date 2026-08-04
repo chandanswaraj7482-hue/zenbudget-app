@@ -739,23 +739,21 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
       if (current.length < 4) {
         setter(prev => prev + num);
       }
-    } else if (step === 'unlock') {
-      const targetPin = dbProfile?.pin || localStorage.getItem('zb_user_pin') || '1234';
+    } else if (step === 'unlock' && dbProfile) {
       if (enteredPin.length < 4) {
         const nextPin = enteredPin + num;
         setEnteredPin(nextPin);
         
         if (nextPin.length === 4) {
-          if (nextPin === targetPin || (dbProfile?.pin && nextPin === dbProfile.pin)) {
-            if (dbProfile?.referral_code) {
+          if (nextPin === dbProfile.pin) {
+            if (dbProfile.referral_code) {
               localStorage.setItem('zb_invite_code', dbProfile.referral_code);
             }
-            playNotificationSound('success');
-            const targetName = dbProfile?.name || username || localStorage.getItem('zb_user_name') || 'User';
-            const targetTier = dbProfile?.subscription_tier || localStorage.getItem('zb_subscription_tier') || 'trial';
-            const targetStart = dbProfile?.trial_start_date || localStorage.getItem('zb_trial_start_date') || new Date().toISOString();
-            const targetExpires = dbProfile?.premium_expires_at || localStorage.getItem('zb_premium_expires_at') || null;
-            const targetTrialExpire = dbProfile?.trial_expire_date || null;
+            const targetName = dbProfile.name || username || localStorage.getItem('zb_user_name') || 'User';
+            const targetTier = dbProfile.subscription_tier || localStorage.getItem('zb_subscription_tier') || 'trial';
+            const targetStart = dbProfile.trial_start_date || localStorage.getItem('zb_trial_start_date') || new Date().toISOString();
+            const targetExpires = dbProfile.premium_expires_at || localStorage.getItem('zb_premium_expires_at') || null;
+            const targetTrialExpire = dbProfile.trial_expire_date || null;
             const targetUserId = userId || localStorage.getItem('zb_profile_id') || 'local';
 
             onUnlock(targetUserId, targetName, targetTier, targetStart, nextPin, targetExpires, targetTrialExpire);
