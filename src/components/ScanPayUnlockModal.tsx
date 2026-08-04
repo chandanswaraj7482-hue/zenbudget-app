@@ -191,6 +191,8 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
     }
   };
 
+  if (!isOpen) return null;
+
   const displayPrice = finalPrice === 0 ? 'FREE' : `${currencySymbol}${finalPrice}`;
 
   return (

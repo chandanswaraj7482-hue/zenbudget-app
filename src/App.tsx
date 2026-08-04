@@ -521,18 +521,17 @@ const App: React.FC = () => {
       return;
     }
 
-    const isPremium = subscriptionTier === 'premium' || subscriptionTier === 'premium_monthly' || subscriptionTier === 'premium_yearly' || subscriptionTier === 'premium_lifetime';
-    const hasScanPayAccess = isPremium || localStorage.getItem(`zb_scan_pay_access_${currentProfileId}`) === 'true';
-
-    if (!hasScanPayAccess && !title.startsWith('loan_')) {
-      setIsSubBlocker(true);
-      setIsSubModalOpen(true);
-      return;
+    // Automatically grant Scan & Pay Lifetime Access on clicking Pay via Cashfree
+    localStorage.setItem(`zb_scan_pay_access_${currentProfileId}`, 'true');
+    if (currentProfileId) {
+      supabase.from('profiles').update({ has_scan_pay_access: true }).eq('id', currentProfileId).catch(() => {});
     }
+
     try {
       const userEmail = localStorage.getItem('zb_user_email') || '';
       const userPhone = localStorage.getItem('zb_user_phone') || '';
-      triggerToast(`Launching Cashfree PhonePe payment for ₹${amount}...`, 'info');
+      triggerToast(`Scan & Pay Unlocked! Launching Cashfree Direct Pay for ₹${amount}...`, 'success');
+      try { confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } }); } catch (e) {}
 
       let payment_session_id = '';
       const endpoints = [
