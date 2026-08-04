@@ -539,10 +539,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingBottom: '80px' }} className="animate-fade-in">
 
       {/* Premium Header with Profile Avatar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', marginTop: '8px' }}>
         <div 
           onClick={onOpenProfile}
-          style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', flex: 1, minWidth: 0 }}
         >
           <div style={{
             width: '42px',
@@ -560,9 +560,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
             />
           </div>
 
-          <div style={{ maxWidth: 'calc(100vw - 120px)' }}>
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
             {/* Line 1: Dynamic Greeting & User Name */}
-            <h1 style={{ fontSize: '18px', fontWeight: 900, color: '#ffffff', margin: 0, fontFamily: "'Manrope', sans-serif", letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <h1 style={{ fontSize: '15px', fontWeight: 900, color: '#ffffff', margin: 0, fontFamily: "'Manrope', sans-serif", letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {(() => {
                 const hour = new Date().getHours();
                 const name = userName || 'User';
@@ -574,7 +574,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </h1>
 
             {/* Line 2: Rotating Financial Tagline */}
-            <div style={{ fontSize: '11.5px', color: '#34d399', fontWeight: 700, marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <div style={{ fontSize: '11px', color: '#34d399', fontWeight: 700, marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {(() => {
                 const taglines = [
                   'Track smart, live mindfully 🌿',
@@ -598,9 +598,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <button
           onClick={onAddTransactionClick}
           className="glass-button active"
-          style={{ padding: '10px 14px', borderRadius: '14px', fontSize: '14px', animation: 'pulse-glow 3s infinite' }}
+          style={{ padding: '9px 12px', borderRadius: '14px', fontSize: '13px', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '5px', animation: 'pulse-glow 3s infinite' }}
         >
-          <Plus size={16} /> {t('add_transaction')}
+          <Plus size={15} /> {t('add_transaction')}
         </button>
       </div>
 
