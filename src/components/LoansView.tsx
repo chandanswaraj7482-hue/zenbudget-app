@@ -84,8 +84,8 @@ export const LoansView: React.FC<LoansViewProps> = ({
 
     if (R > 0) {
       if (isYearlyMode) {
-        // Time in years (1 year minimum for yearly calculations)
-        const timeInYears = Math.max(1, Math.round(durationMonths / 12));
+        // Exact time in years (e.g. 6 months = 0.5 years, 12 months = 1 year, 24 months = 2 years)
+        const timeInYears = durationMonths / 12;
         if (interestCalcMode === 'compound') {
           totalInterest = P * (Math.pow(1 + R / 100, timeInYears) - 1);
         } else {
@@ -160,11 +160,11 @@ export const LoansView: React.FC<LoansViewProps> = ({
     onAddLoan({
       type: activeTab,
       personName: personName.trim(),
-      totalAmount: Math.round(totalPayable),
+      totalAmount: Number(totalPayable.toFixed(2)),
       principalAmount: principalNum,
       interestRate: ratePct > 0 ? ratePct : undefined,
       interestType: ratePct > 0 ? interestType : undefined,
-      emiInstallment: Math.round(emiInstallment),
+      emiInstallment: Number(emiInstallment.toFixed(2)),
       dueDate,
       frequency,
       customFrequencyText: frequency === 'custom' ? (customFrequencyText.trim() || 'Custom') : undefined,
