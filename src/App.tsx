@@ -525,7 +525,8 @@ const App: React.FC = () => {
     const hasScanPayAccess = isPremium || localStorage.getItem(`zb_scan_pay_access_${currentProfileId}`) === 'true';
 
     if (!hasScanPayAccess && !title.startsWith('loan_')) {
-      setIsScanPayUnlockOpen(true);
+      setIsSubBlocker(true);
+      setIsSubModalOpen(true);
       return;
     }
     try {
