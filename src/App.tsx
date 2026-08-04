@@ -1000,7 +1000,7 @@ const App: React.FC = () => {
       const start = new Date(trialStartDate).getTime();
       if (!isNaN(start)) {
         const diffDays = (Date.now() - start) / (1000 * 60 * 60 * 24);
-        return diffDays >= 30;
+        return diffDays >= 7;
       }
       return false;
     }
@@ -2594,7 +2594,52 @@ const App: React.FC = () => {
 
 
   return (
-    <div key={langKey} style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%' }}>
+    <div 
+      key={langKey} 
+      style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%' }}
+      onClickCapture={(e) => {
+        if (isSubscriptionExpired()) {
+          const target = e.target as HTMLElement;
+          if (target && target.closest('.subscription-modal-wrapper')) {
+            return;
+          }
+          e.preventDefault();
+          e.stopPropagation();
+          setIsSubBlocker(true);
+          setIsSubModalOpen(true);
+        }
+      }}
+    >
+      {/* Sticky Trial Expired Locked Banner */}
+      {isSubscriptionExpired() && (
+        <div 
+          onClick={() => { setIsSubBlocker(true); setIsSubModalOpen(true); }}
+          style={{
+            background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+            color: '#ffffff',
+            padding: '12px 18px',
+            borderRadius: '16px',
+            margin: '12px 16px 0 16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontWeight: 800,
+            fontSize: '13px',
+            cursor: 'pointer',
+            boxShadow: '0 6px 20px rgba(239, 68, 68, 0.45)',
+            zIndex: 100
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '16px' }}>⏳</span>
+            <span>Free Trial Expired (All Features Locked)</span>
+          </div>
+          <span style={{ background: '#ffffff', color: '#dc2626', padding: '5px 14px', borderRadius: '20px', fontSize: '11px', fontWeight: 900 }}>
+            UPGRADE PRO 🚀
+          </span>
+        </div>
+      )}
+
       {/* Top action header - cleaned and simplified */}
       <div style={{ 
         display: 'flex', 

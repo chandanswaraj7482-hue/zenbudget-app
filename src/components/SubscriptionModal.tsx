@@ -335,6 +335,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
   return (
     <div 
+      className="subscription-modal-wrapper"
       style={{
         position: 'fixed',
         top: 0,
