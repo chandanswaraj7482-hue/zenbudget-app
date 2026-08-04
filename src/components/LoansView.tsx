@@ -65,12 +65,20 @@ export const LoansView: React.FC<LoansViewProps> = ({
 
     const diffTime = due.getTime() - start.getTime();
     let diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-    if (diffDays <= 1) diffDays = 30; // default 1 month if due date is today or invalid
 
-    // Calculate exact duration in months (e.g., 30 days = 1 month)
-    const durationMonths = Math.max(1, diffDays / 30);
+    // Calculate integer calendar months between start and due date
+    let monthDiff = (due.getFullYear() - start.getFullYear()) * 12 + (due.getMonth() - start.getMonth());
+    const dayDiff = due.getDate() - start.getDate();
+    if (dayDiff > 10) {
+      monthDiff += 1;
+    } else if (dayDiff < -10 && monthDiff > 1) {
+      monthDiff -= 1;
+    }
 
-    // Calculate Simple Interest based on frequency (yearly -> % p.a., monthly/custom -> % per month)
+    // Default to at least 1 month if due date is same month or valid range
+    const durationMonths = Math.max(1, monthDiff > 0 ? monthDiff : Math.round(diffDays / 30));
+
+    // Calculate Pure Simple Interest based on frequency (yearly -> % p.a., monthly/custom -> % per month)
     let totalInterest = 0;
     if (R > 0) {
       if (frequency === 'yearly') {
@@ -87,7 +95,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
     let installmentCount = 1;
     let installmentLabel = 'lump sum';
 
-    const roundedMonths = Math.max(1, Math.round(durationMonths));
+    const roundedMonths = Math.max(1, durationMonths);
 
     if (frequency === 'monthly') {
       installmentCount = roundedMonths;
@@ -106,7 +114,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
       installmentLabel = 'lump sum';
     }
 
-    const emiInstallment = totalPayable / installmentCount;
+    const emiInstallment = totalPayable / Math.max(1, installmentCount);
 
     return { 
       P, 

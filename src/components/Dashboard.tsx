@@ -561,20 +561,24 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            {/* Line 1: Dynamic Greeting & User Name */}
-            <h1 style={{ fontSize: '15px', fontWeight: 900, color: '#ffffff', margin: 0, fontFamily: "'Manrope', sans-serif", letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {/* Line 1: Dynamic Time Greeting Badge */}
+            <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--primary)', letterSpacing: '0.04em', textTransform: 'uppercase', lineHeight: 1 }}>
               {(() => {
                 const hour = new Date().getHours();
-                const name = userName || 'User';
-                if (hour >= 5 && hour < 12) return `Good Morning ☀️, ${name}`;
-                if (hour >= 12 && hour < 17) return `Good Afternoon 🌤️, ${name}`;
-                if (hour >= 17 && hour < 21) return `Good Evening 🌆, ${name}`;
-                return `Good Night 🌙, ${name}`;
+                if (hour >= 5 && hour < 12) return 'Good Morning ☀️';
+                if (hour >= 12 && hour < 17) return 'Good Afternoon 🌤️';
+                if (hour >= 17 && hour < 21) return 'Good Evening 🌆';
+                return 'Good Night 🌙';
               })()}
+            </div>
+
+            {/* Line 2: User Name (Full Name Visible!) */}
+            <h1 style={{ fontSize: '16px', fontWeight: 900, color: '#ffffff', margin: '2px 0 0 0', fontFamily: "'Manrope', sans-serif", letterSpacing: '-0.02em', lineHeight: 1.2, wordBreak: 'break-word', whiteSpace: 'normal' }}>
+              {userName || 'User'}
             </h1>
 
-            {/* Line 2: Rotating Financial Tagline */}
-            <div style={{ fontSize: '11px', color: '#34d399', fontWeight: 700, marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {/* Line 3: Rotating Financial Tagline (Full Tagline Wrapped & Visible!) */}
+            <div style={{ fontSize: '11px', color: '#34d399', fontWeight: 700, marginTop: '3px', lineHeight: 1.3, wordBreak: 'break-word', whiteSpace: 'normal' }}>
               {(() => {
                 const taglines = [
                   'Track smart, live mindfully 🌿',

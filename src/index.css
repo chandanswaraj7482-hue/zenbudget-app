@@ -457,3 +457,23 @@ body {
   50% { top: 100%; }
   100% { top: 0%; }
 }
+
+/* Custom Dark Datepicker styling for sleek modern calendar picker */
+input[type="date"].custom-dark-datepicker,
+.custom-dark-datepicker {
+  color-scheme: dark !important;
+  background-color: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-input) !important;
+  border-radius: 14px !important;
+  padding: 11px 14px !important;
+  font-family: inherit !important;
+  font-size: 14px !important;
+  accent-color: #22c55e !important;
+}
+
+input[type="date"].custom-dark-datepicker::-webkit-calendar-picker-indicator {
+  filter: invert(0.8) sepia(1) saturate(5) hue-rotate(90deg);
+  cursor: pointer;
+  opacity: 0.9;
+}
