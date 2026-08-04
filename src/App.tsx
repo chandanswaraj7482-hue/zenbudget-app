@@ -995,16 +995,17 @@ const App: React.FC = () => {
       return false;
     }
 
-    if (subscriptionTier === 'trial') {
+    if (subscriptionTier === 'trial' || !subscriptionTier) {
+      if (!trialStartDate) return false;
       const start = new Date(trialStartDate).getTime();
       if (!isNaN(start)) {
         const diffDays = (Date.now() - start) / (1000 * 60 * 60 * 24);
-        return diffDays >= 7;
+        return diffDays >= 30;
       }
       return false;
     }
 
-    return true;
+    return false;
   };
 
   const isTrialExpired = () => isSubscriptionExpired();
@@ -2590,100 +2591,7 @@ const App: React.FC = () => {
     />;
   }
 
-  if (!isLocked && isSubscriptionExpired()) {
-    return (
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: '#09090f',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '24px',
-        color: '#fff',
-        fontFamily: 'inherit',
-        textAlign: 'center',
-        zIndex: 1200
-      }}>
-        {/* Rounded square gradient box icon with soft glow */}
-        <div style={{
-          width: '72px',
-          height: '72px',
-          borderRadius: '22px',
-          background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 8px 24px rgba(20, 184, 166, 0.25)',
-          marginBottom: '24px',
-          color: '#fff'
-        }}>
-          <Sparkles size={32} />
-        </div>
 
-        <h2 style={{ fontSize: '26px', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '8px' }}>
-          Subscription Expired ⏳
-        </h2>
-        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', maxWidth: '300px', marginBottom: '24px', lineHeight: '1.6' }}>
-          Your 7-day free trial or premium subscription has ended. Please upgrade to continue using ZenBudget tracker.
-        </p>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '280px' }}>
-          <button
-            onClick={() => setIsSubModalOpen(true)}
-            style={{
-              padding: '14px',
-              borderRadius: '16px',
-              border: 'none',
-              fontSize: '14px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              background: 'linear-gradient(to right, var(--primary), var(--secondary))',
-              color: '#fff',
-              boxShadow: '0 4px 15px rgba(20, 184, 166, 0.3)'
-            }}
-          >
-            Renew Now (₹49/month)
-          </button>
-          
-          <button
-            onClick={() => setShowLogoutConfirm(true)}
-            style={{
-              padding: '12px',
-              borderRadius: '16px',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              background: 'rgba(255, 255, 255, 0.03)',
-              fontSize: '13px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              color: 'var(--text-secondary)'
-            }}
-          >
-            Switch Profile / Log Out
-          </button>
-        </div>
-
-        {/* Render subscription modal for renewal */}
-        {isSubModalOpen && (
-          <SubscriptionModal
-            isOpen={isSubModalOpen}
-            onClose={() => setIsSubModalOpen(false)}
-            currentTransactionsCount={transactions.length}
-            trialStartDate={trialStartDate}
-            subscriptionTier={subscriptionTier}
-            onUpgradeSuccess={handleUpgradeSuccess}
-            isBlocker={true} // prevent closing until paid
-            currency={currency}
-            rates={rates}
-          />
-        )}
-      </div>
-    );
-  }
 
   return (
     <div key={langKey} style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%' }}>
