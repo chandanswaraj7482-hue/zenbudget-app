@@ -10,7 +10,7 @@ interface AnalyticsProps {
   accounts?: Account[];
 }
 
-export const Analytics: React.FC<AnalyticsProps> = ({ transactions, currencySymbol, accounts = [] }) => {
+export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currencySymbol, accounts = [] }) => {
   const [timeframe, setTimeframe] = useState<'month' | 'all'>('month');
   const [moodTimeframe, setMoodTimeframe] = useState<MoodTimeframe>('7d');
   const [moodStartDate, setMoodStartDate] = useState<string>(() => {

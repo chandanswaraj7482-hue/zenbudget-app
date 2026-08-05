@@ -23,8 +23,8 @@ interface LoansViewProps {
 
 export const LoansView: React.FC<LoansViewProps> = ({
   onBack,
-  loans,
-  accounts,
+  loans = [],
+  accounts = [],
   currencySymbol,
   onAddLoan,
   onRepayLoan,

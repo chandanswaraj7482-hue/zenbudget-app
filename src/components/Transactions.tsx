@@ -37,7 +37,7 @@ const CATEGORIES: { id: CategoryType | 'all'; label: string; color: string }[] =
 ];
 
 export const Transactions: React.FC<TransactionsProps> = ({
-  transactions,
+  transactions = [],
   currencySymbol,
   onEditTransaction,
   onDeleteTransaction

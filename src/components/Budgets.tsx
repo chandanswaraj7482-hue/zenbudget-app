@@ -33,8 +33,8 @@ const CATEGORIES: { id: CategoryType; label: string; icon: React.ReactNode; colo
 ];
 
 export const Budgets: React.FC<BudgetsProps> = ({
-  budgets,
-  transactions,
+  budgets = [],
+  transactions = [],
   currencySymbol,
   onSaveBudget
 }) => {
