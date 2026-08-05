@@ -19,6 +19,13 @@ export const FollowUsView: React.FC<FollowUsViewProps> = ({ onBack }) => {
   const [socialLinks, setSocialLinks] = useState<SocialLinkItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const defaultLinks: SocialLinkItem[] = [
+    { platform: 'Instagram', icon: '📸', url: 'https://www.instagram.com/zenbudget_tracker/', color: '#e1306c', is_active: true },
+    { platform: 'Facebook', icon: '👥', url: 'https://www.facebook.com/people/ZenBudget/61592667931013/', color: '#1877f2', is_active: true },
+    { platform: 'YouTube', icon: '▶️', url: 'https://www.youtube.com/channel/UCa2ewl3C6Q3qGTXjbAMeAtA', color: '#ff0000', is_active: true },
+    { platform: 'TikTok', icon: '🎵', url: 'https://www.tiktok.com/@zenbudget_tracker?lang=en-GB', color: '#00f2fe', is_active: true }
+  ];
+
   useEffect(() => {
     supabase
       .from('social_links')
@@ -28,20 +35,12 @@ export const FollowUsView: React.FC<FollowUsViewProps> = ({ onBack }) => {
         if (data && data.length > 0) {
           setSocialLinks(data);
         } else {
-          setSocialLinks([
-            { platform: 'Instagram', icon: '📸', url: 'https://www.instagram.com/zenbudget_tracker/', color: '#e1306c', is_active: true },
-            { platform: 'Facebook', icon: '👥', url: 'https://www.facebook.com/people/ZenBudget/61592667931013/', color: '#1877f2', is_active: true },
-            { platform: 'YouTube', icon: '▶️', url: 'https://www.youtube.com/channel/UCa2ewl3C6Q3qGTXjbAMeAtA', color: '#ff0000', is_active: true },
-          ]);
+          setSocialLinks(defaultLinks);
         }
         setLoading(false);
       })
       .catch(() => {
-        setSocialLinks([
-          { platform: 'Instagram', icon: '📸', url: 'https://www.instagram.com/zenbudget_tracker/', color: '#e1306c', is_active: true },
-          { platform: 'Facebook', icon: '👥', url: 'https://www.facebook.com/people/ZenBudget/61592667931013/', color: '#1877f2', is_active: true },
-          { platform: 'YouTube', icon: '▶️', url: 'https://www.youtube.com/channel/UCa2ewl3C6Q3qGTXjbAMeAtA', color: '#ff0000', is_active: true },
-        ]);
+        setSocialLinks(defaultLinks);
         setLoading(false);
       });
   }, []);
@@ -97,63 +96,93 @@ export const FollowUsView: React.FC<FollowUsViewProps> = ({ onBack }) => {
         {loading ? (
           <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-secondary)', fontSize: '13px' }}>Loading links...</div>
         ) : (
-          socialLinks.map((social) => (
-            <a
-              key={social.platform}
-              href={social.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '16px',
-                borderRadius: '16px',
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border-color)',
-                textDecoration: 'none',
-                color: 'var(--text-primary)',
-                transition: 'all 0.2s ease',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <div style={{
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '14px',
-                  background: 'rgba(255,255,255,0.05)',
+          socialLinks.map((social) => {
+            const platformLower = social.platform.toLowerCase();
+            const iconMap: Record<string, string> = {
+              instagram: '📸',
+              facebook: '👥',
+              youtube: '▶️',
+              tiktok: '🎵',
+              twitter: '🐤',
+              x: '𝕏'
+            };
+            const iconToDisplay = social.icon || iconMap[platformLower] || '🌐';
+
+            let handle = social.url;
+            if (handle) {
+              if (handle.includes('zenbudget_tracker')) handle = '@zenbudget_tracker';
+              else if (handle.includes('ZenBudget')) handle = '@ZenBudget';
+              else {
+                try {
+                  const urlObj = new URL(handle);
+                  const path = urlObj.pathname.replace(/^\//, '').replace(/\/$/, '');
+                  handle = path ? (path.startsWith('@') ? path : `@${path}`) : `@${platformLower}`;
+                } catch (e) {
+                  handle = `@${platformLower}`;
+                }
+              }
+            } else {
+              handle = `@${platformLower}`;
+            }
+
+            return (
+              <a
+                key={social.platform}
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '22px'
-                }}>
-                  {social.icon}
+                  justifyContent: 'space-between',
+                  padding: '16px',
+                  borderRadius: '16px',
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border-card)',
+                  textDecoration: 'none',
+                  color: 'var(--text-primary)',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '14px',
+                    background: 'var(--primary-glow)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '22px'
+                  }}>
+                    {iconToDisplay}
+                  </div>
+                  <div>
+                    <h4 style={{ fontSize: '15px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{social.platform}</h4>
+                    <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                      {handle}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <h4 style={{ fontSize: '15px', fontWeight: 700, margin: 0 }}>{social.platform}</h4>
-                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                    {social.url ? social.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') : `@${social.platform.toLowerCase()}`}
-                  </span>
-                </div>
-              </div>
 
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '8px 14px',
-                borderRadius: '10px',
-                background: 'rgba(255,255,255,0.05)',
-                color: social.color || 'var(--primary)',
-                fontWeight: 700,
-                fontSize: '12px'
-              }}>
-                <span>Follow</span>
-                <ExternalLink size={14} />
-              </div>
-            </a>
-          ))
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '8px 14px',
+                  borderRadius: '10px',
+                  background: 'var(--primary-glow)',
+                  color: social.color || 'var(--primary)',
+                  fontWeight: 700,
+                  fontSize: '12px'
+                }}>
+                  <span>Follow</span>
+                  <ExternalLink size={14} />
+                </div>
+              </a>
+            );
+          })
         )}
       </div>
     </div>
