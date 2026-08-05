@@ -2294,21 +2294,21 @@ const App: React.FC = () => {
   // Convert Base USD values dynamically into active selected currency for subcomponents
   const activeRate = rates[currency] || 1;
 
-  const convertedTransactions = transactions.map(t => ({
+  const convertedTransactions = (transactions || []).map(t => ({
     ...t,
-    amount: t.amount * activeRate,
+    amount: (t.amount || 0) * activeRate,
     paidBy: partnerId && t.user_id === partnerId ? 'Partner' : 'You'
   }));
 
-  const convertedBudgets = budgets.map(b => ({
+  const convertedBudgets = (budgets || []).map(b => ({
     ...b,
-    limit: currency === 'INR' ? Math.round(b.limit * activeRate) : Number((b.limit * activeRate).toFixed(2))
+    limit: currency === 'INR' ? Math.round((b.limit || 0) * activeRate) : Number(((b.limit || 0) * activeRate).toFixed(2))
   }));
 
-  const convertedGoals = goals.map(g => ({
+  const convertedGoals = (goals || []).map(g => ({
     ...g,
-    targetAmount: currency === 'INR' ? Math.round(g.targetAmount * activeRate) : Number((g.targetAmount * activeRate).toFixed(2)),
-    currentAmount: currency === 'INR' ? Math.round(g.currentAmount * activeRate) : Number((g.currentAmount * activeRate).toFixed(2))
+    targetAmount: currency === 'INR' ? Math.round((g.targetAmount || 0) * activeRate) : Number(((g.targetAmount || 0) * activeRate).toFixed(2)),
+    currentAmount: currency === 'INR' ? Math.round((g.currentAmount || 0) * activeRate) : Number(((g.currentAmount || 0) * activeRate).toFixed(2))
   }));
 
   const handleSaveProfile = async (newName: string, newPin: string, newCurrency: string, newLanguage: string, newEmail?: string) => {
@@ -2552,15 +2552,16 @@ const App: React.FC = () => {
       
 
       // Check onboarding
-      if (!localStorage.getItem(`zb_onboarded_${profileId}`)) {
+      const effectiveId = profileId || localStorage.getItem('zb_profile_id') || 'local';
+      if (!localStorage.getItem(`zb_onboarded_${effectiveId}`) && !localStorage.getItem('zb_onboarded_global')) {
         setShowOnboarding(true);
       } else {
         // Trigger Proactive AI Briefs if already onboarded
         const todayStr = new Date().toISOString().split('T')[0];
         const hour = new Date().getHours();
         
-        const morningKey = `zb_morning_shown_${profileId}_${todayStr}`;
-        const eveningKey = `zb_evening_shown_${profileId}_${todayStr}`;
+        const morningKey = `zb_morning_shown_${effectiveId}_${todayStr}`;
+        const eveningKey = `zb_evening_shown_${effectiveId}_${todayStr}`;
         
         if (hour >= 6 && hour < 12 && !localStorage.getItem(morningKey)) {
           setShowMorningBrief(true);
@@ -2582,15 +2583,17 @@ const App: React.FC = () => {
     return <Onboarding 
       currencySymbol={currencySymbol} 
       onComplete={(goal) => {
+        const effectiveId = currentProfileId || localStorage.getItem('zb_profile_id') || 'local';
         if (goal) {
           const updatedGoals = [goal];
           setGoals(updatedGoals);
-          localStorage.setItem(`zb_goals_${currentProfileId}`, JSON.stringify(updatedGoals));
+          localStorage.setItem(`zb_goals_${effectiveId}`, JSON.stringify(updatedGoals));
         } else {
           setGoals([]);
-          localStorage.setItem(`zb_goals_${currentProfileId}`, JSON.stringify([]));
+          localStorage.setItem(`zb_goals_${effectiveId}`, JSON.stringify([]));
         }
-        localStorage.setItem(`zb_onboarded_${currentProfileId}`, 'true');
+        localStorage.setItem(`zb_onboarded_${effectiveId}`, 'true');
+        localStorage.setItem('zb_onboarded_global', 'true');
         setShowOnboarding(false);
       }} 
     />;
