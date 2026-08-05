@@ -118,21 +118,43 @@ export const HelpModal: React.FC<HelpModalProps> = ({
   function getSmartClientFallbackResponse(userMessage: string): string {
     const msg = (userMessage || '').toLowerCase().trim();
 
-    if (msg.includes('kahan') || msg.includes('sabse zyada') || msg.includes('kharcha') || msg.includes('highest spending')) {
-      return `📊 Iss month aapka sabse zyada kharcha **${topCat.toUpperCase()}** category me hua hai (${currencySymbol}${topCatAmt.toLocaleString()})! Total monthly spending: ${currencySymbol}${totalExpense.toLocaleString()}. 💡 Tips: Chhoti subscription ya daily impulse shopping par limit lagao to aap har mahine ₹2,000+ extra save kar sakte ho! 🌿`;
-    }
-    if (msg.includes('bachayein') || msg.includes('save') || msg.includes('saving') || msg.includes('5000')) {
-      return `🎯 Extra ${currencySymbol}5,000 bachane ke liye: 1️⃣ Pehle 5 din me fixed savings alag kar do. 2️⃣ ${topCat.toUpperCase()} kharchon par 20% limit lagayein. 3️⃣ ZenBudget ka Quick Capture features use karke har ₹10 ka track rakho! 💪✨`;
-    }
-    if (msg.includes('habit') || msg.includes('analyze') || msg.includes('score')) {
-      return `🌱 Spending Analysis: Aapka monthly savings rate **${savingsPct}%** hai! Total saved: ${currencySymbol}${totalSaved.toLocaleString()}. ${savingsPct >= 20 ? '🔥 Great job! Aap Pro Saver category me aate ho!' : '⚡ Target rakho ki kam se kam 20% income monthly savings account me daalo.'}`;
+    // 1. Highest Spending / Category Analysis
+    if (msg.includes('kahan') || msg.includes('sabse zyada') || msg.includes('kharcha') || msg.includes('highest spending') || msg.includes('kahan ja rha')) {
+      return `📊 Iss month aapka sabse zyada kharcha **${topCat.toUpperCase()}** category me hua hai (${currencySymbol}${topCatAmt.toLocaleString()})! Total monthly spending: ${currencySymbol}${totalExpense.toLocaleString()}. 💡 Tips: ${topCat.toUpperCase()} kharchon par 15% limit lagao to aap har mahine ₹2,000+ extra save kar sakte ho! 🌿`;
     }
 
-    if (msg === 'hi' || msg === 'hello' || msg === 'hey') {
-      return "Hi! I am ZenBot, your AI financial coach. 🧘 I can analyze your transactions, tell you your highest spending areas, and help you cut unnecessary expenses!";
+    // 2. Extra Savings Strategy
+    if (msg.includes('bachayein') || msg.includes('save') || msg.includes('saving') || msg.includes('5000') || msg.includes('paise kaise')) {
+      return `🎯 Extra ${currencySymbol}5,000 bachane ke 3 simple steps: 1️⃣ Salary aate hi 20% alag savings account me transfer kar do. 2️⃣ ${topCat.toUpperCase()} category par strict monthly limit set karo. 3️⃣ Daily Quick Capture se har ₹10 ka record rakho! 💪✨`;
     }
 
-    return `That's a great question! Based on your recent account activity (${currencySymbol}${totalExpense.toLocaleString()} spent this month), tracking daily expenses and sticking to category budgets will help you save more. Ask me "Mera sabse zyada kharcha kahan ho rha hai?" for detailed insight! 💡`;
+    // 3. Spending Habits / Analysis
+    if (msg.includes('habit') || msg.includes('analyze') || msg.includes('score') || msg.includes('analysis')) {
+      return `🌱 Spending Habits Analysis: Aapka monthly savings rate **${savingsPct}%** hai! Total saved: ${currencySymbol}${totalSaved.toLocaleString()}. ${savingsPct >= 20 ? '🔥 Great job! Aap Pro Saver category me aate ho!' : '⚡ Aim for 20%+ savings rate to build a solid emergency fund.'} Key focus: ${topCat.toUpperCase()} spending. 📈`;
+    }
+
+    // 4. Scan & Pay / UPI Questions
+    if (msg.includes('scan') || msg.includes('upi') || msg.includes('pay') || msg.includes('qr') || msg.includes('cashfree')) {
+      return `⚡ ZenBudget Direct Scan & Pay: App me Top QR icon tap karo. Scanned QR, Mobile number, Bank A/c (IFSC), ya UPI ID se zero-fee Direct Deep Linking se instant pay ho jata hai! ₹79 payment se Lifetime Scan & Pay access milta hai! 📲`;
+    }
+
+    // 5. Quick Capture / AI Voice Entry
+    if (msg.includes('quick capture') || msg.includes('voice') || msg.includes('mic') || msg.includes('bol kar')) {
+      return `🎙️ AI Quick Capture: Dashboard par card me bol kar ya likh kar (e.g. "Paid 220 for petrol in cash") entry kar sakte ho! System auto-detect karke instant save kar deta hai! ⚡`;
+    }
+
+    // 6. Security / PIN / Biometrics
+    if (msg.includes('pin') || msg.includes('lock') || msg.includes('password') || msg.includes('security') || msg.includes('biometric')) {
+      return `🔒 Security & Privacy: ZenBudget aapka data aapke device sandbox me store karta hai. Login PIN & Biometrics (Fingerprint/Face ID) se aapka app 100% private & secure rehta hai! 🛡️`;
+    }
+
+    // 7. General Greetings
+    if (msg === 'hi' || msg === 'hello' || msg === 'hey' || msg.includes('kaise ho')) {
+      return `Hi ${userName}! 🌿 Main Zen hu — aapka AI Financial Coach. Main aapki spending analyze kar sakta hu, savings tips de sakta hu, aur ZenBudget app ke bare me kuch bhi samjha sakta hu! Ask me anything! 🤝✨`;
+    }
+
+    // 8. Universal Smart Money & App Guide Fallback
+    return `💡 Great question! Based on your active monthly balance (${currencySymbol}${totalIncome.toLocaleString()} income, ${currencySymbol}${totalExpense.toLocaleString()} spent): Spending discipline and tracking daily entries via Quick Capture will boost your savings. Ask me "Mera sabse zyada kharcha kahan ho rha hai?" for deep insights! 🧘‍♂️✨`;
   }
 
   const handleSend = async (e?: React.FormEvent, customPrompt?: string) => {

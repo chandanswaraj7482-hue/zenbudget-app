@@ -765,8 +765,13 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         setEnteredPin(nextPin);
         
         if (nextPin.length === 4) {
-          const expectedPin = dbProfile?.pin || localStorage.getItem('zb_user_pin') || localStorage.getItem(`zb_pin_${userId}`) || '1234';
-          if (nextPin === expectedPin || (dbProfile && nextPin === dbProfile.pin)) {
+          const storedPin = dbProfile?.pin || localStorage.getItem('zb_user_pin') || localStorage.getItem(`zb_pin_${userId}`);
+          const isValidPin = !storedPin || nextPin === storedPin || (dbProfile && nextPin === dbProfile.pin);
+
+          if (isValidPin) {
+            if (!storedPin) {
+              localStorage.setItem('zb_user_pin', nextPin);
+            }
             if (dbProfile?.referral_code) {
               localStorage.setItem('zb_invite_code', dbProfile.referral_code);
             }
