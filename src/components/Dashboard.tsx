@@ -125,7 +125,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenLoans: _onOpenLoans,
   onOpenProfile,
   onUpgradeClick,
-  onDeleteAccount
+  onDeleteAccount,
+  onSaveTransaction
 }) => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showAllAccountsModal, setShowAllAccountsModal] = useState(false);
