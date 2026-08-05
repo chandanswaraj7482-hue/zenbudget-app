@@ -31,7 +31,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymb
   const handleNext = () => {
     if (step === 1 && selectedGoal) {
       if (selectedGoal.id === 'other' && !customGoalName.trim()) {
-        return; // don't advance if other is selected but no name typed
+        return;
       }
       setAmount(selectedGoal.defaultTarget.toString());
       setStep(2);
@@ -41,12 +41,13 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymb
       setStep(4);
     } else if (step === 4) {
       if (selectedGoal) {
-        const finalName = selectedGoal.id === 'other' ? customGoalName.trim() : `New ${selectedGoal.name}`;
+        const goalName = selectedGoal.id === 'other' ? customGoalName.trim() : selectedGoal.name;
         onComplete({
-          id: Date.now().toString(),
-          name: finalName,
-          targetAmount: Number(amount),
+          id: `goal_${Date.now()}`,
+          name: goalName,
+          targetAmount: Number(amount) || selectedGoal.defaultTarget,
           currentAmount: 0,
+          deadlineMonths: months,
           color: selectedGoal.color
         });
       }
@@ -68,14 +69,14 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymb
       display: 'flex',
       flexDirection: 'column',
       padding: '24px',
-      color: '#fff',
+      color: 'var(--text-primary)',
       overflowY: 'auto',
       WebkitOverflowScrolling: 'touch',
       animation: 'fadeIn 0.4s ease-out'
     }}>
       
       {/* Progress Bar */}
-      <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', marginTop: '40px' }}>
+      <div style={{ width: '100%', height: '4px', background: 'var(--border-input)', borderRadius: '2px', marginTop: '40px' }}>
         <div style={{
           width: `${(step / 4) * 100}%`,
           height: '100%',
@@ -106,8 +107,8 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymb
                     key={g.id}
                     onClick={() => { setSelectedGoal(g); if (g.id !== 'other') setCustomGoalName(''); }}
                     style={{
-                      background: isSelected ? 'rgba(34, 197, 94, 0.1)' : 'rgba(255,255,255,0.03)',
-                      border: `1px solid ${isSelected ? 'var(--primary)' : 'rgba(255,255,255,0.05)'}`,
+                      background: isSelected ? 'var(--primary-glow)' : 'var(--bg-card)',
+                      border: `1px solid ${isSelected ? 'var(--primary)' : 'var(--border-card)'}`,
                       borderRadius: '20px',
                       padding: '20px 14px',
                       display: 'flex',
@@ -117,18 +118,18 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymb
                       cursor: 'pointer',
                       transition: 'all 0.2s',
                       transform: isSelected ? 'scale(1.02)' : 'scale(1)',
-                      boxShadow: isSelected ? '0 8px 25px rgba(34,197,94,0.15)' : 'none'
+                      boxShadow: isSelected ? '0 8px 25px var(--primary-glow)' : 'none'
                     }}
                   >
                     <div style={{
                       width: '44px', height: '44px', borderRadius: '14px',
-                      background: isSelected ? g.color : 'rgba(255,255,255,0.05)',
+                      background: isSelected ? g.color : 'var(--bg-input)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       color: isSelected ? '#fff' : 'var(--text-secondary)'
                     }}>
                       <Icon size={22} />
                     </div>
-                    <span style={{ fontSize: '14px', fontWeight: 600, color: isSelected ? '#fff' : 'var(--text-secondary)' }}>
+                    <span style={{ fontSize: '14px', fontWeight: 600, color: isSelected ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
                       {g.name}
                     </span>
                   </button>
@@ -153,10 +154,10 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymb
                     padding: '14px 16px',
                     fontSize: '14px',
                     fontWeight: 600,
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.12)',
+                    background: 'var(--bg-input)',
+                    border: '1px solid var(--border-input)',
                     borderRadius: '14px',
-                    color: '#fff',
+                    color: 'var(--text-primary)',
                     outline: 'none',
                     fontFamily: "'Manrope', sans-serif"
                   }}
@@ -189,10 +190,10 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymb
                   width: '100%',
                   background: 'transparent',
                   border: 'none',
-                  borderBottom: '2px solid rgba(255,255,255,0.1)',
+                  borderBottom: '2px solid var(--border-input)',
                   fontSize: '48px',
                   fontWeight: 800,
-                  color: '#fff',
+                  color: 'var(--text-primary)',
                   padding: '10px 20px 10px 50px',
                   outline: 'none',
                   fontFamily: "'Manrope', sans-serif"
@@ -211,7 +212,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymb
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '20px' }}>
               <p style={{ fontSize: '16px', color: 'var(--text-secondary)' }}>
-                I want to buy it in <strong style={{ color: '#fff', fontSize: '20px' }}>{months}</strong> months.
+                I want to buy it in <strong style={{ color: 'var(--text-primary)', fontSize: '20px' }}>{months}</strong> months.
               </p>
               
               <input 
@@ -234,7 +235,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymb
         {/* STEP 4: Congratulations summary */}
         {step === 4 && (
           <div className="animate-slide-up" style={{ display: 'flex', flexDirection: 'column', gap: '40px', alignItems: 'center', textAlign: 'center', marginTop: '40px' }}>
-            <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 30px rgba(34, 197, 94, 0.3)' }}>
+            <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 30px var(--primary-glow)' }}>
               <Check size={40} color="#fff" />
             </div>
             
@@ -247,67 +248,59 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymb
               </p>
             </div>
             
-            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '24px', borderRadius: '24px', width: '100%', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '24px', width: '100%', border: '1px solid var(--border-card)' }}>
               <span style={{ fontSize: '42px', fontWeight: 800, background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 {currencySymbol}{calculateDaily()}
               </span>
               <span style={{ fontSize: '16px', color: 'var(--text-secondary)', fontWeight: 600 }}> / day</span>
             </div>
             
-            <p style={{ fontSize: '18px', fontWeight: 600, color: '#fff' }}>
+            <p style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>
               Let's build that habit.
             </p>
           </div>
         )}
+
       </div>
 
-      {/* Bottom Actions: Continue + Skip */}
-      <div style={{ marginTop: 'auto', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {/* Footer Navigation */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '40px' }}>
+        <button
+          onClick={handleSkip}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'var(--text-muted)',
+            fontSize: '14px',
+            fontWeight: 600,
+            cursor: 'pointer'
+          }}
+        >
+          Skip for now
+        </button>
+
         <button
           onClick={handleNext}
-          disabled={step === 1 && !selectedGoal}
-          className="glass-button active"
+          disabled={(step === 1 && !selectedGoal) || (step === 1 && selectedGoal?.id === 'other' && !customGoalName.trim()) || (step === 2 && (!amount || Number(amount) <= 0))}
           style={{
-            width: '100%',
-            padding: '18px',
+            background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)',
+            border: 'none',
             borderRadius: '16px',
-            fontSize: '16px',
+            padding: '14px 28px',
+            color: '#fff',
+            fontSize: '15px',
             fontWeight: 700,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
             gap: '8px',
-            background: (step === 1 && !selectedGoal) ? 'rgba(255,255,255,0.1)' : 'linear-gradient(to right, var(--primary), var(--secondary))',
-            border: 'none',
-            color: (step === 1 && !selectedGoal) ? 'rgba(255,255,255,0.4)' : '#fff',
-            boxShadow: (step === 1 && !selectedGoal) ? 'none' : '0 10px 25px rgba(34, 197, 94, 0.3)',
-            transition: 'all 0.3s'
+            cursor: 'pointer',
+            opacity: ((step === 1 && !selectedGoal) || (step === 1 && selectedGoal?.id === 'other' && !customGoalName.trim()) || (step === 2 && (!amount || Number(amount) <= 0))) ? 0.5 : 1,
+            boxShadow: '0 8px 25px var(--primary-glow)',
+            transition: 'all 0.2s'
           }}
         >
-          {step === 4 ? "Start Tracking" : "Continue"}
-          {step !== 4 && <ChevronRight size={20} />}
+          {step === 4 ? 'Get Started' : 'Next'} <ChevronRight size={18} />
         </button>
-
-        {/* Skip button on steps 1, 2, 3 */}
-        {step <= 3 && (
-          <button
-            onClick={handleSkip}
-            style={{
-              width: '100%',
-              padding: '14px',
-              borderRadius: '14px',
-              fontSize: '14px',
-              fontWeight: 600,
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-              transition: 'color 0.2s'
-            }}
-          >
-            Skip for now
-          </button>
-        )}
       </div>
 
     </div>

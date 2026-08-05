@@ -47,54 +47,55 @@
 }
 
 /* Premium Light Mode Colors */
+/* Apple Design System - Premium Light Mode Colors */
 .light-theme, body.light-theme {
   color-scheme: light;
-  --bg-dark: #f1f5f9;
-  --bg-card: rgba(255, 255, 255, 0.92);
-  --bg-card-hover: rgba(248, 250, 252, 1);
-  --border-card: rgba(0, 0, 0, 0.08);
-  --border-card-active: rgba(22, 163, 74, 0.5);
+  --bg-dark: #f6f8fa;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fafc;
+  --border-card: rgba(0, 0, 0, 0.06);
+  --border-card-active: rgba(22, 163, 74, 0.4);
 
   --primary: #16a34a;
-  --primary-glow: rgba(22, 163, 74, 0.15);
+  --primary-glow: rgba(22, 163, 74, 0.12);
   --secondary: #0d9488;
-  --secondary-glow: rgba(13, 148, 136, 0.15);
+  --secondary-glow: rgba(13, 148, 136, 0.12);
   --success: #059669;
-  --success-glow: rgba(5, 150, 105, 0.15);
+  --success-glow: rgba(5, 150, 105, 0.12);
   --danger: #dc2626;
-  --danger-glow: rgba(220, 38, 38, 0.15);
+  --danger-glow: rgba(220, 38, 38, 0.12);
   --warning: #d97706;
-  --warning-glow: rgba(217, 119, 6, 0.15);
+  --warning-glow: rgba(217, 119, 6, 0.12);
 
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-muted: #64748b;
 
-  --bg-balance-card: linear-gradient(135deg, #ffffff 0%, rgba(22, 163, 74, 0.1) 100%);
-  --border-balance-card: rgba(22, 163, 74, 0.25);
-  --border-divider: rgba(0, 0, 0, 0.08);
-  --bg-app-gradient: radial-gradient(circle at 50% 0%, rgba(22, 163, 74, 0.08) 0%, #e2e8f0 70%);
-  --bg-input: rgba(0, 0, 0, 0.04);
-  --border-input: rgba(0, 0, 0, 0.12);
-  --bg-input-focus: rgba(0, 0, 0, 0.07);
-  --border-button: rgba(0, 0, 0, 0.1);
-  --scroll-thumb: rgba(0, 0, 0, 0.2);
+  --bg-balance-card: linear-gradient(135deg, #ffffff 0%, rgba(22, 163, 74, 0.08) 100%);
+  --border-balance-card: rgba(22, 163, 74, 0.2);
+  --border-divider: rgba(0, 0, 0, 0.06);
+  --bg-app-gradient: radial-gradient(circle at 50% 0%, rgba(22, 163, 74, 0.06) 0%, #f1f5f9 100%);
+  --bg-input: #ffffff;
+  --border-input: rgba(0, 0, 0, 0.1);
+  --bg-input-focus: #ffffff;
+  --border-button: rgba(0, 0, 0, 0.08);
+  --scroll-thumb: rgba(0, 0, 0, 0.15);
 }
 
-/* Complete Bulletproof Light Mode System Overrides */
+/* Complete Apple Design System Light Mode Overrides */
 html.light-theme,
 body.light-theme,
 #root.light-theme {
   color-scheme: light !important;
-  background-color: #f1f5f9 !important;
-  background: radial-gradient(circle at 50% 0%, rgba(22, 163, 74, 0.08) 0%, #e2e8f0 70%) !important;
+  background-color: #f6f8fa !important;
+  background: radial-gradient(circle at 50% 0%, rgba(22, 163, 74, 0.06) 0%, #f1f5f9 100%) !important;
   color: #0f172a !important;
 }
 
 html.light-theme *,
 body.light-theme *,
 #root.light-theme * {
-  border-color: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.07);
 }
 
 /* Glass Panels & Cards in Light Mode */
@@ -110,8 +111,8 @@ body.light-theme *,
 .light-theme [style*="rgba(255, 255, 255, 0.05)"] {
   background-color: #ffffff !important;
   background: #ffffff !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02) !important;
 }
 
 /* Headings, Text, Labels in Light Mode */

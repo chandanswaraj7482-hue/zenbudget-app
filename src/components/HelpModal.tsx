@@ -1,10 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { X, HelpCircle, Send, Mail, Bot, Star } from 'lucide-react';
-import { supabase } from '../supabaseClient';
+import type { Transaction, CategoryBudget, SavingsGoal } from '../types';
 
 interface HelpModalProps {
   isOpen: boolean;
   onClose: () => void;
+  transactions?: Transaction[];
+  budgets?: CategoryBudget[];
+  goals?: SavingsGoal[];
+  currencySymbol?: string;
+  userName?: string;
 }
 
 interface ChatMessage {
@@ -14,7 +17,15 @@ interface ChatMessage {
   time: string;
 }
 
-export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
+export const HelpModal: React.FC<HelpModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  transactions = [], 
+  budgets = [],
+  goals = [],
+  currencySymbol = '₹',
+  userName = 'User'
+}) => {
   if (!isOpen) return null;
 
   const [activeTab, setActiveTab] = useState<'faq' | 'bot' | 'feedback'>('faq');
@@ -25,13 +36,50 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
     {
       id: '1',
       sender: 'bot',
-      text: "Hi! I am 🌿 Zen — Your Money Coach. 🧘‍♂️ How can I help you today with your budgets, expenses, or financial goals?",
+      text: "Hi! I am 🌿 Zen — Your AI Financial Coach. 🧘‍♂️ I analyze your transactions, budgets, goals, and can answer any question about your money or ZenBudget features!",
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
   const [inputVal, setInputVal] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Analyze user spending activity for AI Coach
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const monthTxs = transactions.filter(t => {
+    const d = new Date(t.date);
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  });
+
+  const totalIncome = monthTxs.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+  const totalExpense = monthTxs.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+  const totalSaved = Math.max(0, totalIncome - totalExpense);
+  const savingsPct = totalIncome > 0 ? Math.round((totalSaved / totalIncome) * 100) : 0;
+
+  const catMap: Record<string, number> = {};
+  monthTxs.filter(t => t.type === 'expense').forEach(t => {
+    catMap[t.category] = (catMap[t.category] || 0) + t.amount;
+  });
+  let topCat = 'none';
+  let topCatAmt = 0;
+  Object.entries(catMap).forEach(([cat, amt]) => {
+    if (amt > topCatAmt) {
+      topCatAmt = amt;
+      topCat = cat;
+    }
+  });
+
+  const catBreakdownText = Object.entries(catMap)
+    .map(([c, amt]) => `${c}: ${currencySymbol}${amt.toLocaleString()}`)
+    .join(', ');
+
+  const recentTxsText = monthTxs.slice(0, 5)
+    .map(t => `${t.title} (${t.type.toUpperCase()} ${currencySymbol}${t.amount})`)
+    .join('; ');
+
+  const budgetSummaryText = budgets.map(b => `${b.category}: ${currencySymbol}${b.spent}/${currencySymbol}${b.limit}`).join(', ');
+  const goalSummaryText = goals.map(g => `${g.name}: ${currencySymbol}${g.currentAmount}/${currencySymbol}${g.targetAmount}`).join(', ');
 
   // Local persistent memory database
   const [learnedMemory, setLearnedMemory] = useState<Record<string, string>>(() => {
@@ -70,33 +118,27 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
   function getSmartClientFallbackResponse(userMessage: string): string {
     const msg = (userMessage || '').toLowerCase().trim();
 
-    if (msg === 'hi' || msg === 'hello' || msg === 'hey' || msg.includes('hi ') || msg.includes('hello ') || msg === 'hi!') {
-      return "Hi! I am ZenBot, your AI financial coach. 🧘 How can I help you today with your budgets, expenses, or savings goals?";
+    if (msg.includes('kahan') || msg.includes('sabse zyada') || msg.includes('kharcha') || msg.includes('highest spending')) {
+      return `📊 Iss month aapka sabse zyada kharcha **${topCat.toUpperCase()}** category me hua hai (${currencySymbol}${topCatAmt.toLocaleString()})! Total monthly spending: ${currencySymbol}${totalExpense.toLocaleString()}. 💡 Tips: Chhoti subscription ya daily impulse shopping par limit lagao to aap har mahine ₹2,000+ extra save kar sakte ho! 🌿`;
     }
-    if (msg.includes('support') || msg.includes('contact') || msg.includes('email') || msg.includes('receipt') || msg.includes('help')) {
-      return "For official support, billing inquiries, or account help, please email our team directly at hello.zenbudget@zohomail.in. We're happy to assist you!";
+    if (msg.includes('bachayein') || msg.includes('save') || msg.includes('saving') || msg.includes('5000')) {
+      return `🎯 Extra ${currencySymbol}5,000 bachane ke liye: 1️⃣ Pehle 5 din me fixed savings alag kar do. 2️⃣ ${topCat.toUpperCase()} kharchon par 20% limit lagayein. 3️⃣ ZenBudget ka Quick Capture features use karke har ₹10 ka track rakho! 💪✨`;
     }
-    if (msg.includes('payment') || msg.includes('subscribe') || msg.includes('premium') || msg.includes('unlock') || msg.includes('trial')) {
-      return "You can upgrade to ZenBudget Premium anytime from the Subscription menu. Payments are processed securely via Cashfree supporting UPI, Cards, and Netbanking. If you completed a payment and need support, feel free to email hello.zenbudget@zohomail.in.";
-    }
-    if (msg.includes('save') || msg.includes('saving') || msg.includes('invest')) {
-      return "A great starting point for savings is the 50/30/20 rule: allocate 50% of income to needs, 30% to wants, and 20% directly to savings or goals. Set up category budgets in ZenBudget to track your progress effortlessly!";
-    }
-    if (msg.includes('budget') || msg.includes('limit') || msg.includes('exceed')) {
-      return "ZenBudget allows you to set monthly budget limits for categories like Food, Shopping, and Entertainment. If an expense exceeds your category budget, ZenBudget will warn you to decide if it's urgent before saving!";
-    }
-    if (msg.includes('transaction') || msg.includes('add') || msg.includes('expense') || msg.includes('income')) {
-      return "To log a new transaction, tap the '+' button at the bottom of the screen. You can choose Expense or Income, select a category, enter the amount, and save!";
+    if (msg.includes('habit') || msg.includes('analyze') || msg.includes('score')) {
+      return `🌱 Spending Analysis: Aapka monthly savings rate **${savingsPct}%** hai! Total saved: ${currencySymbol}${totalSaved.toLocaleString()}. ${savingsPct >= 20 ? '🔥 Great job! Aap Pro Saver category me aate ho!' : '⚡ Target rakho ki kam se kam 20% income monthly savings account me daalo.'}`;
     }
 
-    return "That's a great financial question! A solid strategy is to track all daily expenses regularly, set realistic monthly category budgets, and save at least 20% of your income. Let me know if you'd like tips on specific categories or features!";
+    if (msg === 'hi' || msg === 'hello' || msg === 'hey') {
+      return "Hi! I am ZenBot, your AI financial coach. 🧘 I can analyze your transactions, tell you your highest spending areas, and help you cut unnecessary expenses!";
+    }
+
+    return `That's a great question! Based on your recent account activity (${currencySymbol}${totalExpense.toLocaleString()} spent this month), tracking daily expenses and sticking to category budgets will help you save more. Ask me "Mera sabse zyada kharcha kahan ho rha hai?" for detailed insight! 💡`;
   }
 
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputVal.trim()) return;
-
-    const rawText = inputVal.trim();
+  const handleSend = async (e?: React.FormEvent, customPrompt?: string) => {
+    if (e) e.preventDefault();
+    const rawText = (customPrompt || inputVal).trim();
+    if (!rawText) return;
 
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
@@ -109,29 +151,9 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
     setInputVal('');
     setIsTyping(true);
 
-    // Silent Context Learning: If user inputs a factual statement (I earn, my salary, I spent), store it silently
-    const lowerText = rawText.toLowerCase();
-    if (lowerText.includes('my salary') || lowerText.includes('i earn') || lowerText.includes('i spent') || lowerText.includes('my budget')) {
-      // Create a small hash keyword from the first few words to memorize the sentiment/fact
-      const key = lowerText.split(' ').slice(0, 3).join('_');
-      const updatedMemory = { ...learnedMemory, [key]: rawText };
-      setLearnedMemory(updatedMemory);
-      localStorage.setItem('zb_bot_memory', JSON.stringify(updatedMemory));
-    }
-
     let botResponseText = '';
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
     try {
-      const activeLang = localStorage.getItem('zb_language') || 'en';
-      const langNames: Record<string, string> = {
-        en: 'English',
-        hi: 'Hindi',
-        es: 'Spanish',
-        fr: 'French',
-        de: 'German'
-      };
-      const selectedLangName = langNames[activeLang] || activeLang;
-
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
@@ -141,10 +163,25 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
           contents: [{
             parts: [
               {
-                text: `You are Zen 🌿 — an ultra-friendly personal finance best friend & AI Coach. Speak like a warm, supportive best friend using emojis. Keep responses short (2-3 sentences max). Answer ONLY personal finance, budgeting, saving tips, or ZenBudget app features. ALWAYS respond strictly in the user's selected language (${selectedLangName}). If language is Hindi/hi, respond in conversational Hindi/Hinglish. If English, respond in English. Support email: hello.zenbudget@zohomail.in.
+                text: `You are Zen 🌿 — an ultra-friendly personal finance best friend & ZenBudget App Master AI Coach.
+Speak like a warm, supportive best friend using emojis. MATCH THE EXACT LANGUAGE THE USER SPEAKS IN (Hindi, Hinglish, English, etc.).
 
-Selected User Language: ${selectedLangName}
-User Message: ${rawText}`
+You can answer ANY question about:
+1. The user's account transactions, monthly spending habits, categories breakdown, budgets, and savings goals.
+2. How to use ZenBudget app features (Quick Capture natural language, Direct Scan & Pay, Bank Sync, Money Wrapped, Zen Pet, Biometric Lock, Loans tracker, Category Budgets, Savings Goals, Analytics).
+
+User Real Activity Context:
+- User Name: ${userName}
+- Monthly Income: ${currencySymbol}${totalIncome}
+- Monthly Expenses: ${currencySymbol}${totalExpense}
+- Monthly Savings Rate: ${savingsPct}%
+- Top Spending Category: ${topCat} (${currencySymbol}${topCatAmt})
+- Category Expenses Breakdown: ${catBreakdownText || 'None yet'}
+- Recent Transaction Logs: ${recentTxsText || 'None yet'}
+- Category Budgets: ${budgetSummaryText || 'None set'}
+- Savings Goals: ${goalSummaryText || 'None set'}
+
+User Question: ${rawText}`
               }
             ]
           }]
@@ -395,8 +432,37 @@ User Message: ${rawText}`
                 <div ref={chatEndRef} />
               </div>
 
+              {/* Quick Prompt Chips */}
+              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '6px', scrollbarWidth: 'none', flexShrink: 0 }}>
+                {[
+                  { text: '💸 Sabse zyada kharcha?', query: 'Mera sabse zyada kharcha kahan ho rha hai?' },
+                  { text: '🎯 Extra ₹5,000 kaise bachayein?', query: 'Mujhe iss month extra ₹5,000 kaise bachane hain?' },
+                  { text: '📊 Habits analyze karo', query: 'Mera spending habits aur score analyze karo' }
+                ].map((chip, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleSend(undefined, chip.query)}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '16px',
+                      border: '1px solid var(--border-input)',
+                      background: 'var(--bg-input)',
+                      color: 'var(--text-secondary)',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      whiteSpace: 'nowrap',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {chip.text}
+                  </button>
+                ))}
+              </div>
+
               {/* Chat Input form */}
-              <form onSubmit={handleSend} style={{ display: 'flex', gap: '8px', borderTop: '1px solid var(--border-input)', paddingTop: '10px', flexShrink: 0 }}>
+              <form onSubmit={(e) => handleSend(e)} style={{ display: 'flex', gap: '8px', borderTop: '1px solid var(--border-input)', paddingTop: '10px', flexShrink: 0 }}>
                 <input
                   type="text"
                   value={inputVal}

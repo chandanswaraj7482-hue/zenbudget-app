@@ -132,7 +132,9 @@ export const FollowUsView: React.FC<FollowUsViewProps> = ({ onBack }) => {
                 </div>
                 <div>
                   <h4 style={{ fontSize: '15px', fontWeight: 700, margin: 0 }}>{social.platform}</h4>
-                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>@zenbudget</span>
+                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                    {social.url ? social.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') : `@${social.platform.toLowerCase()}`}
+                  </span>
                 </div>
               </div>
 

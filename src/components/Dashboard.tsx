@@ -26,6 +26,7 @@ import type { Transaction, SavingsGoal, CategoryBudget, Account } from '../types
 import { t } from '../utils/i18n';
 import { ZenPet } from './ZenPet';
 import { PremiumHub } from './PremiumHub';
+import { QuickCaptureCard } from './QuickCaptureCard';
 import { formatCurrency } from '../utils/formatCurrency';
 import confetti from 'canvas-confetti';
 
@@ -58,6 +59,7 @@ interface DashboardProps {
   onOpenLoans?: () => void;
   onOpenProfile?: () => void;
   onUpgradeClick?: () => void;
+  onSaveTransaction?: (tx: Omit<Transaction, 'id'>) => void;
   onDeleteAccount?: (accId: string) => void;
 }
 
@@ -799,6 +801,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </button>
         </div>
       </div>
+
+      {/* AI Quick Capture Natural Language Card */}
+      {onSaveTransaction && (
+        <QuickCaptureCard
+          onSaveTransaction={onSaveTransaction}
+          currencySymbol={currencySymbol}
+        />
+      )}
 
       {/* Savings Rate Card */}
       {income > 0 && (

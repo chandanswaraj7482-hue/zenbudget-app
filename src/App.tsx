@@ -521,17 +521,19 @@ const App: React.FC = () => {
       return;
     }
 
-    // Automatically grant Scan & Pay Lifetime Access on clicking Pay via Cashfree
-    localStorage.setItem(`zb_scan_pay_access_${currentProfileId}`, 'true');
-    if (currentProfileId) {
-      supabase.from('profiles').update({ has_scan_pay_access: true }).eq('id', currentProfileId).catch(() => {});
+    const isPremium = subscriptionTier === 'premium' || subscriptionTier === 'premium_monthly' || subscriptionTier === 'premium_yearly' || subscriptionTier === 'premium_lifetime';
+    const hasScanPayAccess = isPremium || localStorage.getItem(`zb_scan_pay_access_${currentProfileId}`) === 'true';
+
+    // Standalone Paid Feature Guard: Must pay ₹79 for Scan & Pay separately
+    if (!hasScanPayAccess && !title.startsWith('loan_')) {
+      setIsScanPayUnlockOpen(true);
+      return;
     }
 
     try {
       const userEmail = localStorage.getItem('zb_user_email') || '';
       const userPhone = localStorage.getItem('zb_user_phone') || '';
-      triggerToast(`Scan & Pay Unlocked! Launching Cashfree Direct Pay for ₹${amount}...`, 'success');
-      try { confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } }); } catch (e) {}
+      triggerToast(`Launching Cashfree Direct Pay for ₹${amount}...`, 'info');
 
       let payment_session_id = '';
       const endpoints = [
@@ -2570,6 +2572,9 @@ const App: React.FC = () => {
       }
 
       setIsLocked(false);
+      setTimeout(() => {
+        fetchDataFromSupabase();
+      }, 50);
     }} />;
   }
 
@@ -2800,6 +2805,7 @@ const App: React.FC = () => {
             onOpenProfile={() => setActiveView('profile')}
             onUpgradeClick={() => setIsSubModalOpen(true)}
             onDeleteAccount={handleDeleteAccount}
+            onSaveTransaction={handleSaveTransaction}
           />
         )}
         {activeView === 'loans' && (
@@ -3410,6 +3416,11 @@ const App: React.FC = () => {
         <HelpModal
           isOpen={isHelpOpen}
           onClose={() => setIsHelpOpen(false)}
+          transactions={convertedTransactions}
+          budgets={convertedBudgets}
+          goals={convertedGoals}
+          currencySymbol={currencySymbol}
+          userName={userName}
         />
       )}
 

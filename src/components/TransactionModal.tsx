@@ -96,7 +96,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   useEffect(() => {
     if (editingTransaction) {
       setType(editingTransaction.type);
-      setAmount(editingTransaction.amount.toString());
+      const roundedAmount = Math.round((editingTransaction.amount + Number.EPSILON) * 100) / 100;
+      setAmount(roundedAmount.toString());
       setTitle(editingTransaction.title);
       setCategory(editingTransaction.category);
       setDate(editingTransaction.date);
@@ -365,8 +366,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setTransferError('');
-    const parsedAmount = parseFloat(amount);
+    const rawNum = parseFloat(amount);
+    const parsedAmount = Math.round((rawNum + Number.EPSILON) * 100) / 100;
 
     if (type === 'transfer') {
       if (isNaN(parsedAmount) || parsedAmount <= 0) {
