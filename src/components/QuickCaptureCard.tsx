@@ -75,14 +75,74 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
       accountId = '1';
     }
 
-    // 5. Clean Title / Description
-    let title = text.trim();
-    if (!title) {
-      title = `${type.toUpperCase()} Entry`;
+    // 5. Intelligent Title & Item Extraction (e.g. "mene 100 ruppess pizza khaya" -> "Pizza")
+    let extractedTitle = '';
+
+    const itemMap: { regex: RegExp; label: string }[] = [
+      { regex: /\bpizza\b/i, label: 'Pizza' },
+      { regex: /\bburger\b/i, label: 'Burger' },
+      { regex: /\bswiggy\b/i, label: 'Swiggy Food' },
+      { regex: /\bzomato\b/i, label: 'Zomato Order' },
+      { regex: /\bpetrol|fuel|diesel\b/i, label: 'Fuel / Petrol' },
+      { regex: /\bchai|tea\b/i, label: 'Chai / Tea' },
+      { regex: /\bcoffee\b/i, label: 'Coffee' },
+      { regex: /\buber|ola|cab|auto|rickshaw\b/i, label: 'Cab Ride' },
+      { regex: /\bdoodh|milk\b/i, label: 'Milk' },
+      { regex: /\bsabzi|vegetables\b/i, label: 'Vegetables' },
+      { regex: /\bgrocer(?:y|ies)|ration|blinkit|zepto|instamart\b/i, label: 'Groceries' },
+      { regex: /\brent|kiraya\b/i, label: 'House Rent' },
+      { regex: /\bwifi|broadband\b/i, label: 'WiFi Bill' },
+      { regex: /\brecharge|mobile recharge\b/i, label: 'Mobile Recharge' },
+      { regex: /\belectricity|bijli\b/i, label: 'Electricity Bill' },
+      { regex: /\bnetflix|spotify|prime\b/i, label: 'Subscription' },
+      { regex: /\bmovie|cinema\b/i, label: 'Movie Ticket' },
+      { regex: /\bmedicine|doctor|clinic\b/i, label: 'Medical & Pharmacy' },
+      { regex: /\bsalary|stipend\b/i, label: 'Monthly Salary' },
+      { regex: /\bamazon|flipkart|myntra\b/i, label: 'Online Shopping' },
+      { regex: /\bclothes|dress|shoes\b/i, label: 'Apparel & Clothes' }
+    ];
+
+    for (const item of itemMap) {
+      if (item.regex.test(cleanText)) {
+        extractedTitle = item.label;
+        break;
+      }
+    }
+
+    if (!extractedTitle) {
+      let stripped = cleanText
+        .replace(/(?:(?:₹|\$|€|£|rs\.?|inr|rupees|ruppess|rupee)?\s*)\d+(?:\.\d+)?\s*k?/gi, '')
+        .replace(/\b(mene|maine|main|i|humne|we|my|mera|meri|mere|ne|ka|ki|ke|ko|se|par|for|in|on|at|with|and|is|was|to|a|an)\b/gi, '')
+        .replace(/\b(paid|spent|bought|kharcha|diya|diye|chukaaya|purchase|order|pay|khaya|khaye|piya|piye|kharida|kharide|bheja|bheje|mila|aaya|gave|took|got|received|cash|bank|online|gpay|phonepe|paytm|upi)\b/gi, '')
+        .replace(/[^\w\s]/gi, '')
+        .trim();
+
+      if (stripped.length > 2) {
+        extractedTitle = stripped
+          .split(/\s+/)
+          .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(' ');
+      }
+    }
+
+    if (!extractedTitle) {
+      const catLabels: Record<string, string> = {
+        food: 'Food & Dining',
+        transport: 'Transport & Travel',
+        groceries: 'Groceries',
+        rent: 'House Rent',
+        bills: 'Bills & Utilities',
+        shopping: 'Shopping',
+        entertainment: 'Entertainment',
+        health: 'Health & Medical',
+        salary: 'Salary / Income',
+        other: 'General Expense'
+      };
+      extractedTitle = catLabels[category] || `${type.toUpperCase()} Transaction`;
     }
 
     return {
-      title: title,
+      title: extractedTitle,
       amount: amount || 0,
       type: type,
       category: category,
