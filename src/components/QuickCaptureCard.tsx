@@ -1,21 +1,27 @@
 import React, { useState } from 'react';
 import { Mic, ArrowRight, Sparkles, Check, RefreshCw } from 'lucide-react';
-import type { Transaction } from '../types';
+import type { Transaction, Account } from '../types';
 import confetti from 'canvas-confetti';
+import { Wallet, Plus, X } from 'lucide-react';
 
 interface QuickCaptureCardProps {
   onSaveTransaction: (tx: Omit<Transaction, 'id'>) => void;
   currencySymbol: string;
+  accounts?: Account[];
+  onAddAccountClick?: () => void;
 }
 
 export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
   onSaveTransaction,
-  currencySymbol
+  currencySymbol,
+  accounts = [],
+  onAddAccountClick
 }) => {
   const [activeTab, setActiveTab] = useState<'expense' | 'income' | 'transfer'>('expense');
   const [inputQuery, setInputQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [lastSavedSummary, setLastSavedSummary] = useState<string | null>(null);
+  const [showNoAccountModal, setShowNoAccountModal] = useState(false);
 
   // Natural Language Multi-lingual Parser
   const parseNaturalLanguage = (text: string, defaultType: 'expense' | 'income' | 'transfer') => {
@@ -191,6 +197,11 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!inputQuery.trim()) return;
+
+    if (!accounts || accounts.length === 0) {
+      setShowNoAccountModal(true);
+      return;
+    }
 
     const parsed = parseNaturalLanguage(inputQuery, activeTab);
     if (!parsed.amount || parsed.amount <= 0) {
@@ -395,6 +406,71 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
         }}>
           <Check size={14} />
           <span>{lastSavedSummary}</span>
+        </div>
+      )}
+
+      {/* No Account Modal Popup */}
+      {showNoAccountModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.7)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 3000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px'
+        }} className="animate-fade-in">
+          <div style={{
+            background: 'var(--bg-dark)',
+            border: '1px solid var(--border-card-active)',
+            borderRadius: '24px',
+            padding: '24px',
+            maxWidth: '340px',
+            width: '100%',
+            textAlign: 'center',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+            position: 'relative'
+          }} className="animate-scale-up">
+            <button 
+              onClick={() => setShowNoAccountModal(false)}
+              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+            >
+              <X size={18} />
+            </button>
+            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
+              <Wallet size={28} />
+            </div>
+            <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>No Account Found</h3>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '20px', lineHeight: 1.5 }}>
+              Please add at least 1 account or wallet (e.g. Cash, Bank, GPay) before logging expenses.
+            </p>
+            <button
+              onClick={() => {
+                setShowNoAccountModal(false);
+                if (onAddAccountClick) onAddAccountClick();
+              }}
+              style={{
+                width: '100%',
+                padding: '14px',
+                borderRadius: '16px',
+                background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)',
+                color: '#fff',
+                fontWeight: 800,
+                fontSize: '14px',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: '0 8px 24px var(--primary-glow)'
+              }}
+            >
+              <Plus size={18} /> Add Account Now
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -808,6 +808,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <QuickCaptureCard
           onSaveTransaction={onSaveTransaction}
           currencySymbol={currencySymbol}
+          accounts={accounts}
+          onAddAccountClick={onAddAccountClick}
         />
       )}
 
