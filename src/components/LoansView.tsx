@@ -337,6 +337,14 @@ export const LoansView: React.FC<LoansViewProps> = ({
                     <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>
                       Total Payable: {formatCurrency(loan.totalAmount, currencySymbol)}
                     </div>
+                    {(loan.emiInstallment || loan.frequency === 'monthly' || loan.frequency === 'yearly' || loan.frequency === 'weekly') && (
+                      <div style={{ fontSize: '11px', color: '#a78bfa', fontWeight: 800, marginTop: '2px' }}>
+                        💳 Monthly: {formatCurrency(
+                          loan.emiInstallment || Math.round(loan.totalAmount / (loan.frequency === 'yearly' ? 12 : 1)), 
+                          currencySymbol
+                        )} / mo
+                      </div>
+                    )}
                   </div>
                 </div>
 

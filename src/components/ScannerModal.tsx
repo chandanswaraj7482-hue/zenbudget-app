@@ -442,6 +442,25 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
   const redirectToUPI = (upiUrl: string) => {
     console.log('🚀 Launching UPI URL synchronously:', upiUrl);
 
+    // Universal Mobile Number Quick Router (Bypassing UPI Extension UI)
+    if (activePayTab === 'Mobile') {
+      const cleanPhone = payMobile.replace(/\D/g, '');
+      const amtVal = parseFloat(amount) || 0;
+      const phonePeDirectUrl = `phonepe://pay?phone=${cleanPhone}&am=${amtVal}&cu=INR`;
+      const defaultUpiUrl = buildUPIUrl(`${cleanPhone}@ybl`);
+
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (isMobile) {
+        window.location.href = phonePeDirectUrl;
+        setTimeout(() => {
+          window.location.href = defaultUpiUrl;
+        }, 500);
+      } else {
+        window.location.href = defaultUpiUrl;
+      }
+      return;
+    }
+
     let finalUrl = upiUrl;
     const isGPay = upiUrl.includes('tez') || upiUrl.includes('google') || upiUrl.includes('package=com.google.android.apps.nbu.paisa.user');
     const isPhonePe = upiUrl.includes('phonepe') || upiUrl.includes('package=com.phonepe.app');
@@ -786,53 +805,6 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                     <span style={{ fontSize: '18px' }}>✅</span>
                   )}
                 </div>
-
-                <div style={{ marginTop: '12px' }}>
-                  <label style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', fontWeight: 600 }}>UPI App Handle / Bank Extension:</label>
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                    {[
-                      { id: 'ybl', label: 'PhonePe (@ybl)' },
-                      { id: 'okaxis', label: 'GPay Axis (@okaxis)' },
-                      { id: 'oksbi', label: 'GPay SBI (@oksbi)' },
-                      { id: 'okicici', label: 'GPay ICICI (@okicici)' },
-                      { id: 'paytm', label: 'Paytm (@paytm)' },
-                      { id: 'upi', label: 'BHIM (@upi)' }
-                    ].map(item => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => setMobileUpiSuffix(item.id)}
-                        style={{
-                          padding: '6px 10px',
-                          borderRadius: '8px',
-                          border: mobileUpiSuffix === item.id ? '1px solid #10b981' : '1px solid var(--border-input)',
-                          background: mobileUpiSuffix === item.id ? 'rgba(16,185,129,0.15)' : 'var(--bg-input)',
-                          color: mobileUpiSuffix === item.id ? '#059669' : 'var(--text-secondary)',
-                          fontSize: '11px',
-                          fontWeight: 600,
-                          cursor: 'pointer'
-                        }}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Custom Handle: @</span>
-                    <input
-                      type="text"
-                      placeholder="e.g. axl, ibl, idfc, barodampay"
-                      value={mobileUpiSuffix}
-                      onChange={e => setMobileUpiSuffix(e.target.value.replace(/[^a-zA-Z0-9._-]/g, ''))}
-                      style={{ flex: 1, padding: '10px 12px', borderRadius: '10px', background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 700, outline: 'none' }}
-                    />
-                  </div>
-                  {payMobile.length === 10 && (
-                    <div style={{ marginTop: '6px', fontSize: '11px', color: 'var(--primary)', fontWeight: 600 }}>
-                      Payee VPA: {payMobile}@{mobileUpiSuffix || 'ybl'}
-                    </div>
-                  )}
                 </div>
               </div>
             )}

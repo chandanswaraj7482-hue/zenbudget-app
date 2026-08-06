@@ -52,7 +52,26 @@ import { playNotificationSound } from './utils/audio';
 import confetti from 'canvas-confetti';
 
 const App: React.FC = () => {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>(() => {
+    const profileId = localStorage.getItem('zb_profile_id') || '';
+    if (profileId) {
+      const cached = localStorage.getItem(`zb_transactions_${profileId}`) || localStorage.getItem(`zb_tx_cache_${profileId}`);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        } catch (_) {}
+      }
+    }
+    const globalCached = localStorage.getItem('zb_transactions') || localStorage.getItem('zb_tx_cache');
+    if (globalCached) {
+      try {
+        const parsed = JSON.parse(globalCached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (_) {}
+    }
+    return [];
+  });
   const [budgets, setBudgets] = useState<CategoryBudget[]>([]);
   const [goals, setGoals] = useState<SavingsGoal[]>([]);
   
@@ -458,6 +477,19 @@ const App: React.FC = () => {
   };
 
   const handlePayLoanViaUPI = async (loan: LoanRecord, amount: number) => {
+    const isUnlocked = subscriptionTier === 'premium_monthly' || 
+                       subscriptionTier === 'premium_yearly' || 
+                       subscriptionTier === 'premium_lifetime' || 
+                       subscriptionTier === 'premium' ||
+                       localStorage.getItem('has_scan_pay_access') === 'true' ||
+                       localStorage.getItem(`zb_scan_pay_access_${currentProfileId}`) === 'true';
+
+    if (!isUnlocked) {
+      setIsScanPayUnlockOpen(true);
+      triggerToast('Unlock 1-Click Cashfree PhonePe Access to proceed!', 'info');
+      return;
+    }
+
     try {
       const userEmail = localStorage.getItem('zb_user_email') || '';
       const userPhone = localStorage.getItem('zb_user_phone') || '';
@@ -1551,7 +1583,7 @@ const App: React.FC = () => {
           .in('user_id', userIds)
           .order('date', { ascending: false });
 
-        if (!txErr && txData) {
+        if (!txErr && txData && txData.length > 0) {
           annotatedTx = txData.map(t => ({
             ...t,
             partnerName: cachedPartnerId && t.user_id === cachedPartnerId
@@ -1559,18 +1591,33 @@ const App: React.FC = () => {
               : undefined
           }));
           // Cache transactions locally for offline fallback
+          localStorage.setItem(`zb_transactions_${currentProfileId}`, JSON.stringify(annotatedTx));
           localStorage.setItem(`zb_tx_cache_${currentProfileId}`, JSON.stringify(annotatedTx));
+          setTransactions(annotatedTx);
         } else {
-          // Fallback to cached transactions on Supabase error
-          const cached = localStorage.getItem(`zb_tx_cache_${currentProfileId}`);
-          if (cached) annotatedTx = JSON.parse(cached);
+          // Fallback to cached transactions on Supabase empty or error
+          const cached = localStorage.getItem(`zb_transactions_${currentProfileId}`) || localStorage.getItem(`zb_tx_cache_${currentProfileId}`);
+          if (cached) {
+            try {
+              const parsed = JSON.parse(cached);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                setTransactions(parsed);
+              }
+            } catch (_) {}
+          }
         }
       } catch (_fetchErr) {
         // Network error — silently use local cache
-        const cached = localStorage.getItem(`zb_tx_cache_${currentProfileId}`);
-        if (cached) annotatedTx = JSON.parse(cached);
+        const cached = localStorage.getItem(`zb_transactions_${currentProfileId}`) || localStorage.getItem(`zb_tx_cache_${currentProfileId}`);
+        if (cached) {
+          try {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setTransactions(parsed);
+            }
+          } catch (_) {}
+        }
       }
-      setTransactions(annotatedTx);
 
       // 2. Fetch budgets
       try {
