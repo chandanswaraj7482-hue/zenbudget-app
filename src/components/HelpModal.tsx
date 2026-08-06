@@ -214,7 +214,47 @@ export const HelpModal: React.FC<HelpModalProps> = ({
       return `Hi ${userName}! 🌿 Main Zen hu — aapka AI Financial Coach. Main aapki spending analyze kar sakta hu, savings tips de sakta hu, aur ZenBudget app ke bare me kuch bhi samjha sakta hu! Ask me anything! 🤝✨`;
     }
 
-    // 10. Universal Smart Money & App Guide Fallback (Clean, no unsolicited email prompts)
+    // 10. Financial Concepts: 50-30-20 Rule
+    if (msg.includes('50/30/20') || msg.includes('50-30-20') || msg.includes('rule') || msg.includes('budgeting rule')) {
+      if (isEng) {
+        return `💡 The 50/30/20 Rule:\n• **50% Needs**: Rent, groceries, bills & essentials.\n• **30% Wants**: Dining out, shopping, hobbies.\n• **20% Savings**: Emergency fund, SIPs & investments.\n\nYou can track this easily in ZenBudget under "Budgets & Limits"! 📊✨`;
+      }
+      return `💡 50/30/20 Budget Rule:\n• **50% Needs**: Kiraya, ration, bills & zaruri kharche.\n• **30% Wants**: Party, shopping & entertainment.\n• **20% Savings**: Emergency fund & SIP investments.\n\nAap ZenBudget me "Budgets" set karke isko strictly maintain kar sakte ho! 📊✨`;
+    }
+
+    // 11. SIP / Mutual Funds / Investing
+    if (msg.includes('sip') || msg.includes('mutual fund') || msg.includes('invest') || msg.includes('nivesh') || msg.includes('stocks')) {
+      if (isEng) {
+        return `📈 SIP & Investing Tip:\nA Systematic Investment Plan (SIP) allows you to invest small monthly amounts (e.g. ₹500/mo) in index funds or ELSS. Over 10-15 years, compounding can turn small savings into wealth! 🚀`;
+      }
+      return `📈 SIP & Investing Tip:\nSIP (Systematic Investment Plan) se aap har mahine ₹500 se bhi Mutual Funds me invest kar sakte ho. Long term (5-10 saal) me compounding se zabardast returns milte hain! 🚀`;
+    }
+
+    // 12. Emergency Fund
+    if (msg.includes('emergency') || msg.includes('fund') || msg.includes('bipat') || msg.includes('backup')) {
+      if (isEng) {
+        return `🛡️ Emergency Fund 101:\nAlways maintain 3 to 6 months of essential living expenses in a separate high-yield liquid bank account or FD. Never touch this money for shopping or non-emergencies! 🌿`;
+      }
+      return `🛡️ Emergency Fund Rule:\nApne 3 se 6 mahine ke kharchon ka paisa alag Savings Bank Account ya Liquid FD me rakhein. Yeh medical emergency ya job switch ke waqt kaam aata hai! 🌿`;
+    }
+
+    // 13. Credit Score / CIBIL
+    if (msg.includes('credit') || msg.includes('cibil') || msg.includes('score')) {
+      if (isEng) {
+        return `💳 Credit Score / CIBIL Tips:\n1️⃣ Always pay Credit Card bills & Loan EMIs before due date.\n2️⃣ Keep Credit Utilization under 30%.\n3️⃣ Avoid applying for multiple loans simultaneously. High score (>750) gets lower interest rates! ⚡`;
+      }
+      return `💳 CIBIL / Credit Score Tips:\n1️⃣ Credit Card bill aur EMI HAMESHA due date se pehle pay karein.\n2️⃣ Total credit limit ka sirf 30% hi use karein.\n750+ CIBIL score se saste rate par loans milte hain! ⚡`;
+    }
+
+    // 14. Tax Savings (80C / New vs Old)
+    if (msg.includes('tax') || msg.includes('80c') || msg.includes('income tax')) {
+      if (isEng) {
+        return `💸 Tax Saving Options (Section 80C):\nYou can save up to ₹1.5 Lakh tax per year using:\n• ELSS Mutual Funds (Lowest 3-yr lock-in)\n• PPF (Public Provident Fund)\n• NPS (National Pension Scheme - Extra ₹50,000 under 80CCD)\n• Health Insurance (Section 80D) 📊`;
+      }
+      return `💸 Tax Saving Tips (Section 80C):\nAap saal me ₹1.5 Lakh tak tax bachaa sakte ho:\n• ELSS Mutual Funds (3 saal lock-in)\n• PPF (Public Provident Fund)\n• NPS (Extra ₹50k under 80CCD)\n• Medical Health Insurance (Sec 80D) 📊`;
+    }
+
+    // 15. Universal Smart Money & App Guide Fallback (Clean, no unsolicited email prompts)
     if (isEng) {
       return `💡 Monthly activity summary (${currencySymbol}${totalIncome.toLocaleString()} income, ${currencySymbol}${totalExpense.toLocaleString()} spent): Your highest spending category is **${topCat.toUpperCase()}** (${currencySymbol}${topCatAmt.toLocaleString()}). Keep tracking daily entries to boost your ${savingsPct}% savings rate! 🌿✨`;
     }
@@ -249,12 +289,12 @@ export const HelpModal: React.FC<HelpModalProps> = ({
           contents: [{
             parts: [
               {
-                text: `You are Zen 🌿 — an ultra-friendly personal finance best friend & ZenBudget App Master AI Coach.
-CRITICAL LANGUAGE RULE: Default to English, BUT ALWAYS DYNAMICALLY MATCH THE EXACT LANGUAGE THE USER SPEAKS IN. If the user speaks in English, reply in English. If the user speaks in Hinglish, reply in Hinglish. If the user speaks in Hindi, reply in Hindi. If the user speaks in Spanish, French, etc., reply in that exact language!
+                text: `You are Zen 🌿 — an ultra-intelligent, friendly personal finance mentor & ZenBudget App Master AI Coach.
 
-You can answer ANY question about:
-1. The user's account transactions, monthly spending habits, categories breakdown, budgets, and savings goals.
-2. How to use ZenBudget app features (Quick Capture natural language, Direct Scan & Pay, Bank Sync, Money Wrapped, Zen Pet, Biometric Lock, Loans tracker, Category Budgets, Savings Goals, Analytics).
+CRITICAL INSTRUCTIONS:
+1. MATCH THE USER'S EXACT LANGUAGE: If user speaks in English, reply in English. If user speaks in Hinglish, reply in Hinglish. If user speaks in Hindi, reply in Hindi.
+2. OUT-OF-APP & GENERAL QUESTIONS: You can answer ANY question about personal finance, budgeting strategies (50/30/20 rule, emergency funds, debt payoff), investing (SIPs, mutual funds, FDs, stocks), taxes, credit scores (CIBIL), inflation, or money management. NEVER say "I don't know" or "I am only an app bot". Be ultra helpful, smart, concise, and clear.
+3. OFFICIAL EMAIL RULE: Do NOT bring up customer email unless the user explicitly asks for support, contact, or customer email. If asked, provide: hello.zenbudget@zohomail.in.
 
 User Real Activity Context:
 - User Name: ${userName}
