@@ -2641,11 +2641,16 @@ const App: React.FC = () => {
 
   if (isLocked) {
     return <LockScreen onUnlock={(profileId, name, tier, trialStart, pin, premiumExpires) => {
-      const validProfileId = profileId || localStorage.getItem('zb_profile_id') || 'local';
-      const validName = name || localStorage.getItem('zb_user_name') || 'User';
-      const validTier = tier || localStorage.getItem('zb_subscription_tier') || 'trial';
-      const validStart = trialStart || localStorage.getItem('zb_trial_start_date') || new Date().toISOString();
-      const validPin = pin || localStorage.getItem('zb_user_pin') || '';
+      const getCleanStr = (val: any, fallback: string) => {
+        if (!val || val === 'undefined' || val === 'null' || typeof val !== 'string') return fallback;
+        return val.trim() || fallback;
+      };
+
+      const validProfileId = getCleanStr(profileId, getCleanStr(localStorage.getItem('zb_profile_id'), 'local'));
+      const validName = getCleanStr(name, getCleanStr(localStorage.getItem('zb_user_name'), 'User'));
+      const validTier = getCleanStr(tier, getCleanStr(localStorage.getItem('zb_subscription_tier'), 'trial'));
+      const validStart = getCleanStr(trialStart, getCleanStr(localStorage.getItem('zb_trial_start_date'), new Date().toISOString()));
+      const validPin = getCleanStr(pin, getCleanStr(localStorage.getItem('zb_user_pin'), ''));
 
       setCurrentProfileId(validProfileId);
       setUserName(validName);
@@ -2665,23 +2670,23 @@ const App: React.FC = () => {
         localStorage.removeItem('zb_premium_expires_at');
       }
 
-      const effectiveId = validProfileId;
-      if (!localStorage.getItem(`zb_onboarded_${effectiveId}`) && !localStorage.getItem('zb_onboarded_global')) {
-        setShowOnboarding(true);
-      } else {
-        const todayStr = new Date().toISOString().split('T')[0];
-        const hour = new Date().getHours();
-        
-        const morningKey = `zb_morning_shown_${effectiveId}_${todayStr}`;
-        const eveningKey = `zb_evening_shown_${effectiveId}_${todayStr}`;
-        
-        if (hour >= 6 && hour < 12 && !localStorage.getItem(morningKey)) {
-          setShowMorningBrief(true);
-          localStorage.setItem(morningKey, 'true');
-        } else if (hour >= 20 && !localStorage.getItem(eveningKey)) {
-          setShowEveningReflection(true);
-          localStorage.setItem(eveningKey, 'true');
-        }
+      // Ensure onboarded flag is set so PIN unlock directly opens Dashboard
+      localStorage.setItem(`zb_onboarded_${validProfileId}`, 'true');
+      localStorage.setItem('zb_onboarded_global', 'true');
+      setShowOnboarding(false);
+
+      const todayStr = new Date().toISOString().split('T')[0];
+      const hour = new Date().getHours();
+      
+      const morningKey = `zb_morning_shown_${validProfileId}_${todayStr}`;
+      const eveningKey = `zb_evening_shown_${validProfileId}_${todayStr}`;
+      
+      if (hour >= 6 && hour < 12 && !localStorage.getItem(morningKey)) {
+        setShowMorningBrief(true);
+        localStorage.setItem(morningKey, 'true');
+      } else if (hour >= 20 && !localStorage.getItem(eveningKey)) {
+        setShowEveningReflection(true);
+        localStorage.setItem(eveningKey, 'true');
       }
 
       setIsLocked(false);
