@@ -18,7 +18,7 @@ interface LoansViewProps {
   currencySymbol: string;
   onAddLoan: (loan: Omit<LoanRecord, 'id' | 'paidAmount' | 'status'>) => void;
   onRepayLoan: (loanId: string, repayAmount: number, accountId: string) => void;
-  onPayLoanViaUPI?: (loan: LoanRecord, amount: number) => void;
+  onPayLoanViaUPI?: (loan: LoanRecord, amount: number, accountId?: string) => void;
 }
 
 export const LoansView: React.FC<LoansViewProps> = ({
@@ -315,26 +315,39 @@ export const LoansView: React.FC<LoansViewProps> = ({
             const isCompleted = loan.status === 'completed' || remaining <= 0;
 
             return (
-              <div key={loan.id} className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>{loan.personName}</span>
-                      {isCompleted ? (
-                        <span style={{ fontSize: '10px', background: 'rgba(34, 197, 94, 0.15)', color: '#22c55e', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>
-                          Completed
-                        </span>
-                      ) : (
-                        <span style={{ fontSize: '10px', background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>
-                          Active ({loan.frequency === 'custom' ? (loan.customFrequencyText || 'Custom') : t(loan.frequency)})
-                        </span>
-                      )}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                      <span><Calendar size={12} style={{ display: 'inline', marginRight: '4px' }} /> {t('due_date')}: {loan.dueDate}</span>
-                      <span>• Principal: {formatCurrency(loan.totalAmount, currencySymbol)}</span>
-                    </div>
-                  </div>
+              {(() => {
+                const now = new Date();
+                now.setHours(0, 0, 0, 0);
+                const due = new Date(loan.dueDate);
+                due.setHours(0, 0, 0, 0);
+                const diffMs = now.getTime() - due.getTime();
+                const overdueDays = diffMs > 0 ? Math.floor(diffMs / (1000 * 60 * 60 * 24)) : 0;
+
+                return (
+                  <div key={loan.id} className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>{loan.personName}</span>
+                          {isCompleted ? (
+                            <span style={{ fontSize: '10px', background: 'rgba(34, 197, 94, 0.15)', color: '#22c55e', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>
+                              Completed
+                            </span>
+                          ) : overdueDays > 0 ? (
+                            <span style={{ fontSize: '10px', background: 'rgba(239, 68, 68, 0.25)', color: '#f87171', padding: '2px 8px', borderRadius: '12px', fontWeight: 800, border: '1px solid rgba(239, 68, 68, 0.4)' }}>
+                              ⚠️ {overdueDays} {overdueDays === 1 ? 'Day Late' : 'Days Late'}!
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: '10px', background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>
+                              Active ({loan.frequency === 'custom' ? (loan.customFrequencyText || 'Custom') : t(loan.frequency)})
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                          <span><Calendar size={12} style={{ display: 'inline', marginRight: '4px' }} /> {t('due_date')}: {loan.dueDate}</span>
+                          <span>• Principal: {formatCurrency(loan.totalAmount, currencySymbol)}</span>
+                        </div>
+                      </div>
 
                   <div style={{ textAlign: 'right' }}>
                     <span style={{ fontSize: '18px', fontWeight: 800, color: activeTab === 'borrowed' ? '#ef4444' : '#22c55e' }}>
@@ -415,6 +428,8 @@ export const LoansView: React.FC<LoansViewProps> = ({
                   </div>
                 )}
               </div>
+                );
+              })()
             );
           })}
         </div>
@@ -676,7 +691,9 @@ export const LoansView: React.FC<LoansViewProps> = ({
               )}
 
               <div>
-                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Linked Account</label>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+                  {activeTab === 'borrowed' ? 'Wallet Account (Money Borrowed / Credited Into):' : 'Wallet Account (Money Lent / Debited From):'}
+                </label>
                 <select
                   value={selectedAccountId}
                   onChange={e => setSelectedAccountId(e.target.value)}
@@ -741,7 +758,9 @@ export const LoansView: React.FC<LoansViewProps> = ({
 
             <form onSubmit={handleRepaySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Payment Amount ({currencySymbol})</label>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+                  {repayModalLoan.type === 'borrowed' ? 'Payment Amount' : 'Collected Amount'} ({currencySymbol})
+                </label>
                 <input
                   type="number"
                   required
@@ -756,26 +775,90 @@ export const LoansView: React.FC<LoansViewProps> = ({
               </div>
 
               <div>
-                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Account to Use</label>
+                <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+                  {repayModalLoan.type === 'borrowed' 
+                    ? 'Select Wallet / Account To Cut Money From (Debited):' 
+                    : 'Select Wallet / Account Where Money Was Credited (Deposited):'}
+                </label>
                 <select
                   value={repayAccountId}
                   onChange={e => setRepayAccountId(e.target.value)}
                   className="glass-input"
-                  style={{ marginTop: '4px', width: '100%', background: 'var(--bg-input)' }}
+                  style={{ marginTop: '4px', width: '100%', background: 'var(--bg-input)', fontWeight: 700 }}
                 >
                   {accounts.map(acc => (
-                    <option key={acc.id} value={acc.id}>{acc.name} ({currencySymbol}{acc.balance})</option>
+                    <option key={acc.id} value={acc.id}>
+                      💳 {acc.name} ({formatCurrency(acc.balance, currencySymbol)})
+                    </option>
                   ))}
                 </select>
               </div>
 
-              <button
-                type="submit"
-                className="glass-button active"
-                style={{ padding: '12px', borderRadius: '12px', marginTop: '10px', fontSize: '14px', fontWeight: 800 }}
-              >
-                Confirm Payment Record
-              </button>
+              {repayModalLoan.type === 'borrowed' ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px' }}>
+                  {onPayLoanViaUPI && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const amtNum = parseFloat(repayAmount) || (repayModalLoan.totalAmount - repayModalLoan.paidAmount);
+                        onPayLoanViaUPI(repayModalLoan, amtNum, repayAccountId || accounts[0]?.id);
+                        setRepayModalLoan(null);
+                      }}
+                      style={{
+                        padding: '12px',
+                        borderRadius: '12px',
+                        border: 'none',
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        color: '#fff',
+                        fontSize: '13px',
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)'
+                      }}
+                    >
+                      ⚡ Pay via PhonePe (Cut From Wallet)
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    className="glass-button"
+                    style={{ padding: '12px', borderRadius: '12px', fontSize: '13px', fontWeight: 800 }}
+                  >
+                    ✅ Record Cash Repayment (Cut From Wallet)
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px' }}>
+                  <button
+                    type="submit"
+                    className="glass-button active"
+                    style={{ padding: '12px', borderRadius: '12px', fontSize: '13px', fontWeight: 800 }}
+                  >
+                    ✅ Record Money Received (Deposit to Wallet)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const friendName = repayModalLoan.personName;
+                      const remAmt = parseFloat(repayAmount) || (repayModalLoan.totalAmount - repayModalLoan.paidAmount);
+                      const msg = `Hi ${friendName}, a friendly reminder regarding the ₹${remAmt} payment due on ZenBudget. Thanks!`;
+                      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+                    }}
+                    style={{
+                      padding: '10px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(37, 211, 102, 0.4)',
+                      background: 'rgba(37, 211, 102, 0.1)',
+                      color: '#25D366',
+                      fontSize: '12px',
+                      fontWeight: 800,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    💬 Remind Friend on WhatsApp
+                  </button>
+                </div>
+              )}
             </form>
           </div>
         </div>
