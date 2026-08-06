@@ -1066,16 +1066,16 @@ const App: React.FC = () => {
         } else if (freq === 'daily') {
           shouldTrigger = true;
         } else if (freq === 'one_time') {
-          shouldTrigger = todayStr === dueStr;
+          shouldTrigger = todayStr >= dueStr;
         } else if (freq === 'weekly') {
           const diffDays = Math.floor((now.getTime() - due.getTime()) / (1000 * 60 * 60 * 24));
-          shouldTrigger = diffDays >= 0 && diffDays % 7 === 0;
+          shouldTrigger = diffDays >= 0;
         } else if (freq === 'monthly') {
-          shouldTrigger = now.getDate() === due.getDate();
+          shouldTrigger = now.getDate() === due.getDate() || todayStr >= dueStr;
         } else if (freq === 'yearly') {
-          shouldTrigger = now.getDate() === due.getDate() && now.getMonth() === due.getMonth();
+          shouldTrigger = (now.getDate() === due.getDate() && now.getMonth() === due.getMonth()) || todayStr >= dueStr;
         } else {
-          shouldTrigger = todayStr === dueStr;
+          shouldTrigger = todayStr >= dueStr;
         }
 
         if (shouldTrigger) {
