@@ -314,17 +314,15 @@ export const LoansView: React.FC<LoansViewProps> = ({
             const progress = Math.min(100, Math.round((loan.paidAmount / loan.totalAmount) * 100));
             const isCompleted = loan.status === 'completed' || remaining <= 0;
 
-            return (
-              {(() => {
-                const now = new Date();
-                now.setHours(0, 0, 0, 0);
-                const due = new Date(loan.dueDate);
-                due.setHours(0, 0, 0, 0);
-                const diffMs = now.getTime() - due.getTime();
-                const overdueDays = diffMs > 0 ? Math.floor(diffMs / (1000 * 60 * 60 * 24)) : 0;
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            const due = new Date(loan.dueDate);
+            due.setHours(0, 0, 0, 0);
+            const diffMs = now.getTime() - due.getTime();
+            const overdueDays = diffMs > 0 ? Math.floor(diffMs / (1000 * 60 * 60 * 24)) : 0;
 
-                return (
-                  <div key={loan.id} className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            return (
+              <div key={loan.id} className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -455,8 +453,6 @@ export const LoansView: React.FC<LoansViewProps> = ({
                   </div>
                 )}
               </div>
-                );
-              })()
             );
           })}
         </div>
