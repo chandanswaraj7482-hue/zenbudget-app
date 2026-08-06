@@ -153,8 +153,13 @@ export const HelpModal: React.FC<HelpModalProps> = ({
       return `💳 Loans & Borrowings Tracker: Aap "Loans Taken" (liya hua udhaar) aur "Loans Given" (diya hua paisa) ka exact hisab rakh sakte ho! Isme automatic due date alerts, late warning badges, aur wallet deduction features included hain! 📊`;
     }
 
-    // 3. Highest Spending / Category Analysis
-    if (msg.includes('kahan') || msg.includes('sabse zyada') || msg.includes('kharcha') || msg.includes('highest spending') || msg.includes('spending')) {
+    // 3. Highest Spending / Category Analysis (Handles typos like expenstion, expence, expanse, highest, max)
+    if (
+      msg.includes('kahan') || msg.includes('sabse zyada') || msg.includes('kharcha') ||
+      msg.includes('highest') || msg.includes('spending') || msg.includes('expense') ||
+      msg.includes('expence') || msg.includes('expenstion') || msg.includes('expanse') ||
+      msg.includes('maximum') || msg.includes('max') || msg.includes('bada')
+    ) {
       if (isEng) {
         return `📊 Your highest expense category this month is **${topCat.toUpperCase()}** (${currencySymbol}${topCatAmt.toLocaleString()}) out of total spending of ${currencySymbol}${totalExpense.toLocaleString()}. 💡 Tip: Set a monthly budget limit on ${topCat.toUpperCase()} to save ${currencySymbol}2,000+ extra each month! 🌿`;
       }
@@ -209,11 +214,11 @@ export const HelpModal: React.FC<HelpModalProps> = ({
       return `Hi ${userName}! 🌿 Main Zen hu — aapka AI Financial Coach. Main aapki spending analyze kar sakta hu, savings tips de sakta hu, aur ZenBudget app ke bare me kuch bhi samjha sakta hu! Ask me anything! 🤝✨`;
     }
 
-    // 10. Universal Smart Money & App Guide Fallback
+    // 10. Universal Smart Money & App Guide Fallback (Clean, no unsolicited email prompts)
     if (isEng) {
-      return `💡 Based on your monthly activity (${currencySymbol}${totalIncome.toLocaleString()} income, ${currencySymbol}${totalExpense.toLocaleString()} spent): Maintaining spending discipline via Quick Capture will boost your savings. Ask me "Where is my highest spending?" or "Give me customer email" for instant answers! 🧘‍♂️✨`;
+      return `💡 Monthly activity summary (${currencySymbol}${totalIncome.toLocaleString()} income, ${currencySymbol}${totalExpense.toLocaleString()} spent): Your highest spending category is **${topCat.toUpperCase()}** (${currencySymbol}${topCatAmt.toLocaleString()}). Keep tracking daily entries to boost your ${savingsPct}% savings rate! 🌿✨`;
     }
-    return `💡 Monthly activity insight (${currencySymbol}${totalIncome.toLocaleString()} income, ${currencySymbol}${totalExpense.toLocaleString()} spent): Spending discipline and tracking daily entries via Quick Capture will boost your savings. Ask me "Mera sabse zyada kharcha kahan ho rha hai?" ya "Customer email do" for instant help! 🧘‍♂️✨`;
+    return `💡 Monthly activity summary (${currencySymbol}${totalIncome.toLocaleString()} income, ${currencySymbol}${totalExpense.toLocaleString()} spent): Aapka top expense category **${topCat.toUpperCase()}** (${currencySymbol}${topCatAmt.toLocaleString()}) hai. Daily entries log karke apna ${savingsPct}% savings rate maintain rakhein! 🌿✨`;
   }
 
   const handleSend = async (e?: React.FormEvent, customPrompt?: string) => {
