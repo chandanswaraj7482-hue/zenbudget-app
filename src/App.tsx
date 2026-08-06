@@ -1213,6 +1213,67 @@ const App: React.FC = () => {
     }
   }, [currentProfileId, isLocked, loans, currency]);
 
+  // Realtime Admin Panel Control & Profile Sync
+  useEffect(() => {
+    if (!currentProfileId) return;
+
+    const syncAdminProfile = async () => {
+      try {
+        const { data: profData } = await supabase
+          .from('profiles')
+          .select('subscription_tier, has_scan_pay_access, is_admin_unlocked, status, pin, name')
+          .eq('id', currentProfileId)
+          .maybeSingle();
+
+        if (profData) {
+          if (profData.subscription_tier) {
+            setSubscriptionTier(profData.subscription_tier);
+            localStorage.setItem('zb_subscription_tier', profData.subscription_tier);
+          }
+          if (profData.has_scan_pay_access || profData.is_admin_unlocked) {
+            localStorage.setItem('has_scan_pay_access', 'true');
+            localStorage.setItem(`zb_scan_pay_access_${currentProfileId}`, 'true');
+          }
+          if (profData.status === 'suspended') {
+            setIsLocked(true);
+            triggerToast('🔒 Your account is suspended by Admin.', 'danger');
+          }
+        }
+      } catch (err) {
+        console.warn('Realtime admin sync poll error:', err);
+      }
+    };
+
+    syncAdminProfile();
+    const interval = setInterval(syncAdminProfile, 4000);
+
+    const channel = supabase
+      .channel(`admin_sync_${currentProfileId}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${currentProfileId}` }, (payload) => {
+        if (payload.new) {
+          const p = payload.new;
+          if (p.subscription_tier) {
+            setSubscriptionTier(p.subscription_tier);
+            localStorage.setItem('zb_subscription_tier', p.subscription_tier);
+          }
+          if (p.has_scan_pay_access || p.is_admin_unlocked) {
+            localStorage.setItem('has_scan_pay_access', 'true');
+            localStorage.setItem(`zb_scan_pay_access_${currentProfileId}`, 'true');
+          }
+          if (p.status === 'suspended') {
+            setIsLocked(true);
+            triggerToast('🔒 Account status updated to Suspended by Admin.', 'danger');
+          }
+        }
+      })
+      .subscribe();
+
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
+  }, [currentProfileId]);
+
   const fetchDataFromSupabase = async () => {
     try {
       if (!currentProfileId) return;
@@ -1242,12 +1303,7 @@ const App: React.FC = () => {
         .eq('id', currentProfileId)
         .maybeSingle();
       
-      if (profErr) throw profErr;
-      if (!profData && currentProfileId) {
-        console.warn('ZenBudget: User profile deleted from database by Admin.');
-        handleAccountDeletedByAdmin();
-        return;
-      }
+      if (profErr) console.warn('ZenBudget: Profile sync fetch warning:', profErr);
       if (profData) {
         let userCoupleCode = profData.couple_code;
         if (!userCoupleCode) {
@@ -2385,71 +2441,87 @@ const App: React.FC = () => {
   const handleConnectPartner = async (code: string): Promise<boolean> => {
     if (!currentProfileId) return false;
 
-    const isPremium = subscriptionTier === 'premium_monthly' || subscriptionTier === 'premium_lifetime' || subscriptionTier === 'premium';
-    if (!isPremium) {
-      triggerToast('You must upgrade to Premium to connect with a partner!', 'warning');
+    const isSelfPremium = subscriptionTier === 'premium_monthly' || subscriptionTier === 'premium_lifetime' || subscriptionTier === 'premium_yearly' || subscriptionTier === 'premium';
+    if (!isSelfPremium) {
+      setIsSubscriptionOpen(true);
+      triggerToast('🔒 You must upgrade to Premium to sync shared budgets with a partner!', 'warning');
       return false;
     }
 
-    const cleanCode = code.trim().toUpperCase();
-    if (!cleanCode) return false;
+    const rawInput = code.trim().toUpperCase();
+    if (!rawInput) return false;
 
-    if (coupleCode && coupleCode.toUpperCase() === cleanCode) {
-      triggerToast('You cannot connect to your own couple code!', 'warning');
+    const strippedInput = rawInput.replace(/[^A-Z0-9]/g, '');
+
+    if (coupleCode && (coupleCode.toUpperCase() === rawInput || coupleCode.replace(/[^A-Z0-9]/g, '').toUpperCase() === strippedInput)) {
+      triggerToast('You cannot connect to your own sync code!', 'warning');
       return false;
     }
 
     try {
-      const { data: partnerProf, error: partnerErr } = await supabase
+      // Flexible lookup matching exact couple_code, referral_code, or stripped code
+      const { data: allProfiles, error: partnerErr } = await supabase
         .from('profiles')
-        .select('id, name, couple_code, subscription_tier')
-        .eq('couple_code', cleanCode)
-        .maybeSingle();
+        .select('id, name, couple_code, referral_code, subscription_tier')
+        .neq('id', currentProfileId);
 
       if (partnerErr) throw partnerErr;
+
+      const partnerProf = (allProfiles || []).find(p => {
+        if (!p) return false;
+        const cCode = (p.couple_code || '').toUpperCase();
+        const rCode = (p.referral_code || '').toUpperCase();
+        const cStripped = cCode.replace(/[^A-Z0-9]/g, '');
+        const rStripped = rCode.replace(/[^A-Z0-9]/g, '');
+
+        return cCode === rawInput || 
+               rCode === rawInput || 
+               (cStripped && cStripped === strippedInput) || 
+               (rStripped && rStripped === strippedInput) ||
+               (cStripped && strippedInput && cStripped.includes(strippedInput));
+      });
+
       if (!partnerProf) {
-        triggerToast('Invalid partner couple code. Please verify spelling!', 'warning');
+        triggerToast('Invalid sync code or partner profile not found. Verify code spelling!', 'warning');
         return false;
       }
 
-      const isPartnerPremium = partnerProf.subscription_tier === 'premium_monthly' || partnerProf.subscription_tier === 'premium_lifetime' || partnerProf.subscription_tier === 'premium';
+      const isPartnerPremium = partnerProf.subscription_tier === 'premium_monthly' || partnerProf.subscription_tier === 'premium_lifetime' || partnerProf.subscription_tier === 'premium_yearly' || partnerProf.subscription_tier === 'premium';
       if (!isPartnerPremium) {
-        triggerToast(`Partner ${partnerProf.name} must also upgrade to Premium to sync ledgers!`, 'warning');
+        triggerToast(`🔒 Partner ${partnerProf.name} does not have Premium! Both users require Premium to sync shared budgets.`, 'warning');
         return false;
       }
 
       localStorage.setItem(`zb_partner_id_${currentProfileId}`, partnerProf.id);
-      localStorage.setItem(`zb_partner_code_${currentProfileId}`, cleanCode);
+      localStorage.setItem(`zb_partner_code_${currentProfileId}`, partnerProf.couple_code || rawInput);
       localStorage.setItem(`zb_partner_name_${currentProfileId}`, partnerProf.name);
       setPartnerId(partnerProf.id);
-      setPartnerCode(cleanCode);
+      setPartnerCode(partnerProf.couple_code || rawInput);
       setPartnerName(partnerProf.name);
 
-      const { error: updateSelfErr } = await supabase
-        .from('profiles')
-        .update({ partner_couple_code: cleanCode })
-        .eq('id', currentProfileId);
-
-      if (updateSelfErr) throw updateSelfErr;
-
-      // Mutual sync dual-link
       await supabase
         .from('profiles')
-        .update({ partner_couple_code: coupleCode })
-        .eq('id', partnerProf.id);
+        .update({ partner_couple_code: partnerProf.couple_code || rawInput })
+        .eq('id', currentProfileId);
 
-      triggerToast(`Connected successfully with ${partnerProf.name}!`, 'success');
+      // Mutual sync dual-link
+      if (coupleCode) {
+        await supabase
+          .from('profiles')
+          .update({ partner_couple_code: coupleCode })
+          .eq('id', partnerProf.id);
+      }
+
+      triggerToast(`Connected successfully with ${partnerProf.name}! 🎉`, 'success');
       addNotification(
         "Partner Connected! 👥",
-        `You have linked ledgers with ${partnerProf.name}. You can now view both transactions together.`,
+        `You have linked shared budgets with ${partnerProf.name}. You can now view entries together.`,
         'success'
       );
-
-      fetchDataFromSupabase();
       return true;
     } catch (err: any) {
-      console.error('Failed to link partner:', err);
-      triggerToast(err.message || 'Linking failed.', 'warning');
+      console.error('Partner connect error:', err);
+      triggerToast(err.message || 'Failed to connect partner profile.', 'warning');
       return false;
     }
   };
