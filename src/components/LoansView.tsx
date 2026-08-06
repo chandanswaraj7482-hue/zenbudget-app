@@ -188,9 +188,19 @@ export const LoansView: React.FC<LoansViewProps> = ({
 
   const handleRepaySubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setModalErr(null);
     if (!repayModalLoan) return;
     const amountNum = parseFloat(repayAmount);
     if (isNaN(amountNum) || amountNum <= 0) return;
+
+    if (repayModalLoan.type === 'borrowed') {
+      const selectedAcc = accounts.find(a => a.id === (repayAccountId || accounts[0]?.id));
+      const balance = selectedAcc ? selectedAcc.balance : 0;
+      if (balance < amountNum) {
+        setModalErr(`⚠️ Insufficient Balance in ${selectedAcc?.name || 'selected Wallet Account'}! Available: ${currencySymbol}${balance}, Required: ${currencySymbol}${amountNum}`);
+        return;
+      }
+    }
 
     onRepayLoan(repayModalLoan.id, amountNum, repayAccountId || accounts[0]?.id);
     setRepayModalLoan(null);
@@ -774,10 +784,16 @@ export const LoansView: React.FC<LoansViewProps> = ({
               <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>
                 {repayModalLoan.type === 'borrowed' ? `Repay to ${repayModalLoan.personName}` : `Receive from ${repayModalLoan.personName}`}
               </h3>
-              <button onClick={() => setRepayModalLoan(null)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+              <button onClick={() => { setRepayModalLoan(null); setModalErr(null); }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
                 <X size={20} />
               </button>
             </div>
+
+            {modalErr && (
+              <div style={{ marginBottom: '12px', padding: '10px 14px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#f87171', fontSize: '12px', fontWeight: 700, lineHeight: 1.4 }}>
+                {modalErr}
+              </div>
+            )}
 
             <form onSubmit={handleRepaySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
@@ -839,7 +855,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
                         boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)'
                       }}
                     >
-                      ⚡ Pay via PhonePe (Cut From Wallet)
+                      ⚡ Pay via PhonePe / Netbanking (Online App)
                     </button>
                   )}
                   <button

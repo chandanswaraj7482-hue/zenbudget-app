@@ -40,7 +40,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
     {
       id: '1',
       sender: 'bot',
-      text: `Hi ${userName}! 🌿 Main Zen hu — aapka AI Financial Coach. 🧘‍♂️ Main aapki spending analyze kar sakta hu, savings tips de sakta hu, aur ZenBudget app ke bare me kuch bhi samjha sakta hu! Ask me anything! 🤝✨`,
+      text: `Hi ${userName}! 🌿 I'm Zen — your personal AI Financial Coach. 🧘‍♂️ I can analyze your spending habits, give smart savings advice, and help you track your money in ZenBudget. Ask me anything! 🤝✨`,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -203,7 +203,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
             parts: [
               {
                 text: `You are Zen 🌿 — an ultra-friendly personal finance best friend & ZenBudget App Master AI Coach.
-Speak like a warm, supportive best friend using emojis. MATCH THE EXACT LANGUAGE THE USER SPEAKS IN (Hindi, Hinglish, English, etc.).
+CRITICAL LANGUAGE RULE: Default to English, BUT ALWAYS DYNAMICALLY MATCH THE EXACT LANGUAGE THE USER SPEAKS IN. If the user speaks in English, reply in English. If the user speaks in Hinglish, reply in Hinglish. If the user speaks in Hindi, reply in Hindi. If the user speaks in Spanish, French, etc., reply in that exact language!
 
 You can answer ANY question about:
 1. The user's account transactions, monthly spending habits, categories breakdown, budgets, and savings goals.
