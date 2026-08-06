@@ -9,6 +9,7 @@ interface HelpModalProps {
   goals?: SavingsGoal[];
   currencySymbol?: string;
   userName?: string;
+  initialTab?: 'faq' | 'bot' | 'feedback';
 }
 
 interface ChatMessage {
@@ -25,11 +26,12 @@ export const HelpModal: React.FC<HelpModalProps> = ({
   budgets = [],
   goals = [],
   currencySymbol = '₹',
-  userName = 'User'
+  userName = 'User',
+  initialTab = 'bot'
 }) => {
   if (!isOpen) return null;
 
-  const [activeTab, setActiveTab] = useState<'faq' | 'bot' | 'feedback'>('faq');
+  const [activeTab, setActiveTab] = useState<'faq' | 'bot' | 'feedback'>(initialTab);
   const [rating, setRating] = useState<number>(5);
   const [comment, setComment] = useState<string>('');
   const [feedbackSuccess, setFeedbackSuccess] = useState<boolean>(false);
@@ -37,7 +39,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
     {
       id: '1',
       sender: 'bot',
-      text: "Hi! I am 🌿 Zen — Your AI Financial Coach. 🧘‍♂️ I analyze your transactions, budgets, goals, and can answer any question about your money or ZenBudget features!",
+      text: `Hi ${userName}! 🌿 Main Zen hu — aapka AI Financial Coach. 🧘‍♂️ Main aapki spending analyze kar sakta hu, savings tips de sakta hu, aur ZenBudget app ke bare me kuch bhi samjha sakta hu! Ask me anything! 🤝✨`,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -48,19 +50,22 @@ export const HelpModal: React.FC<HelpModalProps> = ({
   // Analyze user spending activity for AI Coach
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
-  const monthTxs = transactions.filter(t => {
+  const safeTxs = Array.isArray(transactions) ? transactions : [];
+  const monthTxs = safeTxs.filter(t => {
+    if (!t || !t.date) return false;
     const d = new Date(t.date);
-    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    return !isNaN(d.getTime()) && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
   });
 
-  const totalIncome = monthTxs.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-  const totalExpense = monthTxs.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+  const totalIncome = monthTxs.filter(t => t && t.type === 'income').reduce((s, t) => s + (Number(t.amount) || 0), 0);
+  const totalExpense = monthTxs.filter(t => t && t.type === 'expense').reduce((s, t) => s + (Number(t.amount) || 0), 0);
   const totalSaved = Math.max(0, totalIncome - totalExpense);
   const savingsPct = totalIncome > 0 ? Math.round((totalSaved / totalIncome) * 100) : 0;
 
   const catMap: Record<string, number> = {};
-  monthTxs.filter(t => t.type === 'expense').forEach(t => {
-    catMap[t.category] = (catMap[t.category] || 0) + t.amount;
+  monthTxs.filter(t => t && t.type === 'expense').forEach(t => {
+    const c = t.category || 'other';
+    catMap[c] = (catMap[c] || 0) + (Number(t.amount) || 0);
   });
   let topCat = 'none';
   let topCatAmt = 0;
@@ -76,14 +81,21 @@ export const HelpModal: React.FC<HelpModalProps> = ({
     .join(', ');
 
   const recentTxsText = monthTxs.slice(0, 5)
-    .map(t => `${t.title} (${t.type.toUpperCase()} ${currencySymbol}${t.amount})`)
+    .map(t => `${t.title || 'Expense'} (${(t.type || 'expense').toUpperCase()} ${currencySymbol}${t.amount || 0})`)
     .join('; ');
 
-  const budgetSummaryText = (budgets || []).map(b => {
+  const safeBudgets = Array.isArray(budgets) ? budgets : [];
+  const budgetSummaryText = safeBudgets.map(b => {
+    if (!b) return '';
     const spentForCat = catMap[b.category] || 0;
     return `${b.category}: ${currencySymbol}${spentForCat}/${currencySymbol}${b.limit}`;
-  }).join(', ');
-  const goalSummaryText = (goals || []).map(g => `${g.name}: ${currencySymbol}${g.currentAmount}/${currencySymbol}${g.targetAmount}`).join(', ');
+  }).filter(Boolean).join(', ');
+
+  const safeGoals = Array.isArray(goals) ? goals : [];
+  const goalSummaryText = safeGoals.map(g => {
+    if (!g) return '';
+    return `${g.name}: ${currencySymbol}${g.currentAmount}/${currencySymbol}${g.targetAmount}`;
+  }).filter(Boolean).join(', ');
 
   // Local persistent memory database
   const [learnedMemory, setLearnedMemory] = useState<Record<string, string>>(() => {

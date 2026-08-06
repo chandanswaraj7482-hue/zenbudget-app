@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import { Mic, ArrowRight, Sparkles, Check, RefreshCw } from 'lucide-react';
 import type { Transaction, Account } from '../types';
 import confetti from 'canvas-confetti';
@@ -450,44 +451,62 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
         </div>
       )}
 
-      {/* No Account Modal Popup */}
-      {showNoAccountModal && (
+      {/* No Account Modal Popup rendered via portal for full-screen overlay */}
+      {showNoAccountModal && ReactDOM.createPortal(
         <div style={{
           position: 'fixed',
           top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.7)',
-          backdropFilter: 'blur(8px)',
-          zIndex: 3000,
+          background: 'rgba(15, 23, 42, 0.85)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          zIndex: 999999,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '20px'
+          padding: '24px'
         }} className="animate-fade-in">
           <div style={{
-            background: 'var(--bg-dark)',
-            border: '1px solid var(--border-card-active)',
+            background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)',
+            border: '1px solid rgba(239, 68, 68, 0.4)',
             borderRadius: '24px',
-            padding: '24px',
-            maxWidth: '340px',
+            padding: '28px 24px',
+            maxWidth: '360px',
             width: '100%',
             textAlign: 'center',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+            boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(239, 68, 68, 0.2)',
             position: 'relative'
           }} className="animate-scale-up">
             <button 
+              type="button"
               onClick={() => setShowNoAccountModal(false)}
-              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+              style={{ 
+                position: 'absolute', top: '16px', right: '16px', 
+                background: 'rgba(255,255,255,0.06)', border: 'none', 
+                borderRadius: '50%', width: '32px', height: '32px',
+                color: 'var(--text-secondary)', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}
             >
               <X size={18} />
             </button>
-            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
-              <Wallet size={28} />
+            <div style={{ 
+              width: '64px', height: '64px', borderRadius: '20px', 
+              background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', 
+              display: 'flex', alignItems: 'center', justifyContent: 'center', 
+              margin: '0 auto 16px auto',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              boxShadow: '0 8px 20px rgba(239, 68, 68, 0.2)'
+            }}>
+              <Wallet size={32} />
             </div>
-            <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>No Account Found</h3>
-            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '20px', lineHeight: 1.5 }}>
-              Please add at least 1 account or wallet (e.g. Cash, Bank, GPay) before logging expenses.
+            <h3 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px', fontFamily: "'Manrope', sans-serif" }}>
+              No Account Found
+            </h3>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '24px', lineHeight: 1.6 }}>
+              Please add at least 1 wallet or bank account (e.g., Cash, Bank, GPay) before logging your expenses.
             </p>
             <button
+              type="button"
               onClick={() => {
                 setShowNoAccountModal(false);
                 if (onAddAccountClick) onAddAccountClick();
@@ -496,23 +515,24 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
                 width: '100%',
                 padding: '14px',
                 borderRadius: '16px',
-                background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)',
-                color: '#fff',
+                background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                color: '#ffffff',
                 fontWeight: 800,
-                fontSize: '14px',
+                fontSize: '15px',
                 border: 'none',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                boxShadow: '0 8px 24px var(--primary-glow)'
+                boxShadow: '0 8px 24px rgba(34, 197, 94, 0.4)'
               }}
             >
               <Plus size={18} /> Add Account Now
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import { Sparkles, ShoppingBag, Check } from 'lucide-react';
 interface ZenPetProps {
   currentProfileId: string;
   spentPercentage: number;
+  transactionCount?: number;
 }
 
 interface Accessory {
@@ -109,7 +110,7 @@ const ACCESSORIES: Accessory[] = [
   }
 ];
 
-export const ZenPet: React.FC<ZenPetProps> = ({ currentProfileId, spentPercentage }) => {
+export const ZenPet: React.FC<ZenPetProps> = ({ currentProfileId, spentPercentage, transactionCount = 0 }) => {
   const [points, setPoints] = useState<number>(0);
   const [unlockedIds, setUnlockedIds] = useState<string[]>([]);
   const [equippedId, setEquippedId] = useState<string>('');
@@ -120,6 +121,20 @@ export const ZenPet: React.FC<ZenPetProps> = ({ currentProfileId, spentPercentag
     const moodLogs = JSON.parse(localStorage.getItem('zb_mood_logs') || '{}');
     return moodLogs[todayStr] || '';
   });
+
+  // Dynamic Companion Happiness starts at 0% and increases with transactions & items bought
+  const txBonus = Math.min(40, (transactionCount || 0) * 5);
+  const equipBonus = equippedId === 'crown' ? 40 : equippedId === 'detective_hat' ? 25 : equippedId === 'sunglasses' ? 15 : 0;
+  const shopBonus = (unlockedIds.length || 0) * 10;
+  const happinessPct = Math.min(100, Math.max(0, txBonus + equipBonus + shopBonus));
+
+  const getHappinessLabel = (pct: number) => {
+    if (pct >= 90) return `${pct}% (Thrilled ✨)`;
+    if (pct >= 70) return `${pct}% (Proud 🎓)`;
+    if (pct >= 40) return `${pct}% (Cheered Up 😊)`;
+    if (pct > 0) return `${pct}% (Getting Happy 🙂)`;
+    return '0% (Needs Attention 😴)';
+  };
 
 
 
@@ -510,25 +525,15 @@ export const ZenPet: React.FC<ZenPetProps> = ({ currentProfileId, spentPercentag
           <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9px', fontWeight: 800 }}>
               <span style={{ color: 'var(--primary)', letterSpacing: '0.05em' }}>COMPANION HAPPINESS</span>
-              <span style={{ color: activeAccessory ? '#d97706' : '#dc2626' }}>
-                {(() => {
-                  if (equippedId === 'crown') return '100% (Thrilled ✨)';
-                  if (equippedId === 'detective_hat') return '75% (Proud 🎓)';
-                  if (equippedId === 'sunglasses') return '45% (Cheered Up 😊)';
-                  return '0% (Needs Attention 😴)';
-                })()}
+              <span style={{ color: happinessPct > 30 ? '#d97706' : '#dc2626' }}>
+                {getHappinessLabel(happinessPct)}
               </span>
             </div>
             <div style={{ height: '6px', width: '100%', background: 'var(--bg-input)', borderRadius: '10px', overflow: 'hidden' }}>
               <div style={{ 
                 height: '100%', 
-                width: (() => {
-                  if (equippedId === 'crown') return '100%';
-                  if (equippedId === 'detective_hat') return '75%';
-                  if (equippedId === 'sunglasses') return '45%';
-                  return '0%';
-                })(), 
-                background: activeAccessory 
+                width: `${happinessPct}%`, 
+                background: happinessPct > 30 
                   ? 'linear-gradient(90deg, #22c55e 0%, #fbbf24 100%)' 
                   : 'linear-gradient(90deg, #ef4444 0%, #f59e0b 100%)', 
                 borderRadius: '10px', 

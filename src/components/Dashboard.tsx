@@ -976,6 +976,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <ZenPet
         currentProfileId={currentProfileId}
         spentPercentage={budgets.reduce((sum, b) => sum + b.limit, 0) > 0 ? (expenses / budgets.reduce((sum, b) => sum + b.limit, 0)) * 100 : 0}
+        transactionCount={transactions.length}
       />
 
       {/* Subscription / Trial Tracker */}
