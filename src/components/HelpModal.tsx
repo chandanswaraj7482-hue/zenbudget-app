@@ -471,35 +471,6 @@ User Question: ${rawText}`
                 <div ref={chatEndRef} />
               </div>
 
-              {/* Quick Prompt Chips */}
-              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '6px', scrollbarWidth: 'none', flexShrink: 0 }}>
-                {[
-                  { text: '💸 Sabse zyada kharcha?', query: 'Mera sabse zyada kharcha kahan ho rha hai?' },
-                  { text: '🎯 Extra ₹5,000 kaise bachayein?', query: 'Mujhe iss month extra ₹5,000 kaise bachane hain?' },
-                  { text: '📊 Habits analyze karo', query: 'Mera spending habits aur score analyze karo' }
-                ].map((chip, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => handleSend(undefined, chip.query)}
-                    style={{
-                      padding: '6px 12px',
-                      borderRadius: '16px',
-                      border: '1px solid var(--border-input)',
-                      background: 'var(--bg-input)',
-                      color: 'var(--text-secondary)',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      whiteSpace: 'nowrap',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    {chip.text}
-                  </button>
-                ))}
-              </div>
-
               {/* Chat Input form */}
               <form onSubmit={(e) => handleSend(e)} style={{ display: 'flex', gap: '8px', borderTop: '1px solid var(--border-input)', paddingTop: '10px', flexShrink: 0 }}>
                 <input
