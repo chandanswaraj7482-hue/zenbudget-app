@@ -32,11 +32,27 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
     }
   }, [accounts]);
 
+  const [parseError, setParseError] = useState<string | null>(null);
+
+  // Convert Indic / Regional digits (Devanagari, Bengali, Arabic, etc.) to 0-9
+  const normalizeDigits = (str: string): string => {
+    return str
+      .replace(/[०-९]/g, d => (d.charCodeAt(0) - 0x0966).toString())
+      .replace(/[০-৯]/g, d => (d.charCodeAt(0) - 0x09e6).toString())
+      .replace(/[੦-੯]/g, d => (d.charCodeAt(0) - 0x0a66).toString())
+      .replace(/[૦-૯]/g, d => (d.charCodeAt(0) - 0x0ae6).toString())
+      .replace(/[୦-୯]/g, d => (d.charCodeAt(0) - 0x0b66).toString())
+      .replace(/[௦-௯]/g, d => (d.charCodeAt(0) - 0x0be6).toString())
+      .replace(/[൦-൯]/g, d => (d.charCodeAt(0) - 0x0d66).toString())
+      .replace(/[٠-٩]/g, d => (d.charCodeAt(0) - 0x0660).toString())
+      .replace(/[۰-۹]/g, d => (d.charCodeAt(0) - 0x06f0).toString());
+  };
+
   // Natural Language Multi-lingual Parser
   const parseNaturalLanguage = (text: string, defaultType: 'expense' | 'income' | 'transfer') => {
-    const cleanText = text.trim().toLowerCase();
+    const cleanText = normalizeDigits(text.trim()).toLowerCase();
     
-    // 1. Amount Extraction (handles 220, 2.5k, ₹500, 5000, 300rs)
+    // 1. Amount Extraction (handles 220, २२०, 2.5k, ₹500, 5000, 300rs)
     let amount = 0;
     const kMatch = cleanText.match(/(\d+(?:\.\d+)?)\s*k\b/i);
     if (kMatch) {

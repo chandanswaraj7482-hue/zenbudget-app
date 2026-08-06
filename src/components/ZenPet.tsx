@@ -512,10 +512,10 @@ export const ZenPet: React.FC<ZenPetProps> = ({ currentProfileId, spentPercentag
               <span style={{ color: 'var(--primary)', letterSpacing: '0.05em' }}>COMPANION HAPPINESS</span>
               <span style={{ color: activeAccessory ? '#d97706' : '#dc2626' }}>
                 {(() => {
-                  if (equippedId === 'crown') return '98% (Thrilled ✨)';
-                  if (equippedId === 'detective_hat') return '82% (Proud 🎓)';
-                  if (equippedId === 'sunglasses') return '65% (Cheered Up 😊)';
-                  return '40% (Regretful 😔)';
+                  if (equippedId === 'crown') return '100% (Thrilled ✨)';
+                  if (equippedId === 'detective_hat') return '75% (Proud 🎓)';
+                  if (equippedId === 'sunglasses') return '45% (Cheered Up 😊)';
+                  return '0% (Needs Attention 😴)';
                 })()}
               </span>
             </div>
@@ -523,10 +523,10 @@ export const ZenPet: React.FC<ZenPetProps> = ({ currentProfileId, spentPercentag
               <div style={{ 
                 height: '100%', 
                 width: (() => {
-                  if (equippedId === 'crown') return '98%';
-                  if (equippedId === 'detective_hat') return '82%';
-                  if (equippedId === 'sunglasses') return '65%';
-                  return '40%';
+                  if (equippedId === 'crown') return '100%';
+                  if (equippedId === 'detective_hat') return '75%';
+                  if (equippedId === 'sunglasses') return '45%';
+                  return '0%';
                 })(), 
                 background: activeAccessory 
                   ? 'linear-gradient(90deg, #22c55e 0%, #fbbf24 100%)' 

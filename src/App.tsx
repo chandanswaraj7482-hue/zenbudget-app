@@ -1213,43 +1213,6 @@ const App: React.FC = () => {
     }
   }, [currentProfileId, isLocked, loans, currency]);
 
-  const handleAccountDeletedByAdmin = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (_) {}
-    localStorage.clear();
-    sessionStorage.clear();
-    setCurrentProfileId('');
-    setTransactions([]);
-    setAccounts([]);
-    setBudgets([]);
-    setGoals([]);
-    setLoans([]);
-    setIsLocked(false);
-    triggerToast('🔒 Your account was reset/deleted by Admin. Please sign up or log in again.', 'warning');
-  };
-
-  // Periodic check if current user was deleted from Admin Panel
-  useEffect(() => {
-    if (!currentProfileId || isLocked) return;
-    const interval = setInterval(async () => {
-      try {
-        const { data: profData } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', currentProfileId)
-          .maybeSingle();
-        if (!profData) {
-          console.warn('ZenBudget: User profile no longer exists in DB. Logging out.');
-          handleAccountDeletedByAdmin();
-        }
-      } catch (err) {
-        console.warn('ZenBudget: Session check failed:', err);
-      }
-    }, 20000);
-    return () => clearInterval(interval);
-  }, [currentProfileId, isLocked]);
-
   const fetchDataFromSupabase = async () => {
     try {
       if (!currentProfileId) return;
@@ -1362,22 +1325,7 @@ const App: React.FC = () => {
                         navigator.language.includes('IN') || 
                         localStorage.getItem('zb_default_currency') === 'INR';
         
-        let userLocCurrency = localStorage.getItem(`zb_currency_${currentProfileId}`) || '';
-        if (!userLocCurrency) {
-          if (profData.currency === 'USD' && isIndia) {
-            userLocCurrency = 'INR';
-            // Sync to database so it stays INR
-            supabase
-              .from('profiles')
-              .update({ currency: 'INR' })
-              .eq('id', currentProfileId)
-              .then(({ error }) => {
-                if (error) console.error('Failed to auto-upgrade profile currency to INR:', error);
-              });
-          } else {
-            userLocCurrency = profData.currency || (isIndia ? 'INR' : 'USD');
-          }
-        }
+        let userLocCurrency = localStorage.getItem(`zb_currency_${currentProfileId}`) || profData.currency || (isIndia ? 'INR' : 'USD');
         setCurrency(userLocCurrency);
         localStorage.setItem(`zb_currency_${currentProfileId}`, userLocCurrency);
 

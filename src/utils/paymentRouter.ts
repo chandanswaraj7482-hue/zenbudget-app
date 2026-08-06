@@ -142,16 +142,11 @@ export function handleZenBudgetPaymentSystem(
   }
 
   // Step 4: Device OS Native App Intent Handshake Execution
-  const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || Capacitor.isNativePlatform();
-
-  if (isMobileDevice) {
-    console.log("ZenBudget Payment System: Handshake redirect ->", compiledNativeUri);
+  try {
+    console.log("ZenBudget Payment System: Direct Intent launch ->", compiledNativeUri);
     window.location.href = compiledNativeUri;
-  } else {
-    const confirmLaunch = window.confirm(`Desktop Environment Alert: Direct native app handshakes require a Mobile Browser or APK.\n\nUPI URI synthesized:\n${compiledNativeUri}\n\nDo you want to launch?`);
-    if (confirmLaunch) {
-      window.location.href = compiledNativeUri;
-    }
+  } catch (e) {
+    console.warn("ZenBudget Payment System: Redirect failed:", e);
   }
 
   return true;
