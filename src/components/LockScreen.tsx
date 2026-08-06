@@ -887,7 +887,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               boxShadow: '0 8px 32px rgba(34,197,94,0.3)',
               marginBottom: '14px', overflow: 'hidden'
             }}>
-              <img src="/logo.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src="/logo-login.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <h1 style={{ fontSize: '30px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
               <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
@@ -1195,7 +1195,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               overflow: 'hidden'
             }}>
               <img 
-                src="/logo.png" 
+                src="/logo-login.png" 
                 alt="ZenBudget Logo" 
                 style={{ 
                   width: '100%', 
