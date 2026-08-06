@@ -47,6 +47,12 @@ export const LoansView: React.FC<LoansViewProps> = ({
   };
 
   const [dueDate, setDueDate] = useState(getInitialDueDate);
+
+  const updateDueDateFromToday = (monthsToAdd: number) => {
+    const d = new Date();
+    d.setMonth(d.getMonth() + monthsToAdd);
+    setDueDate(d.toISOString().split('T')[0]);
+  };
   const [frequency, setFrequency] = useState<'one_time' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'custom'>('monthly');
   const [customFrequencyText, setCustomFrequencyText] = useState('');
   const [notes, setNotes] = useState('');
@@ -600,8 +606,13 @@ export const LoansView: React.FC<LoansViewProps> = ({
                     onChange={e => {
                       const val = e.target.value as any;
                       setFrequency(val);
-                      if (val === 'yearly') setInterestType('yearly');
-                      if (val === 'monthly') setInterestType('monthly');
+                      if (val === 'yearly') {
+                        setInterestType('yearly');
+                        updateDueDateFromToday(12);
+                      } else if (val === 'monthly') {
+                        setInterestType('monthly');
+                        updateDueDateFromToday(1);
+                      }
                     }}
                     className="glass-input"
                     style={{ marginTop: '4px', width: '100%', background: 'var(--bg-input)' }}
@@ -611,6 +622,41 @@ export const LoansView: React.FC<LoansViewProps> = ({
                     <option value="yearly">{t('yearly')}</option>
                     <option value="custom">✨ Custom Frequency...</option>
                   </select>
+                </div>
+              </div>
+
+              {/* Duration Presets for Auto Due Date */}
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+                  ⏳ Quick Tenure / Duration (Auto Due Date)
+                </label>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {[
+                    { label: '1 Month', months: 1 },
+                    { label: '3 Months', months: 3 },
+                    { label: '6 Months', months: 6 },
+                    { label: '1 Year', months: 12 },
+                    { label: '2 Years', months: 24 }
+                  ].map(chip => (
+                    <button
+                      key={chip.months}
+                      type="button"
+                      onClick={() => updateDueDateFromToday(chip.months)}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '10px',
+                        border: '1px solid var(--border-input)',
+                        background: 'rgba(34, 197, 94, 0.1)',
+                        color: 'var(--primary)',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      + {chip.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
