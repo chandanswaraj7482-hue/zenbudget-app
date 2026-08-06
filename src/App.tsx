@@ -2443,8 +2443,20 @@ const App: React.FC = () => {
 
     const isSelfPremium = subscriptionTier === 'premium_monthly' || subscriptionTier === 'premium_lifetime' || subscriptionTier === 'premium_yearly' || subscriptionTier === 'premium';
     if (!isSelfPremium) {
-      setIsSubscriptionOpen(true);
-      triggerToast('🔒 You must upgrade to Premium to sync shared budgets with a partner!', 'warning');
+      setConfirmDialog({
+        isOpen: true,
+        title: '🔒 Premium Subscription Required',
+        message: 'Shared Budget sync requires an active Premium plan for both users. Upgrade to Premium now to sync entries with your partner!',
+        type: 'warning',
+        confirmText: '⭐ Go Premium Now',
+        cancelText: 'Close',
+        onConfirm: () => {
+          setConfirmDialog(null);
+          setIsSubBlocker(false);
+          setIsSubModalOpen(true);
+        },
+        onCancel: () => setConfirmDialog(null)
+      });
       return false;
     }
 
@@ -2488,7 +2500,16 @@ const App: React.FC = () => {
 
       const isPartnerPremium = partnerProf.subscription_tier === 'premium_monthly' || partnerProf.subscription_tier === 'premium_lifetime' || partnerProf.subscription_tier === 'premium_yearly' || partnerProf.subscription_tier === 'premium';
       if (!isPartnerPremium) {
-        triggerToast(`🔒 Partner ${partnerProf.name} does not have Premium! Both users require Premium to sync shared budgets.`, 'warning');
+        setConfirmDialog({
+          isOpen: true,
+          title: '🔒 Partner Premium Required',
+          message: `Partner ${partnerProf.name} is currently on Free Trial. Both users must have an active Premium subscription to sync shared budgets!`,
+          type: 'warning',
+          confirmText: 'OK, Got It',
+          cancelText: 'Close',
+          onConfirm: () => setConfirmDialog(null),
+          onCancel: () => setConfirmDialog(null)
+        });
         return false;
       }
 
@@ -2983,6 +3004,9 @@ const App: React.FC = () => {
             coupleCode={coupleCode || ''}
             onConnectPartner={handleConnectPartner}
             onDisconnectPartner={handleDisconnectPartner}
+            transactions={convertedTransactions}
+            currencySymbol={currencySymbol}
+            onOpenTransferModal={() => setIsTransferOpen(true)}
           />
         )}
         {activeView === 'referral' && (

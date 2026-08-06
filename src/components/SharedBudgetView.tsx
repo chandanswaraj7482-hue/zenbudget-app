@@ -9,6 +9,9 @@ interface SharedBudgetViewProps {
   coupleCode?: string;
   onConnectPartner?: (code: string) => Promise<boolean>;
   onDisconnectPartner?: () => void;
+  transactions?: any[];
+  currencySymbol?: string;
+  onOpenTransferModal?: () => void;
 }
 
 export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
@@ -18,7 +21,10 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
   partnerName = null,
   coupleCode = '',
   onConnectPartner,
-  onDisconnectPartner
+  onDisconnectPartner,
+  transactions = [],
+  currencySymbol = '₹',
+  onOpenTransferModal
 }) => {
   const [partnerInputCode, setPartnerInputCode] = useState('');
   const [isLinking, setIsLinking] = useState(false);
@@ -26,6 +32,14 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
   const [errorMsg, setErrorMsg] = useState('');
 
   const myShareCode = currentProfileId ? currentProfileId.slice(0, 8).toUpperCase() : '';
+
+  // Calculate partner vs self spending stats
+  const partnerTxs = (transactions || []).filter(t => t.paidBy === 'Partner' || (t.user_id && t.user_id !== currentProfileId));
+  const myTxs = (transactions || []).filter(t => t.paidBy !== 'Partner' && (!t.user_id || t.user_id === currentProfileId));
+
+  const partnerTotalSpent = partnerTxs.filter(t => t.type === 'expense').reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+  const myTotalSpent = myTxs.filter(t => t.type === 'expense').reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+  const combinedTotalSpent = partnerTotalSpent + myTotalSpent;
 
   const handleCopyCode = () => {
     if (!myShareCode) return;
@@ -56,7 +70,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '80px', animation: 'fadeIn 0.3s ease-out' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '90px', animation: 'fadeIn 0.3s ease-out' }}>
       
       {/* Title Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -84,7 +98,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
             Shared Budget
           </h2>
           <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
-            Couples • Roommates • Families sync in real-time.
+            Couples • Roommates • Families real-time spending &amp; transfer sync.
           </p>
         </div>
       </div>
@@ -94,27 +108,169 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
         
         {partnerCode ? (
           /* CONNECTED STATE */
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', textAlign: 'center' }}>
-            <div style={{ padding: '20px', background: 'rgba(139,92,246,0.12)', borderRadius: '20px', border: '1px solid rgba(139,92,246,0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ padding: '20px', background: 'rgba(139,92,246,0.12)', borderRadius: '20px', border: '1px solid rgba(139,92,246,0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', textAlign: 'center' }}>
               <div style={{ width: '54px', height: '54px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>
                 👫
               </div>
               <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
                 Synced with {partnerName || 'Partner'}
               </h3>
-              <span style={{ fontSize: '12px', color: '#a78bfa', fontWeight: 600 }}>
+              <span style={{ fontSize: '12px', color: '#a78bfa', fontWeight: 700 }}>
                 Shared Pair Code: {coupleCode || partnerCode}
               </span>
               <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                Your income &amp; expenses are synced live into a shared budget view.
+                Real-time Dual Premium Sync Active ⚡
               </span>
+            </div>
+
+            {/* Household Spending Breakdown Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ padding: '16px', background: 'rgba(239, 68, 68, 0.08)', borderRadius: '16px', border: '1px solid rgba(239, 68, 68, 0.2)', textAlign: 'left' }}>
+                <span style={{ fontSize: '11px', color: '#f87171', fontWeight: 700, textTransform: 'uppercase' }}>
+                  {partnerName || 'Partner'}'s Spent
+                </span>
+                <p style={{ fontSize: '20px', fontWeight: 800, color: '#ffffff', margin: '4px 0 0 0' }}>
+                  {currencySymbol}{partnerTotalSpent.toLocaleString()}
+                </p>
+                <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{partnerTxs.length} entries</span>
+              </div>
+
+              <div style={{ padding: '16px', background: 'rgba(34, 197, 94, 0.08)', borderRadius: '16px', border: '1px solid rgba(34, 197, 94, 0.2)', textAlign: 'left' }}>
+                <span style={{ fontSize: '11px', color: '#4ade80', fontWeight: 700, textTransform: 'uppercase' }}>
+                  Your Spent
+                </span>
+                <p style={{ fontSize: '20px', fontWeight: 800, color: '#ffffff', margin: '4px 0 0 0' }}>
+                  {currencySymbol}{myTotalSpent.toLocaleString()}
+                </p>
+                <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{myTxs.length} entries</span>
+              </div>
+            </div>
+
+            {/* Combined Household Total Banner */}
+            <div style={{ padding: '14px 18px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary)' }}>Total Combined Household Spent</span>
+              <span style={{ fontSize: '18px', fontWeight: 800, color: 'var(--primary)' }}>{currencySymbol}{combinedTotalSpent.toLocaleString()}</span>
+            </div>
+
+            {/* Money Transfer / Send Money to Partner Button */}
+            {onOpenTransferModal && (
+              <button
+                type="button"
+                onClick={onOpenTransferModal}
+                style={{
+                  padding: '14px',
+                  borderRadius: '16px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                  color: '#ffffff',
+                  fontSize: '14px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 8px 24px rgba(34, 197, 94, 0.35)'
+                }}
+              >
+                💸 Send / Transfer Money to {partnerName || 'Partner'}
+              </button>
+            )}
+
+            {/* Live Spending Activity Feed — Both sides */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', textAlign: 'left' }}>
+              
+              {/* Partner's entries */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <h4 style={{ fontSize: '12px', fontWeight: 800, color: '#f87171', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  👤 {partnerName || 'Partner'}'s Recent Spending
+                </h4>
+                {partnerTxs.length === 0 ? (
+                  <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
+                    No entries logged by partner yet.
+                  </p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+                    {partnerTxs.slice(0, 8).map((tx: any) => (
+                      <div
+                        key={tx.id || Math.random()}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '11px 14px',
+                          borderRadius: '13px',
+                          background: 'rgba(239, 68, 68, 0.06)',
+                          border: '1px solid rgba(239, 68, 68, 0.15)'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px' }}>
+                            💸
+                          </div>
+                          <div>
+                            <p style={{ fontSize: '13px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{tx.title || tx.category}</p>
+                            <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{tx.category} • {tx.date ? new Date(tx.date).toLocaleDateString('en-IN') : 'Today'}</span>
+                          </div>
+                        </div>
+                        <span style={{ fontSize: '14px', fontWeight: 800, color: '#f87171' }}>
+                          -{currencySymbol}{(Number(tx.amount) || 0).toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* My entries */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <h4 style={{ fontSize: '12px', fontWeight: 800, color: '#4ade80', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  🙋 Your Recent Spending
+                </h4>
+                {myTxs.filter(t => t.type === 'expense').length === 0 ? (
+                  <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
+                    No expense entries logged yet by you.
+                  </p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+                    {myTxs.filter(t => t.type === 'expense').slice(0, 8).map((tx: any) => (
+                      <div
+                        key={tx.id || Math.random()}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '11px 14px',
+                          borderRadius: '13px',
+                          background: 'rgba(34, 197, 94, 0.05)',
+                          border: '1px solid rgba(34, 197, 94, 0.15)'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(34, 197, 94, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px' }}>
+                            🏷️
+                          </div>
+                          <div>
+                            <p style={{ fontSize: '13px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{tx.title || tx.category}</p>
+                            <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{tx.category} • {tx.date ? new Date(tx.date).toLocaleDateString('en-IN') : 'Today'}</span>
+                          </div>
+                        </div>
+                        <span style={{ fontSize: '14px', fontWeight: 800, color: '#4ade80' }}>
+                          -{currencySymbol}{(Number(tx.amount) || 0).toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <button
               onClick={onDisconnectPartner}
               style={{
                 padding: '12px',
-                borderRadius: '12px',
+                borderRadius: '14px',
                 border: '1px solid rgba(239, 68, 68, 0.3)',
                 background: 'rgba(239, 68, 68, 0.1)',
                 color: 'var(--danger)',
@@ -124,7 +280,8 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '6px'
+                gap: '6px',
+                marginTop: '10px'
               }}
             >
               <LogOut size={16} /> Disconnect Shared Pair

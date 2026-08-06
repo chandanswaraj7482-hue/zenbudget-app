@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { HelpCircle, X, Bot, Star, Mail, Send, MessageSquare, Sparkles, ThumbsUp, CheckCircle, CheckCircle2 } from 'lucide-react';
 import type { Transaction, CategoryBudget, SavingsGoal } from '../types';
 
 interface HelpModalProps {
