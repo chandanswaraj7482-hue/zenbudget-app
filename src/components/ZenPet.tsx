@@ -125,7 +125,7 @@ export const ZenPet: React.FC<ZenPetProps> = ({ currentProfileId, spentPercentag
 
   // Load pet state on profile swap
   useEffect(() => {
-    const loadedPoints = parseInt(localStorage.getItem(`zb_pet_points_${currentProfileId}`) || '200'); // default 200 to test
+    const loadedPoints = parseInt(localStorage.getItem(`zb_pet_points_${currentProfileId}`) || '0'); // starting points 0
     const loadedUnlocked = JSON.parse(localStorage.getItem(`zb_pet_unlocked_${currentProfileId}`) || '[]');
     const loadedEquipped = localStorage.getItem(`zb_pet_equipped_${currentProfileId}`) || '';
     

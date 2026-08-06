@@ -23,17 +23,26 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
   const [lastSavedSummary, setLastSavedSummary] = useState<string | null>(null);
   const [showNoAccountModal, setShowNoAccountModal] = useState(false);
 
+  const [selectedAccountId, setSelectedAccountId] = useState<string>(() => accounts[0]?.id || '1');
+  const [selectedTransferToAccountId, setSelectedTransferToAccountId] = useState<string>(() => accounts[1]?.id || accounts[0]?.id || '2');
+
+  React.useEffect(() => {
+    if (accounts && accounts.length > 0 && (!selectedAccountId || !accounts.some(a => a.id === selectedAccountId))) {
+      setSelectedAccountId(accounts[0].id);
+    }
+  }, [accounts]);
+
   // Natural Language Multi-lingual Parser
   const parseNaturalLanguage = (text: string, defaultType: 'expense' | 'income' | 'transfer') => {
     const cleanText = text.trim().toLowerCase();
     
-    // 1. Amount Extraction (handles 220, 2.5k, ₹500, 5000)
+    // 1. Amount Extraction (handles 220, 2.5k, ₹500, 5000, 300rs)
     let amount = 0;
     const kMatch = cleanText.match(/(\d+(?:\.\d+)?)\s*k\b/i);
     if (kMatch) {
       amount = parseFloat(kMatch[1]) * 1000;
     } else {
-      const numMatch = cleanText.match(/(?:(?:₹|\$|€|£|rs\.?|inr)?\s*)(\d+(?:\.\d+)?)/i);
+      const numMatch = cleanText.match(/(?:(?:₹|\$|€|£|rs\.?|inr|rupees|ruppess|rupee)?\s*)(\d+(?:\.\d+)?)/i) || cleanText.match(/(\d+(?:\.\d+)?)\s*(?:rs|inr|rupees|ruppess|rupee)?/i);
       if (numMatch) {
         amount = parseFloat(numMatch[1]);
       }
@@ -43,15 +52,17 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
     let type: 'expense' | 'income' | 'transfer' = defaultType;
     if (/\b(transfer|transferred|bheja|send|sent|remit)\b/i.test(cleanText)) {
       type = 'transfer';
-    } else if (/\b(received|got|salary|earned|income|aaya|mila|cashback|refund)\b/i.test(cleanText)) {
+    } else if (/\b(received|got|salary|freelance|earned|income|aaya|aayi|aaye|mila|mili|mile|cashback|refund|credited)\b/i.test(cleanText)) {
       type = 'income';
-    } else if (/\b(paid|spent|bought|kharcha|diya|chukaaya|purchase|order|pay)\b/i.test(cleanText)) {
+    } else if (/\b(paid|spent|bought|kharcha|diya|diye|chukaaya|purchase|order|pay|debited)\b/i.test(cleanText)) {
       type = 'expense';
     }
 
     // 3. Category Detection
     let category = 'other';
-    if (/\b(petrol|fuel|diesel|cab|uber|ola|auto|rickshaw|metro|bus|flight|train|travel|petrolcard)\b/i.test(cleanText)) {
+    if (/\b(freelance|freelancing|salary|stipend|dividend|bonus|interest|profit|income|refund|cashback)\b/i.test(cleanText)) {
+      category = 'salary';
+    } else if (/\b(petrol|fuel|diesel|cab|uber|ola|auto|rickshaw|metro|bus|flight|train|travel|petrolcard)\b/i.test(cleanText)) {
       category = 'transport';
     } else if (/\b(food|swiggy|zomato|pizza|burger|dinner|lunch|breakfast|tea|chai|coffee|restaurant|hotel|snack|khana)\b/i.test(cleanText)) {
       category = 'food';
@@ -67,24 +78,31 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
       category = 'entertainment';
     } else if (/\b(medicine|doctor|hospital|medical|pharma|clinic)\b/i.test(cleanText)) {
       category = 'health';
-    } else if (/\b(salary|stipend|freelance|dividend|bonus|interest)\b/i.test(cleanText)) {
-      category = 'salary';
     }
 
     // 4. Account Mode Detection
-    let accountId = '1'; // Cash default
-    if (/\b(bank|hdfc|sbi|icici|axis|card|debit|credit|online|netbanking)\b/i.test(cleanText)) {
-      accountId = '2';
-    } else if (/\b(upi|gpay|phonepe|paytm|scan|qr)\b/i.test(cleanText)) {
-      accountId = '3';
-    } else if (/\b(cash|nakad)\b/i.test(cleanText)) {
-      accountId = '1';
+    let detectedAccId: string | null = null;
+    if (accounts && accounts.length > 0) {
+      if (/\b(bank|hdfc|sbi|icici|axis|card|debit|credit|netbanking)\b/i.test(cleanText)) {
+        const found = accounts.find(a => /bank|hdfc|sbi|icici|axis/i.test(a.name) || a.type === 'bank');
+        if (found) detectedAccId = found.id;
+      } else if (/\b(upi|gpay|phonepe|paytm|scan|qr)\b/i.test(cleanText)) {
+        const found = accounts.find(a => /upi|gpay|phonepe|paytm/i.test(a.name) || a.type === 'upi');
+        if (found) detectedAccId = found.id;
+      } else if (/\b(cash|nakad)\b/i.test(cleanText)) {
+        const found = accounts.find(a => /cash/i.test(a.name) || a.type === 'cash');
+        if (found) detectedAccId = found.id;
+      }
     }
 
-    // 5. Intelligent Title & Item Extraction (e.g. "mene 100 ruppess pizza khaya" -> "Pizza")
+    // 5. Intelligent Title & Item Extraction
     let extractedTitle = '';
 
     const itemMap: { regex: RegExp; label: string }[] = [
+      { regex: /\bfreelance|freelancing\b/i, label: 'Freelance Work' },
+      { regex: /\bsalary|stipend\b/i, label: 'Monthly Salary' },
+      { regex: /\bbonus|dividend|interest|profit\b/i, label: 'Bonus & Investments' },
+      { regex: /\bcashback|refund\b/i, label: 'Cashback & Refund' },
       { regex: /\bpizza\b/i, label: 'Pizza' },
       { regex: /\bburger\b/i, label: 'Burger' },
       { regex: /\bswiggy\b/i, label: 'Swiggy Food' },
@@ -103,7 +121,6 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
       { regex: /\bnetflix|spotify|prime\b/i, label: 'Subscription' },
       { regex: /\bmovie|cinema\b/i, label: 'Movie Ticket' },
       { regex: /\bmedicine|doctor|clinic\b/i, label: 'Medical & Pharmacy' },
-      { regex: /\bsalary|stipend\b/i, label: 'Monthly Salary' },
       { regex: /\bamazon|flipkart|myntra\b/i, label: 'Online Shopping' },
       { regex: /\bclothes|dress|shoes\b/i, label: 'Apparel & Clothes' }
     ];
@@ -117,9 +134,9 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
 
     if (!extractedTitle) {
       let stripped = cleanText
-        .replace(/(?:(?:₹|\$|€|£|rs\.?|inr|rupees|ruppess|rupee)?\s*)\d+(?:\.\d+)?\s*k?/gi, '')
-        .replace(/\b(mene|maine|main|i|humne|we|my|mera|meri|mere|ne|ka|ki|ke|ko|se|par|for|in|on|at|with|and|is|was|to|a|an)\b/gi, '')
-        .replace(/\b(paid|spent|bought|kharcha|diya|diye|chukaaya|purchase|order|pay|khaya|khaye|piya|piye|kharida|kharide|bheja|bheje|mila|aaya|gave|took|got|received|cash|bank|online|gpay|phonepe|paytm|upi)\b/gi, '')
+        .replace(/(?:(?:₹|\$|€|£|rs\.?|inr|rupees|ruppess|rupee)?\s*)\d+(?:\.\d+)?\s*(?:rs|inr|rupees|ruppess|rupee|k)?/gi, '')
+        .replace(/\b(mujhe|mujko|mujhko|mereko|hume|humne|humko|usko|isiko|paisa|paise|rupee|rupees|ruppess|rs|inr|roopaye|rupaye|rupya|rupye|amount|money|taka|milars|milar|mene|maine|main|i|we|my|mera|meri|mere|ne|ka|ki|ke|ko|se|par|for|from|to|in|on|at|with|and|is|was|a|an|the)\b/gi, '')
+        .replace(/\b(paid|spent|bought|kharcha|diya|diye|chukaaya|purchase|order|pay|khaya|khaye|piya|piye|kharida|kharide|bheja|bheje|mila|mili|mile|aaya|aayi|aaye|gave|took|got|received|cash|bank|online|gpay|phonepe|paytm|upi)\b/gi, '')
         .replace(/[^\w\s]/gi, '')
         .trim();
 
@@ -152,7 +169,7 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
       amount: amount || 0,
       type: type,
       category: category,
-      accountId: accountId,
+      accountId: detectedAccId,
       date: new Date().toISOString().split('T')[0]
     };
   };
@@ -205,9 +222,13 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
 
     const parsed = parseNaturalLanguage(inputQuery, activeTab);
     if (!parsed.amount || parsed.amount <= 0) {
-      alert('Please mention a valid amount in text (e.g., "Paid 220 for petrol in cash").');
+      alert('Please mention a valid amount in text (e.g., "Paid 220 for petrol in cash" or "mujhe 300rs freelance se mila").');
       return;
     }
+
+    const finalAccountId = (parsed.accountId && accounts.some(a => a.id === parsed.accountId))
+      ? parsed.accountId
+      : selectedAccountId || accounts[0]?.id || '1';
 
     onSaveTransaction({
       title: parsed.title,
@@ -215,6 +236,8 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
       category: parsed.category,
       date: parsed.date,
       type: parsed.type,
+      accountId: finalAccountId,
+      transferToAccountId: parsed.type === 'transfer' ? selectedTransferToAccountId : undefined,
       notes: `Quick captured from: "${inputQuery}"`
     });
 
@@ -222,7 +245,9 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
       confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
     } catch (_) {}
 
-    setLastSavedSummary(`Saved: ${parsed.type.toUpperCase()} ${currencySymbol}${parsed.amount} (${parsed.title})`);
+    const selectedAccObj = accounts.find(a => a.id === finalAccountId);
+    const accName = selectedAccObj ? selectedAccObj.name : 'Account';
+    setLastSavedSummary(`Saved: ${parsed.type.toUpperCase()} ${currencySymbol}${parsed.amount} (${parsed.title}) -> ${accName}`);
     setInputQuery('');
     setTimeout(() => setLastSavedSummary(null), 4000);
   };

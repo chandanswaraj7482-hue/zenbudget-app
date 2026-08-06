@@ -169,7 +169,7 @@ export const WishlistBlocker: React.FC<WishlistBlockerProps> = ({
   const handleSavedIt = (item: WishlistItem) => {
     // 1. Award +100 Zen Pet points!
     const petPointsKey = `zb_pet_points_${currentProfileId}`;
-    const currentPoints = parseInt(localStorage.getItem(petPointsKey) || '200');
+    const currentPoints = parseInt(localStorage.getItem(petPointsKey) || '0');
     localStorage.setItem(petPointsKey, (currentPoints + 100).toString());
 
     // 2. Play Audio chime

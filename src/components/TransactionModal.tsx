@@ -14,7 +14,9 @@ import {
   ChevronRight,
   Camera as CameraIcon,
   Lock,
-  Clock
+  Clock,
+  Briefcase,
+  Home
 } from 'lucide-react';
 import type { Transaction, CategoryType, Account } from '../types';
 import { EXPENSE_MOODS, INCOME_MOODS, normalizeMood } from '../types';
@@ -39,9 +41,12 @@ const CATEGORIES = [
   { id: 'food', label: '🍔 Food & Drinks', icon: <Utensils size={16} />, color: 'var(--warning)' },
   { id: 'shopping', label: '🛍️ Shopping', icon: <ShoppingBag size={16} />, color: 'var(--secondary)' },
   { id: 'entertainment', label: '🎬 Entertainment', icon: <Film size={16} />, color: 'var(--primary)' },
-  { id: 'bills', label: '💳 Bills & Rent', icon: <CreditCard size={16} />, color: 'var(--info)' },
+  { id: 'bills', label: '💳 Bills & Utilities', icon: <CreditCard size={16} />, color: 'var(--info)' },
   { id: 'travel', label: '✈️ Travel', icon: <Compass size={16} />, color: 'var(--info)' },
   { id: 'health', label: '🏥 Health', icon: <HeartPulse size={16} />, color: 'var(--success)' },
+  { id: 'salary', label: '💼 Salary / Income', icon: <Briefcase size={16} />, color: 'var(--success)' },
+  { id: 'rent', label: '🏠 Rent & Housing', icon: <Home size={16} />, color: 'var(--warning)' },
+  { id: 'groceries', label: '🛒 Groceries', icon: <ShoppingBag size={16} />, color: 'var(--primary)' },
   { id: 'other', label: '📦 Other', icon: <MoreHorizontal size={16} />, color: 'var(--text-muted)' }
 ] as const;
 

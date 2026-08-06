@@ -1212,7 +1212,7 @@ const App: React.FC = () => {
     if (lastCheckin !== today) {
       localStorage.setItem(`zb_last_checkin_${currentProfileId}`, today);
       const petPointsKey = `zb_pet_points_${currentProfileId}`;
-      const currentPoints = parseInt(localStorage.getItem(petPointsKey) || '200');
+      const currentPoints = parseInt(localStorage.getItem(petPointsKey) || '0');
       localStorage.setItem(petPointsKey, (currentPoints + 20).toString());
       setTimeout(() => {
         triggerToast('Daily Check-in! +20 Zen Pet Points! 🌿🐷', 'success');
@@ -1838,7 +1838,7 @@ const App: React.FC = () => {
 
         // Award Zen Companion Points (+10) on adding a new transaction
         const petPointsKey = `zb_pet_points_${currentProfileId}`;
-        const currentPoints = parseInt(localStorage.getItem(petPointsKey) || '200');
+        const currentPoints = parseInt(localStorage.getItem(petPointsKey) || '0');
         localStorage.setItem(petPointsKey, (currentPoints + 10).toString());
         triggerToast('Transaction added! +10 Zen Pet Points! 🐷', 'success');
 

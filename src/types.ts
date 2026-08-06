@@ -1,4 +1,4 @@
-export type CategoryType = 'food' | 'shopping' | 'entertainment' | 'bills' | 'travel' | 'health' | 'other';
+export type CategoryType = 'food' | 'shopping' | 'entertainment' | 'bills' | 'travel' | 'health' | 'other' | 'salary' | 'rent' | 'groceries';
 
 export interface CategoryInfo {
   id: CategoryType;
