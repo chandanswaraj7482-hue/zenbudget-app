@@ -228,6 +228,8 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
     }
   };
 
+  const [insufficientBalanceError, setInsufficientBalanceError] = useState<{ accountName: string; available: number; required: number } | null>(null);
+
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!inputQuery.trim()) return;
@@ -247,6 +249,21 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
       ? parsed.accountId
       : selectedAccountId || accounts[0]?.id || '1';
 
+    const selectedAccObj = accounts.find(a => a.id === finalAccountId);
+    const accBalance = selectedAccObj ? (selectedAccObj.balance || 0) : 0;
+
+    // Strict Insufficient Balance Check
+    if (parsed.type === 'expense' || parsed.type === 'transfer') {
+      if (accBalance < parsed.amount) {
+        setInsufficientBalanceError({
+          accountName: selectedAccObj?.name || 'Wallet Account',
+          available: accBalance,
+          required: parsed.amount
+        });
+        return; // STOP EXECUTION! DO NOT SAVE OR FIRE CONFETTI!
+      }
+    }
+
     onSaveTransaction({
       title: parsed.title,
       amount: parsed.amount,
@@ -262,7 +279,6 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
       confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
     } catch (_) {}
 
-    const selectedAccObj = accounts.find(a => a.id === finalAccountId);
     const accName = selectedAccObj ? selectedAccObj.name : 'Account';
     setLastSavedSummary(`Saved: ${parsed.type.toUpperCase()} ${currencySymbol}${parsed.amount} (${parsed.title}) -> ${accName}`);
     setInputQuery('');
@@ -529,6 +545,76 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
               }}
             >
               <Plus size={18} /> Add Account Now
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Insufficient Balance Error Modal */}
+      {insufficientBalanceError && createPortal(
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(12px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px',
+          zIndex: 99999, animation: 'fadeIn 0.2s ease-out'
+        }}>
+          <div className="glass-panel" style={{
+            maxWidth: '380px', width: '100%',
+            background: 'linear-gradient(180deg, rgba(239, 68, 68, 0.2) 0%, rgba(15, 23, 42, 0.98) 100%)',
+            borderRadius: '24px', border: '1px solid rgba(239, 68, 68, 0.4)',
+            padding: '24px', textAlign: 'center', boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setInsufficientBalanceError(null)}
+              style={{
+                position: 'absolute', top: '16px', right: '16px',
+                background: 'rgba(255,255,255,0.06)', border: 'none',
+                borderRadius: '50%', width: '32px', height: '32px',
+                color: 'var(--text-secondary)', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}
+            >
+              <X size={18} />
+            </button>
+
+            <div style={{
+              width: '64px', height: '64px', borderRadius: '50%',
+              background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 16px auto',
+              border: '1px solid rgba(239, 68, 68, 0.4)',
+              boxShadow: '0 8px 20px rgba(239, 68, 68, 0.3)'
+            }}>
+              <span style={{ fontSize: '32px' }}>⚠️</span>
+            </div>
+
+            <h3 style={{ fontSize: '20px', fontWeight: 900, color: '#f87171', marginBottom: '8px', fontFamily: "'Manrope', sans-serif" }}>
+              Insufficient Balance!
+            </h3>
+
+            <p style={{ fontSize: '13px', color: '#cbd5e1', marginBottom: '20px', lineHeight: 1.6 }}>
+              Your <strong>{insufficientBalanceError.accountName}</strong> has only <strong style={{ color: '#f87171' }}>{currencySymbol}{insufficientBalanceError.available.toLocaleString()}</strong> available balance, but this expense requires <strong style={{ color: '#fff' }}>{currencySymbol}{insufficientBalanceError.required.toLocaleString()}</strong>.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => setInsufficientBalanceError(null)}
+              style={{
+                width: '100%',
+                padding: '14px',
+                borderRadius: '16px',
+                background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                color: '#ffffff',
+                fontWeight: 900,
+                fontSize: '14px',
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 8px 24px rgba(239, 68, 68, 0.4)'
+              }}
+            >
+              Understand &amp; Select Different Account
             </button>
           </div>
         </div>,

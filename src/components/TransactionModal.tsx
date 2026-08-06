@@ -427,7 +427,19 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         calm: '😐 Neutral' 
       };
       const moodLabel = moodMap[mood] || mood;
-      finalNotes = `[${moodLabel}] ${finalNotes}`.trim();
+    // Insufficient Balance check for expense
+    if (type === 'expense' && accounts && accounts.length > 0) {
+      const selectedAccId = selectedAccountId || accounts[0]?.id;
+      const selectedAccObj = accounts.find(a => a.id === selectedAccId);
+      const accBalance = selectedAccObj ? (selectedAccObj.balance || 0) : 0;
+      if (accBalance < parsedAmount) {
+        setInsufficientBalanceModal({
+          accountName: selectedAccObj?.name || 'Wallet Account',
+          available: accBalance,
+          required: parsedAmount
+        });
+        return; // STOP EXECUTION! DO NOT SAVE!
+      }
     }
 
     onSave({

@@ -210,7 +210,7 @@ const App: React.FC = () => {
     remainingAmount: number;
   } | null>(null);
   const [loanReminderAccountId, setLoanReminderAccountId] = useState<string>('');
-  const [showUpdatePopup, setShowUpdatePopup] = useState<boolean>(false);
+  const [insufficientBalanceModalData, setInsufficientBalanceModalData] = useState<{ accountName: string; available: number; required: number } | null>(null);
   const [updateVersion, setUpdateVersion] = useState<string>('');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState<boolean>(false);
   const [dailyLimit, setDailyLimit] = useState<number>(1000);
@@ -1864,14 +1864,17 @@ const App: React.FC = () => {
         setTransactions(nextTransactions);
         localStorage.setItem(`zb_transactions_${currentProfileId}`, JSON.stringify(nextTransactions));
 
-        // 🏦 Auto-update account balance on expense/income
-        if (txData.accountId && (txData.type === 'expense' || txData.type === 'income')) {
+        // 🏦 Auto-update account balance on expense/income/transfer
+        if (txData.accountId && (txData.type === 'expense' || txData.type === 'income' || txData.type === 'transfer')) {
           setAccounts(prev => {
             const updated = prev.map(a => {
               if (a.id === txData.accountId) {
-                const delta = txData.type === 'expense' ? -txData.amount : txData.amount;
+                const delta = (txData.type === 'expense' || txData.type === 'transfer') ? -txData.amount : txData.amount;
                 const newBalance = Math.max(0, a.balance + delta);
                 return { ...a, balance: newBalance };
+              }
+              if (txData.type === 'transfer' && a.id === txData.transferToAccountId) {
+                return { ...a, balance: a.balance + txData.amount };
               }
               return a;
             });
@@ -1960,14 +1963,18 @@ const App: React.FC = () => {
     setEditingTransaction(null);
   };
 
-  const handleSaveTransaction = async (txData: Omit<Transaction, 'id'> & { id?: string }) => {
-    // Insufficient Balance Validation
-    if (!txData.id && txData.type === 'expense' && accounts && accounts.length > 0) {
+  const handleSaveTransaction = async (txData: Omit<Transaction, 'id'> & { id?: string }): Promise<boolean> => {
+    // Insufficient Balance Validation for Expenses and Transfers
+    if (!txData.id && (txData.type === 'expense' || txData.type === 'transfer') && accounts && accounts.length > 0) {
       const selectedAcc = accounts.find(a => a.id === txData.accountId);
       const accBalance = selectedAcc ? (selectedAcc.balance || 0) : accounts.reduce((s, a) => s + (a.balance || 0), 0);
       if (accBalance <= 0 || accBalance < txData.amount) {
-        triggerToast('⚠️ Insufficient Balance in Account! Please add funds or select another wallet.', 'danger');
-        return;
+        setInsufficientBalanceModalData({
+          accountName: selectedAcc ? selectedAcc.name : 'Wallet Account',
+          available: accBalance,
+          required: txData.amount
+        });
+        return false;
       }
     }
 
@@ -4171,6 +4178,73 @@ const App: React.FC = () => {
                 ⏰ Remind Me Later
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Global Insufficient Balance Error Modal */}
+      {insufficientBalanceModalData && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 99999,
+          backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(12px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px',
+          animation: 'fadeIn 0.2s ease-out'
+        }}>
+          <div className="glass-panel" style={{
+            maxWidth: '380px', width: '100%',
+            background: 'linear-gradient(180deg, rgba(239, 68, 68, 0.25) 0%, rgba(15, 23, 42, 0.98) 100%)',
+            borderRadius: '24px', border: '1px solid rgba(239, 68, 68, 0.4)',
+            padding: '24px', textAlign: 'center', boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setInsufficientBalanceModalData(null)}
+              style={{
+                position: 'absolute', top: '16px', right: '16px',
+                background: 'rgba(255,255,255,0.06)', border: 'none',
+                borderRadius: '50%', width: '32px', height: '32px',
+                color: '#cbd5e1', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}
+            >
+              ✕
+            </button>
+
+            <div style={{
+              width: '64px', height: '64px', borderRadius: '50%',
+              background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 16px auto', border: '1px solid rgba(239, 68, 68, 0.4)',
+              boxShadow: '0 8px 20px rgba(239, 68, 68, 0.3)'
+            }}>
+              <span style={{ fontSize: '32px' }}>⚠️</span>
+            </div>
+
+            <h3 style={{ fontSize: '20px', fontWeight: 900, color: '#f87171', marginBottom: '8px', fontFamily: "'Manrope', sans-serif" }}>
+              Insufficient Balance!
+            </h3>
+
+            <p style={{ fontSize: '13px', color: '#cbd5e1', marginBottom: '20px', lineHeight: 1.6 }}>
+              Your <strong>{insufficientBalanceModalData.accountName}</strong> has only <strong style={{ color: '#f87171' }}>{currencySymbol}{insufficientBalanceModalData.available.toLocaleString()}</strong> available balance, but this transaction requires <strong style={{ color: '#fff' }}>{currencySymbol}{insufficientBalanceModalData.required.toLocaleString()}</strong>. Please add funds or select another wallet.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => setInsufficientBalanceModalData(null)}
+              style={{
+                width: '100%',
+                padding: '14px',
+                borderRadius: '16px',
+                background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                color: '#ffffff',
+                fontWeight: 900,
+                fontSize: '14px',
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 8px 24px rgba(239, 68, 68, 0.4)'
+              }}
+            >
+              Understand &amp; Select Different Wallet
+            </button>
           </div>
         </div>
       )}
