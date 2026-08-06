@@ -805,7 +805,6 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                     <span style={{ fontSize: '18px' }}>✅</span>
                   )}
                 </div>
-                </div>
               </div>
             )}
 
