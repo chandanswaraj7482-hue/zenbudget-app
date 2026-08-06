@@ -362,7 +362,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
                       {formatCurrency(remaining, currencySymbol)}
                     </span>
                     <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 700 }}>
-                      Remaining ({activeTab === 'borrowed' ? 'Baki Dena' : 'Baki Lena'})
+                      Remaining ({activeTab === 'borrowed' ? 'To Pay' : 'To Collect'})
                     </div>
                     <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.45)', marginTop: '2px', fontWeight: 600 }}>
                       Total Loan: {formatCurrency(loan.totalAmount, currencySymbol)}
