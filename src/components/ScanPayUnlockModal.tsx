@@ -113,6 +113,7 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
       const userPhone = localStorage.getItem('zb_user_phone') || '';
 
       if (finalPrice <= 0) {
+        localStorage.setItem('has_scan_pay_access', 'true');
         localStorage.setItem(`zb_scan_pay_access_${profileId}`, 'true');
         if (profileId) {
           await supabase.from('profiles').update({ has_scan_pay_access: true }).eq('id', profileId);
@@ -163,6 +164,7 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
         launchCashfreeCheckout(
           payment_session_id,
           async (result: any) => {
+            localStorage.setItem('has_scan_pay_access', 'true');
             localStorage.setItem(`zb_scan_pay_access_${profileId}`, 'true');
             if (profileId) {
               await supabase.from('profiles').update({ has_scan_pay_access: true }).eq('id', profileId);

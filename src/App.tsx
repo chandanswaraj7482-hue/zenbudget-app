@@ -31,6 +31,7 @@ import { FollowUsView } from './components/FollowUsView';
 import { BankSyncModal } from './components/BankSyncModal';
 import { ScanPayUnlockModal } from './components/ScanPayUnlockModal';
 import { launchCashfreeCheckout } from './utils/cashfreeHelper';
+import { handleZenBudgetPaymentSystem, checkHasScanPayAccess } from './utils/paymentRouter';
 import { WidgetModal } from './components/WidgetModal';
 import { TransferModal } from './components/TransferModal';
 import { AddAccountModal } from './components/AddAccountModal';
@@ -521,84 +522,22 @@ const App: React.FC = () => {
       return;
     }
 
-    const isPremium = subscriptionTier === 'premium' || subscriptionTier === 'premium_monthly' || subscriptionTier === 'premium_yearly' || subscriptionTier === 'premium_lifetime';
-    const hasScanPayAccess = isPremium || localStorage.getItem(`zb_scan_pay_access_${currentProfileId}`) === 'true';
+    const userProfile = {
+      id: currentProfileId,
+      currency: currency,
+      has_scan_pay_access: localStorage.getItem('has_scan_pay_access') === 'true' || localStorage.getItem(`zb_scan_pay_access_${currentProfileId}`) === 'true',
+      isAdminUnlocked: localStorage.getItem('admin_overridden') === 'true'
+    };
 
-    // Standalone Paid Feature Guard: Must pay ₹79 for Scan & Pay separately
-    if (!hasScanPayAccess && !title.startsWith('loan_')) {
-      setIsScanPayUnlockOpen(true);
-      return;
-    }
+    const launched = handleZenBudgetPaymentSystem(
+      'SCAN_OR_UPI',
+      { recipientName: title, amount },
+      userProfile,
+      () => setIsScanPayUnlockOpen(true)
+    );
 
-    try {
-      const userEmail = localStorage.getItem('zb_user_email') || '';
-      const userPhone = localStorage.getItem('zb_user_phone') || '';
-      triggerToast(`Launching Cashfree Direct Pay for ₹${amount}...`, 'info');
-
-      let payment_session_id = '';
-      const endpoints = [
-        'https://admin-portal-zenbudget.vercel.app/api/create-payment-session',
-        'https://zenbudget-tracker.vercel.app/api/create-payment-session',
-        '/api/create-payment-session'
-      ];
-
-      for (const url of endpoints) {
-        try {
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              amount: amount,
-              planType: `pay_${Date.now()}`,
-              userId: currentProfileId,
-              email: userEmail,
-              phone: userPhone
-            })
-          });
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.payment_session_id) {
-              payment_session_id = data.payment_session_id;
-              break;
-            }
-          }
-        } catch (e) {
-          console.warn('Payment session fetch error for', url, e);
-        }
-      }
-
-      if (payment_session_id) {
-        launchCashfreeCheckout(
-          payment_session_id,
-          (result: any) => {
-            handleSaveTransaction({
-              title: title || 'UPI Payment via Cashfree',
-              amount: amount,
-              category: 'shopping',
-              date: new Date().toISOString().split('T')[0],
-              type: 'expense',
-              notes: 'Paid via Cashfree PhonePe/UPI'
-            });
-            triggerToast(`Payment of ₹${amount} completed via Cashfree! 🎉`, 'success');
-            try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
-          },
-          (err: any) => {
-            triggerToast('Payment cancelled or incomplete.', 'warning');
-          }
-        );
-      } else {
-        // Fallback: Direct UPI App intent launch on Mobile only (PhonePe / GPay / Paytm / Netbanking)
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        if (isMobile) {
-          const upiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${amount}&cu=INR&tn=${encodeURIComponent(title || 'ZenBudget Payment')}`;
-          try { window.location.href = upiUrl; } catch (e) {}
-          triggerToast(`Redirecting to UPI App for ₹${amount} payment...`, 'info');
-        } else {
-          triggerToast('Could not launch Cashfree payment gateway session. Please try again.', 'warning');
-        }
-      }
-    } catch (err: any) {
-      triggerToast(err.message || 'Payment failed to initialize.', 'warning');
+    if (launched) {
+      triggerToast(`Launching UPI payment for ₹${amount}...`, 'info');
     }
   };
 
@@ -1390,6 +1329,10 @@ const App: React.FC = () => {
         setReferredBy(profData.referred_by || null);
         setUserReferralCode(profData.referral_code || '');
         setUserPin(profData.pin);
+        if (profData.has_scan_pay_access) {
+          localStorage.setItem('has_scan_pay_access', 'true');
+          localStorage.setItem(`zb_scan_pay_access_${currentProfileId}`, 'true');
+        }
 
         // Auto sync Google OAuth Avatar & Email
         try {

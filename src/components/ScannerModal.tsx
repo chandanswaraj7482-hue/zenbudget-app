@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, QrCode, Phone, Hash, FileText, Tag, Send } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { Capacitor } from '@capacitor/core';
+import { checkHasScanPayAccess, handleZenBudgetPaymentSystem } from '../utils/paymentRouter';
 
 interface ScannerModalProps {
   isOpen: boolean;
@@ -926,30 +927,62 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <button 
                 onClick={() => {
-                  const numAmt = parseFloat(amount);
+                  const numAmt = parseFloat(amount) || 0;
                   if (isNaN(numAmt) || numAmt <= 0) {
                     showErr('Please enter a valid payment amount (e.g. ₹100).');
                     return;
                   }
-                  if (onPayViaCashfree) {
-                    const payTitle = description.trim() || `Scan & Pay (${merchantName || recipientId || 'Merchant'})`;
-                    onPayViaCashfree(numAmt, payTitle);
+
+                  const isUnlocked = checkHasScanPayAccess();
+                  if (!isUnlocked) {
+                    if (onPayViaCashfree) {
+                      const payTitle = description.trim() || `Scan & Pay (${merchantName || recipientId || 'Merchant'})`;
+                      onPayViaCashfree(numAmt, payTitle);
+                      stopCamera();
+                      onClose();
+                    } else {
+                      handleProceedToPayment();
+                    }
+                  } else {
+                    let actionType: 'SCAN_OR_UPI' | 'MOBILE_NUMBER' | 'BANK_TRANSFER' = 'SCAN_OR_UPI';
+                    let payloadData: any = {};
+
+                    if (activePayTab === 'Mobile') {
+                      actionType = 'MOBILE_NUMBER';
+                      payloadData = { phone: payMobile, amount: numAmt };
+                    } else if (activePayTab === 'Bank A/c') {
+                      actionType = 'BANK_TRANSFER';
+                      payloadData = { accountNumber: payAccNum, ifsc: payIfsc, holderName: payHolderName, amount: numAmt };
+                    } else if (activePayTab === 'UPI ID') {
+                      actionType = 'SCAN_OR_UPI';
+                      payloadData = { targetUpiId: payUpiIdDirect, amount: numAmt };
+                    } else {
+                      actionType = 'SCAN_OR_UPI';
+                      payloadData = _rawQrUrl || { targetUpiId: recipientId, recipientName: merchantName, amount: numAmt };
+                    }
+
+                    handleZenBudgetPaymentSystem(actionType, payloadData, null, () => {
+                      if (onPayViaCashfree) onPayViaCashfree(numAmt, 'Scan & Pay');
+                    });
+                    saveTransactionRecord();
                     stopCamera();
                     onClose();
-                  } else {
-                    handleProceedToPayment();
                   }
                 }} 
                 style={{
                   width: '100%', padding: '16px', borderRadius: '16px', border: 'none',
-                  background: 'linear-gradient(135deg, #6366f1 0%, #3b82f6 50%, #10b981 100%)',
+                  background: checkHasScanPayAccess() ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'linear-gradient(135deg, #6366f1 0%, #3b82f6 50%, #10b981 100%)',
                   color: '#fff', fontSize: '15px', fontWeight: 900, cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                  boxShadow: '0 6px 20px rgba(99, 102, 241, 0.4)',
+                  boxShadow: '0 6px 20px rgba(16, 185, 129, 0.4)',
                   transition: 'all 0.2s ease'
                 }}
               >
-                <span>⚡ Pay via Cashfree (PhonePe / Cards / Netbanking)</span>
+                <span>
+                  {checkHasScanPayAccess() 
+                    ? `⚡ Pay via UPI App (0% Fee — ₹${amount || 0})` 
+                    : '⚡ Pay via Cashfree (PhonePe / Cards / Netbanking)'}
+                </span>
               </button>
 
               <button 
@@ -963,7 +996,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                   transition: 'all 0.2s ease'
                 }}
               >
-                <Send size={15} /> Standard UPI App Redirect ({amount ? `₹${amount}` : '₹0'})
+                <Send size={15} /> Standard UPI Deep Link ({amount ? `₹${amount}` : '₹0'})
               </button>
             </div>
           </div>
