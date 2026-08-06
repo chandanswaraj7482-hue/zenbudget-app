@@ -209,8 +209,8 @@ export const LoansView: React.FC<LoansViewProps> = ({
 
   const borrowedLoans = loans.filter(l => l.type === 'borrowed');
   const lentLoans = loans.filter(l => l.type === 'lent');
-  const totalBorrowed = borrowedLoans.reduce((sum, l) => sum + (l.totalAmount - l.paidAmount), 0);
-  const totalLent = lentLoans.reduce((sum, l) => sum + (l.totalAmount - l.paidAmount), 0);
+  const totalBorrowed = borrowedLoans.reduce((sum, l) => sum + l.totalAmount, 0);
+  const totalLent = lentLoans.reduce((sum, l) => sum + l.totalAmount, 0);
   const filteredLoans = loans.filter(l => l.type === activeTab);
 
   return (
@@ -241,9 +241,22 @@ export const LoansView: React.FC<LoansViewProps> = ({
         </div>
 
         <button
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={() => {
+            setNotes('');
+            setPersonName('');
+            setTotalAmount('');
+            setIsAddModalOpen(true);
+          }}
           className="glass-button active"
-          style={{ padding: '8px 14px', borderRadius: '12px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}
+          style={{
+            padding: '10px 16px',
+            borderRadius: '12px',
+            fontSize: '13px',
+            fontWeight: 800,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
         >
           <Plus size={16} /> {t('add_loan')}
         </button>
@@ -258,6 +271,9 @@ export const LoansView: React.FC<LoansViewProps> = ({
           <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#ef4444', margin: '4px 0 0 0' }}>
             {formatCurrency(totalBorrowed, currencySymbol)}
           </h3>
+          <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', marginTop: '2px', fontWeight: 600 }}>
+            Total Taken (Remaining: {formatCurrency(borrowedLoans.reduce((sum, l) => sum + (l.totalAmount - l.paidAmount), 0), currencySymbol)})
+          </div>
         </div>
 
         <div className="glass-panel" style={{ padding: '16px', background: 'rgba(34, 197, 94, 0.08)', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
@@ -267,6 +283,9 @@ export const LoansView: React.FC<LoansViewProps> = ({
           <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#22c55e', margin: '4px 0 0 0' }}>
             {formatCurrency(totalLent, currencySymbol)}
           </h3>
+          <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', marginTop: '2px', fontWeight: 600 }}>
+            Total Given (Remaining: {formatCurrency(lentLoans.reduce((sum, l) => sum + (l.totalAmount - l.paidAmount), 0), currencySymbol)})
+          </div>
         </div>
       </div>
 

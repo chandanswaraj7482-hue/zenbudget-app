@@ -140,9 +140,9 @@ export const HelpModal: React.FC<HelpModalProps> = ({
     // 1. Customer Support / Email / Contact
     if (msg.includes('email') || msg.includes('support') || msg.includes('contact') || msg.includes('helpdesk') || msg.includes('customer') || msg.includes('mail')) {
       if (isEng) {
-        return `📧 Official Customer Support Email: **support@zenbudget.app**\n\nOur team is active 24/7 and usually responds within 2-4 hours! You can also leave direct feedback in the "Rate App" tab above. 🌿✨`;
+        return `📧 Official Support Email: **hello.zenbudget@zohomail.in**\n\nOur team is active 24/7 and usually responds within 2-4 hours! You can also leave direct feedback in the "Rate App" tab above. 🌿✨`;
       }
-      return `📧 Customer Support Email: **support@zenbudget.app**\n\nAap humein kisi bhi help ke liye support@zenbudget.app par mail kar sakte ho. Aap "Rate App" tab se direct feedback bhi bhej sakte ho! 🌿✨`;
+      return `📧 Official Support Email: **hello.zenbudget@zohomail.in**\n\nAap humein kisi bhi help ya query ke liye hello.zenbudget@zohomail.in par mail kar sakte ho! Aap "Rate App" tab se direct feedback bhi bhej sakte ho! 🌿✨`;
     }
 
     // 2. Loans & EMI Tracker Questions
