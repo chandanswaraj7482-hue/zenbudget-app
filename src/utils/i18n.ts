@@ -934,7 +934,15 @@ const translations: Record<Language, Record<string, string>> = {
   }
 };
 
-let currentLanguage: Language = (localStorage.getItem('zb_language') as Language) || 'en';
+// Always default to English — only switch to saved language if user explicitly chose one
+const _savedLang = (localStorage.getItem('zb_language') || '') as Language;
+const _validLangs: Language[] = ['en', 'hi', 'bn', 'mr', 'te', 'ta', 'gu', 'ur', 'kn', 'or', 'ml', 'pa', 'es', 'fr'];
+const _defaultLang: Language = _validLangs.includes(_savedLang) ? _savedLang : 'en';
+// If no language saved yet, persist English as default
+if (!localStorage.getItem('zb_language')) {
+  localStorage.setItem('zb_language', 'en');
+}
+let currentLanguage: Language = _defaultLang;
 
 export const setLanguage = (lang: Language) => {
   currentLanguage = lang;
