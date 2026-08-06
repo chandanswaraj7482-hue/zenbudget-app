@@ -268,19 +268,34 @@ const App: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // ─── Version Check & Update Popup ─────────────────────────────────────────
+  // ─── Version Check & Update Popup (Remote Supabase & local version.json) ───
   useEffect(() => {
-    const APP_VERSION_CODE = 3; // Current APK version — bump version.json versionCode above this to show update popup
+    const APP_VERSION_CODE = 3; // Current APK version — bump version.json or app_updates table in Supabase
     const checkForUpdates = async () => {
       try {
-        const res = await fetch('/version.json?t=' + Date.now());
-        if (!res.ok) return;
-        const data = await res.json();
-        const serverVersionCode: number = data.versionCode || 1;
-        const serverVersion: string = data.version || '1.0.0';
-        const apkUrl: string = data.apkUrl || 'https://zenbudget-tracker.vercel.app/zenbudget.apk';
-        const releaseNotes: string = data.releaseNotes || '';
-        const isForce: boolean = data.forceUpdate || false;
+        let remoteData: any = null;
+        try {
+          const { data: dbUpdate } = await supabase
+            .from('app_updates')
+            .select('*')
+            .order('version_code', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          if (dbUpdate) remoteData = dbUpdate;
+        } catch (e) {}
+
+        if (!remoteData) {
+          const res = await fetch('/version.json?t=' + Date.now());
+          if (res.ok) remoteData = await res.json();
+        }
+
+        if (!remoteData) return;
+
+        const serverVersionCode: number = remoteData.version_code || remoteData.versionCode || 1;
+        const serverVersion: string = remoteData.version || '1.0.0';
+        const apkUrl: string = remoteData.apk_url || remoteData.apkUrl || 'https://zenbudget-tracker.vercel.app/zenbudget.apk';
+        const releaseNotes: string = remoteData.release_notes || remoteData.releaseNotes || '';
+        const isForce: boolean = remoteData.is_force_update || remoteData.forceUpdate || false;
 
         // Check if user already dismissed this version
         const dismissedVersion = localStorage.getItem('zb_last_update_dismissed_version');
