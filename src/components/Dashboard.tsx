@@ -1705,7 +1705,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 {(() => {
                   let inviteCode = localStorage.getItem('zb_user_referral_code') || localStorage.getItem('zb_invite_code');
                   if (!inviteCode) {
-                    const userNameClean = userName.replace(/\s+/g, '').toUpperCase();
+                    const userNameClean = (userName || 'User').replace(/\s+/g, '').toUpperCase();
                     inviteCode = `ZB-${userNameClean.slice(0, 6)}-${Math.floor(1000 + Math.random() * 9000)}`;
                     localStorage.setItem('zb_invite_code', inviteCode);
                   }
@@ -1870,7 +1870,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   </h3>
 
                   <p style={{ fontSize: '13px', lineHeight: 1.6, color: 'rgba(255,255,255,0.95)' }}>
-                    Dear {userName.split(' ')[0]},<br /><br />
+                    Dear {(userName || 'User').split(' ')[0]},<br /><br />
                     This month you made <strong>{thisMonthTx.length}</strong> financial decisions.<br /><br />
                     Through conscious habits, you logged a total income of <strong>{currencySymbol}{totalMonthIncome.toLocaleString()}</strong> and spent <strong>{currencySymbol}{totalMonthExpenses.toLocaleString()}</strong>.<br /><br />
                     {totalSaved > 0 ? (

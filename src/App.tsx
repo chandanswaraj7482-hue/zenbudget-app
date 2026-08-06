@@ -2641,31 +2641,34 @@ const App: React.FC = () => {
 
   if (isLocked) {
     return <LockScreen onUnlock={(profileId, name, tier, trialStart, pin, premiumExpires) => {
-      setCurrentProfileId(profileId);
-      setUserName(name);
-      setSubscriptionTier(tier);
-      setTrialStartDate(trialStart);
-      setUserPin(pin);
-      setPremiumExpiresAt(premiumExpires);
+      const validProfileId = profileId || localStorage.getItem('zb_profile_id') || 'local';
+      const validName = name || localStorage.getItem('zb_user_name') || 'User';
+      const validTier = tier || localStorage.getItem('zb_subscription_tier') || 'trial';
+      const validStart = trialStart || localStorage.getItem('zb_trial_start_date') || new Date().toISOString();
+      const validPin = pin || localStorage.getItem('zb_user_pin') || '';
 
-      localStorage.setItem('zb_profile_id', profileId);
-      localStorage.setItem('zb_user_name', name);
-      localStorage.setItem('zb_subscription_tier', tier);
-      localStorage.setItem('zb_trial_start_date', trialStart);
-      localStorage.setItem('zb_user_pin', pin);
+      setCurrentProfileId(validProfileId);
+      setUserName(validName);
+      setSubscriptionTier(validTier);
+      setTrialStartDate(validStart);
+      setUserPin(validPin);
+      setPremiumExpiresAt(premiumExpires || null);
+
+      localStorage.setItem('zb_profile_id', validProfileId);
+      localStorage.setItem('zb_user_name', validName);
+      localStorage.setItem('zb_subscription_tier', validTier);
+      localStorage.setItem('zb_trial_start_date', validStart);
+      if (validPin) localStorage.setItem('zb_user_pin', validPin);
       if (premiumExpires) {
         localStorage.setItem('zb_premium_expires_at', premiumExpires);
       } else {
         localStorage.removeItem('zb_premium_expires_at');
       }
-      
 
-      // Check onboarding
-      const effectiveId = profileId || localStorage.getItem('zb_profile_id') || 'local';
+      const effectiveId = validProfileId;
       if (!localStorage.getItem(`zb_onboarded_${effectiveId}`) && !localStorage.getItem('zb_onboarded_global')) {
         setShowOnboarding(true);
       } else {
-        // Trigger Proactive AI Briefs if already onboarded
         const todayStr = new Date().toISOString().split('T')[0];
         const hour = new Date().getHours();
         
