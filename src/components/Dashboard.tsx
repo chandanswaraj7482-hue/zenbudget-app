@@ -982,7 +982,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* Subscription / Trial Tracker */}
       {(() => {
         const now = new Date();
-        if (subscriptionTier === 'premium') {
+        if (['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(subscriptionTier)) {
           const expiryDate = premiumExpiresAt ? new Date(premiumExpiresAt) : null;
           const daysLeft = expiryDate ? Math.max(0, Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))) : null;
           return (

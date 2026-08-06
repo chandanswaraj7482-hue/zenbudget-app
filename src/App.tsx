@@ -144,10 +144,10 @@ const App: React.FC = () => {
   const [currentProfileId, setCurrentProfileId] = useState<string>(() => localStorage.getItem('zb_profile_id') || '');
   const [userName, setUserName] = useState<string>(() => localStorage.getItem('zb_user_name') || '');
   
-  // Subscription parameters
   const [subscriptionTier, setSubscriptionTier] = useState<string>(() => {
     return localStorage.getItem('zb_subscription_tier') || 'trial';
   });
+  const isPremiumUser = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(subscriptionTier);
   const [trialStartDate, setTrialStartDate] = useState<string>(() => {
     return localStorage.getItem('zb_trial_start_date') || new Date().toISOString();
   });
@@ -1003,7 +1003,7 @@ const App: React.FC = () => {
   const isSubscriptionExpired = (): boolean => {
     if (subscriptionTier === 'premium_lifetime') return false;
 
-    if (subscriptionTier === 'premium_monthly' || subscriptionTier === 'premium') {
+    if (['premium', 'premium_monthly', 'premium_yearly'].includes(subscriptionTier)) {
       if (premiumExpiresAt) {
         const expireTime = new Date(premiumExpiresAt).getTime();
         if (!isNaN(expireTime) && Date.now() > expireTime) {
@@ -2301,7 +2301,7 @@ const App: React.FC = () => {
   // Reset database triggers local arrays wipeout
   const handleResetDataRequest = () => {
     // Premium Lock to prevent free trial users from bypassing limits by clearing transactions
-    if (subscriptionTier !== 'premium') {
+    if (!isPremiumUser) {
       setIsSubBlocker(false);
       setIsSubModalOpen(true);
       triggerToast('Upgrade to Premium to clear database ledger! Trial users cannot reset.', 'warning');
@@ -2339,7 +2339,7 @@ const App: React.FC = () => {
 
   const handleExportCSV = () => {
     // Premium Feature Lock
-    if (subscriptionTier !== 'premium') {
+    if (!isPremiumUser) {
       setIsSubBlocker(false);
       setIsSubModalOpen(true);
       triggerToast('Upgrade to Premium to export CSV report spreadsheets!', 'warning');
@@ -2858,7 +2858,7 @@ const App: React.FC = () => {
           </button>
 
           {/* Premium Status Badge */}
-          {subscriptionTier === 'premium' ? (
+          {isPremiumUser ? (
             <div style={{
               padding: '6px 12px',
               borderRadius: '10px',
@@ -3455,7 +3455,9 @@ const App: React.FC = () => {
               fontSize: '14px',
               color: 'var(--text-secondary)',
               lineHeight: 1.7,
-              marginBottom: '24px'
+              marginBottom: '24px',
+              whiteSpace: 'pre-line',
+              textAlign: 'left'
             }}>{announcementPopup.message}</p>
 
             {/* Dismiss button */}
