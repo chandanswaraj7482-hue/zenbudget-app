@@ -67,12 +67,21 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
 
     // 2. Type Extraction (expense / income / transfer)
     let type: 'expense' | 'income' | 'transfer' = defaultType;
-    if (/\b(transfer|transferred|bheja|send|sent|remit)\b/i.test(cleanText)) {
-      type = 'transfer';
-    } else if (/\b(received|got|salary|freelance|earned|income|aaya|aayi|aaye|mila|mili|mile|cashback|refund|credited)\b/i.test(cleanText)) {
+    if (defaultType === 'income') {
       type = 'income';
-    } else if (/\b(paid|spent|bought|kharcha|diya|diye|chukaaya|purchase|order|pay|debited)\b/i.test(cleanText)) {
-      type = 'expense';
+      if (/\b(transfer|transferred)\b/i.test(cleanText)) {
+        type = 'transfer';
+      }
+    } else if (defaultType === 'transfer') {
+      type = 'transfer';
+    } else {
+      if (/\b(transfer|transferred|bheja|send|sent|remit)\b/i.test(cleanText)) {
+        type = 'transfer';
+      } else if (/\b(received|got|salary|freelance|earned|income|aaya|aayi|aaye|mila|mili|mile|cashback|refund|credited)\b/i.test(cleanText)) {
+        type = 'income';
+      } else if (/\b(paid|spent|bought|kharcha|diya|diye|chukaaya|purchase|order|pay|debited)\b/i.test(cleanText)) {
+        type = 'expense';
+      }
     }
 
     // 3. Category Detection
@@ -228,7 +237,12 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
     }
   };
 
-  const [insufficientBalanceError, setInsufficientBalanceError] = useState<{ accountName: string; available: number; required: number } | null>(null);
+  const [insufficientBalanceError, setInsufficientBalanceError] = useState<{
+    accountName: string;
+    available: number;
+    required: number;
+    type: 'expense' | 'transfer';
+  } | null>(null);
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -241,7 +255,7 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
 
     const parsed = parseNaturalLanguage(inputQuery, activeTab);
     if (!parsed.amount || parsed.amount <= 0) {
-      alert('Please mention a valid amount in text (e.g., "Paid 220 for petrol in cash" or "mujhe 300rs freelance se mila").');
+      alert('Please mention a valid amount in text (e.g., "Paid 220 for petrol in cash" or "received 5000 salary").');
       return;
     }
 
@@ -258,7 +272,8 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
         setInsufficientBalanceError({
           accountName: selectedAccObj?.name || 'Wallet Account',
           available: accBalance,
-          required: parsed.amount
+          required: parsed.amount,
+          type: parsed.type
         });
         return; // STOP EXECUTION! DO NOT SAVE OR FIRE CONFETTI!
       }
@@ -591,11 +606,15 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
             </div>
 
             <h3 style={{ fontSize: '20px', fontWeight: 900, color: '#f87171', marginBottom: '8px', fontFamily: "'Manrope', sans-serif" }}>
-              Insufficient Balance!
+              {insufficientBalanceError.type === 'transfer' ? 'Insufficient Balance for Transfer!' : 'Insufficient Balance for Expense!'}
             </h3>
 
             <p style={{ fontSize: '13px', color: '#cbd5e1', marginBottom: '20px', lineHeight: 1.6 }}>
-              Your <strong>{insufficientBalanceError.accountName}</strong> has only <strong style={{ color: '#f87171' }}>{currencySymbol}{insufficientBalanceError.available.toLocaleString()}</strong> available balance, but this expense requires <strong style={{ color: '#fff' }}>{currencySymbol}{insufficientBalanceError.required.toLocaleString()}</strong>.
+              {insufficientBalanceError.type === 'transfer' ? (
+                <>Your <strong>{insufficientBalanceError.accountName}</strong> has only <strong style={{ color: '#f87171' }}>{currencySymbol}{insufficientBalanceError.available.toLocaleString()}</strong> available balance, but this transfer requires <strong style={{ color: '#fff' }}>{currencySymbol}{insufficientBalanceError.required.toLocaleString()}</strong>. Please select another source wallet or add funds.</>
+              ) : (
+                <>Your <strong>{insufficientBalanceError.accountName}</strong> has only <strong style={{ color: '#f87171' }}>{currencySymbol}{insufficientBalanceError.available.toLocaleString()}</strong> available balance, but this expense requires <strong style={{ color: '#fff' }}>{currencySymbol}{insufficientBalanceError.required.toLocaleString()}</strong>. Please select another wallet or add funds.</>
+              )}
             </p>
 
             <button
@@ -614,7 +633,7 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
                 boxShadow: '0 8px 24px rgba(239, 68, 68, 0.4)'
               }}
             >
-              Understand &amp; Select Different Account
+              {insufficientBalanceError.type === 'transfer' ? 'Understand & Select Source Wallet' : 'Understand & Select Different Wallet'}
             </button>
           </div>
         </div>,
