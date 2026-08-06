@@ -552,7 +552,7 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
       )}
 
       {/* Insufficient Balance Error Modal */}
-      {insufficientBalanceError && createPortal(
+      {insufficientBalanceError && ReactDOM.createPortal(
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(12px)',
