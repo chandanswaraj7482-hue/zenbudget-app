@@ -427,6 +427,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         calm: '😐 Neutral' 
       };
       const moodLabel = moodMap[mood] || mood;
+      finalNotes = `[${moodLabel}] ${finalNotes}`.trim();
+    }
+
     // Insufficient Balance check for expense
     if (type === 'expense' && accounts && accounts.length > 0) {
       const selectedAccId = selectedAccountId || accounts[0]?.id;
