@@ -208,10 +208,10 @@ export const HelpModal: React.FC<HelpModalProps> = ({
 
     // 9. General Greetings (matches hi, hii, hiii, hello, hey, heyy, yo, sup, etc. using regex)
     if (/^(hi+|hello+|hey+|yo+|sup|hola|namaste|salam)\b/i.test(msg) || msg.includes('kaise ho') || msg.includes('who are you') || msg.includes('kaise hain')) {
-      if (isEng) {
-        return `Hi ${userName || 'yaar'}! 🌿 I'm Zen — your personal AI Financial Coach & best friend. I can analyze your monthly spending habits, give you smart savings advice, and help you track every rupee in ZenBudget. Ask me anything, I'm here to help you save! 🤝✨`;
+      if (/[अ-ह]/.test(rawText) || /\b(kahan|kaise|mera|meri|mere|mujhe|btao|batao|apka|aapka|kya|kab|kaun|hai|hain|rha|rhi|rhe|hoga|hogaye|bhai|yaar|karo|do|karna)\b/i.test(msg)) {
+        return `Hii ${userName || 'yaar'}! 🌿 Main Zen hu — aapka AI Financial Coach aur personal money buddy. Main aapki spending habits check kar sakta hu, savings tips de sakta hu, aur ZenBudget app ke details samjha sakta hu! Poocho yaar, kya help chahiye? 🤝✨`;
       }
-      return `Hi ${userName || 'yaar'}! 🌿 Main Zen hu — aapka AI Financial Coach aur personal money buddy. Main aapki spending habits check kar sakta hu, savings tips de sakta hu, aur ZenBudget app ke details samjha sakta hu! Poocho yaar, kya help chahiye? 🤝✨`;
+      return `Hii ${userName || 'buddy'}! 🌿 I'm Zen — your personal AI Financial Coach & best friend. I can analyze your monthly spending habits, give you smart savings advice, and help you track every rupee in ZenBudget. Ask me anything, I'm here to help you save! 🤝✨`;
     }
 
     // 10. Financial Concepts: 50-30-20 Rule
