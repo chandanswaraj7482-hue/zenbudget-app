@@ -894,7 +894,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
             </h1>
             <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', margin: 0, fontWeight: 700 }}>
-              Claim Your Money
+              Clam Your Money
             </p>
           </div>
 

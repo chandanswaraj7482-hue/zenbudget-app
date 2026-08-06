@@ -206,12 +206,12 @@ export const HelpModal: React.FC<HelpModalProps> = ({
       return `🔒 Security & Privacy: ZenBudget aapka data aapke device sandbox me store karta hai. Login PIN & Biometrics (Fingerprint/Face ID) se aapka app 100% private & secure rehta hai! 🛡️`;
     }
 
-    // 9. General Greetings
-    if (msg === 'hi' || msg === 'hello' || msg === 'hey' || msg.includes('kaise ho') || msg.includes('who are you')) {
+    // 9. General Greetings (matches hi, hii, hiii, hello, hey, heyy, yo, sup, etc. using regex)
+    if (/^(hi+|hello+|hey+|yo+|sup|hola|namaste|salam)\b/i.test(msg) || msg.includes('kaise ho') || msg.includes('who are you') || msg.includes('kaise hain')) {
       if (isEng) {
-        return `Hi ${userName}! 🌿 I'm Zen — your personal AI Financial Coach. I can analyze your monthly spending habits, give savings advice, and help you track your money in ZenBudget. Ask me anything! 🤝✨`;
+        return `Hi ${userName || 'yaar'}! 🌿 I'm Zen — your personal AI Financial Coach & best friend. I can analyze your monthly spending habits, give you smart savings advice, and help you track every rupee in ZenBudget. Ask me anything, I'm here to help you save! 🤝✨`;
       }
-      return `Hi ${userName}! 🌿 Main Zen hu — aapka AI Financial Coach. Main aapki spending analyze kar sakta hu, savings tips de sakta hu, aur ZenBudget app ke bare me kuch bhi samjha sakta hu! Ask me anything! 🤝✨`;
+      return `Hi ${userName || 'yaar'}! 🌿 Main Zen hu — aapka AI Financial Coach aur personal money buddy. Main aapki spending habits check kar sakta hu, savings tips de sakta hu, aur ZenBudget app ke details samjha sakta hu! Poocho yaar, kya help chahiye? 🤝✨`;
     }
 
     // 10. Financial Concepts: 50-30-20 Rule
@@ -294,7 +294,8 @@ export const HelpModal: React.FC<HelpModalProps> = ({
 CRITICAL INSTRUCTIONS:
 1. MATCH THE USER'S EXACT LANGUAGE: If user speaks in English, reply in English. If user speaks in Hinglish, reply in Hinglish. If user speaks in Hindi, reply in Hindi.
 2. OUT-OF-APP & GENERAL QUESTIONS: You can answer ANY question about personal finance, budgeting strategies (50/30/20 rule, emergency funds, debt payoff), investing (SIPs, mutual funds, FDs, stocks), taxes, credit scores (CIBIL), inflation, or money management. NEVER say "I don't know" or "I am only an app bot". Be ultra helpful, smart, concise, and clear.
-3. OFFICIAL EMAIL RULE: Do NOT bring up customer email unless the user explicitly asks for support, contact, or customer email. If asked, provide: hello.zenbudget@zohomail.in.
+3. TONALITY & STYLE: Speak like an ultra-friendly, supportive personal financial buddy. Use warm and casual words like "bro", "yaar", "buddy" naturally. Include suitable emojis to keep the conversation engaging, fun, and motivating. Never sound cold, strict, or robotic.
+4. OFFICIAL EMAIL RULE: Do NOT bring up customer support email unless the user explicitly asks for support, contact, or customer email. If asked, provide: hello.zenbudget@zohomail.in.
 
 User Real Activity Context:
 - User Name: ${userName}
