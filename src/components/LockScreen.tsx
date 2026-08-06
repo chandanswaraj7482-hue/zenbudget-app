@@ -883,12 +883,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '28px' }}>
             <div style={{
               width: '72px', height: '72px', borderRadius: '20px',
-              background: '#ffffff',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 8px 32px rgba(34,197,94,0.25)',
-              marginBottom: '14px', overflow: 'hidden', padding: '6px'
+              boxShadow: '0 8px 32px rgba(34,197,94,0.3)',
+              marginBottom: '14px', overflow: 'hidden'
             }}>
-              <img src="/logo.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              <img src="/logo.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <h1 style={{ fontSize: '30px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
               <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
@@ -1188,14 +1187,12 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               width: '64px',
               height: '64px',
               borderRadius: '20px',
-              background: '#ffffff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 8px 24px rgba(34, 197, 94, 0.25)',
+              boxShadow: '0 8px 24px rgba(34, 197, 94, 0.3)',
               marginBottom: '16px',
-              overflow: 'hidden',
-              padding: '6px'
+              overflow: 'hidden'
             }}>
               <img 
                 src="/logo.png" 
@@ -1203,7 +1200,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                 style={{ 
                   width: '100%', 
                   height: '100%', 
-                  objectFit: 'contain' 
+                  objectFit: 'cover' 
                 }} 
               />
             </div>
