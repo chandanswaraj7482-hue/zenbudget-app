@@ -584,6 +584,10 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
     try {
       await supabaseClient.from('profiles').delete().eq('id', userId);
       await supabaseClient.from('transactions').delete().eq('user_id', userId);
+      await supabaseClient.from('accounts').delete().eq('user_id', userId);
+      await supabaseClient.from('goals').delete().eq('user_id', userId);
+      await supabaseClient.from('budgets').delete().eq('user_id', userId);
+      await supabaseClient.from('loans').delete().eq('user_id', userId);
       await supabaseClient.from('device_sessions').delete().eq('user_id', userId);
 
       setProfiles(prev => prev.filter(p => p.id !== userId));
@@ -591,7 +595,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
       if (selectedDetailUser?.id === userId) setSelectedDetailUser(null);
       setConfirmDeleteTarget(null);
 
-      if (onShowToast) onShowToast(`User "${userName}" deleted successfully!`, 'success');
+      if (onShowToast) onShowToast(`User "${userName}" reset & deleted successfully!`, 'success');
     } catch (err: any) {
       if (onShowToast) onShowToast(`Delete failed: ${err.message}`, 'warning');
     }
@@ -602,6 +606,10 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
     try {
       await supabaseClient.from('profiles').delete().in('id', selectedUserIds);
       await supabaseClient.from('transactions').delete().in('user_id', selectedUserIds);
+      await supabaseClient.from('accounts').delete().in('user_id', selectedUserIds);
+      await supabaseClient.from('goals').delete().in('user_id', selectedUserIds);
+      await supabaseClient.from('budgets').delete().in('user_id', selectedUserIds);
+      await supabaseClient.from('loans').delete().in('user_id', selectedUserIds);
       await supabaseClient.from('device_sessions').delete().in('user_id', selectedUserIds);
 
       setProfiles(prev => prev.filter(p => !selectedUserIds.includes(p.id)));
@@ -610,7 +618,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
         setSelectedDetailUser(null);
       }
       setConfirmBulkDeleteOpen(false);
-      if (onShowToast) onShowToast(`${selectedUserIds.length} users deleted successfully!`, 'success');
+      if (onShowToast) onShowToast(`${selectedUserIds.length} users reset & deleted successfully!`, 'success');
     } catch (err: any) {
       if (onShowToast) onShowToast(`Bulk delete failed: ${err.message}`, 'warning');
     }

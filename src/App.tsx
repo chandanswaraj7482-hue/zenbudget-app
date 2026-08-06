@@ -849,7 +849,7 @@ const App: React.FC = () => {
     ];
   };
 
-  const addNotification = (title: string, desc: string, type: ZenNotification['type']) => {
+  const addNotification = async (title: string, desc: string, type: ZenNotification['type']) => {
     if (!currentProfileId) return;
     const newNotif: ZenNotification = {
       id: Math.random().toString(36).substring(2, 9),
@@ -872,6 +872,35 @@ const App: React.FC = () => {
       playNotificationSound('warning');
     } else {
       playNotificationSound('success');
+    }
+
+    // Trigger System & Push Local Notification with ZenBudget Official Logo Icon
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const { LocalNotifications } = await import('@capacitor/local-notifications');
+        await LocalNotifications.schedule({
+          notifications: [{
+            id: Math.floor(Math.random() * 100000),
+            title: title,
+            body: desc,
+            smallIcon: 'ic_launcher',
+            iconColor: '#22c55e',
+            schedule: { at: new Date(Date.now() + 100) }
+          }]
+        });
+      } catch (e) {
+        console.warn('ZenBudget: Native notification trigger error:', e);
+      }
+    } else if ('Notification' in window && Notification.permission === 'granted') {
+      try {
+        new Notification(title, {
+          body: desc,
+          icon: '/icon.png',
+          badge: '/icon.png'
+        });
+      } catch (e) {
+        console.warn('ZenBudget: Web notification trigger error:', e);
+      }
     }
   };
 
@@ -1245,9 +1274,46 @@ const App: React.FC = () => {
     }
   }, [currentProfileId, isLocked, loans, currency]);
 
+  const handleAccountDeletedByAdmin = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (_) {}
+    localStorage.clear();
+    sessionStorage.clear();
+    setCurrentProfileId('');
+    setTransactions([]);
+    setAccounts([]);
+    setBudgets([]);
+    setGoals([]);
+    setLoans([]);
+    setIsLocked(false);
+    triggerToast('🔒 Your account was reset/deleted by Admin. Please sign up or log in again.', 'warning');
+  };
+
+  // Periodic check if current user was deleted from Admin Panel
+  useEffect(() => {
+    if (!currentProfileId || isLocked) return;
+    const interval = setInterval(async () => {
+      try {
+        const { data: profData } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', currentProfileId)
+          .maybeSingle();
+        if (!profData) {
+          console.warn('ZenBudget: User profile no longer exists in DB. Logging out.');
+          handleAccountDeletedByAdmin();
+        }
+      } catch (err) {
+        console.warn('ZenBudget: Session check failed:', err);
+      }
+    }, 20000);
+    return () => clearInterval(interval);
+  }, [currentProfileId, isLocked]);
+
   const fetchDataFromSupabase = async () => {
     try {
-
+      if (!currentProfileId) return;
 
       // Load local partner info
       let cachedPartnerId = localStorage.getItem(`zb_partner_id_${currentProfileId}`) || null;
@@ -1275,6 +1341,11 @@ const App: React.FC = () => {
         .maybeSingle();
       
       if (profErr) throw profErr;
+      if (!profData && currentProfileId) {
+        console.warn('ZenBudget: User profile deleted from database by Admin.');
+        handleAccountDeletedByAdmin();
+        return;
+      }
       if (profData) {
         let userCoupleCode = profData.couple_code;
         if (!userCoupleCode) {
