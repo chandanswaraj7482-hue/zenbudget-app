@@ -882,12 +882,13 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           {/* ── Logo & Branding ── */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '28px' }}>
             <div style={{
-              width: '72px', height: '72px', borderRadius: '20px',
+              width: '72px', height: '72px', borderRadius: '22px',
+              background: '#ffffff',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 8px 32px rgba(34,197,94,0.3)',
-              marginBottom: '14px', overflow: 'hidden'
+              boxShadow: '0 10px 30px rgba(0,0,0,0.3), 0 0 20px rgba(34,197,94,0.25)',
+              marginBottom: '14px', padding: '12px'
             }}>
-              <img src="/logo-login.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src="/zen-icon-green.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>
             <h1 style={{ fontSize: '30px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
               <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
@@ -1187,20 +1188,21 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               width: '64px',
               height: '64px',
               borderRadius: '20px',
+              background: '#ffffff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 8px 24px rgba(34, 197, 94, 0.3)',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.3), 0 0 20px rgba(34,197,94,0.25)',
               marginBottom: '16px',
-              overflow: 'hidden'
+              padding: '10px'
             }}>
               <img 
-                src="/logo-login.png" 
+                src="/zen-icon-green.png" 
                 alt="ZenBudget Logo" 
                 style={{ 
                   width: '100%', 
                   height: '100%', 
-                  objectFit: 'cover' 
+                  objectFit: 'contain' 
                 }} 
               />
             </div>
