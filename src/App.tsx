@@ -1732,7 +1732,7 @@ const App: React.FC = () => {
   };
 
   const verifyLimitBeforeAdd = () => {
-    const isPremium = subscriptionTier === 'premium_monthly' || subscriptionTier === 'premium_lifetime' || subscriptionTier === 'premium';
+    const isPremium = subscriptionTier === 'premium_monthly' || subscriptionTier === 'premium_yearly' || subscriptionTier === 'premium_lifetime' || subscriptionTier === 'premium';
     if (isPremium) return true;
 
     // Check trial duration
@@ -2091,7 +2091,7 @@ const App: React.FC = () => {
   };
 
   const handleSaveBudget = async (category: CategoryType, limitInActiveCurrency: number) => {
-    const isPremium = subscriptionTier === 'premium_monthly' || subscriptionTier === 'premium_lifetime' || subscriptionTier === 'premium';
+    const isPremium = subscriptionTier === 'premium_monthly' || subscriptionTier === 'premium_yearly' || subscriptionTier === 'premium_lifetime' || subscriptionTier === 'premium';
 
     // Trial limits check: max 2 free budgets, then ₹10 (or active currency equivalent) per extra
     if (!isPremium) {
