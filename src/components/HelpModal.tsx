@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useRef } from 'react';
 import type { Transaction, CategoryBudget, SavingsGoal } from '../types';
 
 interface HelpModalProps {
@@ -78,8 +79,11 @@ export const HelpModal: React.FC<HelpModalProps> = ({
     .map(t => `${t.title} (${t.type.toUpperCase()} ${currencySymbol}${t.amount})`)
     .join('; ');
 
-  const budgetSummaryText = budgets.map(b => `${b.category}: ${currencySymbol}${b.spent}/${currencySymbol}${b.limit}`).join(', ');
-  const goalSummaryText = goals.map(g => `${g.name}: ${currencySymbol}${g.currentAmount}/${currencySymbol}${g.targetAmount}`).join(', ');
+  const budgetSummaryText = (budgets || []).map(b => {
+    const spentForCat = catMap[b.category] || 0;
+    return `${b.category}: ${currencySymbol}${spentForCat}/${currencySymbol}${b.limit}`;
+  }).join(', ');
+  const goalSummaryText = (goals || []).map(g => `${g.name}: ${currencySymbol}${g.currentAmount}/${currencySymbol}${g.targetAmount}`).join(', ');
 
   // Local persistent memory database
   const [learnedMemory, setLearnedMemory] = useState<Record<string, string>>(() => {
