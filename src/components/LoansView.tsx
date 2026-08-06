@@ -358,7 +358,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
                     </div>
                     {(loan.emiInstallment || loan.frequency === 'monthly' || loan.frequency === 'yearly' || loan.frequency === 'weekly') && (
                       <div style={{ fontSize: '11px', color: '#a78bfa', fontWeight: 800, marginTop: '2px' }}>
-                        💳 Monthly: {formatCurrency(
+                        💳 {activeTab === 'borrowed' ? 'Monthly Payable:' : 'Monthly Collection:'} {formatCurrency(
                           loan.emiInstallment || Math.round(loan.totalAmount / (loan.frequency === 'yearly' ? 12 : 1)), 
                           currencySymbol
                         )} / mo
@@ -400,31 +400,58 @@ export const LoansView: React.FC<LoansViewProps> = ({
                         gap: '4px'
                       }}
                     >
-                      <CheckCircle size={14} /> Record Cash
+                      <CheckCircle size={14} /> {activeTab === 'borrowed' ? 'Record Cash' : 'Record Deposit'}
                     </button>
 
-                    <button
-                      onClick={() => {
-                        if (onPayLoanViaUPI) onPayLoanViaUPI(loan, remaining);
-                      }}
-                      style={{
-                        padding: '10px',
-                        borderRadius: '10px',
-                        border: 'none',
-                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                        color: '#fff',
-                        fontSize: '12px',
-                        fontWeight: 800,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px',
-                        boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)'
-                      }}
-                    >
-                      <span>⚡ Pay via PhonePe</span>
-                    </button>
+                    {activeTab === 'borrowed' ? (
+                      <button
+                        onClick={() => {
+                          setRepayModalLoan(loan);
+                          setRepayAmount(remaining.toString());
+                        }}
+                        style={{
+                          padding: '10px',
+                          borderRadius: '10px',
+                          border: 'none',
+                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                          color: '#fff',
+                          fontSize: '12px',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                          boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)'
+                        }}
+                      >
+                        <span>⚡ Pay via PhonePe</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setRepayModalLoan(loan);
+                          setRepayAmount(remaining.toString());
+                        }}
+                        style={{
+                          padding: '10px',
+                          borderRadius: '10px',
+                          border: 'none',
+                          background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                          color: '#fff',
+                          fontSize: '12px',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                          boxShadow: '0 4px 14px rgba(59, 130, 246, 0.3)'
+                        }}
+                      >
+                        <span>💰 Collect / Remind</span>
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
