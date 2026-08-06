@@ -361,8 +361,11 @@ export const LoansView: React.FC<LoansViewProps> = ({
                     <span style={{ fontSize: '18px', fontWeight: 800, color: activeTab === 'borrowed' ? '#ef4444' : '#22c55e' }}>
                       {formatCurrency(remaining, currencySymbol)}
                     </span>
-                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                      Total Payable: {formatCurrency(loan.totalAmount, currencySymbol)}
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 700 }}>
+                      Remaining ({activeTab === 'borrowed' ? 'Baki Dena' : 'Baki Lena'})
+                    </div>
+                    <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.45)', marginTop: '2px', fontWeight: 600 }}>
+                      Total Loan: {formatCurrency(loan.totalAmount, currencySymbol)}
                     </div>
                     {(loan.emiInstallment || loan.frequency === 'monthly' || loan.frequency === 'yearly' || loan.frequency === 'weekly') && (
                       <div style={{ fontSize: '11px', color: '#a78bfa', fontWeight: 800, marginTop: '2px' }}>
@@ -811,6 +814,44 @@ export const LoansView: React.FC<LoansViewProps> = ({
                   className="glass-input"
                   style={{ marginTop: '4px', width: '100%' }}
                 />
+
+                {/* Early Payment / Preset Amount Chips */}
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setRepayAmount((repayModalLoan.totalAmount - repayModalLoan.paidAmount).toString())}
+                    style={{
+                      padding: '5px 10px', borderRadius: '8px', border: '1px solid rgba(34, 197, 94, 0.4)',
+                      background: 'rgba(34, 197, 94, 0.15)', color: '#22c55e', fontSize: '11px', fontWeight: 800, cursor: 'pointer'
+                    }}
+                  >
+                    💯 Pay Full Remaining ({formatCurrency(repayModalLoan.totalAmount - repayModalLoan.paidAmount, currencySymbol)})
+                  </button>
+                  {repayModalLoan.emiInstallment && repayModalLoan.emiInstallment < (repayModalLoan.totalAmount - repayModalLoan.paidAmount) && (
+                    <button
+                      type="button"
+                      onClick={() => setRepayAmount(repayModalLoan.emiInstallment!.toString())}
+                      style={{
+                        padding: '5px 10px', borderRadius: '8px', border: '1px solid rgba(167, 139, 250, 0.4)',
+                        background: 'rgba(167, 139, 250, 0.15)', color: '#a78bfa', fontSize: '11px', fontWeight: 800, cursor: 'pointer'
+                      }}
+                    >
+                      💳 1 Monthly EMI ({formatCurrency(repayModalLoan.emiInstallment, currencySymbol)})
+                    </button>
+                  )}
+                  {Math.round((repayModalLoan.totalAmount - repayModalLoan.paidAmount) / 2) > 0 && Math.round((repayModalLoan.totalAmount - repayModalLoan.paidAmount) / 2) < (repayModalLoan.totalAmount - repayModalLoan.paidAmount) && (
+                    <button
+                      type="button"
+                      onClick={() => setRepayAmount(Math.round((repayModalLoan.totalAmount - repayModalLoan.paidAmount) / 2).toString())}
+                      style={{
+                        padding: '5px 10px', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.4)',
+                        background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', fontSize: '11px', fontWeight: 800, cursor: 'pointer'
+                      }}
+                    >
+                      ⚡ 50% Half ({formatCurrency(Math.round((repayModalLoan.totalAmount - repayModalLoan.paidAmount) / 2), currencySymbol)})
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div>
