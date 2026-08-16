@@ -177,12 +177,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         setUsername(name);
 
         // Save Google OAuth avatar as a persistent preset in profile picker
-        const googleAvatar = metadata?.avatar_url || metadata?.picture || metadata?.photo_url;
+        const googleAvatar = metadata?.avatar_url || metadata?.picture || metadata?.photo_url || metadata?.avatar;
         if (googleAvatar) {
           localStorage.setItem('zb_google_avatar', googleAvatar);
-          if (!localStorage.getItem('zb_user_avatar') || localStorage.getItem('zb_user_avatar')?.includes('ui-avatars.com')) {
-            localStorage.setItem('zb_user_avatar', googleAvatar);
-          }
+          localStorage.setItem('zb_user_avatar', googleAvatar);
+          window.dispatchEvent(new Event('profile_avatar_updated'));
         }
 
         await fetchUserProfile(session.user.id);
@@ -273,12 +272,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         setUsername(name);
 
         // Save Google OAuth avatar on every session check so it persists in profile picker
-        const googleAvatar = metadata?.avatar_url || metadata?.picture || metadata?.photo_url;
+        const googleAvatar = metadata?.avatar_url || metadata?.picture || metadata?.photo_url || metadata?.avatar;
         if (googleAvatar) {
           localStorage.setItem('zb_google_avatar', googleAvatar);
-          if (!localStorage.getItem('zb_user_avatar') || localStorage.getItem('zb_user_avatar')?.includes('ui-avatars.com')) {
-            localStorage.setItem('zb_user_avatar', googleAvatar);
-          }
+          localStorage.setItem('zb_user_avatar', googleAvatar);
+          window.dispatchEvent(new Event('profile_avatar_updated'));
         }
 
         await fetchUserProfile(session.user.id);
@@ -363,7 +361,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         localStorage.setItem('zb_profile_id', userProf.id || uid);
 
         // Sync database avatar to localstorage
-        if (userProf.avatar_url) {
+        if (userProf.avatar_url && !userProf.avatar_url.includes('name=User')) {
           localStorage.setItem('zb_user_avatar', userProf.avatar_url);
         } else {
           // If no database avatar, check for saved Google avatar
@@ -374,11 +372,12 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               if (error) console.warn('Supabase auto-save google avatar error:', error);
             });
           } else {
-            // Generate initials avatar
+            // Generate initials avatar using user real name
             const initAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(getInitialsName(userProf.name, userProf.email || storedEmail))}&background=22c55e&color=fff&rounded=true`;
             localStorage.setItem('zb_user_avatar', initAvatar);
           }
         }
+        window.dispatchEvent(new Event('profile_avatar_updated'));
 
         console.log("LockScreen: Profile found, state set to unlock");
         setIsLoading(false);
@@ -926,7 +925,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
             </h1>
             <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', margin: 0, fontWeight: 700 }}>
-              Clam Your Money
+              CLAIM YOUR MONEY
             </p>
           </div>
 

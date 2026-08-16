@@ -2679,6 +2679,15 @@ const App: React.FC = () => {
       setUserPin(validPin);
       setPremiumExpiresAt(premiumExpires || null);
 
+      const activeAvatar = localStorage.getItem('zb_user_avatar') || (validName ? `https://ui-avatars.com/api/?name=${encodeURIComponent(validName)}&background=22c55e&color=fff&rounded=true` : '');
+      if (activeAvatar && (!activeAvatar.includes('name=User') || validName === 'User')) {
+        setUserAvatar(activeAvatar);
+      } else if (validName) {
+        const correctAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(validName)}&background=22c55e&color=fff&rounded=true`;
+        setUserAvatar(correctAvatar);
+        localStorage.setItem('zb_user_avatar', correctAvatar);
+      }
+
       localStorage.setItem('zb_profile_id', validProfileId);
       localStorage.setItem('zb_user_name', validName);
       localStorage.setItem('zb_subscription_tier', validTier);

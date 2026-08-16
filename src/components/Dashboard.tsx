@@ -557,7 +557,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
             flexShrink: 0
           }}>
             <img 
-              src={userAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName || 'User')}&background=22c55e&color=fff&rounded=true`}
+              src={
+                (userAvatar && !userAvatar.includes('name=User'))
+                  ? userAvatar
+                  : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName || 'User')}&background=22c55e&color=fff&rounded=true`
+              }
               alt={userName} 
               style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
             />
