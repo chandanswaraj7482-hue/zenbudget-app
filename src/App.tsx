@@ -165,7 +165,10 @@ const App: React.FC = () => {
     message: string;
     type: string;
     createdAt: string;
+    linkUrl?: string;
+    buttonText?: string;
   } | null>(null);
+  const [announcementExpanded, setAnnouncementExpanded] = useState(false);
   
   // Profile settings editor states
   const [userPin, setUserPin] = useState<string>(() => {
@@ -749,7 +752,9 @@ const App: React.FC = () => {
                   title: lUnseen.title,
                   message: lUnseen.message,
                   type: lUnseen.type || 'info',
-                  createdAt: lUnseen.created_at
+                  createdAt: lUnseen.created_at,
+                  linkUrl: lUnseen.link_url || undefined,
+                  buttonText: lUnseen.button_text || undefined
                 });
               }, 1500);
               localStorage.setItem(shownKey, JSON.stringify([...shownIds, String(lUnseen.id)]));
@@ -794,7 +799,9 @@ const App: React.FC = () => {
             title: b.title,
             message: b.message,
             type: b.type || 'info',
-            createdAt: b.created_at
+            createdAt: b.created_at,
+            linkUrl: b.link_url || undefined,
+            buttonText: b.button_text || undefined
           });
           triggerToast(`📣 ${b.title}`, b.type === 'coupon' ? 'success' : 'info');
           try { playNotificationSound('info'); } catch (_) {}
@@ -2402,9 +2409,11 @@ const App: React.FC = () => {
   const handleSaveProfile = async (newName: string, newPin: string, newCurrency: string, newLanguage: string, newEmail?: string) => {
     try {
       const userPhone = localStorage.getItem('zb_user_phone') || '';
+      const currentAvatar = localStorage.getItem('zb_user_avatar') || '';
       const updateData: any = { name: newName, pin: newPin };
       if (newEmail) updateData.email = newEmail;
       if (userPhone) updateData.phone = userPhone;
+      if (currentAvatar) updateData.avatar_url = currentAvatar;
 
       const { error } = await supabase
         .from('profiles')
@@ -3354,6 +3363,9 @@ const App: React.FC = () => {
           <div style={{
             width: '100%',
             maxWidth: '380px',
+            maxHeight: '85vh',
+            display: 'flex',
+            flexDirection: 'column',
             background: 'linear-gradient(160deg, rgba(20,15,35,0.98) 0%, rgba(10,8,18,0.98) 100%)',
             border: announcementPopup.type === 'coupon'
               ? '1px solid rgba(234,179,8,0.6)'
@@ -3366,11 +3378,12 @@ const App: React.FC = () => {
               ? '0 0 40px rgba(234,179,8,0.2), 0 20px 60px rgba(0,0,0,0.8)'
               : '0 0 40px rgba(99,102,241,0.15), 0 20px 60px rgba(0,0,0,0.8)',
             textAlign: 'center',
-            position: 'relative'
+            position: 'relative',
+            overflow: 'hidden'
           }}>
             {/* Close button */}
             <button
-              onClick={() => setAnnouncementPopup(null)}
+              onClick={() => { setAnnouncementPopup(null); setAnnouncementExpanded(false); }}
               style={{
                 position: 'absolute',
                 top: '14px',
@@ -3386,116 +3399,169 @@ const App: React.FC = () => {
                 cursor: 'pointer',
                 color: 'var(--text-secondary)',
                 fontSize: '16px',
-                lineHeight: 1
+                lineHeight: 1,
+                zIndex: 2,
+                flexShrink: 0
               }}
             >×</button>
 
-            {/* Icon */}
-            <div style={{
-              width: '64px',
-              height: '64px',
-              borderRadius: '20px',
-              background: announcementPopup.type === 'coupon'
-                ? 'linear-gradient(135deg, rgba(234,179,8,0.2), rgba(202,138,4,0.1))'
-                : announcementPopup.type === 'warning'
-                ? 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(220,38,38,0.1))'
-                : announcementPopup.type === 'success'
-                ? 'linear-gradient(135deg, rgba(34,197,94,0.2), rgba(22,163,74,0.1))'
-                : 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(79,70,229,0.1))',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 18px',
-              fontSize: '28px',
-              border: announcementPopup.type === 'coupon'
-                ? '1px solid rgba(234,179,8,0.3)'
-                : announcementPopup.type === 'warning'
-                ? '1px solid rgba(239,68,68,0.3)'
-                : announcementPopup.type === 'success'
-                ? '1px solid rgba(34,197,94,0.3)'
-                : '1px solid rgba(99,102,241,0.3)'
-            }}>
-              {announcementPopup.type === 'coupon' ? '🎟️'
-                : announcementPopup.type === 'warning' ? '⚠️'
-                : announcementPopup.type === 'success' ? '🎉'
-                : '📣'}
-            </div>
-
-            {/* FROM ZenBudget badge */}
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
-              padding: '3px 10px',
-              borderRadius: '99px',
-              background: 'rgba(99,102,241,0.12)',
-              border: '1px solid rgba(99,102,241,0.25)',
-              fontSize: '10px',
-              fontWeight: 700,
-              color: '#818cf8',
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-              marginBottom: '12px'
-            }}>
-              📣 Announcement from ZenBudget
-            </div>
-
-            {/* Title */}
-            <h2 style={{
-              fontSize: '20px',
-              fontWeight: 800,
-              color: 'var(--text-primary)',
-              marginBottom: '10px',
-              letterSpacing: '-0.02em',
-              lineHeight: 1.3
-            }}>{announcementPopup.title}</h2>
-
-            {/* Message */}
-            <p style={{
-              fontSize: '14px',
-              color: 'var(--text-secondary)',
-              lineHeight: 1.7,
-              marginBottom: '24px',
-              whiteSpace: 'pre-line',
-              textAlign: 'left'
-            }}>{announcementPopup.message}</p>
-
-            {/* Dismiss button */}
-            <button
-              onClick={() => setAnnouncementPopup(null)}
-              style={{
-                width: '100%',
-                padding: '14px',
-                borderRadius: '16px',
-                border: 'none',
+            {/* Scrollable content area */}
+            <div style={{ overflowY: 'auto', flex: 1, paddingRight: '4px' }}>
+              {/* Icon */}
+              <div style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '20px',
                 background: announcementPopup.type === 'coupon'
-                  ? 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)'
+                  ? 'linear-gradient(135deg, rgba(234,179,8,0.2), rgba(202,138,4,0.1))'
                   : announcementPopup.type === 'warning'
-                  ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+                  ? 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(220,38,38,0.1))'
                   : announcementPopup.type === 'success'
-                  ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
-                  : 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                color: '#ffffff',
-                fontSize: '14px',
-                fontWeight: 800,
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.3)'
-              }}
-            >
-              Got it! ✨
-            </button>
-
-            {/* Timestamp */}
-            {announcementPopup.createdAt && (
-              <p style={{
-                marginTop: '12px',
-                fontSize: '11px',
-                color: 'var(--text-muted)',
-                fontWeight: 500
+                  ? 'linear-gradient(135deg, rgba(34,197,94,0.2), rgba(22,163,74,0.1))'
+                  : 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(79,70,229,0.1))',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 18px',
+                fontSize: '28px',
+                border: announcementPopup.type === 'coupon'
+                  ? '1px solid rgba(234,179,8,0.3)'
+                  : announcementPopup.type === 'warning'
+                  ? '1px solid rgba(239,68,68,0.3)'
+                  : announcementPopup.type === 'success'
+                  ? '1px solid rgba(34,197,94,0.3)'
+                  : '1px solid rgba(99,102,241,0.3)'
               }}>
-                {new Date(announcementPopup.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
-              </p>
-            )}
+                {announcementPopup.type === 'coupon' ? '🎟️'
+                  : announcementPopup.type === 'warning' ? '⚠️'
+                  : announcementPopup.type === 'success' ? '🎉'
+                  : '📣'}
+              </div>
+
+              {/* FROM ZenBudget badge */}
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '3px 10px',
+                borderRadius: '99px',
+                background: 'rgba(99,102,241,0.12)',
+                border: '1px solid rgba(99,102,241,0.25)',
+                fontSize: '10px',
+                fontWeight: 700,
+                color: '#818cf8',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                marginBottom: '12px'
+              }}>
+                📣 Announcement from ZenBudget
+              </div>
+
+              {/* Title */}
+              <h2 style={{
+                fontSize: '20px',
+                fontWeight: 800,
+                color: 'var(--text-primary)',
+                marginBottom: '10px',
+                letterSpacing: '-0.02em',
+                lineHeight: 1.3
+              }}>{announcementPopup.title}</h2>
+
+              {/* Message with See More / Show Less */}
+              <div style={{ marginBottom: '20px', textAlign: 'left' }}>
+                <p style={{
+                  fontSize: '14px',
+                  color: 'var(--text-secondary)',
+                  lineHeight: 1.7,
+                  whiteSpace: 'pre-line',
+                  maxHeight: announcementExpanded ? 'none' : '120px',
+                  overflow: 'hidden',
+                  transition: 'max-height 0.3s ease'
+                }}>{announcementPopup.message}</p>
+                {announcementPopup.message.length > 240 && (
+                  <button
+                    onClick={() => setAnnouncementExpanded(!announcementExpanded)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#818cf8',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      padding: '6px 0 0',
+                      textDecoration: 'underline'
+                    }}
+                  >
+                    {announcementExpanded ? 'Show Less ▲' : 'See More ▼'}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Fixed bottom actions */}
+            <div style={{ flexShrink: 0, paddingTop: '4px' }}>
+              {/* CTA link button */}
+              {announcementPopup.linkUrl && (
+                <button
+                  onClick={() => window.open(announcementPopup.linkUrl, '_blank')}
+                  style={{
+                    width: '100%',
+                    padding: '13px',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(99,102,241,0.4)',
+                    background: 'rgba(99,102,241,0.15)',
+                    color: '#a5b4fc',
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    marginBottom: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  🔗 {announcementPopup.buttonText || 'Open Link'}
+                </button>
+              )}
+
+              {/* Dismiss button */}
+              <button
+                onClick={() => { setAnnouncementPopup(null); setAnnouncementExpanded(false); }}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  borderRadius: '16px',
+                  border: 'none',
+                  background: announcementPopup.type === 'coupon'
+                    ? 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)'
+                    : announcementPopup.type === 'warning'
+                    ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+                    : announcementPopup.type === 'success'
+                    ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
+                    : 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                  color: '#ffffff',
+                  fontSize: '14px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.3)'
+                }}
+              >
+                Got it! ✨
+              </button>
+
+              {/* Timestamp */}
+              {announcementPopup.createdAt && (
+                <p style={{
+                  marginTop: '12px',
+                  fontSize: '11px',
+                  color: 'var(--text-muted)',
+                  fontWeight: 500
+                }}>
+                  {new Date(announcementPopup.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+                </p>
+              )}
+            </div>
           </div>
         </div>
       )}

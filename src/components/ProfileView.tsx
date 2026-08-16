@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, KeyRound, Check, Eye, EyeOff, Globe, Banknote, ArrowLeft, Mail, Moon, Sun, Upload } from 'lucide-react';
+import { User, KeyRound, Check, Eye, EyeOff, Globe, Banknote, ArrowLeft, Mail, Moon, Sun, Upload, Trash2 } from 'lucide-react';
 import { t } from '../utils/i18n';
 
 interface ProfileViewProps {
@@ -86,15 +86,22 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   };
 
   const googleAvatarSaved = localStorage.getItem('zb_google_avatar');
+  const initialsAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=22c55e&color=fff&rounded=true`;
 
   const PRESET_AVATARS = [
     ...(googleAvatarSaved ? [googleAvatarSaved] : []),
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=22c55e&color=fff&rounded=true`,
+    initialsAvatar,
     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
     'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
     'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
     'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80'
   ];
+
+  const handleRemovePhoto = () => {
+    setAvatarUrl(initialsAvatar);
+    localStorage.setItem('zb_user_avatar', initialsAvatar);
+    window.dispatchEvent(new Event('profile_avatar_updated'));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -225,6 +232,31 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               >
                 <Upload size={16} />
               </button>
+
+              {/* Remove Photo — revert to initials */}
+              {avatarUrl && !avatarUrl.includes('ui-avatars.com') && (
+                <button
+                  type="button"
+                  onClick={handleRemovePhoto}
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    border: '1.5px dashed var(--danger)',
+                    background: 'rgba(239, 68, 68, 0.15)',
+                    color: 'var(--danger)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    padding: 0,
+                    transition: 'all 0.2s ease'
+                  }}
+                  title="Remove photo & use initials"
+                >
+                  <Trash2 size={16} />
+                </button>
+              )}
 
               <input
                 ref={avatarFileRef}

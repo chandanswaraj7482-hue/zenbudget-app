@@ -9,6 +9,15 @@ interface LockScreenProps {
   onUnlock: (userId: string, username: string, tier: string, trialStart: string, pin: string, premiumExpiresAt: string | null, trialExpireDate?: string | null) => void;
 }
 
+const getInitialsName = (userName: string, userEmail: string) => {
+  if (userName && userName.trim() !== '') return userName.trim();
+  if (userEmail && userEmail.trim() !== '') {
+    const usernamePart = userEmail.split('@')[0];
+    return usernamePart.substring(0, 2).toUpperCase();
+  }
+  return 'User';
+};
+
 export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [showPassword, setShowPassword] = useState(false);
@@ -352,11 +361,32 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         // Store profile details locally to avoid logouts
         localStorage.setItem('zb_local_session_profile', JSON.stringify({ userId: uid, profile: userProf }));
         localStorage.setItem('zb_profile_id', userProf.id || uid);
+
+        // Sync database avatar to localstorage
+        if (userProf.avatar_url) {
+          localStorage.setItem('zb_user_avatar', userProf.avatar_url);
+        } else {
+          // If no database avatar, check for saved Google avatar
+          const googleAvatar = localStorage.getItem('zb_google_avatar');
+          if (googleAvatar) {
+            localStorage.setItem('zb_user_avatar', googleAvatar);
+            supabase.from('profiles').update({ avatar_url: googleAvatar }).eq('id', uid).then(({ error }) => {
+              if (error) console.warn('Supabase auto-save google avatar error:', error);
+            });
+          } else {
+            // Generate initials avatar
+            const initAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(getInitialsName(userProf.name, userProf.email || storedEmail))}&background=22c55e&color=fff&rounded=true`;
+            localStorage.setItem('zb_user_avatar', initAvatar);
+          }
+        }
+
         console.log("LockScreen: Profile found, state set to unlock");
+        setIsLoading(false);
       } else {
         // Logged in but profile data is missing, prompt onboarding (PIN setup)
         setStep('onboard-pin');
         console.log("LockScreen: Profile not found, state set to onboard-pin");
+        setIsLoading(false);
       }
     } catch (err: any) {
       console.error("LockScreen: fetchUserProfile caught error:", err);
@@ -367,6 +397,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         setDbProfile(cachedData.profile);
         setUsername(cachedData.profile.name);
         setStep('unlock');
+        setIsLoading(false);
         return;
       }
       let msg = err.message || 'Error fetching user profile';
@@ -375,6 +406,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
       }
       setErrorMsg(msg);
       setStep('auth');
+      setIsLoading(false);
     }
   };
 

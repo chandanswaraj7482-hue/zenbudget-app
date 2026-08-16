@@ -335,6 +335,8 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   const [bcTitle, setBcTitle] = useState('');
   const [bcMessage, setBcMessage] = useState('');
   const [bcType, setBcType] = useState<'info' | 'warning' | 'success' | 'update'>('info');
+  const [bcLink, setBcLink] = useState('');
+  const [bcButtonText, setBcButtonText] = useState('');
 
   const [couponCode, setCouponCode] = useState('');
   const [discountPercent, setDiscountPercent] = useState<number>(50);
@@ -634,7 +636,9 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
       title: bcTitle.trim(),
       message: bcMessage.trim(),
       type: bcType,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      link_url: bcLink.trim() || null,
+      button_text: bcButtonText.trim() || null
     };
 
     // 1. OPTIMISTIC UPDATE: Update local state IMMEDIATELY before Supabase call
@@ -645,14 +649,19 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
     } catch (_) {}
     setBcTitle('');
     setBcMessage('');
+    setBcLink('');
+    setBcButtonText('');
     if (onShowToast) onShowToast('Broadcast announcement published to all users! 📣', 'success');
 
     // 2. BACKGROUND SYNC: Try to persist in Supabase (fire-and-forget)
     (async () => {
       try {
+        const insertData: any = { title: newBc.title, message: newBc.message, type: newBc.type };
+        if (newBc.link_url) insertData.link_url = newBc.link_url;
+        if (newBc.button_text) insertData.button_text = newBc.button_text;
         const { error } = await supabaseClient
           .from('broadcast_notifications')
-          .insert([{ title: newBc.title, message: newBc.message, type: newBc.type }]);
+          .insert([insertData]);
         if (error) console.warn('Broadcast Supabase insert error (local state preserved):', error);
       } catch (err) {
         console.warn('Broadcast Supabase sync failed (local state preserved):', err);
@@ -1939,6 +1948,51 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                             resize: 'vertical'
                           }}
                         />
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem' }}>
+                        <div style={{ flex: 1 }}>
+                          <label style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'block', marginBottom: '0.35rem' }}>
+                            🔗 Link URL (optional)
+                          </label>
+                          <input
+                            type="url"
+                            placeholder="https://example.com"
+                            value={bcLink}
+                            onChange={(e) => setBcLink(e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: '0.75rem 1rem',
+                              borderRadius: '10px',
+                              backgroundColor: 'rgba(15, 23, 42, 0.8)',
+                              border: '1px solid rgba(255, 255, 255, 0.1)',
+                              color: '#fff',
+                              fontSize: '0.9rem',
+                              outline: 'none'
+                            }}
+                          />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <label style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'block', marginBottom: '0.35rem' }}>
+                            Button Label (optional)
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g., Learn More"
+                            value={bcButtonText}
+                            onChange={(e) => setBcButtonText(e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: '0.75rem 1rem',
+                              borderRadius: '10px',
+                              backgroundColor: 'rgba(15, 23, 42, 0.8)',
+                              border: '1px solid rgba(255, 255, 255, 0.1)',
+                              color: '#fff',
+                              fontSize: '0.9rem',
+                              outline: 'none'
+                            }}
+                          />
+                        </div>
                       </div>
 
                       <button
