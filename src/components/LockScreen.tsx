@@ -913,12 +913,13 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           {/* ── Logo & Branding ── */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '28px' }}>
             <div style={{
-              width: '72px', height: '72px', borderRadius: '22px',
+              width: '110px', height: '110px', borderRadius: '32px',
+              background: '#ffffff',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               boxShadow: '0 10px 30px rgba(0,0,0,0.3), 0 0 20px rgba(34,197,94,0.25)',
-              marginBottom: '14px', overflow: 'hidden'
+              marginBottom: '18px', padding: '16px'
             }}>
-              <img src="/zen-icon-green.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src="/zen-icon-green.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>
             <h1 style={{ fontSize: '30px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
               <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
