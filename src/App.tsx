@@ -2349,7 +2349,7 @@ const App: React.FC = () => {
           setAccounts([]);
           setLoans([]);
           
-          const keysToRemove = [
+          const keysToEmpty = [
             `zb_transactions_${currentProfileId}`,
             `zb_tx_cache_${currentProfileId}`,
             `zb_budgets_${currentProfileId}`,
@@ -2357,7 +2357,7 @@ const App: React.FC = () => {
             `zb_accounts_${currentProfileId}`,
             `zb_loans_${currentProfileId}`
           ];
-          keysToRemove.forEach(k => localStorage.removeItem(k));
+          keysToEmpty.forEach(k => localStorage.setItem(k, '[]'));
 
           setActiveView('dashboard');
           setConfirmDialog(null);
