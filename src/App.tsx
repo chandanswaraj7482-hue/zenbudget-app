@@ -391,7 +391,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleAddAccount = (newAcc: Omit<Account, 'id'>) => {
-    const accId = `acc_${Math.random().toString(36).substring(2, 9)}`;
+    const accId = crypto.randomUUID();
     const created: Account = { ...newAcc, id: accId };
     const updated = [...accounts, created];
     setAccounts(updated);
@@ -431,7 +431,7 @@ const App: React.FC = () => {
 
 
   const handleAddLoan = (loanData: Omit<LoanRecord, 'id' | 'paidAmount' | 'status'>) => {
-    const loanId = `loan_${Math.random().toString(36).substring(2, 9)}`;
+    const loanId = crypto.randomUUID();
     const newLoan: LoanRecord = {
       ...loanData,
       id: loanId,
@@ -846,7 +846,7 @@ const App: React.FC = () => {
   const addNotification = async (title: string, desc: string, type: ZenNotification['type']) => {
     if (!currentProfileId) return;
     const newNotif: ZenNotification = {
-      id: Math.random().toString(36).substring(2, 9),
+      id: crypto.randomUUID(),
       type,
       title,
       desc,
@@ -1867,7 +1867,7 @@ const App: React.FC = () => {
         }
       } else {
         // Create sync
-        const newTxId = Math.random().toString(36).substring(2, 9);
+        const newTxId = crypto.randomUUID();
         const newTx = {
           id: newTxId,
           user_id: currentProfileId,
@@ -2280,9 +2280,21 @@ const App: React.FC = () => {
   };
 
   const handleDeleteGoal = (goalId: string) => {
-    const updated = goals.filter(g => g.id !== goalId);
-    handleSaveGoal(updated);
-    triggerToast(`Goal removed successfully!`, 'success');
+    const goalToDelete = goals.find(g => g.id === goalId);
+    if (!goalToDelete) return;
+
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Goal?',
+      message: `Are you sure you want to delete the goal "${goalToDelete.name}"?`,
+      type: 'danger',
+      onConfirm: async () => {
+        const updated = goals.filter(g => g.id !== goalId);
+        handleSaveGoal(updated);
+        setConfirmDialog(null);
+        triggerToast(`Goal removed successfully!`, 'success');
+      }
+    });
   };
 
   const handleAddGoalProgress = (goalId: string, amountInActiveCurrency: number) => {
@@ -2322,21 +2334,34 @@ const App: React.FC = () => {
       type: 'danger',
       onConfirm: async () => {
         try {
-          // Delete from Supabase
-          const { error: txErr } = await supabase.from('transactions').delete().eq('user_id', currentProfileId);
-          const { error: bgtErr } = await supabase.from('budgets').delete().eq('user_id', currentProfileId);
-          
-          if (txErr) throw txErr;
-          if (bgtErr) throw bgtErr;
+          // Delete from Supabase silently ignoring missing tables
+          await Promise.all([
+            supabase.from('transactions').delete().eq('user_id', currentProfileId),
+            supabase.from('budgets').delete().eq('user_id', currentProfileId),
+            supabase.from('goals').delete().eq('user_id', currentProfileId),
+            supabase.from('accounts').delete().eq('user_id', currentProfileId),
+            supabase.from('loans').delete().eq('user_id', currentProfileId)
+          ]);
 
           setTransactions([]);
           setBudgets([]);
           setGoals([]);
-          localStorage.removeItem(`zb_goals_${currentProfileId}`);
+          setAccounts([]);
+          setLoans([]);
+          
+          const keysToRemove = [
+            `zb_transactions_${currentProfileId}`,
+            `zb_tx_cache_${currentProfileId}`,
+            `zb_budgets_${currentProfileId}`,
+            `zb_goals_${currentProfileId}`,
+            `zb_accounts_${currentProfileId}`,
+            `zb_loans_${currentProfileId}`
+          ];
+          keysToRemove.forEach(k => localStorage.removeItem(k));
 
           setActiveView('dashboard');
           setConfirmDialog(null);
-          triggerToast('Ledger cleared successfully.', 'info');
+          triggerToast('Ledger & all data cleared successfully.', 'info');
         } catch (err: any) {
           triggerToast(err.message || 'Reset failed.', 'warning');
         }

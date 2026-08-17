@@ -2349,10 +2349,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <button
                   type="button"
                   onClick={() => {
-                    if (confirm("Are you sure you want to delete this goal?")) {
-                      if (onDeleteGoal) onDeleteGoal(editingGoalId);
-                      setEditingGoalId(null);
-                    }
+                    if (onDeleteGoal) onDeleteGoal(editingGoalId);
+                    setEditingGoalId(null);
                   }}
                   style={{ padding: '12px', borderRadius: '12px', fontWeight: 700, background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', border: '1px solid rgba(239, 68, 68, 0.2)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
                 >
