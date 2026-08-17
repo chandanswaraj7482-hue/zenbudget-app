@@ -1216,16 +1216,16 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', width: '100%', maxWidth: '320px', textAlign: 'center' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{
-              width: '64px',
-              height: '64px',
-              borderRadius: '20px',
+              width: '110px',
+              height: '110px',
+              borderRadius: '32px',
               background: '#ffffff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               boxShadow: '0 10px 30px rgba(0,0,0,0.3), 0 0 20px rgba(34,197,94,0.25)',
               marginBottom: '16px',
-              padding: '10px'
+              padding: '16px'
             }}>
               <img 
                 src="/zen-icon-green.png" 
