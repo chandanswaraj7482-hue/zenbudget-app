@@ -704,19 +704,22 @@ User Question: ${rawText}`
                         const userName = localStorage.getItem('zb_user_name') || user?.user_metadata?.full_name || user?.user_metadata?.name || 'ZenBudget User';
                         const userEmail = user?.email || localStorage.getItem('zb_user_email') || 'user@example.com';
 
-                        await supabase.from('app_ratings').insert([{
-                          user_id: user?.id || null,
+                        const trimmedComment = comment.trim();
+                        const feedbackText = trimmedComment ? trimmedComment : `${rating} Star rating submitted`;
+
+                        const { error: insertErr } = await supabase.from('app_ratings').insert([{
                           user_name: userName,
                           user_email: userEmail,
                           rating_stars: rating,
-                          rating: rating,
-                          feedback: comment || `${rating} Star rating submitted`,
-                          comment: comment || null,
-                          month: `${curMonth} ${curYear}`,
-                          platform: navigator.userAgent.includes('Android') ? 'Android APK' : 'Web',
+                          feedback: feedbackText,
                           created_at: new Date().toISOString()
                         }]);
-                        console.log('✅ Rating saved to Supabase admin panel');
+
+                        if (insertErr) {
+                          console.error('Supabase app_ratings insert error:', insertErr);
+                        } else {
+                          console.log('✅ Rating & feedback saved to Supabase app_ratings');
+                        }
                       } catch (err) {
                         console.warn('Rating save to Supabase failed (table may not exist yet):', err);
                         // Fallback: silently ignore, local storage already saved

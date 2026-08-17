@@ -3846,15 +3846,15 @@ const App: React.FC = () => {
                     try {
                       const userName = userNameInput.trim() || 'ZenBudget User';
                       const userEmail = localStorage.getItem('zb_user_email') || `${currentProfileId.slice(0, 8)}@zenbudget.app`;
-                      const feedback = reviewFeedback.trim() || `${ratingStars} Star rating submitted`;
+                      const feedbackText = reviewFeedback.trim() ? reviewFeedback.trim() : `${ratingStars} Star rating submitted`;
 
-                      await supabase.from('app_reviews').insert({
+                      await supabase.from('app_ratings').insert([{
                         user_name: userName,
                         user_email: userEmail,
                         rating_stars: ratingStars,
-                        feedback: feedback,
+                        feedback: feedbackText,
                         created_at: new Date().toISOString()
-                      });
+                      }]);
 
                       localStorage.setItem('zb_has_submitted_review', 'true');
                       setHasSubmittedReview(true);
@@ -4004,14 +4004,14 @@ const App: React.FC = () => {
                   try {
                     const textFeedback = reviewFeedback.trim() ? reviewFeedback.trim() : `${ratingStars} Star rating submitted`;
                     await supabase.from('app_ratings').insert([{
-                      user_name: userName || 'Anonymous',
+                      user_name: userName || 'ZenBudget User',
                       user_email: localStorage.getItem('zb_user_email') || 'user@zenbudget.app',
                       rating_stars: ratingStars,
                       feedback: textFeedback,
-                      comment: reviewFeedback.trim() || null
+                      created_at: new Date().toISOString()
                     }]);
                   } catch (err) {
-                    console.error('Error saving rating:', err);
+                    console.error('Error saving rating to Supabase:', err);
                   }
                   setReviewFeedback('');
                 }}
