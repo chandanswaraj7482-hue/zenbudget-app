@@ -488,32 +488,32 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
         <div style={{
           position: 'fixed',
           top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(15, 23, 42, 0.85)',
+          background: 'rgba(0, 0, 0, 0.75)',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
           zIndex: 999999,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '24px'
+          padding: '20px'
         }} className="animate-fade-in">
-          <div style={{
-            background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)',
-            border: '1px solid rgba(239, 68, 68, 0.4)',
+          <div className="glass-panel animate-scale-up" style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-card)',
             borderRadius: '24px',
             padding: '28px 24px',
             maxWidth: '360px',
             width: '100%',
             textAlign: 'center',
-            boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(239, 68, 68, 0.2)',
+            boxShadow: 'var(--glow-shadow)',
             position: 'relative'
-          }} className="animate-scale-up">
+          }}>
             <button 
               type="button"
               onClick={() => setShowNoAccountModal(false)}
               style={{ 
                 position: 'absolute', top: '16px', right: '16px', 
-                background: 'rgba(255,255,255,0.06)', border: 'none', 
+                background: 'rgba(0,0,0,0.05)', border: 'none', 
                 borderRadius: '50%', width: '32px', height: '32px',
                 color: 'var(--text-secondary)', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center'
@@ -523,11 +523,11 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
             </button>
             <div style={{ 
               width: '64px', height: '64px', borderRadius: '20px', 
-              background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', 
+              background: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', 
               display: 'flex', alignItems: 'center', justifyContent: 'center', 
               margin: '0 auto 16px auto',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              boxShadow: '0 8px 20px rgba(239, 68, 68, 0.2)'
+              border: '1px solid rgba(239, 68, 68, 0.25)',
+              boxShadow: '0 8px 20px rgba(239, 68, 68, 0.15)'
             }}>
               <Wallet size={32} />
             </div>
@@ -547,7 +547,7 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
                 width: '100%',
                 padding: '14px',
                 borderRadius: '16px',
-                background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                 color: '#ffffff',
                 fontWeight: 800,
                 fontSize: '15px',
@@ -557,7 +557,7 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                boxShadow: '0 8px 24px rgba(34, 197, 94, 0.4)'
+                boxShadow: '0 8px 24px rgba(16, 185, 129, 0.35)'
               }}
             >
               <Plus size={18} /> Add Account Now
@@ -571,22 +571,23 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
       {insufficientBalanceError && ReactDOM.createPortal(
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(12px)',
+          background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px',
-          zIndex: 99999, animation: 'fadeIn 0.2s ease-out'
+          zIndex: 999999, animation: 'fadeIn 0.2s ease-out'
         }}>
-          <div className="glass-panel" style={{
+          <div className="glass-panel animate-scale-up" style={{
             maxWidth: '380px', width: '100%',
-            background: 'linear-gradient(180deg, rgba(239, 68, 68, 0.2) 0%, rgba(15, 23, 42, 0.98) 100%)',
-            borderRadius: '24px', border: '1px solid rgba(239, 68, 68, 0.4)',
-            padding: '24px', textAlign: 'center', boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+            background: 'var(--bg-card)',
+            borderRadius: '24px', border: '1px solid rgba(239, 68, 68, 0.3)',
+            padding: '24px', textAlign: 'center', boxShadow: 'var(--glow-shadow)',
             position: 'relative'
           }}>
             <button
               onClick={() => setInsufficientBalanceError(null)}
               style={{
                 position: 'absolute', top: '16px', right: '16px',
-                background: 'rgba(255,255,255,0.06)', border: 'none',
+                background: 'rgba(0,0,0,0.05)', border: 'none',
                 borderRadius: '50%', width: '32px', height: '32px',
                 color: 'var(--text-secondary)', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center'
@@ -597,24 +598,24 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
 
             <div style={{
               width: '64px', height: '64px', borderRadius: '50%',
-              background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444',
+              background: 'rgba(239, 68, 68, 0.12)', color: '#ef4444',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               margin: '0 auto 16px auto',
-              border: '1px solid rgba(239, 68, 68, 0.4)',
-              boxShadow: '0 8px 20px rgba(239, 68, 68, 0.3)'
+              border: '1px solid rgba(239, 68, 68, 0.25)',
+              boxShadow: '0 8px 20px rgba(239, 68, 68, 0.15)'
             }}>
               <span style={{ fontSize: '32px' }}>⚠️</span>
             </div>
 
-            <h3 style={{ fontSize: '20px', fontWeight: 900, color: '#f87171', marginBottom: '8px', fontFamily: "'Manrope', sans-serif" }}>
+            <h3 style={{ fontSize: '19px', fontWeight: 900, color: '#ef4444', marginBottom: '8px', fontFamily: "'Manrope', sans-serif" }}>
               {insufficientBalanceError.type === 'transfer' ? 'Insufficient Balance for Transfer!' : 'Insufficient Balance for Expense!'}
             </h3>
 
-            <p style={{ fontSize: '13px', color: '#cbd5e1', marginBottom: '20px', lineHeight: 1.6 }}>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '20px', lineHeight: 1.6 }}>
               {insufficientBalanceError.type === 'transfer' ? (
-                <>Your <strong>{insufficientBalanceError.accountName}</strong> has only <strong style={{ color: '#f87171' }}>{currencySymbol}{insufficientBalanceError.available.toLocaleString()}</strong> available balance, but this transfer requires <strong style={{ color: '#fff' }}>{currencySymbol}{insufficientBalanceError.required.toLocaleString()}</strong>. Please select another source wallet or add funds.</>
+                <>Your <strong style={{ color: 'var(--text-primary)' }}>{insufficientBalanceError.accountName}</strong> has only <strong style={{ color: '#ef4444' }}>{currencySymbol}{insufficientBalanceError.available.toLocaleString()}</strong> available balance, but this transfer requires <strong style={{ color: 'var(--text-primary)' }}>{currencySymbol}{insufficientBalanceError.required.toLocaleString()}</strong>. Please select another source wallet or add funds.</>
               ) : (
-                <>Your <strong>{insufficientBalanceError.accountName}</strong> has only <strong style={{ color: '#f87171' }}>{currencySymbol}{insufficientBalanceError.available.toLocaleString()}</strong> available balance, but this expense requires <strong style={{ color: '#fff' }}>{currencySymbol}{insufficientBalanceError.required.toLocaleString()}</strong>. Please select another wallet or add funds.</>
+                <>Your <strong style={{ color: 'var(--text-primary)' }}>{insufficientBalanceError.accountName}</strong> has only <strong style={{ color: '#ef4444' }}>{currencySymbol}{insufficientBalanceError.available.toLocaleString()}</strong> available balance, but this expense requires <strong style={{ color: 'var(--text-primary)' }}>{currencySymbol}{insufficientBalanceError.required.toLocaleString()}</strong>. Please select another wallet or add funds.</>
               )}
             </p>
 
