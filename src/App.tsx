@@ -2779,7 +2779,15 @@ const App: React.FC = () => {
       onClickCapture={(e) => {
         if (isSubscriptionExpired()) {
           const target = e.target as HTMLElement;
-          if (target && target.closest('.subscription-modal-wrapper')) {
+          if (
+            target && (
+              target.closest('.subscription-modal-wrapper') ||
+              target.closest('.announcement-modal-wrapper') ||
+              target.closest('[data-allow-click="true"]') ||
+              target.closest('button') ||
+              target.closest('.modal-container')
+            )
+          ) {
             return;
           }
           e.preventDefault();
@@ -3382,6 +3390,8 @@ const App: React.FC = () => {
       {/* 📣 Admin Announcement Popup */}
       {announcementPopup && (
         <div 
+          className="announcement-modal-wrapper"
+          data-allow-click="true"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setAnnouncementPopup(null);
