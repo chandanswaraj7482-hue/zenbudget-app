@@ -2940,7 +2940,7 @@ const App: React.FC = () => {
       </div>
 
       {/* Main View Area */}
-      <main className="scroll-container" style={{ padding: '20px 20px 95px 20px' }}>
+      <main className="scroll-container" style={{ padding: '20px 20px calc(95px + env(safe-area-inset-bottom)) 20px' }}>
         {activeView === 'dashboard' && (
           <Dashboard 
             key={langKey}
@@ -3159,13 +3159,13 @@ const App: React.FC = () => {
         transform: 'translateX(-50%)',
         width: '100%',
         maxWidth: '480px',
-        background: 'var(--bg-card)',
-        borderTop: '1px solid var(--border-card)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        background: 'var(--bg-nav-glass)',
+        borderTop: '1px solid var(--border-divider)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
         display: 'flex',
         justifyContent: 'space-around',
-        padding: '12px 10px 24px 10px',
+        padding: '12px 10px calc(env(safe-area-inset-bottom) + 16px) 10px',
         zIndex: 999
       }}>
         <button
