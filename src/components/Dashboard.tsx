@@ -554,16 +554,26 @@ export const Dashboard: React.FC<DashboardProps> = ({
             overflow: 'hidden',
             border: '2px solid var(--primary)',
             boxShadow: '0 2px 10px rgba(34, 197, 94, 0.25)',
-            flexShrink: 0
+            flexShrink: 0,
+            backgroundColor: 'var(--primary)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#fff',
+            fontSize: '18px',
+            fontWeight: 'bold'
           }}>
             <img 
               src={
-                (userAvatar && !userAvatar.includes('name=User'))
+                (userAvatar && userAvatar !== 'null' && !userAvatar.includes('name=User'))
                   ? userAvatar
                   : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName || 'User')}&background=22c55e&color=fff&rounded=true`
               }
-              alt={userName} 
+              alt={userName?.charAt(0) || 'U'} 
               style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+              onError={(e) => {
+                 (e.target as HTMLImageElement).style.display = 'none';
+              }}
             />
           </div>
 
@@ -579,13 +589,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
               })()}
             </div>
 
-            {/* Line 2: User Name (Full Name Visible!) */}
-            <h1 style={{ fontSize: '16px', fontWeight: 900, color: '#ffffff', margin: '2px 0 0 0', fontFamily: "'Manrope', sans-serif", letterSpacing: '-0.02em', lineHeight: 1.2, wordBreak: 'break-word', whiteSpace: 'normal' }}>
+            {/* Line 2: User Name */}
+            <h1 style={{ fontSize: '16px', fontWeight: 900, color: '#ffffff', margin: '2px 0 0 0', fontFamily: "'Manrope', sans-serif", letterSpacing: '-0.02em', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {userName || 'User'}
             </h1>
 
-            {/* Line 3: Rotating Financial Tagline (Full Tagline Wrapped & Visible!) */}
-            <div style={{ fontSize: '11px', color: '#34d399', fontWeight: 700, marginTop: '3px', lineHeight: 1.3, wordBreak: 'break-word', whiteSpace: 'normal' }}>
+            {/* Line 3: Rotating Financial Tagline */}
+            <div style={{ fontSize: '11px', color: '#34d399', fontWeight: 700, marginTop: '3px', lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {(() => {
                 const taglines = [
                   'Track smart, live mindfully 🌿',

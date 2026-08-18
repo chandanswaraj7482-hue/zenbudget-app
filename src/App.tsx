@@ -3501,34 +3501,14 @@ const App: React.FC = () => {
                 lineHeight: 1.3
               }}>{announcementPopup.title}</h2>
 
-              {/* Message with See More / Show Less */}
+              {/* Message */}
               <div style={{ marginBottom: '20px', textAlign: 'left' }}>
                 <p style={{
                   fontSize: '14px',
                   color: 'var(--text-secondary)',
                   lineHeight: 1.7,
-                  whiteSpace: 'pre-line',
-                  maxHeight: announcementExpanded ? 'none' : '120px',
-                  overflow: 'hidden',
-                  transition: 'max-height 0.3s ease'
+                  whiteSpace: 'pre-line'
                 }}>{announcementPopup.message}</p>
-                {announcementPopup.message.length > 240 && (
-                  <button
-                    onClick={() => setAnnouncementExpanded(!announcementExpanded)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#818cf8',
-                      fontSize: '12px',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      padding: '6px 0 0',
-                      textDecoration: 'underline'
-                    }}
-                  >
-                    {announcementExpanded ? 'Show Less ▲' : 'See More ▼'}
-                  </button>
-                )}
               </div>
             </div>
 
