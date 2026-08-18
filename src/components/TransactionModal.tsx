@@ -476,6 +476,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     setShowCalendar(false);
   };
 
+  const modalScrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (modalScrollRef.current) {
+      modalScrollRef.current.scrollTop = 0;
+    }
+  }, []);
+
   return (
     <div style={{
       position: 'fixed',
@@ -494,6 +502,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       animation: 'fadeIn 0.2s ease-out'
     }} onClick={onClose}>
       <div 
+        ref={modalScrollRef}
         className="glass-panel"
         style={{
           width: '100%',

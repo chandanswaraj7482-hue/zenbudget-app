@@ -213,6 +213,21 @@ export const LoansView: React.FC<LoansViewProps> = ({
   const totalLent = lentLoans.reduce((sum, l) => sum + l.totalAmount, 0);
   const filteredLoans = loans.filter(l => l.type === activeTab);
 
+  const addLoanFormRef = useRef<HTMLFormElement>(null);
+  const repayFormRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (isAddModalOpen && addLoanFormRef.current) {
+      addLoanFormRef.current.scrollTop = 0;
+    }
+  }, [isAddModalOpen]);
+
+  useEffect(() => {
+    if (repayModalLoan && repayFormRef.current) {
+      repayFormRef.current.scrollTop = 0;
+    }
+  }, [repayModalLoan]);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '80px' }} className="animate-fade-in">
       {/* Header */}
@@ -532,7 +547,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
               </div>
             )}
 
-            <form onSubmit={handleSubmitAdd} style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, overflowY: 'auto', paddingRight: '4px', paddingBottom: '16px' }}>
+            <form ref={addLoanFormRef} onSubmit={handleSubmitAdd} style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, overflowY: 'auto', paddingRight: '4px', paddingBottom: '16px' }}>
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Lender / Person Name</label>
                 <input
@@ -837,7 +852,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
               </div>
             )}
 
-            <form onSubmit={handleRepaySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, overflowY: 'auto', paddingRight: '4px', paddingBottom: '16px' }}>
+            <form ref={repayFormRef} onSubmit={handleRepaySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, overflowY: 'auto', paddingRight: '4px', paddingBottom: '16px' }}>
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
                   {repayModalLoan.type === 'borrowed' ? 'Payment Amount' : 'Collected Amount'} ({currencySymbol})

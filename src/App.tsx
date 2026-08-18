@@ -79,6 +79,16 @@ const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
+  const mainScrollRef = useRef<HTMLElement>(null);
+
+  // Always reset scroll to the very top whenever the user switches views/pages
+  useEffect(() => {
+    if (mainScrollRef.current) {
+      mainScrollRef.current.scrollTop = 0;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [activeView]);
+
   // Accounts & Loans states
   const [accounts, setAccounts] = useState<Account[]>(() => {
     const profileId = localStorage.getItem('zb_profile_id') || '';
@@ -2960,7 +2970,7 @@ const App: React.FC = () => {
       </div>
 
       {/* Main View Area */}
-      <main className="scroll-container" style={{ padding: '20px 20px calc(95px + env(safe-area-inset-bottom)) 20px' }}>
+      <main ref={mainScrollRef} className="scroll-container" style={{ padding: '20px 20px calc(95px + env(safe-area-inset-bottom)) 20px' }}>
         {activeView === 'dashboard' && (
           <Dashboard 
             key={langKey}
