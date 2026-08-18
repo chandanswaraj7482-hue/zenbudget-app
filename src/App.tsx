@@ -3381,19 +3381,27 @@ const App: React.FC = () => {
 
       {/* 📣 Admin Announcement Popup */}
       {announcementPopup && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0, 0, 0, 0.88)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 11000,
-          padding: '20px',
-          animation: 'fadeIn 0.3s ease-out'
-        }}>
+        <div 
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setAnnouncementPopup(null);
+              setAnnouncementExpanded(false);
+            }
+          }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.88)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 11000,
+            padding: '20px',
+            animation: 'fadeIn 0.3s ease-out'
+          }}
+        >
           <div style={{
             width: '100%',
             maxWidth: '380px',
@@ -3417,30 +3425,36 @@ const App: React.FC = () => {
           }}>
             {/* Close button */}
             <button
-              onClick={() => { setAnnouncementPopup(null); setAnnouncementExpanded(false); }}
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setAnnouncementPopup(null);
+                setAnnouncementExpanded(false);
+              }}
               style={{
                 position: 'absolute',
                 top: '14px',
                 right: '14px',
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.1)',
+                background: 'rgba(255,255,255,0.12)',
+                border: '1px solid rgba(255,255,255,0.2)',
                 borderRadius: '50%',
-                width: '32px',
-                height: '32px',
+                width: '34px',
+                height: '34px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                color: 'var(--text-secondary)',
-                fontSize: '16px',
+                color: '#ffffff',
+                fontSize: '18px',
+                fontWeight: 700,
                 lineHeight: 1,
-                zIndex: 2,
+                zIndex: 10,
                 flexShrink: 0
               }}
             >×</button>
 
             {/* Scrollable content area */}
-            <div style={{ overflowY: 'auto', flex: 1, paddingRight: '4px' }}>
+            <div style={{ overflowY: 'auto', flex: 1, paddingRight: '4px', textAlign: 'center' }}>
               {/* Icon */}
               <div style={{
                 width: '64px',
@@ -3496,28 +3510,73 @@ const App: React.FC = () => {
                 fontSize: '20px',
                 fontWeight: 800,
                 color: 'var(--text-primary)',
-                marginBottom: '10px',
+                marginBottom: '12px',
                 letterSpacing: '-0.02em',
                 lineHeight: 1.3
               }}>{announcementPopup.title}</h2>
 
-              {/* Message */}
-              <div style={{ marginBottom: '20px', textAlign: 'left' }}>
-                <p style={{
+              {/* Message with See More / Show Less */}
+              <div style={{ marginBottom: '20px', textAlign: 'left', position: 'relative' }}>
+                <div style={{
                   fontSize: '14px',
                   color: 'var(--text-secondary)',
                   lineHeight: 1.7,
-                  whiteSpace: 'pre-line'
-                }}>{announcementPopup.message}</p>
+                  whiteSpace: 'pre-line',
+                  maxHeight: announcementExpanded ? 'none' : '100px',
+                  overflow: 'hidden',
+                  position: 'relative'
+                }}>
+                  {announcementPopup.message}
+                  {!announcementExpanded && announcementPopup.message.length > 100 && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: '50px',
+                      background: 'linear-gradient(to bottom, transparent, rgba(15,12,25,0.95))',
+                      pointerEvents: 'none'
+                    }} />
+                  )}
+                </div>
+                {announcementPopup.message.length > 100 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setAnnouncementExpanded(!announcementExpanded);
+                    }}
+                    style={{
+                      background: 'rgba(99,102,241,0.15)',
+                      border: '1px solid rgba(99,102,241,0.3)',
+                      borderRadius: '8px',
+                      color: '#a5b4fc',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      padding: '6px 12px',
+                      marginTop: '8px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    {announcementExpanded ? 'Show Less ▲' : 'See More ▼'}
+                  </button>
+                )}
               </div>
             </div>
 
             {/* Fixed bottom actions */}
-            <div style={{ flexShrink: 0, paddingTop: '4px' }}>
+            <div style={{ flexShrink: 0, paddingTop: '10px', position: 'relative', zIndex: 10 }}>
               {/* CTA link button */}
               {announcementPopup.linkUrl && (
                 <button
-                  onClick={() => window.open(announcementPopup.linkUrl, '_blank')}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(announcementPopup.linkUrl, '_blank');
+                  }}
                   style={{
                     width: '100%',
                     padding: '13px',
@@ -3541,7 +3600,12 @@ const App: React.FC = () => {
 
               {/* Dismiss button */}
               <button
-                onClick={() => { setAnnouncementPopup(null); setAnnouncementExpanded(false); }}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setAnnouncementPopup(null);
+                  setAnnouncementExpanded(false);
+                }}
                 style={{
                   width: '100%',
                   padding: '14px',
@@ -3567,7 +3631,7 @@ const App: React.FC = () => {
               {/* Timestamp */}
               {announcementPopup.createdAt && (
                 <p style={{
-                  marginTop: '12px',
+                  marginTop: '10px',
                   fontSize: '11px',
                   color: 'var(--text-muted)',
                   fontWeight: 500
