@@ -561,16 +561,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
             justifyContent: 'center',
             color: '#fff',
             fontSize: '18px',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            position: 'relative'
           }}>
+            {userName?.charAt(0)?.toUpperCase() || 'U'}
             <img 
               src={
                 (userAvatar && userAvatar !== 'null' && !userAvatar.includes('name=User'))
                   ? userAvatar
                   : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName || 'User')}&background=22c55e&color=fff&rounded=true`
               }
-              alt={userName?.charAt(0) || 'U'} 
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+              alt="" 
+              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} 
               onError={(e) => {
                  (e.target as HTMLImageElement).style.display = 'none';
               }}

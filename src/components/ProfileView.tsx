@@ -182,9 +182,25 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               borderRadius: '50%',
               overflow: 'hidden',
               border: '3px solid var(--primary)',
-              boxShadow: '0 4px 20px rgba(34, 197, 94, 0.3)'
+              boxShadow: '0 4px 20px rgba(34, 197, 94, 0.3)',
+              backgroundColor: 'var(--primary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              fontSize: '32px',
+              fontWeight: 'bold',
+              position: 'relative'
             }}>
-              <img src={avatarUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              {name?.charAt(0)?.toUpperCase() || 'U'}
+              <img 
+                src={avatarUrl} 
+                alt="" 
+                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} 
+                onError={(e) => {
+                   (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
             </div>
 
             <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>Choose Profile Picture</span>
