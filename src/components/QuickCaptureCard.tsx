@@ -331,9 +331,9 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
 
       {/* Header Title & Date */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <h3 style={{ fontSize: '17px', fontWeight: 900, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em' }}>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <h3 style={{ fontSize: '17px', fontWeight: 900, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
               Quick capture
             </h3>
             <span style={{
@@ -347,12 +347,13 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
               borderRadius: '12px',
               display: 'flex',
               alignItems: 'center',
-              gap: '4px'
+              gap: '4px',
+              whiteSpace: 'nowrap'
             }}>
               <Sparkles size={11} /> AI Auto-Detect
             </span>
           </div>
-          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '4px 0 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             Add expense, income, or transfer in natural language
           </p>
         </div>

@@ -646,8 +646,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
         }} />
 
         <span style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-secondary)', fontWeight: 600 }}>{t('total_balance')}</span>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', margin: '8px 0 16px 0', color: 'var(--text-balance)' }}>
-          <span style={{ fontSize: '36px', fontWeight: 800, letterSpacing: '-0.02em' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', margin: '8px 0 16px 0', color: 'var(--text-balance)', minWidth: 0, maxWidth: '100%' }}>
+          <span style={{ fontSize: 'clamp(24px, 8vw, 36px)', fontWeight: 800, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {formatCurrency(totalBalance, currencySymbol, 0)}
           </span>
         </div>
@@ -682,10 +682,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* ─── My Accounts in Wallet Section (Screenshot 1) ─── */}
       <div className="glass-panel" style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Wallet size={18} style={{ color: 'var(--primary)' }} />
-            {t('my_accounts')}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <Wallet size={18} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{t('my_accounts')}</span>
           </h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button
