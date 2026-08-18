@@ -58,16 +58,25 @@ export const TransferModal: React.FC<TransferModalProps> = ({
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'rgba(0, 0, 0, 0.8)',
-      backdropFilter: 'blur(10px)',
+      background: 'rgba(0, 0, 0, 0.85)',
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '20px',
-      zIndex: 1000
+      padding: '16px',
+      zIndex: 10000
     }}>
-      <div className="glass-panel" style={{ width: '100%', maxWidth: '380px', padding: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+      <div className="glass-panel" style={{
+        width: '100%',
+        maxWidth: '380px',
+        maxHeight: 'calc(100vh - 32px)',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        padding: '24px'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <ArrowLeftRight size={20} style={{ color: '#818cf8' }} />
             <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>{t('transfer_money')}</h3>

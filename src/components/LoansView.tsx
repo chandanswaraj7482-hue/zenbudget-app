@@ -498,16 +498,26 @@ export const LoansView: React.FC<LoansViewProps> = ({
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(0, 0, 0, 0.8)',
-          backdropFilter: 'blur(8px)',
+          background: 'rgba(0, 0, 0, 0.85)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '20px',
-          zIndex: 1000
+          padding: '16px',
+          zIndex: 10000
         }}>
-          <div className="glass-panel" style={{ width: '100%', maxWidth: '460px', padding: '24px', boxShadow: '0 20px 60px rgba(0,0,0,0.6)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div className="glass-panel" style={{
+            width: '100%',
+            maxWidth: '460px',
+            maxHeight: 'calc(100vh - 32px)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            padding: '24px',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.6)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexShrink: 0 }}>
               <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>
                 {activeTab === 'borrowed' ? `${t('add_loan')} (${t('borrowed_loans')})` : `${t('add_loan')} (${t('lent_loans')})`}
               </h3>
@@ -517,12 +527,12 @@ export const LoansView: React.FC<LoansViewProps> = ({
             </div>
 
             {modalErr && (
-              <div style={{ padding: '10px 14px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#f87171', fontSize: '12px', fontWeight: 700, lineHeight: 1.4 }}>
+              <div style={{ padding: '10px 14px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#f87171', fontSize: '12px', fontWeight: 700, lineHeight: 1.4, flexShrink: 0, marginBottom: '10px' }}>
                 {modalErr}
               </div>
             )}
 
-            <form onSubmit={handleSubmitAdd} style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxHeight: '80vh', overflowY: 'auto', paddingRight: '4px' }}>
+            <form onSubmit={handleSubmitAdd} style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, overflowY: 'auto', paddingRight: '4px', paddingBottom: '16px' }}>
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Lender / Person Name</label>
                 <input
@@ -793,16 +803,26 @@ export const LoansView: React.FC<LoansViewProps> = ({
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(0, 0, 0, 0.8)',
-          backdropFilter: 'blur(8px)',
+          background: 'rgba(0, 0, 0, 0.85)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '20px',
-          zIndex: 1000
+          padding: '16px',
+          zIndex: 10000
         }}>
-          <div className="glass-panel" style={{ width: '100%', maxWidth: '380px', padding: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div className="glass-panel" style={{
+            width: '100%',
+            maxWidth: '380px',
+            maxHeight: 'calc(100vh - 32px)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            padding: '24px',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.6)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexShrink: 0 }}>
               <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>
                 {repayModalLoan.type === 'borrowed' ? `Repay to ${repayModalLoan.personName}` : `Receive from ${repayModalLoan.personName}`}
               </h3>
@@ -812,12 +832,12 @@ export const LoansView: React.FC<LoansViewProps> = ({
             </div>
 
             {modalErr && (
-              <div style={{ marginBottom: '12px', padding: '10px 14px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#f87171', fontSize: '12px', fontWeight: 700, lineHeight: 1.4 }}>
+              <div style={{ marginBottom: '12px', padding: '10px 14px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#f87171', fontSize: '12px', fontWeight: 700, lineHeight: 1.4, flexShrink: 0 }}>
                 {modalErr}
               </div>
             )}
 
-            <form onSubmit={handleRepaySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <form onSubmit={handleRepaySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, overflowY: 'auto', paddingRight: '4px', paddingBottom: '16px' }}>
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
                   {repayModalLoan.type === 'borrowed' ? 'Payment Amount' : 'Collected Amount'} ({currencySymbol})

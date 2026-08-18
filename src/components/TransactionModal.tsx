@@ -483,13 +483,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.75)',
-      backdropFilter: 'blur(8px)',
+      backgroundColor: 'rgba(0, 0, 0, 0.85)',
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      zIndex: 1000,
-      padding: '20px',
+      zIndex: 10000,
+      padding: '16px',
       animation: 'fadeIn 0.2s ease-out'
     }} onClick={onClose}>
       <div 
@@ -501,7 +502,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           borderRadius: '24px',
           position: 'relative',
           animation: 'slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-          maxHeight: '90vh',
+          maxHeight: 'calc(100vh - 32px)',
           overflowY: 'auto'
         }}
         onClick={(e) => e.stopPropagation()}
