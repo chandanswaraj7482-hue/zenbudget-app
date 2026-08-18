@@ -160,12 +160,35 @@ html.light-theme #root {
   letter-spacing: -0.025em !important;
 }
 
-.light-theme h1[style*="color: #ffffff"],
-.light-theme h1[style*="color:#ffffff"],
-.light-theme h2[style*="color: #ffffff"],
-.light-theme h2[style*="color:#ffffff"],
-.light-theme h3[style*="color: #ffffff"],
-.light-theme h3[style*="color:#ffffff"] {
+/* Fix any hardcoded white text on white panels */
+.light-theme .glass-panel h1[style*="color: #fff"],
+.light-theme .glass-panel h1[style*="color:#fff"],
+.light-theme .glass-panel h2[style*="color: #fff"],
+.light-theme .glass-panel h2[style*="color:#fff"],
+.light-theme .glass-panel h3[style*="color: #fff"],
+.light-theme .glass-panel h3[style*="color:#fff"],
+.light-theme .glass-panel h4[style*="color: #fff"],
+.light-theme .glass-panel h4[style*="color:#fff"],
+.light-theme .glass-panel p[style*="color: #fff"],
+.light-theme .glass-panel p[style*="color:#fff"],
+.light-theme .glass-panel span[style*="color: #fff"]:not([style*="background"]):not([class*="badge"]),
+.light-theme .glass-panel span[style*="color:#fff"]:not([style*="background"]):not([class*="badge"]),
+.light-theme .glass-panel div:not([style*="background"]):not([class*="btn"])[style*="color: #fff"],
+.light-theme .glass-panel div:not([style*="background"]):not([class*="btn"])[style*="color:#fff"],
+.light-theme .glass-panel h1[style*="color: #ffffff"],
+.light-theme .glass-panel h1[style*="color:#ffffff"],
+.light-theme .glass-panel h2[style*="color: #ffffff"],
+.light-theme .glass-panel h2[style*="color:#ffffff"],
+.light-theme .glass-panel h3[style*="color: #ffffff"],
+.light-theme .glass-panel h3[style*="color:#ffffff"],
+.light-theme .glass-panel h4[style*="color: #ffffff"],
+.light-theme .glass-panel h4[style*="color:#ffffff"],
+.light-theme .glass-panel p[style*="color: #ffffff"],
+.light-theme .glass-panel p[style*="color:#ffffff"],
+.light-theme .glass-panel span[style*="color: #ffffff"]:not([style*="background"]):not([class*="badge"]),
+.light-theme .glass-panel span[style*="color:#ffffff"]:not([style*="background"]):not([class*="badge"]),
+.light-theme .glass-panel div:not([style*="background"]):not([class*="btn"])[style*="color: #ffffff"],
+.light-theme .glass-panel div:not([style*="background"]):not([class*="btn"])[style*="color:#ffffff"] {
   color: #1D1D1F !important;
 }
 
@@ -183,7 +206,9 @@ html.light-theme #root {
 .light-theme span[style*="color: #64748b"],
 .light-theme span[style*="color:#64748b"],
 .light-theme p[style*="color: #64748b"],
-.light-theme p[style*="color:#64748b"] {
+.light-theme p[style*="color:#64748b"],
+.light-theme [style*="color: #cbd5e1"],
+.light-theme [style*="color:#cbd5e1"] {
   color: #6E6E73 !important;
 }
 
