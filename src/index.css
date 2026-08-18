@@ -48,36 +48,36 @@
 }
 
 /* ==========================================================================
-   🍏 APPLE DESIGN SYSTEM (Apple.com & iOS 18) - PREMIUM LIGHT THEME
+   🍏 APPLE DESIGN SYSTEM (Apple.com & iOS 18) - MASTER LIGHT THEME
    ========================================================================== */
 .light-theme, body.light-theme {
   color-scheme: light;
   
   /* Apple Signature Backgrounds */
-  --bg-dark: #F5F5F7;
+  --bg-dark: #F2F2F7;
   --bg-card: #FFFFFF;
-  --bg-card-hover: #FBFBFD;
-  --bg-balance-card: linear-gradient(180deg, #FFFFFF 0%, #F5F5F7 100%);
-  --bg-app-gradient: #F5F5F7;
-  --bg-nav-glass: rgba(255, 255, 255, 0.82);
+  --bg-card-hover: #F8F8FA;
+  --bg-balance-card: linear-gradient(145deg, #FFFFFF 0%, #F2FAF5 100%);
+  --bg-app-gradient: #F2F2F7;
+  --bg-nav-glass: rgba(255, 255, 255, 0.88);
 
   /* Apple Hairline Borders & Dividers */
   --border-card: rgba(0, 0, 0, 0.06);
   --border-card-active: rgba(0, 113, 227, 0.4);
-  --border-balance-card: rgba(0, 113, 227, 0.12);
+  --border-balance-card: rgba(34, 197, 94, 0.2);
   --border-divider: rgba(0, 0, 0, 0.06);
   --border-button: rgba(0, 0, 0, 0.08);
 
   /* Apple Signature Brand Colors */
-  --primary: #0071E3;            /* Apple Official Blue */
+  --primary: #0071E3;            /* Apple Official System Blue */
   --primary-glow: rgba(0, 113, 227, 0.12);
   --secondary: #5AC8FA;          /* Apple Cyan */
   --secondary-glow: rgba(90, 200, 250, 0.12);
-  --success: #34C759;            /* Apple Green */
+  --success: #34C759;            /* Apple System Green */
   --success-glow: rgba(52, 199, 89, 0.12);
-  --danger: #FF3B30;             /* Apple Red */
+  --danger: #FF3B30;             /* Apple System Red */
   --danger-glow: rgba(255, 59, 48, 0.12);
-  --warning: #FF9500;            /* Apple Orange */
+  --warning: #FF9500;            /* Apple System Orange */
   --warning-glow: rgba(255, 149, 0, 0.12);
   --info: #5856D6;               /* Apple Purple/Indigo */
   --info-glow: rgba(88, 86, 214, 0.12);
@@ -88,40 +88,65 @@
   --text-muted: #86868B;         /* Apple Caption/Muted Gray */
   --text-balance: #1D1D1F;
 
-  /* Apple Diffused Drop Shadows */
-  --glow-shadow: 0 8px 30px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
+  /* Apple Multi-layer Diffused Shadows */
+  --glow-shadow: 0 2px 12px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.03);
 
-  /* Apple Inputs & Forms */
-  --bg-input: #FFFFFF;
-  --border-input: #D2D2D7;
+  /* Apple Native Inputs */
+  --bg-input: #F2F2F7;
+  --border-input: rgba(0, 0, 0, 0.08);
   --bg-input-focus: #FFFFFF;
-  --scroll-thumb: rgba(0, 0, 0, 0.18);
+  --scroll-thumb: rgba(0, 0, 0, 0.16);
 }
 
-/* Global Light Mode Root Overrides */
+/* Global Light Mode Canvas */
 html.light-theme,
 body.light-theme,
 #root.light-theme {
   color-scheme: light !important;
-  background-color: #F5F5F7 !important;
-  background: #F5F5F7 !important;
+  background-color: #F2F2F7 !important;
+  background: #F2F2F7 !important;
   color: #1D1D1F !important;
 }
 
 html.light-theme #root {
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.04) !important;
-  border-left: 1px solid rgba(0, 0, 0, 0.04) !important;
-  border-right: 1px solid rgba(0, 0, 0, 0.04) !important;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.05) !important;
+  border-left: 1px solid rgba(0, 0, 0, 0.05) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.05) !important;
 }
 
-/* Apple Cards & Glass Panels */
+/* Apple Primary Card Surfaces */
 .light-theme .glass-panel,
 .light-theme [class*="glass-panel"] {
   background-color: #FFFFFF !important;
   background: #FFFFFF !important;
   border: 1px solid rgba(0, 0, 0, 0.06) !important;
-  border-radius: 22px !important;
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 6px 16px rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Apple Inner Grouped / Nested Surfaces (List items, Account chips, Sub-cards) */
+.light-theme div[style*="background: 'rgba(255, 255, 255, 0.02)'"],
+.light-theme div[style*="background: 'rgba(255, 255, 255, 0.03)'"],
+.light-theme div[style*="background: 'rgba(255, 255, 255, 0.04)'"],
+.light-theme div[style*="background: 'rgba(255, 255, 255, 0.05)'"],
+.light-theme div[style*="background: 'rgba(255, 255, 255, 0.06)'"],
+.light-theme div[style*="background: rgba(255, 255, 255, 0.02)"],
+.light-theme div[style*="background: rgba(255, 255, 255, 0.03)"],
+.light-theme div[style*="background: rgba(255, 255, 255, 0.04)"],
+.light-theme div[style*="background: rgba(255, 255, 255, 0.05)"],
+.light-theme div[style*="background: rgba(255, 255, 255, 0.06)"],
+.light-theme div[style*="background-color: rgba(255, 255, 255"] {
+  background-color: #F6F7F9 !important;
+  background: #F6F7F9 !important;
+  border-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Apple Balance Card Accent */
+.light-theme .glass-panel[style*="var(--bg-balance-card)"],
+.light-theme [style*="var(--bg-balance-card)"] {
+  background: linear-gradient(145deg, #FFFFFF 0%, #F2FAF5 100%) !important;
+  border: 1px solid rgba(34, 197, 94, 0.22) !important;
+  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03) !important;
 }
 
 /* Apple Typography in Light Mode */
@@ -132,17 +157,37 @@ html.light-theme #root {
 .light-theme h5,
 .light-theme h6 {
   color: #1D1D1F !important;
-  letter-spacing: -0.022em !important;
+  letter-spacing: -0.025em !important;
+}
+
+.light-theme h1[style*="color: #ffffff"],
+.light-theme h1[style*="color:#ffffff"],
+.light-theme h2[style*="color: #ffffff"],
+.light-theme h2[style*="color:#ffffff"],
+.light-theme h3[style*="color: #ffffff"],
+.light-theme h3[style*="color:#ffffff"] {
+  color: #1D1D1F !important;
 }
 
 .light-theme p,
 .light-theme span,
-.light-theme label,
-.light-theme div:not([class*="btn"]):not([class*="badge"]) {
+.light-theme label {
   color: inherit;
 }
 
-/* Ensure Colored Buttons & Badges Keep Crisp White Text */
+/* Fix light gray subtext on white surfaces */
+.light-theme span[style*="color: #94a3b8"],
+.light-theme span[style*="color:#94a3b8"],
+.light-theme p[style*="color: #94a3b8"],
+.light-theme p[style*="color:#94a3b8"],
+.light-theme span[style*="color: #64748b"],
+.light-theme span[style*="color:#64748b"],
+.light-theme p[style*="color: #64748b"],
+.light-theme p[style*="color:#64748b"] {
+  color: #6E6E73 !important;
+}
+
+/* Apple Pill Buttons with Vibrant Fill */
 .light-theme button[style*="background: linear-gradient"],
 .light-theme button[style*="background:linear-gradient"],
 .light-theme button[style*="background: #22c55e"],
@@ -158,7 +203,7 @@ html.light-theme #root {
 .light-theme [class*="btn-primary"] {
   color: #FFFFFF !important;
   -webkit-text-fill-color: #FFFFFF !important;
-  box-shadow: 0 4px 12px rgba(0, 113, 227, 0.25) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
 }
 
 .light-theme .glass-button.active svg,
@@ -167,12 +212,13 @@ html.light-theme #root {
   stroke: #FFFFFF !important;
 }
 
-/* Apple-style Secondary Buttons */
+/* Apple Secondary Pill Buttons */
 .light-theme .glass-button:not(.active) {
-  background: rgba(0, 0, 0, 0.04) !important;
+  background: rgba(0, 0, 0, 0.05) !important;
   border: 1px solid rgba(0, 0, 0, 0.06) !important;
   color: #1D1D1F !important;
   border-radius: 980px !important;
+  font-weight: 600 !important;
 }
 
 /* Apple Native Form Inputs */
@@ -185,6 +231,7 @@ html.light-theme #root {
   color: #1D1D1F !important;
   border-radius: 12px !important;
   font-size: 14px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
@@ -193,7 +240,7 @@ html.light-theme #root {
 .light-theme textarea:focus,
 .light-theme .glass-input:focus {
   border-color: #0071E3 !important;
-  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.18) !important;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15) !important;
   outline: none !important;
 }
 
@@ -209,13 +256,13 @@ html.light-theme #root {
 
 /* Apple Frosted Glass Tab Bar */
 .light-theme nav {
-  background: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(25px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
   border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
 }
 
-/* Keypad Buttons on Lock Screen & Modals */
+/* Apple Circular Keypad Buttons */
 .light-theme button[style*="height: 60px"],
 .light-theme button[style*="height:60px"] {
   background-color: #FFFFFF !important;
