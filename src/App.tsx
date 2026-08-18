@@ -2779,21 +2779,33 @@ const App: React.FC = () => {
       onClickCapture={(e) => {
         if (isSubscriptionExpired()) {
           const target = e.target as HTMLElement;
+          // Whitelist subscription modal, announcements, and whitelisted modals
           if (
             target && (
               target.closest('.subscription-modal-wrapper') ||
               target.closest('.announcement-modal-wrapper') ||
-              target.closest('[data-allow-click="true"]') ||
-              target.closest('button') ||
-              target.closest('.modal-container')
+              target.closest('[data-allow-click="true"]')
             )
           ) {
             return;
           }
-          e.preventDefault();
-          e.stopPropagation();
-          setIsSubBlocker(true);
-          setIsSubModalOpen(true);
+          // If user clicks on ANY action button, input, navigation, or interactive element:
+          if (
+            target && (
+              target.closest('button') ||
+              target.closest('input') ||
+              target.closest('select') ||
+              target.closest('a') ||
+              target.closest('.glass-button') ||
+              target.closest('[role="button"]') ||
+              target.closest('nav')
+            )
+          ) {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsSubBlocker(false);
+            setIsSubModalOpen(true);
+          }
         }
       }}
     >
@@ -3659,10 +3671,8 @@ const App: React.FC = () => {
         <SubscriptionModal
           isOpen={isSubModalOpen}
           onClose={() => {
-            if (!isSubscriptionExpired()) {
-              setIsSubModalOpen(false);
-              setIsSubBlocker(false);
-            }
+            setIsSubModalOpen(false);
+            setIsSubBlocker(false);
           }}
           currentTransactionsCount={transactions.length}
           trialStartDate={trialStartDate}
@@ -3672,7 +3682,7 @@ const App: React.FC = () => {
             setIsSubModalOpen(false);
             setIsSubBlocker(false);
           }}
-          isBlocker={isSubBlocker || isSubscriptionExpired()}
+          isBlocker={false}
           currency={currency}
           rates={rates}
         />

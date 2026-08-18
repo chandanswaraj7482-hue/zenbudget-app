@@ -369,29 +369,34 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button */}
-        {!isBlocker && (
-          <button 
-            onClick={onClose}
-            style={{
-              position: 'absolute',
-              top: '16px',
-              right: '16px',
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: 'none',
-              borderRadius: '50%',
-              width: '32px',
-              height: '32px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              color: 'var(--text-secondary)'
-            }}
-          >
-            <X size={16} />
-          </button>
-        )}
+        {/* Top-Right Close (Cross) Button - Always Available */}
+        <button 
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          title="Close"
+          style={{
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            borderRadius: '50%',
+            width: '34px',
+            height: '34px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: '#cbd5e1',
+            zIndex: 20,
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <X size={18} />
+        </button>
 
         {/* PROCESSING STEP */}
         {paymentStep === 'processing' && (
