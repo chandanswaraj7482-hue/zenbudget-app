@@ -592,7 +592,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             {/* Line 2: User Name */}
-            <h1 style={{ fontSize: '16px', fontWeight: 900, color: '#ffffff', margin: '2px 0 0 0', fontFamily: "'Manrope', sans-serif", letterSpacing: '-0.02em', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <h1 style={{ fontSize: '16px', fontWeight: 900, color: 'var(--text-primary)', margin: '2px 0 0 0', fontFamily: "'Manrope', sans-serif", letterSpacing: '-0.02em', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {userName || 'User'}
             </h1>
 

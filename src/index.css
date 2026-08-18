@@ -160,35 +160,39 @@ html.light-theme #root {
   letter-spacing: -0.025em !important;
 }
 
-/* Fix any hardcoded white text on white panels */
-.light-theme .glass-panel h1[style*="color: #fff"],
-.light-theme .glass-panel h1[style*="color:#fff"],
-.light-theme .glass-panel h2[style*="color: #fff"],
-.light-theme .glass-panel h2[style*="color:#fff"],
-.light-theme .glass-panel h3[style*="color: #fff"],
-.light-theme .glass-panel h3[style*="color:#fff"],
-.light-theme .glass-panel h4[style*="color: #fff"],
-.light-theme .glass-panel h4[style*="color:#fff"],
-.light-theme .glass-panel p[style*="color: #fff"],
-.light-theme .glass-panel p[style*="color:#fff"],
-.light-theme .glass-panel span[style*="color: #fff"]:not([style*="background"]):not([class*="badge"]),
-.light-theme .glass-panel span[style*="color:#fff"]:not([style*="background"]):not([class*="badge"]),
-.light-theme .glass-panel div:not([style*="background"]):not([class*="btn"])[style*="color: #fff"],
-.light-theme .glass-panel div:not([style*="background"]):not([class*="btn"])[style*="color:#fff"],
-.light-theme .glass-panel h1[style*="color: #ffffff"],
-.light-theme .glass-panel h1[style*="color:#ffffff"],
-.light-theme .glass-panel h2[style*="color: #ffffff"],
-.light-theme .glass-panel h2[style*="color:#ffffff"],
-.light-theme .glass-panel h3[style*="color: #ffffff"],
-.light-theme .glass-panel h3[style*="color:#ffffff"],
-.light-theme .glass-panel h4[style*="color: #ffffff"],
-.light-theme .glass-panel h4[style*="color:#ffffff"],
-.light-theme .glass-panel p[style*="color: #ffffff"],
-.light-theme .glass-panel p[style*="color:#ffffff"],
-.light-theme .glass-panel span[style*="color: #ffffff"]:not([style*="background"]):not([class*="badge"]),
-.light-theme .glass-panel span[style*="color:#ffffff"]:not([style*="background"]):not([class*="badge"]),
-.light-theme .glass-panel div:not([style*="background"]):not([class*="btn"])[style*="color: #ffffff"],
-.light-theme .glass-panel div:not([style*="background"]):not([class*="btn"])[style*="color:#ffffff"] {
+/* Universal White/Near-White Text Fix Across Entire App in Light Theme */
+.light-theme h1[style*="color: #fff"],
+.light-theme h1[style*="color:#fff"],
+.light-theme h2[style*="color: #fff"],
+.light-theme h2[style*="color:#fff"],
+.light-theme h3[style*="color: #fff"],
+.light-theme h3[style*="color:#fff"],
+.light-theme h4[style*="color: #fff"],
+.light-theme h4[style*="color:#fff"],
+.light-theme p[style*="color: #fff"],
+.light-theme p[style*="color:#fff"],
+.light-theme span[style*="color: #fff"]:not(button *):not([class*="badge"]),
+.light-theme span[style*="color:#fff"]:not(button *):not([class*="badge"]),
+.light-theme div[style*="color: #fff"]:not(button *):not([class*="btn"]):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]),
+.light-theme div[style*="color:#fff"]:not(button *):not([class*="btn"]):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]),
+.light-theme h1[style*="color: #ffffff"],
+.light-theme h1[style*="color:#ffffff"],
+.light-theme h2[style*="color: #ffffff"],
+.light-theme h2[style*="color:#ffffff"],
+.light-theme h3[style*="color: #ffffff"],
+.light-theme h3[style*="color:#ffffff"],
+.light-theme h4[style*="color: #ffffff"],
+.light-theme h4[style*="color:#ffffff"],
+.light-theme p[style*="color: #ffffff"],
+.light-theme p[style*="color:#ffffff"],
+.light-theme span[style*="color: #ffffff"]:not(button *):not([class*="badge"]),
+.light-theme span[style*="color:#ffffff"]:not(button *):not([class*="badge"]),
+.light-theme div[style*="color: #ffffff"]:not(button *):not([class*="btn"]):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]),
+.light-theme div[style*="color:#ffffff"]:not(button *):not([class*="btn"]):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]),
+.light-theme [style*="color: #f8fafc"]:not(button *):not([class*="badge"]),
+.light-theme [style*="color:#f8fafc"]:not(button *):not([class*="badge"]),
+.light-theme [style*="color: #f1f5f9"]:not(button *):not([class*="badge"]),
+.light-theme [style*="color:#f1f5f9"]:not(button *):not([class*="badge"]) {
   color: #1D1D1F !important;
 }
 
@@ -198,18 +202,22 @@ html.light-theme #root {
   color: inherit;
 }
 
-/* Fix light gray subtext on white surfaces */
-.light-theme span[style*="color: #94a3b8"],
-.light-theme span[style*="color:#94a3b8"],
-.light-theme p[style*="color: #94a3b8"],
-.light-theme p[style*="color:#94a3b8"],
-.light-theme span[style*="color: #64748b"],
-.light-theme span[style*="color:#64748b"],
-.light-theme p[style*="color: #64748b"],
-.light-theme p[style*="color:#64748b"],
-.light-theme [style*="color: #cbd5e1"],
-.light-theme [style*="color:#cbd5e1"] {
+/* Universal Gray / Muted Subtext Fix */
+.light-theme [style*="color: #94a3b8"]:not(button *),
+.light-theme [style*="color:#94a3b8"]:not(button *),
+.light-theme [style*="color: #64748b"]:not(button *),
+.light-theme [style*="color:#64748b"]:not(button *),
+.light-theme [style*="color: #cbd5e1"]:not(button *),
+.light-theme [style*="color:#cbd5e1"]:not(button *),
+.light-theme [style*="color: #e2e8f0"]:not(button *) {
   color: #6E6E73 !important;
+}
+
+/* Universal Semi-Transparent White Text Fix */
+.light-theme [style*="color: rgba(255, 255, 255"]:not(button *):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]),
+.light-theme [style*="color:rgba(255,255,255"]:not(button *):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]),
+.light-theme [style*="color: rgba(255,255,255"]:not(button *):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]) {
+  color: #48484A !important;
 }
 
 /* Logo Green Fill on Action Buttons */
