@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   ArrowLeft, 
   Plus, 
@@ -506,497 +507,529 @@ export const LoansView: React.FC<LoansViewProps> = ({
       )}
 
       {/* Modal: Add Loan */}
-      {isAddModalOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.85)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '16px',
-          zIndex: 10000
-        }}>
-          <div className="glass-panel" style={{
-            width: '100%',
-            maxWidth: '460px',
-            maxHeight: 'calc(100vh - 32px)',
+      {isAddModalOpen && createPortal(
+  <div 
+    onClick={() => setIsAddModalOpen(false)}
+    style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0, 0, 0, 0.75)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '16px',
+      zIndex: 9999999
+    }}
+  >
+    <div 
+      onClick={e => e.stopPropagation()}
+      style={{
+        width: '100%',
+        maxWidth: '460px',
+        maxHeight: 'min(90vh, 720px)',
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border-card)',
+        borderRadius: '24px',
+        display: 'flex',
+        flexDirection: 'column',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+        overflow: 'hidden'
+      }}
+    >
+      {/* Fixed Modal Header */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '16px 20px',
+        borderBottom: '1px solid var(--border-card)',
+        background: 'var(--bg-card)',
+        flexShrink: 0
+      }}>
+        <h3 style={{ fontSize: '17px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+          {activeTab === 'borrowed' ? `${t('add_loan')} (${t('borrowed_loans')})` : `${t('add_loan')} (${t('lent_loans')})`}
+        </h3>
+        <button 
+          type="button"
+          onClick={() => setIsAddModalOpen(false)} 
+          title="Close"
+          style={{ 
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            background: 'var(--bg-dark)', 
+            border: '1px solid var(--border-card)', 
+            color: 'var(--text-primary)', 
             display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-            padding: '24px',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.6)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexShrink: 0 }}>
-              <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>
-                {activeTab === 'borrowed' ? `${t('add_loan')} (${t('borrowed_loans')})` : `${t('add_loan')} (${t('lent_loans')})`}
-              </h3>
-              <button onClick={() => setIsAddModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
-                <X size={20} />
-              </button>
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            flexShrink: 0,
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <X size={18} />
+        </button>
+      </div>
+
+      {/* Scrollable Form Body */}
+      <div style={{
+        flex: 1,
+        overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        padding: '20px'
+      }}>
+        {modalErr && (
+          <div style={{ padding: '10px 14px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#f87171', fontSize: '12px', fontWeight: 700, lineHeight: 1.4, marginBottom: '14px' }}>
+            {modalErr}
+          </div>
+        )}
+
+        <form ref={addLoanFormRef} onSubmit={handleSubmitAdd} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div>
+            <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Lender / Person Name
+            </label>
+            <input
+              type="text"
+              required
+              value={personName}
+              onChange={e => setPersonName(e.target.value)}
+              placeholder="e.g. Alex Morgan / HDFC Bank"
+              className="glass-input"
+              style={{ marginTop: '6px', width: '100%' }}
+            />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div>
+              <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Principal ({currencySymbol})
+              </label>
+              <input
+                type="number"
+                required
+                min="1"
+                step="any"
+                value={totalAmount}
+                onChange={e => setTotalAmount(e.target.value)}
+                placeholder="10000"
+                className="glass-input"
+                style={{ marginTop: '6px', width: '100%' }}
+              />
             </div>
 
-            {modalErr && (
-              <div style={{ padding: '10px 14px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#f87171', fontSize: '12px', fontWeight: 700, lineHeight: 1.4, flexShrink: 0, marginBottom: '10px' }}>
-                {modalErr}
-              </div>
-            )}
-
-            <form ref={addLoanFormRef} onSubmit={handleSubmitAdd} style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, overflowY: 'auto', paddingRight: '4px', paddingBottom: '16px' }}>
-              <div>
-                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Lender / Person Name</label>
-                <input
-                  type="text"
-                  required
-                  value={personName}
-                  onChange={e => setPersonName(e.target.value)}
-                  placeholder="e.g. Alex Morgan / HDFC Bank"
-                  className="glass-input"
-                  style={{ marginTop: '4px', width: '100%' }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Principal ({currencySymbol})</label>
-                  <input
-                    type="number"
-                    required
-                    min="1"
-                    step="any"
-                    value={totalAmount}
-                    onChange={e => setTotalAmount(e.target.value)}
-                    placeholder="10000"
-                    className="glass-input"
-                    style={{ marginTop: '4px', width: '100%' }}
-                  />
-                </div>
-
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Interest Rate (%)</label>
-                    <select
-                      value={interestType}
-                      onChange={e => setInterestType(e.target.value as any)}
-                      style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
-                    >
-                      <option value="monthly">% / mo</option>
-                      <option value="yearly">% p.a.</option>
-                    </select>
-                  </div>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={interestRate}
-                    onChange={e => setInterestRate(e.target.value)}
-                    placeholder="e.g. 3"
-                    className="glass-input"
-                    style={{ marginTop: '4px', width: '100%' }}
-                  />
-                </div>
-              </div>
-
-              {/* Simple vs Compound Interest Toggle */}
-              {parseFloat(interestRate) > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-input)', padding: '6px 12px', borderRadius: '12px', border: '1px solid var(--border-input)' }}>
-                  <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Calculation Math:</span>
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    <button
-                      type="button"
-                      onClick={() => setInterestCalcMode('simple')}
-                      style={{
-                        padding: '4px 10px',
-                        borderRadius: '8px',
-                        border: 'none',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        background: interestCalcMode === 'simple' ? 'var(--primary)' : 'transparent',
-                        color: interestCalcMode === 'simple' ? '#fff' : 'var(--text-secondary)'
-                      }}
-                    >
-                      Simple 📐
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setInterestCalcMode('compound')}
-                      style={{
-                        padding: '4px 10px',
-                        borderRadius: '8px',
-                        border: 'none',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        background: interestCalcMode === 'compound' ? 'var(--primary)' : 'transparent',
-                        color: interestCalcMode === 'compound' ? '#fff' : 'var(--text-secondary)'
-                      }}
-                    >
-                      Compound 📈
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Live Repayment & Installment Breakdown */}
-              {parseFloat(totalAmount) > 0 && (() => {
-                const { P, R, totalInterest, totalPayable, emiInstallment, installmentCount, installmentLabel, durationMonths, isYearlyMode } = calcEmiDetails();
-                const rateLabel = isYearlyMode ? '% p.a.' : '% / mo';
-                
-                const formatCurr = (val: number) => {
-                  return val % 1 === 0 ? val.toLocaleString() : val.toFixed(2);
-                };
-
-                return (
-                  <div style={{ padding: '12px 14px', borderRadius: '14px', background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.3)', fontSize: '12px', color: '#e2e8f0', fontWeight: 600, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <div style={{ fontSize: '13px', color: '#38bdf8', fontWeight: 800, marginBottom: '4px' }}>💡 Repayment Breakdown ({durationMonths} Mo Duration)</div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: '#94a3b8' }}>Principal Amount</span>
-                      <span style={{ fontWeight: 700 }}>{currencySymbol}{formatCurr(P)}</span>
-                    </div>
-                    {R > 0 && (
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: '#94a3b8' }}>Interest ({R}{rateLabel} - {interestCalcMode === 'simple' ? 'Simple' : 'Compound'})</span>
-                        <span style={{ fontWeight: 700, color: '#fbbf24' }}>+{currencySymbol}{formatCurr(totalInterest)}</span>
-                      </div>
-                    )}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(56,189,248,0.2)', paddingTop: '6px', marginTop: '2px' }}>
-                      <span style={{ color: '#94a3b8' }}>Total Payable Amount</span>
-                      <span style={{ fontWeight: 800, color: '#fff' }}>{currencySymbol}{formatCurr(totalPayable)}</span>
-                    </div>
-                    <div style={{ background: 'rgba(52, 211, 153, 0.12)', borderRadius: '10px', padding: '8px 12px', marginTop: '4px', textAlign: 'center' }}>
-                      <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '2px' }}>
-                        {frequency === 'one_time' ? 'One-time Full Repayment' : `Pay per ${installmentLabel} (${installmentCount} installment${installmentCount > 1 ? 's' : ''})`}
-                      </div>
-                      <div style={{ fontSize: '18px', fontWeight: 900, color: '#34d399' }}>
-                        {currencySymbol}{formatCurr(emiInstallment)} <span style={{ fontSize: '12px', fontWeight: 600, color: '#94a3b8' }}>/ {installmentLabel}</span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{t('due_date')}</label>
-                  <input
-                    type="date"
-                    required
-                    value={dueDate}
-                    onChange={e => setDueDate(e.target.value)}
-                    className="glass-input custom-dark-datepicker"
-                    style={{ marginTop: '4px', width: '100%' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{t('frequency')}</label>
-                  <select
-                    value={frequency}
-                    onChange={e => {
-                      const val = e.target.value as any;
-                      setFrequency(val);
-                      if (val === 'yearly') {
-                        setInterestType('yearly');
-                        updateDueDateFromToday(12);
-                      } else if (val === 'monthly') {
-                        setInterestType('monthly');
-                        updateDueDateFromToday(1);
-                      }
-                    }}
-                    className="glass-input"
-                    style={{ marginTop: '4px', width: '100%', background: 'var(--bg-input)' }}
-                  >
-                    <option value="one_time">{t('one_time')}</option>
-                    <option value="monthly">{t('monthly')}</option>
-                    <option value="yearly">{t('yearly')}</option>
-                    <option value="custom">✨ Custom Frequency...</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Duration Presets for Auto Due Date */}
-              <div>
-                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
-                  ⏳ Quick Tenure / Duration (Auto Due Date)
-                </label>
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  {[
-                    { label: '1 Month', months: 1 },
-                    { label: '3 Months', months: 3 },
-                    { label: '6 Months', months: 6 },
-                    { label: '1 Year', months: 12 },
-                    { label: '2 Years', months: 24 }
-                  ].map(chip => (
-                    <button
-                      key={chip.months}
-                      type="button"
-                      onClick={() => updateDueDateFromToday(chip.months)}
-                      style={{
-                        padding: '6px 12px',
-                        borderRadius: '10px',
-                        border: '1px solid var(--border-input)',
-                        background: 'rgba(34, 197, 94, 0.1)',
-                        color: 'var(--primary)',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease'
-                      }}
-                    >
-                      + {chip.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {frequency === 'custom' && (
-                <div>
-                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Custom Repayment Frequency</label>
-                  <input
-                    type="text"
-                    required
-                    value={customFrequencyText}
-                    onChange={e => setCustomFrequencyText(e.target.value)}
-                    placeholder="e.g. Every 15 Days, Bi-weekly, Quarterly"
-                    className="glass-input"
-                    style={{ marginTop: '4px', width: '100%' }}
-                  />
-                </div>
-              )}
-
-              <div>
-                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
-                  {activeTab === 'borrowed' ? 'Wallet Account (Money Borrowed / Credited Into):' : 'Wallet Account (Money Lent / Debited From):'}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Interest Rate (%)
                 </label>
                 <select
-                  value={selectedAccountId}
-                  onChange={e => setSelectedAccountId(e.target.value)}
-                  className="glass-input"
-                  style={{ marginTop: '4px', width: '100%', background: 'var(--bg-input)' }}
+                  value={interestType}
+                  onChange={e => setInterestType(e.target.value as any)}
+                  style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontSize: '11px', fontWeight: 800, cursor: 'pointer' }}
                 >
-                  {accounts.map(acc => (
-                    <option key={acc.id} value={acc.id}>{acc.name} ({currencySymbol}{acc.balance})</option>
-                  ))}
+                  <option value="monthly">% / mo</option>
+                  <option value="yearly">% p.a.</option>
                 </select>
               </div>
+              <input
+                type="number"
+                min="0"
+                step="0.1"
+                value={interestRate}
+                onChange={e => setInterestRate(e.target.value)}
+                placeholder="e.g. 3"
+                className="glass-input"
+                style={{ marginTop: '6px', width: '100%' }}
+              />
+            </div>
+          </div>
 
-              <div>
-                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Notes (Optional)</label>
-                <input
-                  type="text"
-                  value={notes}
-                  onChange={e => setNotes(e.target.value)}
-                  placeholder="Reason / Agreement info..."
-                  className="glass-input"
-                  style={{ marginTop: '4px', width: '100%' }}
-                />
-              </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div>
+              <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Due Date
+              </label>
+              <input
+                type="date"
+                value={dueDate}
+                onChange={e => setDueDate(e.target.value)}
+                className="glass-input"
+                style={{ marginTop: '6px', width: '100%' }}
+              />
+            </div>
 
+            <div>
+              <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Repayment Frequency
+              </label>
+              <select
+                value={frequency}
+                onChange={e => setFrequency(e.target.value as any)}
+                className="glass-input"
+                style={{ marginTop: '6px', width: '100%', background: 'var(--bg-input)' }}
+              >
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Quarterly</option>
+                <option value="yearly">Yearly</option>
+                <option value="lump-sum">Lump-sum</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Quick Tenure / Duration Chips for Auto-calculating Due Date */}
+          <div>
+            <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              ⏳ Quick Tenure / Duration (Auto Due Date)
+            </label>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
+              {[
+                { label: '+ 1 Month', months: 1 },
+                { label: '+ 3 Months', months: 3 },
+                { label: '+ 6 Months', months: 6 },
+                { label: '+ 1 Year', months: 12 },
+                { label: '+ 2 Years', months: 24 }
+              ].map(tenure => (
+                <button
+                  key={tenure.label}
+                  type="button"
+                  onClick={() => {
+                    const d = new Date();
+                    d.setMonth(d.getMonth() + tenure.months);
+                    setDueDate(d.toISOString().split('T')[0]);
+                  }}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(34, 197, 94, 0.3)',
+                    background: 'rgba(34, 197, 94, 0.08)',
+                    color: 'var(--primary)',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {tenure.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Wallet / Account Selection */}
+          <div>
+            <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {activeTab === 'borrowed' 
+                ? 'Wallet Account (Money Borrowed / Credited into):' 
+                : 'Wallet Account (Money Lent / Given from):'}
+            </label>
+            <select
+              value={selectedAccountId}
+              onChange={e => setSelectedAccountId(e.target.value)}
+              className="glass-input"
+              style={{ marginTop: '6px', width: '100%', background: 'var(--bg-input)' }}
+            >
+              {accounts.map(acc => (
+                <option key={acc.id} value={acc.id}>
+                  💳 {acc.name} ({formatCurrency(acc.balance, currencySymbol)})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Notes (Optional)
+            </label>
+            <input
+              type="text"
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              placeholder="Reason / Agreement info..."
+              className="glass-input"
+              style={{ marginTop: '6px', width: '100%' }}
+            />
+          </div>
+
+          <button
+            type="submit"
+            style={{
+              padding: '14px',
+              borderRadius: '14px',
+              marginTop: '8px',
+              fontSize: '15px',
+              fontWeight: 800,
+              border: 'none',
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              color: '#ffffff',
+              cursor: 'pointer',
+              boxShadow: '0 6px 20px rgba(16, 185, 129, 0.35)',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            Save Loan Entry
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>,
+  document.body
+)}
+
+{/* Modal: Repay Loan */}
+{repayModalLoan && createPortal(
+  <div 
+    onClick={() => { setRepayModalLoan(null); setModalErr(null); }}
+    style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0, 0, 0, 0.75)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '16px',
+      zIndex: 9999999
+    }}
+  >
+    <div 
+      onClick={e => e.stopPropagation()}
+      style={{
+        width: '100%',
+        maxWidth: '420px',
+        maxHeight: 'min(90vh, 680px)',
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border-card)',
+        borderRadius: '24px',
+        display: 'flex',
+        flexDirection: 'column',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+        overflow: 'hidden'
+      }}
+    >
+      {/* Fixed Header */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '16px 20px',
+        borderBottom: '1px solid var(--border-card)',
+        background: 'var(--bg-card)',
+        flexShrink: 0
+      }}>
+        <h3 style={{ fontSize: '17px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+          {repayModalLoan.type === 'borrowed' ? `Repay to ${repayModalLoan.personName}` : `Receive from ${repayModalLoan.personName}`}
+        </h3>
+        <button 
+          type="button"
+          onClick={() => { setRepayModalLoan(null); setModalErr(null); }} 
+          title="Close"
+          style={{ 
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            background: 'var(--bg-dark)', 
+            border: '1px solid var(--border-card)', 
+            color: 'var(--text-primary)', 
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            flexShrink: 0
+          }}
+        >
+          <X size={18} />
+        </button>
+      </div>
+
+      {/* Scrollable Body */}
+      <div style={{
+        flex: 1,
+        overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        padding: '20px'
+      }}>
+        {modalErr && (
+          <div style={{ marginBottom: '14px', padding: '10px 14px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#f87171', fontSize: '12px', fontWeight: 700, lineHeight: 1.4 }}>
+            {modalErr}
+          </div>
+        )}
+
+        <form ref={repayFormRef} onSubmit={handleRepaySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div>
+            <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {repayModalLoan.type === 'borrowed' ? 'Payment Amount' : 'Collected Amount'} ({currencySymbol})
+            </label>
+            <input
+              type="number"
+              required
+              min="1"
+              max={repayModalLoan.totalAmount - repayModalLoan.paidAmount}
+              step="any"
+              value={repayAmount}
+              onChange={e => setRepayAmount(e.target.value)}
+              className="glass-input"
+              style={{ marginTop: '6px', width: '100%' }}
+            />
+
+            {/* Early Payment / Preset Amount Chips */}
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '8px' }}>
+              <button
+                type="button"
+                onClick={() => setRepayAmount((repayModalLoan.totalAmount - repayModalLoan.paidAmount).toString())}
+                style={{
+                  padding: '6px 10px', borderRadius: '8px', border: '1px solid rgba(34, 197, 94, 0.4)',
+                  background: 'rgba(34, 197, 94, 0.15)', color: '#22c55e', fontSize: '11px', fontWeight: 800, cursor: 'pointer'
+                }}
+              >
+                💯 Pay Full Remaining ({formatCurrency(repayModalLoan.totalAmount - repayModalLoan.paidAmount, currencySymbol)})
+              </button>
+              {repayModalLoan.emiInstallment && repayModalLoan.emiInstallment < (repayModalLoan.totalAmount - repayModalLoan.paidAmount) && (
+                <button
+                  type="button"
+                  onClick={() => setRepayAmount(repayModalLoan.emiInstallment!.toString())}
+                  style={{
+                    padding: '6px 10px', borderRadius: '8px', border: '1px solid rgba(167, 139, 250, 0.4)',
+                    background: 'rgba(167, 139, 250, 0.15)', color: '#a78bfa', fontSize: '11px', fontWeight: 800, cursor: 'pointer'
+                  }}
+                >
+                  💳 1 Monthly EMI ({formatCurrency(repayModalLoan.emiInstallment, currencySymbol)})
+                </button>
+              )}
+              {Math.round((repayModalLoan.totalAmount - repayModalLoan.paidAmount) / 2) > 0 && Math.round((repayModalLoan.totalAmount - repayModalLoan.paidAmount) / 2) < (repayModalLoan.totalAmount - repayModalLoan.paidAmount) && (
+                <button
+                  type="button"
+                  onClick={() => setRepayAmount(Math.round((repayModalLoan.totalAmount - repayModalLoan.paidAmount) / 2).toString())}
+                  style={{
+                    padding: '6px 10px', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.4)',
+                    background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', fontSize: '11px', fontWeight: 800, cursor: 'pointer'
+                  }}
+                >
+                  ⚡ 50% Half ({formatCurrency(Math.round((repayModalLoan.totalAmount - repayModalLoan.paidAmount) / 2), currencySymbol)})
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {repayModalLoan.type === 'borrowed' 
+                ? 'Select Wallet / Account To Cut Money From (Debited):' 
+                : 'Select Wallet / Account Where Money Was Credited (Deposited):'}
+            </label>
+            <select
+              value={repayAccountId}
+              onChange={e => setRepayAccountId(e.target.value)}
+              className="glass-input"
+              style={{ marginTop: '6px', width: '100%', background: 'var(--bg-input)', fontWeight: 700 }}
+            >
+              {accounts.map(acc => (
+                <option key={acc.id} value={acc.id}>
+                  💳 {acc.name} ({formatCurrency(acc.balance, currencySymbol)})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {repayModalLoan.type === 'borrowed' ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '6px' }}>
+              {onPayLoanViaUPI && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const amtNum = parseFloat(repayAmount) || (repayModalLoan.totalAmount - repayModalLoan.paidAmount);
+                    onPayLoanViaUPI(repayModalLoan, amtNum, repayAccountId || accounts[0]?.id);
+                    setRepayModalLoan(null);
+                  }}
+                  style={{
+                    padding: '13px',
+                    borderRadius: '13px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    color: '#fff',
+                    fontSize: '13.5px',
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)'
+                  }}
+                >
+                  ⚡ Pay via PhonePe / Netbanking (Online App)
+                </button>
+              )}
               <button
                 type="submit"
-                className="glass-button active"
-                style={{ padding: '12px', borderRadius: '12px', marginTop: '10px', fontSize: '14px', fontWeight: 800 }}
+                style={{
+                  padding: '13px',
+                  borderRadius: '13px',
+                  fontSize: '13.5px',
+                  fontWeight: 800,
+                  border: '1px solid var(--border-card)',
+                  background: 'var(--bg-dark)',
+                  color: 'var(--text-primary)',
+                  cursor: 'pointer'
+                }}
               >
-                Save Loan Entry
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal: Repay Loan */}
-      {repayModalLoan && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.85)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '16px',
-          zIndex: 10000
-        }}>
-          <div className="glass-panel" style={{
-            width: '100%',
-            maxWidth: '380px',
-            maxHeight: 'calc(100vh - 32px)',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-            padding: '24px',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.6)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexShrink: 0 }}>
-              <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>
-                {repayModalLoan.type === 'borrowed' ? `Repay to ${repayModalLoan.personName}` : `Receive from ${repayModalLoan.personName}`}
-              </h3>
-              <button onClick={() => { setRepayModalLoan(null); setModalErr(null); }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
-                <X size={20} />
+                ✅ Record Cash Repayment (Cut From Wallet)
               </button>
             </div>
-
-            {modalErr && (
-              <div style={{ marginBottom: '12px', padding: '10px 14px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#f87171', fontSize: '12px', fontWeight: 700, lineHeight: 1.4, flexShrink: 0 }}>
-                {modalErr}
-              </div>
-            )}
-
-            <form ref={repayFormRef} onSubmit={handleRepaySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, overflowY: 'auto', paddingRight: '4px', paddingBottom: '16px' }}>
-              <div>
-                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
-                  {repayModalLoan.type === 'borrowed' ? 'Payment Amount' : 'Collected Amount'} ({currencySymbol})
-                </label>
-                <input
-                  type="number"
-                  required
-                  min="1"
-                  max={repayModalLoan.totalAmount - repayModalLoan.paidAmount}
-                  step="any"
-                  value={repayAmount}
-                  onChange={e => setRepayAmount(e.target.value)}
-                  className="glass-input"
-                  style={{ marginTop: '4px', width: '100%' }}
-                />
-
-                {/* Early Payment / Preset Amount Chips */}
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '8px' }}>
-                  <button
-                    type="button"
-                    onClick={() => setRepayAmount((repayModalLoan.totalAmount - repayModalLoan.paidAmount).toString())}
-                    style={{
-                      padding: '5px 10px', borderRadius: '8px', border: '1px solid rgba(34, 197, 94, 0.4)',
-                      background: 'rgba(34, 197, 94, 0.15)', color: '#22c55e', fontSize: '11px', fontWeight: 800, cursor: 'pointer'
-                    }}
-                  >
-                    💯 Pay Full Remaining ({formatCurrency(repayModalLoan.totalAmount - repayModalLoan.paidAmount, currencySymbol)})
-                  </button>
-                  {repayModalLoan.emiInstallment && repayModalLoan.emiInstallment < (repayModalLoan.totalAmount - repayModalLoan.paidAmount) && (
-                    <button
-                      type="button"
-                      onClick={() => setRepayAmount(repayModalLoan.emiInstallment!.toString())}
-                      style={{
-                        padding: '5px 10px', borderRadius: '8px', border: '1px solid rgba(167, 139, 250, 0.4)',
-                        background: 'rgba(167, 139, 250, 0.15)', color: '#a78bfa', fontSize: '11px', fontWeight: 800, cursor: 'pointer'
-                      }}
-                    >
-                      💳 1 Monthly EMI ({formatCurrency(repayModalLoan.emiInstallment, currencySymbol)})
-                    </button>
-                  )}
-                  {Math.round((repayModalLoan.totalAmount - repayModalLoan.paidAmount) / 2) > 0 && Math.round((repayModalLoan.totalAmount - repayModalLoan.paidAmount) / 2) < (repayModalLoan.totalAmount - repayModalLoan.paidAmount) && (
-                    <button
-                      type="button"
-                      onClick={() => setRepayAmount(Math.round((repayModalLoan.totalAmount - repayModalLoan.paidAmount) / 2).toString())}
-                      style={{
-                        padding: '5px 10px', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.4)',
-                        background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', fontSize: '11px', fontWeight: 800, cursor: 'pointer'
-                      }}
-                    >
-                      ⚡ 50% Half ({formatCurrency(Math.round((repayModalLoan.totalAmount - repayModalLoan.paidAmount) / 2), currencySymbol)})
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
-                  {repayModalLoan.type === 'borrowed' 
-                    ? 'Select Wallet / Account To Cut Money From (Debited):' 
-                    : 'Select Wallet / Account Where Money Was Credited (Deposited):'}
-                </label>
-                <select
-                  value={repayAccountId}
-                  onChange={e => setRepayAccountId(e.target.value)}
-                  className="glass-input"
-                  style={{ marginTop: '4px', width: '100%', background: 'var(--bg-input)', fontWeight: 700 }}
-                >
-                  {accounts.map(acc => (
-                    <option key={acc.id} value={acc.id}>
-                      💳 {acc.name} ({formatCurrency(acc.balance, currencySymbol)})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {repayModalLoan.type === 'borrowed' ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px' }}>
-                  {onPayLoanViaUPI && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const amtNum = parseFloat(repayAmount) || (repayModalLoan.totalAmount - repayModalLoan.paidAmount);
-                        onPayLoanViaUPI(repayModalLoan, amtNum, repayAccountId || accounts[0]?.id);
-                        setRepayModalLoan(null);
-                      }}
-                      style={{
-                        padding: '12px',
-                        borderRadius: '12px',
-                        border: 'none',
-                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                        color: '#fff',
-                        fontSize: '13px',
-                        fontWeight: 900,
-                        cursor: 'pointer',
-                        boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)'
-                      }}
-                    >
-                      ⚡ Pay via PhonePe / Netbanking (Online App)
-                    </button>
-                  )}
-                  <button
-                    type="submit"
-                    className="glass-button"
-                    style={{ padding: '12px', borderRadius: '12px', fontSize: '13px', fontWeight: 800 }}
-                  >
-                    ✅ Record Cash Repayment (Cut From Wallet)
-                  </button>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px' }}>
-                  <button
-                    type="submit"
-                    className="glass-button active"
-                    style={{ padding: '12px', borderRadius: '12px', fontSize: '13px', fontWeight: 800 }}
-                  >
-                    ✅ Record Money Received (Deposit to Wallet)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const friendName = repayModalLoan.personName;
-                      const remAmt = parseFloat(repayAmount) || (repayModalLoan.totalAmount - repayModalLoan.paidAmount);
-                      const msg = `Hi ${friendName}, a friendly reminder regarding the ₹${remAmt} payment due on ZenBudget. Thanks!`;
-                      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-                    }}
-                    style={{
-                      padding: '10px',
-                      borderRadius: '12px',
-                      border: '1px solid rgba(37, 211, 102, 0.4)',
-                      background: 'rgba(37, 211, 102, 0.1)',
-                      color: '#25D366',
-                      fontSize: '12px',
-                      fontWeight: 800,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    💬 Remind Friend on WhatsApp
-                  </button>
-                </div>
-              )}
-            </form>
-          </div>
-        </div>
-      )}
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '6px' }}>
+              <button
+                type="submit"
+                style={{
+                  padding: '13px',
+                  borderRadius: '13px',
+                  fontSize: '13.5px',
+                  fontWeight: 800,
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)'
+                }}
+              >
+                ✅ Record Money Received (Deposit to Wallet)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const friendName = repayModalLoan.personName;
+                  const remAmt = parseFloat(repayAmount) || (repayModalLoan.totalAmount - repayModalLoan.paidAmount);
+                  const msg = `Hi ${friendName}, a friendly reminder regarding the ₹${remAmt} payment due on ZenBudget. Thanks!`;
+                  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+                }}
+                style={{
+                  padding: '11px',
+                  borderRadius: '13px',
+                  border: '1px solid rgba(37, 211, 102, 0.4)',
+                  background: 'rgba(37, 211, 102, 0.1)',
+                  color: '#25D366',
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  cursor: 'pointer'
+                }}
+              >
+                💬 Remind Friend on WhatsApp
+              </button>
+            </div>
+          )}
+        </form>
+      </div>
+    </div>
+  </div>,
+  document.body
+)}
     </div>
   );
 };
+
+export default LoansView;
