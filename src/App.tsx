@@ -37,6 +37,7 @@ import { TransferModal } from './components/TransferModal';
 import { AddAccountModal } from './components/AddAccountModal';
 import { t, setLanguage as setI18nLanguage } from './utils/i18n';
 import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 import { autoSyncCurrencyFromIP } from './utils/geoTracker';
 import type { Transaction, SavingsGoal, CategoryBudget, CategoryType, Account, LoanRecord } from './types';
 import { Dashboard } from './components/Dashboard';
@@ -3994,17 +3995,32 @@ const App: React.FC = () => {
                   Later
                 </button>
               )}
-              <a
-                href={updateUrl || '/zenbudget.apk'}
-                download="ZenBudget.apk"
-                target="_self"
-                onClick={() => {
-                  if (!forceUpdate) setShowUpdatePopup(false);
+              <button
+                onClick={async () => {
+                  let fullUrl = updateUrl || 'https://zenbudget-tracker.vercel.app/zenbudget.apk';
+                  if (!fullUrl.startsWith('http')) {
+                    fullUrl = `https://zenbudget-tracker.vercel.app${fullUrl.startsWith('/') ? '' : '/'}${fullUrl}`;
+                  }
+
+                  try {
+                    if (Capacitor.isNativePlatform()) {
+                      await Browser.open({ url: fullUrl });
+                    } else {
+                      window.open(fullUrl, '_blank');
+                    }
+                  } catch (err) {
+                    console.warn('Browser open fallback:', err);
+                    window.location.href = fullUrl;
+                  }
+
+                  if (!forceUpdate) {
+                    setShowUpdatePopup(false);
+                  }
                 }}
-                style={{ flex: 2, padding: '12px', borderRadius: '14px', border: 'none', background: 'linear-gradient(to right, var(--primary), var(--secondary))', color: '#000', fontSize: '13px', fontWeight: 800, cursor: 'pointer', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{ flex: 2, padding: '12px', borderRadius: '14px', border: 'none', background: 'linear-gradient(to right, var(--primary), var(--secondary))', color: '#000', fontSize: '13px', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
               >
                 Update Now ⬇️
-              </a>
+              </button>
             </div>
           </div>
         </div>
