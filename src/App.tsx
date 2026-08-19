@@ -2338,30 +2338,24 @@ const App: React.FC = () => {
     handleSaveGoal(updated);
   };
 
-  // Reset database triggers local arrays wipeout
+  // Reset database triggers complete wipeout of challenges, limits, and ledger data
   const handleResetDataRequest = () => {
-    // Premium Lock to prevent free trial users from bypassing limits by clearing transactions
-    if (!isPremiumUser) {
-      setIsSubBlocker(false);
-      setIsSubModalOpen(true);
-      triggerToast('Upgrade to Premium to clear database ledger! Trial users cannot reset.', 'warning');
-      return;
-    }
-
     setConfirmDialog({
       isOpen: true,
-      title: 'Clear Profiles Ledger?',
-      message: 'Are you sure you want to clear all data and reset to empty state for this profile? This cannot be undone.',
+      title: 'Reset All Workspace Data?',
+      message: 'Are you sure you want to reset all challenges, daily/category limits, transactions, accounts, and ledger data? This cannot be undone.',
       type: 'danger',
       onConfirm: async () => {
         try {
           // Delete from Supabase silently ignoring missing tables
-          await Promise.all([
+          await Promise.allSettled([
             supabase.from('transactions').delete().eq('user_id', currentProfileId),
             supabase.from('budgets').delete().eq('user_id', currentProfileId),
             supabase.from('goals').delete().eq('user_id', currentProfileId),
             supabase.from('accounts').delete().eq('user_id', currentProfileId),
-            supabase.from('loans').delete().eq('user_id', currentProfileId)
+            supabase.from('loans').delete().eq('user_id', currentProfileId),
+            supabase.from('wishlist').delete().eq('user_id', currentProfileId),
+            supabase.from('debts').delete().eq('user_id', currentProfileId)
           ]);
 
           setTransactions([]);
@@ -2370,19 +2364,52 @@ const App: React.FC = () => {
           setAccounts([]);
           setLoans([]);
           
-          const keysToEmpty = [
+          const keysToWipe = [
             `zb_transactions_${currentProfileId}`,
             `zb_tx_cache_${currentProfileId}`,
             `zb_budgets_${currentProfileId}`,
             `zb_goals_${currentProfileId}`,
             `zb_accounts_${currentProfileId}`,
-            `zb_loans_${currentProfileId}`
+            `zb_loans_${currentProfileId}`,
+            `zb_challenges`,
+            `zb_challenges_${currentProfileId}`,
+            `zb_claimed_badges_${currentProfileId}`,
+            `zb_daily_limit_${currentProfileId}`,
+            `zb_custom_daily_limit_${currentProfileId}`,
+            `zb_spending_limit_${currentProfileId}`,
+            `zb_today_smart_limit`,
+            `zb_smart_budget_limit`,
+            `zb_wishlist_${currentProfileId}`,
+            `zb_splits_${currentProfileId}`,
+            `zb_debts_${currentProfileId}`,
+            `zb_pet_points_${currentProfileId}`,
+            `zb_pet_unlocked_${currentProfileId}`,
+            `zb_pet_equipped_${currentProfileId}`,
+            'zb_mood_logs'
           ];
-          keysToEmpty.forEach(k => localStorage.setItem(k, '[]'));
+          keysToWipe.forEach(k => {
+            try {
+              localStorage.removeItem(k);
+            } catch (_) {}
+          });
+
+          // Also set empty arrays for cached ledger structures
+          localStorage.setItem(`zb_transactions_${currentProfileId}`, '[]');
+          localStorage.setItem(`zb_tx_cache_${currentProfileId}`, '[]');
+          localStorage.setItem(`zb_budgets_${currentProfileId}`, '[]');
+          localStorage.setItem(`zb_goals_${currentProfileId}`, '[]');
+          localStorage.setItem(`zb_accounts_${currentProfileId}`, '[]');
+          localStorage.setItem(`zb_loans_${currentProfileId}`, '[]');
+          localStorage.setItem('zb_challenges', '[]');
+          localStorage.setItem(`zb_challenges_${currentProfileId}`, '[]');
+
+          // Broadcast global reset event to sync all UI components immediately
+          window.dispatchEvent(new CustomEvent('zenbudget_reset_all_data'));
+          window.dispatchEvent(new Event('storage'));
 
           setActiveView('dashboard');
           setConfirmDialog(null);
-          triggerToast('Ledger & all data cleared successfully.', 'info');
+          triggerToast('✅ All challenges, limits, and ledger data reset successfully.', 'info');
         } catch (err: any) {
           triggerToast(err.message || 'Reset failed.', 'warning');
         }

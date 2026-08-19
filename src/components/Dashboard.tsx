@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ArrowUpRight,
   ArrowDownRight,
@@ -158,6 +158,24 @@ export const Dashboard: React.FC<DashboardProps> = ({
     return [];
   });
   const [showAllChallenges, setShowAllChallenges] = useState(false);
+
+  useEffect(() => {
+    const handleResetEvent = () => {
+      setChallenges([]);
+      setClaimedBadges([]);
+    };
+    window.addEventListener('zenbudget_reset_all_data', handleResetEvent);
+    return () => window.removeEventListener('zenbudget_reset_all_data', handleResetEvent);
+  }, []);
+
+  useEffect(() => {
+    const cached = localStorage.getItem(`zb_challenges_${currentProfileId}`) || localStorage.getItem('zb_challenges');
+    if (cached) {
+      try { setChallenges(JSON.parse(cached)); } catch (e) { setChallenges([]); }
+    } else {
+      setChallenges([]);
+    }
+  }, [currentProfileId]);
 
   const [activeBadgeModal, setActiveBadgeModal] = useState<{
     id: string;
