@@ -23,6 +23,7 @@ interface TransactionsProps {
   currencySymbol: string;
   onEditTransaction: (tx: Transaction) => void;
   onDeleteTransaction: (id: string) => void;
+  isPremiumUser?: boolean;
 }
 
 const CATEGORIES: { id: CategoryType | 'all'; label: string; color: string }[] = [
@@ -40,7 +41,8 @@ export const Transactions: React.FC<TransactionsProps> = ({
   transactions = [],
   currencySymbol,
   onEditTransaction,
-  onDeleteTransaction
+  onDeleteTransaction,
+  isPremiumUser = false
 }) => {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<CategoryType | 'all'>('all');
@@ -414,10 +416,6 @@ export const Transactions: React.FC<TransactionsProps> = ({
                           </button>
                           <button
                             onClick={() => {
-                              // We will handle confirm modal via parent/App callbacks later or keep standard browser confirm wrapper if needed
-                              // Actually, to fully respect user request of no ugly alerts, let's pass a confirmation modal triggers!
-                              // We can just confirm with normal confirm wrapper for a second, or call onDeleteTransaction direct if we trust user,
-                              // but let's keep it clean: we will trigger confirmation via props!
                               onDeleteTransaction(t.id);
                               setActiveTxMenu(null);
                             }}
@@ -425,17 +423,17 @@ export const Transactions: React.FC<TransactionsProps> = ({
                               display: 'inline-flex',
                               alignItems: 'center',
                               gap: '6px',
-                              background: 'var(--danger-glow)',
-                              border: 'none',
+                              background: isPremiumUser ? 'var(--danger-glow)' : 'rgba(236,72,153,0.1)',
+                              border: isPremiumUser ? 'none' : '1px solid rgba(236,72,153,0.25)',
                               borderRadius: '8px',
                               padding: '6px 12px',
-                              color: 'var(--danger)',
+                              color: isPremiumUser ? 'var(--danger)' : '#ec4899',
                               fontSize: '12px',
-                              fontWeight: 600,
+                              fontWeight: 700,
                               cursor: 'pointer'
                             }}
                           >
-                            <Trash2 size={12} /> Delete
+                            <Trash2 size={12} /> {isPremiumUser ? 'Delete' : '🔒 Delete (PRO)'}
                           </button>
                         </div>
                       )}

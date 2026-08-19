@@ -106,6 +106,13 @@ const App: React.FC = () => {
   });
 
   const handleDeleteAccount = (accId: string) => {
+    if (!isPremiumUser) {
+      triggerToast('🔒 Deleting accounts is a Premium feature. Upgrade to Pro!', 'warning');
+      setIsSubBlocker(false);
+      setIsSubModalOpen(true);
+      return;
+    }
+
     const acc = accounts.find(a => a.id === accId);
     setConfirmDialog({
       isOpen: true,
@@ -2368,6 +2375,13 @@ const App: React.FC = () => {
   };
 
   const handleDeleteGoal = (goalId: string) => {
+    if (!isPremiumUser) {
+      triggerToast('🔒 Deleting savings goals is a Premium feature. Upgrade to Pro!', 'warning');
+      setIsSubBlocker(false);
+      setIsSubModalOpen(true);
+      return;
+    }
+
     const goalToDelete = goals.find(g => g.id === goalId);
     if (!goalToDelete) return;
 
@@ -3176,6 +3190,7 @@ const App: React.FC = () => {
               setIsModalOpen(true);
             }}
             onDeleteTransaction={handleDeleteTransactionRequest}
+            isPremiumUser={isPremiumUser}
           />
         )}
         {activeView === 'budgets' && (
