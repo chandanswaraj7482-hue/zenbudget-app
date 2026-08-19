@@ -149,51 +149,75 @@ html.light-theme #root {
   box-shadow: 0 4px 20px rgba(16, 185, 129, 0.08), 0 1px 3px rgba(0, 0, 0, 0.03) !important;
 }
 
-/* Apple Typography in Light Mode */
-.light-theme h1,
-.light-theme h2,
-.light-theme h3,
-.light-theme h4,
-.light-theme h5,
-.light-theme h6 {
+/* Apple Typography in Light Mode (Excludes dark context & story modals) */
+.light-theme h1:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme h2:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme h3:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme h4:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme h5:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme h6:not(.story-modal-overlay *):not(.dark-mode-context *) {
   color: #1D1D1F !important;
   letter-spacing: -0.025em !important;
 }
 
 /* Universal White/Near-White Text Fix Across Entire App in Light Theme */
-.light-theme h1[style*="color: #fff"],
-.light-theme h1[style*="color:#fff"],
-.light-theme h2[style*="color: #fff"],
-.light-theme h2[style*="color:#fff"],
-.light-theme h3[style*="color: #fff"],
-.light-theme h3[style*="color:#fff"],
-.light-theme h4[style*="color: #fff"],
-.light-theme h4[style*="color:#fff"],
-.light-theme p[style*="color: #fff"],
-.light-theme p[style*="color:#fff"],
-.light-theme span[style*="color: #fff"]:not(button *):not([class*="badge"]),
-.light-theme span[style*="color:#fff"]:not(button *):not([class*="badge"]),
-.light-theme div[style*="color: #fff"]:not(button *):not([class*="btn"]):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]),
-.light-theme div[style*="color:#fff"]:not(button *):not([class*="btn"]):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]),
-.light-theme h1[style*="color: #ffffff"],
-.light-theme h1[style*="color:#ffffff"],
-.light-theme h2[style*="color: #ffffff"],
-.light-theme h2[style*="color:#ffffff"],
-.light-theme h3[style*="color: #ffffff"],
-.light-theme h3[style*="color:#ffffff"],
-.light-theme h4[style*="color: #ffffff"],
-.light-theme h4[style*="color:#ffffff"],
-.light-theme p[style*="color: #ffffff"],
-.light-theme p[style*="color:#ffffff"],
-.light-theme span[style*="color: #ffffff"]:not(button *):not([class*="badge"]),
-.light-theme span[style*="color:#ffffff"]:not(button *):not([class*="badge"]),
-.light-theme div[style*="color: #ffffff"]:not(button *):not([class*="btn"]):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]),
-.light-theme div[style*="color:#ffffff"]:not(button *):not([class*="btn"]):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]),
-.light-theme [style*="color: #f8fafc"]:not(button *):not([class*="badge"]),
-.light-theme [style*="color:#f8fafc"]:not(button *):not([class*="badge"]),
-.light-theme [style*="color: #f1f5f9"]:not(button *):not([class*="badge"]),
-.light-theme [style*="color:#f1f5f9"]:not(button *):not([class*="badge"]) {
+.light-theme h1[style*="color: #fff"]:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme h1[style*="color:#fff"]:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme h2[style*="color: #fff"]:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme h2[style*="color:#fff"]:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme h3[style*="color: #fff"]:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme h3[style*="color:#fff"]:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme h4[style*="color: #fff"]:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme h4[style*="color:#fff"]:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme p[style*="color: #fff"]:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme p[style*="color:#fff"]:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme span[style*="color: #fff"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme span[style*="color:#fff"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme div[style*="color: #fff"]:not(button *):not([class*="btn"]):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]):not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme div[style*="color:#fff"]:not(button *):not([class*="btn"]):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]):not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme h1[style*="color: #ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme h1[style*="color:#ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme h2[style*="color: #ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme h2[style*="color:#ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme h3[style*="color: #ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme h3[style*="color:#ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme h4[style*="color: #ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme h4[style*="color:#ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme p[style*="color: #ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme p[style*="color:#ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme span[style*="color: #ffffff"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme span[style*="color:#ffffff"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme div[style*="color: #ffffff"]:not(button *):not([class*="btn"]):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]):not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme div[style*="color:#ffffff"]:not(button *):not([class*="btn"]):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]):not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme [style*="color: #f8fafc"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme [style*="color:#f8fafc"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme [style*="color: #f1f5f9"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *),
+.light-theme [style*="color:#f1f5f9"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *) {
   color: #1D1D1F !important;
+}
+
+/* Explicit Story Modal / Dark Overlay Protection */
+.story-modal-overlay,
+.story-modal-overlay * {
+  color: unset;
+}
+.light-theme .story-modal-overlay h1,
+.light-theme .story-modal-overlay h2,
+.light-theme .story-modal-overlay h3,
+.light-theme .story-modal-overlay h4,
+.story-modal-overlay h1,
+.story-modal-overlay h2,
+.story-modal-overlay h3,
+.story-modal-overlay h4 {
+  color: #ffffff !important;
+}
+.light-theme .story-modal-overlay p,
+.story-modal-overlay p {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+.light-theme .story-modal-overlay span,
+.story-modal-overlay span {
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .light-theme p,

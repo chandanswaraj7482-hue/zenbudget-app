@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Sparkles, 
   Flame, 
@@ -477,13 +478,13 @@ export const PremiumHub: React.FC<PremiumHubProps> = ({
       {/* Emotional Spending Tracker moved to Stats tab */}
 
       {/* ── WEEKLY WRAPPED MODAL ── */}
-      {showWrappedModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }} onClick={() => setShowWrappedModal(false)}>
-          <div style={{ width: '100%', maxWidth: '350px', background: 'var(--bg-card)', border: '1px solid var(--border-card)', borderRadius: '32px', padding: '24px', textAlign: 'center', position: 'relative' }} onClick={e => e.stopPropagation()}>
-            <h3 style={{ fontSize: '16px', color: 'var(--primary)', fontWeight: 800, margin: '0 0 16px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Weekly Wrapped 🎁</h3>
+      {showWrappedModal && createPortal(
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', zIndex: 9999999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }} onClick={() => setShowWrappedModal(false)}>
+          <div style={{ width: '100%', maxWidth: '360px', background: 'var(--bg-card)', border: '1px solid var(--border-card)', borderRadius: '32px', padding: '24px', textAlign: 'center', position: 'relative', boxShadow: '0 25px 60px rgba(0,0,0,0.5)' }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ fontSize: '17px', color: 'var(--primary)', fontWeight: 900, margin: '0 0 16px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Weekly Wrapped 🎁</h3>
             
             {/* Watermark Shareable Card */}
-            <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', borderRadius: '24px', padding: '20px', position: 'relative', marginBottom: '20px', textAlign: 'left', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
+            <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', borderRadius: '24px', padding: '20px', position: 'relative', marginBottom: '20px', textAlign: 'left', boxShadow: '0 8px 24px rgba(0,0,0,0.06)' }}>
               
               {/* Watermark Logo */}
               <div style={{ position: 'absolute', bottom: '12px', right: '16px', fontSize: '9px', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '0.08em' }}>
@@ -491,116 +492,134 @@ export const PremiumHub: React.FC<PremiumHubProps> = ({
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-input)', paddingBottom: '10px', marginBottom: '14px' }}>
-                <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)' }}>Weekly Summary</span>
-                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Past 7 Days</span>
+                <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>Weekly Summary</span>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>Past 7 Days</span>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <div>
-                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block' }}>TOTAL SPENT</span>
-                  <span style={{ fontSize: '18px', fontWeight: 900, color: 'var(--text-primary)' }}>{currencySymbol}{wrapped.spent}</span>
+                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block', fontWeight: 700 }}>TOTAL SPENT</span>
+                  <span style={{ fontSize: '20px', fontWeight: 900, color: 'var(--text-primary)' }}>{currencySymbol}{wrapped.spent}</span>
                 </div>
                 <div>
-                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block' }}>SAVED THIS WEEK</span>
-                  <span style={{ fontSize: '18px', fontWeight: 900, color: 'var(--success)' }}>{currencySymbol}{Math.round(wrapped.saved)}</span>
+                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block', fontWeight: 700 }}>SAVED THIS WEEK</span>
+                  <span style={{ fontSize: '20px', fontWeight: 900, color: 'var(--success)' }}>{currencySymbol}{Math.round(wrapped.saved)}</span>
                 </div>
                 <div>
-                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block' }}>ZEN MONEY SCORE</span>
-                  <span style={{ fontSize: '18px', fontWeight: 900, color: 'var(--primary)' }}>{wrapped.score}/100</span>
+                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block', fontWeight: 700 }}>ZEN MONEY SCORE</span>
+                  <span style={{ fontSize: '20px', fontWeight: 900, color: 'var(--primary)' }}>{wrapped.score}/100</span>
                 </div>
                 <div>
-                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block' }}>TOP CATEGORY</span>
-                  <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>{wrapped.topCategory}</span>
+                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block', fontWeight: 700 }}>TOP CATEGORY</span>
+                  <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>{wrapped.topCategory}</span>
                 </div>
                 <div>
-                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block' }}>BEST DAY</span>
-                  <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>{wrapped.bestDay}</span>
+                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block', fontWeight: 700 }}>BEST DAY</span>
+                  <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>{wrapped.bestDay}</span>
                 </div>
               </div>
             </div>
 
             {/* Sharing Platform Buttons */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <button onClick={() => handleShare('whatsapp')} style={{ padding: '12px', borderRadius: '12px', border: 'none', background: '#25D366', color: '#ffffff', fontWeight: 800, fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              <button onClick={() => handleShare('whatsapp')} style={{ padding: '13px', borderRadius: '14px', border: 'none', background: '#25D366', color: '#ffffff', fontWeight: 800, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(37, 211, 102, 0.3)' }}>
                 <MessageCircle size={16} /> Share to WhatsApp
               </button>
-              <button onClick={() => handleShare('x')} style={{ padding: '12px', borderRadius: '12px', border: 'none', background: '#14171a', color: '#ffffff', fontWeight: 800, fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              <button onClick={() => handleShare('x')} style={{ padding: '13px', borderRadius: '14px', border: 'none', background: '#14171a', color: '#ffffff', fontWeight: 800, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '14px', fontWeight: 900, color: '#ffffff' }}>𝕏</span> <span style={{ color: '#ffffff' }}>Share to X (Twitter)</span>
               </button>
-              <button onClick={() => handleShare('instagram')} style={{ padding: '12px', borderRadius: '12px', border: 'none', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', color: '#ffffff', fontWeight: 800, fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              <button onClick={() => handleShare('instagram')} style={{ padding: '13px', borderRadius: '14px', border: 'none', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', color: '#ffffff', fontWeight: 800, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(220, 39, 67, 0.3)' }}>
                 <span style={{ fontSize: '14px' }}>📸</span> <span style={{ color: '#ffffff' }}>Share to Instagram</span>
               </button>
-              <button onClick={() => setShowWrappedModal(false)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--border-input)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontWeight: 700, fontSize: '12px', cursor: 'pointer', marginTop: '4px' }}>
+              <button onClick={() => setShowWrappedModal(false)} style={{ padding: '12px', borderRadius: '14px', border: '1px solid var(--border-input)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontWeight: 700, fontSize: '13px', cursor: 'pointer', marginTop: '4px' }}>
                 Close
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ── SPOTIFY STYLE STORY MODAL ── */}
-      {showStoryModal && (
-        <div style={{ position: 'fixed', inset: 0, background: '#000', zIndex: 4000, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '20px' }}>
-          
+      {showStoryModal && createPortal(
+        <div 
+          className="story-modal-overlay"
+          style={{ 
+            position: 'fixed', 
+            inset: 0, 
+            background: activeStorySlide === 0 
+              ? 'linear-gradient(180deg, #1e1b4b 0%, #0f172a 100%)'
+              : activeStorySlide === 1
+                ? 'linear-gradient(180deg, #14532d 0%, #064e3b 100%)'
+                : 'linear-gradient(180deg, #701a75 0%, #3b0764 100%)',
+            zIndex: 9999999, 
+            display: 'flex', 
+            flexDirection: 'column', 
+            justifyContent: 'space-between', 
+            padding: '24px 20px 32px',
+            transition: 'background 0.5s ease',
+            color: '#ffffff'
+          }}
+        >
           {/* Audio music controller & close button */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <button onClick={toggleMusic} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '30px', padding: '8px 14px', color: '#fff', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontWeight: 700 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
+            <button onClick={toggleMusic} style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', border: 'none', borderRadius: '30px', padding: '8px 16px', color: '#ffffff', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontWeight: 800 }}>
               <Music size={14} className={isPlayingMusic ? 'animate-spin' : ''} />
-              {isPlayingMusic ? 'Music: ON' : 'Music: OFF'}
+              {isPlayingMusic ? 'Music: ON 🎵' : 'Music: OFF'}
             </button>
-            <button onClick={() => { setShowStoryModal(false); audio.pause(); setIsPlayingMusic(false); }} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', color: '#fff', cursor: 'pointer', fontWeight: 900 }}>
+            <button onClick={() => { setShowStoryModal(false); audio.pause(); setIsPlayingMusic(false); }} style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', border: 'none', borderRadius: '50%', width: '36px', height: '36px', color: '#ffffff', cursor: 'pointer', fontWeight: 900, fontSize: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               ✕
             </button>
           </div>
 
           {/* Progress Indicators */}
-          <div style={{ display: 'flex', gap: '4px', margin: '10px 0' }}>
+          <div style={{ display: 'flex', gap: '6px', margin: '14px 0' }}>
             {[0, 1, 2].map(idx => (
-              <div key={idx} style={{ flex: 1, height: '3px', borderRadius: '2px', backgroundColor: idx <= activeStorySlide ? '#22c55e' : 'rgba(255,255,255,0.15)' }} />
+              <div key={idx} style={{ flex: 1, height: '4px', borderRadius: '2px', backgroundColor: idx <= activeStorySlide ? '#22c55e' : 'rgba(255,255,255,0.25)', transition: 'background-color 0.3s ease' }} />
             ))}
           </div>
 
           {/* Slide Content Area */}
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '20px' }}>
             {activeStorySlide === 0 && (
-              <div className="animate-fade-in">
-                <span style={{ fontSize: '64px', display: 'block', marginBottom: '16px' }}>📊</span>
-                <h2 style={{ fontSize: '28px', fontWeight: 900, color: '#ffffff', marginBottom: '10px' }}>Your Month in Review</h2>
-                <p style={{ fontSize: '15px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: 600 }}>Let's see where your hard-earned money went this month...</p>
+              <div className="animate-fade-in" style={{ color: '#ffffff' }}>
+                <span style={{ fontSize: '72px', display: 'block', marginBottom: '20px' }}>📊</span>
+                <h2 style={{ fontSize: '30px', fontWeight: 900, color: '#ffffff', marginBottom: '12px', letterSpacing: '-0.02em' }}>Your Month in Review</h2>
+                <p style={{ fontSize: '16px', color: 'rgba(255, 255, 255, 0.9)', fontWeight: 600, maxWidth: '320px', margin: '0 auto', lineHeight: 1.5 }}>Let's see where your hard-earned money went this month...</p>
               </div>
             )}
 
             {activeStorySlide === 1 && (
-              <div className="animate-fade-in">
-                <span style={{ fontSize: '64px', display: 'block', marginBottom: '16px' }}>🛍️</span>
-                <h2 style={{ fontSize: '22px', fontWeight: 900, color: '#ffffff', marginBottom: '6px' }}>Top Spending Category</h2>
-                <p style={{ fontSize: '32px', fontWeight: 900, color: '#22c55e', marginBottom: '8px' }}>
+              <div className="animate-fade-in" style={{ color: '#ffffff' }}>
+                <span style={{ fontSize: '72px', display: 'block', marginBottom: '20px' }}>🛍️</span>
+                <h2 style={{ fontSize: '24px', fontWeight: 900, color: '#ffffff', marginBottom: '8px' }}>Top Spending Category</h2>
+                <p style={{ fontSize: '36px', fontWeight: 900, color: '#4ade80', marginBottom: '12px', letterSpacing: '-0.01em' }}>
                   {wrapped.topCategory}
                 </p>
-                <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: 600 }}>You spent a significant portion on this category. Balance it next month!</p>
+                <p style={{ fontSize: '15px', color: 'rgba(255, 255, 255, 0.9)', fontWeight: 600, maxWidth: '320px', margin: '0 auto', lineHeight: 1.5 }}>You spent a significant portion on this category. Balance it next month!</p>
               </div>
             )}
 
             {activeStorySlide === 2 && (
-              <div className="animate-fade-in">
-                <span style={{ fontSize: '64px', display: 'block', marginBottom: '16px' }}>🌱</span>
-                <h2 style={{ fontSize: '22px', fontWeight: 900, color: '#ffffff', marginBottom: '6px' }}>Zen Money Score</h2>
-                <p style={{ fontSize: '54px', fontWeight: 900, color: '#22c55e', marginBottom: '8px' }}>
+              <div className="animate-fade-in" style={{ color: '#ffffff' }}>
+                <span style={{ fontSize: '72px', display: 'block', marginBottom: '20px' }}>🌱</span>
+                <h2 style={{ fontSize: '24px', fontWeight: 900, color: '#ffffff', marginBottom: '8px' }}>Zen Money Score</h2>
+                <p style={{ fontSize: '64px', fontWeight: 900, color: '#4ade80', marginBottom: '12px', letterSpacing: '-0.02em' }}>
                   {wrapped.score}/100
                 </p>
-                <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.85)', fontWeight: 600 }}>Excellent! You have maintained a stable spending control. Keep it up!</p>
+                <p style={{ fontSize: '15px', color: 'rgba(255, 255, 255, 0.9)', fontWeight: 600, maxWidth: '320px', margin: '0 auto', lineHeight: 1.5 }}>Excellent! You have maintained a stable spending control. Keep it up!</p>
               </div>
             )}
           </div>
 
           {/* Story Navigation Controls */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0 20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0 10px', zIndex: 10 }}>
             <button 
               disabled={activeStorySlide === 0}
               onClick={() => setActiveStorySlide(prev => prev - 1)}
-              style={{ background: 'none', border: 'none', color: '#fff', opacity: activeStorySlide === 0 ? 0.3 : 1, cursor: 'pointer' }}
+              style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', width: '44px', height: '44px', color: '#ffffff', opacity: activeStorySlide === 0 ? 0.3 : 1, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              <ChevronLeft size={36} />
+              <ChevronLeft size={28} />
             </button>
 
             {activeStorySlide === 2 ? (
@@ -609,23 +628,24 @@ export const PremiumHub: React.FC<PremiumHubProps> = ({
                   navigator.clipboard.writeText(`My Zen Money Score is ${wrapped.score}/100! Calculated by ZenBudget.`);
                   window.open('https://instagram.com', '_blank');
                 }}
-                style={{ padding: '12px 24px', borderRadius: '24px', border: 'none', background: 'linear-gradient(to right, var(--primary), var(--secondary))', color: '#000', fontWeight: 900, fontSize: '13px', cursor: 'pointer' }}
+                style={{ padding: '14px 28px', borderRadius: '30px', border: 'none', background: 'linear-gradient(to right, #10b981, #14b8a6)', color: '#ffffff', fontWeight: 900, fontSize: '14px', cursor: 'pointer', boxShadow: '0 8px 24px rgba(16, 185, 129, 0.4)' }}
               >
                 Share to Instagram Stories 📸
               </button>
             ) : (
-              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 700 }}>Slide {activeStorySlide + 1} of 3</span>
+              <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.75)', fontWeight: 800 }}>Slide {activeStorySlide + 1} of 3</span>
             )}
 
             <button 
               disabled={activeStorySlide === 2}
               onClick={() => setActiveStorySlide(prev => prev + 1)}
-              style={{ background: 'none', border: 'none', color: '#fff', opacity: activeStorySlide === 2 ? 0.3 : 1, cursor: 'pointer' }}
+              style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', width: '44px', height: '44px', color: '#ffffff', opacity: activeStorySlide === 2 ? 0.3 : 1, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              <ChevronRight size={36} />
+              <ChevronRight size={28} />
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>
