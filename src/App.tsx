@@ -630,6 +630,11 @@ const App: React.FC = () => {
       setLangKey(k => k + 1); // force full re-render of all views
     };
     const syncCurrency = () => {
+      const profileId = localStorage.getItem('zb_profile_id') || '';
+      const currentCurr = (profileId ? localStorage.getItem(`zb_currency_${profileId}`) : null) || localStorage.getItem('zb_default_currency');
+      if (currentCurr) {
+        setCurrency(currentCurr);
+      }
       setLangKey(k => k + 1); // currency change → also re-render all views
     };
     window.addEventListener('languagechange', syncLang);
@@ -649,7 +654,13 @@ const App: React.FC = () => {
     JPY: 158.0,
     AED: 3.67,
     SAR: 3.75,
-    CNY: 7.25
+    CNY: 7.25,
+    SGD: 1.35,
+    NZD: 1.64,
+    CHF: 0.89,
+    HKD: 7.82,
+    KWD: 0.31,
+    QAR: 3.64
   });
 
   // Custom modals & toast state

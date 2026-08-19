@@ -174,7 +174,15 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 <Banknote size={15} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', pointerEvents: 'none' }} />
                 <select
                   value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
+                  onChange={async (e) => {
+                    const newCurr = e.target.value;
+                    setCurrency(newCurr);
+                    try {
+                      await onSaveProfile(name, pin, newCurr, language);
+                    } catch (err) {
+                      console.warn('Currency auto-sync error:', err);
+                    }
+                  }}
                   className="glass-input"
                   style={{ width: '100%', paddingLeft: '40px', fontSize: '13px', padding: '10px 14px 10px 40px', appearance: 'none', backgroundColor: 'transparent' }}
                 >
@@ -182,6 +190,18 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   <option value="USD" style={{ color: '#000' }}>$ USD</option>
                   <option value="EUR" style={{ color: '#000' }}>€ EUR</option>
                   <option value="GBP" style={{ color: '#000' }}>£ GBP</option>
+                  <option value="CAD" style={{ color: '#000' }}>C$ CAD</option>
+                  <option value="AUD" style={{ color: '#000' }}>A$ AUD</option>
+                  <option value="JPY" style={{ color: '#000' }}>¥ JPY</option>
+                  <option value="AED" style={{ color: '#000' }}>DH AED</option>
+                  <option value="SAR" style={{ color: '#000' }}>SR SAR</option>
+                  <option value="CNY" style={{ color: '#000' }}>¥ CNY</option>
+                  <option value="SGD" style={{ color: '#000' }}>$ SGD</option>
+                  <option value="NZD" style={{ color: '#000' }}>$ NZD</option>
+                  <option value="CHF" style={{ color: '#000' }}>CHF</option>
+                  <option value="HKD" style={{ color: '#000' }}>$ HKD</option>
+                  <option value="KWD" style={{ color: '#000' }}>KD KWD</option>
+                  <option value="QAR" style={{ color: '#000' }}>QR QAR</option>
                 </select>
               </div>
             </div>
@@ -194,13 +214,32 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 <Globe size={15} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', pointerEvents: 'none' }} />
                 <select
                   value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
+                  onChange={async (e) => {
+                    const newLang = e.target.value;
+                    setLanguage(newLang);
+                    try {
+                      await onSaveProfile(name, pin, currency, newLang);
+                    } catch (err) {
+                      console.warn('Language auto-sync error:', err);
+                    }
+                  }}
                   className="glass-input"
                   style={{ width: '100%', paddingLeft: '40px', fontSize: '13px', padding: '10px 14px 10px 40px', appearance: 'none', backgroundColor: 'transparent' }}
                 >
-                  <option value="English" style={{ color: '#000' }}>English</option>
-                  <option value="Hindi" style={{ color: '#000' }}>Hindi</option>
-                  <option value="Spanish" style={{ color: '#000' }}>Spanish</option>
+                  <option value="en" style={{ color: '#000' }}>English</option>
+                  <option value="hi" style={{ color: '#000' }}>हिन्दी (Hindi)</option>
+                  <option value="bn" style={{ color: '#000' }}>বাংলা (Bengali)</option>
+                  <option value="mr" style={{ color: '#000' }}>मराठी (Marathi)</option>
+                  <option value="te" style={{ color: '#000' }}>తెలుగు (Telugu)</option>
+                  <option value="ta" style={{ color: '#000' }}>தமிழ் (Tamil)</option>
+                  <option value="gu" style={{ color: '#000' }}>ગુજરાતી (Gujarati)</option>
+                  <option value="ur" style={{ color: '#000' }}>اردو (Urdu)</option>
+                  <option value="kn" style={{ color: '#000' }}>ಕನ್ನಡ (Kannada)</option>
+                  <option value="or" style={{ color: '#000' }}>ଓଡ଼ିଆ (Odia)</option>
+                  <option value="ml" style={{ color: '#000' }}>മലയാളം (Malayalam)</option>
+                  <option value="pa" style={{ color: '#000' }}>ਪੰਜਾਬੀ (Punjabi)</option>
+                  <option value="es" style={{ color: '#000' }}>Español (Spanish)</option>
+                  <option value="fr" style={{ color: '#000' }}>Français (French)</option>
                 </select>
               </div>
             </div>

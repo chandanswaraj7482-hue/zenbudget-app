@@ -900,7 +900,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           className="glass-panel"
           style={{
             width: '100%',
-            maxWidth: '360px',
+            maxWidth: '380px',
             padding: '32px 24px 24px',
             borderRadius: '28px',
             border: '1px solid rgba(255,255,255,0.08)',
@@ -911,20 +911,20 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           }}
         >
           {/* ── Logo & Branding ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '28px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '24px' }}>
             <div style={{
-              width: '110px', height: '110px', borderRadius: '32px',
+              width: '68px', height: '68px', borderRadius: '18px',
               background: '#ffffff',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.3), 0 0 20px rgba(34,197,94,0.25)',
-              marginBottom: '18px', padding: '16px'
+              boxShadow: '0 10px 28px rgba(0,0,0,0.3), 0 0 20px rgba(34,197,94,0.25)',
+              marginBottom: '14px', padding: '12px'
             }}>
               <img src="/zen-icon-green.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>
-            <h1 style={{ fontSize: '30px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
+            <h1 style={{ fontSize: '26px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
               <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
             </h1>
-            <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', margin: 0, fontWeight: 700 }}>
+            <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', margin: 0, fontWeight: 700 }}>
               CLAIM YOUR MONEY
             </p>
           </div>
@@ -1173,25 +1173,51 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
 
       {/* STEP: Onboarding PIN Setup (Choose & Confirm) */}
       {!isLoading && (step === 'onboard-pin' || step === 'onboard-confirm') && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', width: '100%', maxWidth: '320px', textAlign: 'center' }} className="animate-slide-up">
-          <div>
-            <h2 style={{ fontSize: '22px', fontWeight: 800 }}>
+        <div
+          className="glass-panel animate-slide-up"
+          style={{
+            width: '100%',
+            maxWidth: '380px',
+            padding: '32px 24px 24px',
+            borderRadius: '28px',
+            border: '1px solid rgba(255,255,255,0.08)',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center',
+            gap: '0px'
+          }}
+        >
+          {/* ── Logo & Branding ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '16px' }}>
+            <div style={{
+              width: '68px', height: '68px', borderRadius: '18px',
+              background: '#ffffff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 10px 28px rgba(0,0,0,0.3), 0 0 20px rgba(34,197,94,0.25)',
+              marginBottom: '14px', padding: '12px'
+            }}>
+              <img src="/zen-icon-green.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            </div>
+            <h2 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 4px 0', fontFamily: "'Manrope', sans-serif" }}>
               {step === 'onboard-pin' ? 'Create PIN' : 'Confirm PIN'}
             </h2>
-            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-              {step === 'onboard-pin' ? `Choose a 4-digit security PIN for locks` : 'Type your passcode again to verify'}
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0 }}>
+              {step === 'onboard-pin' ? 'Choose a 4-digit security PIN for locks' : 'Type your passcode again to verify'}
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '16px', margin: '15px 0' }}>
+          {/* Dots */}
+          <div style={{ display: 'flex', gap: '16px', margin: '10px 0 16px' }}>
             {[0, 1, 2, 3].map((index) => {
               const active = getDotsCount() > index;
               return (
                 <div
                   key={index}
                   style={{
-                    width: '18px',
-                    height: '18px',
+                    width: '16px',
+                    height: '16px',
                     borderRadius: '50%',
                     border: '2px solid var(--primary)',
                     backgroundColor: active ? 'var(--primary)' : 'transparent',
@@ -1204,28 +1230,144 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           </div>
 
           {errorMsg && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--danger)', fontSize: '13px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--danger)', fontSize: '12px', fontWeight: 700, marginBottom: '10px' }}>
               <AlertCircle size={14} /> {errorMsg}
             </div>
+          )}
+
+          {/* Numeric Keypad */}
+          <div 
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '14px',
+              width: '100%',
+              maxWidth: '260px',
+              marginTop: '4px'
+            }}
+          >
+            {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((num) => (
+              <button
+                key={num}
+                onClick={() => handleKeypadPress(num)}
+                style={{
+                  height: '56px',
+                  borderRadius: '50%',
+                  border: '1px solid var(--border-card)',
+                  background: 'var(--bg-card)',
+                  color: 'var(--text-primary)',
+                  fontSize: '20px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                  transition: 'all 0.2s ease-out'
+                }}
+                onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.25)'}
+                onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
+              >
+                {num}
+              </button>
+            ))}
+            
+            <div style={{ height: '56px', width: '56px' }} />
+
+            <button
+              onClick={() => handleKeypadPress('0')}
+              style={{
+                height: '56px',
+                borderRadius: '50%',
+                border: '1px solid var(--border-card)',
+                background: 'var(--bg-card)',
+                color: 'var(--text-primary)',
+                fontSize: '20px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.25)'}
+              onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
+            >
+              0
+            </button>
+
+            <button
+              onClick={handleBackspace}
+              style={{
+                height: '56px',
+                borderRadius: '50%',
+                border: '1px solid var(--border-card)',
+                background: 'var(--bg-card)',
+                color: 'var(--text-primary)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseDown={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
+              onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
+            >
+              <Delete size={20} />
+            </button>
+          </div>
+
+          {step === 'onboard-confirm' && (
+            <button
+              onClick={() => {
+                setConfirmPin('');
+                setStep('onboard-pin');
+                setErrorMsg('');
+              }}
+              style={{
+                marginTop: '16px',
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-secondary)',
+                fontSize: '12px',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              ← Back to Create PIN
+            </button>
           )}
         </div>
       )}
 
       {/* STEP: Verify PIN for unlock */}
       {!isLoading && step === 'unlock' && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', width: '100%', maxWidth: '320px', textAlign: 'center' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div
+          className="glass-panel animate-slide-up"
+          style={{
+            width: '100%',
+            maxWidth: '380px',
+            padding: '32px 24px 24px',
+            borderRadius: '28px',
+            border: '1px solid rgba(255,255,255,0.08)',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center',
+            gap: '0px'
+          }}
+        >
+          {/* ── Logo & Branding ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '14px' }}>
             <div style={{
-              width: '110px',
-              height: '110px',
-              borderRadius: '32px',
+              width: '68px', height: '68px', borderRadius: '18px',
               background: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.3), 0 0 20px rgba(34,197,94,0.25)',
-              marginBottom: '16px',
-              padding: '16px'
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 10px 28px rgba(0,0,0,0.3), 0 0 20px rgba(34,197,94,0.25)',
+              marginBottom: '14px', padding: '12px'
             }}>
               <img 
                 src="/zen-icon-green.png" 
@@ -1237,41 +1379,15 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                 }} 
               />
             </div>
-            <h2 style={{ fontSize: '28px', fontWeight: 800, letterSpacing: '-0.03em', fontFamily: "'Manrope', sans-serif" }}>
+            <h2 style={{ fontSize: '26px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
               <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
             </h2>
-            <div style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--text-primary)', marginTop: '2px', fontWeight: 800 }}>
-              Calm Your Money
+            <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', margin: 0, fontWeight: 700 }}>
+              CLAIM YOUR MONEY
             </div>
-            <p style={{ fontSize: '14px', color: 'var(--text-primary)', marginTop: '8px', marginBottom: '14px', fontWeight: 700 }}>
+            <p style={{ fontSize: '13px', color: 'var(--text-primary)', marginTop: '8px', marginBottom: '4px', fontWeight: 700 }}>
               Welcome back, {dbProfile?.name || username || localStorage.getItem('zb_user_name') || 'User'}
             </p>
-            
-            {/* Custom Quote & Today's Goal lock reminder */}
-            <div style={{ 
-              background: 'var(--bg-card)', 
-              border: '1px solid var(--border-card)', 
-              padding: '16px', 
-              borderRadius: '20px', 
-              textAlign: 'center',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.06)'
-            }}>
-              <p style={{ fontSize: '13px', fontStyle: 'italic', color: 'var(--text-primary)', marginBottom: '10px', lineHeight: 1.4, fontWeight: 600 }}>
-                "A budget is telling your money where to go instead of wondering where it went."
-              </p>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--primary)', fontWeight: 800, fontSize: '12px', background: 'rgba(34, 197, 94, 0.12)', border: '1px solid rgba(34, 197, 94, 0.25)', padding: '6px 14px', borderRadius: '99px' }}>
-                <span>
-                  Today's Limit: Stay under {(() => {
-                    const activeUserId = userId || localStorage.getItem('zb_registered_device_user_id');
-                    const symbol = '₹';
-                    if (!activeUserId) return '₹500';
-                    const cachedLimit = localStorage.getItem('zb_today_smart_limit') || localStorage.getItem(`zb_daily_limit_${activeUserId}`);
-                    const limitVal = cachedLimit ? parseInt(cachedLimit, 10) : 500;
-                    return `${symbol}${limitVal.toLocaleString()}`;
-                  })()} 🤝
-                </span>
-              </div>
-            </div>
           </div>
 
           {/* Dots */}
@@ -1279,7 +1395,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
             style={{ 
               display: 'flex', 
               gap: '16px', 
-              margin: '15px 0',
+              margin: '6px 0 14px',
               animation: isIncorrect ? 'shake 0.5s ease-in-out' : 'none'
             }}
           >
@@ -1289,8 +1405,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                 <div
                   key={index}
                   style={{
-                    width: '18px',
-                    height: '18px',
+                    width: '16px',
+                    height: '16px',
                     borderRadius: '50%',
                     border: '2px solid',
                     borderColor: isIncorrect ? 'var(--danger)' : 'var(--primary)',
@@ -1304,189 +1420,154 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           </div>
 
           {errorMsg && (
-            <div style={{ color: 'var(--danger)', fontSize: '13px', fontWeight: 700 }}>
+            <div style={{ color: 'var(--danger)', fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>
               {errorMsg}
             </div>
           )}
-        </div>
-      )}
 
-      {/* Numeric Keypad */}
-      {!isLoading && step !== 'auth' && (
-        <div 
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '16px',
-            width: '100%',
-            maxWidth: '300px',
-            marginTop: '10px'
-          }}
-          className="animate-slide-up"
-        >
-          {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((num) => (
+          {/* Numeric Keypad */}
+          <div 
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '14px',
+              width: '100%',
+              maxWidth: '260px',
+              marginTop: '4px'
+            }}
+          >
+            {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((num) => (
+              <button
+                key={num}
+                onClick={() => handleKeypadPress(num)}
+                style={{
+                  height: '56px',
+                  borderRadius: '50%',
+                  border: '1px solid var(--border-card)',
+                  background: 'var(--bg-card)',
+                  color: 'var(--text-primary)',
+                  fontSize: '20px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                  transition: 'all 0.2s ease-out'
+                }}
+                onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.25)'}
+                onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
+              >
+                {num}
+              </button>
+            ))}
+            
+            {/* Left Keypad Column: Biometrics button or empty spacer */}
+            {biometricsAvailable ? (
+              <button
+                onClick={() => triggerBiometricUnlock()}
+                style={{
+                  height: '56px',
+                  borderRadius: '50%',
+                  border: '1px solid rgba(34, 197, 94, 0.3)',
+                  background: 'rgba(34, 197, 94, 0.12)',
+                  color: 'var(--primary)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 4px 12px rgba(34, 197, 94, 0.15)',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.3)'}
+                onMouseUp={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.12)'}
+              >
+                <Fingerprint size={22} />
+              </button>
+            ) : (
+              <div style={{ height: '56px', width: '56px' }} />
+            )}
+
+            {/* Center Column: 0 */}
             <button
-              key={num}
-              onClick={() => handleKeypadPress(num)}
+              onClick={() => handleKeypadPress('0')}
               style={{
-                height: '60px',
+                height: '56px',
                 borderRadius: '50%',
                 border: '1px solid var(--border-card)',
                 background: 'var(--bg-card)',
                 color: 'var(--text-primary)',
-                fontSize: '22px',
+                fontSize: '20px',
                 fontWeight: 800,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-                transition: 'all 0.2s ease-out'
+                transition: 'all 0.2s ease'
               }}
               onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.25)'}
               onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
             >
-              {num}
+              0
             </button>
-          ))}
-          
-           {/* Left Keypad Column: Biometrics button or empty spacer */}
-          {step === 'unlock' && biometricsAvailable ? (
+
+            {/* Right Column: Delete Backspace */}
             <button
-              onClick={() => triggerBiometricUnlock()}
+              onClick={handleBackspace}
               style={{
-                height: '60px',
+                height: '56px',
                 borderRadius: '50%',
-                border: '1px solid rgba(34, 197, 94, 0.3)',
-                background: 'rgba(34, 197, 94, 0.12)',
-                color: 'var(--primary)',
+                border: '1px solid var(--border-card)',
+                background: 'var(--bg-card)',
+                color: 'var(--text-primary)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(34, 197, 94, 0.15)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
                 transition: 'all 0.2s ease'
               }}
-              onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.3)'}
-              onMouseUp={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.12)'}
+              onMouseDown={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
+              onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
             >
-              <Fingerprint size={24} />
+              <Delete size={20} />
             </button>
-          ) : (
-            <div style={{ height: '60px', width: '60px' }} />
-          )}
+          </div>
 
-          {/* Center Column: 0 */}
-          <button
-            onClick={() => handleKeypadPress('0')}
-            style={{
-              height: '60px',
-              borderRadius: '50%',
-              border: '1px solid var(--border-card)',
-              background: 'var(--bg-card)',
-              color: 'var(--text-primary)',
-              fontSize: '22px',
-              fontWeight: 800,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.25)'}
-            onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
-          >
-            0
-          </button>
-
-          {/* Right Column: Delete Backspace */}
-          <button
-            onClick={handleBackspace}
-            style={{
-              height: '60px',
-              borderRadius: '50%',
-              border: '1px solid var(--border-card)',
-              background: 'var(--bg-card)',
-              color: 'var(--text-primary)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseDown={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
-            onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
-          >
-            <Delete size={22} />
-          </button>
-        </div>
-      )}
-
-      {/* Secondary Bottom Footer Actions (Back / Sign Out link) */}
-      {!isLoading && (
-        <div style={{ marginTop: '24px', zIndex: 10 }}>
-          {step === 'unlock' ? (
-            <>
-              <button
-                onClick={() => setShowSignOutConfirm(true)}
-                style={{
-                  background: 'rgba(239, 68, 68, 0.1)',
-                  border: '1px solid rgba(239, 68, 68, 0.25)',
-                  color: 'var(--danger)',
-                  fontSize: '12px',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '8px 16px',
-                  borderRadius: '99px'
-                }}
-              >
-                <LogOut size={13} /> Sign Out of Account
-              </button>
-
-              {/* Sign Out Confirmation Popup */}
-              {showSignOutConfirm && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
-                  <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)', borderRadius: '24px', padding: '28px', maxWidth: '300px', width: '100%', textAlign: 'center', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
-                    <div style={{ fontSize: '36px', marginBottom: '12px' }}>👋</div>
-                    <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>Sign Out?</h3>
-                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '24px' }}>Are you sure you want to sign out? Your data is saved securely.</p>
-                    <div style={{ display: 'flex', gap: '12px' }}>
-                      <button onClick={() => setShowSignOutConfirm(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid var(--border-input)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
-                      <button onClick={() => { setShowSignOutConfirm(false); handleSignOut(); }} style={{ flex: 1, padding: '12px', borderRadius: '12px', border: 'none', background: 'var(--danger)', color: '#ffffff', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Yes, Sign Out</button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </>
-          ) : (step === 'onboard-pin' || step === 'onboard-confirm') && (
+          {/* Sign Out Action */}
+          <div style={{ marginTop: '18px' }}>
             <button
-              onClick={() => {
-                if (step === 'onboard-pin' || step === 'onboard-confirm') {
-                  setStep('auth');
-                }
-                setPin('');
-                setConfirmPin('');
-                setErrorMsg('');
-              }}
+              onClick={() => setShowSignOutConfirm(true)}
               style={{
-                background: 'none',
+                background: 'transparent',
                 border: 'none',
                 color: 'var(--text-secondary)',
-                fontSize: '13px',
-                fontWeight: 600,
+                fontSize: '12px',
+                fontWeight: 700,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px'
               }}
             >
-              <ArrowLeft size={14} /> Back to Login / SignUp
+              <LogOut size={13} /> Sign Out of Account
             </button>
+          </div>
+
+          {/* Sign Out Confirmation Popup */}
+          {showSignOutConfirm && (
+            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '20px' }}>
+              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)', borderRadius: '24px', padding: '28px', maxWidth: '300px', width: '100%', textAlign: 'center', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
+                <div style={{ fontSize: '36px', marginBottom: '12px' }}>👋</div>
+                <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>Sign Out?</h3>
+                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '24px' }}>Are you sure you want to sign out? Your data is saved securely.</p>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button onClick={() => setShowSignOutConfirm(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid var(--border-input)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
+                  <button onClick={() => { setShowSignOutConfirm(false); handleSignOut(); }} style={{ flex: 1, padding: '12px', borderRadius: '12px', border: 'none', background: 'var(--danger)', color: '#ffffff', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Yes, Sign Out</button>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       )}

@@ -481,7 +481,15 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               <Banknote size={15} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', pointerEvents: 'none' }} />
               <select
                 value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
+                onChange={async (e) => {
+                  const newCurr = e.target.value;
+                  setCurrency(newCurr);
+                  try {
+                    await onSaveProfile(name, pin, newCurr, language, email);
+                  } catch (err) {
+                    console.warn('Currency auto-sync error:', err);
+                  }
+                }}
                 className="glass-input"
                 style={{ width: '100%', paddingLeft: '40px', fontSize: '13px', padding: '12px 14px 12px 40px', appearance: 'none', backgroundColor: 'transparent' }}
               >
@@ -514,7 +522,15 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               <Globe size={15} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', pointerEvents: 'none' }} />
               <select
                 value={language}
-                onChange={(e) => setLanguage(e.target.value)}
+                onChange={async (e) => {
+                  const newLang = e.target.value;
+                  setLanguage(newLang);
+                  try {
+                    await onSaveProfile(name, pin, currency, newLang, email);
+                  } catch (err) {
+                    console.warn('Language auto-sync error:', err);
+                  }
+                }}
                 className="glass-input"
                 style={{ width: '100%', paddingLeft: '40px', fontSize: '13px', padding: '12px 14px 12px 40px', appearance: 'none', backgroundColor: 'transparent' }}
               >
