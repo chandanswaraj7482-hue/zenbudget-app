@@ -39,16 +39,16 @@ interface TransactionModalProps {
 }
 
 const CATEGORIES = [
-  { id: 'food', label: '🍔 Food & Drinks', icon: <Utensils size={16} />, color: 'var(--warning)' },
-  { id: 'shopping', label: '🛍️ Shopping', icon: <ShoppingBag size={16} />, color: 'var(--secondary)' },
-  { id: 'entertainment', label: '🎬 Entertainment', icon: <Film size={16} />, color: 'var(--primary)' },
-  { id: 'bills', label: '💳 Bills & Utilities', icon: <CreditCard size={16} />, color: 'var(--info)' },
-  { id: 'travel', label: '✈️ Travel', icon: <Compass size={16} />, color: 'var(--info)' },
-  { id: 'health', label: '🏥 Health', icon: <HeartPulse size={16} />, color: 'var(--success)' },
-  { id: 'salary', label: '💼 Salary / Income', icon: <Briefcase size={16} />, color: 'var(--success)' },
-  { id: 'rent', label: '🏠 Rent & Housing', icon: <Home size={16} />, color: 'var(--warning)' },
-  { id: 'groceries', label: '🛒 Groceries', icon: <ShoppingBag size={16} />, color: 'var(--primary)' },
-  { id: 'other', label: '📦 Other', icon: <MoreHorizontal size={16} />, color: 'var(--text-muted)' }
+  { id: 'food', label: 'Food', icon: <Utensils size={18} />, color: 'var(--warning)', emoji: '🍔' },
+  { id: 'shopping', label: 'Shopping', icon: <ShoppingBag size={18} />, color: 'var(--secondary)', emoji: '🛍️' },
+  { id: 'entertainment', label: 'Fun', icon: <Film size={18} />, color: 'var(--primary)', emoji: '🎬' },
+  { id: 'bills', label: 'Bills', icon: <CreditCard size={18} />, color: 'var(--info)', emoji: '💳' },
+  { id: 'groceries', label: 'Groceries', icon: <ShoppingBag size={18} />, color: 'var(--primary)', emoji: '🛒' },
+  { id: 'travel', label: 'Travel', icon: <Compass size={18} />, color: 'var(--info)', emoji: '✈️' },
+  { id: 'health', label: 'Health', icon: <HeartPulse size={18} />, color: 'var(--success)', emoji: '🏥' },
+  { id: 'rent', label: 'Rent', icon: <Home size={18} />, color: 'var(--warning)', emoji: '🏠' },
+  { id: 'salary', label: 'Salary', icon: <Briefcase size={18} />, color: 'var(--success)', emoji: '💼' },
+  { id: 'other', label: 'Other', icon: <MoreHorizontal size={18} />, color: 'var(--text-muted)', emoji: '📦' }
 ] as const;
 
 export const TransactionModal: React.FC<TransactionModalProps> = ({
@@ -822,24 +822,30 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           )}
 
           {/* Amount Input */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'center' }}>
-            <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'left' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Amount
             </label>
-            <div style={{ position: 'relative' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              background: 'var(--bg-input)',
+              borderRadius: '16px',
+              padding: '12px 18px',
+              border: '1px solid var(--border-input)'
+            }}>
               <span style={{ 
-                position: 'absolute', 
-                left: '16px', 
-                top: '50%', 
-                transform: 'translateY(-50%)', 
-                fontSize: '28px', 
-                fontWeight: 700,
-                color: 'var(--text-secondary)'
+                fontSize: '26px', 
+                fontWeight: 900,
+                color: type === 'expense' ? 'var(--danger)' : 'var(--success)',
+                minWidth: '20px'
               }}>
                 {currencySymbol}
               </span>
               <input
                 type="text"
+                className="unadorned-input"
                 inputMode="decimal"
                 required
                 value={amount}
@@ -851,16 +857,15 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 }}
                 placeholder="0"
                 style={{
-                  width: '100%',
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: '16px',
-                  padding: '16px 16px 16px 40px',
-                  fontSize: '28px',
-                  fontWeight: 700,
+                  flex: 1,
+                  background: 'transparent',
+                  border: 'none',
+                  fontSize: '26px',
+                  fontWeight: 900,
                   color: type === 'expense' ? 'var(--danger)' : 'var(--success)',
                   outline: 'none',
-                  textAlign: 'left'
+                  padding: '2px 4px',
+                  fontFamily: "'Manrope', sans-serif"
                 }}
               />
             </div>
@@ -868,28 +873,48 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
           {/* Title Field */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <label style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               {type === 'income' ? 'Income Source' : 'Expense Description'}
             </label>
-            <input
-              type="text"
-              required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder={type === 'income' ? 'e.g., Salary, Freelance, Gift' : 'e.g., Grocery Shopping, Uber, Zomato'}
-              className="glass-input"
-            />
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              background: 'var(--bg-input)',
+              borderRadius: '16px',
+              padding: '12px 18px',
+              border: '1px solid var(--border-input)'
+            }}>
+              <input
+                type="text"
+                className="unadorned-input"
+                required
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder={type === 'income' ? 'e.g., Salary, Freelance, Gift' : 'e.g., Grocery Shopping, Uber, Zomato'}
+                style={{
+                  flex: 1,
+                  background: 'transparent',
+                  border: 'none',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  outline: 'none',
+                  padding: '2px 4px'
+                }}
+              />
+            </div>
           </div>
 
           {/* Category Field (only if type is expense) */}
           {type === 'expense' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <label style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Category
               </label>
               <div style={{ 
                 display: 'grid', 
-                gridTemplateColumns: 'repeat(4, 1fr)', 
+                gridTemplateColumns: 'repeat(5, 1fr)', 
                 gap: '8px' 
               }}>
                 {CATEGORIES.map((cat) => {
@@ -907,27 +932,35 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         gap: '6px',
                         padding: '10px 4px',
                         borderRadius: '14px',
-                        border: '1px solid',
+                        border: isSelected ? '2px solid var(--primary)' : '1px solid var(--border-input)',
                         cursor: 'pointer',
-                        transition: 'var(--transition-smooth)',
-                        backgroundColor: isSelected ? 'rgba(34, 197, 94, 0.12)' : 'rgba(255, 255, 255, 0.02)',
-                        borderColor: isSelected ? 'var(--primary)' : 'rgba(255, 255, 255, 0.05)',
-                        color: isSelected ? 'var(--text-primary)' : 'var(--text-secondary)'
+                        transition: 'all 0.15s ease',
+                        background: isSelected ? 'rgba(34, 197, 94, 0.14)' : 'var(--bg-input)',
+                        boxShadow: isSelected ? '0 4px 12px rgba(34, 197, 94, 0.2)' : 'none'
                       }}
                     >
-                      <div className={cat.id === category ? '' : cat.color} style={{
+                      <div style={{
                         width: '32px',
                         height: '32px',
                         borderRadius: '10px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        backgroundColor: isSelected ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
-                        color: isSelected ? '#fff' : undefined
+                        backgroundColor: isSelected ? 'var(--primary)' : 'rgba(255,255,255,0.06)',
+                        color: isSelected ? '#ffffff' : 'var(--text-secondary)',
+                        transition: 'all 0.15s ease'
                       }}>
                         {cat.icon}
                       </div>
-                      <span style={{ fontSize: '9px', fontWeight: 600, textAlign: 'center', lineHeight: '1.2', marginTop: '2px' }}>{cat.label}</span>
+                      <span style={{ 
+                        fontSize: '11px', 
+                        fontWeight: 700, 
+                        textAlign: 'center', 
+                        lineHeight: '1.2',
+                        color: isSelected ? 'var(--primary)' : 'var(--text-primary)'
+                      }}>
+                        {cat.label}
+                      </span>
                     </button>
                   );
                 })}
@@ -937,27 +970,28 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
           {/* Premium Custom Date Picker */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <label style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Date
             </label>
             <div style={{ position: 'relative' }}>
-              <Calendar size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', zIndex: 2 }} />
-              
               <div 
                 onClick={() => setShowCalendar(!showCalendar)}
-                className="glass-input"
                 style={{ 
-                  paddingLeft: '48px', 
-                  cursor: 'pointer', 
                   display: 'flex', 
                   alignItems: 'center', 
-                  height: '42px',
-                  fontSize: '13px',
-                  color: 'var(--text-primary)',
+                  gap: '12px',
+                  background: 'var(--bg-input)',
+                  borderRadius: '16px',
+                  padding: '12px 18px',
+                  border: '1px solid var(--border-input)',
+                  cursor: 'pointer',
                   userSelect: 'none'
                 }}
               >
-                {new Date(date).toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                <Calendar size={18} color="var(--text-secondary)" style={{ flexShrink: 0 }} />
+                <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  {new Date(date).toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                </span>
               </div>
 
               {/* Glassmorphic React Calendar Panel */}
@@ -966,7 +1000,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   className="glass-panel" 
                   style={{
                     position: 'absolute',
-                    top: '48px',
+                    top: '54px',
                     left: 0,
                     right: 0,
                     zIndex: 100,
@@ -1009,12 +1043,10 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
                   {/* Days grid */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
-                    {/* Month Offset empty spaces */}
                     {Array.from({ length: getFirstDayOfMonth(navDate.getFullYear(), navDate.getMonth()) }).map((_, idx) => (
                       <div key={`empty-${idx}`} />
                     ))}
                     
-                    {/* Days items */}
                     {Array.from({ length: getDaysInMonth(navDate.getFullYear(), navDate.getMonth()) }).map((_, idx) => {
                       const day = idx + 1;
                       const isSelected = 
@@ -1050,12 +1082,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             </div>
           </div>
 
-          {/* Mood Selector (Optional) - Different for Income vs Expense */}
+          {/* Mood Selector (Optional) - Balanced 5-Column Grid */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <label style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               {type === 'income' ? 'How does this earning feel? (Optional)' : 'How did this spend feel? (Optional)'}
             </label>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
               {(type === 'income' ? INCOME_MOODS : EXPENSE_MOODS).map((m) => {
                 const currentNorm = normalizeMood(mood, type);
                 const isSelected = currentNorm === m.id;
@@ -1064,56 +1096,82 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     key={m.id}
                     type="button"
                     onClick={() => setMood(isSelected ? '' : m.id)}
-                    className={`glass-button ${isSelected ? 'active' : ''}`}
                     style={{
-                      flex: '1 1 18%',
-                      minWidth: '60px',
-                      padding: '10px 4px',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      gap: '4px',
-                      background: isSelected ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                      borderColor: isSelected ? 'var(--primary)' : 'rgba(255,255,255,0.1)'
+                      justifyContent: 'center',
+                      padding: '10px 4px',
+                      borderRadius: '14px',
+                      border: isSelected ? '2px solid var(--primary)' : '1px solid var(--border-input)',
+                      background: isSelected ? 'rgba(34, 197, 94, 0.15)' : 'var(--bg-input)',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      boxShadow: isSelected ? '0 4px 12px rgba(34, 197, 94, 0.2)' : 'none'
                     }}
                   >
-                    <span style={{ fontSize: '20px' }}>{m.emoji}</span>
-                    <span style={{ fontSize: '11px', fontWeight: 600 }}>{m.label}</span>
+                    <span style={{ fontSize: '22px' }}>{m.emoji}</span>
+                    <span style={{ 
+                      fontSize: '11px', 
+                      fontWeight: 700, 
+                      color: isSelected ? 'var(--primary)' : 'var(--text-secondary)',
+                      marginTop: '2px'
+                    }}>
+                      {m.label}
+                    </span>
                   </button>
                 );
               })}
             </div>
           </div>
 
-
-          {/* Payee UPI ID input removed */}
-
           {/* Notes Picker */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <label style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Notes (Optional)
             </label>
-            <div style={{ position: 'relative' }}>
-              <FileText size={18} style={{ position: 'absolute', left: '16px', top: '16px', color: 'var(--text-secondary)' }} />
+            <div style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '12px',
+              background: 'var(--bg-input)',
+              borderRadius: '16px',
+              padding: '12px 18px',
+              border: '1px solid var(--border-input)'
+            }}>
+              <FileText size={18} color="var(--text-secondary)" style={{ marginTop: '4px', flexShrink: 0 }} />
               <textarea
                 value={notes}
+                className="unadorned-input"
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder={type === 'income' ? 'Add income details, invoice number...' : 'Add receipt details or tags...'}
-                className="glass-input"
-                style={{ paddingLeft: '48px', minHeight: '80px', paddingTop: '14px', resize: 'vertical' }}
+                style={{
+                  flex: 1,
+                  background: 'transparent',
+                  border: 'none',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  outline: 'none',
+                  minHeight: '60px',
+                  resize: 'vertical',
+                  padding: '2px 4px',
+                  fontFamily: 'inherit'
+                }}
               />
             </div>
           </div>
 
           <button
             type="submit"
-            className="glass-button active"
             style={{
-              padding: '14px',
+              width: '100%',
+              padding: '16px',
               borderRadius: '16px',
               fontSize: '14px',
-              fontWeight: 700,
+              fontWeight: 800,
               background: 'linear-gradient(to right, var(--primary), var(--secondary))',
+              color: '#ffffff',
               border: 'none',
               boxShadow: '0 4px 15px rgba(34, 197, 94, 0.3)',
               cursor: 'pointer',
@@ -1143,14 +1201,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               }}
               style={{
                 width: '100%',
-                padding: '14px',
+                padding: '16px',
                 borderRadius: '16px',
-                fontSize: '13px',
-                fontWeight: 800,
-                background: 'linear-gradient(135deg, #6366f1 0%, #3b82f6 50%, #10b981 100%)',
-                color: '#fff',
+                fontSize: '14px',
+                fontWeight: 900,
+                background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
+                color: '#ffffff',
                 border: 'none',
-                boxShadow: '0 6px 20px rgba(99, 102, 241, 0.4)',
+                boxShadow: '0 8px 24px rgba(99, 102, 241, 0.4)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
