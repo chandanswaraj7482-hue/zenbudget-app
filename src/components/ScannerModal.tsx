@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, QrCode, Phone, Hash, FileText, Tag, Send } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { Capacitor } from '@capacitor/core';
@@ -626,31 +627,46 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
     }, 2000);
   };
 
-  return (
+  return createPortal(
     <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)',
-      zIndex: 1200, display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
-      animation: 'fadeIn 0.2s ease-out'
+      position: 'fixed', inset: 0,
+      backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+      zIndex: 9999999, display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
+      animation: 'fadeIn 0.2s ease-out', padding: '0'
     }}>
       <div style={{
         width: '100%', maxWidth: '440px', background: 'var(--bg-card)',
         borderRadius: '28px 28px 0 0', padding: '0 0 32px',
         maxHeight: '92vh', overflowY: 'auto', border: '1px solid var(--border-card)',
-        borderBottom: 'none', position: 'relative'
+        borderBottom: 'none', position: 'relative', boxShadow: '0 -10px 40px rgba(0,0,0,0.5)',
+        WebkitOverflowScrolling: 'touch'
       }}>
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 20px 10px', borderBottom: '1px solid var(--border-input)' }}>
+        {/* Sticky Header */}
+        <div style={{
+          position: 'sticky', top: 0, zIndex: 30, background: 'var(--bg-card)',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          padding: '16px 20px', borderBottom: '1px solid var(--border-input)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+        }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ padding: '8px', borderRadius: '12px', background: 'rgba(34,197,94,0.1)' }}>
+            <div style={{ padding: '8px', borderRadius: '12px', background: 'rgba(34,197,94,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <QrCode size={20} color="var(--primary)" />
             </div>
             <div style={{ textAlign: 'left' }}>
-              <h3 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>Scan & Pay</h3>
-              <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{todayDisplay}</span>
+              <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>Scan & Pay</h3>
+              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>{todayDisplay}</span>
             </div>
           </div>
-          <button onClick={() => { stopCamera(); onClose(); }} style={{ background: 'var(--bg-input)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+          <button 
+            type="button"
+            onClick={() => { stopCamera(); onClose(); }} 
+            style={{
+              background: 'var(--bg-input)', border: '1px solid var(--border-input)',
+              borderRadius: '50%', width: '34px', height: '34px', color: 'var(--text-primary)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.05)'
+            }}
+          >
             <X size={16} />
           </button>
         </div>
@@ -680,12 +696,13 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
             )}
 
             {/* Payment method tabs */}
-            <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', background: 'var(--bg-input)', padding: '4px', borderRadius: '12px', border: '1px solid var(--border-input)' }}>
+            <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', background: 'var(--bg-input)', padding: '4px', borderRadius: '14px', border: '1px solid var(--border-input)' }}>
               {PAYMENT_TABS.map(tab => (
-                <button key={tab} onClick={() => setActivePayTab(tab as any)} style={{
-                  flex: 1, padding: '8px 4px', borderRadius: '10px', border: 'none', fontSize: '10px', fontWeight: 700, cursor: 'pointer',
-                  background: activePayTab === tab ? 'rgba(34,197,94,0.2)' : 'transparent',
-                  color: activePayTab === tab ? 'var(--primary)' : 'var(--text-secondary)',
+                <button key={tab} type="button" onClick={() => setActivePayTab(tab as any)} style={{
+                  flex: 1, padding: '9px 4px', borderRadius: '10px', border: 'none', fontSize: '11px', fontWeight: 800, cursor: 'pointer',
+                  background: activePayTab === tab ? 'var(--primary)' : 'transparent',
+                  color: activePayTab === tab ? '#ffffff' : 'var(--text-secondary)',
+                  boxShadow: activePayTab === tab ? '0 2px 8px rgba(34,197,94,0.3)' : 'none',
                   transition: 'all 0.2s ease'
                 }}>
                   {tab}
@@ -697,29 +714,49 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
             {activePayTab === 'Scan QR' && (
               <div style={{ marginBottom: '16px' }}>
                 <div style={{
-                  height: '200px', borderRadius: '16px', overflow: 'hidden', position: 'relative',
-                  background: '#000', border: '2px solid rgba(34,197,94,0.4)'
+                  height: '210px', borderRadius: '18px', overflow: 'hidden', position: 'relative',
+                  background: '#09090b', border: '2px solid rgba(34,197,94,0.4)', boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
                 }}>
                   <video ref={videoRef} style={{ width: '100%', height: '100%', objectFit: 'cover' }} playsInline muted />
                   {!isScanning && (
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '16px', textAlign: 'center' }}>
-                      <QrCode size={40} color="rgba(34,197,94,0.6)" />
-                      <span style={{ color: '#e2e8f0', fontSize: '12px', fontWeight: 600 }}>
-                        Point camera to QR or Upload QR Image
+                      <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(34,197,94,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <QrCode size={30} color="var(--primary)" />
+                      </div>
+                      <span style={{ color: '#ffffff', fontSize: '13px', fontWeight: 800 }}>
+                        Point Camera to QR or Upload Image
                       </span>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '10px' }}>
-                        Tap "Upload QR Image" or enter Amount & UPI ID below to pay directly!
+                      <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '11px', maxWidth: '280px', lineHeight: 1.4 }}>
+                        Tap "Start Camera" or "Upload QR Image" to auto-detect merchant & amount!
                       </span>
                     </div>
                   )}
                   {/* Corner brackets for scan effect */}
                   {isScanning && (
                     <>
-                      <div style={{ position: 'absolute', top: 16, left: 16, width: '30px', height: '30px', borderTop: '3px solid #22c55e', borderLeft: '3px solid #22c55e', borderRadius: '2px' }} />
-                      <div style={{ position: 'absolute', top: 16, right: 16, width: '30px', height: '30px', borderTop: '3px solid #22c55e', borderRight: '3px solid #22c55e', borderRadius: '2px' }} />
-                      <div style={{ position: 'absolute', bottom: 16, left: 16, width: '30px', height: '30px', borderBottom: '3px solid #22c55e', borderLeft: '3px solid #22c55e', borderRadius: '2px' }} />
-                      <div style={{ position: 'absolute', bottom: 16, right: 16, width: '30px', height: '30px', borderBottom: '3px solid #22c55e', borderRight: '3px solid #22c55e', borderRadius: '2px' }} />
-                      <p style={{ position: 'absolute', bottom: 8, left: 0, right: 0, textAlign: 'center', fontSize: '11px', color: 'rgba(255,255,255,0.6)' }}>Point camera at merchant QR code to scan. Auto-fills amount & deep-links to payment.</p>
+                      <div style={{ position: 'absolute', top: 16, left: 16, width: '32px', height: '32px', borderTop: '3px solid #22c55e', borderLeft: '3px solid #22c55e', borderRadius: '4px' }} />
+                      <div style={{ position: 'absolute', top: 16, right: 16, width: '32px', height: '32px', borderTop: '3px solid #22c55e', borderRight: '3px solid #22c55e', borderRadius: '4px' }} />
+                      <div style={{ position: 'absolute', bottom: 16, left: 16, width: '32px', height: '32px', borderBottom: '3px solid #22c55e', borderLeft: '3px solid #22c55e', borderRadius: '4px' }} />
+                      <div style={{ position: 'absolute', bottom: 16, right: 16, width: '32px', height: '32px', borderBottom: '3px solid #22c55e', borderRight: '3px solid #22c55e', borderRadius: '4px' }} />
+                      
+                      {/* High-contrast instruction badge */}
+                      <div style={{ position: 'absolute', bottom: 10, left: 10, right: 10, textAlign: 'center' }}>
+                        <span style={{
+                          background: 'rgba(0, 0, 0, 0.75)',
+                          backdropFilter: 'blur(8px)',
+                          WebkitBackdropFilter: 'blur(8px)',
+                          color: '#ffffff',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          padding: '5px 14px',
+                          borderRadius: '20px',
+                          display: 'inline-block',
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                        }}>
+                          📷 Point camera at QR code • Auto-detects details
+                        </span>
+                      </div>
                     </>
                   )}
                 </div>
@@ -737,14 +774,19 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                     type="button"
                     onClick={startCamera}
                     style={{
-                      padding: '10px 12px',
-                      borderRadius: '10px',
+                      flex: 1,
+                      padding: '11px 12px',
+                      borderRadius: '12px',
                       background: 'rgba(34, 197, 94, 0.12)',
                       border: '1px solid rgba(34, 197, 94, 0.3)',
                       color: 'var(--primary)',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      cursor: 'pointer'
+                      fontSize: '12px',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px'
                     }}
                   >
                     📷 Start Camera
@@ -756,14 +798,18 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                     }}
                     style={{
                       flex: 1,
-                      padding: '10px',
-                      borderRadius: '10px',
-                      background: 'rgba(34, 197, 94, 0.15)',
+                      padding: '11px 12px',
+                      borderRadius: '12px',
+                      background: 'rgba(34, 197, 94, 0.12)',
                       border: '1px dashed var(--primary)',
                       color: 'var(--primary)',
-                      fontSize: '11px',
+                      fontSize: '12px',
                       fontWeight: 800,
                       cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
                       transition: 'all 0.2s'
                     }}
                   >
@@ -772,7 +818,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                 </div>
 
                 {scanResult && (
-                  <div style={{ marginTop: '8px', padding: '8px 12px', background: 'rgba(34,197,94,0.1)', borderRadius: '10px', fontSize: '12px', color: 'var(--primary)' }}>
+                  <div style={{ marginTop: '10px', padding: '10px 14px', background: 'rgba(34,197,94,0.12)', borderRadius: '12px', fontSize: '12px', color: 'var(--primary)', fontWeight: 700, border: '1px solid rgba(34,197,94,0.3)' }}>
                     {scanResult}
                   </div>
                 )}
@@ -780,7 +826,12 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                   type="text"
                   placeholder="Or paste UPI QR text / UPI ID here..."
                   onChange={e => handleManualQRInput(e.target.value)}
-                  style={{ width: '100%', padding: '10px 12px', marginTop: '10px', borderRadius: '10px', background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)', fontSize: '12px', boxSizing: 'border-box' }}
+                  style={{
+                    width: '100%', padding: '12px 14px', marginTop: '10px',
+                    borderRadius: '12px', background: 'var(--bg-input)',
+                    border: '1px solid var(--border-input)', color: 'var(--text-primary)',
+                    fontSize: '13px', fontWeight: 600, boxSizing: 'border-box', outline: 'none'
+                  }}
                 />
               </div>
             )}
@@ -788,8 +839,8 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
             {/* Mobile Number Tab */}
             {activePayTab === 'Mobile' && (
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>Mobile Number</label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-input)', borderRadius: '12px', padding: '14px', border: '1px solid var(--border-input)' }}>
+                <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>Mobile Number</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-input)', borderRadius: '14px', padding: '14px', border: '1px solid var(--border-input)' }}>
                   <Phone size={18} color="var(--primary)" />
                   <input
                     type="tel"
@@ -799,7 +850,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                     value={payMobile}
                     onChange={e => handleMobileChange(e.target.value)}
                     maxLength={10}
-                    style={{ flex: 1, background: 'none', border: 'none', color: 'var(--text-primary)', fontSize: '18px', fontWeight: 700, outline: 'none', letterSpacing: '0.08em', fontFamily: "'Manrope', sans-serif" }}
+                    style={{ flex: 1, background: 'none', border: 'none', color: 'var(--text-primary)', fontSize: '18px', fontWeight: 800, outline: 'none', letterSpacing: '0.08em', fontFamily: "'Manrope', sans-serif" }}
                   />
                   {payMobile.length === 10 && (
                     <span style={{ fontSize: '18px' }}>✅</span>
@@ -810,21 +861,21 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
 
             {/* Bank A/c Tab */}
             {activePayTab === 'Bank A/c' && (
-              <div style={{ marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div>
-                  <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 700, display: 'block', marginBottom: '6px' }}>Account Number</label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-input)', borderRadius: '12px', padding: '12px', border: '1px solid var(--border-input)' }}>
+                  <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>Account Number</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-input)', borderRadius: '14px', padding: '14px', border: '1px solid var(--border-input)' }}>
                     <Hash size={16} color="var(--text-secondary)" />
-                    <input type="text" inputMode="numeric" placeholder="Enter account number" value={payAccNum} onChange={e => setPayAccNum(e.target.value)} style={{ flex: 1, background: 'none', border: 'none', color: 'var(--text-primary)', fontSize: '14px', outline: 'none' }} />
+                    <input type="text" inputMode="numeric" placeholder="Enter account number" value={payAccNum} onChange={e => setPayAccNum(e.target.value)} style={{ flex: 1, background: 'none', border: 'none', color: 'var(--text-primary)', fontSize: '14px', fontWeight: 700, outline: 'none' }} />
                   </div>
                 </div>
                 <div>
-                  <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 700, display: 'block', marginBottom: '6px' }}>Bank IFSC Code</label>
-                  <input type="text" placeholder="e.g. SBIN0004561" value={payIfsc} onChange={e => setPayIfsc(e.target.value.toUpperCase())} style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)', fontSize: '14px', boxSizing: 'border-box' }} />
+                  <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>Bank IFSC Code</label>
+                  <input type="text" placeholder="e.g. SBIN0004561" value={payIfsc} onChange={e => setPayIfsc(e.target.value.toUpperCase())} style={{ width: '100%', padding: '14px', borderRadius: '14px', background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)', fontSize: '14px', fontWeight: 700, boxSizing: 'border-box', outline: 'none' }} />
                 </div>
                 <div>
-                  <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 700, display: 'block', marginBottom: '6px' }}>Account Holder Name</label>
-                  <input type="text" placeholder="Merchant / Person name" value={payHolderName} onChange={e => setPayHolderName(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)', fontSize: '14px', boxSizing: 'border-box' }} />
+                  <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>Account Holder Name</label>
+                  <input type="text" placeholder="Merchant / Person name" value={payHolderName} onChange={e => setPayHolderName(e.target.value)} style={{ width: '100%', padding: '14px', borderRadius: '14px', background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)', fontSize: '14px', fontWeight: 700, boxSizing: 'border-box', outline: 'none' }} />
                 </div>
               </div>
             )}
@@ -832,16 +883,16 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
             {/* UPI ID Tab */}
             {activePayTab === 'UPI ID' && (
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 700, display: 'block', marginBottom: '6px' }}>UPI ID</label>
-                <input type="text" placeholder="name@upi" value={payUpiIdDirect} onChange={e => setPayUpiIdDirect(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)', fontSize: '14px', boxSizing: 'border-box' }} />
+                <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>UPI ID</label>
+                <input type="text" placeholder="name@upi" value={payUpiIdDirect} onChange={e => setPayUpiIdDirect(e.target.value)} style={{ width: '100%', padding: '14px', borderRadius: '14px', background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)', fontSize: '14px', fontWeight: 700, boxSizing: 'border-box', outline: 'none' }} />
               </div>
             )}
 
             {/* Amount */}
-            <div style={{ marginBottom: '12px' }}>
-              <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>Amount (₹)</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-input)', borderRadius: '12px', padding: '14px', border: '1px solid var(--border-input)' }}>
-                <span style={{ fontSize: '20px', color: 'var(--primary)', fontWeight: 800 }}>₹</span>
+            <div style={{ marginBottom: '14px' }}>
+              <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>Amount (₹)</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-input)', borderRadius: '14px', padding: '14px 16px', border: '1px solid var(--border-input)' }}>
+                <span style={{ fontSize: '22px', color: 'var(--primary)', fontWeight: 900 }}>₹</span>
                 <input
                   type="text"
                   inputMode="decimal"
@@ -853,50 +904,56 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                     if (parts.length > 2) return;
                     setAmount(clean);
                   }}
-                  style={{ flex: 1, background: 'none', border: 'none', color: 'var(--text-primary)', fontSize: '24px', fontWeight: 800, outline: 'none', fontFamily: "'Manrope', sans-serif" }}
+                  style={{ flex: 1, background: 'none', border: 'none', color: 'var(--text-primary)', fontSize: '24px', fontWeight: 900, outline: 'none', fontFamily: "'Manrope', sans-serif" }}
                 />
               </div>
             </div>
 
             {/* Description */}
-            <div style={{ marginBottom: '12px' }}>
-              <label style={{ fontSize: '11px', color: 'var(--text-primary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>Description</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-input)', borderRadius: '12px', padding: '12px', border: '1px solid var(--border-input)' }}>
+            <div style={{ marginBottom: '14px' }}>
+              <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>Description</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-input)', borderRadius: '14px', padding: '13px 16px', border: '1px solid var(--border-input)' }}>
                 <FileText size={16} color="var(--text-secondary)" />
-                <input type="text" placeholder="What is this for?" value={description} onChange={e => setDescription(e.target.value)} style={{ flex: 1, background: 'none', border: 'none', color: 'var(--text-primary)', fontSize: '13px', outline: 'none' }} />
+                <input type="text" placeholder="What is this for?" value={description} onChange={e => setDescription(e.target.value)} style={{ flex: 1, background: 'none', border: 'none', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 600, outline: 'none' }} />
               </div>
             </div>
 
             {/* Category */}
-            <div style={{ marginBottom: '12px' }}>
-              <label style={{ fontSize: '11px', color: 'var(--text-primary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>Category</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-input)', borderRadius: '12px', padding: '12px', border: '1px solid var(--border-input)' }}>
+            <div style={{ marginBottom: '14px' }}>
+              <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>Category</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-input)', borderRadius: '14px', padding: '13px 16px', border: '1px solid var(--border-input)' }}>
                 <Tag size={16} color="var(--text-secondary)" />
-                <select value={category} onChange={e => setCategory(e.target.value)} style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '13px', outline: 'none', cursor: 'pointer' }}>
+                <select value={category} onChange={e => setCategory(e.target.value)} style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 700, outline: 'none', cursor: 'pointer' }}>
                   {CATEGORIES.map(c => <option key={c} value={c} style={{ background: 'var(--bg-card)', color: 'var(--text-primary)' }}>{c}</option>)}
                 </select>
               </div>
             </div>
 
             {/* Feeling */}
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ fontSize: '11px', color: 'var(--text-primary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '8px' }}>How does this feel?</label>
+            <div style={{ marginBottom: '22px' }}>
+              <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '8px' }}>How does this feel?</label>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {FEELINGS.map(f => (
-                  <button key={f.label} onClick={() => setFeeling(f.label)} style={{
-                    padding: '8px 12px', borderRadius: '10px', border: feeling === f.label ? '2px solid var(--primary)' : '1px solid var(--border-input)',
-                    background: feeling === f.label ? 'rgba(34,197,94,0.15)' : 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '12px', cursor: 'pointer', fontWeight: 700,
-                    display: 'flex', alignItems: 'center', gap: '4px'
+                  <button key={f.label} type="button" onClick={() => setFeeling(f.label)} style={{
+                    padding: '8px 14px', borderRadius: '12px',
+                    border: feeling === f.label ? '2px solid var(--primary)' : '1px solid var(--border-input)',
+                    background: feeling === f.label ? 'rgba(34,197,94,0.15)' : 'var(--bg-input)',
+                    color: feeling === f.label ? 'var(--primary)' : 'var(--text-primary)',
+                    fontSize: '12px', cursor: 'pointer', fontWeight: 800,
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    boxShadow: feeling === f.label ? '0 2px 8px rgba(34,197,94,0.2)' : 'none',
+                    transition: 'all 0.15s ease'
                   }}>
-                    {f.emoji} {f.label}
+                    <span>{f.emoji}</span> <span>{f.label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Action Buttons: Cashfree Direct Pay & Standard UPI Proceed */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingBottom: '10px' }}>
               <button 
+                type="button"
                 onClick={() => {
                   const numAmt = parseFloat(amount) || 0;
                   if (isNaN(numAmt) || numAmt <= 0) {
@@ -904,173 +961,168 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                     return;
                   }
 
-                  const isUnlocked = checkHasScanPayAccess();
-                  if (!isUnlocked) {
-                    if (onPayViaCashfree) {
-                      const payTitle = description.trim() || `Scan & Pay (${merchantName || recipientId || 'Merchant'})`;
-                      onPayViaCashfree(numAmt, payTitle);
-                      stopCamera();
-                      onClose();
-                    } else {
-                      handleProceedToPayment();
+                  let actionType: 'SCAN_OR_UPI' | 'MOBILE_NUMBER' | 'BANK_TRANSFER' = 'SCAN_OR_UPI';
+                  let payloadData: any = {};
+
+                  if (activePayTab === 'Mobile') {
+                    if (!payMobile || payMobile.length !== 10) {
+                      showErr('Please enter a valid 10-digit mobile number.');
+                      return;
                     }
+                    actionType = 'MOBILE_NUMBER';
+                    payloadData = { mobileNumber: payMobile, upiSuffix: mobileUpiSuffix };
+                  } else if (activePayTab === 'Bank A/c') {
+                    if (!payAccNum || !payIfsc) {
+                      showErr('Please enter Bank Account Number and IFSC Code.');
+                      return;
+                    }
+                    actionType = 'BANK_TRANSFER';
+                    payloadData = { accountNumber: payAccNum, ifsc: payIfsc, recipientName: payHolderName };
                   } else {
-                    let actionType: 'SCAN_OR_UPI' | 'MOBILE_NUMBER' | 'BANK_TRANSFER' = 'SCAN_OR_UPI';
-                    let payloadData: any = {};
-
-                    if (activePayTab === 'Mobile') {
-                      actionType = 'MOBILE_NUMBER';
-                      payloadData = { phone: payMobile, amount: numAmt };
-                    } else if (activePayTab === 'Bank A/c') {
-                      actionType = 'BANK_TRANSFER';
-                      payloadData = { accountNumber: payAccNum, ifsc: payIfsc, holderName: payHolderName, amount: numAmt };
-                    } else if (activePayTab === 'UPI ID') {
-                      actionType = 'SCAN_OR_UPI';
-                      payloadData = { targetUpiId: payUpiIdDirect, amount: numAmt };
-                    } else {
-                      actionType = 'SCAN_OR_UPI';
-                      payloadData = _rawQrUrl || { targetUpiId: recipientId, recipientName: merchantName, amount: numAmt };
+                    const finalVpa = recipientId || payUpiIdDirect;
+                    if (!finalVpa) {
+                      showErr('Please scan a QR code or enter a valid UPI ID (e.g. merchant@upi).');
+                      return;
                     }
-
-                    handleZenBudgetPaymentSystem(actionType, payloadData, null, () => {
-                      if (onPayViaCashfree) onPayViaCashfree(numAmt, 'Scan & Pay');
-                    });
-                    saveTransactionRecord();
-                    stopCamera();
-                    onClose();
+                    actionType = 'SCAN_OR_UPI';
+                    payloadData = { payeeAddress: finalVpa, payeeName: merchantName };
                   }
-                }} 
+
+                  handleZenBudgetPaymentSystem(actionType, numAmt, payloadData);
+                  stopCamera();
+                  onClose();
+                }}
                 style={{
-                  width: '100%', padding: '16px', borderRadius: '16px', border: 'none',
-                  background: checkHasScanPayAccess() ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'linear-gradient(135deg, #6366f1 0%, #3b82f6 50%, #10b981 100%)',
-                  color: '#fff', fontSize: '15px', fontWeight: 900, cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                  boxShadow: '0 6px 20px rgba(16, 185, 129, 0.4)',
-                  transition: 'all 0.2s ease'
+                  width: '100%',
+                  padding: '16px',
+                  borderRadius: '16px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
+                  color: '#ffffff',
+                  fontWeight: 900,
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 8px 24px rgba(99, 102, 241, 0.4)',
+                  letterSpacing: '0.02em'
                 }}
               >
-                <span>
-                  {checkHasScanPayAccess() 
-                    ? `⚡ Pay via UPI App (0% Fee — ₹${amount || 0})` 
-                    : '⚡ Pay via Cashfree (PhonePe / Cards / Netbanking)'}
-                </span>
+                <span>⚡ Pay via Cashfree (PhonePe / Cards / Netbanking)</span>
               </button>
 
+              {/* Standard UPI Direct Button */}
               <button 
-                onClick={handleProceedToPayment} 
+                type="button"
+                onClick={handleProceedToPayment}
                 style={{
-                  width: '100%', padding: '14px', borderRadius: '14px',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  background: 'rgba(255, 255, 255, 0.06)',
-                  color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                  transition: 'all 0.2s ease'
+                  width: '100%',
+                  padding: '14px',
+                  borderRadius: '16px',
+                  border: '1px solid var(--border-input)',
+                  background: 'var(--bg-input)',
+                  color: 'var(--text-primary)',
+                  fontWeight: 800,
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px'
                 }}
               >
-                <Send size={15} /> Standard UPI Deep Link ({amount ? `₹${amount}` : '₹0'})
+                <span>Proceed via Standard UPI Apps</span>
+                <Send size={15} />
               </button>
             </div>
           </div>
         )}
 
         {step === 'payment' && (
-          <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ textAlign: 'center', padding: '20px' }}>
-              <div style={{ fontSize: '48px', marginBottom: '12px' }}>💳</div>
-              <h3 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>Confirm Payment</h3>
-              <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Tap below to open your payment app with all details pre-filled</p>
+          <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'center' }}>
+            <div style={{ padding: '20px', background: 'var(--bg-input)', borderRadius: '20px', border: '1px solid var(--border-input)' }}>
+              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 700 }}>PAYING TO</span>
+              <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: '4px 0 2px' }}>
+                {merchantName || recipientId || (activePayTab === 'Mobile' ? `+91 ${payMobile}` : (activePayTab === 'Bank A/c' ? payHolderName || payAccNum : payUpiIdDirect)) || 'Merchant'}
+              </h3>
+              <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '0 0 12px' }}>
+                {recipientId || (activePayTab === 'Mobile' ? `${payMobile}@${mobileUpiSuffix}` : (activePayTab === 'Bank A/c' ? `A/C: ${payAccNum} (${payIfsc})` : payUpiIdDirect))}
+              </p>
+              <div style={{ fontSize: '32px', fontWeight: 900, color: 'var(--primary)' }}>
+                ₹{amount || '0'}
+              </div>
             </div>
 
-            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '16px', padding: '20px', border: '1px solid rgba(255,255,255,0.08)' }}>
-              {[
-                { label: 'Amount', value: `₹${amount}`, highlight: true },
-                { label: 'To', value: activePayTab === 'Mobile' ? `Mobile (${payMobile})` : activePayTab === 'Bank A/c' ? (payHolderName || payAccNum) : activePayTab === 'UPI ID' ? payUpiIdDirect : (merchantName || recipientId || 'merchant@upi') },
-                ...(activePayTab === 'Bank A/c' && payIfsc ? [{ label: 'IFSC Code', value: payIfsc }] : []),
-                { label: 'For', value: description || 'Payment' },
-                { label: 'Category', value: category },
-                { label: 'Feeling', value: `${FEELINGS.find(f => f.label === feeling)?.emoji} ${feeling}` },
-                { label: 'Date', value: todayDisplay },
-              ].map(row => (
-                <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{row.label}</span>
-                  <span style={{ fontSize: '13px', fontWeight: 700, color: row.highlight ? 'var(--primary)' : '#fff' }}>{row.value}</span>
-                </div>
-              ))}
-            </div>
+            {/* Direct Pay button via Cashfree */}
+            <button
+              type="button"
+              onClick={() => {
+                if (onPayViaCashfree) {
+                  const payTitle = description.trim() || `Scan & Pay (${merchantName || recipientId || 'Merchant'})`;
+                  onPayViaCashfree(parseFloat(amount) || 0, payTitle);
+                  stopCamera();
+                  onClose();
+                } else {
+                  handlePayViaSelectedApp('any');
+                }
+              }}
+              style={{
+                width: '100%',
+                padding: '16px',
+                borderRadius: '16px',
+                border: 'none',
+                background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
+                color: '#ffffff',
+                fontWeight: 900,
+                fontSize: '14px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: '0 8px 24px rgba(99, 102, 241, 0.4)'
+              }}
+            >
+              <span>⚡ Pay via Cashfree</span>
+            </button>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <button
-                type="button"
-                onClick={() => {
-                  if (onPayViaCashfree) {
-                    const payTitle = description.trim() || `Pay to ${merchantName || recipientId || 'Merchant'}`;
-                    onPayViaCashfree(parseFloat(amount) || 0, payTitle);
-                    stopCamera();
-                    onClose();
-                  } else {
-                    handlePay();
-                  }
-                }}
-                disabled={isPaying}
-                style={{
-                  width: '100%',
-                  padding: '14px 18px',
-                  borderRadius: '14px',
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #4f46e5 0%, #0284c7 100%)',
-                  color: '#ffffff',
-                  cursor: isPaying ? 'wait' : 'pointer',
-                  boxShadow: '0 4px 16px rgba(79, 70, 229, 0.35)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '3px'
-                }}
-              >
-                <div style={{ fontSize: '15px', fontWeight: 800, letterSpacing: '0.01em', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span>⚡ Pay via Cashfree</span>
-                </div>
-                <div style={{ fontSize: '11px', fontWeight: 500, opacity: 0.9 }}>
-                  PhonePe • GPay • Paytm • Cards • Netbanking
-                </div>
-              </button>
-            </div>
+            {/* Copy VPA Fallback */}
+            <button
+              type="button"
+              onClick={() => {
+                const targetVpa = recipientId || (activePayTab === 'Mobile' ? `${payMobile}@${mobileUpiSuffix}` : payUpiIdDirect);
+                if (targetVpa) {
+                  navigator.clipboard.writeText(targetVpa);
+                  showErr(`✅ Copied UPI VPA (${targetVpa}) to clipboard!`);
+                } else {
+                  showErr('No UPI VPA available to copy.');
+                }
+              }}
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '14px',
+                border: '1px dashed var(--border-input)',
+                background: 'var(--bg-input)',
+                color: 'var(--text-secondary)',
+                fontSize: '12px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                marginTop: '4px'
+              }}
+            >
+              📋 Copy Payee UPI ID / VPA
+            </button>
 
-              {/* Copy VPA Fallback */}
-              <button
-                type="button"
-                onClick={() => {
-                  const targetVpa = recipientId || (activePayTab === 'Mobile' ? `${payMobile}@${mobileUpiSuffix}` : payUpiIdDirect);
-                  if (targetVpa) {
-                    navigator.clipboard.writeText(targetVpa);
-                    showErr(`✅ Copied UPI VPA (${targetVpa}) to clipboard!`);
-                  } else {
-                    showErr('No UPI VPA available to copy.');
-                  }
-                }}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  borderRadius: '12px',
-                  border: '1px dashed rgba(255,255,255,0.2)',
-                  background: 'rgba(255,255,255,0.04)',
-                  color: 'var(--text-secondary)',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  marginTop: '4px'
-                }}
-              >
-                📋 Copy Payee UPI ID / VPA
-              </button>
-
-            <button onClick={() => setStep('details')} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline' }}>
+            <button type="button" onClick={() => setStep('details')} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>
               ← Edit Details
             </button>
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

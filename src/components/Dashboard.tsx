@@ -1204,28 +1204,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
             </div>
           ))}
-
-          {challenges.length > 3 && !showAllChallenges && (
-            <button
-              type="button"
-              onClick={() => setShowAllChallenges(true)}
-              style={{
-                width: '100%',
-                padding: '10px',
-                borderRadius: '14px',
-                border: '1px dashed var(--border-card)',
-                background: 'var(--bg-card)',
-                color: 'var(--primary)',
-                fontSize: '12px',
-                fontWeight: 800,
-                cursor: 'pointer',
-                textAlign: 'center',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
-              }}
-            >
-              See {challenges.length - 3} more challenge{challenges.length - 3 > 1 ? 's' : ''}... 🔽
-            </button>
-          )}
         </div>
       </div>
 
