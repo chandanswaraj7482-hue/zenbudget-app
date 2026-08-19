@@ -117,7 +117,9 @@ export const Transactions: React.FC<TransactionsProps> = ({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '80px' }} className="animate-fade-in">
-      <h2 style={{ fontSize: '22px', fontWeight: 800 }}>{t('transactions_title')}</h2>
+      <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em', margin: 0 }}>
+        {t('transactions_title')}
+      </h2>
 
       {/* Search Bar */}
       <div style={{ position: 'relative' }}>
@@ -127,8 +129,18 @@ export const Transactions: React.FC<TransactionsProps> = ({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t('search_placeholder')}
-          className="glass-input"
-          style={{ paddingLeft: '48px' }}
+          style={{
+            width: '100%',
+            padding: '13px 18px 13px 46px',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-card)',
+            borderRadius: '16px',
+            color: 'var(--text-primary)',
+            fontSize: '13.5px',
+            outline: 'none',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+            transition: 'all 0.15s ease'
+          }}
         />
       </div>
 
@@ -140,12 +152,18 @@ export const Transactions: React.FC<TransactionsProps> = ({
             <button
               key={item.id}
               onClick={() => setSelectedType(item.id as any)}
-              className={`glass-button ${selectedType === item.id ? 'active' : ''}`}
               style={{
                 flex: 1,
-                padding: '8px 12px',
+                padding: '9px 12px',
                 borderRadius: '12px',
-                fontSize: '13px'
+                fontSize: '13px',
+                fontWeight: 800,
+                border: selectedType === item.id ? 'none' : '1px solid var(--border-card)',
+                background: selectedType === item.id ? 'var(--primary)' : 'var(--bg-card)',
+                color: selectedType === item.id ? '#ffffff' : 'var(--text-secondary)',
+                cursor: 'pointer',
+                boxShadow: selectedType === item.id ? '0 2px 8px rgba(16, 185, 129, 0.25)' : 'none',
+                transition: 'all 0.15s ease'
               }}
             >
               {item.label}
@@ -167,16 +185,17 @@ export const Transactions: React.FC<TransactionsProps> = ({
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
               style={{
-                padding: '6px 14px',
+                padding: '7px 14px',
                 borderRadius: '12px',
-                border: '1px solid',
+                border: selectedCategory === cat.id ? 'none' : '1px solid var(--border-card)',
                 fontSize: '12px',
-                fontWeight: 600,
+                fontWeight: 700,
                 cursor: 'pointer',
                 flexShrink: 0,
-                backgroundColor: selectedCategory === cat.id ? 'var(--primary)' : 'rgba(255,255,255,0.03)',
-                borderColor: selectedCategory === cat.id ? 'transparent' : 'rgba(255,255,255,0.08)',
-                color: selectedCategory === cat.id ? '#fff' : 'var(--text-secondary)'
+                backgroundColor: selectedCategory === cat.id ? 'var(--primary)' : 'var(--bg-card)',
+                color: selectedCategory === cat.id ? '#ffffff' : 'var(--text-secondary)',
+                boxShadow: selectedCategory === cat.id ? '0 2px 8px rgba(16, 185, 129, 0.25)' : 'none',
+                transition: 'all 0.15s ease'
               }}
             >
               {cat.label}
@@ -186,29 +205,38 @@ export const Transactions: React.FC<TransactionsProps> = ({
 
         {/* Sort Row */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
-          <span style={{ color: 'var(--text-secondary)' }}>
+          <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>
             {t('showing_items').replace('{{count}}', String(filteredTransactions.length))}
           </span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--primary)', fontWeight: 600 }}>
-            <ArrowUpDown size={14} />
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-card)',
+            padding: '5px 12px',
+            borderRadius: '12px',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.02)'
+          }}>
+            <ArrowUpDown size={14} color="var(--primary)" />
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
               style={{
-                background: 'none',
+                background: 'transparent',
                 border: 'none',
-                color: 'inherit',
+                color: 'var(--text-primary)',
                 fontFamily: 'inherit',
-                fontWeight: 'inherit',
-                fontSize: 'inherit',
+                fontWeight: 700,
+                fontSize: '12px',
                 outline: 'none',
                 cursor: 'pointer'
               }}
             >
-              <option value="date-desc">{t('newest_first')}</option>
-              <option value="date-asc">{t('oldest_first')}</option>
-              <option value="amount-desc">{t('newest_first')}</option>
-              <option value="amount-asc">{t('oldest_first')}</option>
+              <option value="date-desc">Newest First</option>
+              <option value="date-asc">Oldest First</option>
+              <option value="amount-desc">Highest Amount</option>
+              <option value="amount-asc">Lowest Amount</option>
             </select>
           </div>
         </div>
@@ -216,8 +244,25 @@ export const Transactions: React.FC<TransactionsProps> = ({
 
       {/* Transactions List Grouped by Date */}
       {sortedDates.length === 0 ? (
-        <div className="glass-panel" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-          {t('empty_ledger')}
+        <div className="glass-panel" style={{
+          padding: '44px 20px',
+          textAlign: 'center',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border-card)',
+          borderRadius: '24px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '8px',
+          boxShadow: 'var(--glow-shadow)'
+        }}>
+          <span style={{ fontSize: '34px' }}>📭</span>
+          <h4 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
+            {t('empty_ledger')}
+          </h4>
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, maxWidth: '280px', lineHeight: 1.4, fontWeight: 500 }}>
+            No transactions found for this filter. Start logging using Quick Capture above!
+          </p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
