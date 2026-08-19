@@ -157,6 +157,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     if (cached) try { return JSON.parse(cached); } catch (e) {}
     return [];
   });
+  const [showAllChallenges, setShowAllChallenges] = useState(false);
 
   const [activeBadgeModal, setActiveBadgeModal] = useState<{
     id: string;
@@ -1077,15 +1078,38 @@ export const Dashboard: React.FC<DashboardProps> = ({
       })()}
 
       {/* Challenge Mode widget */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('active_challenges')}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              {t('active_challenges')}
+            </span>
+            {challenges.length > 3 && (
+              <button
+                type="button"
+                onClick={() => setShowAllChallenges(!showAllChallenges)}
+                style={{
+                  background: 'rgba(16, 185, 129, 0.1)',
+                  border: '1px solid rgba(16, 185, 129, 0.25)',
+                  color: 'var(--primary)',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  padding: '2px 8px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                {showAllChallenges ? 'Show Recent 3 🔼' : `See All (${challenges.length}) 🔽`}
+              </button>
+            )}
+          </div>
           <button
             type="button"
             onClick={() => {
               const newId = Date.now().toString();
-              const newCh = { id: newId, title: 'New Challenge 🏆', subtitle: 'Not started', percent: 0 };
-              const list = [...challenges, newCh];
+              const newCh = { id: newId, title: 'No Takeout Challenge 🏆', subtitle: 'Not started', percent: 0 };
+              const list = [newCh, ...challenges];
               setChallenges(list);
               localStorage.setItem('zb_challenges', JSON.stringify(list));
               setEditingChallengeId(newId);
@@ -1093,24 +1117,64 @@ export const Dashboard: React.FC<DashboardProps> = ({
               setEditChallengeSubtitle(newCh.subtitle);
               setEditChallengePercent(newCh.percent);
             }}
-            style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
+            style={{
+              background: 'rgba(16, 185, 129, 0.12)',
+              border: '1px solid rgba(16, 185, 129, 0.25)',
+              color: 'var(--primary)',
+              fontSize: '11.5px',
+              fontWeight: 800,
+              padding: '4px 12px',
+              borderRadius: '10px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
           >
-            {t('add_new')}
+            + {t('add_new')}
           </button>
         </div>
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {challenges.length === 0 && (
-            <div className="glass-panel" style={{ padding: '20px', textAlign: 'center' }}>
-              <p style={{ fontSize: '28px', marginBottom: '8px' }}>🏆</p>
-              <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>No challenges yet</p>
-              <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>Tap "+ Add" to create your first challenge!</p>
+            <div className="glass-panel" style={{
+              padding: '24px 20px',
+              textAlign: 'center',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-card)',
+              borderRadius: '20px',
+              boxShadow: 'var(--glow-shadow)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <span style={{ fontSize: '32px' }}>🏆</span>
+              <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
+                No active challenges yet
+              </h4>
+              <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, fontWeight: 500 }}>
+                Tap "+ Add" to create your first spending challenge!
+              </p>
             </div>
           )}
-          {challenges.slice(0, 3).map((ch: any) => (
+
+          {(showAllChallenges ? challenges : challenges.slice(0, 3)).map((ch: any) => (
             <div
               key={ch.id}
               className="glass-panel glass-panel-hover"
-              style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', cursor: 'pointer' }}
+              style={{
+                padding: '14px 18px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-card)',
+                borderRadius: '18px',
+                boxShadow: 'var(--glow-shadow)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
               onClick={() => {
                 setEditingChallengeId(ch.id);
                 setEditChallengeTitle(ch.title);
@@ -1119,14 +1183,49 @@ export const Dashboard: React.FC<DashboardProps> = ({
               }}
             >
               <div>
-                <h4 style={{ fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  {ch.title} <span style={{ fontSize: '10px', opacity: 0.7 }}>✏️</span>
+                <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
+                  {ch.title} <span style={{ fontSize: '11px', opacity: 0.7 }}>✏️</span>
                 </h4>
-                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{ch.subtitle}</span>
+                <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 600, display: 'block', marginTop: '2px' }}>
+                  {ch.subtitle}
+                </span>
               </div>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: ch.percent === 100 ? 'var(--success)' : 'var(--primary)' }}>{ch.percent}%</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{
+                  fontSize: '13px',
+                  fontWeight: 900,
+                  color: ch.percent === 100 ? '#10b981' : 'var(--primary)',
+                  background: ch.percent === 100 ? 'rgba(16, 185, 129, 0.12)' : 'rgba(16, 185, 129, 0.08)',
+                  padding: '4px 10px',
+                  borderRadius: '12px'
+                }}>
+                  {ch.percent}%
+                </span>
+              </div>
             </div>
           ))}
+
+          {challenges.length > 3 && !showAllChallenges && (
+            <button
+              type="button"
+              onClick={() => setShowAllChallenges(true)}
+              style={{
+                width: '100%',
+                padding: '10px',
+                borderRadius: '14px',
+                border: '1px dashed var(--border-card)',
+                background: 'var(--bg-card)',
+                color: 'var(--primary)',
+                fontSize: '12px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                textAlign: 'center',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+              }}
+            >
+              See {challenges.length - 3} more challenge{challenges.length - 3 > 1 ? 's' : ''}... 🔽
+            </button>
+          )}
         </div>
       </div>
 
