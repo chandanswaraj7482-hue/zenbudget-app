@@ -913,11 +913,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           {/* ── Logo & Branding ── */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '24px' }}>
             <div style={{
-              width: '52px', height: '52px', borderRadius: '14px',
+              width: '60px', height: '60px', borderRadius: '16px',
               background: '#ffffff',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 6px 18px rgba(0,0,0,0.18), 0 0 16px rgba(34,197,94,0.2)',
-              marginBottom: '10px', padding: '9px'
+              boxShadow: '0 10px 25px rgba(0,0,0,0.25), 0 0 20px rgba(34,197,94,0.25)',
+              marginBottom: '12px', padding: '10px'
             }}>
               <img src="/zen-icon-green.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>
@@ -1192,11 +1192,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           {/* ── Logo & Branding ── */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '16px' }}>
             <div style={{
-              width: '52px', height: '52px', borderRadius: '14px',
+              width: '60px', height: '60px', borderRadius: '16px',
               background: '#ffffff',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 6px 18px rgba(0,0,0,0.18), 0 0 16px rgba(34,197,94,0.2)',
-              marginBottom: '10px', padding: '9px'
+              boxShadow: '0 10px 25px rgba(0,0,0,0.25), 0 0 20px rgba(34,197,94,0.25)',
+              marginBottom: '12px', padding: '10px'
             }}>
               <img src="/zen-icon-green.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>
@@ -1363,11 +1363,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           {/* ── Logo & Branding ── */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '14px' }}>
             <div style={{
-              width: '52px', height: '52px', borderRadius: '14px',
+              width: '60px', height: '60px', borderRadius: '16px',
               background: '#ffffff',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 6px 18px rgba(0,0,0,0.18), 0 0 16px rgba(34,197,94,0.2)',
-              marginBottom: '10px', padding: '9px'
+              boxShadow: '0 10px 25px rgba(0,0,0,0.25), 0 0 20px rgba(34,197,94,0.25)',
+              marginBottom: '12px', padding: '10px'
             }}>
               <img 
                 src="/zen-icon-green.png" 
