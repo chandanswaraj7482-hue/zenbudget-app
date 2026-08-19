@@ -2087,9 +2087,10 @@ const App: React.FC = () => {
 
   const handleDeleteTransactionRequest = (id: string) => {
     // Non-Premium / Free Trial Delete Restriction:
-    if (subscriptionTier === 'trial') {
-      triggerToast('🔒 Deleting transactions requires ZenBudget Premium!', 'info');
-      setShowSubscriptionModal(true);
+    if (!isPremiumUser) {
+      triggerToast('🔒 Deleting ledger records is a Premium Feature. Upgrade to Pro to manage & delete records!', 'warning');
+      setIsSubBlocker(false);
+      setIsSubModalOpen(true);
       return;
     }
 
@@ -2219,22 +2220,21 @@ const App: React.FC = () => {
   };
 
   const handleSaveBudget = async (category: CategoryType, limitInActiveCurrency: number) => {
-    const isPremium = subscriptionTier === 'premium_monthly' || subscriptionTier === 'premium_yearly' || subscriptionTier === 'premium_lifetime' || subscriptionTier === 'premium';
-
-    // Trial limits check: max 2 free budgets, then ₹10 (or active currency equivalent) per extra
-    if (!isPremium) {
-      const isNew = !budgets.some(b => b.category === category);
+    // Trial limits check: max 2 free category limits, then ₹10 per extra slot or Pro Upgrade
+    if (!isPremiumUser) {
+      const activeBudgets = budgets.filter(b => (b.limit || 0) > 0);
+      const isNew = !budgets.some(b => b.category === category && (b.limit || 0) > 0);
       const freeSlots = 2;
       const purchasedSlots = parseInt(localStorage.getItem(`zb_extra_budget_slots_${currentProfileId}`) || '0');
       const maxAllowed = freeSlots + purchasedSlots;
 
-      if (isNew && budgets.length >= maxAllowed) {
+      if (isNew && activeBudgets.length >= maxAllowed) {
         const priceDisplay = getExtraSlotPriceDisplay();
         // Show buy extra limit popup
         setConfirmDialog({
           isOpen: true,
           title: '🔒 Budget Limit Slot Required',
-          message: `You've used all ${maxAllowed} budget limit slots (${freeSlots} free${purchasedSlots > 0 ? ` + ${purchasedSlots} extra` : ''}). Buy +1 Extra Budget Limit Slot for ${priceDisplay} (per limit slot price), or upgrade to Premium!`,
+          message: `Trial users can set up to ${maxAllowed} active budget limits (${freeSlots} free${purchasedSlots > 0 ? ` + ${purchasedSlots} extra` : ''}). Buy +1 Extra Budget Limit Slot for ${priceDisplay}, or upgrade to Premium for unlimited limits!`,
           type: 'warning',
           confirmText: `💳 Buy Extra Slot (${priceDisplay})`,
           cancelText: '⭐ Go Premium',
@@ -2370,6 +2370,13 @@ const App: React.FC = () => {
 
   // Reset database triggers complete wipeout of challenges, limits, and ledger data
   const handleResetDataRequest = () => {
+    if (!isPremiumUser) {
+      triggerToast('🔒 Reset Workspace is a Premium Feature. Upgrade to Pro to reset & manage ledgers!', 'warning');
+      setIsSubBlocker(false);
+      setIsSubModalOpen(true);
+      return;
+    }
+
     setConfirmDialog({
       isOpen: true,
       title: 'Reset All Workspace Data?',
@@ -3229,6 +3236,7 @@ const App: React.FC = () => {
             userReferralCode={userReferralCode}
             referralCount={referralCount}
             onNavigateToFollowUs={() => setActiveView('follow_us')}
+            isPremiumUser={isPremiumUser}
           />
         )}
         {activeView === 'shared_budget' && (

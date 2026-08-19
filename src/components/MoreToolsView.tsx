@@ -37,6 +37,7 @@ interface MoreToolsViewProps {
   onOpenBankSync?: () => void;
   onOpenWidgetModal?: () => void;
   onNavigateToFollowUs?: () => void;
+  isPremiumUser?: boolean;
 }
 
 export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
@@ -56,8 +57,9 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
   referralCount = 0,
   onNavigateToLoans,
   onOpenBankSync,
-  onOpenWidgetModal: _onOpenWidgetModal,
-  onNavigateToFollowUs
+  onOpenWidgetModal,
+  onNavigateToFollowUs,
+  isPremiumUser = false
 }) => {
   const [socialLinks, setSocialLinks] = useState<Array<{ platform: string; icon: string; url: string; color: string; is_active: boolean }>>([]);
 
@@ -461,8 +463,17 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
                 <RefreshCw size={20} />
               </div>
               <div>
-                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>Reset Workspace Data</p>
-                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Clear local cache or start fresh.</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>Reset Workspace Data</p>
+                  {!isPremiumUser && (
+                    <span style={{ fontSize: '10px', fontWeight: 800, padding: '2px 6px', borderRadius: '6px', background: 'rgba(236,72,153,0.15)', color: '#ec4899', border: '1px solid rgba(236,72,153,0.3)' }}>
+                      🔒 PRO
+                    </span>
+                  )}
+                </div>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                  {!isPremiumUser ? 'Premium feature — Upgrade to reset workspace' : 'Clear local cache or start fresh.'}
+                </span>
               </div>
             </div>
             <ChevronRight size={18} color="#94a3b8" />
