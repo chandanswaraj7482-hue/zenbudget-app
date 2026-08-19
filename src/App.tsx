@@ -299,7 +299,7 @@ const App: React.FC = () => {
     // Only check and show APK update popup on installed Native Mobile APK (skip Web browsers)
     if (!Capacitor.isNativePlatform()) return;
 
-    const APP_VERSION_CODE = 3; // Current APK version — bump version.json or app_updates table in Supabase
+    const APP_VERSION_CODE = 4; // Current APK version (v2.0.0) — bump version.json or app_updates table in Supabase
     const checkForUpdates = async () => {
       try {
         let remoteData: any = null;
