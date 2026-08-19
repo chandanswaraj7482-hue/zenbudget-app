@@ -74,8 +74,36 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState('');
   const [isPaying, setIsPaying] = useState(false);
-  const [step, setStep] = useState<'details' | 'payment'>('details');
+  const [step, setStep] = useState<'details' | 'payment' | 'collect_waiting'>('details');
+  const [collectTimeLeft, setCollectTimeLeft] = useState<number>(300); // 5 minutes
+  const [collectTargetVpa, setCollectTargetVpa] = useState<string>('');
   const [validationError, setValidationError] = useState('');
+
+  // 5-minute countdown timer for UPI Collect Approval (like Meesho / Swiggy)
+  useEffect(() => {
+    let timer: any = null;
+    if (step === 'collect_waiting') {
+      setCollectTimeLeft(300);
+      timer = setInterval(() => {
+        setCollectTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [step]);
+
+  const formatCollectTime = (secs: number) => {
+    const mins = Math.floor(secs / 60);
+    const rem = secs % 60;
+    return `${mins.toString().padStart(2, '0')}:${rem.toString().padStart(2, '0')}`;
+  };
 
   const showErr = (msg: string) => {
     setValidationError(msg);
@@ -684,6 +712,32 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
     }
   };
 
+  const handleSendUpiCollect = (targetVpa?: string) => {
+    const vpa = targetVpa || recipientId || (activePayTab === 'Mobile' ? `${payMobile}@${mobileUpiSuffix}` : payUpiIdDirect) || '';
+    if (!vpa || !vpa.includes('@')) {
+      showErr('Please enter a valid UPI ID (e.g. 9199927258@ybl or user@okhdfcbank)');
+      return;
+    }
+    const numAmt = parseFloat(amount) || 0;
+    if (isNaN(numAmt) || numAmt <= 0) {
+      showErr('Please enter a valid amount (e.g. ₹100)');
+      return;
+    }
+
+    setCollectTargetVpa(vpa);
+    setStep('collect_waiting');
+
+    // Trigger Cashfree / UPI Collect notification to user's UPI app
+    try {
+      handleZenBudgetPaymentSystem('SCAN_OR_UPI', {
+        amount: numAmt,
+        targetUpiId: vpa,
+        recipientName: merchantName || vpa,
+        description: description || 'ZenBudget Collect Request'
+      });
+    } catch (_) {}
+  };
+
   return createPortal(
     <div style={{
       position: 'fixed', inset: 0,
@@ -1210,6 +1264,33 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
               </button>
             </div>
 
+            {/* Send UPI Collect Request (Meesho / Swiggy style) */}
+            <button
+              type="button"
+              onClick={() => {
+                const targetVpa = recipientId || (activePayTab === 'Mobile' ? `${payMobile}@${mobileUpiSuffix}` : payUpiIdDirect);
+                handleSendUpiCollect(targetVpa);
+              }}
+              style={{
+                width: '100%',
+                padding: '14px',
+                borderRadius: '14px',
+                border: '1px solid rgba(99, 102, 241, 0.4)',
+                background: 'rgba(99, 102, 241, 0.12)',
+                color: '#818cf8',
+                fontSize: '13px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                marginTop: '4px'
+              }}
+            >
+              <span>📲 Send UPI Collect / Payment Request</span>
+            </button>
+
             {/* Share Payment Link (Auto-fill for others) */}
             <button
               type="button"
@@ -1228,7 +1309,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                marginTop: '6px',
+                marginTop: '2px',
                 boxShadow: '0 2px 10px rgba(34, 197, 94, 0.15)'
               }}
             >
@@ -1265,6 +1346,138 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
 
             <button type="button" onClick={() => setStep('details')} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>
               ← Edit Details
+            </button>
+          </div>
+        )}
+
+        {/* Live UPI Collect Waiting Screen (Like Meesho / Swiggy) */}
+        {step === 'collect_waiting' && (
+          <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'center' }}>
+            {/* Animated Radar Pulse Icon */}
+            <div style={{ position: 'relative', width: '80px', height: '80px', margin: '10px auto 0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{
+                position: 'absolute', inset: 0, borderRadius: '50%',
+                background: 'rgba(99, 102, 241, 0.2)', animation: 'pulse 1.8s infinite'
+              }} />
+              <div style={{
+                width: '64px', height: '64px', borderRadius: '50%',
+                background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '28px', color: '#fff', boxShadow: '0 8px 24px rgba(99, 102, 241, 0.4)'
+              }}>
+                📲
+              </div>
+            </div>
+
+            <div>
+              <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: '4px 0 4px' }}>
+                Payment Request Sent!
+              </h3>
+              <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>
+                Requesting from <strong style={{ color: 'var(--text-primary)' }}>{collectTargetVpa}</strong>
+              </p>
+            </div>
+
+            {/* Amount Card */}
+            <div style={{ padding: '16px', background: 'var(--bg-input)', borderRadius: '18px', border: '1px solid var(--border-input)' }}>
+              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>AMOUNT REQUESTED</span>
+              <div style={{ fontSize: '32px', fontWeight: 900, color: 'var(--primary)', marginTop: '4px' }}>
+                ₹{amount || '0'}
+              </div>
+            </div>
+
+            {/* Instruction Box */}
+            <div style={{
+              padding: '14px 16px',
+              borderRadius: '14px',
+              background: 'rgba(99, 102, 241, 0.08)',
+              border: '1px solid rgba(99, 102, 241, 0.25)',
+              textAlign: 'left'
+            }}>
+              <p style={{ fontSize: '12px', color: 'var(--text-primary)', margin: '0 0 6px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>🔔</span> Open UPI App to Approve
+              </p>
+              <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                A collect request of <strong>₹{amount}</strong> has been sent to the <strong>PhonePe, Google Pay, or Paytm</strong> app linked to <strong>{collectTargetVpa}</strong>. Open the app and approve the request with your UPI PIN.
+              </p>
+            </div>
+
+            {/* Live Countdown Timer */}
+            <div style={{ padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 700 }}>
+              <span>⏳ Time Remaining:</span>
+              <span style={{ color: collectTimeLeft < 60 ? '#ef4444' : 'var(--primary)', fontWeight: 900, fontSize: '16px' }}>
+                {formatCollectTime(collectTimeLeft)}
+              </span>
+            </div>
+
+            {/* Send WhatsApp Reminder Link */}
+            <button
+              type="button"
+              onClick={handleSharePaymentLink}
+              style={{
+                width: '100%',
+                padding: '14px',
+                borderRadius: '14px',
+                border: 'none',
+                background: '#25D366',
+                color: '#ffffff',
+                fontSize: '13px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 16px rgba(37, 211, 102, 0.35)'
+              }}
+            >
+              <span>💬 Send Direct WhatsApp Pay Link</span>
+            </button>
+
+            {/* I have paid button */}
+            <button
+              type="button"
+              onClick={() => {
+                handlePay(collectTargetVpa);
+                stopCamera();
+                onClose();
+              }}
+              style={{
+                width: '100%',
+                padding: '14px',
+                borderRadius: '14px',
+                border: 'none',
+                background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                color: '#ffffff',
+                fontSize: '13px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 16px rgba(34, 197, 94, 0.35)'
+              }}
+            >
+              <span>✅ I Have Approved & Paid</span>
+            </button>
+
+            {/* Cancel Collect Request */}
+            <button
+              type="button"
+              onClick={() => setStep('payment')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-secondary)',
+                fontSize: '13px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                marginTop: '4px'
+              }}
+            >
+              ✕ Cancel Collect Request
             </button>
           </div>
         )}
