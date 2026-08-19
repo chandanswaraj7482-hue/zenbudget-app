@@ -724,6 +724,43 @@ const App: React.FC = () => {
     }
   }, [currentProfileId]);
 
+  // Sync live dynamic pricing from Supabase app_config table
+  useEffect(() => {
+    const fetchLiveDynamicPricing = async () => {
+      try {
+        const { data } = await supabase
+          .from('app_config')
+          .select('data')
+          .eq('id', 'subscription_pricing')
+          .maybeSingle();
+
+        if (data && data.data) {
+          localStorage.setItem('zb_dynamic_prices', JSON.stringify(data.data));
+          window.dispatchEvent(new CustomEvent('zenbudget_prices_updated', { detail: data.data }));
+        }
+      } catch (err) {
+        console.warn('Live dynamic pricing fetch deferred:', err);
+      }
+    };
+
+    fetchLiveDynamicPricing();
+
+    // Subscribe to realtime changes on app_config
+    const configChannel = supabase
+      .channel('public:app_config')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'app_config' }, (payload) => {
+        if (payload.new && (payload.new as any).id === 'subscription_pricing' && (payload.new as any).data) {
+          localStorage.setItem('zb_dynamic_prices', JSON.stringify((payload.new as any).data));
+          window.dispatchEvent(new CustomEvent('zenbudget_prices_updated', { detail: (payload.new as any).data }));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(configChannel);
+    };
+  }, []);
+
   // Sync live broadcast announcements from Supabase broadcast_notifications table
   useEffect(() => {
     if (!currentProfileId) return;

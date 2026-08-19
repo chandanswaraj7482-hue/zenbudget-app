@@ -149,6 +149,61 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     }
   };
 
+  const [dynamicPrices, setDynamicPrices] = useState<any>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
+    } catch (_) {
+      return {};
+    }
+  });
+
+  // Sync latest dynamic prices whenever subscription modal opens or updates
+  useEffect(() => {
+    const handlePriceUpdate = (e: any) => {
+      if (e.detail) {
+        setDynamicPrices(e.detail);
+      }
+    };
+    window.addEventListener('zenbudget_prices_updated', handlePriceUpdate);
+
+    if (isOpen) {
+      supabase
+        .from('app_config')
+        .select('data')
+        .eq('id', 'subscription_pricing')
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data && data.data) {
+            setDynamicPrices(data.data);
+            localStorage.setItem('zb_dynamic_prices', JSON.stringify(data.data));
+          }
+        })
+        .catch(() => {});
+    }
+
+    return () => {
+      window.removeEventListener('zenbudget_prices_updated', handlePriceUpdate);
+    };
+  }, [isOpen]);
+
+  const getDynamicAmount = (cycle: PlanCycle, curr: string): number => {
+    const orig = cycle === 'monthly' 
+      ? (LOCALIZED_PRICES_MONTHLY[curr] || LOCALIZED_PRICES_MONTHLY['USD'])
+      : cycle === 'yearly'
+        ? (LOCALIZED_PRICES_YEARLY[curr] || LOCALIZED_PRICES_YEARLY['USD'])
+        : (LOCALIZED_PRICES_LIFETIME[curr] || LOCALIZED_PRICES_LIFETIME['USD']);
+
+    if (curr === 'INR') {
+      if (cycle === 'monthly' && dynamicPrices.monthly) return Number(dynamicPrices.monthly);
+      if (cycle === 'yearly' && dynamicPrices.yearly) return Number(dynamicPrices.yearly);
+      if (cycle === 'lifetime' && dynamicPrices.lifetime) return Number(dynamicPrices.lifetime);
+    } else {
+      const key = `${curr.toLowerCase()}_${cycle}`;
+      if (dynamicPrices[key]) return Number(dynamicPrices[key]);
+    }
+    return orig.amount;
+  };
+
   const getPlanPriceDisplay = (cycle: PlanCycle) => {
     const orig = cycle === 'monthly' 
       ? (LOCALIZED_PRICES_MONTHLY[currency] || LOCALIZED_PRICES_MONTHLY['USD'])
@@ -156,17 +211,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         ? (LOCALIZED_PRICES_YEARLY[currency] || LOCALIZED_PRICES_YEARLY['USD'])
         : (LOCALIZED_PRICES_LIFETIME[currency] || LOCALIZED_PRICES_LIFETIME['USD']);
 
-    let displayAmount = orig.amount;
-    let labelStr = orig.label;
-    if (currency === 'INR') {
-      try {
-        const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-        if (cycle === 'monthly' && stored.monthly) displayAmount = stored.monthly;
-        if (cycle === 'yearly' && stored.yearly) displayAmount = stored.yearly;
-        if (cycle === 'lifetime' && stored.lifetime) displayAmount = stored.lifetime;
-        labelStr = `₹${displayAmount.toLocaleString()}${cycle === 'monthly' ? '/mo' : cycle === 'yearly' ? '/yr' : ''}`;
-      } catch (_) {}
-    }
+    const displayAmount = getDynamicAmount(cycle, currency);
+    const suffix = cycle === 'monthly' ? '/mo' : cycle === 'yearly' ? '/yr' : '';
+    const labelStr = `${orig.symbol}${displayAmount.toLocaleString()}${suffix}`;
 
     if (!appliedCoupon) {
       return (
@@ -178,7 +225,6 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
     const discountFactor = (100 - appliedCoupon.discount_percent) / 100;
     const finalAmount = (displayAmount * discountFactor).toFixed(cycle === 'lifetime' ? 0 : 2);
-    const suffix = cycle === 'monthly' ? '/mo' : cycle === 'yearly' ? '/yr' : '';
     
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center' }}>
@@ -309,20 +355,12 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
   const priceInfo = getPriceInfo();
 
-  // Convert localized price to INR for payment session request
-  let defaultBase = billingCycle === 'monthly' ? 149 : (billingCycle === 'yearly' ? 1499 : 2499);
-  try {
-    const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
-    if (billingCycle === 'monthly' && stored.monthly) defaultBase = Number(stored.monthly);
-    if (billingCycle === 'yearly' && stored.yearly) defaultBase = Number(stored.yearly);
-    if (billingCycle === 'lifetime' && stored.lifetime) defaultBase = Number(stored.lifetime);
-  } catch (_) {}
+  // Dynamic base price for current currency
+  const activePlanAmount = getDynamicAmount(billingCycle, currency);
+  let upiAmountINR = currency === 'INR' 
+    ? activePlanAmount 
+    : Math.round((activePlanAmount / (rates[currency] || 1)) * (rates['INR'] || 83.5));
 
-  let upiAmountINR = defaultBase;
-  if (currency !== 'INR') {
-    const priceInUSD = priceInfo.amount / (rates[currency] || 1);
-    upiAmountINR = Math.round(priceInUSD * (rates['INR'] || 83.5));
-  }
   if (appliedCoupon) {
     upiAmountINR = Math.round(upiAmountINR * ((100 - appliedCoupon.discount_percent) / 100));
   }

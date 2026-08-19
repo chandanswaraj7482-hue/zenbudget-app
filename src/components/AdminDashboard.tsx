@@ -176,6 +176,69 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [aedScanPayPrice, setAedScanPayPrice] = useState<number>(() => getInitialPrice('aed_scan_pay_price', 7.99));
   const [sgdScanPayPrice, setSgdScanPayPrice] = useState<number>(() => getInitialPrice('sgd_scan_pay_price', 2.99));
 
+  // Fetch latest live prices from Supabase on mount
+  useEffect(() => {
+    const fetchLivePricing = async () => {
+      try {
+        const { data, error } = await supabaseClient
+          .from('app_config')
+          .select('data')
+          .eq('id', 'subscription_pricing')
+          .maybeSingle();
+
+        if (data && data.data) {
+          const p = data.data;
+          localStorage.setItem('zb_dynamic_prices', JSON.stringify(p));
+          if (p.monthly) setMonthlyPrice(p.monthly);
+          if (p.yearly) setYearlyPrice(p.yearly);
+          if (p.lifetime) setLifetimePrice(p.lifetime);
+          if (p.usd_monthly) setUsdMonthlyPrice(p.usd_monthly);
+          if (p.usd_yearly) setUsdYearlyPrice(p.usd_yearly);
+          if (p.usd_lifetime) setUsdLifetimePrice(p.usd_lifetime);
+          if (p.eur_monthly) setEurMonthlyPrice(p.eur_monthly);
+          if (p.eur_yearly) setEurYearlyPrice(p.eur_yearly);
+          if (p.eur_lifetime) setEurLifetimePrice(p.eur_lifetime);
+          if (p.gbp_monthly) setGbpMonthlyPrice(p.gbp_monthly);
+          if (p.gbp_yearly) setGbpYearlyPrice(p.gbp_yearly);
+          if (p.gbp_lifetime) setGbpLifetimePrice(p.gbp_lifetime);
+          if (p.cad_monthly) setCadMonthlyPrice(p.cad_monthly);
+          if (p.cad_yearly) setCadYearlyPrice(p.cad_yearly);
+          if (p.cad_lifetime) setCadLifetimePrice(p.cad_lifetime);
+          if (p.aud_monthly) setAudMonthlyPrice(p.aud_monthly);
+          if (p.aud_yearly) setAudYearlyPrice(p.aud_yearly);
+          if (p.aud_lifetime) setAudLifetimePrice(p.aud_lifetime);
+          if (p.aed_monthly) setAedMonthlyPrice(p.aed_monthly);
+          if (p.aed_yearly) setAedYearlyPrice(p.aed_yearly);
+          if (p.aed_lifetime) setAedLifetimePrice(p.aed_lifetime);
+          if (p.sgd_monthly) setSgdMonthlyPrice(p.sgd_monthly);
+          if (p.sgd_yearly) setSgdYearlyPrice(p.sgd_yearly);
+          if (p.sgd_lifetime) setSgdLifetimePrice(p.sgd_lifetime);
+
+          if (p.inr_slot_price) setInrSlotPrice(p.inr_slot_price);
+          if (p.usd_slot_price) setUsdSlotPrice(p.usd_slot_price);
+          if (p.eur_slot_price) setEurSlotPrice(p.eur_slot_price);
+          if (p.gbp_slot_price) setGbpSlotPrice(p.gbp_slot_price);
+          if (p.cad_slot_price) setCadSlotPrice(p.cad_slot_price);
+          if (p.aud_slot_price) setAudSlotPrice(p.aud_slot_price);
+          if (p.aed_slot_price) setAedSlotPrice(p.aed_slot_price);
+          if (p.sgd_slot_price) setSgdSlotPrice(p.sgd_slot_price);
+
+          if (p.inr_scan_pay_price) setInrScanPayPrice(p.inr_scan_pay_price);
+          if (p.usd_scan_pay_price) setUsdScanPayPrice(p.usd_scan_pay_price);
+          if (p.eur_scan_pay_price) setEurScanPayPrice(p.eur_scan_pay_price);
+          if (p.gbp_scan_pay_price) setGbpScanPayPrice(p.gbp_scan_pay_price);
+          if (p.cad_scan_pay_price) setCadScanPayPrice(p.cad_scan_pay_price);
+          if (p.aud_scan_pay_price) setAudScanPayPrice(p.aud_scan_pay_price);
+          if (p.aed_scan_pay_price) setAedScanPayPrice(p.aed_scan_pay_price);
+          if (p.sgd_scan_pay_price) setSgdScanPayPrice(p.sgd_scan_pay_price);
+        }
+      } catch (err) {
+        console.warn('Error fetching live pricing in admin:', err);
+      }
+    };
+    fetchLivePricing();
+  }, []);
+
   const handleSavePricing = async (e: React.FormEvent) => {
     e.preventDefault();
     const pricingObj = { 
@@ -223,9 +286,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       sgd_scan_pay_price: Number(sgdScanPayPrice)
     };
     try {
-      await supabaseClient.from('app_config').upsert([{ id: 'subscription_pricing', data: pricingObj }]);
-    } catch (err) {}
+      const { error } = await supabaseClient.from('app_config').upsert([{ id: 'subscription_pricing', data: pricingObj, updated_at: new Date().toISOString() }]);
+      if (error) {
+        console.warn('Supabase app_config save warning:', error.message);
+      }
+    } catch (err) {
+      console.warn('Supabase app_config save error:', err);
+    }
     localStorage.setItem('zb_dynamic_prices', JSON.stringify(pricingObj));
+    window.dispatchEvent(new CustomEvent('zenbudget_prices_updated', { detail: pricingObj }));
     if (onShowToast) onShowToast(`Live Multi-Currency Prices updated for ${selectedPricingCurrency}!`, 'success');
   };
 
