@@ -2917,102 +2917,119 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Top action header - cleaned and simplified */}
-      <div style={{ 
+      {/* Top action header - Modern Apple FinTech Bar */}
+      <header style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center',
-        padding: '16px 20px', 
+        padding: '12px 18px', 
         background: 'var(--bg-card)', 
         borderBottom: '1px solid var(--border-card)',
-        backdropFilter: 'blur(10px)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         position: 'sticky',
         top: 0,
-        zIndex: 99
+        zIndex: 99,
+        transition: 'all 0.2s ease'
       }}>
         {/* Branding Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '20px', fontWeight: 800, letterSpacing: '-0.03em', fontFamily: "'Manrope', sans-serif" }}>
+          <div style={{
+            width: '26px',
+            height: '26px',
+            borderRadius: '8px',
+            background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.18) 0%, rgba(6, 182, 212, 0.12) 100%)',
+            border: '1px solid rgba(34, 197, 94, 0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden'
+          }}>
+            <img src="/favicon.png" alt="Zen" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+          <span style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '-0.03em', fontFamily: "'Manrope', sans-serif" }}>
             <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
           </span>
-          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#22c55e', boxShadow: '0 0 10px #22c55e' }} />
+          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#22c55e', boxShadow: '0 0 8px #22c55e' }} />
         </div>
 
         {/* Status Actions */}
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           
           {/* Scanner Button */}
           <button
             onClick={() => setIsScannerOpen(true)}
             title="Scan & Pay"
             style={{
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: '50%',
-              width: '32px',
-              height: '32px',
-              color: 'var(--text-secondary)',
+              background: 'var(--bg-input)',
+              border: '1px solid var(--border-input)',
+              borderRadius: '12px',
+              width: '36px',
+              height: '36px',
+              color: 'var(--text-primary)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              transition: 'all 0.2s ease-out'
+              boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+              transition: 'all 0.15s ease'
             }}
           >
-            <QrCode size={15} />
+            <QrCode size={16} />
           </button>
-
 
           {/* Notifications Button */}
           <button 
             onClick={() => setIsNotificationsOpen(true)} 
             title="Notifications"
             style={{
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: '50%',
-              width: '32px',
-              height: '32px',
-              color: 'var(--text-secondary)',
+              background: 'var(--bg-input)',
+              border: '1px solid var(--border-input)',
+              borderRadius: '12px',
+              width: '36px',
+              height: '36px',
+              color: 'var(--text-primary)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              transition: 'all 0.2s ease-out',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+              transition: 'all 0.15s ease',
               position: 'relative'
             }}
           >
-            <Bell size={15} />
+            <Bell size={16} />
             {notifications.some(n => n.unread) && (
               <span style={{
                 position: 'absolute',
-                top: '2px',
-                right: '2px',
-                width: '8px',
-                height: '8px',
+                top: '6px',
+                right: '6px',
+                width: '7px',
+                height: '7px',
                 borderRadius: '50%',
                 backgroundColor: 'var(--primary)',
-                boxShadow: '0 0 6px var(--primary)',
-                border: '1.5px solid #09090f'
+                boxShadow: '0 0 6px var(--primary)'
               }} />
             )}
           </button>
 
-          {/* Premium Status Badge */}
+          {/* Premium / Trial Status Badge */}
           {isPremiumUser ? (
             <div style={{
-              padding: '6px 12px',
-              borderRadius: '10px',
+              height: '36px',
+              padding: '0 12px',
+              borderRadius: '12px',
               background: 'linear-gradient(135deg, rgba(236,72,153,0.15) 0%, rgba(99,102,241,0.15) 100%)',
               border: '1px solid rgba(236,72,153,0.3)',
               color: 'var(--secondary)',
-              fontSize: '10px',
+              fontSize: '11px',
               fontWeight: 800,
               display: 'flex',
               alignItems: 'center',
-              gap: '4px'
+              gap: '4px',
+              boxShadow: '0 2px 6px rgba(236,72,153,0.08)'
             }}>
-              <Sparkles size={11} /> PREMIUM
+              <Sparkles size={12} /> PREMIUM
             </div>
           ) : (
             <button
@@ -3021,21 +3038,27 @@ const App: React.FC = () => {
                 setIsSubModalOpen(true);
               }}
               style={{
-                padding: '6px 12px',
-                borderRadius: '10px',
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                color: 'var(--primary)',
-                fontSize: '10px',
-                fontWeight: 700,
-                cursor: 'pointer'
+                height: '36px',
+                padding: '0 12px',
+                borderRadius: '12px',
+                background: isTrialExpired() ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.1)',
+                border: isTrialExpired() ? '1px solid rgba(239,68,68,0.25)' : '1px solid rgba(34,197,94,0.25)',
+                color: isTrialExpired() ? '#ef4444' : 'var(--primary)',
+                fontSize: '11px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+                transition: 'all 0.15s ease'
               }}
             >
-              {isTrialExpired() ? 'Expired' : `${getRemainingDays()}d left`}
+              <span>{isTrialExpired() ? '⚠️ Expired' : `⏳ ${getRemainingDays()}d left`}</span>
             </button>
           )}
         </div>
-      </div>
+      </header>
 
       {/* Main View Area */}
       <main ref={mainScrollRef} className="scroll-container" style={{ padding: '20px 20px calc(95px + env(safe-area-inset-bottom)) 20px' }}>
