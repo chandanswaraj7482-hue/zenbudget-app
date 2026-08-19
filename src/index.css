@@ -277,9 +277,9 @@ html.light-theme #root {
 }
 
 /* Apple Native Form Inputs */
-.light-theme input,
-.light-theme select,
-.light-theme textarea,
+.light-theme input:not(.unadorned-input),
+.light-theme select:not(.unadorned-input),
+.light-theme textarea:not(.unadorned-input),
 .light-theme .glass-input {
   background-color: #FFFFFF !important;
   border: 1px solid #D2D2D7 !important;
@@ -290,9 +290,19 @@ html.light-theme #root {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-.light-theme input:focus,
-.light-theme select:focus,
-.light-theme textarea:focus,
+.light-theme input.unadorned-input,
+.light-theme select.unadorned-input,
+.light-theme .unadorned-input input,
+.light-theme .unadorned-input select {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 4px 8px !important;
+}
+
+.light-theme input:focus:not(.unadorned-input),
+.light-theme select:focus:not(.unadorned-input),
+.light-theme textarea:focus:not(.unadorned-input),
 .light-theme .glass-input:focus {
   border-color: #10b981 !important;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18) !important;

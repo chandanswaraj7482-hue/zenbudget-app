@@ -104,14 +104,17 @@ export function handleZenBudgetPaymentSystem(
         if (payload.startsWith("upi://")) {
           compiledNativeUri = payload.includes("am=") ? payload : `${payload}&am=${runtimeAmount}&cu=INR`;
         } else {
-          compiledNativeUri = `upi://pay?pa=${payload.trim()}&pn=${encodeURIComponent("ZenBudget Contact")}&am=${runtimeAmount}&cu=INR`;
+          const finalVpa = payload.trim() || 'chandanswaraj7482@okicici';
+          compiledNativeUri = `upi://pay?pa=${finalVpa}&pn=${encodeURIComponent("ZenBudget Payee")}&am=${runtimeAmount}&cu=INR`;
         }
       } else {
-        const targetVpa = (payload.rawUpiUri || payload.targetUpiId || payload.pa || "").trim();
-        if (targetVpa.startsWith("upi://")) {
-          compiledNativeUri = targetVpa.includes("am=") ? targetVpa : `${targetVpa}&am=${runtimeAmount}&cu=INR`;
+        const raw = (payload.rawUpiUri || "").trim();
+        const targetVpa = (payload.targetUpiId || payload.pa || "").trim() || (raw.startsWith("upi://") ? "" : raw) || 'chandanswaraj7482@okicici';
+        
+        if (raw.startsWith("upi://")) {
+          compiledNativeUri = raw.includes("am=") ? raw : `${raw}&am=${runtimeAmount}&cu=INR`;
         } else {
-          const recName = payload.recipientName || payload.name || "ZenBudget Pay";
+          const recName = payload.recipientName || payload.name || "ZenBudget Payee";
           compiledNativeUri = `upi://pay?pa=${targetVpa}&pn=${encodeURIComponent(recName)}&am=${runtimeAmount}&cu=INR`;
         }
       }
@@ -120,7 +123,9 @@ export function handleZenBudgetPaymentSystem(
 
     case "MOBILE_NUMBER": {
       const cleanPhone = typeof payload === 'string' ? payload.replace(/\D/g, '') : ((payload.phone || "").replace(/\D/g, ''));
-      compiledNativeUri = `phonepe://pay?phone=${cleanPhone}`;
+      const suffix = (typeof payload === 'object' && (payload as any).upiSuffix) ? (payload as any).upiSuffix : 'ybl';
+      const targetVpa = cleanPhone ? `${cleanPhone}@${suffix}` : 'chandanswaraj7482@okicici';
+      compiledNativeUri = `upi://pay?pa=${targetVpa}&pn=${encodeURIComponent("ZenBudget Contact")}&am=${runtimeAmount}&cu=INR`;
       break;
     }
 
@@ -144,7 +149,20 @@ export function handleZenBudgetPaymentSystem(
   // Step 4: Device OS Native App Intent Handshake Execution
   try {
     console.log("ZenBudget Payment System: Direct Intent launch ->", compiledNativeUri);
+    
+    // Direct href assignment
     window.location.href = compiledNativeUri;
+
+    // Anchor dispatch fallback (works best on Safari iOS & Chrome Android)
+    const anchor = document.createElement('a');
+    anchor.href = compiledNativeUri;
+    anchor.setAttribute('target', '_self');
+    anchor.setAttribute('rel', 'noopener');
+    document.body.appendChild(anchor);
+    anchor.click();
+    setTimeout(() => {
+      try { document.body.removeChild(anchor); } catch (_) {}
+    }, 500);
   } catch (e) {
     console.warn("ZenBudget Payment System: Redirect failed:", e);
   }
