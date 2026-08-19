@@ -697,13 +697,17 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
 
   const handleSendBroadcast = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!bcTitle.trim() || !bcMessage.trim()) return;
+    if (!bcTitle.trim()) {
+      if (onShowToast) onShowToast('Please enter an announcement title!', 'warning');
+      return;
+    }
 
+    const finalMessage = bcMessage.trim() || bcTitle.trim();
     const newId = `bc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const newBc = {
       id: newId,
       title: bcTitle.trim(),
-      message: bcMessage.trim(),
+      message: finalMessage,
       type: bcType,
       created_at: new Date().toISOString(),
       link_url: bcLink.trim() || null,
@@ -722,20 +726,29 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
     setBcButtonText('');
     if (onShowToast) onShowToast('Broadcast announcement published to all users! 📣', 'success');
 
-    // 2. BACKGROUND SYNC: Try to persist in Supabase (fire-and-forget)
-    (async () => {
-      try {
-        const insertData: any = { title: newBc.title, message: newBc.message, type: newBc.type };
-        if (newBc.link_url) insertData.link_url = newBc.link_url;
-        if (newBc.button_text) insertData.button_text = newBc.button_text;
-        const { error } = await supabaseClient
-          .from('broadcast_notifications')
-          .insert([insertData]);
-        if (error) console.warn('Broadcast Supabase insert error (local state preserved):', error);
-      } catch (err) {
-        console.warn('Broadcast Supabase sync failed (local state preserved):', err);
+    // 2. BACKGROUND SYNC: Persist in Supabase broadcast_notifications table
+    try {
+      const insertData: any = { 
+        title: newBc.title, 
+        message: newBc.message, 
+        type: newBc.type 
+      };
+      if (newBc.link_url) insertData.link_url = newBc.link_url;
+      if (newBc.button_text) insertData.button_text = newBc.button_text;
+
+      const { data, error } = await supabaseClient
+        .from('broadcast_notifications')
+        .insert([insertData])
+        .select();
+
+      if (error) {
+        console.warn('Broadcast Supabase insert error:', error);
+      } else if (data && data.length > 0) {
+        setBroadcasts(prev => prev.map(b => b.id === newId ? { ...b, id: data[0].id } : b));
       }
-    })();
+    } catch (err) {
+      console.warn('Broadcast Supabase sync failed:', err);
+    }
   };
 
   const handleDeleteBroadcast = async (id: string) => {
