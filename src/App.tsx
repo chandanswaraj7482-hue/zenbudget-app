@@ -285,6 +285,9 @@ const App: React.FC = () => {
 
   // ─── Version Check & Update Popup (Remote Supabase & local version.json) ───
   useEffect(() => {
+    // Only check and show APK update popup on installed Native Mobile APK (skip Web browsers)
+    if (!Capacitor.isNativePlatform()) return;
+
     const APP_VERSION_CODE = 3; // Current APK version — bump version.json or app_updates table in Supabase
     const checkForUpdates = async () => {
       try {
@@ -3867,8 +3870,21 @@ const App: React.FC = () => {
                 : 'A new version is ready with bug fixes and new features. Update now for the best experience.'}
             </p>
             {updateReleaseNotes && (
-              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '10px 14px', fontSize: '11px', color: 'var(--text-muted)', textAlign: 'left', marginBottom: '24px', maxHeight: '80px', overflowY: 'auto' }}>
-                <strong>What\'s New:</strong><br/>{updateReleaseNotes}
+              <div style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '14px',
+                padding: '12px 14px',
+                fontSize: '12px',
+                color: 'var(--text-secondary)',
+                textAlign: 'left',
+                marginBottom: '20px',
+                maxHeight: '120px',
+                overflowY: 'auto',
+                lineHeight: 1.5
+              }}>
+                <div style={{ fontWeight: 800, color: '#fff', marginBottom: '4px' }}>What's New:</div>
+                <div style={{ whiteSpace: 'pre-line' }}>{updateReleaseNotes}</div>
               </div>
             )}
             <div style={{ display: 'flex', gap: '12px' }}>
