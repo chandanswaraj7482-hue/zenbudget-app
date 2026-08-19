@@ -34,6 +34,7 @@ import { launchCashfreeCheckout } from './utils/cashfreeHelper';
 import { handleZenBudgetPaymentSystem, checkHasScanPayAccess } from './utils/paymentRouter';
 import { WidgetModal } from './components/WidgetModal';
 import { TransferModal } from './components/TransferModal';
+import { AddAccountModal } from './components/AddAccountModal';
 import { t, setLanguage as setI18nLanguage } from './utils/i18n';
 import { Capacitor } from '@capacitor/core';
 import { autoSyncCurrencyFromIP } from './utils/geoTracker';
