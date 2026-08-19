@@ -34,9 +34,9 @@ import { launchCashfreeCheckout } from './utils/cashfreeHelper';
 import { handleZenBudgetPaymentSystem, checkHasScanPayAccess } from './utils/paymentRouter';
 import { WidgetModal } from './components/WidgetModal';
 import { TransferModal } from './components/TransferModal';
-import { AddAccountModal } from './components/AddAccountModal';
 import { t, setLanguage as setI18nLanguage } from './utils/i18n';
 import { Capacitor } from '@capacitor/core';
+import { autoSyncCurrencyFromIP } from './utils/geoTracker';
 import type { Transaction, SavingsGoal, CategoryBudget, CategoryType, Account, LoanRecord } from './types';
 import { Dashboard } from './components/Dashboard';
 import { Transactions } from './components/Transactions';
@@ -644,6 +644,14 @@ const App: React.FC = () => {
       window.removeEventListener('currencychange', syncCurrency);
     };
   }, []);
+
+  // Auto-detect user currency from IP Address Location
+  useEffect(() => {
+    autoSyncCurrencyFromIP(currentProfileId, (detectedCurr) => {
+      setCurrency(detectedCurr);
+      setLangKey(k => k + 1);
+    });
+  }, [currentProfileId]);
   const [rates, setRates] = useState<Record<string, number>>({
     USD: 1.0,
     INR: 83.5,

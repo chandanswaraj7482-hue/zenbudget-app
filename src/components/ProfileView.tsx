@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { User, KeyRound, Check, Eye, EyeOff, Globe, Banknote, ArrowLeft, Mail, Moon, Sun, Upload, Trash2 } from 'lucide-react';
 import { t } from '../utils/i18n';
+import { detectLocationFromIP } from '../utils/geoTracker';
 
 interface ProfileViewProps {
   currentName: string;
@@ -51,16 +52,15 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       setPhoneCode('+44');
     }
 
-    fetch('https://ipapi.co/json/')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.country_calling_code) {
-          const code = data.country_calling_code.startsWith('+') ? data.country_calling_code : `+${data.country_calling_code}`;
-          setPhoneCode(code);
-          localStorage.setItem('zb_user_phone_code', code);
-        }
-      })
-      .catch(() => {});
+    detectLocationFromIP().then(geo => {
+      if (geo && geo.phoneCode) {
+        setPhoneCode(geo.phoneCode);
+        localStorage.setItem('zb_user_phone_code', geo.phoneCode);
+      }
+      if (geo && geo.countryCode) {
+        localStorage.setItem('zb_user_country_code', geo.countryCode);
+      }
+    }).catch(() => {});
   }, []);
 
   const avatarFileRef = useRef<HTMLInputElement>(null);
