@@ -831,14 +831,25 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* Savings Rate Card */}
       {income > 0 && (
-        <div className="glass-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px' }}>
+        <div className="glass-panel" style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '16px 20px',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border-card)',
+          borderRadius: '20px',
+          boxShadow: 'var(--glow-shadow)'
+        }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '12px', backgroundColor: 'var(--primary-glow)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '12px', backgroundColor: 'rgba(16, 185, 129, 0.12)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <TrendingUp size={18} />
             </div>
             <div>
-              <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('monthly_savings_rate')}</span>
-              <p style={{ fontSize: '15px', fontWeight: 700, color: '#fff' }}>
+              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {t('monthly_savings_rate')}
+              </span>
+              <p style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', margin: '2px 0 0 0' }}>
                 {savingsRate > 0 ? `${savingsRate}% ${t('saved_rate')}` : `0% ${t('saved_rate')}`}
               </p>
             </div>
@@ -846,7 +857,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           <div style={{ width: '48px', height: '48px', position: 'relative' }}>
             <svg width="48" height="48" viewBox="0 0 36 36">
-              <circle cx="18" cy="18" r="16" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="3" />
+              <circle cx="18" cy="18" r="16" fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth="3" />
               <circle
                 cx="18"
                 cy="18"
@@ -860,7 +871,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 className="progress-ring-circle"
               />
             </svg>
-            <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '9px', fontWeight: 700 }}>
+            <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '10px', fontWeight: 800, color: 'var(--text-primary)' }}>
               {savingsRate > 0 ? `${savingsRate}%` : '0%'}
             </span>
           </div>
@@ -868,24 +879,35 @@ export const Dashboard: React.FC<DashboardProps> = ({
       )}
 
       {/* Aesthetic Money Score Card */}
-      <div className="glass-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(20, 184, 166, 0.1) 100%)', border: '1px solid rgba(34,197,94,0.2)' }}>
+      <div className="glass-panel" style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '16px 20px',
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border-card)',
+        borderRadius: '20px',
+        boxShadow: 'var(--glow-shadow)'
+      }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: 'linear-gradient(135deg, #22C55E 0%, #14B8A6 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(34, 197, 94, 0.3)' }}>
+          <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)', flexShrink: 0 }}>
             <span style={{ fontSize: '18px' }}>✨</span>
           </div>
           <div>
-            <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('zen_money_score')}</span>
-            <p style={{ fontSize: '15px', fontWeight: 700, color: '#fff' }}>
+            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {t('zen_money_score')}
+            </span>
+            <p style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', margin: '2px 0 0 0' }}>
               {zenStatus}
             </p>
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
-          <span style={{ fontSize: '28px', fontWeight: 800, fontFamily: "'Manrope', sans-serif", background: 'linear-gradient(135deg, #22C55E 0%, #14B8A6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          <span style={{ fontSize: '28px', fontWeight: 900, fontFamily: "'Manrope', sans-serif", color: '#10b981' }}>
             {zenScore}
           </span>
-          <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 600 }}>/100</span>
+          <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 700 }}>/100</span>
         </div>
       </div>
 
@@ -1499,10 +1521,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
             );
           })
         ) : (
-          <div className="glass-panel" style={{ padding: '24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+          <div className="glass-panel" style={{ padding: '24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', background: 'var(--bg-card)', border: '1px solid var(--border-card)', borderRadius: '20px' }}>
             <span style={{ fontSize: '28px' }}>🎯</span>
-            <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>{t('dreams_destination')}</h4>
-            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{t('create_first_goal')}</span>
+            <h4 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{t('dreams_destination')}</h4>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 600 }}>{t('create_first_goal')}</span>
           </div>
         )}
       </div>
