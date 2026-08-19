@@ -900,7 +900,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           className="glass-panel"
           style={{
             width: '100%',
-            maxWidth: '380px',
+            maxWidth: '360px',
             padding: '32px 24px 24px',
             borderRadius: '28px',
             border: '1px solid rgba(255,255,255,0.08)',
@@ -911,21 +911,22 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           }}
         >
           {/* ── Logo & Branding ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '28px' }}>
             <div style={{
-              width: '60px', height: '60px', borderRadius: '16px',
-              background: '#ffffff',
+              width: '72px', height: '72px', borderRadius: '22px',
+              background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%)',
+              border: '1px solid rgba(34, 197, 94, 0.25)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.25), 0 0 20px rgba(34,197,94,0.25)',
-              marginBottom: '12px', padding: '10px'
+              boxShadow: '0 8px 32px rgba(34, 197, 94, 0.2)',
+              marginBottom: '14px', overflow: 'hidden'
             }}>
-              <img src="/zen-icon-green.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              <img src="/favicon.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
-            <h1 style={{ fontSize: '26px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
+            <h1 style={{ fontSize: '30px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
               <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
             </h1>
-            <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', margin: 0, fontWeight: 700 }}>
-              CLAIM YOUR MONEY
+            <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', margin: 0, fontWeight: 700 }}>
+              Claim Your Money
             </p>
           </div>
 
@@ -1174,10 +1175,10 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
       {/* STEP: Onboarding PIN Setup (Choose & Confirm) */}
       {!isLoading && (step === 'onboard-pin' || step === 'onboard-confirm') && (
         <div
-          className="glass-panel animate-slide-up"
+          className="glass-panel"
           style={{
             width: '100%',
-            maxWidth: '380px',
+            maxWidth: '360px',
             padding: '32px 24px 24px',
             borderRadius: '28px',
             border: '1px solid rgba(255,255,255,0.08)',
@@ -1190,15 +1191,16 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           }}
         >
           {/* ── Logo & Branding ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '20px' }}>
             <div style={{
-              width: '60px', height: '60px', borderRadius: '16px',
-              background: '#ffffff',
+              width: '72px', height: '72px', borderRadius: '22px',
+              background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%)',
+              border: '1px solid rgba(34, 197, 94, 0.25)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.25), 0 0 20px rgba(34,197,94,0.25)',
-              marginBottom: '12px', padding: '10px'
+              boxShadow: '0 8px 32px rgba(34, 197, 94, 0.2)',
+              marginBottom: '14px', overflow: 'hidden'
             }}>
-              <img src="/zen-icon-green.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              <img src="/favicon.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <h2 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 4px 0', fontFamily: "'Manrope', sans-serif" }}>
               {step === 'onboard-pin' ? 'Create PIN' : 'Confirm PIN'}
@@ -1345,10 +1347,10 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
       {/* STEP: Verify PIN for unlock */}
       {!isLoading && step === 'unlock' && (
         <div
-          className="glass-panel animate-slide-up"
+          className="glass-panel"
           style={{
             width: '100%',
-            maxWidth: '380px',
+            maxWidth: '360px',
             padding: '32px 24px 24px',
             borderRadius: '28px',
             border: '1px solid rgba(255,255,255,0.08)',
@@ -1361,28 +1363,29 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           }}
         >
           {/* ── Logo & Branding ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '14px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '18px' }}>
             <div style={{
-              width: '60px', height: '60px', borderRadius: '16px',
-              background: '#ffffff',
+              width: '72px', height: '72px', borderRadius: '22px',
+              background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%)',
+              border: '1px solid rgba(34, 197, 94, 0.25)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.25), 0 0 20px rgba(34,197,94,0.25)',
-              marginBottom: '12px', padding: '10px'
+              boxShadow: '0 8px 32px rgba(34, 197, 94, 0.2)',
+              marginBottom: '14px', overflow: 'hidden'
             }}>
               <img 
-                src="/zen-icon-green.png" 
+                src="/favicon.png" 
                 alt="ZenBudget Logo" 
                 style={{ 
                   width: '100%', 
                   height: '100%', 
-                  objectFit: 'contain' 
+                  objectFit: 'cover' 
                 }} 
               />
             </div>
-            <h2 style={{ fontSize: '26px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
+            <h2 style={{ fontSize: '30px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
               <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
             </h2>
-            <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', margin: 0, fontWeight: 700 }}>
+            <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', margin: 0, fontWeight: 700 }}>
               CLAIM YOUR MONEY
             </div>
             <p style={{ fontSize: '13px', color: 'var(--text-primary)', marginTop: '8px', marginBottom: '4px', fontWeight: 700 }}>
