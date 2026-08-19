@@ -106,7 +106,10 @@ const App: React.FC = () => {
   });
 
   const handleDeleteAccount = (accId: string) => {
-    if (!isPremiumUser) {
+    const tier = subscriptionTier || localStorage.getItem('zb_subscription_tier') || 'trial';
+    const isPro = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(tier);
+
+    if (!isPro) {
       triggerToast('🔒 Deleting accounts is a Premium feature. Upgrade to Pro!', 'warning');
       setIsSubBlocker(false);
       setIsSubModalOpen(true);
@@ -2130,8 +2133,11 @@ const App: React.FC = () => {
   };
 
   const handleDeleteTransactionRequest = (id: string) => {
+    const tier = subscriptionTier || localStorage.getItem('zb_subscription_tier') || 'trial';
+    const isPro = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(tier);
+
     // Non-Premium / Free Trial Delete Restriction:
-    if (!isPremiumUser) {
+    if (!isPro) {
       triggerToast('🔒 Deleting ledger records is a Premium Feature. Upgrade to Pro to manage & delete records!', 'warning');
       setIsSubBlocker(false);
       setIsSubModalOpen(true);
@@ -2375,7 +2381,10 @@ const App: React.FC = () => {
   };
 
   const handleDeleteGoal = (goalId: string) => {
-    if (!isPremiumUser) {
+    const tier = subscriptionTier || localStorage.getItem('zb_subscription_tier') || 'trial';
+    const isPro = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(tier);
+
+    if (!isPro) {
       triggerToast('🔒 Deleting savings goals is a Premium feature. Upgrade to Pro!', 'warning');
       setIsSubBlocker(false);
       setIsSubModalOpen(true);
@@ -2421,8 +2430,11 @@ const App: React.FC = () => {
 
   // Reset database triggers complete wipeout of challenges, limits, and ledger data
   const handleResetDataRequest = () => {
-    if (!isPremiumUser) {
-      triggerToast('🔒 Reset Workspace is a Premium Feature. Upgrade to Pro to reset & manage ledgers!', 'warning');
+    const tier = subscriptionTier || localStorage.getItem('zb_subscription_tier') || 'trial';
+    const isPro = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(tier);
+
+    if (!isPro) {
+      triggerToast('🔒 Reset Workspace Data is a Premium Feature. Upgrade to Pro to reset & manage ledgers!', 'warning');
       setIsSubBlocker(false);
       setIsSubModalOpen(true);
       return;

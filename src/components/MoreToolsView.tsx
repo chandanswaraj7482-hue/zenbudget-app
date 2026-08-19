@@ -444,7 +444,13 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
 
           {/* Reset Database */}
           <button
-            onClick={onResetData}
+            onClick={() => {
+              if (!isPremiumUser) {
+                onOpenSubscriptionModal();
+                return;
+              }
+              onResetData();
+            }}
             style={{
               display: 'flex',
               alignItems: 'center',
