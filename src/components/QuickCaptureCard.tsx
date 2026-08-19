@@ -402,8 +402,8 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
             width: '40px',
             height: '40px',
             borderRadius: '50%',
-            border: isListening ? '2px solid var(--primary)' : '1px solid var(--border-input)',
-            background: isListening ? 'var(--primary-glow)' : 'var(--bg-input)',
+            border: isListening ? '2px solid var(--primary)' : '1px solid var(--border-card)',
+            background: isListening ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-dark)',
             color: isListening ? 'var(--primary)' : 'var(--text-secondary)',
             display: 'flex',
             alignItems: 'center',
@@ -446,16 +446,16 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
             width: '48px',
             height: '48px',
             borderRadius: '18px',
-            border: 'none',
-            background: inputQuery.trim() ? 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)' : 'var(--bg-input)',
-            color: '#ffffff',
+            border: inputQuery.trim() ? 'none' : '1px solid var(--border-card)',
+            background: inputQuery.trim() ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'var(--bg-dark)',
+            color: inputQuery.trim() ? '#ffffff' : 'var(--text-secondary)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            cursor: inputQuery.trim() ? 'pointer' : 'not-allowed',
-            opacity: inputQuery.trim() ? 1 : 0.4,
-            boxShadow: inputQuery.trim() ? '0 4px 16px var(--primary-glow)' : 'none',
-            transition: 'all 0.2s ease'
+            cursor: inputQuery.trim() ? 'pointer' : 'default',
+            boxShadow: inputQuery.trim() ? '0 4px 16px rgba(16, 185, 129, 0.4)' : 'none',
+            transition: 'all 0.2s ease',
+            flexShrink: 0
           }}
         >
           <ArrowRight size={20} />

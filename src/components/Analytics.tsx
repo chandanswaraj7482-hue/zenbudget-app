@@ -577,23 +577,27 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingBottom: '80px' }} className="animate-fade-in">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '80px' }} className="animate-fade-in">
 
       {/* Header + Timeframe Toggle */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ fontSize: '22px', fontWeight: 800 }}>{t('analytics_title')}</h2>
-        <div style={{ display: 'flex', background: 'rgba(255, 255, 255, 0.04)', padding: '2px', borderRadius: '10px' }}>
+        <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em', margin: 0 }}>
+          {t('analytics_title')}
+        </h2>
+        <div style={{ display: 'flex', background: 'var(--bg-dark)', border: '1px solid var(--border-card)', padding: '3px', borderRadius: '12px' }}>
           <button 
             onClick={() => setTimeframe('month')}
             style={{
-              padding: '6px 12px',
-              borderRadius: '8px',
+              padding: '6px 14px',
+              borderRadius: '9px',
               border: 'none',
               cursor: 'pointer',
-              fontSize: '11px',
-              fontWeight: 600,
+              fontSize: '12px',
+              fontWeight: 800,
               backgroundColor: timeframe === 'month' ? 'var(--primary)' : 'transparent',
-              color: timeframe === 'month' ? '#fff' : 'var(--text-secondary)'
+              color: timeframe === 'month' ? '#ffffff' : 'var(--text-secondary)',
+              boxShadow: timeframe === 'month' ? '0 2px 8px rgba(16, 185, 129, 0.25)' : 'none',
+              transition: 'all 0.15s ease'
             }}
           >
             This Month
@@ -601,14 +605,16 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
           <button 
             onClick={() => setTimeframe('all')}
             style={{
-              padding: '6px 12px',
-              borderRadius: '8px',
+              padding: '6px 14px',
+              borderRadius: '9px',
               border: 'none',
               cursor: 'pointer',
-              fontSize: '11px',
-              fontWeight: 600,
+              fontSize: '12px',
+              fontWeight: 800,
               backgroundColor: timeframe === 'all' ? 'var(--primary)' : 'transparent',
-              color: timeframe === 'all' ? '#fff' : 'var(--text-secondary)'
+              color: timeframe === 'all' ? '#ffffff' : 'var(--text-secondary)',
+              boxShadow: timeframe === 'all' ? '0 2px 8px rgba(16, 185, 129, 0.25)' : 'none',
+              transition: 'all 0.15s ease'
             }}
           >
             All Time
@@ -617,19 +623,36 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
       </div>
 
       {/* Money Streak */}
-      <div style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(239,68,68,0.06) 100%)', borderRadius: '20px', padding: '16px 20px', border: '1px solid rgba(245,158,11,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="glass-panel" style={{
+        background: 'var(--bg-card)',
+        borderRadius: '24px',
+        padding: '22px 24px',
+        border: '1px solid var(--border-card)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        boxShadow: 'var(--glow-shadow)'
+      }}>
         <div>
-          <span style={{ fontSize: '11px', color: '#f59e0b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Money Streak 🔥</span>
-          <p style={{ fontSize: '28px', fontWeight: 800, color: '#fff', margin: '4px 0 2px', fontFamily: "'Manrope', sans-serif" }}>{streak} Days</p>
-          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Consecutive days under budget</span>
+          <span style={{ fontSize: '12px', color: '#d97706', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            Money Streak 🔥
+          </span>
+          <p style={{ fontSize: '34px', fontWeight: 900, color: 'var(--text-primary)', margin: '4px 0 2px', fontFamily: "'Manrope', sans-serif", letterSpacing: '-0.02em' }}>
+            {streak} Days
+          </p>
+          <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+            Consecutive days under budget
+          </span>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ display: 'flex', gap: '2px', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', gap: '2px', justifyContent: 'flex-end', marginBottom: '4px' }}>
             {['🔥','🔥','🔥'].map((f, i) => (
-              <span key={i} style={{ fontSize: '24px', opacity: streak >= (i + 1) * 3 ? 1 : 0.2 }}>{f}</span>
+              <span key={i} style={{ fontSize: '24px', opacity: streak >= (i + 1) * 3 ? 1 : 0.25 }}>{f}</span>
             ))}
           </div>
-          <span style={{ fontSize: '11px', color: '#f59e0b', fontWeight: 600 }}>{streak >= 7 ? '7 Day Goal Hit! 🏆' : streak >= 3 ? 'Keep it up!' : 'Build your streak!'}</span>
+          <span style={{ fontSize: '12px', color: '#d97706', fontWeight: 800 }}>
+            {streak >= 7 ? '7 Day Goal Hit! 🏆' : streak >= 3 ? 'Keep it up! ⚡' : 'Build your streak! 🌱'}
+          </span>
         </div>
       </div>
 
@@ -637,13 +660,33 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
       {renderAccountBalanceChart()}
 
       {/* SVG Daily Expense Trend */}
-      <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div className="glass-panel" style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px',
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border-card)',
+        borderRadius: '24px',
+        padding: '22px',
+        boxShadow: 'var(--glow-shadow)'
+      }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('trend_analysis')}</span>
-            <h4 style={{ fontSize: '15px', fontWeight: 600 }}>{t('last_7_days')}</h4>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 800 }}>
+              {t('trend_analysis')}
+            </span>
+            <h4 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)', margin: '2px 0 0 0' }}>
+              {t('last_7_days')}
+            </h4>
           </div>
-          <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--primary)' }}>
+          <span style={{
+            fontSize: '13px',
+            fontWeight: 800,
+            color: 'var(--primary)',
+            background: 'rgba(16, 185, 129, 0.12)',
+            padding: '4px 10px',
+            borderRadius: '10px'
+          }}>
             Avg: {currencySymbol}{(trendData.reduce((sum, d) => sum + d.amount, 0) / 7).toFixed(0)}/day
           </span>
         </div>
@@ -659,9 +702,9 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
             </defs>
 
             {/* Grid Lines */}
-            <line x1="20" y1="20" x2={svgWidth - 20} y2="20" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-            <line x1="20" y1="60" x2={svgWidth - 20} y2="60" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-            <line x1="20" y1="100" x2={svgWidth - 20} y2="100" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
+            <line x1="20" y1="20" x2={svgWidth - 20} y2="20" stroke="rgba(0,0,0,0.05)" strokeWidth="1" />
+            <line x1="20" y1="60" x2={svgWidth - 20} y2="60" stroke="rgba(0,0,0,0.05)" strokeWidth="1" />
+            <line x1="20" y1="100" x2={svgWidth - 20} y2="100" stroke="rgba(0,0,0,0.05)" strokeWidth="1" />
 
             {/* Area under line */}
             {points.length > 0 && (
@@ -675,7 +718,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
                 fill="none" 
                 stroke="var(--primary)" 
                 strokeWidth="3.5" 
-                strokeLinecap="round"
+                strokeLinecap="round" 
                 strokeLinejoin="round" 
               />
             )}
@@ -686,11 +729,10 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
                 <text
                   x={p.x}
                   y={Math.max(12, p.y - 9)}
-                  fill="#ffffff"
-                  fontSize="8.5"
+                  fill="var(--text-primary)"
+                  fontSize="9.5"
                   fontWeight="800"
                   textAnchor="middle"
-                  style={{ textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}
                 >
                   {currencySymbol}{Math.round(p.value).toLocaleString()}
                 </text>
@@ -698,9 +740,9 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
                   cx={p.x} 
                   cy={p.y} 
                   r="5" 
-                  fill="#0b0f19" 
+                  fill="#ffffff" 
                   stroke="var(--primary)" 
-                  strokeWidth="2.5" 
+                  strokeWidth="3" 
                 />
               </g>
             ))}
@@ -711,9 +753,9 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
                 key={i} 
                 x={p.x} 
                 y={svgHeight - 2} 
-                fill="var(--text-muted)" 
-                fontSize="9" 
-                fontWeight="600"
+                fill="var(--text-secondary)" 
+                fontSize="10" 
+                fontWeight="700"
                 textAnchor="middle"
               >
                 {p.label}
@@ -724,11 +766,23 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
       </div>
 
       {/* Donut Chart and List */}
-      <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
-        <h3 style={{ fontSize: '15px', fontWeight: 600, alignSelf: 'flex-start' }}>{t('category_breakdown')}</h3>
+      <div className="glass-panel" style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '20px',
+        alignItems: 'center',
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border-card)',
+        borderRadius: '24px',
+        padding: '24px',
+        boxShadow: 'var(--glow-shadow)'
+      }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)', alignSelf: 'flex-start', margin: 0 }}>
+          {t('category_breakdown')}
+        </h3>
 
         {totalExpense === 0 ? (
-          <div style={{ padding: '30px 0', color: 'var(--text-secondary)', textAlign: 'center', fontSize: '14px' }}>
+          <div style={{ padding: '30px 0', color: 'var(--text-secondary)', textAlign: 'center', fontSize: '14px', fontWeight: 600 }}>
             No expense data available for this range.
           </div>
         ) : (
@@ -741,7 +795,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
                   cy="60" 
                   r={radius} 
                   fill="none" 
-                  stroke="rgba(255,255,255,0.03)" 
+                  stroke="rgba(0, 0, 0, 0.06)" 
                   strokeWidth="12" 
                 />
                 
