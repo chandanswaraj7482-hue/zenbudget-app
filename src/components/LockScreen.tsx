@@ -1347,14 +1347,12 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
       {/* STEP: Verify PIN for unlock */}
       {!isLoading && step === 'unlock' && (
         <div
-          className="glass-panel"
           style={{
             width: '100%',
             maxWidth: '360px',
-            padding: '32px 24px 24px',
+            padding: '24px 20px 20px',
             borderRadius: '28px',
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+            background: 'transparent',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -1363,7 +1361,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           }}
         >
           {/* ── Logo & Branding ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '18px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '8px' }}>
             <div style={{
               width: '72px', height: '72px', borderRadius: '22px',
               background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%)',
@@ -1386,19 +1384,50 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
             </h2>
             <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', margin: 0, fontWeight: 700 }}>
-              CLAIM YOUR MONEY
+              CALM YOUR MONEY
             </div>
             <p style={{ fontSize: '13px', color: 'var(--text-primary)', marginTop: '8px', marginBottom: '4px', fontWeight: 700 }}>
-              Welcome back, {dbProfile?.name || username || localStorage.getItem('zb_user_name') || 'User'}
+              Welcome back, {dbProfile?.name || username || localStorage.getItem('zb_user_name') || 'Chandan Swaraj'}
             </p>
+          </div>
+
+          {/* ── Inspirational Quote & Daily Limit Card ── */}
+          <div style={{
+            width: '100%',
+            maxWidth: '320px',
+            background: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.06)',
+            borderRadius: '16px',
+            padding: '12px 14px',
+            margin: '6px 0 16px',
+            textAlign: 'center'
+          }}>
+            <p style={{ fontSize: '11px', fontStyle: 'italic', color: '#94a3b8', margin: '0 0 8px', lineHeight: 1.4 }}>
+              "A budget is telling your money where to go instead of wondering where it went."
+            </p>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              background: 'rgba(34, 197, 94, 0.12)',
+              border: '1px solid rgba(34, 197, 94, 0.25)',
+              borderRadius: '20px',
+              padding: '4px 12px',
+              fontSize: '11px',
+              fontWeight: 700,
+              color: '#22c55e'
+            }}>
+              <span>Today's Limit: Stay under ₹1,538</span>
+              <span>🤝</span>
+            </div>
           </div>
 
           {/* Dots */}
           <div 
             style={{ 
               display: 'flex', 
-              gap: '16px', 
-              margin: '6px 0 14px',
+              gap: '14px', 
+              margin: '4px 0 18px',
               animation: isIncorrect ? 'shake 0.5s ease-in-out' : 'none'
             }}
           >
@@ -1408,13 +1437,12 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                 <div
                   key={index}
                   style={{
-                    width: '16px',
-                    height: '16px',
+                    width: '14px',
+                    height: '14px',
                     borderRadius: '50%',
-                    border: '2px solid',
-                    borderColor: isIncorrect ? 'var(--danger)' : 'var(--primary)',
-                    backgroundColor: isIncorrect ? 'var(--danger)' : active ? 'var(--primary)' : 'transparent',
-                    boxShadow: isIncorrect ? '0 0 10px var(--danger)' : active ? '0 0 10px var(--primary)' : 'none',
+                    border: '2px solid #22c55e',
+                    backgroundColor: active ? '#22c55e' : 'transparent',
+                    boxShadow: active ? '0 0 12px rgba(34, 197, 94, 0.6)' : 'none',
                     transition: 'all 0.15s ease'
                   }}
                 />
@@ -1433,10 +1461,10 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '14px',
+              gap: '12px',
               width: '100%',
               maxWidth: '260px',
-              marginTop: '4px'
+              marginTop: '0px'
             }}
           >
             {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((num) => (
@@ -1444,73 +1472,75 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                 key={num}
                 onClick={() => handleKeypadPress(num)}
                 style={{
-                  height: '56px',
+                  height: '60px',
+                  width: '60px',
                   borderRadius: '50%',
-                  border: '1px solid var(--border-card)',
-                  background: 'var(--bg-card)',
-                  color: 'var(--text-primary)',
-                  fontSize: '20px',
-                  fontWeight: 800,
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  background: '#131b26',
+                  color: '#ffffff',
+                  fontSize: '22px',
+                  fontWeight: 700,
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-                  transition: 'all 0.2s ease-out'
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.35)',
+                  transition: 'all 0.15s ease-out',
+                  margin: '0 auto'
                 }}
-                onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.25)'}
-                onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
+                onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.3)'}
+                onMouseUp={(e) => e.currentTarget.style.background = '#131b26'}
               >
                 {num}
               </button>
             ))}
             
-            {/* Left Keypad Column: Biometrics button or empty spacer */}
-            {biometricsAvailable ? (
-              <button
-                onClick={() => triggerBiometricUnlock()}
-                style={{
-                  height: '56px',
-                  borderRadius: '50%',
-                  border: '1px solid rgba(34, 197, 94, 0.3)',
-                  background: 'rgba(34, 197, 94, 0.12)',
-                  color: 'var(--primary)',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 4px 12px rgba(34, 197, 94, 0.15)',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.3)'}
-                onMouseUp={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.12)'}
-              >
-                <Fingerprint size={22} />
-              </button>
-            ) : (
-              <div style={{ height: '56px', width: '56px' }} />
-            )}
+            {/* Left Keypad Column: Biometrics button */}
+            <button
+              onClick={() => triggerBiometricUnlock()}
+              style={{
+                height: '60px',
+                width: '60px',
+                borderRadius: '50%',
+                border: '1px solid rgba(34, 197, 94, 0.3)',
+                background: 'rgba(34, 197, 94, 0.12)',
+                color: '#22c55e',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 0 16px rgba(34, 197, 94, 0.25)',
+                transition: 'all 0.15s ease',
+                margin: '0 auto'
+              }}
+              onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.3)'}
+              onMouseUp={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.12)'}
+            >
+              <Fingerprint size={24} />
+            </button>
 
             {/* Center Column: 0 */}
             <button
               onClick={() => handleKeypadPress('0')}
               style={{
-                height: '56px',
+                height: '60px',
+                width: '60px',
                 borderRadius: '50%',
-                border: '1px solid var(--border-card)',
-                background: 'var(--bg-card)',
-                color: 'var(--text-primary)',
-                fontSize: '20px',
-                fontWeight: 800,
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                background: '#131b26',
+                color: '#ffffff',
+                fontSize: '22px',
+                fontWeight: 700,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-                transition: 'all 0.2s ease'
+                boxShadow: '0 4px 16px rgba(0,0,0,0.35)',
+                transition: 'all 0.15s ease',
+                margin: '0 auto'
               }}
-              onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.25)'}
-              onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
+              onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.3)'}
+              onMouseUp={(e) => e.currentTarget.style.background = '#131b26'}
             >
               0
             </button>
@@ -1519,42 +1549,48 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
             <button
               onClick={handleBackspace}
               style={{
-                height: '56px',
+                height: '60px',
+                width: '60px',
                 borderRadius: '50%',
-                border: '1px solid var(--border-card)',
-                background: 'var(--bg-card)',
-                color: 'var(--text-primary)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                background: '#131b26',
+                color: '#ffffff',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-                transition: 'all 0.2s ease'
+                boxShadow: '0 4px 16px rgba(0,0,0,0.35)',
+                transition: 'all 0.15s ease',
+                margin: '0 auto'
               }}
-              onMouseDown={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
-              onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
+              onMouseDown={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.25)'}
+              onMouseUp={(e) => e.currentTarget.style.background = '#131b26'}
             >
-              <Delete size={20} />
+              <Delete size={22} />
             </button>
           </div>
 
           {/* Sign Out Action */}
-          <div style={{ marginTop: '18px' }}>
+          <div style={{ marginTop: '22px' }}>
             <button
               onClick={() => setShowSignOutConfirm(true)}
               style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-secondary)',
-                fontSize: '12px',
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.25)',
+                borderRadius: '20px',
+                padding: '8px 18px',
+                color: '#ef4444',
+                fontSize: '11px',
                 fontWeight: 700,
                 cursor: 'pointer',
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px'
+                gap: '6px',
+                transition: 'all 0.15s ease'
               }}
             >
-              <LogOut size={13} /> Sign Out of Account
+              <LogOut size={12} />
+              <span>Sign Out of Account</span>
             </button>
           </div>
 
