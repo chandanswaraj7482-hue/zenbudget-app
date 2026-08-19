@@ -2009,26 +2009,114 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 />
               </div>
 
-              {/* Status / Subtitle */}
+              {/* Status / Subtitle with Options */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.02em' }}>
-                  Status / Subtitle
-                </label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.02em' }}>
+                    Status / Subtitle Type
+                  </label>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--primary)', fontWeight: 700 }}>
+                    Select preset or custom
+                  </span>
+                </div>
+
+                {/* Dropdown Selector */}
+                <select
+                  value={
+                    ['Not started', 'In progress', 'Active Streak', 'Almost done', 'Completed! 🏆', 'On pause'].some(
+                      opt => opt.toLowerCase() === (editChallengeSubtitle || '').toLowerCase()
+                    )
+                      ? ['Not started', 'In progress', 'Active Streak', 'Almost done', 'Completed! 🏆', 'On pause'].find(
+                          opt => opt.toLowerCase() === (editChallengeSubtitle || '').toLowerCase()
+                        )
+                      : 'custom'
+                  }
+                  onChange={(e) => {
+                    const selected = e.target.value;
+                    if (selected !== 'custom') {
+                      setEditChallengeSubtitle(selected);
+                      if (selected === 'Not started') setEditChallengePercent(0);
+                      else if (selected === 'In progress') setEditChallengePercent(25);
+                      else if (selected === 'Active Streak') setEditChallengePercent(50);
+                      else if (selected === 'Almost done') setEditChallengePercent(80);
+                      else if (selected === 'Completed! 🏆') setEditChallengePercent(100);
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px',
+                    fontSize: '0.88rem',
+                    fontWeight: 700,
+                    background: 'var(--bg-input)',
+                    border: '1px solid var(--border-input)',
+                    color: 'var(--text-primary)',
+                    borderRadius: '12px',
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="Not started">⏳ Not started (0%)</option>
+                  <option value="In progress">🔥 In progress (25%)</option>
+                  <option value="Active Streak">💪 Active Streak (50%)</option>
+                  <option value="Almost done">⚡ Almost done (80%)</option>
+                  <option value="Completed! 🏆">✅ Completed! 🏆 (100%)</option>
+                  <option value="On pause">⏸️ On pause</option>
+                  <option value="custom">✏️ Custom Subtitle (Type below)...</option>
+                </select>
+
+                {/* Quick Status Chips */}
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '2px' }}>
+                  {[
+                    { label: 'Not started', icon: '⏳', pct: 0 },
+                    { label: 'In progress', icon: '🔥', pct: 30 },
+                    { label: 'Active Streak', icon: '💪', pct: 50 },
+                    { label: 'Almost done', icon: '⚡', pct: 85 },
+                    { label: 'Completed! 🏆', icon: '✅', pct: 100 }
+                  ].map(chip => {
+                    const isSelected = (editChallengeSubtitle || '').toLowerCase() === chip.label.toLowerCase();
+                    return (
+                      <button
+                        key={chip.label}
+                        type="button"
+                        onClick={() => {
+                          setEditChallengeSubtitle(chip.label);
+                          setEditChallengePercent(chip.pct);
+                        }}
+                        style={{
+                          padding: '4px 10px',
+                          borderRadius: '8px',
+                          border: isSelected ? '1px solid var(--primary)' : '1px solid var(--border-input)',
+                          background: isSelected ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-input)',
+                          color: isSelected ? 'var(--primary)' : 'var(--text-secondary)',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        {chip.icon} {chip.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Custom / Editable Text Input */}
                 <input
                   type="text"
                   value={editChallengeSubtitle}
                   onChange={(e) => setEditChallengeSubtitle(e.target.value)}
-                  placeholder="Streak: 0 days..."
+                  placeholder="Or enter custom subtitle / streak..."
                   style={{
                     width: '100%',
-                    padding: '12px 16px',
-                    fontSize: '0.9rem',
+                    padding: '10px 14px',
+                    fontSize: '0.85rem',
                     fontWeight: 600,
                     background: 'var(--bg-input)',
                     border: '1px solid var(--border-input)',
                     color: 'var(--text-primary)',
                     borderRadius: '12px',
-                    outline: 'none'
+                    outline: 'none',
+                    marginTop: '2px'
                   }}
                 />
               </div>
