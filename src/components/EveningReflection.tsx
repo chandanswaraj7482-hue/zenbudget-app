@@ -152,70 +152,71 @@ export const EveningReflection: React.FC<EveningReflectionProps> = ({
   return (
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(10px)',
+      backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
       display: 'flex', justifyContent: 'center', alignItems: 'center',
-      zIndex: 2000, padding: '20px', animation: 'fadeIn 0.3s ease-out'
+      zIndex: 10000, padding: '20px', animation: 'fadeIn 0.3s ease-out'
     }} onClick={onClose}>
       
       <div 
         className="glass-panel"
         style={{
-          width: '100%', maxWidth: '360px', padding: '30px', borderRadius: '32px',
-          background: 'linear-gradient(180deg, rgba(139, 92, 246, 0.08) 0%, rgba(9, 9, 15, 0.9) 100%)',
-          border: '1px solid rgba(139, 92, 246, 0.2)', position: 'relative',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.5)', animation: 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+          width: '100%', maxWidth: '380px', padding: '28px 24px', borderRadius: '28px',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border-card)', position: 'relative',
+          boxShadow: 'var(--glow-shadow)', animation: 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
         onClick={e => e.stopPropagation()}
       >
-        <button onClick={onClose} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
-          <X size={20} />
+        <button onClick={onClose} style={{ position: 'absolute', top: '18px', right: '18px', background: 'rgba(0,0,0,0.05)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <X size={18} />
         </button>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', textAlign: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', alignItems: 'center', textAlign: 'center' }}>
           
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-              <Moon size={20} color="#8b5cf6" />
-              <span style={{ fontSize: '13px', fontWeight: 600, color: '#8b5cf6', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Evening Reflection</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <Moon size={18} color="#8b5cf6" />
+              <span style={{ fontSize: '12px', fontWeight: 800, color: '#8b5cf6', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Evening Reflection</span>
             </div>
-            <h1 style={{ fontSize: '24px', fontWeight: 800, lineHeight: 1.2, fontFamily: "'Manrope', sans-serif" }}>
-              {userName.split(' ')[0]}'s Night Recap
+            <h1 style={{ fontSize: '24px', fontWeight: 900, lineHeight: 1.2, fontFamily: "'Manrope', sans-serif", color: 'var(--text-primary)', margin: 0 }}>
+              {userName.split(' ')[0] || 'User'}'s Night Recap
             </h1>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', width: '100%' }}>
-            <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '16px', borderRadius: '20px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-              <span style={{ fontSize: '12px', color: 'var(--danger)', fontWeight: 600 }}>Spent Today</span>
-              <p style={{ fontSize: '22px', fontWeight: 800, color: '#fff' }}>{currencySymbol}{Math.round(spentToday).toLocaleString()}</p>
+            <div style={{ background: 'rgba(239, 68, 68, 0.08)', padding: '16px', borderRadius: '20px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+              <span style={{ fontSize: '12px', color: '#dc2626', fontWeight: 800 }}>Spent Today</span>
+              <p style={{ fontSize: '22px', fontWeight: 900, color: 'var(--text-primary)', margin: '4px 0 0 0' }}>{currencySymbol}{Math.round(spentToday).toLocaleString()}</p>
             </div>
-            <div style={{ background: 'rgba(34, 197, 94, 0.1)', padding: '16px', borderRadius: '20px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
-              <span style={{ fontSize: '12px', color: 'var(--primary)', fontWeight: 600 }}>Saved Today</span>
-              <p style={{ fontSize: '22px', fontWeight: 800, color: '#fff' }}>{currencySymbol}{Math.round(savedToday).toLocaleString()}</p>
+            <div style={{ background: 'rgba(34, 197, 94, 0.08)', padding: '16px', borderRadius: '20px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
+              <span style={{ fontSize: '12px', color: '#16a34a', fontWeight: 800 }}>Saved Today</span>
+              <p style={{ fontSize: '22px', fontWeight: 900, color: 'var(--text-primary)', margin: '4px 0 0 0' }}>{currencySymbol}{Math.round(savedToday).toLocaleString()}</p>
             </div>
           </div>
 
           {/* Score & Visual Bar Chart */}
-          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '18px 24px', borderRadius: '20px', width: '100%', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ background: 'var(--bg-dark)', padding: '18px 24px', borderRadius: '20px', width: '100%', border: '1px solid var(--border-card)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>Money Score</span>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: score >= 70 ? '#22c55e' : score >= 40 ? '#f59e0b' : '#ef4444' }}>
+              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 800 }}>Money Score</span>
+              <span style={{ fontSize: '12px', fontWeight: 800, color: score >= 70 ? '#16a34a' : score >= 40 ? '#d97706' : '#dc2626' }}>
                 {score >= 70 ? 'Excellent 🌟' : score >= 40 ? 'Fair ⚖️' : 'Needs Care ⚠️'}
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '2px' }}>
-              <span style={{ fontSize: '48px', fontWeight: 800, fontFamily: "'Manrope', sans-serif", background: score >= 70 ? 'linear-gradient(135deg, #22C55E 0%, #14B8A6 100%)' : score >= 40 ? 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              <span style={{ fontSize: '48px', fontWeight: 900, fontFamily: "'Manrope', sans-serif", background: score >= 70 ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' : score >= 40 ? 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 {score}
               </span>
-              <span style={{ fontSize: '16px', color: 'var(--text-secondary)', fontWeight: 600 }}>/100</span>
+              <span style={{ fontSize: '16px', color: 'var(--text-secondary)', fontWeight: 700 }}>/100</span>
             </div>
 
             {/* Score Visual Progress Bar */}
-            <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.08)', borderRadius: '99px', overflow: 'hidden', marginTop: '2px' }}>
+            <div style={{ width: '100%', height: '8px', background: 'rgba(0, 0, 0, 0.08)', borderRadius: '99px', overflow: 'hidden', marginTop: '2px' }}>
               <div style={{
                 width: `${score}%`,
                 height: '100%',
                 background: score >= 70 
-                  ? 'linear-gradient(90deg, #22c55e 0%, #14b8a6 100%)' 
+                  ? 'linear-gradient(90deg, #10b981 0%, #059669 100%)' 
                   : score >= 40 
                   ? 'linear-gradient(90deg, #f59e0b 0%, #ef4444 100%)' 
                   : 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)',
@@ -226,23 +227,23 @@ export const EveningReflection: React.FC<EveningReflectionProps> = ({
           </div>
 
           {/* AI Money Coach Message */}
-          <div style={{ background: 'rgba(139, 92, 246, 0.08)', padding: '16px', borderRadius: '16px', width: '100%', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+          <div style={{ background: 'rgba(139, 92, 246, 0.08)', padding: '16px', borderRadius: '18px', width: '100%', border: '1px solid rgba(139, 92, 246, 0.25)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
               <Sparkles size={14} color="#8b5cf6" />
-              <span style={{ fontSize: '11px', fontWeight: 700, color: '#8b5cf6', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI Money Coach</span>
+              <span style={{ fontSize: '11px', fontWeight: 800, color: '#8b5cf6', textTransform: 'uppercase', letterSpacing: '0.06em' }}>AI Money Coach</span>
             </div>
             {isLoading ? (
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', fontStyle: 'italic' }}>Analyzing your day...</p>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', fontStyle: 'italic', margin: 0 }}>Analyzing your day...</p>
             ) : (
-              <p style={{ fontSize: '13px', color: '#fff', lineHeight: 1.6 }}>{aiMessage}</p>
+              <p style={{ fontSize: '14px', color: 'var(--text-primary)', lineHeight: 1.55, margin: 0, fontWeight: 600 }}>{aiMessage}</p>
             )}
           </div>
 
           {/* Future Prediction */}
           {budgetEndDate && (
-            <div style={{ background: 'rgba(245, 158, 11, 0.08)', padding: '12px 16px', borderRadius: '14px', width: '100%', border: '1px solid rgba(245, 158, 11, 0.2)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <TrendingDown size={16} color="#f59e0b" style={{ flexShrink: 0 }} />
-              <p style={{ fontSize: '12px', color: '#f59e0b', fontWeight: 600, textAlign: 'left' }}>
+            <div style={{ background: 'rgba(245, 158, 11, 0.08)', padding: '12px 16px', borderRadius: '14px', width: '100%', border: '1px solid rgba(245, 158, 11, 0.25)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <TrendingDown size={16} color="#d97706" style={{ flexShrink: 0 }} />
+              <p style={{ fontSize: '13px', color: '#d97706', fontWeight: 700, textAlign: 'left', margin: 0 }}>
                 At this pace, your budget runs out by <strong>{budgetEndDate}</strong>. Cut back to stay on track!
               </p>
             </div>

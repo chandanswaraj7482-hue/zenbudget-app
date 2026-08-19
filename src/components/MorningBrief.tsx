@@ -142,62 +142,72 @@ export const MorningBrief: React.FC<MorningBriefProps> = ({
   return (
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(10px)',
+      backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
       display: 'flex', justifyContent: 'center', alignItems: 'center',
-      zIndex: 2000, padding: '20px', animation: 'fadeIn 0.3s ease-out'
+      zIndex: 10000, padding: '20px', animation: 'fadeIn 0.3s ease-out'
     }} onClick={onClose}>
       
       <div 
         className="glass-panel"
         style={{
-          width: '100%', maxWidth: '360px', padding: '30px', borderRadius: '32px',
-          background: 'linear-gradient(180deg, rgba(245, 158, 11, 0.06) 0%, var(--bg-dark) 100%)',
+          width: '100%', maxWidth: '380px', padding: '28px 24px', borderRadius: '28px',
+          background: 'var(--bg-card)',
           border: '1px solid var(--border-card)', position: 'relative',
           boxShadow: 'var(--glow-shadow)', animation: 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
         onClick={e => e.stopPropagation()}
       >
-        <button onClick={onClose} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
-          <X size={20} />
+        <button onClick={onClose} style={{ position: 'absolute', top: '18px', right: '18px', background: 'rgba(0,0,0,0.05)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <X size={18} />
         </button>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
           
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <Sun size={20} color="#f59e0b" />
-              <span style={{ fontSize: '13px', fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Morning Brief</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+              <Sun size={18} color="#f59e0b" />
+              <span style={{ fontSize: '12px', fontWeight: 800, color: '#d97706', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Morning Brief</span>
             </div>
-            <h1 style={{ fontSize: '28px', fontWeight: 800, lineHeight: 1.1, fontFamily: "'Manrope', sans-serif", color: 'var(--text-primary)' }}>
-              Good Morning,<br/>{userName.split(' ')[0]} ☀️
+            <h1 style={{ fontSize: '26px', fontWeight: 900, lineHeight: 1.15, fontFamily: "'Manrope', sans-serif", color: 'var(--text-primary)', margin: 0 }}>
+              Good Morning,<br/>{userName.split(' ')[0] || 'User'} ☀️
             </h1>
           </div>
 
           {/* Yesterday summary & Visual Progress Bar */}
-          <div style={{ background: 'var(--bg-input)', padding: '20px', borderRadius: '20px', display: 'flex', flexDirection: 'column', gap: '14px', border: '1px solid var(--border-card)' }}>
+          <div style={{ background: 'var(--bg-dark)', padding: '18px', borderRadius: '20px', display: 'flex', flexDirection: 'column', gap: '12px', border: '1px solid var(--border-card)' }}>
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Yesterday you spent</span>
-                <span style={{ fontSize: '12px', color: spentYesterday > todaysLimit ? '#ef4444' : '#22c55e', fontWeight: 700 }}>
-                  {spentYesterday > todaysLimit ? 'Over Limit' : 'Within Limit'}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 700 }}>Yesterday you spent</span>
+                <span style={{
+                  fontSize: '11px',
+                  color: spentYesterday > todaysLimit ? '#dc2626' : '#16a34a',
+                  fontWeight: 800,
+                  background: spentYesterday > todaysLimit ? 'rgba(239, 68, 68, 0.12)' : 'rgba(34, 197, 94, 0.12)',
+                  padding: '3px 8px',
+                  borderRadius: '8px'
+                }}>
+                  {spentYesterday > todaysLimit ? '⚠️ Over Limit' : '✓ Within Limit'}
                 </span>
               </div>
-              <p style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-primary)', margin: '4px 0 8px 0' }}>{currencySymbol}{Math.round(spentYesterday).toLocaleString()}</p>
+              <p style={{ fontSize: '32px', fontWeight: 900, color: 'var(--text-primary)', margin: '4px 0 0 0', letterSpacing: '-0.02em' }}>
+                {currencySymbol}{Math.round(spentYesterday).toLocaleString()}
+              </p>
             </div>
 
             {/* Visual Progress Bar Graph */}
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '6px', fontWeight: 600 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '6px', fontWeight: 700 }}>
                 <span>Daily Limit Progress</span>
-                <span>{Math.min(100, Math.round((spentYesterday / (todaysLimit || 1)) * 100))}% Used</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 800 }}>{Math.min(100, Math.round((spentYesterday / (todaysLimit || 1)) * 100))}% Used</span>
               </div>
-              <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.08)', borderRadius: '99px', overflow: 'hidden' }}>
+              <div style={{ width: '100%', height: '8px', background: 'rgba(0, 0, 0, 0.08)', borderRadius: '99px', overflow: 'hidden' }}>
                 <div style={{
                   width: `${Math.min(100, (spentYesterday / (todaysLimit || 1)) * 100)}%`,
                   height: '100%',
                   background: spentYesterday > todaysLimit 
                     ? 'linear-gradient(90deg, #f59e0b 0%, #ef4444 100%)' 
-                    : 'linear-gradient(90deg, #22c55e 0%, #14b8a6 100%)',
+                    : 'linear-gradient(90deg, #10b981 0%, #059669 100%)',
                   borderRadius: '99px',
                   transition: 'width 0.8s ease-out'
                 }} />
@@ -205,46 +215,61 @@ export const MorningBrief: React.FC<MorningBriefProps> = ({
             </div>
 
             {topCat && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--warning)', fontSize: '13px', fontWeight: 600, paddingTop: '4px' }}>
-                <AlertTriangle size={16} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--warning)', fontSize: '13px', fontWeight: 700, paddingTop: '2px' }}>
+                <AlertTriangle size={15} />
                 <span style={{ textTransform: 'capitalize' }}>Highest: {topCat[0]} ({currencySymbol}{Math.round(topCat[1])})</span>
               </div>
             )}
           </div>
 
           {/* AI Coach Message */}
-          <div style={{ background: 'rgba(245, 158, 11, 0.06)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-              <Sparkles size={14} color="#f59e0b" />
-              <span style={{ fontSize: '11px', fontWeight: 700, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI Money Coach</span>
+          <div style={{ background: 'rgba(245, 158, 11, 0.08)', padding: '16px', borderRadius: '18px', border: '1px solid rgba(245, 158, 11, 0.25)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+              <Sparkles size={15} color="#d97706" />
+              <span style={{ fontSize: '11px', fontWeight: 800, color: '#d97706', textTransform: 'uppercase', letterSpacing: '0.06em' }}>AI Money Coach</span>
             </div>
             {isLoading ? (
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', fontStyle: 'italic' }}>Analyzing your finances...</p>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', fontStyle: 'italic', margin: 0 }}>Analyzing your finances...</p>
             ) : (
-              <p style={{ fontSize: '13px', color: 'var(--text-primary)', lineHeight: 1.6 }}>{aiMessage}</p>
+              <p style={{ fontSize: '14px', color: 'var(--text-primary)', lineHeight: 1.55, margin: 0, fontWeight: 600 }}>{aiMessage}</p>
             )}
           </div>
 
           {/* Budget prediction & Visual Bar */}
           {budgetEndDate && (
-            <div style={{ background: 'rgba(239, 68, 68, 0.06)', padding: '12px 16px', borderRadius: '14px', border: '1px solid rgba(239, 68, 68, 0.2)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ background: 'rgba(239, 68, 68, 0.08)', padding: '12px 16px', borderRadius: '14px', border: '1px solid rgba(239, 68, 68, 0.25)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <TrendingDown size={16} color="var(--danger)" style={{ flexShrink: 0 }} />
-                <p style={{ fontSize: '12px', color: 'var(--danger)', fontWeight: 600, margin: 0 }}>
+                <p style={{ fontSize: '13px', color: 'var(--danger)', fontWeight: 700, margin: 0 }}>
                   At current pace, budget ends by <strong>{budgetEndDate}</strong>. Slow down to last the month!
                 </p>
               </div>
             </div>
           )}
 
-          <div style={{ borderTop: '1px solid var(--border-card)', paddingTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-            <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Today's smart limit</span>
-            <span style={{ fontSize: '26px', fontWeight: 800, color: 'var(--primary)' }}>{currencySymbol}{todaysLimit.toLocaleString()}</span>
+          <div style={{ borderTop: '1px solid var(--border-card)', paddingTop: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '14px', color: 'var(--text-secondary)', fontWeight: 700 }}>Today's smart limit</span>
+            <span style={{ fontSize: '28px', fontWeight: 900, color: 'var(--primary)', letterSpacing: '-0.02em' }}>{currencySymbol}{todaysLimit.toLocaleString()}</span>
           </div>
 
           <button
             onClick={onClose}
-            style={{ width: '100%', padding: '16px', borderRadius: '16px', fontSize: '15px', fontWeight: 800, background: 'linear-gradient(to right, #f59e0b, var(--primary))', border: 'none', color: '#000', cursor: 'pointer' }}
+            style={{
+              width: '100%',
+              padding: '15px',
+              borderRadius: '16px',
+              fontSize: '15px',
+              fontWeight: 800,
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              border: 'none',
+              color: '#ffffff',
+              cursor: 'pointer',
+              boxShadow: '0 8px 24px rgba(16, 185, 129, 0.35)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px'
+            }}
           >
             Let's Go! 🚀
           </button>
