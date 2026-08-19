@@ -395,7 +395,7 @@ export const PremiumHub: React.FC<PremiumHubProps> = ({
       {/* AI Velocity Alert Banner */}
       {velocity.status !== 'safe' && (
         <div style={{ 
-          background: velocity.status === 'danger' ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)', 
+          background: velocity.status === 'danger' ? 'rgba(239,68,68,0.08)' : 'rgba(245,158,11,0.08)', 
           border: `1px solid ${velocity.status === 'danger' ? 'rgba(239,68,68,0.25)' : 'rgba(245,158,11,0.25)'}`, 
           borderRadius: '16px', 
           padding: '12px 16px', 
@@ -404,8 +404,26 @@ export const PremiumHub: React.FC<PremiumHubProps> = ({
           gap: '12px',
           textAlign: 'left'
         }}>
-          <AlertTriangle color={velocity.status === 'danger' ? '#ef4444' : '#f59e0b'} size={24} style={{ flexShrink: 0 }} />
-          <span style={{ fontSize: '12px', color: '#fff', fontWeight: 600 }}>{velocity.msg}</span>
+          <div style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '8px',
+            background: velocity.status === 'danger' ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <AlertTriangle color={velocity.status === 'danger' ? '#ef4444' : '#f59e0b'} size={18} />
+          </div>
+          <span style={{ 
+            fontSize: '13px', 
+            color: velocity.status === 'danger' ? '#ef4444' : '#d97706', 
+            fontWeight: 700,
+            lineHeight: 1.4
+          }}>
+            {velocity.msg}
+          </span>
         </div>
       )}
 
