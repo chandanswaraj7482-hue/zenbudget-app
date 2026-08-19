@@ -72,17 +72,60 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const handleAvatarFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      setErrorMsg('Image size should be less than 5MB.');
+    if (file.size > 10 * 1024 * 1024) {
+      setErrorMsg('Image size should be less than 10MB.');
       return;
     }
+
     const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === 'string') {
-        setAvatarUrl(reader.result);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          const maxSize = 256;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxSize) {
+              height = Math.round((height * maxSize) / width);
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width = Math.round((width * maxSize) / height);
+              height = maxSize;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressed = canvas.toDataURL('image/jpeg', 0.85);
+            setAvatarUrl(compressed);
+            localStorage.setItem('zb_user_avatar', compressed);
+            window.dispatchEvent(new Event('profile_avatar_updated'));
+            setErrorMsg('');
+          }
+        } catch (err) {
+          console.warn('Canvas compression error:', err);
+          if (typeof event.target?.result === 'string') {
+            setAvatarUrl(event.target.result);
+            localStorage.setItem('zb_user_avatar', event.target.result);
+            window.dispatchEvent(new Event('profile_avatar_updated'));
+          }
+        }
+      };
+      if (typeof event.target?.result === 'string') {
+        img.src = event.target.result;
       }
     };
     reader.readAsDataURL(file);
+    // Reset file input so user can pick the same file again if desired
+    e.target.value = '';
   };
 
   const googleAvatarSaved = localStorage.getItem('zb_google_avatar');
@@ -118,7 +161,9 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     setErrorMsg('');
     setSuccessMsg('');
     try {
-      localStorage.setItem('zb_user_avatar', avatarUrl);
+      if (avatarUrl) {
+        localStorage.setItem('zb_user_avatar', avatarUrl);
+      }
       localStorage.setItem('zb_user_phone', phone.trim());
       localStorage.setItem('zb_user_phone_code', phoneCode);
       window.dispatchEvent(new Event('profile_avatar_updated'));
@@ -193,14 +238,17 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               position: 'relative'
             }}>
               {name?.charAt(0)?.toUpperCase() || 'U'}
-              <img 
-                src={avatarUrl} 
-                alt="" 
-                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} 
-                onError={(e) => {
-                   (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
+              {avatarUrl && (
+                <img 
+                  key={avatarUrl}
+                  src={avatarUrl} 
+                  alt="" 
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} 
+                  onError={(e) => {
+                     (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              )}
             </div>
 
             <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>Choose Profile Picture</span>
@@ -210,7 +258,11 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 <button
                   key={idx}
                   type="button"
-                  onClick={() => setAvatarUrl(url)}
+                  onClick={() => {
+                    setAvatarUrl(url);
+                    localStorage.setItem('zb_user_avatar', url);
+                    window.dispatchEvent(new Event('profile_avatar_updated'));
+                  }}
                   style={{
                     width: '36px',
                     height: '36px',

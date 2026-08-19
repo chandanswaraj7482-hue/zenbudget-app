@@ -585,6 +585,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           }}>
             {userName?.charAt(0)?.toUpperCase() || 'U'}
             <img 
+              key={userAvatar || 'default'}
               src={
                 (userAvatar && userAvatar !== 'null' && !userAvatar.includes('name=User'))
                   ? userAvatar
