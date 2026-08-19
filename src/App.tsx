@@ -3004,20 +3004,7 @@ const App: React.FC = () => {
         transition: 'all 0.2s ease'
       }}>
         {/* Branding Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{
-            width: '26px',
-            height: '26px',
-            borderRadius: '8px',
-            background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.18) 0%, rgba(6, 182, 212, 0.12) 100%)',
-            border: '1px solid rgba(34, 197, 94, 0.25)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden'
-          }}>
-            <img src="/favicon.png" alt="Zen" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <span style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '-0.03em', fontFamily: "'Manrope', sans-serif" }}>
             <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
           </span>
