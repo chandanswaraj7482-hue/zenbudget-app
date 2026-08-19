@@ -217,6 +217,7 @@ const App: React.FC = () => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState<boolean>(false);
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
   const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false);
+  const [incomingPaymentData, setIncomingPaymentData] = useState<{ vpa?: string; amount?: string; name?: string; note?: string } | null>(null);
   const [activeLoanReminderModal, setActiveLoanReminderModal] = useState<{
     loan: any;
     overdueDays: number;
@@ -956,6 +957,23 @@ const App: React.FC = () => {
     if (refCode) {
       localStorage.setItem('zb_pending_referral_code', refCode);
       console.log('ZenBudget: Pending referral code saved:', refCode);
+    }
+
+    // Parse incoming shared payment link parameters
+    const payVpa = urlParams.get('pay_vpa') || urlParams.get('vpa') || urlParams.get('pa');
+    const payAmount = urlParams.get('pay_amount') || urlParams.get('amount') || urlParams.get('am');
+    const payName = urlParams.get('pay_name') || urlParams.get('name') || urlParams.get('pn');
+    const payNote = urlParams.get('pay_note') || urlParams.get('note') || urlParams.get('tn');
+
+    if (payVpa || payAmount) {
+      console.log('ZenBudget: Incoming payment link detected:', { payVpa, payAmount, payName, payNote });
+      setIncomingPaymentData({
+        vpa: payVpa || '',
+        amount: payAmount || '',
+        name: payName || '',
+        note: payNote || ''
+      });
+      setIsScannerOpen(true);
     }
 
     // Background update checker from Supabase app_versions & broadcast notifications
@@ -3809,9 +3827,14 @@ const App: React.FC = () => {
       {isScannerOpen && (
         <ScannerModal
           isOpen={isScannerOpen}
-          onClose={() => setIsScannerOpen(false)}
+          initialData={incomingPaymentData}
+          onClose={() => {
+            setIsScannerOpen(false);
+            setIncomingPaymentData(null);
+          }}
           onSuccess={() => {
             setIsScannerOpen(false);
+            setIncomingPaymentData(null);
             fetchDataFromSupabase();
           }}
           onPayViaCashfree={handleDirectCashfreePayment}

@@ -11,6 +11,7 @@ interface ScannerModalProps {
   onSuccess: () => void;
   referralCount?: number;
   onPayViaCashfree?: (amount: number, title: string) => void;
+  initialData?: { vpa?: string; amount?: string; name?: string; note?: string } | null;
 }
 
 const CATEGORIES = [
@@ -28,7 +29,7 @@ const FEELINGS = [
 
 const PAYMENT_TABS = ['Scan QR', 'Mobile', 'Bank A/c', 'UPI ID'];
 
-export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onSuccess, onPayViaCashfree }) => {
+export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onSuccess, onPayViaCashfree, initialData }) => {
   if (!isOpen) return null;
 
   const [activePayTab, setActivePayTab] = useState<'Scan QR' | 'Mobile' | 'Bank A/c' | 'UPI ID'>('Scan QR');
@@ -47,6 +48,28 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
   const [payHolderName, setPayHolderName] = useState(''); // Bank Account Holder Name
   const [payUpiIdDirect, setPayUpiIdDirect] = useState(''); // Manually entered UPI ID
   const [_rawQrUrl, setRawQrUrl] = useState(''); // Original QR code URL string
+
+  // Auto-fill from incoming shared payment link
+  useEffect(() => {
+    if (initialData) {
+      if (initialData.vpa) {
+        setRecipientId(initialData.vpa);
+        setPayUpiIdDirect(initialData.vpa);
+      }
+      if (initialData.amount) {
+        setAmount(initialData.amount);
+      }
+      if (initialData.name) {
+        setMerchantName(initialData.name);
+      }
+      if (initialData.note) {
+        setDescription(initialData.note);
+      }
+      if (initialData.vpa) {
+        setStep('payment');
+      }
+    }
+  }, [initialData]);
 
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState('');
@@ -627,6 +650,40 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
     }, 2000);
   };
 
+  const handleSharePaymentLink = async () => {
+    const targetVpa = recipientId || (activePayTab === 'Mobile' ? `${payMobile}@${mobileUpiSuffix}` : payUpiIdDirect) || 'chandanswaraj7482@okicici';
+    const recName = merchantName || (activePayTab === 'Mobile' ? `+91 ${payMobile}` : (activePayTab === 'Bank A/c' ? payHolderName || payAccNum : payUpiIdDirect)) || 'ZenBudget Merchant';
+    const amtVal = parseFloat(amount) || 0;
+    const noteVal = description.trim() || 'ZenBudget Payment';
+
+    // Compile shareable Web URL with prefilled parameters
+    const origin = window.location.origin;
+    const pathname = window.location.pathname;
+    const shareUrl = `${origin}${pathname}?pay_vpa=${encodeURIComponent(targetVpa)}&pay_amount=${encodeURIComponent(amtVal)}&pay_name=${encodeURIComponent(recName)}&pay_note=${encodeURIComponent(noteVal)}`;
+    const shareText = `💳 Pay ₹${amtVal} to ${recName} (${targetVpa})\nTap the link to pay instantly with pre-filled details:\n${shareUrl}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `ZenBudget: Pay ₹${amtVal} to ${recName}`,
+          text: shareText,
+          url: shareUrl
+        });
+        showErr('✅ Payment link shared successfully!');
+        return;
+      } catch (_) {}
+    }
+
+    if (navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        showErr(`✅ Payment Link Copied!\nAnyone opening this link will have ₹${amtVal} to ${recName} auto-filled.`);
+      } catch (_) {
+        showErr(`Link: ${shareUrl}`);
+      }
+    }
+  };
+
   return createPortal(
     <div style={{
       position: 'fixed', inset: 0,
@@ -1153,6 +1210,31 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
               </button>
             </div>
 
+            {/* Share Payment Link (Auto-fill for others) */}
+            <button
+              type="button"
+              onClick={handleSharePaymentLink}
+              style={{
+                width: '100%',
+                padding: '14px',
+                borderRadius: '14px',
+                border: '1px solid rgba(34, 197, 94, 0.4)',
+                background: 'rgba(34, 197, 94, 0.12)',
+                color: 'var(--primary)',
+                fontSize: '13px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                marginTop: '6px',
+                boxShadow: '0 2px 10px rgba(34, 197, 94, 0.15)'
+              }}
+            >
+              <span>🔗 Share / Copy Payment Link</span>
+            </button>
+
             {/* Copy VPA Fallback */}
             <button
               type="button"
@@ -1175,7 +1257,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                 fontSize: '12px',
                 fontWeight: 700,
                 cursor: 'pointer',
-                marginTop: '4px'
+                marginTop: '2px'
               }}
             >
               📋 Copy Payee UPI ID / VPA
