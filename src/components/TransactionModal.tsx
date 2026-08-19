@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   X, 
   Utensils, 
@@ -156,8 +157,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
   }, [showImpulseLockModal, impulseLockData]);
-
-  if (!isOpen) return null;
 
   const processReceiptBase64 = async (base64Data: string) => {
     setScanMessage({ text: '🔍 Analyzing receipt with AI Vision...', type: 'info' });
@@ -484,7 +483,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     }
   }, []);
 
-  return (
+  if (!isOpen) return null;
+
+  return createPortal(
     <div style={{
       position: 'fixed',
       top: 0,
@@ -1717,6 +1718,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           </div>
         </div>
       )}
-    </div>
+    </div>,
+    document.body
   );
 };
