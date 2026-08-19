@@ -513,9 +513,17 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
           {/* Donut Chart */}
-          <div style={{ position: 'relative', width: '200px', height: '200px' }}>
-            <svg width="200" height="200" viewBox="0 0 200 200">
-              {accountData.map((d, idx) => {
+          <div style={{ position: 'relative', width: '180px', height: '180px', margin: '4px 0' }}>
+            <svg width="100%" height="100%" viewBox="0 0 200 200">
+              <circle
+                cx={cx}
+                cy={cy}
+                r={radius}
+                fill="none"
+                stroke="var(--bg-input)"
+                strokeWidth={strokeWidth}
+              />
+              {accountData.map((d) => {
                 const dashArray = (d.percentage / 100) * circumference;
                 const dashOffset = -(cumulativePercent / 100) * circumference;
                 cumulativePercent += d.percentage;
@@ -530,41 +538,77 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
                     strokeWidth={strokeWidth}
                     strokeDasharray={`${dashArray} ${circumference - dashArray}`}
                     strokeDashoffset={dashOffset}
-                    strokeLinecap="round"
                     transform={`rotate(-90 ${cx} ${cy})`}
-                    style={{ transition: 'all 0.6s ease', filter: idx === 0 ? `drop-shadow(0 0 6px ${d.color}40)` : 'none' }}
+                    style={{ transition: 'all 0.6s ease' }}
                   />
                 );
               })}
             </svg>
             <div style={{
               position: 'absolute',
-              inset: 0,
+              inset: '28px',
+              borderRadius: '50%',
+              background: 'var(--bg-card)',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+              border: '1px solid var(--border-card)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              padding: '8px'
             }}>
-              <span style={{ fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Total Balance</span>
-              <span style={{ fontSize: '16px', fontWeight: 800 }}>
+              <span style={{ fontSize: '9px', letterSpacing: '0.08em', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 800 }}>Total Balance</span>
+              <span style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-primary)', marginTop: '2px', letterSpacing: '-0.02em' }}>
                 {currencySymbol}{totalBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}
               </span>
             </div>
           </div>
 
           {/* Account Breakdown List */}
-          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {accountData.map(d => (
-              <div key={d.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0' }}>
+              <div 
+                key={d.id} 
+                style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  padding: '12px 14px',
+                  background: 'var(--bg-input)',
+                  border: '1px solid var(--border-input)',
+                  borderRadius: '14px',
+                  transition: 'all 0.15s ease'
+                }}
+              >
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                  <div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: d.color }} />
-                  <span style={{ fontSize: '14px', fontWeight: 500 }}>{d.name}</span>
+                  <div style={{ 
+                    width: '10px', 
+                    height: '10px', 
+                    borderRadius: '50%', 
+                    backgroundColor: d.color,
+                    boxShadow: `0 0 8px ${d.color}60`
+                  }} />
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>{d.name}</span>
+                    {/* Mini Progress Bar */}
+                    <div style={{ width: '60px', height: '3px', borderRadius: '2px', background: 'var(--border-card)', marginTop: '4px', overflow: 'hidden' }}>
+                      <div style={{ width: `${d.percentage}%`, height: '100%', background: d.color, borderRadius: '2px' }} />
+                    </div>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                  <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)' }}>
                     {currencySymbol}{d.balance.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                   </span>
-                  <span style={{ fontSize: '12px', fontWeight: 700, width: '32px', textAlign: 'right', color: d.color }}>
+                  <span style={{ 
+                    fontSize: '11px', 
+                    fontWeight: 800, 
+                    padding: '3px 8px',
+                    borderRadius: '8px',
+                    background: `${d.color}15`,
+                    color: d.color,
+                    border: `1px solid ${d.color}30`
+                  }}>
                     {d.percentage}%
                   </span>
                 </div>
@@ -788,72 +832,109 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
         ) : (
           <>
             {/* SVG Donut */}
-            <div style={{ position: 'relative', width: '150px', height: '150px' }}>
-              <svg width="100%" height="100%" viewBox="0 0 120 120">
+            <div style={{ position: 'relative', width: '170px', height: '170px', margin: '4px 0 10px' }}>
+              <svg width="100%" height="100%" viewBox="0 0 140 140">
                 <circle 
-                  cx="60" 
-                  cy="60" 
-                  r={radius} 
+                  cx="70" 
+                  cy="70" 
+                  r="52" 
                   fill="none" 
-                  stroke="rgba(0, 0, 0, 0.06)" 
-                  strokeWidth="12" 
+                  stroke="var(--bg-input)" 
+                  strokeWidth="14" 
                 />
                 
                 {breakdownData.map((d) => {
+                  const catRadius = 52;
+                  const catCircumference = 2 * Math.PI * catRadius;
                   const percent = (d.total / totalExpense) * 100;
-                  const strokeDashoffset = circumference - (circumference * percent) / 100;
+                  const strokeDashoffset = catCircumference - (catCircumference * percent) / 100;
                   const rotation = (accumulatedPercent / 100) * 360 - 90;
                   accumulatedPercent += percent;
 
                   return (
                     <circle 
                       key={d.category}
-                      cx="60" 
-                      cy="60" 
-                      r={radius} 
+                      cx="70" 
+                      cy="70" 
+                      r={catRadius} 
                       fill="none" 
                       stroke={d.meta.color} 
-                      strokeWidth="12" 
-                      strokeDasharray={circumference}
+                      strokeWidth="14" 
+                      strokeDasharray={catCircumference}
                       strokeDashoffset={strokeDashoffset}
-                      transform={`rotate(${rotation} 60 60)`}
-                      strokeLinecap="round"
+                      transform={`rotate(${rotation} 70 70)`}
                       style={{ transition: 'stroke-dashoffset 0.5s ease-out' }}
                     />
                   );
                 })}
               </svg>
               
-              {/* Inner Label */}
+              {/* Inner Label Card */}
               <div style={{
                 position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
+                inset: '24px',
+                borderRadius: '50%',
+                background: 'var(--bg-card)',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+                border: '1px solid var(--border-card)',
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center'
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '8px'
               }}>
-                <span style={{ fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Total Spent</span>
-                <span style={{ fontSize: '16px', fontWeight: 800 }}>
+                <span style={{ fontSize: '9px', letterSpacing: '0.08em', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 800 }}>Total Spent</span>
+                <span style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-primary)', marginTop: '2px', letterSpacing: '-0.02em' }}>
                   {currencySymbol}{totalExpense.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                 </span>
               </div>
             </div>
 
-            {/* Breakdown List */}
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {/* Breakdown List Cards */}
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {breakdownData.map((d) => (
-                <div key={d.category} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0' }}>
+                <div 
+                  key={d.category} 
+                  style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    padding: '12px 14px',
+                    background: 'var(--bg-input)',
+                    border: '1px solid var(--border-input)',
+                    borderRadius: '14px',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: d.meta.color }} />
-                    <span style={{ fontSize: '14px', fontWeight: 500 }}>{d.meta.label}</span>
+                    <div style={{ 
+                      width: '10px', 
+                      height: '10px', 
+                      borderRadius: '50%', 
+                      backgroundColor: d.meta.color,
+                      boxShadow: `0 0 8px ${d.meta.color}60`
+                    }} />
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>{d.meta.label}</span>
+                      {/* Mini Progress Bar */}
+                      <div style={{ width: '60px', height: '3px', borderRadius: '2px', background: 'var(--border-card)', marginTop: '4px', overflow: 'hidden' }}>
+                        <div style={{ width: `${d.percentage}%`, height: '100%', background: d.meta.color, borderRadius: '2px' }} />
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)' }}>
                       {currencySymbol}{d.total.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                     </span>
-                    <span style={{ fontSize: '12px', fontWeight: 700, width: '32px', textAlign: 'right', color: d.meta.color }}>
+                    <span style={{ 
+                      fontSize: '11px', 
+                      fontWeight: 800, 
+                      padding: '3px 8px',
+                      borderRadius: '8px',
+                      background: `${d.meta.color}15`,
+                      color: d.meta.color,
+                      border: `1px solid ${d.meta.color}30`
+                    }}>
                       {d.percentage}%
                     </span>
                   </div>
