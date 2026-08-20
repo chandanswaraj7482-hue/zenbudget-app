@@ -37,7 +37,7 @@ android-sdk
 
 # APK binaries
 *.apk
-!public/zenbudget.apk
+!public/*.apk
 
 # Admin portal zip archive
 admin-portal.zip

@@ -4,7 +4,3 @@ android
 admin-portal.zip
 admin-portal
 .git
-*.apk
-public/*.apk
-dist/*.apk
-
