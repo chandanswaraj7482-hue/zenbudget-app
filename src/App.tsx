@@ -39,6 +39,7 @@ import { t, setLanguage as setI18nLanguage } from './utils/i18n';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { autoSyncCurrencyFromIP } from './utils/geoTracker';
+import { formatCurrency } from './utils/formatCurrency';
 import type { Transaction, SavingsGoal, CategoryBudget, CategoryType, Account, LoanRecord } from './types';
 import { Dashboard } from './components/Dashboard';
 import { Transactions } from './components/Transactions';
@@ -299,7 +300,7 @@ const App: React.FC = () => {
     // Only check and show APK update popup on installed Native Mobile APK (skip Web browsers)
     if (!Capacitor.isNativePlatform()) return;
 
-    const APP_VERSION_CODE = 4; // Current APK version (v2.0.0) — bump version.json or app_updates table in Supabase
+    const APP_VERSION_CODE = 5; // Current APK version (v2.0.1) — bump version.json or app_updates table in Supabase
     const checkForUpdates = async () => {
       try {
         let remoteData: any = null;

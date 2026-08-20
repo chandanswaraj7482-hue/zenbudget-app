@@ -64,7 +64,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
   const calcEmiDetails = () => {
     const P = parseFloat(totalAmount) || 0;
     const R = parseFloat(interestRate) || 0;
-    if (P <= 0) return { P: 0, R: 0, totalInterest: 0, totalPayable: 0, emiInstallment: 0, installmentCount: 1, installmentLabel: 'month', durationMonths: 1 };
+    if (P <= 0) return { P: 0, R: 0, totalInterest: 0, totalPayable: 0, emiInstallment: 0, installmentCount: 1, installmentLabel: 'month', durationMonths: 1, isYearlyMode: false };
 
     const start = new Date();
     start.setHours(0, 0, 0, 0);
@@ -91,16 +91,16 @@ export const LoansView: React.FC<LoansViewProps> = ({
 
     if (R > 0) {
       if (isYearlyMode) {
-        // Exact time in years (e.g. 6 months = 0.5 years, 12 months = 1 year, 24 months = 2 years)
+        // Exact time in years
         const timeInYears = durationMonths / 12;
         if (interestCalcMode === 'compound') {
           totalInterest = P * (Math.pow(1 + R / 100, timeInYears) - 1);
         } else {
-          // Pure Simple Yearly Interest Formula: P * (R / 100) * Years
+          // Simple Yearly Interest: P * (R / 100) * Years
           totalInterest = P * (R / 100) * timeInYears;
         }
       } else {
-        // Pure Monthly Interest Formula: P * (R / 100) * Months
+        // Monthly Interest: P * (R / 100) * Months
         if (interestCalcMode === 'compound') {
           totalInterest = P * (Math.pow(1 + R / 100, durationMonths) - 1);
         } else {
@@ -113,13 +113,16 @@ export const LoansView: React.FC<LoansViewProps> = ({
 
     // Calculate installment count + label based on user-selected frequency
     let installmentCount = 1;
-    let installmentLabel = 'lump sum';
+    let installmentLabel = 'month';
 
     const roundedMonths = Math.max(1, durationMonths);
 
     if (frequency === 'monthly') {
       installmentCount = roundedMonths;
       installmentLabel = 'month';
+    } else if (frequency === 'quarterly' as any) {
+      installmentCount = Math.max(1, Math.round(roundedMonths / 3));
+      installmentLabel = 'quarter';
     } else if (frequency === 'weekly') {
       installmentCount = Math.max(1, Math.round(diffDays / 7));
       installmentLabel = 'week';
@@ -131,7 +134,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
       installmentLabel = 'year';
     } else {
       installmentCount = 1;
-      installmentLabel = 'lump sum';
+      installmentLabel = 'lump-sum';
     }
 
     const emiInstallment = totalPayable / Math.max(1, installmentCount);
@@ -386,9 +389,14 @@ export const LoansView: React.FC<LoansViewProps> = ({
                             </span>
                           )}
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', fontSize: '12px', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
                           <span><Calendar size={12} style={{ display: 'inline', marginRight: '4px' }} /> {t('due_date')}: {loan.dueDate}</span>
-                          <span>• Principal: {formatCurrency(loan.totalAmount, currencySymbol)}</span>
+                          <span>• Principal: {formatCurrency(loan.principalAmount || loan.totalAmount, currencySymbol)}</span>
+                          {loan.interestRate ? (
+                            <span style={{ color: '#f59e0b', fontWeight: 700 }}>
+                              (+{loan.interestRate}% {loan.interestType === 'yearly' ? 'p.a.' : '/mo'})
+                            </span>
+                          ) : null}
                         </div>
                       </div>
 
@@ -651,6 +659,49 @@ export const LoansView: React.FC<LoansViewProps> = ({
             </div>
           </div>
 
+          {/* Simple vs Compound Interest Toggle (if interest rate > 0) */}
+          {parseFloat(interestRate) > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(255, 255, 255, 0.04)', borderRadius: '12px', border: '1px solid var(--border-input)' }}>
+              <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+                Calculation Method:
+              </span>
+              <div style={{ display: 'flex', gap: '4px' }}>
+                <button
+                  type="button"
+                  onClick={() => setInterestCalcMode('simple')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    background: interestCalcMode === 'simple' ? 'var(--primary)' : 'transparent',
+                    color: interestCalcMode === 'simple' ? '#fff' : 'var(--text-secondary)'
+                  }}
+                >
+                  Simple
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInterestCalcMode('compound')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    background: interestCalcMode === 'compound' ? 'var(--primary)' : 'transparent',
+                    color: interestCalcMode === 'compound' ? '#fff' : 'var(--text-secondary)'
+                  }}
+                >
+                  Compound
+                </button>
+              </div>
+            </div>
+          )}
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
             <div>
               <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
@@ -675,10 +726,11 @@ export const LoansView: React.FC<LoansViewProps> = ({
                 className="glass-input"
                 style={{ marginTop: '6px', width: '100%', background: 'var(--bg-input)' }}
               >
-                <option value="monthly">Monthly</option>
+                <option value="monthly">Monthly EMI</option>
+                <option value="weekly">Weekly</option>
                 <option value="quarterly">Quarterly</option>
                 <option value="yearly">Yearly</option>
-                <option value="lump-sum">Lump-sum</option>
+                <option value="one_time">One-Time (Lump-sum)</option>
               </select>
             </div>
           </div>
@@ -720,6 +772,69 @@ export const LoansView: React.FC<LoansViewProps> = ({
               ))}
             </div>
           </div>
+
+          {/* Live Loan & EMI Calculation Preview Box */}
+          {parseFloat(totalAmount) > 0 && (() => {
+            const live = calcEmiDetails();
+            return (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 182, 212, 0.08) 100%)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                borderRadius: '14px',
+                padding: '14px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    🧮 Live Calculation Breakdown
+                  </span>
+                  <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                    {live.durationMonths} {live.durationMonths === 1 ? 'Month' : 'Months'} Tenure
+                  </span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '2px' }}>
+                  <div style={{ background: 'rgba(0,0,0,0.25)', padding: '8px 10px', borderRadius: '10px' }}>
+                    <div style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>Principal Amount</div>
+                    <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)' }}>
+                      {formatCurrency(live.P, currencySymbol)}
+                    </div>
+                  </div>
+
+                  <div style={{ background: 'rgba(0,0,0,0.25)', padding: '8px 10px', borderRadius: '10px' }}>
+                    <div style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                      Interest ({interestRate || 0}% {interestType === 'yearly' ? 'p.a.' : '/mo'})
+                    </div>
+                    <div style={{ fontSize: '13px', fontWeight: 800, color: '#f59e0b' }}>
+                      +{formatCurrency(live.totalInterest, currencySymbol)}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(16, 185, 129, 0.16)', padding: '10px 12px', borderRadius: '10px', marginTop: '4px' }}>
+                  <div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 700 }}>
+                      {activeTab === 'borrowed' ? 'Total You Will Repay:' : 'Total You Will Collect:'}
+                    </div>
+                    <div style={{ fontSize: '16px', fontWeight: 900, color: activeTab === 'borrowed' ? '#ef4444' : '#22c55e' }}>
+                      {formatCurrency(live.totalPayable, currencySymbol)}
+                    </div>
+                  </div>
+
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 700 }}>
+                      Per {live.installmentLabel.toUpperCase()} EMI:
+                    </div>
+                    <div style={{ fontSize: '15px', fontWeight: 800, color: '#a78bfa' }}>
+                      {formatCurrency(live.emiInstallment, currencySymbol)} <span style={{ fontSize: '10px' }}>({live.installmentCount}x)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Wallet / Account Selection */}
           <div>

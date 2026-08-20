@@ -1,0 +1,10 @@
+node_modules
+android
+.gradle
+admin-portal.zip
+admin-portal
+.git
+*.apk
+public/*.apk
+dist/*.apk
+
