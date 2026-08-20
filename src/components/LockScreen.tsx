@@ -1176,75 +1176,88 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
             </button>
           </form>
 
-          {/* ── Footer: Download Cards ── */}
+          {/* ── Footer: Prominent App Download Card ── */}
           <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-input)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '0.03em' }}>🔒 256-bit Encrypted • Privacy First</span>
+            
             {!Capacitor.isNativePlatform() && (
-              <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
-                {/* APK / iOS Card */}
-                {/iPad|iPhone|iPod|macintosh|mac os x/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ? (
-                  <button
-                    type="button"
-                    onClick={() => setShowIOSInstructions(true)}
-                    style={{
-                      flex: 1,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
-                      padding: '11px 10px',
-                      borderRadius: '14px',
-                      border: '1px solid rgba(34,197,94,0.25)',
-                      background: 'rgba(34,197,94,0.06)',
-                      color: 'var(--primary)',
-                      fontSize: '12px', fontWeight: 700,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    <Download size={14} />
-                    Install iOS App
-                  </button>
-                ) : (
-                  <a
-                    href="https://raw.githubusercontent.com/chandanswaraj7482-hue/zenbudget-app/main/public/zenbudget.apk"
-                    download="ZenBudget.apk"
-                    style={{
-                      flex: 1,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
-                      padding: '11px 10px',
-                      borderRadius: '14px',
-                      border: '1px solid rgba(34,197,94,0.25)',
-                      background: 'rgba(34,197,94,0.06)',
-                      color: 'var(--primary)',
-                      fontSize: '12px', fontWeight: 700,
-                      textDecoration: 'none',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    <Download size={14} />
-                    Android APK
-                  </a>
-                )}
-                {/* Web App Card */}
-                <a
-                  href="https://zenbudget-tracker.vercel.app"
-                  target="_blank"
-                  rel="noopener noreferrer"
+              <a
+                href="/zenbudget.apk"
+                download="zenbudget.apk"
+                style={{
+                  width: '100%',
+                  padding: '12px 14px',
+                  borderRadius: '16px',
+                  background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%)',
+                  border: '1px solid rgba(34, 197, 94, 0.35)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  textDecoration: 'none',
+                  color: '#ffffff',
+                  boxShadow: '0 6px 20px rgba(34, 197, 94, 0.15)',
+                  transition: 'all 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{
+                    width: '36px', height: '36px', borderRadius: '10px',
+                    background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '18px', boxShadow: '0 4px 10px rgba(34,197,94,0.3)'
+                  }}>
+                    🤖
+                  </div>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontSize: '13px', fontWeight: 800, color: '#ffffff' }}>
+                      Download Android App
+                    </div>
+                    <div style={{ fontSize: '10px', color: '#86efac', fontWeight: 600 }}>
+                      Latest v2.0.2 APK • 16 MB
+                    </div>
+                  </div>
+                </div>
+                <div style={{
+                  background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                  color: '#ffffff',
+                  padding: '6px 12px',
+                  borderRadius: '10px',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px'
+                }}>
+                  <Download size={13} />
+                  <span>Download</span>
+                </div>
+              </a>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+              <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '0.03em' }}>
+                🔒 256-bit Encrypted • Privacy First
+              </span>
+              {!Capacitor.isNativePlatform() && (
+                <button
+                  type="button"
+                  onClick={() => setShowIOSInstructions(true)}
                   style={{
-                    flex: 1,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
-                    padding: '11px 10px',
-                    borderRadius: '14px',
-                    border: '1px solid rgba(99,102,241,0.25)',
-                    background: 'rgba(99,102,241,0.06)',
+                    background: 'transparent',
+                    border: 'none',
                     color: '#818cf8',
-                    fontSize: '12px', fontWeight: 700,
-                    textDecoration: 'none',
-                    transition: 'all 0.2s ease'
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
                   }}
                 >
-                  🌐 Open Web App
-                </a>
-              </div>
-            )}
+                  🍏 iOS Web App
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -1649,7 +1662,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           </div>
 
           {/* Sign Out Action */}
-          <div style={{ marginTop: '22px' }}>
+          <div style={{ marginTop: '22px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
             <button
               onClick={() => setShowSignOutConfirm(true)}
               style={{
@@ -1670,6 +1683,29 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               <LogOut size={12} />
               <span>Sign Out of Account</span>
             </button>
+
+            {!Capacitor.isNativePlatform() && (
+              <a
+                href="/zenbudget.apk"
+                download="zenbudget.apk"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '8px 14px',
+                  borderRadius: '14px',
+                  background: 'rgba(34, 197, 94, 0.08)',
+                  border: '1px solid rgba(34, 197, 94, 0.25)',
+                  color: 'var(--primary)',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  textDecoration: 'none'
+                }}
+              >
+                <Download size={12} />
+                <span>Download Android App (APK)</span>
+              </a>
+            )}
           </div>
 
           {/* Sign Out Confirmation Popup */}
