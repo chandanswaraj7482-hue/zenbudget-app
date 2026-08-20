@@ -10,5 +10,19 @@
     { "source": "/pay", "destination": "/pay.html" },
     { "source": "/pay-success", "destination": "/pay-success.html" },
     { "source": "/((?!.*\\.[\\w]+$).*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*\\.html|/)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
   ]
 }

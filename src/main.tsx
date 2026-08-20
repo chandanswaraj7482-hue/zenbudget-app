@@ -57,7 +57,14 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             {this.state.error?.message || 'An unexpected error occurred.'}
           </p>
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => {
+              if ('caches' in window) {
+                caches.keys().then(names => {
+                  names.forEach(name => caches.delete(name));
+                });
+              }
+              window.location.href = window.location.origin + window.location.pathname + '?refresh=' + Date.now();
+            }}
             style={{
               padding: '14px 28px',
               borderRadius: '16px',
