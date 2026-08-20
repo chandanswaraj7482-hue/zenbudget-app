@@ -413,8 +413,16 @@ const App: React.FC = () => {
       const updated = localStorage.getItem('zb_user_avatar');
       if (updated) setUserAvatar(updated);
     };
+    const handleOpenScanPayUnlock = () => {
+      setIsScanPayUnlockOpen(true);
+    };
+
     window.addEventListener('profile_avatar_updated', handleAvatarUpdate);
-    return () => window.removeEventListener('profile_avatar_updated', handleAvatarUpdate);
+    window.addEventListener('open-scanpay-unlock', handleOpenScanPayUnlock);
+    return () => {
+      window.removeEventListener('profile_avatar_updated', handleAvatarUpdate);
+      window.removeEventListener('open-scanpay-unlock', handleOpenScanPayUnlock);
+    };
   }, []);
 
   const handleAddAccount = (newAcc: Omit<Account, 'id'>) => {
@@ -3954,6 +3962,7 @@ const App: React.FC = () => {
             fetchDataFromSupabase();
           }}
           onPayViaCashfree={handleDirectCashfreePayment}
+          onRequireUnlockModal={() => setIsScanPayUnlockOpen(true)}
         />
       )}
 

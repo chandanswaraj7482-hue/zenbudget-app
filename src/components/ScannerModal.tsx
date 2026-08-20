@@ -12,6 +12,7 @@ interface ScannerModalProps {
   referralCount?: number;
   onPayViaCashfree?: (amount: number, title: string) => void;
   initialData?: { vpa?: string; amount?: string; name?: string; note?: string } | null;
+  onRequireUnlockModal?: () => void;
 }
 
 const CATEGORIES = [
@@ -29,7 +30,7 @@ const FEELINGS = [
 
 const PAYMENT_TABS = ['Scan QR', 'Mobile', 'Bank A/c', 'UPI ID'];
 
-export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onSuccess, onPayViaCashfree, initialData }) => {
+export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onSuccess, onPayViaCashfree, initialData, onRequireUnlockModal }) => {
   if (!isOpen) return null;
 
   const [activePayTab, setActivePayTab] = useState<'Scan QR' | 'Mobile' | 'Bank A/c' | 'UPI ID'>('Scan QR');
@@ -734,6 +735,9 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
         targetUpiId: vpa,
         recipientName: merchantName || vpa,
         description: description || 'ZenBudget Collect Request'
+      }, null, () => {
+        if (onRequireUnlockModal) onRequireUnlockModal();
+        else window.dispatchEvent(new CustomEvent('open-scanpay-unlock'));
       });
     } catch (_) {}
   };
@@ -1116,7 +1120,17 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                     payloadData.rawUpiUri = qrData;
                   }
 
-                  handleZenBudgetPaymentSystem(actionType, payloadData);
+                  const proceed = handleZenBudgetPaymentSystem(
+                    actionType,
+                    payloadData,
+                    null,
+                    () => {
+                      if (onRequireUnlockModal) onRequireUnlockModal();
+                      else window.dispatchEvent(new CustomEvent('open-scanpay-unlock'));
+                    }
+                  );
+                  if (!proceed) return;
+
                   stopCamera();
                   onClose();
                 }}

@@ -66,8 +66,8 @@ export function handleZenBudgetPaymentSystem(
   if (!isUnlocked) {
     if (onRequireUnlockModal) {
       onRequireUnlockModal();
-    } else {
-      alert("⚠️ Direct UPI Payment features require a one-time Scan & Pay Lifetime Unlock (₹79).");
+    } else if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('open-scanpay-unlock'));
     }
     return false;
   }
