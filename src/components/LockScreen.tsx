@@ -1181,8 +1181,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
             
             {!Capacitor.isNativePlatform() && (
               <a
-                href="/zenbudget.apk"
-                download="zenbudget.apk"
+                href="/zenbudget.apk?v=203"
+                download="zenbudget-v2.0.3.apk"
                 style={{
                   width: '100%',
                   padding: '12px 14px',
@@ -1686,8 +1686,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
 
             {!Capacitor.isNativePlatform() && (
               <a
-                href="/zenbudget.apk"
-                download="zenbudget.apk"
+                href="/zenbudget.apk?v=203"
+                download="zenbudget-v2.0.3.apk"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',

@@ -397,12 +397,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 </div>
               )}
               <a
-                href="/zenbudget.apk"
-                download="ZenBudget.apk"
+                href="/zenbudget.apk?v=203"
+                download="ZenBudget-v2.0.3.apk"
                 target="_self"
                 onClick={() => {
                   setTimeout(() => {
-                    window.location.href = '/zenbudget.apk';
+                    window.location.href = '/zenbudget.apk?v=203';
                   }, 300);
                 }}
                 style={{

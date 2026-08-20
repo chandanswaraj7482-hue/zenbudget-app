@@ -2,8 +2,15 @@
   Content-Type: application/vnd.android.package-archive
   Content-Disposition: attachment; filename="ZenBudget.apk"
   Access-Control-Allow-Origin: *
+  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
+
+/zenbudget-v2.0.3.apk
+  Content-Type: application/vnd.android.package-archive
+  Content-Disposition: attachment; filename="ZenBudget.apk"
+  Access-Control-Allow-Origin: *
+  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
 
 /version.json
   Content-Type: application/json
   Access-Control-Allow-Origin: *
-  Cache-Control: no-cache, no-store, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
