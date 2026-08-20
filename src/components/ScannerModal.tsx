@@ -4,6 +4,7 @@ import { X, QrCode, Phone, Hash, FileText, Tag, Send } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { Capacitor } from '@capacitor/core';
 import { checkHasScanPayAccess, handleZenBudgetPaymentSystem } from '../utils/paymentRouter';
+import { PhonePeLogo, GooglePayLogo, PaytmLogo } from './UPIIcons';
 
 interface ScannerModalProps {
   isOpen: boolean;
@@ -1241,9 +1242,24 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                   stopCamera();
                   onClose();
                 }}
-                style={{ padding: '12px 6px', borderRadius: '12px', background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}
+                style={{
+                  padding: '12px 6px',
+                  borderRadius: '14px',
+                  background: 'var(--bg-input)',
+                  border: '1px solid var(--border-input)',
+                  color: 'var(--text-primary)',
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.15s ease',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }}
               >
-                <span>🟣</span>
+                <PhonePeLogo size={32} />
                 <span>PhonePe</span>
               </button>
 
@@ -1256,9 +1272,24 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                   stopCamera();
                   onClose();
                 }}
-                style={{ padding: '12px 6px', borderRadius: '12px', background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}
+                style={{
+                  padding: '12px 6px',
+                  borderRadius: '14px',
+                  background: 'var(--bg-input)',
+                  border: '1px solid var(--border-input)',
+                  color: 'var(--text-primary)',
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.15s ease',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }}
               >
-                <span>🔵</span>
+                <GooglePayLogo size={32} />
                 <span>Google Pay</span>
               </button>
 
@@ -1271,9 +1302,24 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                   stopCamera();
                   onClose();
                 }}
-                style={{ padding: '12px 6px', borderRadius: '12px', background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-primary)', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}
+                style={{
+                  padding: '12px 6px',
+                  borderRadius: '14px',
+                  background: 'var(--bg-input)',
+                  border: '1px solid var(--border-input)',
+                  color: 'var(--text-primary)',
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.15s ease',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }}
               >
-                <span>🔷</span>
+                <PaytmLogo size={32} />
                 <span>Paytm</span>
               </button>
             </div>

@@ -2646,36 +2646,34 @@ const App: React.FC = () => {
     let cleanCode = code.trim().toUpperCase();
     if (!cleanCode) return false;
 
-    // Normalize to ZB- prefix to perform validation checks
-    if (!cleanCode.startsWith('ZB-')) {
-      cleanCode = 'ZB-' + cleanCode;
-    }
-
-    // Verify self-referral
-    const myCode = localStorage.getItem('zb_user_referral_code') || localStorage.getItem('zb_invite_code');
-    if (myCode) {
-      let myCodeNormal = myCode.trim().toUpperCase();
-      if (!myCodeNormal.startsWith('ZB-')) {
-        myCodeNormal = 'ZB-' + myCodeNormal;
-      }
-      if (myCodeNormal === cleanCode) {
-        triggerToast('You cannot claim your own referral code!', 'warning');
-        return false;
-      }
-    }
+    // Normalize codes for flexible matching
+    const rawClean = cleanCode;
+    const strippedCode = rawClean.replace('ZB-', '');
+    const prefixedCode = rawClean.startsWith('ZB-') ? rawClean : `ZB-${rawClean}`;
 
     try {
       // Query inviter by matching either the full code (ZB-XXXX) or the stripped code (XXXX)
-      const strippedCode = cleanCode.replace('ZB-', '');
-      const { data: inviter, error: inviterErr } = await supabase
+      const { data: allProfiles, error: inviterErr } = await supabase
         .from('profiles')
-        .select('id, name, referral_code')
-        .or(`referral_code.eq.${cleanCode},referral_code.eq.${strippedCode}`)
-        .maybeSingle();
+        .select('id, name, referral_code');
 
       if (inviterErr) throw inviterErr;
+
+      const inviter = (allProfiles || []).find(p => {
+        if (!p || !p.referral_code) return false;
+        const rCode = (p.referral_code || '').toUpperCase();
+        const rStripped = rCode.replace('ZB-', '');
+        return rCode === prefixedCode || rCode === strippedCode || rStripped === strippedCode || rCode === rawClean;
+      });
+
       if (!inviter) {
         triggerToast('Invalid referral code. Please check spelling!', 'warning');
+        return false;
+      }
+
+      // Check if self-referral
+      if (inviter.id === currentProfileId) {
+        triggerToast('You cannot claim your own referral code!', 'warning');
         return false;
       }
 
