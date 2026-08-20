@@ -36,24 +36,42 @@ export const LoansView: React.FC<LoansViewProps> = ({
   const [repayModalLoan, setRepayModalLoan] = useState<LoanRecord | null>(null);
 
   const [interestRate, setInterestRate] = useState('');
-  const [interestType, setInterestType] = useState<'monthly' | 'yearly'>('monthly');
-  const [interestCalcMode, setInterestCalcMode] = useState<'simple' | 'compound'>('simple');
+  const [interestType, setInterestType] = useState<'monthly' | 'yearly'>('yearly');
+  const [interestCalcMode, setInterestCalcMode] = useState<'simple' | 'reducing' | 'compound'>('simple');
+  const [tenureMonths, setTenureMonths] = useState<number>(12);
   const [modalErr, setModalErr] = useState<string | null>(null);
   const [personName, setPersonName] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
+
   const getInitialDueDate = () => {
     const d = new Date();
-    d.setDate(d.getDate() + 30);
+    d.setMonth(d.getMonth() + 12);
     return d.toISOString().split('T')[0];
   };
 
   const [dueDate, setDueDate] = useState(getInitialDueDate);
 
-  const updateDueDateFromToday = (monthsToAdd: number) => {
+  const updateTenure = (months: number) => {
+    const valid = Math.max(1, months);
+    setTenureMonths(valid);
     const d = new Date();
-    d.setMonth(d.getMonth() + monthsToAdd);
+    d.setMonth(d.getMonth() + valid);
     setDueDate(d.toISOString().split('T')[0]);
   };
+
+  const handleDueDateChange = (newDateStr: string) => {
+    setDueDate(newDateStr);
+    try {
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      const due = new Date(newDateStr);
+      due.setHours(0, 0, 0, 0);
+      const diffTime = due.getTime() - start.getTime();
+      const diffMonths = Math.max(1, Math.round(diffTime / (1000 * 60 * 60 * 24 * 30.4375)));
+      setTenureMonths(diffMonths);
+    } catch (_) {}
+  };
+
   const [frequency, setFrequency] = useState<'one_time' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'custom'>('monthly');
   const [customFrequencyText, setCustomFrequencyText] = useState('');
   const [notes, setNotes] = useState('');
@@ -64,80 +82,67 @@ export const LoansView: React.FC<LoansViewProps> = ({
   const calcEmiDetails = () => {
     const P = parseFloat(totalAmount) || 0;
     const R = parseFloat(interestRate) || 0;
-    if (P <= 0) return { P: 0, R: 0, totalInterest: 0, totalPayable: 0, emiInstallment: 0, installmentCount: 1, installmentLabel: 'month', durationMonths: 1, isYearlyMode: false };
+    const durationMonths = Math.max(1, tenureMonths || 1);
 
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
-    const due = new Date(dueDate);
-    due.setHours(0, 0, 0, 0);
-
-    const diffTime = due.getTime() - start.getTime();
-    let diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-
-    // Calculate integer calendar months between start and due date
-    let monthDiff = (due.getFullYear() - start.getFullYear()) * 12 + (due.getMonth() - start.getMonth());
-    const dayDiff = due.getDate() - start.getDate();
-    if (dayDiff > 10) {
-      monthDiff += 1;
-    } else if (dayDiff < -10 && monthDiff > 1) {
-      monthDiff -= 1;
-    }
-
-    const durationMonths = Math.max(1, monthDiff > 0 ? monthDiff : Math.round(diffDays / 30));
-
-    // Calculate Interest based on rate unit (monthly vs yearly) and calculation mode (simple vs compound)
     let totalInterest = 0;
-    const isYearlyMode = interestType === 'yearly' || frequency === 'yearly';
+    let emiInstallment = 0;
+    const isYearlyMode = interestType === 'yearly';
 
-    if (R > 0) {
-      if (isYearlyMode) {
-        // Exact time in years
-        const timeInYears = durationMonths / 12;
-        if (interestCalcMode === 'compound') {
-          totalInterest = P * (Math.pow(1 + R / 100, timeInYears) - 1);
+    if (P > 0) {
+      if (R <= 0) {
+        totalInterest = 0;
+        emiInstallment = P / durationMonths;
+      } else if (interestCalcMode === 'reducing') {
+        // Standard Bank Reducing Balance EMI: P * r * (1+r)^n / ((1+r)^n - 1)
+        const monthlyRate = (isYearlyMode ? R / 12 : R) / 100;
+        if (monthlyRate > 0) {
+          const emi = (P * monthlyRate * Math.pow(1 + monthlyRate, durationMonths)) / (Math.pow(1 + monthlyRate, durationMonths) - 1);
+          emiInstallment = emi;
+          const totalPayableCalc = emi * durationMonths;
+          totalInterest = Math.max(0, totalPayableCalc - P);
         } else {
-          // Simple Yearly Interest: P * (R / 100) * Years
-          totalInterest = P * (R / 100) * timeInYears;
+          emiInstallment = P / durationMonths;
+          totalInterest = 0;
         }
+      } else if (interestCalcMode === 'compound') {
+        const timeInYears = isYearlyMode ? durationMonths / 12 : durationMonths;
+        const ratePerPeriod = R / 100;
+        const totalPayableCalc = P * Math.pow(1 + ratePerPeriod, timeInYears);
+        totalInterest = Math.max(0, totalPayableCalc - P);
+        emiInstallment = totalPayableCalc / durationMonths;
       } else {
-        // Monthly Interest: P * (R / 100) * Months
-        if (interestCalcMode === 'compound') {
-          totalInterest = P * (Math.pow(1 + R / 100, durationMonths) - 1);
+        // Flat Simple Interest: P * R * T
+        if (isYearlyMode) {
+          totalInterest = P * (R / 100) * (durationMonths / 12);
         } else {
           totalInterest = P * (R / 100) * durationMonths;
         }
+        emiInstallment = (P + totalInterest) / durationMonths;
       }
     }
 
     const totalPayable = P + totalInterest;
 
-    // Calculate installment count + label based on user-selected frequency
-    let installmentCount = 1;
+    let installmentCount = durationMonths;
     let installmentLabel = 'month';
 
-    const roundedMonths = Math.max(1, durationMonths);
-
-    if (frequency === 'monthly') {
-      installmentCount = roundedMonths;
-      installmentLabel = 'month';
-    } else if (frequency === 'quarterly' as any) {
-      installmentCount = Math.max(1, Math.round(roundedMonths / 3));
-      installmentLabel = 'quarter';
-    } else if (frequency === 'weekly') {
-      installmentCount = Math.max(1, Math.round(diffDays / 7));
+    if (frequency === 'weekly') {
+      installmentCount = Math.max(1, Math.round(durationMonths * 4.33));
       installmentLabel = 'week';
-    } else if (frequency === 'daily') {
-      installmentCount = Math.max(1, Math.round(diffDays));
-      installmentLabel = 'day';
+      emiInstallment = totalPayable / installmentCount;
+    } else if (frequency === 'quarterly' as any) {
+      installmentCount = Math.max(1, Math.round(durationMonths / 3));
+      installmentLabel = 'quarter';
+      emiInstallment = totalPayable / installmentCount;
     } else if (frequency === 'yearly') {
       installmentCount = Math.max(1, Math.round(durationMonths / 12));
       installmentLabel = 'year';
-    } else {
+      emiInstallment = totalPayable / installmentCount;
+    } else if (frequency === 'one_time') {
       installmentCount = 1;
       installmentLabel = 'lump-sum';
+      emiInstallment = totalPayable;
     }
-
-    const emiInstallment = totalPayable / Math.max(1, installmentCount);
 
     return { 
       P, 
@@ -147,7 +152,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
       emiInstallment: Number(emiInstallment.toFixed(2)), 
       installmentCount, 
       installmentLabel, 
-      durationMonths: roundedMonths,
+      durationMonths,
       isYearlyMode
     };
   };
@@ -659,58 +664,49 @@ export const LoansView: React.FC<LoansViewProps> = ({
             </div>
           </div>
 
-          {/* Simple vs Compound Interest Toggle (if interest rate > 0) */}
-          {parseFloat(interestRate) > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(255, 255, 255, 0.04)', borderRadius: '12px', border: '1px solid var(--border-input)' }}>
-              <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
-                Calculation Method:
-              </span>
-              <div style={{ display: 'flex', gap: '4px' }}>
+          {/* Calculation Method Toggle */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'rgba(255, 255, 255, 0.04)', borderRadius: '12px', border: '1px solid var(--border-input)' }}>
+            <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+              Interest Method:
+            </span>
+            <div style={{ display: 'flex', gap: '4px' }}>
+              {[
+                { id: 'simple', label: 'Simple' },
+                { id: 'reducing', label: 'Reducing (EMI)' },
+                { id: 'compound', label: 'Compound' }
+              ].map(m => (
                 <button
+                  key={m.id}
                   type="button"
-                  onClick={() => setInterestCalcMode('simple')}
+                  onClick={() => setInterestCalcMode(m.id as any)}
                   style={{
-                    padding: '4px 10px',
+                    padding: '4px 8px',
                     borderRadius: '8px',
                     border: 'none',
                     fontSize: '11px',
                     fontWeight: 800,
                     cursor: 'pointer',
-                    background: interestCalcMode === 'simple' ? 'var(--primary)' : 'transparent',
-                    color: interestCalcMode === 'simple' ? '#fff' : 'var(--text-secondary)'
+                    background: interestCalcMode === m.id ? 'var(--primary)' : 'transparent',
+                    color: interestCalcMode === m.id ? '#fff' : 'var(--text-secondary)'
                   }}
                 >
-                  Simple
+                  {m.label}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setInterestCalcMode('compound')}
-                  style={{
-                    padding: '4px 10px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    fontSize: '11px',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    background: interestCalcMode === 'compound' ? 'var(--primary)' : 'transparent',
-                    color: interestCalcMode === 'compound' ? '#fff' : 'var(--text-secondary)'
-                  }}
-                >
-                  Compound
-                </button>
-              </div>
+              ))}
             </div>
-          )}
+          </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
             <div>
               <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Due Date
+                Tenure / Duration (Months)
               </label>
               <input
-                type="date"
-                value={dueDate}
-                onChange={e => setDueDate(e.target.value)}
+                type="number"
+                min="1"
+                step="1"
+                value={tenureMonths}
+                onChange={e => updateTenure(parseInt(e.target.value) || 1)}
                 className="glass-input"
                 style={{ marginTop: '6px', width: '100%' }}
               />
@@ -735,46 +731,59 @@ export const LoansView: React.FC<LoansViewProps> = ({
             </div>
           </div>
 
-          {/* Quick Tenure / Duration Chips for Auto-calculating Due Date */}
           <div>
-            <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              ⏳ Quick Tenure / Duration (Auto Due Date)
-            </label>
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Due Date
+              </label>
+              <span style={{ fontSize: '10px', color: 'var(--primary)', fontWeight: 700 }}>
+                ({tenureMonths} {tenureMonths === 1 ? 'Month' : 'Months'} Duration)
+              </span>
+            </div>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={e => handleDueDateChange(e.target.value)}
+              className="glass-input"
+              style={{ marginTop: '6px', width: '100%' }}
+            />
+          </div>
+
+          {/* Quick Duration Chips */}
+          <div>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '2px' }}>
               {[
-                { label: '+ 1 Month', months: 1 },
-                { label: '+ 3 Months', months: 3 },
-                { label: '+ 6 Months', months: 6 },
-                { label: '+ 1 Year', months: 12 },
-                { label: '+ 2 Years', months: 24 }
-              ].map(tenure => (
+                { label: '1 Mo', months: 1 },
+                { label: '3 Mos', months: 3 },
+                { label: '6 Mos', months: 6 },
+                { label: '1 Year', months: 12 },
+                { label: '2 Years', months: 24 },
+                { label: '3 Years', months: 36 },
+                { label: '5 Years', months: 60 }
+              ].map(tItem => (
                 <button
-                  key={tenure.label}
+                  key={tItem.label}
                   type="button"
-                  onClick={() => {
-                    const d = new Date();
-                    d.setMonth(d.getMonth() + tenure.months);
-                    setDueDate(d.toISOString().split('T')[0]);
-                  }}
+                  onClick={() => updateTenure(tItem.months)}
                   style={{
-                    padding: '6px 12px',
-                    borderRadius: '10px',
-                    border: '1px solid rgba(34, 197, 94, 0.3)',
-                    background: 'rgba(34, 197, 94, 0.08)',
-                    color: 'var(--primary)',
+                    padding: '5px 10px',
+                    borderRadius: '8px',
+                    border: tenureMonths === tItem.months ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.08)',
+                    background: tenureMonths === tItem.months ? 'rgba(34, 197, 94, 0.18)' : 'rgba(255, 255, 255, 0.04)',
+                    color: tenureMonths === tItem.months ? 'var(--primary)' : 'var(--text-secondary)',
                     fontSize: '11px',
                     fontWeight: 800,
                     cursor: 'pointer'
                   }}
                 >
-                  {tenure.label}
+                  {tItem.label}
                 </button>
               ))}
             </div>
           </div>
 
           {/* Live Loan & EMI Calculation Preview Box */}
-          {parseFloat(totalAmount) > 0 && (() => {
+          {(() => {
             const live = calcEmiDetails();
             return (
               <div style={{
@@ -791,7 +800,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
                     🧮 Live Calculation Breakdown
                   </span>
                   <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                    {live.durationMonths} {live.durationMonths === 1 ? 'Month' : 'Months'} Tenure
+                    {live.durationMonths} {live.durationMonths === 1 ? 'Month' : 'Months'} ({interestCalcMode.toUpperCase()})
                   </span>
                 </div>
 
