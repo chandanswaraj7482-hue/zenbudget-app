@@ -31,7 +31,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
   const [copied, setCopied] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const myShareCode = currentProfileId ? currentProfileId.slice(0, 8).toUpperCase() : '';
+  const myShareCode = coupleCode || (currentProfileId ? currentProfileId.slice(0, 8).toUpperCase() : '');
 
   // Calculate partner vs self spending stats
   const partnerTxs = (transactions || []).filter(t => t.paidBy === 'Partner' || (t.user_id && t.user_id !== currentProfileId));

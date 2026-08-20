@@ -1627,8 +1627,8 @@ const App: React.FC = () => {
           }
         }
 
-        // Couple Ledger Sync: Check if both profiles are premium
-        const isSelfPremium = profData.subscription_tier === 'premium' || profData.subscription_tier === 'premium_monthly' || profData.subscription_tier === 'premium_lifetime';
+        // Couple Ledger Sync: Check if self profile is premium
+        const isSelfPremium = profData.subscription_tier === 'premium' || profData.subscription_tier === 'premium_monthly' || profData.subscription_tier === 'premium_yearly' || profData.subscription_tier === 'premium_lifetime' || profData.subscription_tier === 'pro';
         if (!isSelfPremium) {
           localStorage.removeItem(`zb_partner_id_${currentProfileId}`);
           localStorage.removeItem(`zb_partner_code_${currentProfileId}`);
@@ -1639,39 +1639,49 @@ const App: React.FC = () => {
           cachedPartnerId = null;
         } else {
           let partnerFound: { id: string; name: string; couple_code: string } | null = null;
+          const userShareCode = userCoupleCode || currentProfileId.slice(0, 8).toUpperCase();
 
           // Case 1: My profile has a linked partner couple code
           if (profData.partner_couple_code) {
-            const { data: partnerProf, error: partnerErr } = await supabase
+            const partnerCodeLookup = profData.partner_couple_code.toUpperCase();
+            const { data: allOtherProfiles } = await supabase
               .from('profiles')
               .select('id, name, couple_code, subscription_tier')
-              .eq('couple_code', profData.partner_couple_code)
-              .maybeSingle();
+              .neq('id', currentProfileId);
 
-            if (!partnerErr && partnerProf) {
-              const isPartnerPremium = partnerProf.subscription_tier === 'premium' || partnerProf.subscription_tier === 'premium_monthly' || partnerProf.subscription_tier === 'premium_lifetime';
-              if (isPartnerPremium) {
-                partnerFound = partnerProf;
+            if (allOtherProfiles) {
+              const matched = allOtherProfiles.find(p => {
+                if (!p || !p.id) return false;
+                const pIdCode = (p.id || '').replace(/-/g, '').slice(0, 8).toUpperCase();
+                const pIdShort = (p.id || '').slice(0, 8).toUpperCase();
+                const cCode = (p.couple_code || '').toUpperCase();
+                return pIdCode === partnerCodeLookup || pIdShort === partnerCodeLookup || cCode === partnerCodeLookup || p.id.toUpperCase().startsWith(partnerCodeLookup);
+              });
+              if (matched) {
+                partnerFound = { ...matched, couple_code: matched.couple_code || matched.id.slice(0, 8).toUpperCase() };
               }
             }
           }
 
           // Case 2: Someone mutually connected to us
-          if (!partnerFound && userCoupleCode) {
-            const { data: mutualProf, error: mutualErr } = await supabase
+          if (!partnerFound) {
+            const { data: allOtherProfiles } = await supabase
               .from('profiles')
-              .select('id, name, couple_code, subscription_tier')
-              .eq('partner_couple_code', userCoupleCode)
-              .maybeSingle();
+              .select('id, name, couple_code, partner_couple_code, subscription_tier')
+              .neq('id', currentProfileId);
 
-            if (!mutualErr && mutualProf) {
-              const isPartnerPremium = mutualProf.subscription_tier === 'premium' || mutualProf.subscription_tier === 'premium_monthly' || mutualProf.subscription_tier === 'premium_lifetime';
-              if (isPartnerPremium) {
-                // Mutually write in DB!
+            if (allOtherProfiles) {
+              const mutualProf = allOtherProfiles.find(p => {
+                if (!p || !p.id) return false;
+                const pPartnerCode = (p.partner_couple_code || '').toUpperCase();
+                return pPartnerCode === userShareCode || (userCoupleCode && pPartnerCode === userCoupleCode.toUpperCase()) || currentProfileId.toUpperCase().startsWith(pPartnerCode);
+              });
+              if (mutualProf) {
+                const partnerShareCode = mutualProf.couple_code || mutualProf.id.slice(0, 8).toUpperCase();
                 try {
-                  await supabase.from('profiles').update({ partner_couple_code: mutualProf.couple_code }).eq('id', currentProfileId);
+                  await supabase.from('profiles').update({ partner_couple_code: partnerShareCode }).eq('id', currentProfileId);
                 } catch (e) {}
-                partnerFound = mutualProf;
+                partnerFound = { ...mutualProf, couple_code: partnerShareCode };
               }
             }
           }
@@ -1679,10 +1689,10 @@ const App: React.FC = () => {
           if (partnerFound) {
             localStorage.setItem(`zb_partner_id_${currentProfileId}`, partnerFound.id);
             localStorage.setItem(`zb_partner_code_${currentProfileId}`, partnerFound.couple_code);
-            localStorage.setItem(`zb_partner_name_${currentProfileId}`, partnerFound.name);
+            localStorage.setItem(`zb_partner_name_${currentProfileId}`, partnerFound.name || 'Partner');
             setPartnerId(partnerFound.id);
             setPartnerCode(partnerFound.couple_code);
-            setPartnerName(partnerFound.name);
+            setPartnerName(partnerFound.name || 'Partner');
             cachedPartnerId = partnerFound.id;
           } else {
             localStorage.removeItem(`zb_partner_id_${currentProfileId}`);
@@ -2695,12 +2705,12 @@ const App: React.FC = () => {
   const handleConnectPartner = async (code: string): Promise<boolean> => {
     if (!currentProfileId) return false;
 
-    const isSelfPremium = subscriptionTier === 'premium_monthly' || subscriptionTier === 'premium_lifetime' || subscriptionTier === 'premium_yearly' || subscriptionTier === 'premium';
+    const isSelfPremium = isPremiumUser || subscriptionTier === 'premium_monthly' || subscriptionTier === 'premium_lifetime' || subscriptionTier === 'premium_yearly' || subscriptionTier === 'premium' || subscriptionTier === 'pro';
     if (!isSelfPremium) {
       setConfirmDialog({
         isOpen: true,
         title: '🔒 Premium Subscription Required',
-        message: 'Shared Budget sync requires an active Premium plan for both users. Upgrade to Premium now to sync entries with your partner!',
+        message: 'Shared Budget sync requires an active Premium plan. Upgrade to Premium now to sync entries with your partner!',
         type: 'warning',
         confirmText: '⭐ Go Premium Now',
         cancelText: 'Close',
@@ -2718,14 +2728,19 @@ const App: React.FC = () => {
     if (!rawInput) return false;
 
     const strippedInput = rawInput.replace(/[^A-Z0-9]/g, '');
+    const myShareCode = coupleCode || currentProfileId.slice(0, 8).toUpperCase();
 
-    if (coupleCode && (coupleCode.toUpperCase() === rawInput || coupleCode.replace(/[^A-Z0-9]/g, '').toUpperCase() === strippedInput)) {
+    if (
+      (coupleCode && (coupleCode.toUpperCase() === rawInput || coupleCode.replace(/[^A-Z0-9]/g, '').toUpperCase() === strippedInput)) ||
+      currentProfileId.toUpperCase().startsWith(rawInput) ||
+      currentProfileId.replace(/[^A-Z0-9]/g, '').toUpperCase().startsWith(strippedInput)
+    ) {
       triggerToast('You cannot connect to your own sync code!', 'warning');
       return false;
     }
 
     try {
-      // Flexible lookup matching exact couple_code, referral_code, or stripped code
+      // Flexible lookup matching ID slice, couple_code, referral_code, or full UUID
       const { data: allProfiles, error: partnerErr } = await supabase
         .from('profiles')
         .select('id, name, couple_code, referral_code, subscription_tier')
@@ -2734,13 +2749,19 @@ const App: React.FC = () => {
       if (partnerErr) throw partnerErr;
 
       const partnerProf = (allProfiles || []).find(p => {
-        if (!p) return false;
+        if (!p || !p.id) return false;
+        const pIdCode = (p.id || '').replace(/-/g, '').slice(0, 8).toUpperCase();
+        const pIdShort = (p.id || '').slice(0, 8).toUpperCase();
+        const pIdFull = (p.id || '').toUpperCase();
         const cCode = (p.couple_code || '').toUpperCase();
         const rCode = (p.referral_code || '').toUpperCase();
         const cStripped = cCode.replace(/[^A-Z0-9]/g, '');
         const rStripped = rCode.replace(/[^A-Z0-9]/g, '');
 
-        return cCode === rawInput || 
+        return pIdShort === rawInput ||
+               pIdCode === rawInput ||
+               pIdFull.startsWith(rawInput) ||
+               cCode === rawInput || 
                rCode === rawInput || 
                (cStripped && cStripped === strippedInput) || 
                (rStripped && rStripped === strippedInput) ||
@@ -2752,45 +2773,52 @@ const App: React.FC = () => {
         return false;
       }
 
-      const isPartnerPremium = partnerProf.subscription_tier === 'premium_monthly' || partnerProf.subscription_tier === 'premium_lifetime' || partnerProf.subscription_tier === 'premium_yearly' || partnerProf.subscription_tier === 'premium';
-      if (!isPartnerPremium) {
-        setConfirmDialog({
-          isOpen: true,
-          title: '🔒 Partner Premium Required',
-          message: `Partner ${partnerProf.name} is currently on Free Trial. Both users must have an active Premium subscription to sync shared budgets!`,
-          type: 'warning',
-          confirmText: 'OK, Got It',
-          cancelText: 'Close',
-          onConfirm: () => setConfirmDialog(null),
-          onCancel: () => setConfirmDialog(null)
-        });
-        return false;
-      }
+      const partnerShareCode = partnerProf.couple_code || partnerProf.id.slice(0, 8).toUpperCase();
 
       localStorage.setItem(`zb_partner_id_${currentProfileId}`, partnerProf.id);
-      localStorage.setItem(`zb_partner_code_${currentProfileId}`, partnerProf.couple_code || rawInput);
-      localStorage.setItem(`zb_partner_name_${currentProfileId}`, partnerProf.name);
+      localStorage.setItem(`zb_partner_code_${currentProfileId}`, partnerShareCode);
+      localStorage.setItem(`zb_partner_name_${currentProfileId}`, partnerProf.name || 'Partner');
       setPartnerId(partnerProf.id);
-      setPartnerCode(partnerProf.couple_code || rawInput);
-      setPartnerName(partnerProf.name);
+      setPartnerCode(partnerShareCode);
+      setPartnerName(partnerProf.name || 'Partner');
 
-      await supabase
-        .from('profiles')
-        .update({ partner_couple_code: partnerProf.couple_code || rawInput })
-        .eq('id', currentProfileId);
-
-      // Mutual sync dual-link
-      if (coupleCode) {
+      // Update both profiles in Supabase for mutual real-time sync
+      try {
         await supabase
           .from('profiles')
-          .update({ partner_couple_code: coupleCode })
+          .update({ partner_couple_code: partnerShareCode })
+          .eq('id', currentProfileId);
+
+        await supabase
+          .from('profiles')
+          .update({ partner_couple_code: myShareCode })
           .eq('id', partnerProf.id);
+      } catch (dbErr) {
+        console.warn('Partner couple_code db sync warning:', dbErr);
       }
 
-      triggerToast(`Connected successfully with ${partnerProf.name}! 🎉`, 'success');
+      // Re-fetch transactions immediately for combined dual view
+      try {
+        const { data: txData } = await supabase
+          .from('transactions')
+          .select('*')
+          .in('user_id', [currentProfileId, partnerProf.id])
+          .order('date', { ascending: false });
+
+        if (txData && txData.length > 0) {
+          const annotatedTx = txData.map(t => ({
+            ...t,
+            partnerName: t.user_id === partnerProf.id ? (partnerProf.name || 'Partner') : undefined
+          }));
+          setTransactions(annotatedTx);
+          localStorage.setItem(`zb_transactions_${currentProfileId}`, JSON.stringify(annotatedTx));
+        }
+      } catch (_) {}
+
+      triggerToast(`Connected successfully with ${partnerProf.name || 'Partner'}! 🎉`, 'success');
       addNotification(
         "Partner Connected! 👥",
-        `You have linked shared budgets with ${partnerProf.name}. You can now view entries together.`,
+        `You have linked shared budgets with ${partnerProf.name || 'Partner'}. Your household spending is now synced in real-time.`,
         'success'
       );
       return true;
