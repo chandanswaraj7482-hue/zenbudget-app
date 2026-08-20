@@ -1695,6 +1695,17 @@ const App: React.FC = () => {
           }
 
           if (partnerFound) {
+            const isPartnerPremium = partnerFound.subscription_tier === 'premium' || 
+                                     partnerFound.subscription_tier === 'premium_monthly' || 
+                                     partnerFound.subscription_tier === 'premium_yearly' || 
+                                     partnerFound.subscription_tier === 'premium_lifetime' || 
+                                     partnerFound.subscription_tier === 'pro';
+            if (!isPartnerPremium) {
+              partnerFound = null;
+            }
+          }
+
+          if (partnerFound) {
             localStorage.setItem(`zb_partner_id_${currentProfileId}`, partnerFound.id);
             localStorage.setItem(`zb_partner_code_${currentProfileId}`, partnerFound.couple_code);
             localStorage.setItem(`zb_partner_name_${currentProfileId}`, partnerFound.name || 'Partner');
@@ -2779,6 +2790,27 @@ const App: React.FC = () => {
         return false;
       }
 
+      // STRICT DUAL PREMIUM ENFORCEMENT: Both users MUST have active Premium subscription
+      const isPartnerPremium = partnerProf.subscription_tier === 'premium' || 
+                               partnerProf.subscription_tier === 'premium_monthly' || 
+                               partnerProf.subscription_tier === 'premium_yearly' || 
+                               partnerProf.subscription_tier === 'premium_lifetime' || 
+                               partnerProf.subscription_tier === 'pro';
+
+      if (!isPartnerPremium) {
+        setConfirmDialog({
+          isOpen: true,
+          title: '🔒 Partner Premium Subscription Required',
+          message: `Shared Budget requires active Premium for BOTH users! Your partner (${partnerProf.name || 'Partner'}) is currently on a Free plan. Both users must purchase a Premium plan to connect and sync.`,
+          type: 'warning',
+          confirmText: 'OK, Got It',
+          cancelText: 'Close',
+          onConfirm: () => setConfirmDialog(null),
+          onCancel: () => setConfirmDialog(null)
+        });
+        return false;
+      }
+
       const partnerShareCode = partnerProf.couple_code || partnerProf.id.slice(0, 8).toUpperCase();
 
       localStorage.setItem(`zb_partner_id_${currentProfileId}`, partnerProf.id);
@@ -3339,6 +3371,8 @@ const App: React.FC = () => {
             transactions={convertedTransactions}
             currencySymbol={currencySymbol}
             onOpenTransferModal={() => setIsTransferOpen(true)}
+            isPremiumUser={isPremiumUser}
+            onOpenSubscriptionModal={() => setIsSubModalOpen(true)}
           />
         )}
         {activeView === 'referral' && (

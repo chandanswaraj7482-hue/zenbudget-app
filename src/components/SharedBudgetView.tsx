@@ -12,6 +12,8 @@ interface SharedBudgetViewProps {
   transactions?: any[];
   currencySymbol?: string;
   onOpenTransferModal?: () => void;
+  isPremiumUser?: boolean;
+  onOpenSubscriptionModal?: () => void;
 }
 
 export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
@@ -24,7 +26,9 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
   onDisconnectPartner,
   transactions = [],
   currencySymbol = '₹',
-  onOpenTransferModal
+  onOpenTransferModal,
+  isPremiumUser = false,
+  onOpenSubscriptionModal
 }) => {
   const [partnerInputCode, setPartnerInputCode] = useState('');
   const [isLinking, setIsLinking] = useState(false);
@@ -291,6 +295,44 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
           /* UNCONNECTED STATE */
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             
+            {/* Dual Premium Requirement Notice */}
+            <div style={{
+              padding: '12px 14px',
+              borderRadius: '14px',
+              background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.12) 0%, rgba(249, 115, 22, 0.08) 100%)',
+              border: '1px solid rgba(234, 179, 8, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '10px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '16px' }}>👑</span>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: '#fbbf24', lineHeight: 1.3 }}>
+                  Dual Real-Time Sync requires an active <strong>Premium Plan for BOTH users</strong>.
+                </span>
+              </div>
+              {!isPremiumUser && onOpenSubscriptionModal && (
+                <button
+                  type="button"
+                  onClick={onOpenSubscriptionModal}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: '10px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                    color: '#000',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  Upgrade ⭐
+                </button>
+              )}
+            </div>
+
             {/* Step 1: Copy My Sync Code */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
