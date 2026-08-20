@@ -168,13 +168,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Multi-Currency Scan & Pay Lifetime Feature Pricing State
   const [inrScanPayPrice, setInrScanPayPrice] = useState<number>(() => getInitialPrice('inr_scan_pay_price', 79));
-  const [usdScanPayPrice, setUsdScanPayPrice] = useState<number>(() => getInitialPrice('usd_scan_pay_price', 1.99));
-  const [eurScanPayPrice, setEurScanPayPrice] = useState<number>(() => getInitialPrice('eur_scan_pay_price', 1.99));
-  const [gbpScanPayPrice, setGbpScanPayPrice] = useState<number>(() => getInitialPrice('gbp_scan_pay_price', 1.99));
-  const [cadScanPayPrice, setCadScanPayPrice] = useState<number>(() => getInitialPrice('cad_scan_pay_price', 2.99));
-  const [audScanPayPrice, setAudScanPayPrice] = useState<number>(() => getInitialPrice('aud_scan_pay_price', 2.99));
-  const [aedScanPayPrice, setAedScanPayPrice] = useState<number>(() => getInitialPrice('aed_scan_pay_price', 7.99));
-  const [sgdScanPayPrice, setSgdScanPayPrice] = useState<number>(() => getInitialPrice('sgd_scan_pay_price', 2.99));
+  const [usdScanPayPrice, setUsdScanPayPrice] = useState<number>(() => getInitialPrice('usd_scan_pay_price', 4.99));
+  const [eurScanPayPrice, setEurScanPayPrice] = useState<number>(() => getInitialPrice('eur_scan_pay_price', 4.49));
+  const [gbpScanPayPrice, setGbpScanPayPrice] = useState<number>(() => getInitialPrice('gbp_scan_pay_price', 3.99));
+  const [cadScanPayPrice, setCadScanPayPrice] = useState<number>(() => getInitialPrice('cad_scan_pay_price', 6.99));
+  const [audScanPayPrice, setAudScanPayPrice] = useState<number>(() => getInitialPrice('aud_scan_pay_price', 7.49));
+  const [aedScanPayPrice, setAedScanPayPrice] = useState<number>(() => getInitialPrice('aed_scan_pay_price', 18.99));
+  const [sgdScanPayPrice, setSgdScanPayPrice] = useState<number>(() => getInitialPrice('sgd_scan_pay_price', 6.99));
 
   // Fetch latest live prices from Supabase on mount
   useEffect(() => {

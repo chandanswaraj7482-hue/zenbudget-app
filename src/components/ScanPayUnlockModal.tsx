@@ -25,13 +25,13 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
   try {
     const stored = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
     if (currencySymbol === '$') {
-      numPrice = stored.usd_scan_pay_price || 1.99;
+      numPrice = stored.usd_scan_pay_price || 4.99;
       priceFormatted = `$${numPrice}`;
     } else if (currencySymbol === '€') {
-      numPrice = stored.eur_scan_pay_price || 1.79;
+      numPrice = stored.eur_scan_pay_price || 4.49;
       priceFormatted = `€${numPrice}`;
     } else if (currencySymbol === '£') {
-      numPrice = stored.gbp_scan_pay_price || 1.49;
+      numPrice = stored.gbp_scan_pay_price || 3.99;
       priceFormatted = `£${numPrice}`;
     } else {
       numPrice = stored.inr_scan_pay_price || 79;
