@@ -599,6 +599,12 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
   };
 
   const handleProceedToPayment = () => {
+    if (!checkHasScanPayAccess()) {
+      if (onRequireUnlockModal) onRequireUnlockModal();
+      else window.dispatchEvent(new CustomEvent('open-scanpay-unlock'));
+      return;
+    }
+
     if (!amount || parseFloat(amount) <= 0) {
       showErr('Please enter a valid expense amount.');
       return;
@@ -627,6 +633,12 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
   };
 
   const handlePay = (paOverride?: string, schemePrefix?: string) => {
+    if (!checkHasScanPayAccess()) {
+      if (onRequireUnlockModal) onRequireUnlockModal();
+      else window.dispatchEvent(new CustomEvent('open-scanpay-unlock'));
+      return;
+    }
+
     if (isPaying) return;
     setIsPaying(true);
 

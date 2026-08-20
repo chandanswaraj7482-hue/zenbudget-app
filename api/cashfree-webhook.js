@@ -19,7 +19,7 @@ export default async function handler(req, res) {
       let expiresAt = new Date(Date.now() + 30 * 86400000).toISOString();
 
       if (orderId.includes('scan_pay_lifetime')) {
-        // Update Scan & Pay Access only
+        // Update Scan & Pay Access + Premium status
         await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, {
           method: 'PATCH',
           headers: {
@@ -30,6 +30,7 @@ export default async function handler(req, res) {
           },
           body: JSON.stringify({
             has_scan_pay_access: true,
+            is_premium: true,
             updated_at: new Date().toISOString()
           })
         });
