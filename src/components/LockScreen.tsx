@@ -119,32 +119,65 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         App.addListener('appUrlOpen', async (eventData: any) => {
           console.log('LockScreen: App opened with deep link URL:', eventData.url);
           try {
-            // The URL looks like: com.zenbudget.app://login#access_token=...&refresh_token=...
-            const urlStr = eventData.url;
-            if (urlStr.includes('access_token=') && urlStr.includes('refresh_token=')) {
-              const hashIndex = urlStr.indexOf('#');
-              if (hashIndex !== -1) {
-                const hash = urlStr.substring(hashIndex + 1);
-                const params = new URLSearchParams(hash);
-                const accessToken = params.get('access_token');
-                const refreshToken = params.get('refresh_token');
-                if (accessToken && refreshToken) {
-                  setIsLoading(true);
-                  const { error } = await supabase.auth.setSession({
-                    access_token: accessToken,
-                    refresh_token: refreshToken
-                  });
-                  if (error) throw error;
-                  
-                  // Close native browser overlay
+            const urlStr = eventData.url || '';
+            setIsLoading(true);
+
+            // 1. Check for PKCE Authorization Code
+            if (urlStr.includes('code=')) {
+              try {
+                const fakeUrl = new URL(urlStr.replace('com.zenbudget.app://', 'https://dummy.app/'));
+                const code = fakeUrl.searchParams.get('code') || urlStr.split('code=')[1]?.split('&')[0];
+                if (code) {
+                  const { data: exchData, error: exchErr } = await supabase.auth.exchangeCodeForSession(code);
+                  if (exchErr) throw exchErr;
+                  if (exchData?.session?.user) {
+                    await fetchUserProfile(exchData.session.user.id);
+                  }
                   const { Browser } = await import('@capacitor/browser');
                   await Browser.close();
+                  setIsLoading(false);
+                  return;
                 }
+              } catch (codeErr) {
+                console.warn('PKCE Code exchange error:', codeErr);
               }
+            }
+
+            // 2. Check for Implicit Access Token + Refresh Token
+            if (urlStr.includes('access_token=') && urlStr.includes('refresh_token=')) {
+              const hashIndex = urlStr.indexOf('#');
+              const queryIndex = urlStr.indexOf('?');
+              const paramsStr = hashIndex !== -1 ? urlStr.substring(hashIndex + 1) : (queryIndex !== -1 ? urlStr.substring(queryIndex + 1) : '');
+              const params = new URLSearchParams(paramsStr);
+              const accessToken = params.get('access_token');
+              const refreshToken = params.get('refresh_token');
+              if (accessToken && refreshToken) {
+                const { data: sessData, error: sessErr } = await supabase.auth.setSession({
+                  access_token: accessToken,
+                  refresh_token: refreshToken
+                });
+                if (sessErr) throw sessErr;
+                if (sessData?.session?.user) {
+                  await fetchUserProfile(sessData.session.user.id);
+                }
+                const { Browser } = await import('@capacitor/browser');
+                await Browser.close();
+                setIsLoading(false);
+                return;
+              }
+            }
+
+            // 3. Fallback: Check active session directly
+            const { data: currentSess } = await supabase.auth.getSession();
+            if (currentSess?.session?.user) {
+              await fetchUserProfile(currentSess.session.user.id);
+              const { Browser } = await import('@capacitor/browser');
+              await Browser.close();
             }
           } catch (err: any) {
             console.error('LockScreen: Error handling deep link session:', err);
-            setErrorMsg(err.message || 'Failed to complete login redirect.');
+            setErrorMsg(err.message || 'Failed to complete Google Sign-In redirect.');
+          } finally {
             setIsLoading(false);
           }
         }).then(listener => {
@@ -351,11 +384,42 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         }
       }
 
+      if (!userProf) {
+        // Auto-provision brand new Google / OAuth user profile
+        try {
+          const { data: currentSess } = await supabase.auth.getSession();
+          const meta = currentSess?.session?.user?.user_metadata || {};
+          const gName = meta.full_name || meta.name || currentSess?.session?.user?.email?.split('@')[0] || username || 'User';
+          const gEmail = (currentSess?.session?.user?.email || storedEmail || '').toLowerCase();
+          const gAvatar = meta.avatar_url || meta.picture || localStorage.getItem('zb_google_avatar') || `https://ui-avatars.com/api/?name=${encodeURIComponent(gName)}&background=22c55e&color=fff&rounded=true`;
+          const myReferralCode = 'ZB-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+
+          const newProf = {
+            id: uid,
+            name: gName,
+            email: gEmail,
+            pin: '0000',
+            subscription_tier: 'free',
+            trial_start_date: new Date().toISOString(),
+            trial_expire_date: new Date(Date.now() + 7 * 86400000).toISOString(),
+            avatar_url: gAvatar,
+            referral_code: myReferralCode,
+            is_premium: false,
+            has_scan_pay_access: false
+          };
+
+          const { data: inserted } = await supabase.from('profiles').upsert(newProf).select('*').maybeSingle();
+          userProf = inserted || newProf;
+        } catch (eProf) {
+          console.warn('Auto-provisioning fallback profile:', eProf);
+        }
+      }
+
       console.log("LockScreen: fetchUserProfile database query result:", userProf);
       if (userProf) {
         setDbProfile(userProf);
         setUsername(userProf.name);
-        setStep('unlock');
+        
         // Store profile details locally to avoid logouts
         localStorage.setItem('zb_local_session_profile', JSON.stringify({ userId: uid, profile: userProf }));
         localStorage.setItem('zb_profile_id', userProf.id || uid);
@@ -379,12 +443,26 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         }
         window.dispatchEvent(new Event('profile_avatar_updated'));
 
-        console.log("LockScreen: Profile found, state set to unlock");
+        console.log("LockScreen: Profile ready, unlocking...");
         setIsLoading(false);
+
+        // Instant unlock for Google OAuth users with default PIN '0000' or no custom PIN
+        if (!userProf.pin || userProf.pin === '0000') {
+          playNotificationSound('success');
+          onUnlock(
+            uid,
+            userProf.name,
+            userProf.subscription_tier,
+            userProf.trial_start_date,
+            userProf.pin,
+            userProf.premium_expires_at,
+            userProf.trial_expire_date
+          );
+        } else {
+          setStep('unlock');
+        }
       } else {
-        // Logged in but profile data is missing, prompt onboarding (PIN setup)
         setStep('onboard-pin');
-        console.log("LockScreen: Profile not found, state set to onboard-pin");
         setIsLoading(false);
       }
     } catch (err: any) {
