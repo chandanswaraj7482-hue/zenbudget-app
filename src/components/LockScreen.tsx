@@ -1166,24 +1166,25 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
 
             {/* Submit Button */}
             <button type="submit" style={{
-              padding: '13px', borderRadius: '14px', fontSize: '14px', fontWeight: 800, marginTop: '4px',
-              background: 'linear-gradient(135deg, #22c55e 0%, #06b6d4 100%)',
+              padding: '14px 20px', borderRadius: '24px', fontSize: '15px', fontWeight: 800, marginTop: '4px',
+              background: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
               color: '#ffffff', border: 'none',
-              boxShadow: '0 6px 20px rgba(34,197,94,0.35)',
-              cursor: 'pointer', transition: 'all 0.2s ease', letterSpacing: '0.01em'
+              boxShadow: '0 10px 25px rgba(16, 185, 129, 0.35)',
+              cursor: 'pointer', transition: 'all 0.2s ease', letterSpacing: '0.01em',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
             }}>
               {authMode === 'login' ? '🔓 Login to ZenBudget' : '🚀 Create Account'}
             </button>
           </form>
 
           {/* ── Footer: Device-Aware App Download & Security ── */}
-          <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-input)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '12px', color: '#94a3b8', fontWeight: 600 }}>
+          <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', width: '100%', boxSizing: 'border-box' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '12px', color: '#94a3b8', fontWeight: 600, letterSpacing: '0.01em' }}>
               <span>🔒 256-bit Encrypted • Privacy First</span>
             </div>
 
             {!Capacitor.isNativePlatform() && (
-              <div style={{ display: 'flex', gap: '10px', width: '100%', boxSizing: 'border-box' }}>
+              <div style={{ display: 'flex', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                 {(/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.userAgent.includes("Mac") && "ontouchend" in document)) ? (
                   <button
                     type="button"
@@ -1191,11 +1192,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                     style={{
                       flex: 1,
                       padding: '12px 14px',
-                      borderRadius: '24px',
-                      border: '1px solid #10b981',
-                      background: 'rgba(16, 185, 129, 0.08)',
+                      borderRadius: '20px',
+                      border: '1px solid rgba(16, 185, 129, 0.45)',
+                      background: 'rgba(16, 185, 129, 0.06)',
                       color: '#10b981',
-                      fontSize: '13px',
+                      fontSize: '14px',
                       fontWeight: 700,
                       display: 'flex',
                       alignItems: 'center',
@@ -1206,7 +1207,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                       boxSizing: 'border-box'
                     }}
                   >
-                    <Download size={15} />
+                    <Download size={16} />
                     <span>Install iOS App</span>
                   </button>
                 ) : (
@@ -1216,11 +1217,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                     style={{
                       flex: 1,
                       padding: '12px 14px',
-                      borderRadius: '24px',
-                      border: '1px solid #10b981',
-                      background: 'rgba(16, 185, 129, 0.08)',
+                      borderRadius: '20px',
+                      border: '1px solid rgba(16, 185, 129, 0.45)',
+                      background: 'rgba(16, 185, 129, 0.06)',
                       color: '#10b981',
-                      fontSize: '13px',
+                      fontSize: '14px',
                       fontWeight: 700,
                       display: 'flex',
                       alignItems: 'center',
@@ -1232,7 +1233,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                       boxSizing: 'border-box'
                     }}
                   >
-                    <Download size={15} />
+                    <Download size={16} />
                     <span>Install Android App</span>
                   </a>
                 )}
@@ -1245,11 +1246,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                   style={{
                     flex: 1,
                     padding: '12px 14px',
-                    borderRadius: '24px',
-                    border: '1px solid #6366f1',
-                    background: 'rgba(99, 102, 241, 0.08)',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(99, 102, 241, 0.45)',
+                    background: 'rgba(99, 102, 241, 0.06)',
                     color: '#818cf8',
-                    fontSize: '13px',
+                    fontSize: '14px',
                     fontWeight: 700,
                     display: 'flex',
                     alignItems: 'center',
@@ -1260,7 +1261,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                     boxSizing: 'border-box'
                   }}
                 >
-                  <Globe size={15} />
+                  <span>🌐</span>
                   <span>Open Web App</span>
                 </button>
               </div>
@@ -1692,13 +1693,13 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
             </button>
 
             {/* ── Footer: Device-Aware App Download & Security ── */}
-            <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-input)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '12px', color: '#94a3b8', fontWeight: 600 }}>
+            <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', width: '100%', boxSizing: 'border-box' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '12px', color: '#94a3b8', fontWeight: 600, letterSpacing: '0.01em' }}>
                 <span>🔒 256-bit Encrypted • Privacy First</span>
               </div>
 
               {!Capacitor.isNativePlatform() && (
-                <div style={{ display: 'flex', gap: '10px', width: '100%', boxSizing: 'border-box' }}>
+                <div style={{ display: 'flex', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
                   {(/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.userAgent.includes("Mac") && "ontouchend" in document)) ? (
                     <button
                       type="button"
@@ -1706,11 +1707,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                       style={{
                         flex: 1,
                         padding: '12px 14px',
-                        borderRadius: '24px',
-                        border: '1px solid #10b981',
-                        background: 'rgba(16, 185, 129, 0.08)',
+                        borderRadius: '20px',
+                        border: '1px solid rgba(16, 185, 129, 0.45)',
+                        background: 'rgba(16, 185, 129, 0.06)',
                         color: '#10b981',
-                        fontSize: '13px',
+                        fontSize: '14px',
                         fontWeight: 700,
                         display: 'flex',
                         alignItems: 'center',
@@ -1721,7 +1722,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                         boxSizing: 'border-box'
                       }}
                     >
-                      <Download size={15} />
+                      <Download size={16} />
                       <span>Install iOS App</span>
                     </button>
                   ) : (
@@ -1731,11 +1732,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                       style={{
                         flex: 1,
                         padding: '12px 14px',
-                        borderRadius: '24px',
-                        border: '1px solid #10b981',
-                        background: 'rgba(16, 185, 129, 0.08)',
+                        borderRadius: '20px',
+                        border: '1px solid rgba(16, 185, 129, 0.45)',
+                        background: 'rgba(16, 185, 129, 0.06)',
                         color: '#10b981',
-                        fontSize: '13px',
+                        fontSize: '14px',
                         fontWeight: 700,
                         display: 'flex',
                         alignItems: 'center',
@@ -1747,7 +1748,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                         boxSizing: 'border-box'
                       }}
                     >
-                      <Download size={15} />
+                      <Download size={16} />
                       <span>Install Android App</span>
                     </a>
                   )}
@@ -1760,11 +1761,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                     style={{
                       flex: 1,
                       padding: '12px 14px',
-                      borderRadius: '24px',
-                      border: '1px solid #6366f1',
-                      background: 'rgba(99, 102, 241, 0.08)',
+                      borderRadius: '20px',
+                      border: '1px solid rgba(99, 102, 241, 0.45)',
+                      background: 'rgba(99, 102, 241, 0.06)',
                       color: '#818cf8',
-                      fontSize: '13px',
+                      fontSize: '14px',
                       fontWeight: 700,
                       display: 'flex',
                       alignItems: 'center',
@@ -1775,7 +1776,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                       boxSizing: 'border-box'
                     }}
                   >
-                    <Globe size={15} />
+                    <span>🌐</span>
                     <span>Open Web App</span>
                   </button>
                 </div>
