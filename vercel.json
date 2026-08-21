@@ -3,7 +3,11 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "framework": "vite",
-  "redirects": [],
+  "redirects": [
+    { "source": "/zenbudget.apk", "destination": "https://files.catbox.moe/i95g5t.apk", "statusCode": 302 },
+    { "source": "/zenbudget-v2.0.3.apk", "destination": "https://files.catbox.moe/i95g5t.apk", "statusCode": 302 },
+    { "source": "/zenbudget-latest.apk", "destination": "https://files.catbox.moe/i95g5t.apk", "statusCode": 302 }
+  ],
   "rewrites": [
     { "source": "/admin", "destination": "/admin.html" },
     { "source": "/admin/", "destination": "/admin.html" },
