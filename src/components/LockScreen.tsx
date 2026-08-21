@@ -1185,7 +1185,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
 
             {!Capacitor.isNativePlatform() && (
               <div style={{ display: 'flex', gap: '10px', width: '100%', boxSizing: 'border-box' }}>
-                {(typeof navigator !== 'undefined' && (/iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))) ? (
+                {(typeof navigator !== 'undefined' && /Macintosh|Mac OS X|MacIntel|Mac|iPhone|iPad|iPod/i.test((navigator.userAgent || '') + ' ' + (navigator.platform || ''))) ? (
                   <button
                     type="button"
                     onClick={() => setShowIOSInstructions(true)}
@@ -1703,7 +1703,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
 
               {!Capacitor.isNativePlatform() && (
                 <div style={{ display: 'flex', gap: '10px', width: '100%', boxSizing: 'border-box' }}>
-                  {(typeof navigator !== 'undefined' && (/iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))) ? (
+                  {(typeof navigator !== 'undefined' && /Macintosh|Mac OS X|MacIntel|Mac|iPhone|iPad|iPod/i.test((navigator.userAgent || '') + ' ' + (navigator.platform || ''))) ? (
                     <button
                       type="button"
                       onClick={() => setShowIOSInstructions(true)}
