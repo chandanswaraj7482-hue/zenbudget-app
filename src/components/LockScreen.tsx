@@ -1185,12 +1185,13 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
 
             {!Capacitor.isNativePlatform() && (
               <div style={{ display: 'flex', gap: '10px', width: '100%', boxSizing: 'border-box' }}>
-                {(/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.userAgent.includes("Mac") && "ontouchend" in document)) ? (
+                {(typeof navigator !== 'undefined' && (/iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))) ? (
                   <button
                     type="button"
                     onClick={() => setShowIOSInstructions(true)}
                     style={{
                       flex: '1 1 0%',
+                      height: '42px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -1216,6 +1217,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                     download="zenbudget-v2.0.3.apk"
                     style={{
                       flex: '1 1 0%',
+                      height: '42px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -1234,7 +1236,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                     }}
                   >
                     <Download size={14} />
-                    <span>Install Android App</span>
+                    <span>Android APK</span>
                   </a>
                 )}
 
@@ -1245,6 +1247,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                   }}
                   style={{
                     flex: '1 1 0%',
+                    height: '42px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -1261,7 +1264,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                     boxSizing: 'border-box'
                   }}
                 >
-                  <span>🌐</span>
+                  <span style={{ fontSize: '14px' }}>🌐</span>
                   <span>Open Web App</span>
                 </button>
               </div>
@@ -1700,12 +1703,13 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
 
               {!Capacitor.isNativePlatform() && (
                 <div style={{ display: 'flex', gap: '10px', width: '100%', boxSizing: 'border-box' }}>
-                  {(/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.userAgent.includes("Mac") && "ontouchend" in document)) ? (
+                  {(typeof navigator !== 'undefined' && (/iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))) ? (
                     <button
                       type="button"
                       onClick={() => setShowIOSInstructions(true)}
                       style={{
                         flex: '1 1 0%',
+                        height: '42px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -1731,6 +1735,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                       download="zenbudget-v2.0.3.apk"
                       style={{
                         flex: '1 1 0%',
+                        height: '42px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -1749,7 +1754,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                       }}
                     >
                       <Download size={14} />
-                      <span>Install Android App</span>
+                      <span>Android APK</span>
                     </a>
                   )}
 
@@ -1760,6 +1765,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                     }}
                     style={{
                       flex: '1 1 0%',
+                      height: '42px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -1776,7 +1782,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                       boxSizing: 'border-box'
                     }}
                   >
-                    <span>🌐</span>
+                    <span style={{ fontSize: '14px' }}>🌐</span>
                     <span>Open Web App</span>
                   </button>
                 </div>
