@@ -59,8 +59,16 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
 
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
+  const [detectedPlatform, setDetectedPlatform] = useState<'apple' | 'android'>('android');
 
   useEffect(() => {
+    // Detect Apple vs Android device
+    const isApple = typeof navigator !== 'undefined' && (
+      /Macintosh|Mac OS X|MacIntel|Mac|iPhone|iPad|iPod/i.test(navigator.userAgent || '') ||
+      /Mac/i.test(navigator.platform || '')
+    );
+    setDetectedPlatform(isApple ? 'apple' : 'android');
+
     // Silently detect location for currency — IP is NOT displayed to user
     fetch('https://ipapi.co/json/')
       .then(res => res.json())
@@ -1185,7 +1193,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
 
             {!Capacitor.isNativePlatform() && (
               <div style={{ display: 'flex', gap: '10px', width: '100%', boxSizing: 'border-box' }}>
-                {(typeof navigator !== 'undefined' && /Macintosh|Mac OS X|MacIntel|Mac|iPhone|iPad|iPod/i.test((navigator.userAgent || '') + ' ' + (navigator.platform || ''))) ? (
+                {detectedPlatform === 'apple' ? (
                   <button
                     type="button"
                     onClick={() => setShowIOSInstructions(true)}
@@ -1703,7 +1711,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
 
               {!Capacitor.isNativePlatform() && (
                 <div style={{ display: 'flex', gap: '10px', width: '100%', boxSizing: 'border-box' }}>
-                  {(typeof navigator !== 'undefined' && /Macintosh|Mac OS X|MacIntel|Mac|iPhone|iPad|iPod/i.test((navigator.userAgent || '') + ' ' + (navigator.platform || ''))) ? (
+                  {detectedPlatform === 'apple' ? (
                     <button
                       type="button"
                       onClick={() => setShowIOSInstructions(true)}
