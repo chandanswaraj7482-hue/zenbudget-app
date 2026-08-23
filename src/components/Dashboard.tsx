@@ -234,9 +234,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0);
 
+  const myAccounts = accounts.filter(a => !a.user_id || a.user_id === currentProfileId);
+  const familyAccounts = accounts.filter(a => a.user_id && a.user_id !== currentProfileId);
+
   const totalAccountBalance = accounts && accounts.length > 0
     ? accounts.reduce((sum, a) => sum + (a.balance || 0), 0)
     : transactions.reduce((sum, t) => t.type === 'income' ? sum + t.amount : sum - t.amount, 0);
+    
+  const myTotalAccountBalance = myAccounts.length > 0 
+    ? myAccounts.reduce((sum, a) => sum + (a.balance || 0), 0) 
+    : totalAccountBalance;
+    
+  const familyTotalAccountBalance = familyAccounts.length > 0 
+    ? familyAccounts.reduce((sum, a) => sum + (a.balance || 0), 0)
+    : 0;
 
   const totalBalance = totalAccountBalance;
 
@@ -665,12 +676,25 @@ export const Dashboard: React.FC<DashboardProps> = ({
           pointerEvents: 'none'
         }} />
 
-        <span style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-secondary)', fontWeight: 600 }}>{t('total_balance')}</span>
+        <span style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-secondary)', fontWeight: 600 }}>{familyAccounts.length > 0 ? 'Combined Family Balance' : t('total_balance')}</span>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', margin: '8px 0 16px 0', color: 'var(--text-balance)', minWidth: 0, maxWidth: '100%' }}>
           <span style={{ fontSize: 'clamp(24px, 8vw, 36px)', fontWeight: 800, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {formatCurrency(totalBalance, currencySymbol, 0)}
           </span>
         </div>
+        
+        {familyAccounts.length > 0 && (
+          <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>My Wallets</span>
+              <span style={{ fontSize: '14px', color: 'var(--success)', fontWeight: 800 }}>{formatCurrency(myTotalAccountBalance, currencySymbol, 0)}</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>Family Wallets</span>
+              <span style={{ fontSize: '14px', color: 'var(--primary)', fontWeight: 800 }}>{formatCurrency(familyTotalAccountBalance, currencySymbol, 0)}</span>
+            </div>
+          </div>
+        )}
 
         {/* Income / Expense Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', borderTop: '1px solid var(--border-divider)', paddingTop: '16px' }}>

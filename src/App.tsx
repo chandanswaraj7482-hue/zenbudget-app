@@ -228,6 +228,7 @@ const App: React.FC = () => {
     const profileId = localStorage.getItem('zb_profile_id') || '';
     return profileId ? localStorage.getItem(`zb_partner_name_${profileId}`) : null;
   });
+  const [familyMembers, setFamilyMembers] = useState<{ id: string, name: string, couple_code: string }[]>([]);
   const [referralCount, setReferralCount] = useState<number>(() => {
     return parseInt(localStorage.getItem('zb_referral_count') || '0');
   });
@@ -469,10 +470,16 @@ const App: React.FC = () => {
       localStorage.setItem(`zb_accounts_${currentProfileId}`, JSON.stringify(updated));
       // Sync account balances to Supabase after transfer
       try {
-        for (const acc of updated) {
+        const fromAccUpdated = updated.find(a => a.id === fromId);
+        const toAccUpdated = updated.find(a => a.id === toId);
+        
+        const accountsToSync = [fromAccUpdated, toAccUpdated].filter(Boolean);
+        
+        for (const acc of accountsToSync) {
+          if (!acc) continue;
           await supabase.from('accounts').upsert({
             id: acc.id,
-            user_id: currentProfileId,
+            user_id: acc.user_id || currentProfileId,
             name: acc.name,
             type: (acc as any).type || 'savings',
             balance: acc.balance || 0,
@@ -1431,7 +1438,7 @@ const App: React.FC = () => {
           }
           if (profData.status === 'suspended') {
             setIsLocked(true);
-            triggerToast('🔒 Your account is suspended by Admin.', 'danger');
+            triggerToast('🔒 Your account is suspended by Admin.', 'warning');
           }
         }
       } catch (err) {
@@ -1457,7 +1464,7 @@ const App: React.FC = () => {
           }
           if (p.status === 'suspended') {
             setIsLocked(true);
-            triggerToast('🔒 Account status updated to Suspended by Admin.', 'danger');
+            triggerToast('🔒 Account status updated to Suspended by Admin.', 'warning');
           }
         }
       })
@@ -1473,11 +1480,11 @@ const App: React.FC = () => {
     try {
       if (!currentProfileId) return;
 
-      // Load local partner info
-      let cachedPartnerId = localStorage.getItem(`zb_partner_id_${currentProfileId}`) || null;
-      const cachedPartnerCode = localStorage.getItem(`zb_partner_code_${currentProfileId}`) || null;
-      setPartnerId(cachedPartnerId);
-      setPartnerCode(cachedPartnerCode);
+      let cachedFamilyMembers: { id: string, name: string, couple_code: string }[] = [];
+      try {
+        const cached = localStorage.getItem(`zb_family_members_${currentProfileId}`);
+        if (cached) cachedFamilyMembers = JSON.parse(cached);
+      } catch (e) {}
 
       // Fetch saved daily limit from database
       const { data: limitData } = await supabase
@@ -1514,6 +1521,7 @@ const App: React.FC = () => {
         localStorage.setItem(`zb_couple_code_${currentProfileId}`, userCoupleCode || '');
 
         // Sync partner disconnection check
+        const cachedPartnerId = localStorage.getItem(`zb_partner_id_${currentProfileId}`) || null;
         if (cachedPartnerId && userCoupleCode) {
           const { data: partnerCheck } = await supabase
             .from('profiles')
@@ -1528,7 +1536,6 @@ const App: React.FC = () => {
             setPartnerId(null);
             setPartnerCode(null);
             setPartnerName(null);
-            cachedPartnerId = null;
             await supabase
               .from('profiles')
               .update({ partner_couple_code: null })
@@ -1552,26 +1559,34 @@ const App: React.FC = () => {
         try {
           const { data: authUserData } = await supabase.auth.getUser();
           if (authUserData && authUserData.user) {
-            const googleAvatar = authUserData.user.user_metadata?.avatar_url || authUserData.user.user_metadata?.picture || authUserData.user.user_metadata?.photo_url;
             const userEmail = authUserData.user.email || profData.email || '';
             if (userEmail && (!profData.email || profData.email !== userEmail)) {
               await supabase.from('profiles').update({ email: userEmail }).eq('id', currentProfileId);
               localStorage.setItem('zb_user_email', userEmail);
             }
+            
+            const googleAvatar = authUserData.user.user_metadata?.avatar_url || authUserData.user.user_metadata?.picture || authUserData.user.user_metadata?.photo_url;
             if (googleAvatar) {
-              // Always save Google avatar as the dedicated google avatar key
-              // so it appears as the first preset option in ProfileView picker
               localStorage.setItem('zb_google_avatar', googleAvatar);
-              // Also set as primary user avatar if not manually changed yet
+            }
+            
+            if (profData.avatar_url) {
+              setUserAvatar(profData.avatar_url);
+              localStorage.setItem('zb_user_avatar', profData.avatar_url);
+            } else if (googleAvatar) {
               if (!localStorage.getItem('zb_user_avatar') || localStorage.getItem('zb_user_avatar')?.includes('ui-avatars.com')) {
                 setUserAvatar(googleAvatar);
                 localStorage.setItem('zb_user_avatar', googleAvatar);
               }
             }
+          } else {
+             if (profData.avatar_url) {
+               setUserAvatar(profData.avatar_url);
+               localStorage.setItem('zb_user_avatar', profData.avatar_url);
+             }
           }
         } catch (e) {}
         
-        // Auto sync active currency from local settings or database settings
         const isIndia = Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Kolkata' || 
                         navigator.language.includes('IN') || 
                         localStorage.getItem('zb_default_currency') === 'INR';
@@ -1624,7 +1639,6 @@ const App: React.FC = () => {
             setReferralCount(count);
             localStorage.setItem('zb_referral_count', count.toString());
 
-            // 10 Paid invites = 1 Month Premium
             const rewardsClaimed = profData.referral_rewards_claimed || 0;
             const eligibleMilestones = Math.floor(count / 10);
             if (eligibleMilestones > rewardsClaimed) {
@@ -1654,7 +1668,6 @@ const App: React.FC = () => {
                   'success'
                 );
                 triggerToast(`Rewarded with ${unclaimedMonths} Month(s) Free Premium! 🚀`, 'success');
-                // Confetti if available
                 try {
                   const confetti = (window as any).confetti;
                   if (confetti) confetti({ particleCount: 120, spread: 70 });
@@ -1667,98 +1680,71 @@ const App: React.FC = () => {
           }
         }
 
-        // Couple Ledger Sync: Check if self profile is premium
         const isSelfPremium = profData.subscription_tier === 'premium' || profData.subscription_tier === 'premium_monthly' || profData.subscription_tier === 'premium_yearly' || profData.subscription_tier === 'premium_lifetime' || profData.subscription_tier === 'pro';
         if (!isSelfPremium) {
           localStorage.removeItem(`zb_partner_id_${currentProfileId}`);
           localStorage.removeItem(`zb_partner_code_${currentProfileId}`);
           localStorage.removeItem(`zb_partner_name_${currentProfileId}`);
+          localStorage.removeItem(`zb_family_members_${currentProfileId}`);
           setPartnerId(null);
           setPartnerCode(null);
           setPartnerName(null);
-          cachedPartnerId = null;
+          setFamilyMembers([]);
+          cachedFamilyMembers = [];
         } else {
-          let partnerFound: { id: string; name: string; couple_code: string } | null = null;
-          const userShareCode = userCoupleCode || currentProfileId.slice(0, 8).toUpperCase();
-
-          // Case 1: My profile has a linked partner couple code
-          if (profData.partner_couple_code) {
-            const partnerCodeLookup = profData.partner_couple_code.toUpperCase();
-            const { data: allOtherProfiles } = await supabase
-              .from('profiles')
-              .select('id, name, couple_code, subscription_tier')
-              .neq('id', currentProfileId);
-
-            if (allOtherProfiles) {
-              const matched = allOtherProfiles.find(p => {
-                if (!p || !p.id) return false;
-                const pIdCode = (p.id || '').replace(/-/g, '').slice(0, 8).toUpperCase();
-                const pIdShort = (p.id || '').slice(0, 8).toUpperCase();
-                const cCode = (p.couple_code || '').toUpperCase();
-                return pIdCode === partnerCodeLookup || pIdShort === partnerCodeLookup || cCode === partnerCodeLookup || p.id.toUpperCase().startsWith(partnerCodeLookup);
-              });
-              if (matched) {
-                partnerFound = { ...matched, couple_code: matched.couple_code || matched.id.slice(0, 8).toUpperCase() };
-              }
-            }
-          }
-
-          // Case 2: Someone mutually connected to us
-          if (!partnerFound) {
-            const { data: allOtherProfiles } = await supabase
+          let fetchedFamilyMembers: { id: string; name: string; couple_code: string; subscription_tier?: string }[] = [];
+          const familySyncCode = profData.partner_couple_code || userCoupleCode;
+          
+          if (familySyncCode) {
+            const codeUpper = familySyncCode.toUpperCase();
+            const shortIdUpper = currentProfileId.slice(0, 8).toUpperCase();
+            
+            const { data: allFamilyProfiles } = await supabase
               .from('profiles')
               .select('id, name, couple_code, partner_couple_code, subscription_tier')
-              .neq('id', currentProfileId);
+              .neq('id', currentProfileId)
+              .or(`partner_couple_code.eq.${codeUpper},couple_code.eq.${codeUpper},partner_couple_code.eq.${shortIdUpper}`);
 
-            if (allOtherProfiles) {
-              const mutualProf = allOtherProfiles.find(p => {
-                if (!p || !p.id) return false;
-                const pPartnerCode = (p.partner_couple_code || '').toUpperCase();
-                return pPartnerCode === userShareCode || (userCoupleCode && pPartnerCode === userCoupleCode.toUpperCase()) || currentProfileId.toUpperCase().startsWith(pPartnerCode);
-              });
-              if (mutualProf) {
-                const partnerShareCode = mutualProf.couple_code || mutualProf.id.slice(0, 8).toUpperCase();
-                try {
-                  await supabase.from('profiles').update({ partner_couple_code: partnerShareCode }).eq('id', currentProfileId);
-                } catch (e) {}
-                partnerFound = { ...mutualProf, couple_code: partnerShareCode };
-              }
+            if (allFamilyProfiles) {
+               fetchedFamilyMembers = allFamilyProfiles.filter(p => {
+                 const isPartnerPremium = p.subscription_tier === 'premium' || 
+                                          p.subscription_tier === 'premium_monthly' || 
+                                          p.subscription_tier === 'premium_yearly' || 
+                                          p.subscription_tier === 'premium_lifetime' || 
+                                          p.subscription_tier === 'pro';
+                 return isPartnerPremium;
+               });
             }
           }
 
-          if (partnerFound) {
-            const isPartnerPremium = partnerFound.subscription_tier === 'premium' || 
-                                     partnerFound.subscription_tier === 'premium_monthly' || 
-                                     partnerFound.subscription_tier === 'premium_yearly' || 
-                                     partnerFound.subscription_tier === 'premium_lifetime' || 
-                                     partnerFound.subscription_tier === 'pro';
-            if (!isPartnerPremium) {
-              partnerFound = null;
-            }
-          }
-
-          if (partnerFound) {
-            localStorage.setItem(`zb_partner_id_${currentProfileId}`, partnerFound.id);
-            localStorage.setItem(`zb_partner_code_${currentProfileId}`, partnerFound.couple_code);
-            localStorage.setItem(`zb_partner_name_${currentProfileId}`, partnerFound.name || 'Partner');
-            setPartnerId(partnerFound.id);
-            setPartnerCode(partnerFound.couple_code);
-            setPartnerName(partnerFound.name || 'Partner');
-            cachedPartnerId = partnerFound.id;
+          if (fetchedFamilyMembers.length > 0) {
+            const firstPartner = fetchedFamilyMembers[0];
+            localStorage.setItem(`zb_partner_id_${currentProfileId}`, firstPartner.id);
+            localStorage.setItem(`zb_partner_code_${currentProfileId}`, firstPartner.couple_code);
+            localStorage.setItem(`zb_partner_name_${currentProfileId}`, firstPartner.name || 'Partner');
+            setPartnerId(firstPartner.id);
+            setPartnerCode(firstPartner.couple_code);
+            setPartnerName(firstPartner.name || 'Partner');
+            
+            localStorage.setItem(`zb_family_members_${currentProfileId}`, JSON.stringify(fetchedFamilyMembers));
+            setFamilyMembers(fetchedFamilyMembers);
+            cachedFamilyMembers = fetchedFamilyMembers;
           } else {
             localStorage.removeItem(`zb_partner_id_${currentProfileId}`);
             localStorage.removeItem(`zb_partner_code_${currentProfileId}`);
             localStorage.removeItem(`zb_partner_name_${currentProfileId}`);
+            localStorage.removeItem(`zb_family_members_${currentProfileId}`);
             setPartnerId(null);
             setPartnerCode(null);
             setPartnerName(null);
-            cachedPartnerId = null;
+            setFamilyMembers([]);
+            cachedFamilyMembers = [];
           }
         }
       }
 
-      // 1. Fetch transactions (including partner transactions if linked)
-      const userIds = cachedPartnerId ? [currentProfileId, cachedPartnerId] : [currentProfileId];
+      // 1. Fetch transactions (including all family transactions if linked)
+      const userIds = [currentProfileId, ...cachedFamilyMembers.map(m => m.id)];
       let annotatedTx: any[] = [];
       try {
         const { data: txData, error: txErr } = await supabase
@@ -1768,18 +1754,18 @@ const App: React.FC = () => {
           .order('date', { ascending: false });
 
         if (!txErr && txData && txData.length > 0) {
-          annotatedTx = txData.map(t => ({
-            ...t,
-            partnerName: cachedPartnerId && t.user_id === cachedPartnerId
-              ? (localStorage.getItem(`zb_partner_name_${currentProfileId}`) || 'Partner')
-              : undefined
-          }));
-          // Cache transactions locally for offline fallback
+          annotatedTx = txData.map(t => {
+            const familyMember = cachedFamilyMembers.find(m => m.id === t.user_id);
+            return {
+              ...t,
+              isPartnerTransaction: t.user_id !== currentProfileId,
+              partnerName: familyMember ? (familyMember.name || 'Family Member') : undefined
+            };
+          });
           localStorage.setItem(`zb_transactions_${currentProfileId}`, JSON.stringify(annotatedTx));
           localStorage.setItem(`zb_tx_cache_${currentProfileId}`, JSON.stringify(annotatedTx));
           setTransactions(annotatedTx);
         } else {
-          // Fallback to cached transactions on Supabase empty or error
           const cached = localStorage.getItem(`zb_transactions_${currentProfileId}`) || localStorage.getItem(`zb_tx_cache_${currentProfileId}`);
           if (cached) {
             try {
@@ -1791,7 +1777,6 @@ const App: React.FC = () => {
           }
         }
       } catch (_fetchErr) {
-        // Network error — silently use local cache
         const cached = localStorage.getItem(`zb_transactions_${currentProfileId}`) || localStorage.getItem(`zb_tx_cache_${currentProfileId}`);
         if (cached) {
           try {
@@ -1818,7 +1803,6 @@ const App: React.FC = () => {
           setBudgets(mappedBudgets);
           localStorage.setItem(`zb_budgets_cache_${currentProfileId}`, JSON.stringify(mappedBudgets));
         } else {
-          // Fallback to cached budgets
           const cachedBgt = localStorage.getItem(`zb_budgets_cache_${currentProfileId}`);
           if (cachedBgt) setBudgets(JSON.parse(cachedBgt));
         }
@@ -1827,23 +1811,27 @@ const App: React.FC = () => {
         if (cachedBgt) setBudgets(JSON.parse(cachedBgt));
       }
 
-      // 3. Accounts — fetch from Supabase for cross-device sync
+      // 3. Accounts (including all family accounts)
+      const accountIds = userIds;
+      let annotatedAccounts: any[] = [];
       try {
         const { data: accData, error: accErr } = await supabase
           .from('accounts')
           .select('*')
-          .eq('user_id', currentProfileId);
-        if (!accErr && accData && accData.length > 0) {
-          const mappedAccounts = accData.map((a: any) => ({
-            id: a.id,
-            name: a.name,
-            type: a.type,
-            balance: parseFloat(a.balance || 0),
-            color: a.color || '#10b981',
-            icon: a.icon || '💰'
-          }));
-          setAccounts(mappedAccounts);
-          localStorage.setItem(`zb_accounts_${currentProfileId}`, JSON.stringify(mappedAccounts));
+          .in('user_id', accountIds)
+          .order('name');
+          
+        if (!accErr && accData) {
+          annotatedAccounts = accData.map(a => {
+            const familyMember = cachedFamilyMembers.find(m => m.id === a.user_id);
+            return {
+              ...a,
+              ownerName: familyMember ? (familyMember.name || 'Family Member') : (a.user_id === currentProfileId ? userName : 'Unknown'),
+              isFamilyAccount: a.user_id !== currentProfileId
+            };
+          });
+          setAccounts(annotatedAccounts);
+          localStorage.setItem(`zb_accounts_${currentProfileId}`, JSON.stringify(annotatedAccounts));
         } else {
           // Fallback: use locally cached accounts if Supabase has none
           const cachedAccs = localStorage.getItem(`zb_accounts_${currentProfileId}`);
@@ -2291,11 +2279,12 @@ const App: React.FC = () => {
             excess: `${currencySymbol}${excess.toFixed(0)}`
           });
           setIsModalOpen(false);
-          return; // Stop here — wait for user decision
+          return false; // Stop here — wait for user decision
         }
       }
     }
     await doSaveTransaction(txData);
+    return true;
   };
 
   const handleDeleteTransactionRequest = (id: string) => {
@@ -2702,7 +2691,7 @@ const App: React.FC = () => {
     });
   };
 
-  const handleExportCSV = () => {
+  const handleExportCSV = async () => {
     // Premium Feature Lock
     if (!isPremiumUser) {
       setIsSubBlocker(false);
@@ -2718,15 +2707,44 @@ const App: React.FC = () => {
       return `"${t.id}","${t.title.replace(/"/g, '""')}",${convertedAmount.toFixed(2)},"${t.category}","${t.date}","${t.type}","${(t.notes || '').replace(/"/g, '""')}"`;
     }).join('\n');
     
-    const blob = new Blob([headers + rows], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `zenbudget_report_${userName}_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    triggerToast('Report exported successfully!', 'success');
+    const csvContent = headers + rows;
+    const fileName = `zenbudget_report_${userName}_${new Date().toISOString().split('T')[0]}.csv`;
+
+    const cap = (window as any).Capacitor;
+    if (cap && cap.isNative) {
+      try {
+        const { Filesystem, Directory, Encoding } = await import('@capacitor/filesystem');
+        const { Share } = await import('@capacitor/share');
+        
+        const result = await Filesystem.writeFile({
+          path: fileName,
+          data: csvContent,
+          directory: Directory.Cache,
+          encoding: Encoding.UTF8,
+        });
+
+        await Share.share({
+          title: 'ZenBudget Report',
+          text: 'Here is your exported CSV report from ZenBudget.',
+          url: result.uri,
+          dialogTitle: 'Share CSV Report',
+        });
+        triggerToast('Report shared successfully!', 'success');
+      } catch (err: any) {
+        console.error('Error sharing CSV:', err);
+        triggerToast('Failed to share CSV report.', 'warning');
+      }
+    } else {
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      triggerToast('Report exported successfully!', 'success');
+    }
   };
 
   const handleLogout = async () => {
@@ -3520,8 +3538,7 @@ const App: React.FC = () => {
             key={langKey}
             onBack={() => setActiveView('more')}
             currentProfileId={currentProfileId}
-            partnerCode={partnerCode}
-            partnerName={partnerName}
+            familyMembers={familyMembers}
             coupleCode={coupleCode || ''}
             onConnectPartner={handleConnectPartner}
             onDisconnectPartner={handleDisconnectPartner}
@@ -3687,6 +3704,7 @@ const App: React.FC = () => {
         editingTransaction={editingTransaction}
         currencySymbol={currencySymbol}
         accounts={accounts}
+        currentProfileId={currentProfileId}
         onOpenTransfer={() => setIsTransferOpen(true)}
         onTransfer={handleTransfer}
         onPayViaUPI={handleDirectCashfreePayment}
@@ -4354,12 +4372,12 @@ const App: React.FC = () => {
                   type="button"
                   onClick={async () => {
                     try {
-                      const userName = userNameInput.trim() || 'ZenBudget User';
+                      const finalUserName = userName.trim() || 'ZenBudget User';
                       const userEmail = localStorage.getItem('zb_user_email') || `${currentProfileId.slice(0, 8)}@zenbudget.app`;
                       const feedbackText = reviewFeedback.trim() ? reviewFeedback.trim() : `${ratingStars} Star rating submitted`;
 
                       await supabase.from('app_ratings').insert([{
-                        user_name: userName,
+                        user_name: finalUserName,
                         user_email: userEmail,
                         rating_stars: ratingStars,
                         feedback: feedbackText,
@@ -4377,7 +4395,7 @@ const App: React.FC = () => {
                     }
                   }}
                   style={{
-                    width: '100%', padding: '8px', borderRadius: '10px', border: 'none',
+                    width: '100%', padding: '8px', borderRadius: '10px',
                     background: 'rgba(251, 191, 36, 0.2)', color: '#fbbf24', fontWeight: 800,
                     fontSize: '11px', cursor: 'pointer', border: '1px solid rgba(251, 191, 36, 0.4)'
                   }}

@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Check, Copy, LogOut } from 'lucide-react';
+import { ArrowLeft, Check, Copy, LogOut, Users } from 'lucide-react';
 
 interface SharedBudgetViewProps {
   onBack: () => void;
   currentProfileId: string;
-  partnerCode?: string | null;
-  partnerName?: string | null;
+  familyMembers?: { id: string, name: string, couple_code: string }[];
   coupleCode?: string;
   onConnectPartner?: (code: string) => Promise<boolean>;
   onDisconnectPartner?: () => void;
@@ -19,8 +18,7 @@ interface SharedBudgetViewProps {
 export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
   onBack,
   currentProfileId,
-  partnerCode = null,
-  partnerName = null,
+  familyMembers = [],
   coupleCode = '',
   onConnectPartner,
   onDisconnectPartner,
@@ -36,14 +34,15 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
   const [errorMsg, setErrorMsg] = useState('');
 
   const myShareCode = coupleCode || (currentProfileId ? currentProfileId.slice(0, 8).toUpperCase() : '');
+  const hasFamily = familyMembers.length > 0;
 
-  // Calculate partner vs self spending stats
-  const partnerTxs = (transactions || []).filter(t => t.paidBy === 'Partner' || (t.user_id && t.user_id !== currentProfileId));
-  const myTxs = (transactions || []).filter(t => t.paidBy !== 'Partner' && (!t.user_id || t.user_id === currentProfileId));
+  // Calculate stats
+  const familyTxs = (transactions || []).filter(t => t.user_id && t.user_id !== currentProfileId);
+  const myTxs = (transactions || []).filter(t => !t.user_id || t.user_id === currentProfileId);
 
-  const partnerTotalSpent = partnerTxs.filter(t => t.type === 'expense').reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+  const familyTotalSpent = familyTxs.filter(t => t.type === 'expense').reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
   const myTotalSpent = myTxs.filter(t => t.type === 'expense').reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-  const combinedTotalSpent = partnerTotalSpent + myTotalSpent;
+  const combinedTotalSpent = familyTotalSpent + myTotalSpent;
 
   const handleCopyCode = () => {
     if (!myShareCode) return;
@@ -62,12 +61,12 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
     try {
       const success = await onConnectPartner(partnerInputCode.trim().toUpperCase());
       if (!success) {
-        setErrorMsg('Invalid code or partner profile not found.');
+        setErrorMsg('Invalid code or family profile not found/not premium.');
       } else {
         setPartnerInputCode('');
       }
     } catch (err: any) {
-      setErrorMsg(err.message || 'Failed to connect partner.');
+      setErrorMsg(err.message || 'Failed to connect to family group.');
     } finally {
       setIsLinking(false);
     }
@@ -99,10 +98,10 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
         </button>
         <div style={{ textAlign: 'left' }}>
           <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', fontFamily: "'Manrope', sans-serif", margin: 0 }}>
-            Shared Budget
+            Couple & Family Sync
           </h2>
           <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
-            Couples • Roommates • Families real-time spending &amp; transfer sync.
+            Partners, families &amp; roommates real-time spending &amp; transfer sync.
           </p>
         </div>
       </div>
@@ -110,21 +109,39 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
       {/* Main Status Card */}
       <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
         
-        {partnerCode ? (
+        {hasFamily ? (
           /* CONNECTED STATE */
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ padding: '20px', background: 'rgba(139,92,246,0.12)', borderRadius: '20px', border: '1px solid rgba(139,92,246,0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', textAlign: 'center' }}>
-              <div style={{ width: '54px', height: '54px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>
-                👫
+              <div style={{ width: '54px', height: '54px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', color: '#fff' }}>
+                <Users size={28} />
               </div>
               <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
-                Synced with {partnerName || 'Partner'}
+                Synced with {familyMembers.length} Partner/Family Member(s)
               </h3>
-              <span style={{ fontSize: '12px', color: '#a78bfa', fontWeight: 700 }}>
-                Shared Pair Code: {coupleCode || partnerCode}
-              </span>
-              <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                Real-time Dual Premium Sync Active ⚡
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', marginTop: '4px' }}>
+                {familyMembers.map(m => (
+                  <span key={m.id} style={{ padding: '4px 8px', borderRadius: '12px', background: 'var(--primary)', color: '#fff', fontSize: '11px', fontWeight: 700 }}>
+                    {m.name || 'Member'}
+                  </span>
+                ))}
+              </div>
+              
+              {/* Share Code Section for inviting more */}
+              <div style={{ marginTop: '10px', padding: '12px', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', width: '100%' }}>
+                <span style={{ fontSize: '11px', color: '#a78bfa', fontWeight: 700, display: 'block', marginBottom: '6px' }}>
+                  INVITE MORE MEMBERS WITH YOUR COUPLE/FAMILY CODE:
+                </span>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center' }}>
+                  <code style={{ fontSize: '15px', fontWeight: 800, color: '#fff', letterSpacing: '1px' }}>{myShareCode}</code>
+                  <button onClick={handleCopyCode} style={{ background: 'none', border: 'none', color: copied ? 'var(--success)' : '#a78bfa', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                    {copied ? <Check size={16} /> : <Copy size={16} />}
+                  </button>
+                </div>
+              </div>
+              
+              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                Real-time Couple/Family Premium Sync Active ⚡
               </span>
             </div>
 
@@ -132,12 +149,12 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div style={{ padding: '16px', background: 'rgba(239, 68, 68, 0.08)', borderRadius: '16px', border: '1px solid rgba(239, 68, 68, 0.2)', textAlign: 'left' }}>
                 <span style={{ fontSize: '11px', color: '#f87171', fontWeight: 700, textTransform: 'uppercase' }}>
-                  {partnerName || 'Partner'}'s Spent
+                  Partner/Family's Spent
                 </span>
                 <p style={{ fontSize: '20px', fontWeight: 800, color: '#ffffff', margin: '4px 0 0 0' }}>
-                  {currencySymbol}{partnerTotalSpent.toLocaleString()}
+                  {currencySymbol}{familyTotalSpent.toLocaleString()}
                 </p>
-                <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{partnerTxs.length} entries</span>
+                <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{familyTxs.length} entries</span>
               </div>
 
               <div style={{ padding: '16px', background: 'rgba(34, 197, 94, 0.08)', borderRadius: '16px', border: '1px solid rgba(34, 197, 94, 0.2)', textAlign: 'left' }}>
@@ -178,7 +195,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                   boxShadow: '0 8px 24px rgba(34, 197, 94, 0.35)'
                 }}
               >
-                💸 Send / Transfer Money to {partnerName || 'Partner'}
+                💸 Send / Transfer Money to Partner/Family
               </button>
             )}
 
@@ -188,15 +205,15 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
               {/* Partner's entries */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <h4 style={{ fontSize: '12px', fontWeight: 800, color: '#f87171', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  👤 {partnerName || 'Partner'}'s Recent Spending
+                  👥 Partner/Family's Recent Spending
                 </h4>
-                {partnerTxs.length === 0 ? (
+                {familyTxs.length === 0 ? (
                   <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
-                    No entries logged by partner yet.
+                    No entries logged by family yet.
                   </p>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
-                    {partnerTxs.slice(0, 8).map((tx: any) => (
+                    {familyTxs.slice(0, 8).map((tx: any) => (
                       <div
                         key={tx.id || Math.random()}
                         style={{
@@ -215,7 +232,9 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                           </div>
                           <div>
                             <p style={{ fontSize: '13px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{tx.title || tx.category}</p>
-                            <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{tx.category} • {tx.date ? new Date(tx.date).toLocaleDateString('en-IN') : 'Today'}</span>
+                            <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
+                              {tx.partnerName || 'Partner/Family'} • {tx.category} • {tx.date ? new Date(tx.date).toLocaleDateString('en-IN') : 'Today'}
+                            </span>
                           </div>
                         </div>
                         <span style={{ fontSize: '14px', fontWeight: 800, color: '#f87171' }}>
@@ -288,7 +307,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                 marginTop: '10px'
               }}
             >
-              <LogOut size={16} /> Disconnect Shared Pair
+              <LogOut size={16} /> Leave Couple/Family Group
             </button>
           </div>
         ) : (
@@ -309,7 +328,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '16px' }}>👑</span>
                 <span style={{ fontSize: '11px', fontWeight: 700, color: '#fbbf24', lineHeight: 1.3 }}>
-                  Dual Real-Time Sync requires an active <strong>Premium Plan for BOTH users</strong>.
+                  Couple & Family Sync requires an active <strong>Premium Plan for ALL members</strong>.
                 </span>
               </div>
               {!isPremiumUser && onOpenSubscriptionModal && (
@@ -336,7 +355,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
             {/* Step 1: Copy My Sync Code */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Your Unique Sync Code
+                Your Unique Couple / Family Sync Code
               </label>
               <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <div style={{ flex: 1, padding: '12px 14px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '16px', fontWeight: 800, color: '#a78bfa', letterSpacing: '2px' }}>
@@ -367,7 +386,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
             {/* Step 2: Connect Partner's Code */}
             <form onSubmit={handleConnect} style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '16px' }}>
               <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Enter Partner / Roommate's Code
+                Join an Existing Couple / Family Group Code
               </label>
               
               {errorMsg && <p style={{ fontSize: '12px', color: 'var(--danger)', fontWeight: 600, margin: 0 }}>{errorMsg}</p>}
@@ -378,7 +397,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                   required
                   value={partnerInputCode}
                   onChange={(e) => setPartnerInputCode(e.target.value)}
-                  placeholder="Paste partner code"
+                  placeholder="Paste couple / family code"
                   style={{
                     flex: 1,
                     padding: '12px 14px',
@@ -407,7 +426,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                     opacity: partnerInputCode.trim() ? 1 : 0.5
                   }}
                 >
-                  {isLinking ? 'Linking...' : 'Connect Pair'}
+                  {isLinking ? 'Linking...' : 'Join Group'}
                 </button>
               </div>
             </form>
@@ -420,16 +439,19 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
       {/* Features Info */}
       <div className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <h4 style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', margin: 0 }}>
-          What Syncs in Shared Budget?
+          What Syncs in Couple/Family Budget?
         </h4>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '12px', color: 'var(--text-primary)' }}>
           <Check size={16} color="var(--success)" /> Shared ledger transactions &amp; category expenses
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '12px', color: 'var(--text-primary)' }}>
-          <Check size={16} color="var(--success)" /> Real-time partner name badges on shared entries
+          <Check size={16} color="var(--success)" /> Real-time family member tags on entries
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '12px', color: 'var(--text-primary)' }}>
           <Check size={16} color="var(--success)" /> Combined category budget limit tracking
+        </div>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '12px', color: 'var(--text-primary)' }}>
+          <Check size={16} color="var(--success)" /> P2P Transfers between personal &amp; family wallets
         </div>
       </div>
 

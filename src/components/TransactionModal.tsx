@@ -32,6 +32,7 @@ interface TransactionModalProps {
   editingTransaction?: Transaction | null;
   currencySymbol: string;
   accounts?: Account[];
+  currentProfileId?: string;
   onOpenTransfer?: () => void;
   onTransfer?: (fromAccountId: string, toAccountId: string, amount: number, notes?: string) => void;
   onPayViaUPI?: (amount: number, title: string) => void;
@@ -58,16 +59,20 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   editingTransaction,
   currencySymbol,
   accounts = [],
+  currentProfileId,
   onOpenTransfer: _onOpenTransfer,
   onTransfer,
   onPayViaUPI,
   onOpenAddAccount
 }) => {
+  const myAccounts = accounts.filter(a => !a.user_id || a.user_id === currentProfileId);
+  const familyAccounts = accounts.filter(a => a.user_id && a.user_id !== currentProfileId);
+
   const [type, setType] = useState<'income' | 'expense' | 'transfer'>('expense');
   const [showNoAccountModal, setShowNoAccountModal] = useState(false);
-  const [selectedAccountId, setSelectedAccountId] = useState<string>(accounts[0]?.id || '');
-  const [fromAccountId, setFromAccountId] = useState<string>(accounts[0]?.id || '');
-  const [toAccountId, setToAccountId] = useState<string>(accounts[1]?.id || accounts[0]?.id || '');
+  const [selectedAccountId, setSelectedAccountId] = useState<string>(myAccounts[0]?.id || accounts[0]?.id || '');
+  const [fromAccountId, setFromAccountId] = useState<string>(myAccounts[0]?.id || accounts[0]?.id || '');
+  const [toAccountId, setToAccountId] = useState<string>(myAccounts[1]?.id || familyAccounts[0]?.id || accounts[1]?.id || accounts[0]?.id || '');
   const [transferError, setTransferError] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
   const [title, setTitle] = useState<string>('');
@@ -694,7 +699,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               {/* From Account */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  From Account
+                  From Account (Your Wallets Only)
                 </label>
                 <select
                   value={fromAccountId}
@@ -702,18 +707,24 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   className="glass-input"
                   style={{ width: '100%', background: 'var(--bg-input)' }}
                 >
-                  {accounts.map(acc => (
-                    <option key={acc.id} value={acc.id}>
-                      {acc.type === 'cash' ? '🪙' : acc.type === 'upi' ? '📱' : acc.type === 'credit' ? '💳' : acc.type === 'wallet' ? '👛' : acc.type === 'custom' ? '✨' : '🏦'} {acc.name} ({currencySymbol}{acc.balance})
-                    </option>
-                  ))}
+                  {myAccounts.length > 0 ? (
+                    <optgroup label="My Wallets">
+                      {myAccounts.map(acc => (
+                        <option key={acc.id} value={acc.id}>
+                          {acc.type === 'cash' ? '🪙' : acc.type === 'upi' ? '📱' : acc.type === 'credit' ? '💳' : acc.type === 'wallet' ? '👛' : acc.type === 'custom' ? '✨' : '🏦'} {acc.name} ({currencySymbol}{acc.balance})
+                        </option>
+                      ))}
+                    </optgroup>
+                  ) : (
+                    <option value="" disabled>No personal wallets found.</option>
+                  )}
                 </select>
               </div>
 
               {/* To Account */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  To Account
+                  To Account (Your Wallets or Family)
                 </label>
                 <select
                   value={toAccountId}
@@ -721,11 +732,24 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   className="glass-input"
                   style={{ width: '100%', background: 'var(--bg-input)' }}
                 >
-                  {accounts.map(acc => (
-                    <option key={acc.id} value={acc.id}>
-                      {acc.type === 'cash' ? '🪙' : acc.type === 'upi' ? '📱' : acc.type === 'credit' ? '💳' : acc.type === 'wallet' ? '👛' : acc.type === 'custom' ? '✨' : '🏦'} {acc.name} ({currencySymbol}{acc.balance})
-                    </option>
-                  ))}
+                  {myAccounts.length > 0 && (
+                    <optgroup label="My Wallets">
+                      {myAccounts.map(acc => (
+                        <option key={acc.id} value={acc.id}>
+                          {acc.type === 'cash' ? '🪙' : acc.type === 'upi' ? '📱' : acc.type === 'credit' ? '💳' : acc.type === 'wallet' ? '👛' : acc.type === 'custom' ? '✨' : '🏦'} {acc.name} ({currencySymbol}{acc.balance})
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                  {familyAccounts.length > 0 && (
+                    <optgroup label="Family Wallets">
+                      {familyAccounts.map(acc => (
+                        <option key={acc.id} value={acc.id}>
+                          {acc.type === 'cash' ? '🪙' : acc.type === 'upi' ? '📱' : acc.type === 'credit' ? '💳' : acc.type === 'wallet' ? '👛' : acc.type === 'custom' ? '✨' : '🏦'} {acc.name} ({currencySymbol}{acc.balance})
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
                 </select>
               </div>
 
@@ -804,7 +828,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           {accounts.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Account / Wallet
+                Account / Wallet (Your Wallets Only)
               </label>
               <select
                 value={selectedAccountId}
@@ -812,11 +836,26 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 className="glass-input"
                 style={{ width: '100%', background: 'var(--bg-input)' }}
               >
-                {accounts.map(acc => (
-                  <option key={acc.id} value={acc.id}>
-                    {acc.type === 'cash' ? '🪙' : acc.type === 'upi' ? '📱' : acc.type === 'credit' ? '💳' : '🏦'} {acc.name} ({currencySymbol}{acc.balance})
-                  </option>
-                ))}
+                {myAccounts.length > 0 ? (
+                  <optgroup label="My Wallets">
+                    {myAccounts.map(acc => (
+                      <option key={acc.id} value={acc.id}>
+                        {acc.type === 'cash' ? '🪙' : acc.type === 'upi' ? '📱' : acc.type === 'credit' ? '💳' : '🏦'} {acc.name} ({currencySymbol}{acc.balance})
+                      </option>
+                    ))}
+                  </optgroup>
+                ) : (
+                  <option value="" disabled>No personal wallets found. Please add one.</option>
+                )}
+                {familyAccounts.length > 0 && (
+                  <optgroup label="Family Wallets (View Only)">
+                    {familyAccounts.map(acc => (
+                      <option key={acc.id} value={acc.id} disabled>
+                        {acc.type === 'cash' ? '🪙' : acc.type === 'upi' ? '📱' : acc.type === 'credit' ? '💳' : '🏦'} {acc.name} ({currencySymbol}{acc.balance})
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
               </select>
             </div>
           )}

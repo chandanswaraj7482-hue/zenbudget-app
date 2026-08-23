@@ -653,6 +653,12 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
 
   const executeDeleteUser = async (userId: string, userName: string) => {
     try {
+      // First, completely delete the user from Auth using the RPC (Requires SQL setup in Supabase)
+      const { error: authError } = await supabaseClient.rpc('delete_auth_user', { target_user_id: userId });
+      if (authError) {
+         console.error('Failed to delete auth user, attempting to delete public records anyway:', authError);
+      }
+
       await supabaseClient.from('profiles').delete().eq('id', userId);
       await supabaseClient.from('transactions').delete().eq('user_id', userId);
       await supabaseClient.from('accounts').delete().eq('user_id', userId);
@@ -675,6 +681,11 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   const executeBulkDeleteUsers = async () => {
     if (selectedUserIds.length === 0) return;
     try {
+      // Loop to delete auth users since our RPC takes one ID at a time
+      for (const id of selectedUserIds) {
+        await supabaseClient.rpc('delete_auth_user', { target_user_id: id });
+      }
+
       await supabaseClient.from('profiles').delete().in('id', selectedUserIds);
       await supabaseClient.from('transactions').delete().in('user_id', selectedUserIds);
       await supabaseClient.from('accounts').delete().in('user_id', selectedUserIds);
