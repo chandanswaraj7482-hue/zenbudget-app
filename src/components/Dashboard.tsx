@@ -1150,7 +1150,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               gap: '4px'
             }}
           >
-            + {t('add_new')}
+            {t('add_new')}
           </button>
         </div>
 
@@ -1340,11 +1340,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  ACHIEVEMENT BADGES 🏆
-                </span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                ACHIEVEMENT BADGES 🏆
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <button
                   type="button"
                   onClick={() => setShowAllBadges(!showAllBadges)}
@@ -1352,19 +1352,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     background: 'rgba(255,255,255,0.06)',
                     border: '1px solid rgba(255,255,255,0.15)',
                     borderRadius: '8px',
-                    padding: '2px 8px',
+                    padding: '3px 10px',
                     fontSize: '10px',
                     fontWeight: 700,
                     color: '#38bdf8',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   {showAllBadges ? 'Show Less' : `See All (${allBadgesList.length})`}
                 </button>
+                <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--primary)', background: 'rgba(34,197,94,0.12)', padding: '3px 10px', borderRadius: '8px', border: '1px solid rgba(34,197,94,0.2)', whiteSpace: 'nowrap' }}>
+                  {unlockedCount}/{allBadgesList.length} Unlocked
+                </span>
               </div>
-              <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--primary)', background: 'rgba(34,197,94,0.12)', padding: '2px 8px', borderRadius: '12px', border: '1px solid rgba(34,197,94,0.2)' }}>
-                {unlockedCount}/{allBadgesList.length} Unlocked
-              </span>
             </div>
             
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', textAlign: 'center' }}>

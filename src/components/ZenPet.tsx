@@ -424,7 +424,7 @@ export const ZenPet: React.FC<ZenPetProps> = ({ currentProfileId, spentPercentag
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(251, 191, 36, 0.1)', padding: '4px 8px', borderRadius: '12px', border: '1px solid rgba(251, 191, 36, 0.2)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(251, 191, 36, 0.1)', padding: '3px 10px', borderRadius: '8px', border: '1px solid rgba(251, 191, 36, 0.2)' }}>
             <Sparkles size={11} style={{ color: '#fbbf24' }} />
             <span style={{ fontSize: '11px', fontWeight: 800, color: '#d97706' }}>{points} pts</span>
           </div>
