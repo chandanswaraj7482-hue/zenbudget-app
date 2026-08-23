@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ZenBudget Payment Checkout</title>
+  <title>ZenBudget – Secure Payment</title>
   <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
   <style>
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background-color: #09090f;
+      background: linear-gradient(135deg, #09090f 0%, #0f172a 100%);
       color: #ffffff;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       display: flex;
@@ -16,56 +16,185 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      margin: 0;
-      padding: 20px;
+      padding: 24px;
       text-align: center;
     }
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 36px 28px;
+      max-width: 360px;
+      width: 100%;
+      backdrop-filter: blur(12px);
+    }
+    .logo {
+      font-size: 2.2rem;
+      margin-bottom: 8px;
+    }
+    .brand {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #10b981;
+      letter-spacing: 0.04em;
+      margin-bottom: 24px;
+    }
     .spinner {
-      width: 48px;
-      height: 48px;
-      border: 4px solid rgba(255, 255, 255, 0.1);
+      width: 44px;
+      height: 44px;
+      border: 4px solid rgba(16, 185, 129, 0.15);
       border-left-color: #10b981;
       border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 20px;
+      animation: spin 0.9s linear infinite;
+      margin: 0 auto 20px;
     }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .icon { font-size: 3rem; margin-bottom: 16px; }
     .title {
-      font-size: 1.3rem;
+      font-size: 1.25rem;
       font-weight: 700;
       margin-bottom: 8px;
-      color: #ffffff;
     }
     .msg {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: #94a3b8;
-      max-width: 320px;
-      line-height: 1.5;
+      line-height: 1.6;
+      margin-bottom: 20px;
     }
+    .btn {
+      display: inline-block;
+      padding: 12px 28px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: #10b981; color: #fff; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-secondary {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.15);
+      margin-top: 10px;
+    }
+    .countdown {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 16px;
+    }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
-  <div class="spinner"></div>
-  <div class="title">ZenBudget Checkout</div>
-  <div class="msg" id="status-msg">Connecting to Cashfree Payment Gateway...</div>
+  <div class="card">
+    <div class="logo">🧘</div>
+    <div class="brand">ZenBudget Pay</div>
+
+    <!-- Loading State -->
+    <div id="state-loading">
+      <div class="spinner"></div>
+      <div class="title">Connecting to Payment...</div>
+      <div class="msg" id="status-msg">Initializing secure Cashfree gateway...</div>
+    </div>
+
+    <!-- Success State -->
+    <div id="state-success" class="hidden">
+      <div class="icon">✅</div>
+      <div class="title" style="color:#10b981;">Payment Successful!</div>
+      <div class="msg">Your ZenBudget subscription has been activated. Thank you! 🎉</div>
+      <button class="btn btn-primary" onclick="closeWindow()">Return to ZenBudget</button>
+      <div class="countdown" id="auto-close-msg"></div>
+    </div>
+
+    <!-- Failure State -->
+    <div id="state-failure" class="hidden">
+      <div class="icon">❌</div>
+      <div class="title" style="color:#ef4444;">Payment Failed</div>
+      <div class="msg" id="failure-msg">Your payment could not be processed. No amount was charged.</div>
+      <button class="btn btn-danger" onclick="closeWindow()">Back to App</button>
+    </div>
+
+    <!-- Error State -->
+    <div id="state-error" class="hidden">
+      <div class="icon">⚠️</div>
+      <div class="title" style="color:#f59e0b;">Something Went Wrong</div>
+      <div class="msg" id="error-msg">Could not connect to the payment gateway. Please try again.</div>
+      <button class="btn btn-secondary" onclick="closeWindow()">Close</button>
+    </div>
+  </div>
 
   <script>
+    function showState(id) {
+      ['state-loading', 'state-success', 'state-failure', 'state-error'].forEach(s => {
+        document.getElementById(s).classList.toggle('hidden', s !== id);
+      });
+    }
+
+    function closeWindow() {
+      try {
+        window.close();
+      } catch(e) {}
+      // Fallback: redirect to app
+      setTimeout(() => {
+        window.location.href = 'https://zenbudget-tracker.vercel.app';
+      }, 300);
+    }
+
+    function startAutoClose(seconds) {
+      const el = document.getElementById('auto-close-msg');
+      let t = seconds;
+      el.textContent = `Auto-closing in ${t}s...`;
+      const iv = setInterval(() => {
+        t--;
+        el.textContent = `Auto-closing in ${t}s...`;
+        if (t <= 0) { clearInterval(iv); closeWindow(); }
+      }, 1000);
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('session_id');
+    const statusParam = urlParams.get('status'); // from return_url callback
 
-    if (!sessionId) {
-      document.getElementById('status-msg').innerText = 'Error: Invalid or missing payment session.';
+    // If Cashfree redirected back with status
+    if (statusParam) {
+      if (statusParam === 'PAID' || statusParam === 'SUCCESS') {
+        showState('state-success');
+        startAutoClose(5);
+      } else if (statusParam === 'FAILED' || statusParam === 'CANCELLED' || statusParam === 'EXPIRED') {
+        showState('state-failure');
+        document.getElementById('failure-msg').textContent = `Payment ${statusParam.toLowerCase()}. No amount was charged. You can retry from the app.`;
+      } else {
+        showState('state-error');
+        document.getElementById('error-msg').textContent = `Payment status: ${statusParam}. Please check your bank and contact support if needed.`;
+      }
+    } else if (!sessionId) {
+      showState('state-error');
+      document.getElementById('error-msg').textContent = 'Invalid or missing payment session. Please go back and try again.';
     } else {
+      // Launch Cashfree checkout
       try {
+        document.getElementById('status-msg').textContent = 'Launching secure payment screen...';
         const cf = Cashfree({ mode: 'production' });
         cf.checkout({
           paymentSessionId: sessionId,
           redirectTarget: '_self'
+        }).then(result => {
+          if (result && result.paymentDetails && result.paymentDetails.paymentMessage === 'Payment successful') {
+            showState('state-success');
+            startAutoClose(5);
+          }
+        }).catch(err => {
+          console.error('CF checkout error:', err);
+          showState('state-failure');
+          document.getElementById('failure-msg').textContent = err?.message || 'Payment could not be processed.';
         });
       } catch (err) {
-        document.getElementById('status-msg').innerText = 'Payment launch error: ' + (err.message || 'Could not connect.');
+        showState('state-error');
+        document.getElementById('error-msg').textContent = 'Payment launch error: ' + (err.message || 'Could not connect to gateway.');
       }
     }
   </script>

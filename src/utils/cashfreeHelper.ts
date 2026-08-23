@@ -36,14 +36,14 @@ export const launchCashfreeCheckout = async (
   if (isNative || isLocalhost) {
     try {
       const { Browser } = await import('@capacitor/browser');
-      const payUrl = `https://zenbudget-tracker.vercel.app/pay?session_id=${encodeURIComponent(paymentSessionId)}`;
+      const payUrl = `https://zenbudget-tracker.vercel.app/pay.html?session_id=${encodeURIComponent(paymentSessionId)}`;
       console.log('Launching Cashfree via Native Browser Chrome Custom Tab:', payUrl);
       await Browser.open({ url: payUrl });
       if (onSuccess) onSuccess({ status: 'launched_in_browser' });
       return;
     } catch (browserErr) {
       console.warn('Browser.open failed, falling back to window.open:', browserErr);
-      window.open(`https://zenbudget-tracker.vercel.app/pay?session_id=${encodeURIComponent(paymentSessionId)}`, '_blank');
+      window.open(`https://zenbudget-tracker.vercel.app/pay.html?session_id=${encodeURIComponent(paymentSessionId)}`, '_blank');
       if (onSuccess) onSuccess({ status: 'launched_in_browser' });
       return;
     }
