@@ -126,7 +126,7 @@ const App: React.FC = () => {
       confirmText: 'Delete Account',
       cancelText: 'Cancel',
       type: 'danger',
-      onConfirm: () => {
+      onConfirm: async () => {
         setAccounts(prev => {
           const nextAccs = prev.filter(a => a.id !== accId);
           if (currentProfileId) {
@@ -134,6 +134,10 @@ const App: React.FC = () => {
           }
           return nextAccs;
         });
+        // Delete from Supabase too for cross-device sync
+        if (currentProfileId) {
+          try { await supabase.from('accounts').delete().eq('id', accId).eq('user_id', currentProfileId); } catch (_) {}
+        }
         setConfirmDialog(null);
         triggerToast('Account deleted successfully.', 'info');
       }
@@ -427,18 +431,30 @@ const App: React.FC = () => {
     };
   }, []);
 
-  const handleAddAccount = (newAcc: Omit<Account, 'id'>) => {
+  const handleAddAccount = async (newAcc: Omit<Account, 'id'>) => {
     const accId = crypto.randomUUID();
     const created: Account = { ...newAcc, id: accId };
     const updated = [...accounts, created];
     setAccounts(updated);
     if (currentProfileId) {
       localStorage.setItem(`zb_accounts_${currentProfileId}`, JSON.stringify(updated));
+      // Sync to Supabase for cross-device access
+      try {
+        await supabase.from('accounts').upsert({
+          id: accId,
+          user_id: currentProfileId,
+          name: newAcc.name,
+          type: (newAcc as any).type || 'savings',
+          balance: newAcc.balance || 0,
+          color: (newAcc as any).color || '#10b981',
+          icon: (newAcc as any).icon || '💰'
+        }, { onConflict: 'id' });
+      } catch (_) {}
     }
     triggerToast(`Account "${newAcc.name}" added successfully!`, 'success');
   };
 
-  const handleTransfer = (fromId: string, toId: string, amount: number, notes?: string) => {
+  const handleTransfer = async (fromId: string, toId: string, amount: number, notes?: string) => {
     const fromAcc = accounts.find(a => a.id === fromId);
     const toAcc = accounts.find(a => a.id === toId);
     if (!fromAcc || !toAcc) return;
@@ -451,6 +467,20 @@ const App: React.FC = () => {
     setAccounts(updated);
     if (currentProfileId) {
       localStorage.setItem(`zb_accounts_${currentProfileId}`, JSON.stringify(updated));
+      // Sync account balances to Supabase after transfer
+      try {
+        for (const acc of updated) {
+          await supabase.from('accounts').upsert({
+            id: acc.id,
+            user_id: currentProfileId,
+            name: acc.name,
+            type: (acc as any).type || 'savings',
+            balance: acc.balance || 0,
+            color: (acc as any).color || '#10b981',
+            icon: (acc as any).icon || '💰'
+          }, { onConflict: 'id' });
+        }
+      } catch (_) {}
     }
 
     handleSaveTransaction({
@@ -1797,20 +1827,107 @@ const App: React.FC = () => {
         if (cachedBgt) setBudgets(JSON.parse(cachedBgt));
       }
 
-      // 3. Goals (Stored locally per profile id)
-      const savedGoals = localStorage.getItem(`zb_goals_${currentProfileId}`);
-      if (savedGoals) {
-        setGoals(JSON.parse(savedGoals));
-      } else {
-        const defaultGoal = {
-          id: Date.now().toString(),
-          name: 'New iPhone 15',
-          targetAmount: 800,
-          currentAmount: 150,
-          color: '#3b82f6'
-        };
-        setGoals([defaultGoal]);
-        localStorage.setItem(`zb_goals_${currentProfileId}`, JSON.stringify([defaultGoal]));
+      // 3. Accounts — fetch from Supabase for cross-device sync
+      try {
+        const { data: accData, error: accErr } = await supabase
+          .from('accounts')
+          .select('*')
+          .eq('user_id', currentProfileId);
+        if (!accErr && accData && accData.length > 0) {
+          const mappedAccounts = accData.map((a: any) => ({
+            id: a.id,
+            name: a.name,
+            type: a.type,
+            balance: parseFloat(a.balance || 0),
+            color: a.color || '#10b981',
+            icon: a.icon || '💰'
+          }));
+          setAccounts(mappedAccounts);
+          localStorage.setItem(`zb_accounts_${currentProfileId}`, JSON.stringify(mappedAccounts));
+        } else {
+          // Fallback: use locally cached accounts if Supabase has none
+          const cachedAccs = localStorage.getItem(`zb_accounts_${currentProfileId}`);
+          if (cachedAccs) {
+            try {
+              const parsed = JSON.parse(cachedAccs);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                setAccounts(parsed);
+                // Upload cached accounts to Supabase for future cross-device access
+                for (const acc of parsed) {
+                  await supabase.from('accounts').upsert({
+                    id: acc.id,
+                    user_id: currentProfileId,
+                    name: acc.name,
+                    type: acc.type || 'savings',
+                    balance: acc.balance || 0,
+                    color: acc.color || '#10b981',
+                    icon: acc.icon || '💰'
+                  }, { onConflict: 'id' });
+                }
+              }
+            } catch (_) {}
+          }
+        }
+      } catch (_accErr) {
+        const cachedAccs = localStorage.getItem(`zb_accounts_${currentProfileId}`);
+        if (cachedAccs) {
+          try { setAccounts(JSON.parse(cachedAccs)); } catch (_) {}
+        }
+      }
+
+      // 4. Goals — fetch from Supabase for cross-device sync
+      try {
+        const { data: goalsData, error: goalsErr } = await supabase
+          .from('goals')
+          .select('*')
+          .eq('user_id', currentProfileId);
+        if (!goalsErr && goalsData && goalsData.length > 0) {
+          const mappedGoals = goalsData.map((g: any) => ({
+            id: g.id,
+            name: g.name,
+            targetAmount: parseFloat(g.target_amount || 0),
+            currentAmount: parseFloat(g.current_amount || 0),
+            color: g.color || '#3b82f6'
+          }));
+          setGoals(mappedGoals);
+          localStorage.setItem(`zb_goals_${currentProfileId}`, JSON.stringify(mappedGoals));
+        } else {
+          // Fallback: use locally cached goals, upload them to Supabase
+          const savedGoals = localStorage.getItem(`zb_goals_${currentProfileId}`);
+          if (savedGoals) {
+            try {
+              const parsed = JSON.parse(savedGoals);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                setGoals(parsed);
+                // Upload cached goals to Supabase
+                for (const g of parsed) {
+                  await supabase.from('goals').upsert({
+                    id: g.id,
+                    user_id: currentProfileId,
+                    name: g.name,
+                    target_amount: g.targetAmount || 0,
+                    current_amount: g.currentAmount || 0,
+                    color: g.color || '#3b82f6'
+                  }, { onConflict: 'id' });
+                }
+              } else {
+                const defaultGoal = { id: Date.now().toString(), name: 'Emergency Fund', targetAmount: 10000, currentAmount: 0, color: '#10b981' };
+                setGoals([defaultGoal]);
+              }
+            } catch (_) {
+              const defaultGoal = { id: Date.now().toString(), name: 'Emergency Fund', targetAmount: 10000, currentAmount: 0, color: '#10b981' };
+              setGoals([defaultGoal]);
+            }
+          } else {
+            const defaultGoal = { id: Date.now().toString(), name: 'Emergency Fund', targetAmount: 10000, currentAmount: 0, color: '#10b981' };
+            setGoals([defaultGoal]);
+          }
+        }
+      } catch (_goalsErr) {
+        const savedGoals = localStorage.getItem(`zb_goals_${currentProfileId}`);
+        if (savedGoals) {
+          try { setGoals(JSON.parse(savedGoals)); } catch (_) {}
+        }
       }
 
       // 4. Currency settings
@@ -2034,6 +2151,22 @@ const App: React.FC = () => {
             });
             if (currentProfileId) {
               localStorage.setItem(`zb_accounts_${currentProfileId}`, JSON.stringify(updated));
+              // Sync account balances to Supabase for cross-device sync
+              (async () => {
+                try {
+                  for (const acc of updated) {
+                    await supabase.from('accounts').upsert({
+                      id: acc.id,
+                      user_id: currentProfileId,
+                      name: acc.name,
+                      type: (acc as any).type || 'savings',
+                      balance: acc.balance || 0,
+                      color: (acc as any).color || '#10b981',
+                      icon: (acc as any).icon || '💰'
+                    }, { onConflict: 'id' });
+                  }
+                } catch (_) {}
+              })();
             }
             return updated;
           });
@@ -2375,9 +2508,24 @@ const App: React.FC = () => {
     }
   };
 
-  const handleSaveGoal = (updatedGoals: SavingsGoal[]) => {
+  const handleSaveGoal = async (updatedGoals: SavingsGoal[]) => {
     setGoals(updatedGoals);
     localStorage.setItem(`zb_goals_${currentProfileId}`, JSON.stringify(updatedGoals));
+    // Sync to Supabase for cross-device access
+    if (currentProfileId) {
+      try {
+        for (const g of updatedGoals) {
+          await supabase.from('goals').upsert({
+            id: g.id,
+            user_id: currentProfileId,
+            name: g.name,
+            target_amount: g.targetAmount,
+            current_amount: g.currentAmount,
+            color: g.color || '#3b82f6'
+          }, { onConflict: 'id' });
+        }
+      } catch (_) {}
+    }
   };
 
   const handleAddNewGoal = (name: string, targetInActiveCurrency: number, color: string) => {
@@ -2435,6 +2583,10 @@ const App: React.FC = () => {
       onConfirm: async () => {
         const updated = goals.filter(g => g.id !== goalId);
         handleSaveGoal(updated);
+        // Delete from Supabase too
+        if (currentProfileId) {
+          try { await supabase.from('goals').delete().eq('id', goalId).eq('user_id', currentProfileId); } catch (_) {}
+        }
         setConfirmDialog(null);
         triggerToast(`Goal removed successfully!`, 'success');
       }
