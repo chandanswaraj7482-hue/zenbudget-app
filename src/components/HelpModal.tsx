@@ -137,8 +137,18 @@ export const HelpModal: React.FC<HelpModalProps> = ({
     const msg = rawText.toLowerCase().trim();
     const isEng = !/[अ-ह]/.test(rawText) && !/\b(kahan|kaise|mera|meri|mere|mujhe|btao|batao|apka|aapka|kya|kab|kaun|hai|hain|rha|rhi|rhe|hoga|hogaye)\b/i.test(msg);
 
+    // 0. User Details (Name, Email)
+    if (msg.includes('mera email') || msg.includes('my email') || msg.includes('meri email') || msg.includes('email kya')) {
+      const userEmail = localStorage.getItem('zb_user_email') || 'Not found';
+      return isEng ? `📧 Your registered email is **${userEmail}**! ✨` : `📧 Aapki registered email id **${userEmail}** hai! ✨`;
+    }
+    
+    if (msg.includes('mera name') || msg.includes('my name') || msg.includes('mera naam') || msg.includes('mera id') || msg.includes('my id') || msg.includes('naam kya')) {
+      return isEng ? `👤 Your registered name is **${userName || 'User'}**! ✨` : `👤 Aapka registered naam **${userName || 'User'}** hai! ✨`;
+    }
+
     // 1. Customer Support / Email / Contact
-    if (msg.includes('email') || msg.includes('support') || msg.includes('contact') || msg.includes('helpdesk') || msg.includes('customer') || msg.includes('mail')) {
+    if ((msg.includes('email') && !msg.includes('mera') && !msg.includes('my') && !msg.includes('kya')) || msg.includes('support') || msg.includes('contact') || msg.includes('helpdesk') || msg.includes('customer') || msg.includes('mail')) {
       if (isEng) {
         return `📧 Official Support Email: **hello.zenbudget@zohomail.in**\n\nOur team is active 24/7 and usually responds within 2-4 hours! You can also leave direct feedback in the "Rate App" tab above. 🌿✨`;
       }
