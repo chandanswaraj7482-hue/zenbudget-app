@@ -217,12 +217,14 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         const name = metadata?.full_name || metadata?.name || session.user.email?.split('@')[0] || 'User';
         setUsername(name);
 
-        // Save Google OAuth avatar as a persistent preset in profile picker
+        // Save Google OAuth avatar as a preset option in profile picker (don't overwrite custom avatar)
         const googleAvatar = metadata?.avatar_url || metadata?.picture || metadata?.photo_url || metadata?.avatar;
         if (googleAvatar) {
           localStorage.setItem('zb_google_avatar', googleAvatar);
-          localStorage.setItem('zb_user_avatar', googleAvatar);
-          window.dispatchEvent(new Event('profile_avatar_updated'));
+          if (!localStorage.getItem('zb_user_avatar')) {
+            localStorage.setItem('zb_user_avatar', googleAvatar);
+            window.dispatchEvent(new Event('profile_avatar_updated'));
+          }
         }
 
         await fetchUserProfile(session.user.id);
@@ -312,12 +314,14 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         const name = metadata?.full_name || metadata?.name || session.user.email?.split('@')[0] || 'User';
         setUsername(name);
 
-        // Save Google OAuth avatar on every session check so it persists in profile picker
+        // Save Google OAuth avatar preset (don't overwrite user's custom avatar)
         const googleAvatar = metadata?.avatar_url || metadata?.picture || metadata?.photo_url || metadata?.avatar;
         if (googleAvatar) {
           localStorage.setItem('zb_google_avatar', googleAvatar);
-          localStorage.setItem('zb_user_avatar', googleAvatar);
-          window.dispatchEvent(new Event('profile_avatar_updated'));
+          if (!localStorage.getItem('zb_user_avatar')) {
+            localStorage.setItem('zb_user_avatar', googleAvatar);
+            window.dispatchEvent(new Event('profile_avatar_updated'));
+          }
         }
 
         await fetchUserProfile(session.user.id);
@@ -426,25 +430,26 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
       console.log("LockScreen: fetchUserProfile database query result:", userProf);
       if (userProf) {
         setDbProfile(userProf);
-        setUsername(userProf.name);
+        if (userProf.name) {
+          setUsername(userProf.name);
+          localStorage.setItem('zb_user_name', userProf.name);
+        }
         
         // Store profile details locally to avoid logouts
         localStorage.setItem('zb_local_session_profile', JSON.stringify({ userId: uid, profile: userProf }));
         localStorage.setItem('zb_profile_id', userProf.id || uid);
 
-        // Sync database avatar to localstorage
-        if (userProf.avatar_url && !userProf.avatar_url.includes('name=User')) {
+        // Sync database avatar to localstorage (preserve user custom uploaded photo)
+        if (userProf.avatar_url) {
           localStorage.setItem('zb_user_avatar', userProf.avatar_url);
         } else {
-          // If no database avatar, check for saved Google avatar
+          // If no database avatar, use existing local avatar or google avatar or initials
+          const existingAvatar = localStorage.getItem('zb_user_avatar');
           const googleAvatar = localStorage.getItem('zb_google_avatar');
-          if (googleAvatar) {
+          if (!existingAvatar && googleAvatar) {
             localStorage.setItem('zb_user_avatar', googleAvatar);
-            supabase.from('profiles').update({ avatar_url: googleAvatar }).eq('id', uid).then(({ error }) => {
-              if (error) console.warn('Supabase auto-save google avatar error:', error);
-            });
-          } else {
-            // Generate initials avatar using user real name
+            supabase.from('profiles').update({ avatar_url: googleAvatar }).eq('id', uid).catch(() => {});
+          } else if (!existingAvatar) {
             const initAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(getInitialsName(userProf.name, userProf.email || storedEmail))}&background=22c55e&color=fff&rounded=true`;
             localStorage.setItem('zb_user_avatar', initAvatar);
           }
