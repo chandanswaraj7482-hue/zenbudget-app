@@ -416,7 +416,6 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
             trial_expire_date: new Date(Date.now() + 7 * 86400000).toISOString(),
             avatar_url: gAvatar,
             referral_code: myReferralCode,
-            is_premium: false,
             has_scan_pay_access: false
           };
 
@@ -832,6 +831,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         trial_start_date: new Date().toISOString(),
         premium_expires_at: restoredExpiry,
         device_id: devId,
+        email: email.trim().toLowerCase(),
         referral_code: myReferralCode,
         referred_by: pendingReferral
       };
@@ -847,6 +847,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           pin: pin,
           subscription_tier: restoredTier,
           trial_start_date: newProfile.trial_start_date,
+          email: email.trim().toLowerCase(),
           device_id: devId
         };
         const retryResult = await supabase.from('profiles').upsert(basicProfile);
