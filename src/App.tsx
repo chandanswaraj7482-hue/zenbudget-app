@@ -348,6 +348,8 @@ const App: React.FC = () => {
                   title: '🚀 ZenBudget Update Available!',
                   body: `v${serverVersion} is ready — ${releaseNotes.split('\n')[0]}`,
                   schedule: { at: new Date(Date.now() + 1000) },
+                  smallIcon: 'ic_stat_icon',
+                  iconColor: '#10b981',
                   sound: undefined,
                   attachments: undefined,
                   actionTypeId: '',

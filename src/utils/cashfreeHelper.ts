@@ -21,15 +21,33 @@ export const cleanUpCashfreeOverlays = () => {
   } catch (e) {}
 };
 
-export const launchCashfreeCheckout = (
+export const launchCashfreeCheckout = async (
   paymentSessionId: string,
   onSuccess: (res: any) => void,
   onFailure?: (err: any) => void
 ) => {
   cleanUpCashfreeOverlays();
 
+  const isNative = !!(window as any).Capacitor?.isNativePlatform?.() || (window as any).Capacitor?.platform === 'android' || (window as any).Capacitor?.platform === 'ios';
   const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  const isMobileOrApp = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || !!(window as any).Capacitor;
+
+  // Fix: For Native Android App or Localhost WebView, open Chrome Custom Tabs via Browser.open
+  // This bypasses the Cashfree "https://localhost is not approved" whitelist error!
+  if (isNative || isLocalhost) {
+    try {
+      const { Browser } = await import('@capacitor/browser');
+      const payUrl = `https://zenbudget-tracker.vercel.app/pay?session_id=${encodeURIComponent(paymentSessionId)}`;
+      console.log('Launching Cashfree via Native Browser Chrome Custom Tab:', payUrl);
+      await Browser.open({ url: payUrl });
+      if (onSuccess) onSuccess({ status: 'launched_in_browser' });
+      return;
+    } catch (browserErr) {
+      console.warn('Browser.open failed, falling back to window.open:', browserErr);
+      window.open(`https://zenbudget-tracker.vercel.app/pay?session_id=${encodeURIComponent(paymentSessionId)}`, '_blank');
+      if (onSuccess) onSuccess({ status: 'launched_in_browser' });
+      return;
+    }
+  }
 
   if (!(window as any).Cashfree) {
     if (onFailure) onFailure('Cashfree SDK not loaded');
@@ -66,27 +84,13 @@ export const launchCashfreeCheckout = (
     document.body.appendChild(closeBtn);
   } catch (e) {}
 
-  const redirectTarget = (isLocalhost && !isMobileOrApp) ? '_blank' : '_modal';
   const cf = (window as any).Cashfree({ mode: 'production' });
-
-  // Safety timer: auto remove overlay if stuck on localhost
-  const safetyTimer = setTimeout(() => {
-    if (isLocalhost) {
-      console.warn('Localhost detected: Cashfree overlay check');
-      const overlay = document.querySelector('#cf-checkout-iframe-container, .cf-checkout-iframe-container');
-      if (overlay) {
-        // If iframe is blank or unreachable, clean up after 6s
-        cleanUpCashfreeOverlays();
-      }
-    }
-  }, 6000);
 
   try {
     cf.checkout({
       paymentSessionId: paymentSessionId,
-      redirectTarget: redirectTarget
+      redirectTarget: '_modal'
     }).then((result: any) => {
-      clearTimeout(safetyTimer);
       cleanUpCashfreeOverlays();
       if (result && result.paymentDetails) {
         onSuccess(result);
@@ -94,12 +98,10 @@ export const launchCashfreeCheckout = (
         if (onFailure) onFailure(result || 'Payment incomplete');
       }
     }).catch((err: any) => {
-      clearTimeout(safetyTimer);
       cleanUpCashfreeOverlays();
       if (onFailure) onFailure(err);
     });
   } catch (err: any) {
-    clearTimeout(safetyTimer);
     cleanUpCashfreeOverlays();
     if (onFailure) onFailure(err);
   }
