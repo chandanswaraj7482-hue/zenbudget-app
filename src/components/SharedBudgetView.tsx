@@ -226,18 +226,18 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                           border: '1px solid rgba(239, 68, 68, 0.15)'
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                          <div style={{ width: '32px', height: '32px', flexShrink: 0, borderRadius: '10px', background: 'rgba(239, 68, 68, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px' }}>
                             💸
                           </div>
-                          <div>
-                            <p style={{ fontSize: '13px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{tx.title || tx.category}</p>
-                            <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
+                          <div style={{ minWidth: 0, overflow: 'hidden' }}>
+                            <p style={{ fontSize: '13px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tx.title || tx.category}</p>
+                            <span style={{ fontSize: '10px', color: 'var(--text-secondary)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {tx.partnerName || 'Partner/Family'} • {tx.category} • {tx.date ? new Date(tx.date).toLocaleDateString('en-IN') : 'Today'}
                             </span>
                           </div>
                         </div>
-                        <span style={{ fontSize: '14px', fontWeight: 800, color: '#f87171' }}>
+                        <span style={{ fontSize: '14px', fontWeight: 800, color: '#f87171', flexShrink: 0, marginLeft: '8px' }}>
                           -{currencySymbol}{(Number(tx.amount) || 0).toLocaleString()}
                         </span>
                       </div>
@@ -270,16 +270,16 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                           border: '1px solid rgba(34, 197, 94, 0.15)'
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(34, 197, 94, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                          <div style={{ width: '32px', height: '32px', flexShrink: 0, borderRadius: '10px', background: 'rgba(34, 197, 94, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px' }}>
                             🏷️
                           </div>
-                          <div>
-                            <p style={{ fontSize: '13px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{tx.title || tx.category}</p>
-                            <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{tx.category} • {tx.date ? new Date(tx.date).toLocaleDateString('en-IN') : 'Today'}</span>
+                          <div style={{ minWidth: 0, overflow: 'hidden' }}>
+                            <p style={{ fontSize: '13px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tx.title || tx.category}</p>
+                            <span style={{ fontSize: '10px', color: 'var(--text-secondary)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tx.category} • {tx.date ? new Date(tx.date).toLocaleDateString('en-IN') : 'Today'}</span>
                           </div>
                         </div>
-                        <span style={{ fontSize: '14px', fontWeight: 800, color: '#4ade80' }}>
+                        <span style={{ fontSize: '14px', fontWeight: 800, color: '#4ade80', flexShrink: 0, marginLeft: '8px' }}>
                           -{currencySymbol}{(Number(tx.amount) || 0).toLocaleString()}
                         </span>
                       </div>
