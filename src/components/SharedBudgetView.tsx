@@ -145,23 +145,23 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
               </span>
             </div>
 
-            {/* Household Spending Breakdown Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div style={{ padding: '16px', background: 'rgba(239, 68, 68, 0.08)', borderRadius: '16px', border: '1px solid rgba(239, 68, 68, 0.2)', textAlign: 'left' }}>
-                <span style={{ fontSize: '11px', color: '#f87171', fontWeight: 700, textTransform: 'uppercase' }}>
-                  Partner/Family's Spent
+            {/* Household Spending Breakdown Flex */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+              <div style={{ flex: '1 1 130px', padding: '16px', background: 'rgba(239, 68, 68, 0.08)', borderRadius: '16px', border: '1px solid rgba(239, 68, 68, 0.2)', textAlign: 'left', minWidth: 0 }}>
+                <span style={{ fontSize: '11px', color: '#f87171', fontWeight: 700, textTransform: 'uppercase', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  Family's Spent
                 </span>
-                <p style={{ fontSize: '20px', fontWeight: 800, color: '#ffffff', margin: '4px 0 0 0' }}>
+                <p style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff', margin: '4px 0 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {currencySymbol}{familyTotalSpent.toLocaleString()}
                 </p>
                 <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{familyTxs.length} entries</span>
               </div>
 
-              <div style={{ padding: '16px', background: 'rgba(34, 197, 94, 0.08)', borderRadius: '16px', border: '1px solid rgba(34, 197, 94, 0.2)', textAlign: 'left' }}>
-                <span style={{ fontSize: '11px', color: '#4ade80', fontWeight: 700, textTransform: 'uppercase' }}>
+              <div style={{ flex: '1 1 130px', padding: '16px', background: 'rgba(34, 197, 94, 0.08)', borderRadius: '16px', border: '1px solid rgba(34, 197, 94, 0.2)', textAlign: 'left', minWidth: 0 }}>
+                <span style={{ fontSize: '11px', color: '#4ade80', fontWeight: 700, textTransform: 'uppercase', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   Your Spent
                 </span>
-                <p style={{ fontSize: '20px', fontWeight: 800, color: '#ffffff', margin: '4px 0 0 0' }}>
+                <p style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff', margin: '4px 0 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {currencySymbol}{myTotalSpent.toLocaleString()}
                 </p>
                 <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{myTxs.length} entries</span>
@@ -169,7 +169,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
             </div>
 
             {/* Combined Household Total Banner */}
-            <div style={{ padding: '14px 18px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ padding: '14px 18px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
               <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary)' }}>Total Combined Household Spent</span>
               <span style={{ fontSize: '18px', fontWeight: 800, color: 'var(--primary)' }}>{currencySymbol}{combinedTotalSpent.toLocaleString()}</span>
             </div>
@@ -357,14 +357,15 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
               <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Your Unique Couple / Family Sync Code
               </label>
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                <div style={{ flex: 1, padding: '12px 14px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '16px', fontWeight: 800, color: '#a78bfa', letterSpacing: '2px' }}>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ flex: '1 1 200px', minWidth: 0, padding: '12px 14px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '16px', fontWeight: 800, color: '#a78bfa', letterSpacing: '2px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {myShareCode}
                 </div>
                 <button
                   type="button"
                   onClick={handleCopyCode}
                   style={{
+                    flex: '1 1 120px',
                     padding: '12px 16px',
                     borderRadius: '12px',
                     border: 'none',
@@ -375,6 +376,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '6px'
                   }}
                 >
@@ -391,7 +393,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
               
               {errorMsg && <p style={{ fontSize: '12px', color: 'var(--danger)', fontWeight: 600, margin: 0 }}>{errorMsg}</p>}
 
-              <div style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <input
                   type="text"
                   required
@@ -399,7 +401,8 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                   onChange={(e) => setPartnerInputCode(e.target.value)}
                   placeholder="Paste couple / family code"
                   style={{
-                    flex: 1,
+                    flex: '1 1 200px',
+                    minWidth: 0,
                     padding: '12px 14px',
                     borderRadius: '12px',
                     background: 'rgba(255,255,255,0.03)',
@@ -415,6 +418,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                   type="submit"
                   disabled={isLinking || !partnerInputCode.trim()}
                   style={{
+                    flex: '1 1 120px',
                     padding: '12px 20px',
                     borderRadius: '12px',
                     border: 'none',
@@ -423,7 +427,10 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                     fontSize: '13px',
                     fontWeight: 700,
                     cursor: 'pointer',
-                    opacity: partnerInputCode.trim() ? 1 : 0.5
+                    opacity: partnerInputCode.trim() ? 1 : 0.5,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                   }}
                 >
                   {isLinking ? 'Linking...' : 'Join Group'}
