@@ -247,20 +247,37 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
   }, [step, biometricsAvailable, dbProfile]);
 
   const getOrCreateDeviceId = async (): Promise<string> => {
+    let prefix = 'desktop_';
     if (Capacitor.isNativePlatform()) {
+      prefix = 'mobile_';
       try {
         const idResult = await Device.getId();
-        return idResult.identifier;
+        return `${prefix}${idResult.identifier}`;
       } catch (e) {
         console.warn('Failed to get Capacitor hardware device ID, falling back to localStorage UUID:', e);
       }
     }
-    let webId = localStorage.getItem('zb_device_id');
-    if (!webId) {
-      webId = 'web-' + Math.random().toString(36).substring(2, 15) + '-' + Math.random().toString(36).substring(2, 15);
-      localStorage.setItem('zb_device_id', webId);
+    
+    // Check if on mobile browser
+    if (window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent)) {
+      prefix = 'mobile_';
     }
-    return webId;
+
+    // Hardware Fingerprint for Web (Chrome/Edge on same device will have same ID)
+    const { screen, navigator } = window;
+    const hardwareString = `${screen.width}x${screen.height}-${navigator.hardwareConcurrency || 2}-${navigator.platform}-${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
+    
+    let hash = 0;
+    for (let i = 0; i < hardwareString.length; i++) {
+      const char = hardwareString.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    
+    const fingerprint = Math.abs(hash).toString(36) + '-' + (screen.width * screen.height).toString(36);
+    const finalId = `${prefix}${fingerprint}`;
+    localStorage.setItem('zb_device_id', finalId);
+    return finalId;
   };
 
   const getDeviceName = async (): Promise<string> => {
@@ -428,6 +445,40 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
 
       console.log("LockScreen: fetchUserProfile database query result:", userProf);
       if (userProf) {
+        
+        // --- Option A: Strict Hardware Device Blocker ---
+        const currentDeviceId = await getOrCreateDeviceId();
+        const isMobile = currentDeviceId.startsWith('mobile_');
+        
+        if (userProf.device_id) {
+          const ids = typeof userProf.device_id === 'string' ? userProf.device_id.split('|') : [];
+          const otherMobile = ids.find((id: string) => id.startsWith('mobile_') && id !== currentDeviceId);
+          const otherDesktop = ids.find((id: string) => id.startsWith('desktop_') && id !== currentDeviceId);
+          
+          if (isMobile && otherMobile) {
+            await supabase.auth.signOut();
+            throw new Error('You are already logged in on another mobile device. Please log out from that device first.');
+          }
+          if (!isMobile && otherDesktop) {
+            await supabase.auth.signOut();
+            throw new Error('You are already logged in on another laptop/desktop device. Please log out from that device first.');
+          }
+          
+          // Merge and save IDs
+          const newIds = ids.filter((id: string) => (isMobile ? !id.startsWith('mobile_') : !id.startsWith('desktop_')));
+          if (!newIds.includes(currentDeviceId)) newIds.push(currentDeviceId);
+          const newDeviceIdString = newIds.join('|');
+          
+          if (newDeviceIdString !== userProf.device_id) {
+            await supabase.from('profiles').update({ device_id: newDeviceIdString }).eq('id', uid);
+            userProf.device_id = newDeviceIdString;
+          }
+        } else {
+          await supabase.from('profiles').update({ device_id: currentDeviceId }).eq('id', uid);
+          userProf.device_id = currentDeviceId;
+        }
+        // ------------------------------------------------
+
         setDbProfile(userProf);
         if (userProf.name) {
           setUsername(userProf.name);
@@ -933,6 +984,14 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
   const handleSignOut = async () => {
     setIsLoading(true);
     try {
+      if (userId && dbProfile) {
+        const currentDeviceId = await getOrCreateDeviceId();
+        if (dbProfile.device_id) {
+          const ids = typeof dbProfile.device_id === 'string' ? dbProfile.device_id.split('|') : [];
+          const updatedIds = ids.filter((id: string) => id !== currentDeviceId);
+          await supabase.from('profiles').update({ device_id: updatedIds.join('|') }).eq('id', userId);
+        }
+      }
       await supabase.auth.signOut();
       localStorage.removeItem('zb_local_session_profile');
       setUserId('');
