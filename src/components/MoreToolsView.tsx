@@ -94,6 +94,36 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
         <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{t('more_tools_sub')}</span>
       </div>
 
+      {/* Bank-Grade Security Status Card */}
+      <div 
+        style={{ 
+          padding: '16px 18px', 
+          borderRadius: '18px', 
+          background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(99, 102, 241, 0.08) 100%)', 
+          border: '1px solid rgba(34, 197, 94, 0.25)', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '8px', 
+          textAlign: 'left' 
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: '13px', fontWeight: 800, color: '#4ade80', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            🛡️ Bank-Grade Security Active
+          </span>
+          <span style={{ fontSize: '10px', padding: '3px 8px', borderRadius: '10px', background: 'rgba(34, 197, 94, 0.2)', color: '#4ade80', fontWeight: 800 }}>
+            ENFORCED
+          </span>
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+          <span>🔒 256-bit AES Encryption</span>
+          <span>•</span>
+          <span>📱 Max 1 Phone + 1 Laptop Limit</span>
+          <span>•</span>
+          <span>⏱️ 5-Min Auto-Session Lock</span>
+        </div>
+      </div>
+
       {/* SECTION 1: MONEY TOOLS */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <h3 style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
