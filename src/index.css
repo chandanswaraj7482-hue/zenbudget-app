@@ -615,3 +615,81 @@ input[type="date"].custom-dark-datepicker::-webkit-calendar-picker-indicator {
   cursor: pointer;
   opacity: 0.9;
 }
+
+/* ==========================================================================
+   📱 UNIVERSAL RESPONSIVE & MOBILE DESIGN SYSTEM
+   ========================================================================== */
+
+/* 1. Global Overflow Prevention */
+html, body {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+  width: 100% !important;
+}
+
+/* 2. Text Truncation Utilities */
+.truncate-text {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* 3. Universal Modal & Popup Responsiveness */
+div[style*="position: fixed"],
+div[style*="position:fixed"] {
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+/* 4. Responsive Media Queries */
+@media (max-width: 480px) {
+  /* Mobile padding & font scaling */
+  #root {
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+  }
+  
+  .glass-panel {
+    padding: 14px 12px !important;
+    border-radius: 16px !important;
+  }
+
+  /* Responsive Headings */
+  h1 { font-size: 22px !important; }
+  h2 { font-size: 19px !important; }
+  h3 { font-size: 16px !important; }
+
+  /* Buttons & Touch Targets */
+  button {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  /* Flexible Grid Wrappers */
+  div[style*="display: grid"],
+  div[style*="display:grid"] {
+    gap: 10px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  /* Extra Small Devices (Galaxy Fold, Small iPhones) */
+  .glass-panel {
+    padding: 10px 8px !important;
+  }
+
+  h1 { font-size: 19px !important; }
+  h2 { font-size: 17px !important; }
+  
+  /* Auto-stack 2-column flex rows on tiny screens */
+  div[style*="display: flex"][style*="justify-content: space-between"] {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+}
+
+/* 5. Safe Area Insets for iOS & Android Gesture Navigation */
+.safe-area-bottom {
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 16px)) !important;
+}
+
