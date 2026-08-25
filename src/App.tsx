@@ -815,12 +815,7 @@ const App: React.FC = () => {
       })
       .subscribe();
 
-    // Bank-Grade Security Console Warning Banner
-    console.log(
-      "%c 🛡️ ZenBudget Bank-Grade Security Active %c\nDo NOT paste any code or tokens into this developer console. 256-bit AES encryption & hardware device blocker enforced.",
-      "color: #22c55e; font-size: 16px; font-weight: 800; background: #09090f; padding: 10px 14px; border-radius: 8px;",
-      "color: #cbd5e1; font-size: 12px;"
-    );
+    console.log("%c 🔒 ZenBudget Security Active ", "color: #22c55e; font-weight: bold;");
 
     return () => {
       supabase.removeChannel(configChannel);
