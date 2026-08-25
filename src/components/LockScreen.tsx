@@ -721,6 +721,88 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
     };
   }, []);
 
+  async function triggerBiometricUnlock(overrideProfile?: typeof dbProfile) {
+    try {
+      const activeProfile = overrideProfile || dbProfile;
+      if (!activeProfile) return;
+
+      if (Capacitor.isNativePlatform()) {
+        // Native biometric via Capacitor plugin
+        const { NativeBiometric } = await import('@capgo/capacitor-native-biometric');
+        await NativeBiometric.verifyIdentity({
+          reason: "Unlock ZenBudget",
+          title: "Biometric Unlock",
+          subtitle: "Use fingerprint or Face ID to unlock your account",
+          description: "Confirm your identity to log in."
+        });
+      } else {
+        // Web/PWA biometric via WebAuthn
+        const storedCredId = localStorage.getItem('zb_webauthn_cred_id');
+        
+        if (storedCredId) {
+          // Use existing credential for biometric verification
+          const credIdBuffer = Uint8Array.from(atob(storedCredId), c => c.charCodeAt(0));
+          await navigator.credentials.get({
+            publicKey: {
+              challenge: crypto.getRandomValues(new Uint8Array(32)),
+              timeout: 60000,
+              userVerification: 'required',
+              allowCredentials: [{
+                type: 'public-key',
+                id: credIdBuffer,
+                transports: ['internal']
+              }],
+              rpId: window.location.hostname
+            }
+          });
+        } else {
+          // First time: Register a new biometric credential
+          const credential = await navigator.credentials.create({
+            publicKey: {
+              challenge: crypto.getRandomValues(new Uint8Array(32)),
+              rp: { name: 'ZenBudget', id: window.location.hostname },
+              user: {
+                id: new TextEncoder().encode(userId || 'zenbudget-user'),
+                name: activeProfile.name || 'ZenBudget User',
+                displayName: activeProfile.name || 'ZenBudget User'
+              },
+              pubKeyCredParams: [{ alg: -7, type: 'public-key' }],
+              authenticatorSelection: {
+                authenticatorAttachment: 'platform',
+                userVerification: 'required'
+              },
+              timeout: 60000
+            }
+          }) as PublicKeyCredential | null;
+          
+          if (credential) {
+            // Store credential ID for future biometric unlocks
+            const credId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
+            localStorage.setItem('zb_webauthn_cred_id', credId);
+          } else {
+            throw new Error('Biometric registration cancelled');
+          }
+        }
+      }
+      
+      if (activeProfile.referral_code) {
+        localStorage.setItem('zb_invite_code', activeProfile.referral_code);
+      }
+      playNotificationSound('success');
+      onUnlock(
+        userId,
+        activeProfile.name,
+        activeProfile.subscription_tier,
+        activeProfile.trial_start_date,
+        activeProfile.pin,
+        activeProfile.premium_expires_at,
+        activeProfile.trial_expire_date
+      );
+    } catch (err: any) {
+      console.warn('LockScreen: Biometric unlock failed or cancelled:', err);
+    }
+  }
+
   // Effect to auto-trigger biometric unlock prompt on mount or step change
   useEffect(() => {
     if (step === 'unlock' && biometricsAvailable && dbProfile) {
@@ -870,87 +952,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
     }
   };
 
-  const triggerBiometricUnlock = async (overrideProfile?: typeof dbProfile) => {
-    try {
-      const activeProfile = overrideProfile || dbProfile;
-      if (!activeProfile) return;
 
-      if (Capacitor.isNativePlatform()) {
-        // Native biometric via Capacitor plugin
-        const { NativeBiometric } = await import('@capgo/capacitor-native-biometric');
-        await NativeBiometric.verifyIdentity({
-          reason: "Unlock ZenBudget",
-          title: "Biometric Unlock",
-          subtitle: "Use fingerprint or Face ID to unlock your account",
-          description: "Confirm your identity to log in."
-        });
-      } else {
-        // Web/PWA biometric via WebAuthn
-        const storedCredId = localStorage.getItem('zb_webauthn_cred_id');
-        
-        if (storedCredId) {
-          // Use existing credential for biometric verification
-          const credIdBuffer = Uint8Array.from(atob(storedCredId), c => c.charCodeAt(0));
-          await navigator.credentials.get({
-            publicKey: {
-              challenge: crypto.getRandomValues(new Uint8Array(32)),
-              timeout: 60000,
-              userVerification: 'required',
-              allowCredentials: [{
-                type: 'public-key',
-                id: credIdBuffer,
-                transports: ['internal']
-              }],
-              rpId: window.location.hostname
-            }
-          });
-        } else {
-          // First time: Register a new biometric credential
-          const credential = await navigator.credentials.create({
-            publicKey: {
-              challenge: crypto.getRandomValues(new Uint8Array(32)),
-              rp: { name: 'ZenBudget', id: window.location.hostname },
-              user: {
-                id: new TextEncoder().encode(userId || 'zenbudget-user'),
-                name: activeProfile.name || 'ZenBudget User',
-                displayName: activeProfile.name || 'ZenBudget User'
-              },
-              pubKeyCredParams: [{ alg: -7, type: 'public-key' }],
-              authenticatorSelection: {
-                authenticatorAttachment: 'platform',
-                userVerification: 'required'
-              },
-              timeout: 60000
-            }
-          }) as PublicKeyCredential | null;
-          
-          if (credential) {
-            // Store credential ID for future biometric unlocks
-            const credId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
-            localStorage.setItem('zb_webauthn_cred_id', credId);
-          } else {
-            throw new Error('Biometric registration cancelled');
-          }
-        }
-      }
-      
-      if (activeProfile.referral_code) {
-        localStorage.setItem('zb_invite_code', activeProfile.referral_code);
-      }
-      playNotificationSound('success');
-      onUnlock(
-        userId,
-        activeProfile.name,
-        activeProfile.subscription_tier,
-        activeProfile.trial_start_date,
-        activeProfile.pin,
-        activeProfile.premium_expires_at,
-        activeProfile.trial_expire_date
-      );
-    } catch (err: any) {
-      console.warn('LockScreen: Biometric unlock failed or cancelled:', err);
-    }
-  };
 
   const getDeviceId = async (): Promise<string> => {
     try {
