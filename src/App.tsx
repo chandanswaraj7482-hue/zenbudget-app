@@ -1468,6 +1468,12 @@ const App: React.FC = () => {
           }
         }
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => {
+        fetchDataFromSupabase();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+        fetchDataFromSupabase();
+      })
       .subscribe();
 
     return () => {
@@ -1706,14 +1712,7 @@ const App: React.FC = () => {
               .or(`partner_couple_code.eq.${codeUpper},couple_code.eq.${codeUpper},partner_couple_code.eq.${shortIdUpper}`);
 
             if (allFamilyProfiles) {
-               fetchedFamilyMembers = allFamilyProfiles.filter(p => {
-                 const isPartnerPremium = p.subscription_tier === 'premium' || 
-                                          p.subscription_tier === 'premium_monthly' || 
-                                          p.subscription_tier === 'premium_yearly' || 
-                                          p.subscription_tier === 'premium_lifetime' || 
-                                          p.subscription_tier === 'pro';
-                 return isPartnerPremium;
-               });
+               fetchedFamilyMembers = allFamilyProfiles;
             }
           }
 
@@ -2897,25 +2896,6 @@ const App: React.FC = () => {
   const handleConnectPartner = async (code: string): Promise<boolean> => {
     if (!currentProfileId) return false;
 
-    const isSelfPremium = isPremiumUser || subscriptionTier === 'premium_monthly' || subscriptionTier === 'premium_lifetime' || subscriptionTier === 'premium_yearly' || subscriptionTier === 'premium' || subscriptionTier === 'pro';
-    if (!isSelfPremium) {
-      setConfirmDialog({
-        isOpen: true,
-        title: '🔒 Premium Subscription Required',
-        message: 'Shared Budget sync requires an active Premium plan. Upgrade to Premium now to sync entries with your partner!',
-        type: 'warning',
-        confirmText: '⭐ Go Premium Now',
-        cancelText: 'Close',
-        onConfirm: () => {
-          setConfirmDialog(null);
-          setIsSubBlocker(false);
-          setIsSubModalOpen(true);
-        },
-        onCancel: () => setConfirmDialog(null)
-      });
-      return false;
-    }
-
     const rawInput = code.trim().toUpperCase();
     if (!rawInput) return false;
 
@@ -2962,27 +2942,6 @@ const App: React.FC = () => {
 
       if (!partnerProf) {
         triggerToast('Invalid sync code or partner profile not found. Verify code spelling!', 'warning');
-        return false;
-      }
-
-      // STRICT DUAL PREMIUM ENFORCEMENT: Both users MUST have active Premium subscription
-      const isPartnerPremium = partnerProf.subscription_tier === 'premium' || 
-                               partnerProf.subscription_tier === 'premium_monthly' || 
-                               partnerProf.subscription_tier === 'premium_yearly' || 
-                               partnerProf.subscription_tier === 'premium_lifetime' || 
-                               partnerProf.subscription_tier === 'pro';
-
-      if (!isPartnerPremium) {
-        setConfirmDialog({
-          isOpen: true,
-          title: '🔒 Partner Premium Subscription Required',
-          message: `Shared Budget requires active Premium for BOTH users! Your partner (${partnerProf.name || 'Partner'}) is currently on a Free plan. Both users must purchase a Premium plan to connect and sync.`,
-          type: 'warning',
-          confirmText: 'OK, Got It',
-          cancelText: 'Close',
-          onConfirm: () => setConfirmDialog(null),
-          onCancel: () => setConfirmDialog(null)
-        });
         return false;
       }
 
