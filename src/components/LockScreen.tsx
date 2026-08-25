@@ -239,14 +239,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
     };
   }, []);
 
-  // Effect to auto-trigger biometric unlock prompt on mount or step change
-  useEffect(() => {
-    if (step === 'unlock' && biometricsAvailable && dbProfile) {
-      triggerBiometricUnlock();
-    }
-  }, [step, biometricsAvailable, dbProfile]);
-
-  const getOrCreateDeviceId = async (): Promise<string> => {
+  async function getOrCreateDeviceId(): Promise<string> {
     let prefix = 'desktop_';
     if (Capacitor.isNativePlatform()) {
       prefix = 'mobile_';
@@ -278,9 +271,9 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
     const finalId = `${prefix}${fingerprint}`;
     localStorage.setItem('zb_device_id', finalId);
     return finalId;
-  };
+  }
 
-  const getDeviceName = async (): Promise<string> => {
+  async function getDeviceName(): Promise<string> {
     if (Capacitor.isNativePlatform()) {
       try {
         const info = await Device.getInfo();
@@ -288,7 +281,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
       } catch (e) {}
     }
     return 'Web - ' + navigator.userAgent.substring(0, 40);
-  };
+  }
 
   async function withTimeout<T>(promise: Promise<T>, ms: number = 2000): Promise<T | null> {
     try {
@@ -300,87 +293,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
     }
   }
 
-  const checkCurrentSession = async () => {
-    setIsLoading(true);
-
-    const safetyTimer = setTimeout(() => {
-      setIsLoading(false);
-      const localCached = localStorage.getItem('zb_local_session_profile');
-      if (localCached) {
-        try {
-          const cachedData = JSON.parse(localCached);
-          setUserId(cachedData.userId);
-          setDbProfile(cachedData.profile);
-          setUsername(cachedData.profile.name);
-          setStep('unlock');
-        } catch (_) { setStep('auth'); }
-      } else {
-        setStep('auth');
-      }
-    }, 2000);
-
-    try {
-      console.log("LockScreen: Running checkCurrentSession()");
-      const sessionRes = await withTimeout(supabase.auth.getSession(), 1800);
-      const session = sessionRes?.data?.session;
-
-      console.log("LockScreen: getSession() result", session?.user?.email);
-      if (session?.user) {
-        setUserId(session.user.id);
-        const metadata = session.user.user_metadata;
-        const name = metadata?.full_name || metadata?.name || session.user.email?.split('@')[0] || 'User';
-        setUsername(name);
-
-        // Save Google OAuth avatar preset (don't overwrite user's custom avatar)
-        const googleAvatar = metadata?.avatar_url || metadata?.picture || metadata?.photo_url || metadata?.avatar;
-        if (googleAvatar) {
-          localStorage.setItem('zb_google_avatar', googleAvatar);
-          if (!localStorage.getItem('zb_user_avatar')) {
-            localStorage.setItem('zb_user_avatar', googleAvatar);
-            window.dispatchEvent(new Event('profile_avatar_updated'));
-          }
-        }
-
-        await fetchUserProfile(session.user.id);
-      } else {
-        // Fallback check: If there is a cached local session profile, use it directly
-        const localCached = localStorage.getItem('zb_local_session_profile');
-        if (localCached) {
-          try {
-            const cachedData = JSON.parse(localCached);
-            console.log("LockScreen: Using cached local session profile fallback");
-            setUserId(cachedData.userId);
-            setDbProfile(cachedData.profile);
-            setUsername(cachedData.profile.name);
-            setStep('unlock');
-          } catch (_) {
-            setStep('auth');
-          }
-        } else {
-          setStep('auth');
-        }
-      }
-    } catch (err) {
-      console.error('LockScreen: Session check error:', err);
-      const localCached = localStorage.getItem('zb_local_session_profile');
-      if (localCached) {
-        try {
-          const cachedData = JSON.parse(localCached);
-          setUserId(cachedData.userId);
-          setDbProfile(cachedData.profile);
-          setUsername(cachedData.profile.name);
-          setStep('unlock');
-        } catch (_) { setStep('auth'); }
-      } else {
-        setStep('auth');
-      }
-    } finally {
-      clearTimeout(safetyTimer);
-      setIsLoading(false);
-    }
-  };
-
-  const fetchUserProfile = async (uid: string) => {
+  async function fetchUserProfile(uid: string) {
     try {
       console.log("LockScreen: fetchUserProfile() starting for uid", uid);
       let userProf: any = null;
@@ -548,7 +461,272 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
       setStep('auth');
       setIsLoading(false);
     }
-  };
+  }
+
+  async function checkCurrentSession() {
+    setIsLoading(true);
+
+    const safetyTimer = setTimeout(() => {
+      setIsLoading(false);
+      const localCached = localStorage.getItem('zb_local_session_profile');
+      if (localCached) {
+        try {
+          const cachedData = JSON.parse(localCached);
+          setUserId(cachedData.userId);
+          setDbProfile(cachedData.profile);
+          setUsername(cachedData.profile.name);
+          setStep('unlock');
+        } catch (_) { setStep('auth'); }
+      } else {
+        setStep('auth');
+      }
+    }, 2000);
+
+    try {
+      console.log("LockScreen: Running checkCurrentSession()");
+      const sessionRes = await withTimeout(supabase.auth.getSession(), 1800);
+      const session = sessionRes?.data?.session;
+
+      console.log("LockScreen: getSession() result", session?.user?.email);
+      if (session?.user) {
+        setUserId(session.user.id);
+        const metadata = session.user.user_metadata;
+        const name = metadata?.full_name || metadata?.name || session.user.email?.split('@')[0] || 'User';
+        setUsername(name);
+
+        // Save Google OAuth avatar preset (don't overwrite user's custom avatar)
+        const googleAvatar = metadata?.avatar_url || metadata?.picture || metadata?.photo_url || metadata?.avatar;
+        if (googleAvatar) {
+          localStorage.setItem('zb_google_avatar', googleAvatar);
+          if (!localStorage.getItem('zb_user_avatar')) {
+            localStorage.setItem('zb_user_avatar', googleAvatar);
+            window.dispatchEvent(new Event('profile_avatar_updated'));
+          }
+        }
+
+        await fetchUserProfile(session.user.id);
+      } else {
+        // Fallback check: If there is a cached local session profile, use it directly
+        const localCached = localStorage.getItem('zb_local_session_profile');
+        if (localCached) {
+          try {
+            const cachedData = JSON.parse(localCached);
+            console.log("LockScreen: Using cached local session profile fallback");
+            setUserId(cachedData.userId);
+            setDbProfile(cachedData.profile);
+            setUsername(cachedData.profile.name);
+            setStep('unlock');
+          } catch (_) {
+            setStep('auth');
+          }
+        } else {
+          setStep('auth');
+        }
+      }
+    } catch (err) {
+      console.error('LockScreen: Session check error:', err);
+      const localCached = localStorage.getItem('zb_local_session_profile');
+      if (localCached) {
+        try {
+          const cachedData = JSON.parse(localCached);
+          setUserId(cachedData.userId);
+          setDbProfile(cachedData.profile);
+          setUsername(cachedData.profile.name);
+          setStep('unlock');
+        } catch (_) { setStep('auth'); }
+      } else {
+        setStep('auth');
+      }
+    } finally {
+      clearTimeout(safetyTimer);
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    // Detect Apple vs Android device
+    const isApple = typeof navigator !== 'undefined' && (
+      /Macintosh|Mac OS X|MacIntel|Mac|iPhone|iPad|iPod/i.test(navigator.userAgent || '') ||
+      /Mac/i.test(navigator.platform || '')
+    );
+    setDetectedPlatform(isApple ? 'apple' : 'android');
+
+    // Silently detect location for currency — IP is NOT displayed to user
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.country_code) {
+          const detectedCurrency = data.country_code === 'IN' ? 'INR' : 'USD';
+          localStorage.setItem('zb_default_currency', detectedCurrency);
+          const profileId = localStorage.getItem('zb_profile_id');
+          if (profileId) {
+            localStorage.setItem(`zb_currency_${profileId}`, detectedCurrency);
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Check if session already exists on load & listen to redirect events
+  useEffect(() => {
+    console.log("LockScreen: Initializing session checks and listeners");
+    checkCurrentSession();
+
+    // Check if biometric authentication is available
+    if (Capacitor.isNativePlatform()) {
+      import('@capgo/capacitor-native-biometric')
+        .then(({ NativeBiometric }) => {
+          return NativeBiometric.isAvailable();
+        })
+        .then((result) => {
+          if (result && result.isAvailable) {
+            setBiometricsAvailable(true);
+          }
+        })
+        .catch((err) => {
+          console.warn('LockScreen: Biometrics isAvailable check failed:', err);
+        });
+    } else {
+      // Web/PWA: Check WebAuthn (fingerprint/face on mobile browsers)
+      if (window.PublicKeyCredential) {
+        PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+          .then((available) => {
+            if (available) {
+              setBiometricsAvailable(true);
+              console.log('LockScreen: Web biometric (WebAuthn) available');
+            }
+          })
+          .catch((err) => {
+            console.warn('LockScreen: WebAuthn check failed:', err);
+          });
+      }
+    }
+
+    // Setup deep link listener for Capacitor native app
+    let urlListener: any = null;
+    if (Capacitor.isNativePlatform()) {
+      import('@capacitor/app').then(({ App }) => {
+        App.addListener('appUrlOpen', async (eventData: any) => {
+          console.log('LockScreen: App opened with deep link URL:', eventData.url);
+          try {
+            const urlStr = eventData.url || '';
+            setIsLoading(true);
+
+            // 1. Check for PKCE Authorization Code
+            if (urlStr.includes('code=')) {
+              try {
+                const fakeUrl = new URL(urlStr.replace('com.zenbudget.app://', 'https://dummy.app/'));
+                const code = fakeUrl.searchParams.get('code') || urlStr.split('code=')[1]?.split('&')[0];
+                if (code) {
+                  const { data: exchData, error: exchErr } = await supabase.auth.exchangeCodeForSession(code);
+                  if (exchErr) throw exchErr;
+                  if (exchData?.session?.user) {
+                    await fetchUserProfile(exchData.session.user.id);
+                  }
+                  const { Browser } = await import('@capacitor/browser');
+                  await Browser.close();
+                  setIsLoading(false);
+                  return;
+                }
+              } catch (codeErr) {
+                console.warn('PKCE Code exchange error:', codeErr);
+              }
+            }
+
+            // 2. Check for Implicit Access Token + Refresh Token
+            if (urlStr.includes('access_token=') && urlStr.includes('refresh_token=')) {
+              const hashIndex = urlStr.indexOf('#');
+              const queryIndex = urlStr.indexOf('?');
+              const paramsStr = hashIndex !== -1 ? urlStr.substring(hashIndex + 1) : (queryIndex !== -1 ? urlStr.substring(queryIndex + 1) : '');
+              const params = new URLSearchParams(paramsStr);
+              const accessToken = params.get('access_token');
+              const refreshToken = params.get('refresh_token');
+              if (accessToken && refreshToken) {
+                const { data: sessData, error: sessErr } = await supabase.auth.setSession({
+                  access_token: accessToken,
+                  refresh_token: refreshToken
+                });
+                if (sessErr) throw sessErr;
+                if (sessData?.session?.user) {
+                  await fetchUserProfile(sessData.session.user.id);
+                }
+                const { Browser } = await import('@capacitor/browser');
+                await Browser.close();
+                setIsLoading(false);
+                return;
+              }
+            }
+
+            // 3. Fallback: Check active session directly
+            const { data: currentSess } = await supabase.auth.getSession();
+            if (currentSess?.session?.user) {
+              await fetchUserProfile(currentSess.session.user.id);
+              const { Browser } = await import('@capacitor/browser');
+              await Browser.close();
+            }
+          } catch (err: any) {
+            console.error('LockScreen: Error handling deep link session:', err);
+            setErrorMsg(err.message || 'Failed to complete Google Sign-In redirect.');
+          } finally {
+            setIsLoading(false);
+          }
+        }).then(listener => {
+          urlListener = listener;
+        });
+      });
+    }
+
+    // Setup active state change listener (critical for OAuth redirects)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("LockScreen: supabase.auth.onAuthStateChange triggered", event, session?.user?.email);
+      
+      // IMPORTANT FIX: Ignore SIGNED_OUT event if user has a valid local cached session
+      // This prevents random auto-logouts when Supabase token refreshes or expires
+      if (event === 'SIGNED_OUT') {
+        const localCached = localStorage.getItem('zb_local_session_profile');
+        if (localCached) {
+          console.log('LockScreen: Ignoring SIGNED_OUT — using cached local session to prevent auto-logout.');
+          return;
+        }
+      }
+      
+      if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user) {
+        setUserId(session.user.id);
+        if (session.user.email) {
+          localStorage.setItem('zb_user_email', session.user.email);
+        }
+        const metadata = session.user.user_metadata;
+        const name = metadata?.full_name || metadata?.name || session.user.email?.split('@')[0] || 'User';
+        setUsername(name);
+
+        // Save Google OAuth avatar as a preset option in profile picker (don't overwrite custom avatar)
+        const googleAvatar = metadata?.avatar_url || metadata?.picture || metadata?.photo_url || metadata?.avatar;
+        if (googleAvatar) {
+          localStorage.setItem('zb_google_avatar', googleAvatar);
+          if (!localStorage.getItem('zb_user_avatar')) {
+            localStorage.setItem('zb_user_avatar', googleAvatar);
+            window.dispatchEvent(new Event('profile_avatar_updated'));
+          }
+        }
+
+        await fetchUserProfile(session.user.id);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      if (urlListener) {
+        urlListener.remove();
+      }
+    };
+  }, []);
+
+  // Effect to auto-trigger biometric unlock prompt on mount or step change
+  useEffect(() => {
+    if (step === 'unlock' && biometricsAvailable && dbProfile) {
+      triggerBiometricUnlock();
+    }
+  }, [step, biometricsAvailable, dbProfile]);
 
   const [agreedTerms, setAgreedTerms] = useState(false);
 
