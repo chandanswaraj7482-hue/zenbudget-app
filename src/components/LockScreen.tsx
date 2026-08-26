@@ -251,13 +251,14 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
       }
     }
     
+    const { screen, navigator } = window;
+
     // Check if on mobile browser
     if (window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent)) {
       prefix = 'mobile_';
     }
 
     // Hardware Fingerprint for Web (Chrome/Edge on same device will have same ID)
-    const { screen, navigator } = window;
     const hardwareString = `${screen.width}x${screen.height}-${navigator.hardwareConcurrency || 2}-${navigator.platform}-${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
     
     let hash = 0;
