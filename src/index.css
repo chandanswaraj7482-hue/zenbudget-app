@@ -665,6 +665,12 @@ div[style*="position:fixed"] {
     touch-action: manipulation;
   }
 
+  /* Prevent small circular icon buttons from becoming vertical ovals */
+  button[style*="border-radius: 50%"],
+  button[style*="border-radius:50%"] {
+    min-height: unset;
+  }
+
   /* Flexible Grid Wrappers */
   div[style*="display: grid"],
   div[style*="display:grid"] {
