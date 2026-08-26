@@ -47,6 +47,7 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
       priceFormatted = `S$${numPrice}`;
     } else {
       numPrice = stored.inr_scan_pay_price || 79;
+      if (numPrice < 10) numPrice = 79; // Fix: Prevent accidental USD value for INR
       priceFormatted = `₹${numPrice}`;
     }
   } catch (_) {

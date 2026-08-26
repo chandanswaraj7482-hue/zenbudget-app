@@ -1385,7 +1385,8 @@ const App: React.FC = () => {
         localStorage.setItem(`zb_currency_symbol_${currentProfileId}`, currencySymbol);
       }
 
-      // 2. Save calculated limit to database
+      // 2. Save calculated limit to database (DISABLED to prevent 400 Bad Request spam)
+      /*
       try {
         const { data: existingLimit } = await supabase
           .from('daily_limits')
@@ -1411,6 +1412,7 @@ const App: React.FC = () => {
             });
         }
       } catch (err) {}
+      */
     };
 
     syncDailyLimit();
@@ -1534,7 +1536,8 @@ const App: React.FC = () => {
         if (cached) cachedFamilyMembers = JSON.parse(cached);
       } catch (e) {}
 
-      // Fetch saved daily limit from database
+      // Fetch saved daily limit from database (DISABLED to prevent 400 Bad Request spam)
+      /*
       const { data: limitData } = await supabase
         .from('daily_limits')
         .select('limit_amount')
@@ -1545,6 +1548,7 @@ const App: React.FC = () => {
         localStorage.setItem(`zb_daily_limit_${currentProfileId}`, String(limitData.limit_amount));
         localStorage.setItem(`zb_currency_symbol_${currentProfileId}`, currencySymbol);
       }
+      */
 
       // 0. Fetch profile info to sync properties (tier, expires_at)
       const { data: profData, error: profErr } = await supabase
