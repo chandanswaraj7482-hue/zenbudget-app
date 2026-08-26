@@ -1309,7 +1309,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                           </tr>
                         ) : (
                           filteredProfiles.map((p) => {
-                            const referredUsers = profiles.filter(pr => pr.referred_by === p.referral_code);
+                            const referredUsers = p.referral_code ? profiles.filter(pr => pr.referred_by === p.referral_code) : [];
                             const totalReferred = referredUsers.length;
                             const paidReferred = referredUsers.filter(pr => pr.subscription_tier && pr.subscription_tier.startsWith('premium')).length;
 
@@ -1702,7 +1702,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                     {(() => {
                       // Filter profiles that have actually referred at least one user
                       const inviters = profiles.filter(p => {
-                        const hasReferred = profiles.some(pr => pr.referred_by === p.referral_code);
+                        const hasReferred = p.referral_code ? profiles.some(pr => pr.referred_by === p.referral_code) : false;
                         const matchesSearch = !searchQuery || 
                           p.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           (p.referral_code && p.referral_code.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -1718,7 +1718,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                       }
 
                       return inviters.map(p => {
-                        const referredUsers = profiles.filter(pr => pr.referred_by === p.referral_code);
+                        const referredUsers = p.referral_code ? profiles.filter(pr => pr.referred_by === p.referral_code) : [];
                         const totalReferred = referredUsers.length;
                         const paidReferred = referredUsers.filter(pr => pr.subscription_tier && pr.subscription_tier.startsWith('premium')).length;
                         const freeReferred = totalReferred - paidReferred;
