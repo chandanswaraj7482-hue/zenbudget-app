@@ -349,7 +349,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
             has_scan_pay_access: false
           };
 
-          let { data: inserted, error: upsertErr } = await supabase.from('profiles').upsert(newProf).select('*').maybeSingle();
+          const { data: inserted, error: upsertErr } = await supabase.from('profiles').upsert(newProf).select('*').maybeSingle();
+          let finalProfile = inserted || newProf;
           if (upsertErr && (upsertErr.message.includes('column') || upsertErr.message.includes('referral_code') || upsertErr.message.includes('avatar_url') || upsertErr.message.includes('trial_expire_date') || upsertErr.message.includes('has_scan_pay_access'))) {
             console.warn('LockScreen: Missing columns for OAuth auto-provision, retrying basic upsert...');
             const basicProf = {
@@ -361,9 +362,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               trial_start_date: new Date().toISOString()
             };
             const retryRes = await supabase.from('profiles').upsert(basicProf).select('*').maybeSingle();
-            inserted = retryRes.data;
+            if (retryRes.data) {
+              finalProfile = retryRes.data;
+            }
           }
-          userProf = inserted || newProf;
+          userProf = finalProfile;
         } catch (eProf) {
           console.warn('Auto-provisioning fallback profile:', eProf);
         }
