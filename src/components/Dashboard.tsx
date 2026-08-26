@@ -2075,7 +2075,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
               background: 'var(--bg-card)',
               border: '1px solid var(--border-card)', position: 'relative',
               textAlign: 'left', color: 'var(--text-primary)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
-              fontFamily: "'Manrope', sans-serif"
+              fontFamily: "'Manrope', sans-serif",
+              maxHeight: '90vh', overflowY: 'auto'
             }}
             onClick={e => e.stopPropagation()}
           >
