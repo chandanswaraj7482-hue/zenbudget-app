@@ -161,6 +161,7 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
       }
 
       if (payment_session_id) {
+        onClose(); // Automatically close paywall so Cashfree popup is instantly visible!
         launchCashfreeCheckout(
           payment_session_id,
           async (result: any) => {
@@ -173,13 +174,10 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
               await supabase.from('promo_coupons').update({ uses_count: (appliedCoupon.uses_count || 0) + 1 }).eq('id', appliedCoupon.id);
             }
             onUnlockSuccess();
-            onClose();
-            setIsProcessing(false);
           },
           (err: any) => {
             console.warn('ScanPay unlock Cashfree error:', err);
-            setModalErr('Payment gateway was closed or cancelled. Please try again.');
-            setIsProcessing(false);
+            window.dispatchEvent(new CustomEvent('toast-alert', { detail: { message: 'Payment incomplete or cancelled. Please try again.', type: 'error' } }));
           }
         );
       } else {
