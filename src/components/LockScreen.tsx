@@ -437,19 +437,9 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
 
         console.log("LockScreen: Profile ready, unlocking...");
         setIsLoading(false);
-
-        // Instant unlock for Google OAuth users with default PIN '0000' or no custom PIN
+        // Force users to create a PIN if they have the default '0000' or no custom PIN
         if (!userProf.pin || userProf.pin === '0000') {
-          playNotificationSound('success');
-          onUnlock(
-            uid,
-            userProf.name,
-            userProf.subscription_tier,
-            userProf.trial_start_date,
-            userProf.pin,
-            userProf.premium_expires_at,
-            userProf.trial_expire_date
-          );
+          setStep('onboard-pin');
         } else {
           setStep('unlock');
         }
@@ -826,6 +816,25 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
     setErrorMsg('');
 
     try {
+      // If user profile already exists (e.g., Google OAuth or existing user login), just update the PIN
+      if (dbProfile) {
+        const { error } = await supabase.from('profiles').update({ pin: pin }).eq('id', userId);
+        if (error) throw error;
+        
+        localStorage.setItem('zb_user_pin', pin);
+        playNotificationSound('success');
+        onUnlock(
+          userId, 
+          dbProfile.name || username || 'User', 
+          dbProfile.subscription_tier || 'trial', 
+          dbProfile.trial_start_date || new Date().toISOString(), 
+          pin, 
+          dbProfile.premium_expires_at || null, 
+          dbProfile.trial_expire_date || null
+        );
+        return;
+      }
+
       const devId = await getDeviceId();
       const myReferralCode = 'ZB-' + Math.random().toString(36).substring(2, 10).toUpperCase();
       const pendingReferral = localStorage.getItem('zb_pending_referral') || null;
