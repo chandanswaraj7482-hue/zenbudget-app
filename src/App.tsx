@@ -1940,16 +1940,13 @@ const App: React.FC = () => {
                   }, { onConflict: 'id' });
                 }
               } else {
-                const defaultGoal = { id: Date.now().toString(), name: 'Emergency Fund', targetAmount: 10000, currentAmount: 0, color: '#10b981' };
-                setGoals([defaultGoal]);
+                setGoals([]);
               }
             } catch (_) {
-              const defaultGoal = { id: Date.now().toString(), name: 'Emergency Fund', targetAmount: 10000, currentAmount: 0, color: '#10b981' };
-              setGoals([defaultGoal]);
+              setGoals([]);
             }
           } else {
-            const defaultGoal = { id: Date.now().toString(), name: 'Emergency Fund', targetAmount: 10000, currentAmount: 0, color: '#10b981' };
-            setGoals([defaultGoal]);
+            setGoals([]);
           }
         }
       } catch (_goalsErr) {
