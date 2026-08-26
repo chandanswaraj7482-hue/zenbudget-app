@@ -788,8 +788,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                         try { window.open(payUrl, '_system'); } catch (e) { window.location.href = payUrl; }
                       }
                       setPaymentStep('details');
-                    } else {
                       // Web / Mobile Browser: Launch Cashfree Drop-in Checkout Modal directly!
+                      onClose(); // Automatically close paywall so Cashfree popup is instantly visible!
                       launchCashfreeCheckout(
                         payment_session_id,
                         (result: any) => {
@@ -801,11 +801,11 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                               });
                           }
                           onUpgradeSuccess(billingCycle);
-                          onClose();
                         },
                         (err: any) => {
                           console.warn('Cashfree payment modal dismissed/failed:', err);
                           setPaymentStep('details');
+                          window.dispatchEvent(new CustomEvent('toast-alert', { detail: { message: 'Payment incomplete or cancelled. Please try again.', type: 'error' } }));
                           if (err && typeof err === 'string' && err.includes('Cashfree SDK')) {
                             // Direct UPI Fallback intent if SDK not loaded
                             const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
