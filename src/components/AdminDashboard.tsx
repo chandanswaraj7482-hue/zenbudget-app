@@ -122,38 +122,38 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [lifetimePrice, setLifetimePrice] = useState<number>(() => getInitialPrice('lifetime', 2499));
 
   // USD Subscription Pricing
-  const [usdMonthlyPrice, setUsdMonthlyPrice] = useState<number>(() => getInitialPrice('usd_monthly', 4.99));
+  const [usdMonthlyPrice, setUsdMonthlyPrice] = useState<number>(() => getInitialPrice('usd_monthly', 6.99));
   const [usdYearlyPrice, setUsdYearlyPrice] = useState<number>(() => getInitialPrice('usd_yearly', 19.99));
   const [usdLifetimePrice, setUsdLifetimePrice] = useState<number>(() => getInitialPrice('usd_lifetime', 29.99));
 
   // EUR Subscription Pricing
-  const [eurMonthlyPrice, setEurMonthlyPrice] = useState<number>(() => getInitialPrice('eur_monthly', 4.99));
+  const [eurMonthlyPrice, setEurMonthlyPrice] = useState<number>(() => getInitialPrice('eur_monthly', 6.99));
   const [eurYearlyPrice, setEurYearlyPrice] = useState<number>(() => getInitialPrice('eur_yearly', 19.99));
   const [eurLifetimePrice, setEurLifetimePrice] = useState<number>(() => getInitialPrice('eur_lifetime', 29.99));
 
   // GBP Subscription Pricing
-  const [gbpMonthlyPrice, setGbpMonthlyPrice] = useState<number>(() => getInitialPrice('gbp_monthly', 4.99));
-  const [gbpYearlyPrice, setGbpYearlyPrice] = useState<number>(() => getInitialPrice('gbp_yearly', 19.99));
+  const [gbpMonthlyPrice, setGbpMonthlyPrice] = useState<number>(() => getInitialPrice('gbp_monthly', 5.99));
+  const [gbpYearlyPrice, setGbpYearlyPrice] = useState<number>(() => getInitialPrice('gbp_yearly', 17.99));
   const [gbpLifetimePrice, setGbpLifetimePrice] = useState<number>(() => getInitialPrice('gbp_lifetime', 24.99));
 
   // CAD Subscription Pricing
-  const [cadMonthlyPrice, setCadMonthlyPrice] = useState<number>(() => getInitialPrice('cad_monthly', 6.99));
-  const [cadYearlyPrice, setCadYearlyPrice] = useState<number>(() => getInitialPrice('cad_yearly', 26.99));
+  const [cadMonthlyPrice, setCadMonthlyPrice] = useState<number>(() => getInitialPrice('cad_monthly', 9.99));
+  const [cadYearlyPrice, setCadYearlyPrice] = useState<number>(() => getInitialPrice('cad_yearly', 27.99));
   const [cadLifetimePrice, setCadLifetimePrice] = useState<number>(() => getInitialPrice('cad_lifetime', 39.99));
 
   // AUD Subscription Pricing
-  const [audMonthlyPrice, setAudMonthlyPrice] = useState<number>(() => getInitialPrice('aud_monthly', 7.99));
+  const [audMonthlyPrice, setAudMonthlyPrice] = useState<number>(() => getInitialPrice('aud_monthly', 10.99));
   const [audYearlyPrice, setAudYearlyPrice] = useState<number>(() => getInitialPrice('aud_yearly', 29.99));
   const [audLifetimePrice, setAudLifetimePrice] = useState<number>(() => getInitialPrice('aud_lifetime', 44.99));
 
   // AED Subscription Pricing
-  const [aedMonthlyPrice, setAedMonthlyPrice] = useState<number>(() => getInitialPrice('aed_monthly', 19.99));
-  const [aedYearlyPrice, setAedYearlyPrice] = useState<number>(() => getInitialPrice('aed_yearly', 79.99));
-  const [aedLifetimePrice, setAedLifetimePrice] = useState<number>(() => getInitialPrice('aed_lifetime', 119.99));
+  const [aedMonthlyPrice, setAedMonthlyPrice] = useState<number>(() => getInitialPrice('aed_monthly', 24.99));
+  const [aedYearlyPrice, setAedYearlyPrice] = useState<number>(() => getInitialPrice('aed_yearly', 69.99));
+  const [aedLifetimePrice, setAedLifetimePrice] = useState<number>(() => getInitialPrice('aed_lifetime', 109.99));
 
   // SGD Subscription Pricing
-  const [sgdMonthlyPrice, setSgdMonthlyPrice] = useState<number>(() => getInitialPrice('sgd_monthly', 6.99));
-  const [sgdYearlyPrice, setSgdYearlyPrice] = useState<number>(() => getInitialPrice('sgd_yearly', 26.99));
+  const [sgdMonthlyPrice, setSgdMonthlyPrice] = useState<number>(() => getInitialPrice('sgd_monthly', 9.99));
+  const [sgdYearlyPrice, setSgdYearlyPrice] = useState<number>(() => getInitialPrice('sgd_yearly', 27.99));
   const [sgdLifetimePrice, setSgdLifetimePrice] = useState<number>(() => getInitialPrice('sgd_lifetime', 39.99));
 
   // Multi-Currency Extra Slot Pricing State (For Trial Users)

@@ -28,18 +28,30 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
       numPrice = stored.usd_scan_pay_price || 4.99;
       priceFormatted = `$${numPrice}`;
     } else if (currencySymbol === '€') {
-      numPrice = stored.eur_scan_pay_price || 4.49;
+      numPrice = stored.eur_scan_pay_price || 4.99;
       priceFormatted = `€${numPrice}`;
     } else if (currencySymbol === '£') {
       numPrice = stored.gbp_scan_pay_price || 3.99;
       priceFormatted = `£${numPrice}`;
+    } else if (currencySymbol === 'C$') {
+      numPrice = stored.cad_scan_pay_price || 6.99;
+      priceFormatted = `C$${numPrice}`;
+    } else if (currencySymbol === 'A$') {
+      numPrice = stored.aud_scan_pay_price || 7.99;
+      priceFormatted = `A$${numPrice}`;
+    } else if (currencySymbol === 'AED') {
+      numPrice = stored.aed_scan_pay_price || 17.99;
+      priceFormatted = `AED ${numPrice}`;
+    } else if (currencySymbol === 'S$') {
+      numPrice = stored.sgd_scan_pay_price || 6.99;
+      priceFormatted = `S$${numPrice}`;
     } else {
       numPrice = stored.inr_scan_pay_price || 79;
-      priceFormatted = `${currencySymbol}${numPrice}`;
+      priceFormatted = `₹${numPrice}`;
     }
   } catch (_) {
-    numPrice = 79;
-    priceFormatted = `${currencySymbol}79`;
+    numPrice = currencySymbol === '$' ? 4.99 : 79;
+    priceFormatted = currencySymbol === '$' ? `$4.99` : `₹79`;
   }
 
   const [couponCode, setCouponCode] = useState('');

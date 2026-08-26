@@ -2366,12 +2366,14 @@ const App: React.FC = () => {
   const getExtraSlotAmountNumber = () => {
     let dynamicPrices: any = {};
     try { dynamicPrices = JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}'); } catch (_) {}
-    if (currency === 'INR') return dynamicPrices.inr_slot_price || 10;
+    if (currency === 'INR') return dynamicPrices.inr_slot_price || 20;
     if (currency === 'USD') return dynamicPrices.usd_slot_price || 1.99;
-    if (currency === 'EUR') return dynamicPrices.eur_slot_price || 1.85;
-    if (currency === 'GBP') return dynamicPrices.gbp_slot_price || 1.59;
-    if (currency === 'CAD') return dynamicPrices.cad_slot_price || 2.49;
-    if (currency === 'AUD') return dynamicPrices.aud_slot_price || 2.79;
+    if (currency === 'EUR') return dynamicPrices.eur_slot_price || 1.99;
+    if (currency === 'GBP') return dynamicPrices.gbp_slot_price || 1.79;
+    if (currency === 'CAD') return dynamicPrices.cad_slot_price || 2.99;
+    if (currency === 'AUD') return dynamicPrices.aud_slot_price || 2.99;
+    if (currency === 'AED') return dynamicPrices.aed_slot_price || 6.99;
+    if (currency === 'SGD') return dynamicPrices.sgd_slot_price || 2.99;
     const baseUSD = dynamicPrices.usd_slot_price || 1.99;
     return parseFloat((baseUSD * (rates[currency] || 1)).toFixed(2));
   };

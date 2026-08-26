@@ -22,41 +22,44 @@ export type PlanCycle = 'monthly' | 'yearly' | 'lifetime';
 
 export const LOCALIZED_PRICES_MONTHLY: Record<string, { amount: number; symbol: string; label: string }> = {
   INR: { amount: 149, symbol: '₹', label: '₹149/mo' },
-  USD: { amount: 4.99, symbol: '$', label: '$4.99/mo' },
-  EUR: { amount: 5.49, symbol: '€', label: '€5.49/mo' },
-  GBP: { amount: 4.99, symbol: '£', label: '£4.99/mo' },
-  CAD: { amount: 6.99, symbol: 'C$', label: 'C$6.99/mo' },
-  AUD: { amount: 7.99, symbol: 'A$', label: 'A$7.99/mo' },
+  USD: { amount: 6.99, symbol: '$', label: '$6.99/mo' },
+  EUR: { amount: 6.99, symbol: '€', label: '€6.99/mo' },
+  GBP: { amount: 5.99, symbol: '£', label: '£5.99/mo' },
+  CAD: { amount: 9.99, symbol: 'C$', label: 'C$9.99/mo' },
+  AUD: { amount: 10.99, symbol: 'A$', label: 'A$10.99/mo' },
   JPY: { amount: 750, symbol: '¥', label: '¥750/mo' },
-  AED: { amount: 19, symbol: 'AED', label: '19 AED/mo' },
-  SAR: { amount: 19, symbol: 'SAR', label: '19 SAR/mo' },
-  CNY: { amount: 35, symbol: '¥', label: '¥35/mo' }
+  AED: { amount: 24.99, symbol: 'AED', label: '24.99 AED/mo' },
+  SAR: { amount: 24.99, symbol: 'SAR', label: '24.99 SAR/mo' },
+  CNY: { amount: 35, symbol: '¥', label: '¥35/mo' },
+  SGD: { amount: 9.99, symbol: 'S$', label: 'S$9.99/mo' }
 };
 
 export const LOCALIZED_PRICES_YEARLY: Record<string, { amount: number; symbol: string; label: string }> = {
   INR: { amount: 1499, symbol: '₹', label: '₹1,499/yr' },
-  USD: { amount: 49.99, symbol: '$', label: '$49.99/yr' },
-  EUR: { amount: 54.99, symbol: '€', label: '€54.99/yr' },
-  GBP: { amount: 49.99, symbol: '£', label: '£49.99/yr' },
-  CAD: { amount: 69.99, symbol: 'C$', label: 'C$69.99/yr' },
-  AUD: { amount: 79.99, symbol: 'A$', label: 'A$79.99/yr' },
+  USD: { amount: 19.99, symbol: '$', label: '$19.99/yr' },
+  EUR: { amount: 19.99, symbol: '€', label: '€19.99/yr' },
+  GBP: { amount: 17.99, symbol: '£', label: '£17.99/yr' },
+  CAD: { amount: 27.99, symbol: 'C$', label: 'C$27.99/yr' },
+  AUD: { amount: 29.99, symbol: 'A$', label: 'A$29.99/yr' },
   JPY: { amount: 7500, symbol: '¥', label: '¥7,500/yr' },
-  AED: { amount: 189, symbol: 'AED', label: '189 AED/yr' },
-  SAR: { amount: 189, symbol: 'SAR', label: '189 SAR/yr' },
-  CNY: { amount: 350, symbol: '¥', label: '¥350/yr' }
+  AED: { amount: 69.99, symbol: 'AED', label: '69.99 AED/yr' },
+  SAR: { amount: 69.99, symbol: 'SAR', label: '69.99 SAR/yr' },
+  CNY: { amount: 350, symbol: '¥', label: '¥350/yr' },
+  SGD: { amount: 27.99, symbol: 'S$', label: 'S$27.99/yr' }
 };
 
 export const LOCALIZED_PRICES_LIFETIME: Record<string, { amount: number; symbol: string; label: string }> = {
   INR: { amount: 2499, symbol: '₹', label: '₹2,499' },
-  USD: { amount: 79.99, symbol: '$', label: '$79.99' },
-  EUR: { amount: 84.99, symbol: '€', label: '€84.99' },
-  GBP: { amount: 79.99, symbol: '£', label: '£79.99' },
-  CAD: { amount: 109.99, symbol: 'C$', label: 'C$109.99' },
-  AUD: { amount: 119.99, symbol: 'A$', label: 'A$119.99' },
-  JPY: { amount: 11900, symbol: '¥', label: '¥11,900' },
-  AED: { amount: 299, symbol: 'AED', label: '299 AED' },
-  SAR: { amount: 299, symbol: 'SAR', label: '299 SAR' },
-  CNY: { amount: 560, symbol: '¥', label: '¥560' }
+  USD: { amount: 29.99, symbol: '$', label: '$29.99' },
+  EUR: { amount: 29.99, symbol: '€', label: '€29.99' },
+  GBP: { amount: 24.99, symbol: '£', label: '£24.99' },
+  CAD: { amount: 39.99, symbol: 'C$', label: 'C$39.99' },
+  AUD: { amount: 44.99, symbol: 'A$', label: 'A$44.99' },
+  JPY: { amount: 15000, symbol: '¥', label: '¥15,000' },
+  AED: { amount: 109.99, symbol: 'AED', label: '109.99 AED' },
+  SAR: { amount: 109.99, symbol: 'SAR', label: '109.99 SAR' },
+  CNY: { amount: 750, symbol: '¥', label: '¥750' },
+  SGD: { amount: 39.99, symbol: 'S$', label: 'S$39.99' }
 };
 
 export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
