@@ -803,8 +803,9 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
     }
   };
 
-  const handlePinConfirmSubmit = async () => {
-    if (confirmPin !== pin) {
+  const handlePinConfirmSubmit = async (finalConfirmPin?: string) => {
+    const confirmVal = finalConfirmPin && typeof finalConfirmPin === 'string' ? finalConfirmPin : confirmPin;
+    if (confirmVal !== pin) {
       setErrorMsg('PINs do not match. Start over.');
       playNotificationSound('warning');
       setPin('');
@@ -962,7 +963,16 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
       const setter = step === 'onboard-pin' ? setPin : setConfirmPin;
       
       if (current.length < 4) {
-        setter(prev => prev + num);
+        const nextPin = current + num;
+        setter(nextPin);
+        
+        if (nextPin.length === 4) {
+          if (step === 'onboard-pin') {
+            setTimeout(() => setStep('onboard-confirm'), 300);
+          } else if (step === 'onboard-confirm') {
+            setTimeout(() => handlePinConfirmSubmit(nextPin), 300);
+          }
+        }
       }
     } else if (step === 'unlock') {
       if (enteredPin.length < 4) {
@@ -1837,23 +1847,6 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               </div>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Onboarding On-Screen Confirmation Buttons (Keypad Bottom) */}
-      {!isLoading && step === 'onboard-pin' && pin.length === 4 && (
-        <div style={{ width: '100%', maxWidth: '300px', marginTop: '20px' }}>
-          <button onClick={() => setStep('onboard-confirm')} className="glass-button active animate-fade-in" style={{ width: '100%', padding: '14px', borderRadius: '16px', fontWeight: 700, background: 'linear-gradient(to right, var(--primary), #06b6d4)', border: 'none', boxShadow: '0 4px 15px rgba(34, 197, 94, 0.3)' }}>
-            Next Step
-          </button>
-        </div>
-      )}
-      
-      {!isLoading && step === 'onboard-confirm' && confirmPin.length === 4 && (
-        <div style={{ width: '100%', maxWidth: '300px', marginTop: '20px' }}>
-          <button onClick={handlePinConfirmSubmit} className="glass-button active animate-fade-in" style={{ width: '100%', padding: '14px', borderRadius: '16px', fontWeight: 700, background: 'linear-gradient(to right, var(--primary), #06b6d4)', border: 'none', boxShadow: '0 4px 15px rgba(34, 197, 94, 0.3)' }}>
-            Create Profile
-          </button>
         </div>
       )}
 
