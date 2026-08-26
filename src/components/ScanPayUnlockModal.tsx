@@ -227,11 +227,12 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
       zIndex: 1400, display: 'flex', justifyContent: 'center', alignItems: 'center',
       padding: '20px', animation: 'fadeIn 0.2s ease-out'
     }}>
-      <div className="glass-panel" style={{
+      <div style={{
         width: '100%', maxWidth: '420px',
         background: 'linear-gradient(180deg, rgba(16, 185, 129, 0.12) 0%, rgba(15, 23, 42, 0.98) 100%)',
         border: '1px solid rgba(16, 185, 129, 0.4)', borderRadius: '24px',
-        padding: '24px', position: 'relative', boxShadow: '0 20px 50px rgba(0,0,0,0.6)'
+        padding: '24px', position: 'relative', boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+        backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)'
       }}>
         <button
           onClick={onClose}
