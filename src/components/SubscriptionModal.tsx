@@ -787,7 +787,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                         console.warn('Browser.open failed, launching window fallback:', browserErr);
                         try { window.open(payUrl, '_system'); } catch (e) { window.location.href = payUrl; }
                       }
+                      }
                       setPaymentStep('details');
+                    } else {
                       // Web / Mobile Browser: Launch Cashfree Drop-in Checkout Modal directly!
                       onClose(); // Automatically close paywall so Cashfree popup is instantly visible!
                       launchCashfreeCheckout(
