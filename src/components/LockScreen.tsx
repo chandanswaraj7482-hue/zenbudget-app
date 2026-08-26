@@ -1380,14 +1380,12 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
       {/* STEP: Onboarding PIN Setup (Choose & Confirm) */}
       {!isLoading && (step === 'onboard-pin' || step === 'onboard-confirm') && (
         <div
-          className="glass-panel"
           style={{
             width: '100%',
             maxWidth: '360px',
-            padding: '32px 24px 24px',
+            padding: '24px 20px 20px',
             borderRadius: '28px',
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+            background: 'transparent',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
