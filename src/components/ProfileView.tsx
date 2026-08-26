@@ -266,6 +266,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   style={{
                     width: '36px',
                     height: '36px',
+                    minWidth: '36px',
+                    minHeight: '36px',
                     borderRadius: '50%',
                     overflow: 'hidden',
                     border: avatarUrl === url ? '2px solid var(--primary)' : '1px solid var(--border-input)',
@@ -285,6 +287,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 style={{
                   width: '36px',
                   height: '36px',
+                  minWidth: '36px',
+                  minHeight: '36px',
                   borderRadius: '50%',
                   border: '1.5px dashed var(--primary)',
                   background: 'rgba(34, 197, 94, 0.15)',
@@ -309,6 +313,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   style={{
                     width: '36px',
                     height: '36px',
+                    minWidth: '36px',
+                    minHeight: '36px',
                     borderRadius: '50%',
                     border: '1.5px dashed var(--danger)',
                     background: 'rgba(239, 68, 68, 0.15)',
