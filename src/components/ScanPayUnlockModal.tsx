@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, QrCode, Zap, Check, Lock, ShieldCheck } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { launchCashfreeCheckout } from '../utils/cashfreeHelper';
@@ -220,7 +221,7 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
 
   const displayPrice = finalPrice === 0 ? 'FREE' : `${currencySymbol}${finalPrice}`;
 
-  return (
+  return createPortal(
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
       backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(16px)',
@@ -370,6 +371,7 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
           )}
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
