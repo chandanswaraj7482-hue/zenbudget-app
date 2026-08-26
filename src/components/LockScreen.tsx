@@ -1024,6 +1024,9 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         }
       }
       await supabase.auth.signOut();
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
       localStorage.removeItem('zb_local_session_profile');
       setUserId('');
       setUsername('');
@@ -1031,9 +1034,6 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
       setEmail('');
       setPassword('');
       setStep('auth');
-    } catch (err) {
-      console.error('Logout error:', err);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -1545,6 +1545,29 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               ← Back to Create PIN
             </button>
           )}
+
+          <button
+            onClick={handleSignOut}
+            style={{
+              marginTop: '32px',
+              padding: '6px 12px',
+              background: 'rgba(239, 68, 68, 0.05)',
+              border: '1px solid rgba(239, 68, 68, 0.2)',
+              borderRadius: '8px',
+              color: '#f87171',
+              fontSize: '11px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <LogOut size={12} />
+            <span>Sign Out of Account</span>
+          </button>
+
         </div>
       )}
 
