@@ -1165,7 +1165,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                   letterSpacing: '0.02em'
                 }}
               >
-                <span>⚡ Pay via Cashfree / PhonePe</span>
+                <span>⚡ Pay via PhonePe / GPay</span>
               </button>
 
               {/* Standard UPI Direct Button */}
