@@ -1359,7 +1359,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
           }] : [])
         ];
 
-        const visibleBadgesList = showAllBadges ? allBadgesList : allBadgesList.slice(0, 3);
+        // Separate badges: unclaimed (active/upcoming) vs claimed (completed)
+        const unclaimedBadges = allBadgesList.filter(b => !claimedBadges.includes(b.id));
+        const claimedBadgesList = allBadgesList.filter(b => claimedBadges.includes(b.id));
+
+        // Sort unclaimed badges so that ready to claim (canClaim) come first
+        const sortedUnclaimed = [...unclaimedBadges].sort((a, b) => {
+          const aCanClaim = a.isUnlocked && !claimedBadges.includes(a.id);
+          const bCanClaim = b.isUnlocked && !claimedBadges.includes(b.id);
+          if (aCanClaim && !bCanClaim) return -1;
+          if (!aCanClaim && bCanClaim) return 1;
+          return 0;
+        });
+
+        // Front view shows active/upcoming badges (hiding completed ones unless all are completed)
+        const frontBadgesList = [...sortedUnclaimed, ...claimedBadgesList].slice(0, 3);
+        const visibleBadgesList = showAllBadges ? [...sortedUnclaimed, ...claimedBadgesList] : frontBadgesList;
         const unlockedCount = allBadgesList.filter(b => b.isUnlocked).length;
 
         return (
