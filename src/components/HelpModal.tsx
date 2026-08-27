@@ -168,6 +168,44 @@ export const HelpModal: React.FC<HelpModalProps> = ({
       return isEng ? `👤 Your registered name is **${userName || 'User'}**! ✨` : `👤 Aapka registered naam **${userName || 'User'}** hai! ✨`;
     }
 
+    // 0.2. Monthly Income / Earnings
+    if (msg.includes('income') || msg.includes('salary') || msg.includes('kamai') || msg.includes('credited') || msg.includes('kitni aayi') || msg.includes('kitna kamaya') || msg.includes('aaya')) {
+      if (isEng) {
+        return `💵 Total Income / Credit this month is **${currencySymbol}${totalIncome.toLocaleString()}**! Keep tracking every credit entry to maintain an accurate ledger. 📈✨`;
+      }
+      return `💵 Iss month aapki total Income / Credit **${currencySymbol}${totalIncome.toLocaleString()}** hai! Daily entries log karke aap exact savings rate monitor kar sakte ho. 📈✨`;
+    }
+
+    // 0.3. Recent Transactions Logged
+    if (msg.includes('transaction') || msg.includes('history') || msg.includes('recent') || msg.includes('pichla') || msg.includes('last entry') || msg.includes('kharcha list')) {
+      if (recentTxsText) {
+        if (isEng) {
+          return `📝 Recent Transactions Logged:\n• ${recentTxsText.replace(/; /g, '\n• ')}\n\nView full detailed history under "Ledger" tab! 📊`;
+        }
+        return `📝 Recent Transactions Logged:\n• ${recentTxsText.replace(/; /g, '\n• ')}\n\nPoori detail ke liye "Ledger" tab dekhein! 📊`;
+      }
+    }
+
+    // 0.4. Category Budgets
+    if (msg.includes('budget') || msg.includes('limit') || msg.includes('category limit')) {
+      if (budgetSummaryText) {
+        if (isEng) {
+          return `📊 Active Category Budgets & Spending:\n• ${budgetSummaryText.replace(/, /g, '\n• ')}\n\nManage limits under "Limits" tab! 💡`;
+        }
+        return `📊 Active Category Budgets & Spending:\n• ${budgetSummaryText.replace(/, /g, '\n• ')}\n\nLimits set karke aap monthly savings increase kar sakte ho! 💡`;
+      }
+    }
+
+    // 0.5. Savings Goals
+    if (msg.includes('goal') || msg.includes('target') || msg.includes('bachat target') || msg.includes('saving goal')) {
+      if (goalSummaryText) {
+        if (isEng) {
+          return `🎯 Savings Goals Progress:\n• ${goalSummaryText.replace(/, /g, '\n• ')}\n\nKeep contributing to reach your targets faster! 🚀`;
+        }
+        return `🎯 Savings Goals Progress:\n• ${goalSummaryText.replace(/, /g, '\n• ')}\n\nDaily small savings se aapke saare goals jaldi complete honge! 🚀`;
+      }
+    }
+
     // 1. Customer Support / Email / Contact
     if ((msg.includes('email') && !msg.includes('mera') && !msg.includes('my') && !msg.includes('kya')) || msg.includes('support') || msg.includes('contact') || msg.includes('helpdesk') || msg.includes('customer') || msg.includes('mail')) {
       if (isEng) {
@@ -285,11 +323,14 @@ export const HelpModal: React.FC<HelpModalProps> = ({
       return `💸 Tax Saving Tips (Section 80C):\nAap saal me ₹1.5 Lakh tak tax bachaa sakte ho:\n• ELSS Mutual Funds (3 saal lock-in)\n• PPF (Public Provident Fund)\n• NPS (Extra ₹50k under 80CCD)\n• Medical Health Insurance (Sec 80D) 📊`;
     }
 
-    // 15. Universal Smart Money & App Guide Fallback (Clean, no unsolicited email prompts)
+    // 15. Universal Intelligent Conversational Fallback with User Real-Time Context
+    const safeAccs = Array.isArray(accounts) ? accounts : [];
+    const totalAccBal = safeAccs.reduce((sum, a) => sum + (Number(a?.balance) || 0), 0);
+
     if (isEng) {
-      return `💡 Monthly activity summary (${currencySymbol}${totalIncome.toLocaleString()} income, ${currencySymbol}${totalExpense.toLocaleString()} spent): Your highest spending category is **${topCat.toUpperCase()}** (${currencySymbol}${topCatAmt.toLocaleString()}). Keep tracking daily entries to boost your ${savingsPct}% savings rate! 🌿✨`;
+      return `🌿 Hii ${userName || 'friend'}! I'm Zen — your personal AI Financial Coach. Right now, your total wallet balance is **${currencySymbol}${totalAccBal.toLocaleString()}**, monthly income is **${currencySymbol}${totalIncome.toLocaleString()}**, total expenses are **${currencySymbol}${totalExpense.toLocaleString()}**, and top spending category is **${topCat.toUpperCase()}** (${currencySymbol}${topCatAmt.toLocaleString()}).\n\nAsk me about your balance, loans, category spending, savings goals, or any money advice! 💡✨`;
     }
-    return `💡 Monthly activity summary (${currencySymbol}${totalIncome.toLocaleString()} income, ${currencySymbol}${totalExpense.toLocaleString()} spent): Aapka top expense category **${topCat.toUpperCase()}** (${currencySymbol}${topCatAmt.toLocaleString()}) hai. Daily entries log karke apna ${savingsPct}% savings rate maintain rakhein! 🌿✨`;
+    return `🌿 Hii ${userName || 'yaar'}! Main Zen hu — aapka AI Financial Coach. Abhi aapka total balance **${currencySymbol}${totalAccBal.toLocaleString()}** hai, iss month income **${currencySymbol}${totalIncome.toLocaleString()}**, total kharcha **${currencySymbol}${totalExpense.toLocaleString()}**, aur sabse zyada kharcha **${topCat.toUpperCase()}** (${currencySymbol}${topCatAmt.toLocaleString()}) me hua hai.\n\nAap mujhse balance, loans, spending habits, budgets ya kisi bhi financial topic ke baare me pooch sakte ho! 🤝✨`;
   }
 
   const handleSend = async (e?: React.FormEvent, customPrompt?: string) => {
