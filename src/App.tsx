@@ -4804,12 +4804,33 @@ const App: React.FC = () => {
                     type="button"
                     onClick={() => {
                       const friendName = activeLoanReminderModal.loan.personName;
-                      const upiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=${encodeURIComponent(friendName)}&am=${activeLoanReminderModal.remainingAmount}&cu=INR&tn=${encodeURIComponent('Loan Repayment to ' + friendName)}`;
-                      try { window.location.href = upiUrl; } catch (e) {}
-                      handleRepayLoan(activeLoanReminderModal.loan.id, activeLoanReminderModal.remainingAmount, loanReminderAccountId || accounts[0]?.id || '1');
-                      setActiveLoanReminderModal(null);
-                      triggerToast(`Loan repayment to ${friendName} processed via UPI! 🎉`, 'success');
-                      try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
+                      const remAmt = activeLoanReminderModal.remainingAmount;
+                      const loanId = activeLoanReminderModal.loan.id;
+
+                      const profileObj = {
+                        id: currentProfileId,
+                        has_scan_pay_access: localStorage.getItem('has_scan_pay_access') === 'true' || localStorage.getItem(`zb_scan_pay_access_${currentProfileId}`) === 'true',
+                        isAdminUnlocked: localStorage.getItem('admin_overridden') === 'true'
+                      };
+
+                      const launched = handleZenBudgetPaymentSystem(
+                        'SCAN_OR_UPI',
+                        {
+                          vpa: 'chandanswaraj7482@okicici',
+                          payeeName: friendName,
+                          amount: remAmt,
+                          note: `Loan Repayment to ${friendName}`
+                        },
+                        profileObj as any,
+                        () => setIsScanPayUnlockOpen(true)
+                      );
+
+                      if (launched) {
+                        handleRepayLoan(loanId, remAmt, loanReminderAccountId || accounts[0]?.id || '1');
+                        setActiveLoanReminderModal(null);
+                        triggerToast(`Loan repayment to ${friendName} processed via PhonePe/UPI! 🎉`, 'success');
+                        try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
+                      }
                     }}
                     style={{
                       width: '100%', padding: '14px', borderRadius: '14px', border: 'none',
