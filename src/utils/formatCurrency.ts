@@ -12,9 +12,7 @@ export const formatCurrency = (
     return `${currencySymbol}0`;
   }
 
-  // INR (₹) always rounds to clean integer whole numbers without messy floating points like ₹87.88
-  const isINR = currencySymbol === '₹' || currencySymbol === 'INR';
-  const targetDecimals = decimals !== undefined ? decimals : (isINR ? 0 : (amount % 1 !== 0 ? 2 : 0));
+  const targetDecimals = decimals !== undefined ? decimals : (amount % 1 !== 0 ? 2 : 0);
 
   const factor = Math.pow(10, targetDecimals);
   const rounded = Math.round((amount + Number.EPSILON) * factor) / factor;

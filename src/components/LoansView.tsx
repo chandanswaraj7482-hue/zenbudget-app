@@ -36,7 +36,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
   const [repayModalLoan, setRepayModalLoan] = useState<LoanRecord | null>(null);
 
   const [interestRate, setInterestRate] = useState('');
-  const [interestType, setInterestType] = useState<'monthly' | 'yearly'>('yearly');
+  const [interestType, setInterestType] = useState<'monthly' | 'yearly'>('monthly');
   const [interestCalcMode, setInterestCalcMode] = useState<'simple' | 'reducing' | 'compound'>('simple');
   const [tenureMonths, setTenureMonths] = useState<number>(12);
   const [modalErr, setModalErr] = useState<string | null>(null);
@@ -105,9 +105,8 @@ export const LoansView: React.FC<LoansViewProps> = ({
           totalInterest = 0;
         }
       } else if (interestCalcMode === 'compound') {
-        const timeInYears = isYearlyMode ? durationMonths / 12 : durationMonths;
-        const ratePerPeriod = R / 100;
-        const totalPayableCalc = P * Math.pow(1 + ratePerPeriod, timeInYears);
+        const monthlyRate = (isYearlyMode ? R / 12 : R) / 100;
+        const totalPayableCalc = P * Math.pow(1 + monthlyRate, durationMonths);
         totalInterest = Math.max(0, totalPayableCalc - P);
         emiInstallment = totalPayableCalc / durationMonths;
       } else {
