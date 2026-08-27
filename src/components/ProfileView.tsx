@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, KeyRound, Check, Eye, EyeOff, Globe, Banknote, ArrowLeft, Mail, Moon, Sun, Upload, Trash2 } from 'lucide-react';
+import { User, KeyRound, Check, Eye, EyeOff, Globe, Banknote, ArrowLeft, Mail, Moon, Sun, Upload, Trash2, LogOut } from 'lucide-react';
 import { t } from '../utils/i18n';
 import { detectLocationFromIP } from '../utils/geoTracker';
 
@@ -13,6 +13,7 @@ interface ProfileViewProps {
   onSaveProfile: (newName: string, newPin: string, newCurrency: string, newLanguage: string, newEmail?: string) => Promise<void>;
   onToggleTheme?: (newTheme: 'dark' | 'light') => void;
   onBack?: () => void;
+  onLogout?: () => void;
 }
 
 export const ProfileView: React.FC<ProfileViewProps> = ({
@@ -24,7 +25,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   currentTheme = 'dark',
   onSaveProfile,
   onToggleTheme,
-  onBack
+  onBack,
+  onLogout
 }) => {
   const [name, setName] = useState(currentName);
   const [email, setEmail] = useState(currentEmail || localStorage.getItem('zb_user_email') || '');
@@ -69,6 +71,11 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     return localStorage.getItem('zb_user_avatar') || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentName || 'User')}&background=22c55e&color=fff&rounded=true`;
   });
 
+  const [rawUploadedImage, setRawUploadedImage] = useState<string | null>(null);
+  const [cropZoom, setCropZoom] = useState<number>(1);
+  const [cropPanX, setCropPanX] = useState<number>(0);
+  const [cropPanY, setCropPanY] = useState<number>(0);
+
   const handleAvatarFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -79,53 +86,53 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        try {
-          const canvas = document.createElement('canvas');
-          const maxSize = 256;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > maxSize) {
-              height = Math.round((height * maxSize) / width);
-              width = maxSize;
-            }
-          } else {
-            if (height > maxSize) {
-              width = Math.round((width * maxSize) / height);
-              height = maxSize;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, width, height);
-            const compressed = canvas.toDataURL('image/jpeg', 0.85);
-            setAvatarUrl(compressed);
-            localStorage.setItem('zb_user_avatar', compressed);
-            window.dispatchEvent(new Event('profile_avatar_updated'));
-            setErrorMsg('');
-          }
-        } catch (err) {
-          console.warn('Canvas compression error:', err);
-          if (typeof event.target?.result === 'string') {
-            setAvatarUrl(event.target.result);
-            localStorage.setItem('zb_user_avatar', event.target.result);
-            window.dispatchEvent(new Event('profile_avatar_updated'));
-          }
-        }
-      };
       if (typeof event.target?.result === 'string') {
-        img.src = event.target.result;
+        setRawUploadedImage(event.target.result);
+        setCropZoom(1);
+        setCropPanX(0);
+        setCropPanY(0);
+        setErrorMsg('');
       }
     };
     reader.readAsDataURL(file);
-    // Reset file input so user can pick the same file again if desired
-    e.target.value = '';
+    if (e.target) e.target.value = '';
+  };
+
+  const handleApplyCrop = () => {
+    if (!rawUploadedImage) return;
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        const size = 300;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, size, size);
+
+          const minDim = Math.min(img.width, img.height);
+          const drawW = (img.width / minDim) * size * cropZoom;
+          const drawH = (img.height / minDim) * size * cropZoom;
+          const drawX = (size - drawW) / 2 + cropPanX;
+          const drawY = (size - drawH) / 2 + cropPanY;
+
+          ctx.drawImage(img, drawX, drawY, drawW, drawH);
+          const compressed = canvas.toDataURL('image/jpeg', 0.88);
+          setAvatarUrl(compressed);
+          localStorage.setItem('zb_user_avatar', compressed);
+          window.dispatchEvent(new Event('profile_avatar_updated'));
+        }
+      } catch (err) {
+        console.warn('Crop canvas error:', err);
+        setAvatarUrl(rawUploadedImage);
+        localStorage.setItem('zb_user_avatar', rawUploadedImage);
+        window.dispatchEvent(new Event('profile_avatar_updated'));
+      }
+      setRawUploadedImage(null);
+    };
+    img.src = rawUploadedImage;
   };
 
   const googleAvatarSaved = localStorage.getItem('zb_google_avatar');
@@ -622,9 +629,182 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               </>
             )}
           </button>
+
+          {/* Sign Out Action Button */}
+          {onLogout && (
+            <button
+              type="button"
+              onClick={onLogout}
+              style={{
+                width: '100%',
+                marginTop: '12px',
+                padding: '13px',
+                borderRadius: '16px',
+                fontWeight: 700,
+                fontSize: '13px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                background: 'rgba(239, 68, 68, 0.08)',
+                color: '#ef4444',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <LogOut size={16} /> Sign Out of Account
+            </button>
+          )}
         </form>
       </div>
 
+      {/* Crop & Adjust Profile Picture Modal */}
+      {rawUploadedImage && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0, 0, 0, 0.85)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 999999,
+          padding: '20px'
+        }}>
+          <div style={{
+            width: '100%',
+            maxWidth: '380px',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-card)',
+            borderRadius: '24px',
+            padding: '24px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '16px',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.6)'
+          }}>
+            <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>
+              Crop & Adjust Profile Picture 🖼️
+            </h4>
+            <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', textAlign: 'center' }}>
+              Zoom & position your photo inside the circular frame
+            </p>
+
+            {/* Circular Preview Container */}
+            <div style={{
+              width: '180px',
+              height: '180px',
+              borderRadius: '50%',
+              overflow: 'hidden',
+              border: '3px solid var(--primary)',
+              boxShadow: '0 0 25px rgba(34, 197, 94, 0.3)',
+              position: 'relative',
+              background: '#000',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <img
+                src={rawUploadedImage}
+                alt="Crop preview"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  transform: `scale(${cropZoom}) translate(${cropPanX / cropZoom}px, ${cropPanY / cropZoom}px)`,
+                  transition: 'transform 0.05s ease-out'
+                }}
+              />
+            </div>
+
+            {/* Controls: Zoom slider & Pan */}
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                  <span>🔍 Zoom</span>
+                  <span>{cropZoom.toFixed(1)}x</span>
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="3"
+                  step="0.1"
+                  value={cropZoom}
+                  onChange={(e) => setCropZoom(parseFloat(e.target.value))}
+                  style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <div>
+                  <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '2px' }}>↔️ Pan Horizontal</div>
+                  <input
+                    type="range"
+                    min="-50"
+                    max="50"
+                    value={cropPanX}
+                    onChange={(e) => setCropPanX(parseInt(e.target.value))}
+                    style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer' }}
+                  />
+                </div>
+                <div>
+                  <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '2px' }}>↕️ Pan Vertical</div>
+                  <input
+                    type="range"
+                    min="-50"
+                    max="50"
+                    value={cropPanY}
+                    onChange={(e) => setCropPanY(parseInt(e.target.value))}
+                    style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer' }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', gap: '10px', width: '100%', marginTop: '8px' }}>
+              <button
+                type="button"
+                onClick={() => setRawUploadedImage(null)}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  borderRadius: '14px',
+                  border: '1px solid var(--border-input)',
+                  background: 'var(--bg-input)',
+                  color: 'var(--text-primary)',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleApplyCrop}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  borderRadius: '14px',
+                  border: 'none',
+                  background: 'var(--primary)',
+                  color: '#ffffff',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 15px rgba(34, 197, 94, 0.4)'
+                }}
+              >
+                Apply Crop ✓
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

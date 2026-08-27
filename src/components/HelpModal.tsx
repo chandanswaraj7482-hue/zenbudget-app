@@ -11,6 +11,7 @@ interface HelpModalProps {
   currencySymbol?: string;
   userName?: string;
   initialTab?: 'faq' | 'bot' | 'feedback';
+  accounts?: any[];
 }
 
 interface ChatMessage {
@@ -28,7 +29,8 @@ export const HelpModal: React.FC<HelpModalProps> = ({
   goals = [],
   currencySymbol = '₹',
   userName = 'User',
-  initialTab = 'bot'
+  initialTab = 'bot',
+  accounts = []
 }) => {
   if (!isOpen) return null;
 
@@ -137,7 +139,26 @@ export const HelpModal: React.FC<HelpModalProps> = ({
     const msg = rawText.toLowerCase().trim();
     const isEng = !/[अ-ह]/.test(rawText) && !/\b(kahan|kaise|mera|meri|mere|mujhe|btao|batao|apka|aapka|kya|kab|kaun|hai|hain|rha|rhi|rhe|hoga|hogaye)\b/i.test(msg);
 
-    // 0. User Details (Name, Email)
+    // 0. Account Balance & Wallet Questions
+    if (
+      msg.includes('balance') || msg.includes('account') || msg.includes('wallet') || 
+      msg.includes('paisa') || msg.includes('paise') || msg.includes('kitna ha') || 
+      msg.includes('kitna hai') || msg.includes('kitne hai') || msg.includes('kitna paisa') ||
+      msg.includes('kitna bacha') || msg.includes('kitne bache')
+    ) {
+      const safeAccs = Array.isArray(accounts) ? accounts : [];
+      const totalAccBal = safeAccs.reduce((sum, a) => sum + (Number(a?.balance) || 0), 0);
+      const accDetails = safeAccs
+        .map(a => `${a.name || 'Account'}: ${currencySymbol}${(Number(a?.balance) || 0).toLocaleString()}`)
+        .join('; ');
+
+      if (isEng) {
+        return `💳 Your total Wallet / Bank Account balance is **${currencySymbol}${totalAccBal.toLocaleString()}**! ${accDetails ? `\n\nAccounts Breakdown: ${accDetails}` : ''} 📊✨`;
+      }
+      return `💳 Aapka current Total Wallet / Bank Account balance **${currencySymbol}${totalAccBal.toLocaleString()}** hai! ${accDetails ? `\n\nAccounts Breakdown: ${accDetails}` : ''} 📊✨`;
+    }
+
+    // 0.1. User Details (Name, Email)
     if (msg.includes('mera email') || msg.includes('my email') || msg.includes('meri email') || msg.includes('email kya')) {
       const userEmail = localStorage.getItem('zb_user_email') || 'Not found';
       return isEng ? `📧 Your registered email is **${userEmail}**! ✨` : `📧 Aapki registered email id **${userEmail}** hai! ✨`;

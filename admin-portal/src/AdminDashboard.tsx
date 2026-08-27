@@ -145,13 +145,23 @@ const SocialLinksManager: React.FC<{ supabaseClient: any }> = ({ supabaseClient 
     setLoading(false);
   };
 
+  const [customPlatformName, setCustomPlatformName] = useState('');
+
   useEffect(() => { fetchLinks(); }, []);
 
   const saveLink = async () => {
     if (!newLink.url?.trim()) { setMsg('❌ URL required'); return; }
     setSaving(true);
+    const isOther = newLink.platform === 'Other';
+    const finalPlatformName = isOther ? (customPlatformName.trim() || 'Other') : (newLink.platform || 'Instagram');
     const preset = PRESET_SOCIALS.find(p => p.platform === newLink.platform) || PRESET_SOCIALS[0];
-    const payload = { platform: newLink.platform || 'Instagram', url: newLink.url.trim(), icon: preset.icon, color: preset.color, is_active: true };
+    const payload = { 
+      platform: finalPlatformName, 
+      url: newLink.url.trim(), 
+      icon: isOther ? '🔗' : preset.icon, 
+      color: isOther ? '#6366f1' : preset.color, 
+      is_active: true 
+    };
     try {
       const { data, error } = await supabaseClient.from('social_links').insert([payload]).select();
       if (!error && data && data.length > 0) {
@@ -162,6 +172,7 @@ const SocialLinksManager: React.FC<{ supabaseClient: any }> = ({ supabaseClient 
         setMsg('✅ Link added locally!');
       }
       setNewLink({ platform: 'Instagram', icon: '📸', color: '#e1306c', url: '', is_active: true });
+      setCustomPlatformName('');
     } catch (e) {
       setLinks(prev => [...prev, { ...payload, id: 'temp-' + Date.now() }]);
       setMsg('✅ Link added!');
@@ -221,7 +232,7 @@ const SocialLinksManager: React.FC<{ supabaseClient: any }> = ({ supabaseClient 
       {/* Add New Link */}
       <div style={{ background: 'rgba(30,41,59,0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '1.2rem', marginBottom: '1.5rem' }}>
         <h5 style={{ fontSize: '13px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '12px' }}>➕ Add New Social Link</h5>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr auto', gap: '10px', alignItems: 'end' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: newLink.platform === 'Other' ? '1fr 1fr 2fr auto' : '1fr 2fr auto', gap: '10px', alignItems: 'end' }}>
           <div>
             <label style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>Platform</label>
             <select value={newLink.platform} onChange={e => { const p = PRESET_SOCIALS.find(x => x.platform === e.target.value); setNewLink(prev => ({ ...prev, platform: e.target.value, icon: p?.icon || '🔗', color: p?.color || '#6366f1' })); }} style={{ ...inputStyle }}>
@@ -229,6 +240,18 @@ const SocialLinksManager: React.FC<{ supabaseClient: any }> = ({ supabaseClient 
               <option value="Other">🔗 Other</option>
             </select>
           </div>
+          {newLink.platform === 'Other' && (
+            <div>
+              <label style={{ fontSize: '11px', color: '#38bdf8', display: 'block', marginBottom: '4px', fontWeight: 700 }}>Custom Platform Name</label>
+              <input 
+                type="text" 
+                placeholder="e.g. Telegram, Discord" 
+                value={customPlatformName} 
+                onChange={e => setCustomPlatformName(e.target.value)} 
+                style={{ ...inputStyle, border: '1px solid #38bdf8' }} 
+              />
+            </div>
+          )}
           <div>
             <label style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>URL</label>
             <input type="url" placeholder="https://..." value={newLink.url || ''} onChange={e => setNewLink(prev => ({ ...prev, url: e.target.value }))} style={inputStyle} />

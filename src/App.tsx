@@ -3486,6 +3486,7 @@ const App: React.FC = () => {
               }
             }}
             onBack={() => setActiveView('more')}
+            onLogout={() => setShowLogoutConfirmModal(true)}
           />
         )}
         {activeView === 'wishlist' && (
@@ -4130,6 +4131,7 @@ const App: React.FC = () => {
           goals={convertedGoals}
           currencySymbol={currencySymbol}
           userName={userName}
+          accounts={accounts}
         />
       )}
 
