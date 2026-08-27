@@ -32,6 +32,8 @@ export interface LoanRecord {
   emiInstallment?: number;
   paidAmount: number;
   dueDate: string;
+  startDate?: string;
+  createdAt?: string;
   frequency: 'one_time' | 'weekly' | 'monthly' | 'yearly' | 'custom' | string;
   customFrequencyText?: string;
   accountId?: string;

@@ -1245,9 +1245,39 @@ const App: React.FC = () => {
     fetchDataFromSupabase();
   }, [currentProfileId, isLocked]);
 
-  // Smart Loan Repayment & Money Collection Reminder Check (Strict User Frequency)
+  // Smart Loan Repayment & Money Collection Reminder Check (Strict User Frequency & Timing)
   useEffect(() => {
     if (isLocked || loans.length === 0) return;
+
+    const parseLoanDate = (dateStr?: string) => {
+      if (!dateStr) return { due: new Date(), dueStr: '', isValid: false };
+      const s = dateStr.trim();
+      const parts = s.split(/[\/\-]/);
+      if (parts.length === 3) {
+        if (parts[0].length === 4) {
+          const y = parseInt(parts[0], 10);
+          const m = parseInt(parts[1], 10) - 1;
+          const d = parseInt(parts[2], 10);
+          const date = new Date(y, m, d);
+          const formatted = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          return { due: date, dueStr: formatted, isValid: !isNaN(date.getTime()) };
+        } else if (parts[2].length === 4) {
+          const d = parseInt(parts[0], 10);
+          const m = parseInt(parts[1], 10) - 1;
+          const y = parseInt(parts[2], 10);
+          const date = new Date(y, m, d);
+          const formatted = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          return { due: date, dueStr: formatted, isValid: !isNaN(date.getTime()) };
+        }
+      }
+      const d = new Date(s);
+      if (isNaN(d.getTime())) return { due: new Date(), dueStr: '', isValid: false };
+      const y = d.getFullYear();
+      const m = d.getMonth() + 1;
+      const day = d.getDate();
+      const formatted = `${y}-${String(m).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      return { due: d, dueStr: formatted, isValid: true };
+    };
 
     const checkLoanReminders = () => {
       const now = new Date();
@@ -1256,33 +1286,36 @@ const App: React.FC = () => {
       const activeLoans = loans.filter(l => l.status !== 'completed');
 
       for (const loan of activeLoans) {
-        const remaining = loan.totalAmount - loan.paidAmount;
+        const remaining = loan.totalAmount - (loan.paidAmount || 0);
         if (remaining <= 0) continue;
 
-        const due = new Date(loan.dueDate);
-        const dueStr = due.toISOString().split('T')[0];
-        const isOverdue = now > due && todayStr !== dueStr;
+        const { due, dueStr, isValid } = parseLoanDate(loan.dueDate);
+        if (!isValid || !dueStr) continue;
+
+        const startDateStr = loan.startDate || (loan.createdAt ? parseLoanDate(loan.createdAt).dueStr : '');
+        const isCreatedToday = startDateStr === todayStr;
+
+        const isOverdue = todayStr > dueStr;
         const overdueDays = isOverdue ? Math.max(1, Math.floor((now.getTime() - due.getTime()) / (1000 * 60 * 60 * 24))) : 0;
 
-        // Determine if reminder should trigger based on selected frequency
         const freq = loan.frequency || 'one_time';
         let shouldTrigger = false;
 
         if (freq === 'every_10_min') {
           shouldTrigger = true;
         } else if (isOverdue) {
-          shouldTrigger = true; // Overdue loans trigger daily reminder!
+          shouldTrigger = true; // Overdue loans trigger reminder
+        } else if (isCreatedToday) {
+          // Do not trigger popup on loan creation day
+          shouldTrigger = false;
         } else if (freq === 'daily') {
-          shouldTrigger = true;
-        } else if (freq === 'one_time') {
-          shouldTrigger = todayStr >= dueStr;
+          shouldTrigger = todayStr >= startDateStr && todayStr <= dueStr;
         } else if (freq === 'weekly') {
-          const diffDays = Math.floor((now.getTime() - due.getTime()) / (1000 * 60 * 60 * 24));
-          shouldTrigger = diffDays >= 0;
+          shouldTrigger = todayStr >= startDateStr && (todayStr === dueStr || (now.getDay() === due.getDay()));
         } else if (freq === 'monthly') {
-          shouldTrigger = now.getDate() === due.getDate() || todayStr >= dueStr;
+          shouldTrigger = todayStr >= startDateStr && (todayStr === dueStr || (now.getDate() === due.getDate() && todayStr <= dueStr));
         } else if (freq === 'yearly') {
-          shouldTrigger = (now.getDate() === due.getDate() && now.getMonth() === due.getMonth()) || todayStr >= dueStr;
+          shouldTrigger = todayStr >= startDateStr && (todayStr === dueStr || (now.getDate() === due.getDate() && now.getMonth() === due.getMonth() && todayStr <= dueStr));
         } else {
           shouldTrigger = todayStr >= dueStr;
         }

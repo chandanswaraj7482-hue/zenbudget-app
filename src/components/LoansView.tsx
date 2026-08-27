@@ -180,6 +180,8 @@ export const LoansView: React.FC<LoansViewProps> = ({
       interestType: ratePct > 0 ? interestType : undefined,
       emiInstallment: Number(emiInstallment.toFixed(2)),
       dueDate,
+      startDate: new Date().toISOString().split('T')[0],
+      createdAt: new Date().toISOString(),
       frequency,
       customFrequencyText: frequency === 'custom' ? (customFrequencyText.trim() || 'Custom') : undefined,
       accountId: selectedAccountId || accounts[0]?.id,
