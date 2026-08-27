@@ -690,7 +690,9 @@ const App: React.FC = () => {
   });
   const [language, setLanguage] = useState<string>(() => {
     const profileId = localStorage.getItem('zb_profile_id') || '';
-    return profileId ? localStorage.getItem(`zb_language_${profileId}`) || 'en' : 'en';
+    const stored = (profileId ? localStorage.getItem(`zb_language_${profileId}`) : null) || localStorage.getItem('zb_language') || 'en';
+    setI18nLanguage(stored as any);
+    return stored;
   });
 
   // langKey: increments on every language OR currency change → forces all views to re-render
@@ -700,7 +702,8 @@ const App: React.FC = () => {
   useEffect(() => {
     const syncLang = () => {
       const profileId = localStorage.getItem('zb_profile_id') || '';
-      const currentLoc = profileId ? localStorage.getItem(`zb_language_${profileId}`) || 'en' : 'en';
+      const currentLoc = (profileId ? localStorage.getItem(`zb_language_${profileId}`) : null) || localStorage.getItem('zb_language') || 'en';
+      setI18nLanguage(currentLoc as any);
       setLanguage(currentLoc);
       setLangKey(k => k + 1); // force full re-render of all views
     };
@@ -2902,6 +2905,7 @@ const App: React.FC = () => {
       setLanguage(newLanguage);
       localStorage.setItem(`zb_language_${currentProfileId}`, newLanguage);
       localStorage.setItem('zb_language', newLanguage);
+      setLangKey(k => k + 1); // Instant re-render of all views with new language dictionary
       window.dispatchEvent(new Event('languagechange'));
 
       triggerToast('Profile updated successfully!', 'success');
@@ -3493,6 +3497,7 @@ const App: React.FC = () => {
         )}
         {activeView === 'profile' && (
           <ProfileView 
+            key={langKey}
             currentName={userName}
             currentPin={userPin}
             currentCurrency={currency}
