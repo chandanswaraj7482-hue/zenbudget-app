@@ -236,6 +236,17 @@ const App: React.FC = () => {
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
   const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false);
   const [incomingPaymentData, setIncomingPaymentData] = useState<{ vpa?: string; amount?: string; name?: string; note?: string } | null>(null);
+  const [showGranularResetModal, setShowGranularResetModal] = useState(false);
+  const [resetSelection, setResetSelection] = useState({
+    transactions: true,
+    accounts: true,
+    budgets: true,
+    goals: true,
+    loans: true,
+    wishlist: true,
+    challenges: true
+  });
+
   const [activeLoanReminderModal, setActiveLoanReminderModal] = useState<{
     loan: any;
     overdueDays: number;
@@ -2646,7 +2657,7 @@ const App: React.FC = () => {
     handleSaveGoal(updated);
   };
 
-  // Reset database triggers complete wipeout of challenges, limits, and ledger data
+  // Reset database triggers custom selection modal for Pro users
   const handleResetDataRequest = () => {
     const tier = subscriptionTier || localStorage.getItem('zb_subscription_tier') || 'trial';
     const isPro = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(tier);
@@ -2658,81 +2669,77 @@ const App: React.FC = () => {
       return;
     }
 
-    setConfirmDialog({
-      isOpen: true,
-      title: 'Reset All Workspace Data?',
-      message: 'Are you sure you want to reset all challenges, daily/category limits, transactions, accounts, and ledger data? This cannot be undone.',
-      type: 'danger',
-      onConfirm: async () => {
-        try {
-          // Delete from Supabase silently ignoring missing tables
-          await Promise.allSettled([
-            supabase.from('transactions').delete().eq('user_id', currentProfileId),
-            supabase.from('budgets').delete().eq('user_id', currentProfileId),
-            supabase.from('goals').delete().eq('user_id', currentProfileId),
-            supabase.from('accounts').delete().eq('user_id', currentProfileId),
-            supabase.from('loans').delete().eq('user_id', currentProfileId),
-            supabase.from('wishlist').delete().eq('user_id', currentProfileId),
-            supabase.from('debts').delete().eq('user_id', currentProfileId)
-          ]);
+    setShowGranularResetModal(true);
+  };
 
-          setTransactions([]);
-          setBudgets([]);
-          setGoals([]);
-          setAccounts([]);
-          setLoans([]);
-          
-          const keysToWipe = [
-            `zb_transactions_${currentProfileId}`,
-            `zb_tx_cache_${currentProfileId}`,
-            `zb_budgets_${currentProfileId}`,
-            `zb_goals_${currentProfileId}`,
-            `zb_accounts_${currentProfileId}`,
-            `zb_loans_${currentProfileId}`,
-            `zb_challenges`,
-            `zb_challenges_${currentProfileId}`,
-            `zb_claimed_badges_${currentProfileId}`,
-            `zb_daily_limit_${currentProfileId}`,
-            `zb_custom_daily_limit_${currentProfileId}`,
-            `zb_spending_limit_${currentProfileId}`,
-            `zb_today_smart_limit`,
-            `zb_smart_budget_limit`,
-            `zb_wishlist_${currentProfileId}`,
-            `zb_splits_${currentProfileId}`,
-            `zb_debts_${currentProfileId}`,
-            `zb_pet_points_${currentProfileId}`,
-            `zb_pet_unlocked_${currentProfileId}`,
-            `zb_pet_equipped_${currentProfileId}`,
-            'zb_mood_logs'
-          ];
-          keysToWipe.forEach(k => {
-            try {
-              localStorage.removeItem(k);
-            } catch (_) {}
-          });
+  const executeGranularReset = async () => {
+    const deletePromises: Promise<any>[] = [];
 
-          // Also set empty arrays for cached ledger structures
-          localStorage.setItem(`zb_transactions_${currentProfileId}`, '[]');
-          localStorage.setItem(`zb_tx_cache_${currentProfileId}`, '[]');
-          localStorage.setItem(`zb_budgets_${currentProfileId}`, '[]');
-          localStorage.setItem(`zb_goals_${currentProfileId}`, '[]');
-          localStorage.setItem(`zb_accounts_${currentProfileId}`, '[]');
-          localStorage.setItem(`zb_loans_${currentProfileId}`, '[]');
-          localStorage.setItem('zb_challenges', '[]');
-          localStorage.setItem(`zb_challenges_${currentProfileId}`, '[]');
+    if (resetSelection.transactions) {
+      deletePromises.push(supabase.from('transactions').delete().eq('user_id', currentProfileId));
+      setTransactions([]);
+      localStorage.removeItem(`zb_transactions_${currentProfileId}`);
+      localStorage.removeItem(`zb_tx_cache_${currentProfileId}`);
+      localStorage.setItem(`zb_transactions_${currentProfileId}`, '[]');
+      localStorage.setItem(`zb_tx_cache_${currentProfileId}`, '[]');
+    }
 
-          // Broadcast global reset event to sync all UI components immediately
-          window.dispatchEvent(new CustomEvent('zenbudget_reset_all_data'));
-          window.dispatchEvent(new Event('storage'));
+    if (resetSelection.accounts) {
+      deletePromises.push(supabase.from('accounts').delete().eq('user_id', currentProfileId));
+      setAccounts([]);
+      localStorage.removeItem(`zb_accounts_${currentProfileId}`);
+      localStorage.setItem(`zb_accounts_${currentProfileId}`, '[]');
+    }
 
-          setActiveView('dashboard');
-          setConfirmDialog(null);
-          triggerToast('✅ All challenges, limits, and ledger data reset successfully.', 'info');
-        } catch (err: any) {
-          triggerToast(err.message || 'Reset failed.', 'warning');
-        }
-      }
-    });
+    if (resetSelection.budgets) {
+      deletePromises.push(supabase.from('budgets').delete().eq('user_id', currentProfileId));
+      setBudgets([]);
+      localStorage.removeItem(`zb_budgets_${currentProfileId}`);
+      localStorage.setItem(`zb_budgets_${currentProfileId}`, '[]');
+      localStorage.removeItem(`zb_daily_limit_${currentProfileId}`);
+      localStorage.removeItem(`zb_custom_daily_limit_${currentProfileId}`);
+      localStorage.removeItem(`zb_spending_limit_${currentProfileId}`);
+      localStorage.removeItem('zb_today_smart_limit');
+      localStorage.removeItem('zb_smart_budget_limit');
+    }
+
+    if (resetSelection.goals) {
+      deletePromises.push(supabase.from('goals').delete().eq('user_id', currentProfileId));
+      setGoals([]);
+      localStorage.removeItem(`zb_goals_${currentProfileId}`);
+      localStorage.setItem(`zb_goals_${currentProfileId}`, '[]');
+    }
+
+    if (resetSelection.loans) {
+      deletePromises.push(supabase.from('loans').delete().eq('user_id', currentProfileId));
+      deletePromises.push(supabase.from('debts').delete().eq('user_id', currentProfileId));
+      setLoans([]);
+      localStorage.removeItem(`zb_loans_${currentProfileId}`);
+      localStorage.removeItem(`zb_debts_${currentProfileId}`);
+      localStorage.removeItem(`zb_splits_${currentProfileId}`);
+      localStorage.setItem(`zb_loans_${currentProfileId}`, '[]');
+    }
+
+    if (resetSelection.wishlist) {
+      deletePromises.push(supabase.from('wishlist').delete().eq('user_id', currentProfileId));
+      localStorage.removeItem(`zb_wishlist_${currentProfileId}`);
+    }
+
+    if (resetSelection.challenges) {
+      localStorage.removeItem('zb_challenges');
+      localStorage.removeItem(`zb_challenges_${currentProfileId}`);
+      localStorage.removeItem(`zb_claimed_badges_${currentProfileId}`);
+    }
+
+    try {
+      await Promise.allSettled(deletePromises);
+      window.dispatchEvent(new CustomEvent('zenbudget_reset_all_data'));
+      window.dispatchEvent(new Event('storage'));
+      triggerToast('Selected workspace data reset successfully! ✨', 'success');
+    } catch (_) {
+      triggerToast('Reset partially completed', 'info');
+    }
+    setShowGranularResetModal(false);
   };
 
   const handleExportCSV = async () => {
@@ -4875,6 +4882,153 @@ const App: React.FC = () => {
             >
               Understand &amp; Select Different Wallet
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Granular Reset Workspace Data Modal */}
+      {showGranularResetModal && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 99999,
+          backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px',
+          animation: 'fadeIn 0.2s ease-out'
+        }}>
+          <div className="glass-panel" style={{
+            maxWidth: '420px', width: '100%',
+            background: 'var(--bg-card)',
+            borderRadius: '24px', border: '1px solid var(--border-card)',
+            padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+            position: 'relative'
+          }}>
+            <button
+              type="button"
+              onClick={() => setShowGranularResetModal(false)}
+              style={{
+                position: 'absolute', top: '16px', right: '16px',
+                background: 'rgba(255,255,255,0.06)', border: 'none',
+                borderRadius: '50%', width: '32px', height: '32px',
+                color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}
+            >
+              ✕
+            </button>
+
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                width: '54px', height: '54px', borderRadius: '50%',
+                background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 12px auto', border: '1px solid rgba(245, 158, 11, 0.3)'
+              }}>
+                <span style={{ fontSize: '24px' }}>🔄</span>
+              </div>
+              <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--text-primary)', margin: 0, fontFamily: "'Manrope', sans-serif" }}>
+                Reset Workspace Data ⚙️
+              </h3>
+              <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
+                Select specific data categories you want to delete. Unselected data will stay safe!
+              </p>
+            </div>
+
+            {/* Quick Select / Deselect All Toggle */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 4px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Select Categories
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  const allSelected = Object.values(resetSelection).every(Boolean);
+                  setResetSelection({
+                    transactions: !allSelected,
+                    accounts: !allSelected,
+                    budgets: !allSelected,
+                    goals: !allSelected,
+                    loans: !allSelected,
+                    wishlist: !allSelected,
+                    challenges: !allSelected
+                  });
+                }}
+                style={{
+                  background: 'none', border: 'none', color: '#38bdf8', fontSize: '11px', fontWeight: 700, cursor: 'pointer'
+                }}
+              >
+                {Object.values(resetSelection).every(Boolean) ? 'Deselect All' : 'Select All'}
+              </button>
+            </div>
+
+            {/* Category Options List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '280px', overflowY: 'auto', paddingRight: '4px' }}>
+              {[
+                { key: 'transactions', label: '💸 Transactions & History', desc: 'All income, expense & transfer logs' },
+                { key: 'accounts', label: '🏦 Accounts & Wallets', desc: 'Bank accounts & cash wallet balances' },
+                { key: 'budgets', label: '📊 Budgets & Limits', desc: 'Category budget limits & daily limits' },
+                { key: 'goals', label: '🎯 Savings Goals', desc: 'Target goals & saved contributions' },
+                { key: 'loans', label: '💳 Loans & Borrowings', desc: 'Loans taken & loans given records' },
+                { key: 'wishlist', label: '📜 Wishlist & Impulse Items', desc: 'Saved wishlist items & impulse blockers' },
+                { key: 'challenges', label: '🏆 Challenges & Badges', desc: 'Unlocked badges & streak records' }
+              ].map(item => {
+                const isChecked = (resetSelection as any)[item.key];
+                return (
+                  <label
+                    key={item.key}
+                    onClick={() => setResetSelection(prev => ({ ...prev, [item.key]: !isChecked }))}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '12px',
+                      padding: '10px 14px', borderRadius: '14px',
+                      background: isChecked ? 'rgba(239, 68, 68, 0.1)' : 'var(--bg-input)',
+                      border: isChecked ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid var(--border-input)',
+                      cursor: 'pointer', transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => {}}
+                      style={{ accentColor: '#ef4444', width: '16px', height: '16px', cursor: 'pointer' }}
+                    />
+                    <div style={{ flex: 1, textAlign: 'left' }}>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>{item.label}</div>
+                      <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{item.desc}</div>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+              <button
+                type="button"
+                onClick={() => setShowGranularResetModal(false)}
+                style={{
+                  flex: 1, padding: '12px', borderRadius: '14px',
+                  border: '1px solid var(--border-input)', background: 'var(--bg-input)',
+                  color: 'var(--text-primary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeGranularReset}
+                disabled={!Object.values(resetSelection).some(Boolean)}
+                style={{
+                  flex: 1.5, padding: '12px', borderRadius: '14px', border: 'none',
+                  background: Object.values(resetSelection).some(Boolean)
+                    ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+                    : 'rgba(100, 116, 139, 0.3)',
+                  color: '#ffffff', fontSize: '13px', fontWeight: 800, cursor: 'pointer',
+                  boxShadow: Object.values(resetSelection).some(Boolean) ? '0 4px 15px rgba(239, 68, 68, 0.4)' : 'none',
+                  opacity: Object.values(resetSelection).some(Boolean) ? 1 : 0.5
+                }}
+              >
+                Reset Selected Data 🔥
+              </button>
+            </div>
           </div>
         </div>
       )}
