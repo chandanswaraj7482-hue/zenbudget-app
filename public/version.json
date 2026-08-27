@@ -1,8 +1,8 @@
 {
-  "version": "2.0.3",
-  "versionCode": 7,
+  "version": "2.5.0",
+  "versionCode": 10,
   "apkUrl": "https://zenbudget-tracker.vercel.app/zenbudget.apk",
-  "releaseNotes": "🚀 Auto-Fill Shareable Payment Links\n📲 UPI Collect Push Requests (Meesho/Swiggy style)\n🌍 Auto Currency Detection via IP Location\n💎 Apple Glassmorphism UI & Compact Branding\n🔒 Sleek PIN Unlock & Biometrics",
+  "releaseNotes": "⚙️ Granular Reset Workspace Data Modal for Pro Users\n⏰ Smart Loan EMI Repayment Timing & Frequency Reminders\n⚡ Loan Repayment PhonePe / UPI linked with Scan & Pay Unlock\n🌐 Instant Multi-Language Localization Sync across all screens\n🔒 Profile Save Protection for Language & Preferences\n💎 Apple Glassmorphism UI & Instant Offline-First Supabase Sync",
   "forceUpdate": false,
   "minVersionCode": 1
 }

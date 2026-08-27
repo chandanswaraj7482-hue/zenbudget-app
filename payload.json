@@ -1,0 +1,38 @@
+[
+  {
+    "id": "38252610-6fa7-406e-97c0-9c00de894e31",
+    "name": "ramesh kumar",
+    "email": "rameshteamlaunchpad@gmail.com",
+    "pin": "0000",
+    "subscription_tier": "free",
+    "trial_start_date": "2026-08-26T07:53:39.301Z",
+    "trial_expire_date": "2026-09-02T07:53:39.301Z",
+    "google_avatar": "https://lh3.googleusercontent.com/a/ACg8ocL4ZHwy77UBRw7p3MnAsp7Jg_CZPNjPgPoYGbFDF3-6YiqmFHAc=s96-c",
+    "referral_code": "ZB-RAMESH123",
+    "has_scan_pay_access": false
+  },
+  {
+    "id": "c942b026-c9a6-4d8a-9860-da797a5a46c5",
+    "name": "Graphic Designer",
+    "email": "graphicdesigner7667@gmail.com",
+    "pin": "0000",
+    "subscription_tier": "free",
+    "trial_start_date": "2026-08-25T05:52:23.449Z",
+    "trial_expire_date": "2026-09-01T05:52:23.449Z",
+    "google_avatar": "https://lh3.googleusercontent.com/a/ACg8ocIHs_v86blGChW9ds3Y8-rG4s-kGGHGUHyltm5wKspnu3C6TEQ=s96-c",
+    "referral_code": "ZB-GRAPHIC123",
+    "has_scan_pay_access": false
+  },
+  {
+    "id": "57c743ae-06f7-4922-a81d-fd7003662aa3",
+    "name": "Cs Designz",
+    "email": "csdesignz07@gmail.com",
+    "pin": "0000",
+    "subscription_tier": "free",
+    "trial_start_date": "2026-08-23T14:20:05.702Z",
+    "trial_expire_date": "2026-08-30T14:20:05.702Z",
+    "google_avatar": "https://lh3.googleusercontent.com/a/ACg8ocJuZKTaxsiKnuqMhh7-ulHDoCpNmMd1zlEpNXMDCk5Jluw3Dg=s96-c",
+    "referral_code": "ZB-CSDESIGN123",
+    "has_scan_pay_access": false
+  }
+]
