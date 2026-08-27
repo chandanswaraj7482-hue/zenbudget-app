@@ -121,14 +121,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           ctx.drawImage(img, drawX, drawY, drawW, drawH);
           const compressed = canvas.toDataURL('image/jpeg', 0.88);
           setAvatarUrl(compressed);
-          localStorage.setItem('zb_user_avatar', compressed);
-          window.dispatchEvent(new Event('profile_avatar_updated'));
         }
       } catch (err) {
         console.warn('Crop canvas error:', err);
         setAvatarUrl(rawUploadedImage);
-        localStorage.setItem('zb_user_avatar', rawUploadedImage);
-        window.dispatchEvent(new Event('profile_avatar_updated'));
       }
       setRawUploadedImage(null);
     };
@@ -141,16 +137,14 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const PRESET_AVATARS = [
     ...(googleAvatarSaved ? [googleAvatarSaved] : []),
     initialsAvatar,
-    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-    'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80'
+    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80'
   ];
 
   const handleRemovePhoto = () => {
     setAvatarUrl(initialsAvatar);
-    localStorage.setItem('zb_user_avatar', initialsAvatar);
-    window.dispatchEvent(new Event('profile_avatar_updated'));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -173,6 +167,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       }
       localStorage.setItem('zb_user_phone', phone.trim());
       localStorage.setItem('zb_user_phone_code', phoneCode);
+      localStorage.setItem('zb_theme', themeMode);
+      
+      if (onToggleTheme && themeMode !== currentTheme) {
+        onToggleTheme(themeMode);
+      }
+
       window.dispatchEvent(new Event('profile_avatar_updated'));
       await onSaveProfile(name.trim(), pin, currency, language, email.trim());
       setSuccessMsg('Profile settings updated successfully!');
@@ -267,8 +267,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   type="button"
                   onClick={() => {
                     setAvatarUrl(url);
-                    localStorage.setItem('zb_user_avatar', url);
-                    window.dispatchEvent(new Event('profile_avatar_updated'));
                   }}
                   style={{
                     width: '36px',
@@ -546,15 +544,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               <Banknote size={15} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', pointerEvents: 'none' }} />
               <select
                 value={currency}
-                onChange={async (e) => {
-                  const newCurr = e.target.value;
-                  setCurrency(newCurr);
-                  try {
-                    await onSaveProfile(name, pin, newCurr, language, email);
-                  } catch (err) {
-                    console.warn('Currency auto-sync error:', err);
-                  }
-                }}
+                onChange={(e) => setCurrency(e.target.value)}
                 className="glass-input"
                 style={{ width: '100%', paddingLeft: '40px', fontSize: '13px', padding: '12px 14px 12px 40px', appearance: 'none', backgroundColor: 'transparent' }}
               >
@@ -587,15 +577,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               <Globe size={15} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', pointerEvents: 'none' }} />
               <select
                 value={language}
-                onChange={async (e) => {
-                  const newLang = e.target.value;
-                  setLanguage(newLang);
-                  try {
-                    await onSaveProfile(name, pin, currency, newLang, email);
-                  } catch (err) {
-                    console.warn('Language auto-sync error:', err);
-                  }
-                }}
+                onChange={(e) => setLanguage(e.target.value)}
                 className="glass-input"
                 style={{ width: '100%', paddingLeft: '40px', fontSize: '13px', padding: '12px 14px 12px 40px', appearance: 'none', backgroundColor: 'transparent' }}
               >
