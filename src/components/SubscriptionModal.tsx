@@ -824,7 +824,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   } catch (sdkErr: any) {
                     console.error('Cashfree checkout session error:', sdkErr);
                     setPaymentStep('details');
-                    alert(sdkErr.message || 'Payment Gateway connection failed. Please try again.');
+                    setCouponMessage(sdkErr.message || 'Payment Gateway connection failed. Please try again.');
+                    setCouponError(true);
                   }
                 }}
                 style={{

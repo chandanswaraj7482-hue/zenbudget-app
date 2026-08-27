@@ -1918,6 +1918,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   const shareUrl = `https://zenbudget-tracker.vercel.app/?code=${inviteCode}`;
                   const shareText = `🌿 Join me on ZenBudget! Track your money habits with AI insights. Use my referral code ${inviteCode} and we both get 1 Month Premium FREE! Join here: ${shareUrl}`;
 
+                  const copyFallback = (str: string) => {
+                    try {
+                      const textArea = document.createElement('textarea');
+                      textArea.value = str;
+                      textArea.style.position = 'fixed';
+                      textArea.style.left = '-9999px';
+                      document.body.appendChild(textArea);
+                      textArea.focus();
+                      textArea.select();
+                      document.execCommand('copy');
+                      document.body.removeChild(textArea);
+                      triggerToast('Share invitation text copied to clipboard!', 'success');
+                    } catch (_) {
+                      triggerToast('Invite link ready!', 'success');
+                    }
+                  };
+
                   if (navigator.share) {
                     try {
                       await navigator.share({ title: 'ZenBudget Invite', text: shareText, url: shareUrl });
@@ -1927,7 +1944,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       await navigator.clipboard.writeText(shareText);
                       triggerToast('Share invitation text copied to clipboard!', 'success');
                     } catch (e) {
-                      prompt('Copy invitation link:', shareText);
+                      copyFallback(shareText);
                     }
                   }
                   setShowInviteModal(false);
@@ -1956,7 +1973,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     await navigator.clipboard.writeText(inviteCode);
                     triggerToast(`Referral code "${inviteCode}" copied to clipboard!`, 'success');
                   } catch (e) {
-                    prompt('Copy referral code:', inviteCode);
+                    try {
+                      const textArea = document.createElement('textarea');
+                      textArea.value = inviteCode;
+                      textArea.style.position = 'fixed';
+                      textArea.style.left = '-9999px';
+                      document.body.appendChild(textArea);
+                      textArea.focus();
+                      textArea.select();
+                      document.execCommand('copy');
+                      document.body.removeChild(textArea);
+                      triggerToast(`Referral code "${inviteCode}" copied to clipboard!`, 'success');
+                    } catch (_) {
+                      triggerToast(`Referral Code: ${inviteCode}`, 'info');
+                    }
                   }
                 }}
                 style={{

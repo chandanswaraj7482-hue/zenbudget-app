@@ -199,7 +199,6 @@ const SocialLinksManager: React.FC<{ supabaseClient: any }> = ({ supabaseClient 
   };
 
   const deleteLink = async (targetLink: SocialLink) => {
-    if (!confirm('Delete this link?')) return;
     try {
       if (targetLink.id && !targetLink.id.startsWith('def-') && !targetLink.id.startsWith('temp-')) {
         await supabaseClient.from('social_links').delete().eq('id', targetLink.id);

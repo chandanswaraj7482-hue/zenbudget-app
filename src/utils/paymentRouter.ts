@@ -90,7 +90,7 @@ export function handleZenBudgetPaymentSystem(
     if (onOpenInternationalGate) {
       onOpenInternationalGate(actionType, payload, runtimeAmount);
     } else {
-      alert("International transfers must be processed via standard card or bank wire network.");
+      console.warn("International transfers must be processed via standard card or bank wire network.");
     }
     return true;
   }

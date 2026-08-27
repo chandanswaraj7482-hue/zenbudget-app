@@ -203,7 +203,7 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
   const handleVoiceInput = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert('Speech recognition is not supported in this browser. Please type text directly.');
+      setParseError('Speech recognition is not supported in this browser. Please type text directly.');
       return;
     }
 
@@ -255,7 +255,7 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
 
     const parsed = parseNaturalLanguage(inputQuery, activeTab);
     if (!parsed.amount || parsed.amount <= 0) {
-      alert('Please mention a valid amount in text (e.g., "Paid 220 for petrol in cash" or "received 5000 salary").');
+      setParseError('Please mention a valid amount in text (e.g., "Paid 220 for petrol in cash" or "received 5000 salary").');
       return;
     }
 
