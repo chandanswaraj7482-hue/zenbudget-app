@@ -818,15 +818,28 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
     setErrorMsg('');
 
     try {
+      // Recover userId from session if state is empty
+      let currentUserId = userId;
+      if (!currentUserId) {
+        const { data: sessData } = await supabase.auth.getSession();
+        if (sessData?.session?.user?.id) {
+          currentUserId = sessData.session.user.id;
+          setUserId(currentUserId);
+        }
+      }
+      if (!currentUserId) {
+        throw new Error('Session expired. Please sign out and log in again.');
+      }
+
       // If user profile already exists (e.g., Google OAuth or existing user login), just update the PIN
       if (dbProfile) {
-        const { error } = await supabase.from('profiles').update({ pin: pin }).eq('id', userId);
+        const { error } = await supabase.from('profiles').update({ pin: pin }).eq('id', currentUserId);
         if (error) throw error;
         
         localStorage.setItem('zb_user_pin', pin);
         playNotificationSound('success');
         onUnlock(
-          userId, 
+          currentUserId, 
           dbProfile.name || username || 'User', 
           dbProfile.subscription_tier || 'trial', 
           dbProfile.trial_start_date || new Date().toISOString(), 
@@ -852,7 +865,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         console.error('LockScreen: Device ID check failed:', checkError);
       }
 
-      if (existingProfile && existingProfile.id !== userId) {
+      if (existingProfile && existingProfile.id !== currentUserId) {
         throw new Error('Only one free trial account is allowed per phone/device. Please log in to your existing account.');
       }
 
@@ -886,14 +899,14 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           // Link old payments to new user ID
           await supabase
             .from('payment_history')
-            .update({ user_id: userId })
+            .update({ user_id: currentUserId })
             .eq('email', email.trim().toLowerCase());
 
           // Insert active subscription row
           await supabase
             .from('subscriptions')
             .insert([{
-              user_id: userId,
+              user_id: currentUserId,
               plan_type: restoredTier,
               purchase_date: new Date().toISOString(),
               expiry_date: restoredExpiry,
@@ -907,7 +920,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
       }
 
       const newProfile: any = {
-        id: userId,
+        id: currentUserId,
         name: username.trim() || 'User',
         pin: pin,
         subscription_tier: restoredTier,
@@ -925,7 +938,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
       if (error && (error.message.includes('column') || error.message.includes('referral_code') || error.message.includes('referred_by'))) {
         console.warn('LockScreen: Referral columns missing, retrying basic upsert...');
         const basicProfile = {
-          id: userId,
+          id: currentUserId,
           name: username.trim() || 'User',
           pin: pin,
           subscription_tier: restoredTier,
@@ -947,7 +960,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
       localStorage.setItem('zb_invite_code', myReferralCode);
 
       playNotificationSound('success');
-      onUnlock(userId, newProfile.name, restoredTier, newProfile.trial_start_date, pin, restoredExpiry, null);
+      onUnlock(currentUserId, newProfile.name, restoredTier, newProfile.trial_start_date, pin, restoredExpiry, null);
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to create profile. Try again.');
       playNotificationSound('warning');
@@ -1118,7 +1131,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
             </h1>
             <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', margin: 0, fontWeight: 700 }}>
-              Claim Your Money
+              Calm Your Money
             </p>
           </div>
 
@@ -1544,15 +1557,23 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               }}
               style={{
                 marginTop: '16px',
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-secondary)',
+                padding: '8px 16px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '20px',
+                color: 'var(--text-primary)',
                 fontSize: '12px',
-                fontWeight: 700,
-                cursor: 'pointer'
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                backdropFilter: 'blur(10px)',
+                transition: 'all 0.2s ease'
               }}
             >
-              ← Back to Create PIN
+              <ArrowLeft size={14} />
+              <span>Back to Create PIN</span>
             </button>
           )}
 
