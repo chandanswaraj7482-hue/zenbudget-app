@@ -665,6 +665,8 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
       await supabaseClient.from('goals').delete().eq('user_id', userId);
       await supabaseClient.from('budgets').delete().eq('user_id', userId);
       await supabaseClient.from('loans').delete().eq('user_id', userId);
+      await supabaseClient.from('wishlist').delete().eq('user_id', userId);
+      await supabaseClient.from('debts').delete().eq('user_id', userId);
       await supabaseClient.from('device_sessions').delete().eq('user_id', userId);
 
       setProfiles(prev => prev.filter(p => p.id !== userId));
@@ -692,6 +694,8 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
       await supabaseClient.from('goals').delete().in('user_id', selectedUserIds);
       await supabaseClient.from('budgets').delete().in('user_id', selectedUserIds);
       await supabaseClient.from('loans').delete().in('user_id', selectedUserIds);
+      await supabaseClient.from('wishlist').delete().in('user_id', selectedUserIds);
+      await supabaseClient.from('debts').delete().in('user_id', selectedUserIds);
       await supabaseClient.from('device_sessions').delete().in('user_id', selectedUserIds);
 
       setProfiles(prev => prev.filter(p => !selectedUserIds.includes(p.id)));

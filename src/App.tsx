@@ -1604,7 +1604,37 @@ const App: React.FC = () => {
         .eq('id', currentProfileId)
         .maybeSingle();
       
-      if (profErr) console.warn('ZenBudget: Profile sync fetch warning:', profErr);
+      if (!profData && !profErr && currentProfileId) {
+        console.warn('ZenBudget: Profile deleted from Supabase. Executing client logout & data wipe.');
+        const keysToWipe = [
+          `zb_transactions_${currentProfileId}`,
+          `zb_tx_cache_${currentProfileId}`,
+          `zb_budgets_${currentProfileId}`,
+          `zb_goals_${currentProfileId}`,
+          `zb_accounts_${currentProfileId}`,
+          `zb_loans_${currentProfileId}`,
+          `zb_wishlist_${currentProfileId}`,
+          `zb_debts_${currentProfileId}`,
+          `zb_couple_code_${currentProfileId}`,
+          `zb_partner_id_${currentProfileId}`,
+          `zb_partner_code_${currentProfileId}`,
+          `zb_partner_name_${currentProfileId}`
+        ];
+        keysToWipe.forEach(k => {
+          try { localStorage.removeItem(k); } catch (_) {}
+        });
+
+        setTransactions([]);
+        setBudgets([]);
+        setGoals([]);
+        setAccounts([]);
+        setLoans([]);
+        setCurrentProfileId('');
+        setIsLocked(true);
+        triggerToast('⚠️ Account deleted by Administrator.', 'warning');
+        return;
+      }
+
       if (profData) {
         let userCoupleCode = profData.couple_code;
         if (!userCoupleCode) {
@@ -1613,6 +1643,17 @@ const App: React.FC = () => {
             await supabase.from('profiles').update({ couple_code: userCoupleCode }).eq('id', currentProfileId);
           } catch (e) {
             console.warn('Failed to auto-create couple code:', e);
+          }
+        }
+
+        let userReferralCode = profData.referral_code;
+        if (!userReferralCode) {
+          userReferralCode = 'ZB-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+          try {
+            await supabase.from('profiles').update({ referral_code: userReferralCode }).eq('id', currentProfileId);
+            profData.referral_code = userReferralCode;
+          } catch (e) {
+            console.warn('Failed to auto-create referral code:', e);
           }
         }
 
