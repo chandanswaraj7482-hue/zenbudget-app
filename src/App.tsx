@@ -109,7 +109,7 @@ const App: React.FC = () => {
 
   const handleDeleteAccount = (accId: string) => {
     const tier = subscriptionTier || localStorage.getItem('zb_subscription_tier') || 'trial';
-    const isPro = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(tier);
+    const isPro = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(tier) || localStorage.getItem('admin_overridden') === 'true';
 
     if (!isPro) {
       triggerToast('🔒 Deleting accounts is a Premium feature. Upgrade to Pro!', 'warning');
@@ -2498,7 +2498,7 @@ const App: React.FC = () => {
     }
 
     const tier = subscriptionTier || localStorage.getItem('zb_subscription_tier') || 'trial';
-    const isPro = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(tier);
+    const isPro = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(tier) || localStorage.getItem('admin_overridden') === 'true';
 
     // Non-Premium / Free Trial Delete Restriction:
     if (!isPro) {
@@ -2763,7 +2763,7 @@ const App: React.FC = () => {
 
   const handleDeleteGoal = (goalId: string) => {
     const tier = subscriptionTier || localStorage.getItem('zb_subscription_tier') || 'trial';
-    const isPro = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(tier);
+    const isPro = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(tier) || localStorage.getItem('admin_overridden') === 'true';
 
     if (!isPro) {
       triggerToast('🔒 Deleting savings goals is a Premium feature. Upgrade to Pro!', 'warning');
@@ -2816,7 +2816,7 @@ const App: React.FC = () => {
   // Reset database triggers custom selection modal for Pro users
   const handleResetDataRequest = () => {
     const tier = subscriptionTier || localStorage.getItem('zb_subscription_tier') || 'trial';
-    const isPro = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(tier);
+    const isPro = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(tier) || localStorage.getItem('admin_overridden') === 'true';
 
     if (!isPro) {
       triggerToast('🔒 Reset Workspace Data is a Premium Feature. Upgrade to Pro to reset & manage ledgers!', 'warning');
