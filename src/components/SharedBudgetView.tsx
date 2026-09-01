@@ -317,7 +317,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
               <span style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
                 Real-time Couple/Family Premium Sync Active ⚡
               </span>
-            </div>div>
+            </div>
 
             {/* Household Spending Breakdown Flex */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
