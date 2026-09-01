@@ -566,7 +566,11 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
             </svg>
             <div style={{
               position: 'absolute',
-              inset: '28px',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '124px',
+              height: '124px',
               borderRadius: '50%',
               background: 'var(--bg-card)',
               boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
@@ -922,7 +926,11 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
               {/* Inner Label Card */}
               <div style={{
                 position: 'absolute',
-                inset: '24px',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '102px',
+                height: '102px',
                 borderRadius: '50%',
                 background: 'var(--bg-card)',
                 boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
