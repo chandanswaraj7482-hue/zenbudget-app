@@ -178,57 +178,118 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                 <span style={{ fontSize: '11px', fontWeight: 800, color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'left' }}>
                   👥 CONNECTED GROUP MEMBERS ({activeFamilyMembers.length})
                 </span>
-                {activeFamilyMembers.map(m => (
-                  <div 
-                    key={m.id}
-                    style={{
-                      padding: '12px 14px',
-                      borderRadius: '14px',
-                      background: 'rgba(255,255,255,0.04)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '10px'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left' }}>
-                      <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(34, 197, 94, 0.2)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px' }}>
-                        {(m.name || 'M').charAt(0).toUpperCase()}
+                {activeFamilyMembers.map(m => {
+                  const mPermsKey = `zb_perm_${currentProfileId}_${m.id}`;
+                  let mPerms = { allowView: true, allowEditDelete: false, allowAddTransactions: true };
+                  try {
+                    const saved = localStorage.getItem(mPermsKey);
+                    if (saved) mPerms = JSON.parse(saved);
+                  } catch (_) {}
+
+                  const handleToggleMPermission = (key: 'allowView' | 'allowEditDelete' | 'allowAddTransactions', val: boolean) => {
+                    const updated = { ...mPerms, [key]: val };
+                    try {
+                      localStorage.setItem(mPermsKey, JSON.stringify(updated));
+                      window.dispatchEvent(new Event('memberpermissionschanged'));
+                      // Sync to Supabase profiles
+                      supabase.from('profiles').update({
+                        [`perm_${m.id}`]: updated
+                      }).eq('id', currentProfileId).then(() => {}).catch(() => {});
+                    } catch (_) {}
+                    setPermissionToast(`Permissions for ${m.name || 'Partner'} updated!`);
+                    setTimeout(() => setPermissionToast(''), 2000);
+                  };
+
+                  return (
+                    <div 
+                      key={m.id}
+                      style={{
+                        padding: '14px',
+                        borderRadius: '16px',
+                        background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '12px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left' }}>
+                          <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, #10b981, #0284c7)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px' }}>
+                            {(m.name || 'M').charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)', display: 'block' }}>
+                              {m.name || 'Group Member'}
+                            </span>
+                            <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
+                              Code: {m.couple_code || 'Connected'} • <strong style={{ color: 'var(--success)' }}>Connected ⚡</strong>
+                            </span>
+                          </div>
+                        </div>
+                        {onDisconnectPartner && (
+                          <button
+                            type="button"
+                            onClick={() => onDisconnectPartner(m.id)}
+                            title="Remove / Disconnect Member"
+                            style={{
+                              padding: '6px 10px',
+                              borderRadius: '10px',
+                              border: '1px solid rgba(239, 68, 68, 0.3)',
+                              background: 'rgba(239, 68, 68, 0.12)',
+                              color: '#f87171',
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            <UserMinus size={13} /> Remove
+                          </button>
+                        )}
                       </div>
-                      <div>
-                        <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>
-                          {m.name || 'Group Member'}
+
+                      {/* Granular Per-Partner Permission Toggles */}
+                      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 800, color: '#fbbf24', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          🔒 PERMISSIONS GRANTED TO {m.name || 'PARTNER'}:
                         </span>
-                        <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
-                          Code: {m.couple_code || 'Connected'} • Status: <strong style={{ color: 'var(--success)' }}>Connected ⚡</strong>
-                        </span>
+
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-primary)', cursor: 'pointer' }}>
+                          <input
+                            type="checkbox"
+                            checked={mPerms.allowView}
+                            onChange={e => handleToggleMPermission('allowView', e.target.checked)}
+                            style={{ width: '15px', height: '15px', accentColor: '#22c55e' }}
+                          />
+                          <span>👁️ Allow <strong>{m.name || 'Partner'}</strong> to view my financial data</span>
+                        </label>
+
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: mPerms.allowEditDelete ? '#34d399' : '#f87171', fontWeight: 700, cursor: 'pointer' }}>
+                          <input
+                            type="checkbox"
+                            checked={mPerms.allowEditDelete}
+                            onChange={e => handleToggleMPermission('allowEditDelete', e.target.checked)}
+                            style={{ width: '15px', height: '15px', accentColor: '#ec4899' }}
+                          />
+                          <span>✏️ Allow <strong>{m.name || 'Partner'}</strong> to edit &amp; delete my entries {mPerms.allowEditDelete ? '✅ (Unlocked)' : '🔒 (Read-Only Protected)'}</span>
+                        </label>
+
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-primary)', cursor: 'pointer' }}>
+                          <input
+                            type="checkbox"
+                            checked={mPerms.allowAddTransactions}
+                            onChange={e => handleToggleMPermission('allowAddTransactions', e.target.checked)}
+                            style={{ width: '15px', height: '15px', accentColor: '#38bdf8' }}
+                          />
+                          <span>➕ Allow <strong>{m.name || 'Partner'}</strong> to log entries into my shared accounts</span>
+                        </label>
                       </div>
                     </div>
-                    {onDisconnectPartner && (
-                      <button
-                        type="button"
-                        onClick={() => onDisconnectPartner(m.id)}
-                        title="Remove / Disconnect Member"
-                        style={{
-                          padding: '6px 10px',
-                          borderRadius: '10px',
-                          border: '1px solid rgba(239, 68, 68, 0.3)',
-                          background: 'rgba(239, 68, 68, 0.12)',
-                          color: '#f87171',
-                          fontSize: '11px',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px'
-                        }}
-                      >
-                        <UserMinus size={13} /> Remove
-                      </button>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Share Code Section for inviting more */}

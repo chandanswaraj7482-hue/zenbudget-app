@@ -2515,6 +2515,24 @@ const App: React.FC = () => {
   };
 
   const handleDeleteTransactionRequest = (id: string) => {
+    const targetTx = transactions.find(t => t.id === id);
+    // Read-only protection check: If transaction belongs to a partner, check if partner granted edit/delete permission
+    if (targetTx && targetTx.user_id && targetTx.user_id !== currentProfileId) {
+      const ownerPermsRaw = localStorage.getItem(`zb_perm_${targetTx.user_id}_${currentProfileId}`);
+      let hasEditDeletePerm = false;
+      if (ownerPermsRaw) {
+        try {
+          const parsed = JSON.parse(ownerPermsRaw);
+          hasEditDeletePerm = parsed.allowEditDelete === true;
+        } catch (_) {}
+      }
+
+      if (!hasEditDeletePerm) {
+        triggerToast(`🔒 Permission Denied: ${targetTx.partnerName || 'Owner'} has not granted you Edit/Delete permission in Couple & Family Sync.`, 'warning');
+        return;
+      }
+    }
+
     const tier = subscriptionTier || localStorage.getItem('zb_subscription_tier') || 'trial';
     const isPro = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(tier);
 
