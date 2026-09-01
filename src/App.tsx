@@ -1718,28 +1718,7 @@ const App: React.FC = () => {
         setCoupleCode(userCoupleCode);
         localStorage.setItem(`zb_couple_code_${currentProfileId}`, userCoupleCode || '');
 
-        // Sync partner disconnection check
-        const cachedPartnerId = localStorage.getItem(`zb_partner_id_${currentProfileId}`) || null;
-        if (cachedPartnerId && userCoupleCode) {
-          const { data: partnerCheck } = await supabase
-            .from('profiles')
-            .select('partner_couple_code, name')
-            .eq('id', cachedPartnerId)
-            .maybeSingle();
-          if (partnerCheck && partnerCheck.partner_couple_code !== userCoupleCode) {
-            console.log(`ZenBudget: Partner ${partnerCheck.name} disconnected couple ledger sync.`);
-            localStorage.removeItem(`zb_partner_id_${currentProfileId}`);
-            localStorage.removeItem(`zb_partner_code_${currentProfileId}`);
-            localStorage.removeItem(`zb_partner_name_${currentProfileId}`);
-            setPartnerId(null);
-            setPartnerCode(null);
-            setPartnerName(null);
-            await supabase
-              .from('profiles')
-              .update({ partner_couple_code: null })
-              .eq('id', currentProfileId);
-          }
-        }
+        // The partner disconnection check has been migrated to the family_group_id fetching logic.
 
         setUserName(profData.name);
         setSubscriptionTier(profData.subscription_tier);
