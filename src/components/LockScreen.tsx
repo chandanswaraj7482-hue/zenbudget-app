@@ -375,24 +375,9 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
 
       console.log("LockScreen: fetchUserProfile database query result:", userProf);
       if (userProf) {
-        
-        // --- Option A: Strict Hardware Device Blocker ---
+        // Auto-register device session for multi-device sync
         const currentDeviceId = await getOrCreateDeviceId();
         const isMobile = currentDeviceId.startsWith('mobile_');
-        
-        if (userProf.device_id) {
-          const ids = typeof userProf.device_id === 'string' ? userProf.device_id.split('|') : [];
-          const otherMobile = ids.find((id: string) => id.startsWith('mobile_') && id !== currentDeviceId);
-          const otherDesktop = ids.find((id: string) => id.startsWith('desktop_') && id !== currentDeviceId);
-          
-          if (isMobile && otherMobile) {
-            await supabase.auth.signOut();
-            throw new Error('You are already logged in on another mobile device. Please log out from that device first.');
-          }
-          if (!isMobile && otherDesktop) {
-            await supabase.auth.signOut();
-            throw new Error('You are already logged in on another laptop/desktop device. Please log out from that device first.');
-          }
           
           // Merge and save IDs
           const newIds = ids.filter((id: string) => (isMobile ? !id.startsWith('mobile_') : !id.startsWith('desktop_')));
@@ -1008,7 +993,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
             const targetStart = dbProfile?.trial_start_date || localStorage.getItem('zb_trial_start_date') || new Date().toISOString();
             const targetExpires = dbProfile?.premium_expires_at || localStorage.getItem('zb_premium_expires_at') || null;
             const targetTrialExpire = dbProfile?.trial_expire_date || null;
-            const targetUserId = userId || localStorage.getItem('zb_profile_id') || 'local';
+            const targetUserId = (dbProfile && dbProfile.id) ? dbProfile.id : (userId || localStorage.getItem('zb_profile_id') || 'local');
+            localStorage.setItem('zb_profile_id', targetUserId);
 
             onUnlock(targetUserId, targetName, targetTier, targetStart, nextPin, targetExpires, targetTrialExpire);
           } else {

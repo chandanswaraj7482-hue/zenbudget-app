@@ -1562,6 +1562,24 @@ const App: React.FC = () => {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => {
         fetchDataFromSupabase();
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'accounts' }, () => {
+        fetchDataFromSupabase();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'budgets' }, () => {
+        fetchDataFromSupabase();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'goals' }, () => {
+        fetchDataFromSupabase();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'loans' }, () => {
+        fetchDataFromSupabase();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'wishlist' }, () => {
+        fetchDataFromSupabase();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'debts' }, () => {
+        fetchDataFromSupabase();
+      })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
         fetchDataFromSupabase();
       })
