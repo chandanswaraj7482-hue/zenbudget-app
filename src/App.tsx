@@ -502,17 +502,44 @@ const App: React.FC = () => {
       } catch (_) {}
     }
 
+    // Check if transferring to a partner/family account (different user_id)
+    const isPartnerTransfer = (toAcc.user_id && toAcc.user_id !== currentProfileId) || (toAcc as any).isFamilyAccount;
+    const partnerTargetUserId = (toAcc.user_id && toAcc.user_id !== currentProfileId) ? toAcc.user_id : (partnerId || null);
+
+    // 1. Sender transaction (logged in sender's ledger)
     handleSaveTransaction({
-      title: `Transfer: ${fromAcc.name} ➤ ${toAcc.name}`,
+      title: isPartnerTransfer ? `Sent to ${(toAcc as any).ownerName || partnerName || 'Partner'}` : `Transfer: ${fromAcc.name} ➤ ${toAcc.name}`,
       amount,
       category: 'other',
       date: new Date().toISOString().split('T')[0],
-      type: 'transfer',
-      notes: notes || `Transfer from ${fromAcc.name} to ${toAcc.name}`,
+      type: 'expense',
+      notes: notes || `Transferred ${currencySymbol}${amount} from ${fromAcc.name} to ${toAcc.name}`,
       accountId: fromId,
       transferToAccountId: toId
     });
-    triggerToast(`Transferred ${currencySymbol}${amount} from ${fromAcc.name} to ${toAcc.name}!`, 'success');
+
+    // 2. Partner recipient transaction (inserted into Supabase for partner's ledger & real-time notification)
+    if (partnerTargetUserId) {
+      try {
+        const activeRate = rates[currency] || 1;
+        const baseUSDAmount = amount / activeRate;
+        await supabase.from('transactions').insert([{
+          id: crypto.randomUUID(),
+          user_id: partnerTargetUserId,
+          title: `Received from ${userName || 'Partner'}`,
+          amount: baseUSDAmount,
+          category: 'other',
+          date: new Date().toISOString().split('T')[0],
+          type: 'income',
+          notes: notes || `Received ${currencySymbol}${amount} into ${toAcc.name}`,
+          accountId: toId
+        }]);
+      } catch (err) {
+        console.warn('Partner recipient transaction sync warning:', err);
+      }
+    }
+
+    triggerToast(`Transferred ${currencySymbol}${amount} to ${(toAcc as any).ownerName || toAcc.name}!`, 'success');
   };
 
 
