@@ -1065,18 +1065,46 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {(() => {
         const now = new Date();
         if (['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(subscriptionTier)) {
-          const expiryDate = premiumExpiresAt ? new Date(premiumExpiresAt) : null;
+          const isLifetime = subscriptionTier === 'premium_lifetime';
+          const isMonthly = subscriptionTier === 'premium_monthly';
+          const isYearly = subscriptionTier === 'premium_yearly';
+
+          let tierTitle = 'PREMIUM ACTIVE ✨';
+          if (isMonthly) tierTitle = 'PREMIUM MONTHLY ACTIVE ⚡';
+          else if (isYearly) tierTitle = 'PREMIUM YEARLY ACTIVE 🌟';
+          else if (isLifetime) tierTitle = 'LIFETIME PREMIUM ACTIVE 👑';
+
+          let expiryDate: Date | null = premiumExpiresAt ? new Date(premiumExpiresAt) : null;
+          if (!expiryDate && !isLifetime) {
+            const startDate = trialStartDate ? new Date(trialStartDate) : new Date();
+            if (isMonthly) {
+              expiryDate = new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+            } else if (isYearly) {
+              expiryDate = new Date(startDate.getTime() + 365 * 24 * 60 * 60 * 1000);
+            }
+          }
+
           const daysLeft = expiryDate ? Math.max(0, Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))) : null;
+
+          let descText = 'Lifetime Premium Access';
+          if (isMonthly) {
+            descText = daysLeft !== null ? (daysLeft > 0 ? `Monthly Plan (${daysLeft} days remaining)` : 'Monthly Plan (Expires today)') : 'Monthly Premium Plan';
+          } else if (isYearly) {
+            descText = daysLeft !== null ? (daysLeft > 0 ? `Yearly Plan (${daysLeft} days remaining)` : 'Yearly Plan (Expires today)') : 'Yearly Premium Plan';
+          } else if (!isLifetime && daysLeft !== null) {
+            descText = daysLeft > 0 ? `${daysLeft} days remaining` : 'Expires today';
+          }
+
           return (
             <div className="glass-panel" style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)' }}>
               <Clock size={18} style={{ color: '#8b5cf6', flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: '#8b5cf6', textTransform: 'uppercase' }}>Premium Active</span>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#8b5cf6', textTransform: 'uppercase' }}>{tierTitle}</span>
                 <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.8)', marginTop: '2px' }}>
-                  {daysLeft !== null ? (daysLeft > 0 ? `${daysLeft} days remaining` : 'Expires today') : 'Lifetime Premium Access'}
+                  {descText}
                 </p>
               </div>
-              {expiryDate && <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{expiryDate.toLocaleDateString()}</span>}
+              {expiryDate && !isLifetime && <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{expiryDate.toLocaleDateString()}</span>}
             </div>
           );
         } else if (trialStartDate) {

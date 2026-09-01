@@ -1544,7 +1544,7 @@ const App: React.FC = () => {
       try {
         const { data: profData, error: profErr } = await supabase
           .from('profiles')
-          .select('subscription_tier, has_scan_pay_access, is_admin_unlocked, status, pin, name')
+          .select('subscription_tier, premium_expires_at, has_scan_pay_access, is_admin_unlocked, status, pin, name')
           .eq('id', currentProfileId)
           .maybeSingle();
 
@@ -1557,6 +1557,10 @@ const App: React.FC = () => {
           if (profData.subscription_tier) {
             setSubscriptionTier(profData.subscription_tier);
             localStorage.setItem('zb_subscription_tier', profData.subscription_tier);
+          }
+          if (profData.premium_expires_at) {
+            setPremiumExpiresAt(profData.premium_expires_at);
+            localStorage.setItem('zb_premium_expires_at', profData.premium_expires_at);
           }
           if (profData.has_scan_pay_access || profData.is_admin_unlocked) {
             localStorage.setItem('has_scan_pay_access', 'true');
@@ -1583,6 +1587,10 @@ const App: React.FC = () => {
           if (p.subscription_tier) {
             setSubscriptionTier(p.subscription_tier);
             localStorage.setItem('zb_subscription_tier', p.subscription_tier);
+          }
+          if (p.premium_expires_at) {
+            setPremiumExpiresAt(p.premium_expires_at);
+            localStorage.setItem('zb_premium_expires_at', p.premium_expires_at);
           }
           if (p.has_scan_pay_access || p.is_admin_unlocked) {
             localStorage.setItem('has_scan_pay_access', 'true');
