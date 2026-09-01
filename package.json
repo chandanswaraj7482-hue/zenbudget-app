@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && ([ -f android/app/build/outputs/apk/debug/app-debug.apk ] && cp android/app/build/outputs/apk/debug/app-debug.apk dist/zenbudget.apk && cp android/app/build/outputs/apk/debug/app-debug.apk public/zenbudget.apk || true) && ([ -f public/zenbudget.apk ] && cp public/zenbudget.apk dist/zenbudget.apk || true) && mkdir -p admin-build && cp -r dist/* admin-build/ && cp dist/admin.html admin-build/index.html",
+    "build": "vite build && ([ -f public/zenbudget.apk ] && cp public/zenbudget.apk dist/zenbudget.apk || true)",
     "build:admin": "cd admin-portal && npm run build",
     "lint": "oxlint",
     "preview": "vite preview"
