@@ -8,6 +8,9 @@ export interface ModuleSyncPermissions {
   syncGoals: boolean;
   syncLoans: boolean;
   syncWishlist: boolean;
+  canAddTransactions: boolean;
+  canEditTransactions: boolean;
+  canDeleteTransactions: boolean;
 }
 
 interface SharedBudgetViewProps {
@@ -62,7 +65,10 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
       syncBudgets: true,
       syncGoals: true,
       syncLoans: true,
-      syncWishlist: true
+      syncWishlist: true,
+      canAddTransactions: false,
+      canEditTransactions: false,
+      canDeleteTransactions: false
     };
   });
 
@@ -483,12 +489,14 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '8px', marginTop: '4px' }}>
                 {[
-                  { key: 'syncTransactions', label: '💳 Shared Ledger Transactions & Expenses', desc: 'Sync expense entries and income transactions' },
+                  { key: 'syncTransactions', label: '💳 Shared Ledger Transactions', desc: 'Sync expense entries and income transactions' },
+                  { key: 'canAddTransactions', label: '✍️ Allow Partner to Add Entries', desc: 'Partner can log new transactions into the shared ledger' },
+                  { key: 'canEditTransactions', label: '✏️ Allow Partner to Edit', desc: 'Partner can modify existing transactions' },
+                  { key: 'canDeleteTransactions', label: '🗑️ Allow Partner to Delete', desc: 'Partner can remove shared transactions' },
                   { key: 'syncAccounts', label: '🏦 Bank Accounts & Wallet Balances', desc: 'Sync bank accounts and wallet totals' },
                   { key: 'syncBudgets', label: '📊 Category Budgets & Limits', desc: 'Sync shared category spending limits' },
                   { key: 'syncGoals', label: '🎯 Goals & Savings Progress', desc: 'Sync shared target savings milestones' },
-                  { key: 'syncLoans', label: '🤝 Loans & Debts Ledger', desc: 'Sync borrowed and loaned money records' },
-                  { key: 'syncWishlist', label: '🎁 Wishlist Items', desc: 'Sync saved wishlist items' }
+                  { key: 'syncLoans', label: '🤝 Loans & Debts Ledger', desc: 'Sync borrowed and loaned money records' }
                 ].map(item => {
                   const isChecked = permissions[item.key as keyof ModuleSyncPermissions];
                   return (

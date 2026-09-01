@@ -249,6 +249,21 @@ const App: React.FC = () => {
     return parseInt(localStorage.getItem('zb_referral_count') || '0');
   });
   const [isNotificationsOpen, setIsNotificationsOpen] = useState<boolean>(false);
+
+  const [syncPermissions, setSyncPermissions] = useState<any>(() => {
+    try {
+      const saved = localStorage.getItem(`zb_sync_permissions_${currentProfileId}`);
+      if (saved) return JSON.parse(saved);
+    } catch (_) {}
+    return {
+      syncTransactions: true,
+      syncAccounts: true,
+      syncBudgets: true,
+      syncGoals: true,
+      syncLoans: true,
+      syncWishlist: true
+    };
+  });
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
   const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false);
   const [incomingPaymentData, setIncomingPaymentData] = useState<{ vpa?: string; amount?: string; name?: string; note?: string } | null>(null);
@@ -1980,18 +1995,17 @@ const App: React.FC = () => {
       }
 
       // Read Module Sync Permissions for selective data sharing
-      let permissions = {
-        syncTransactions: true,
-        syncAccounts: true,
-        syncBudgets: true,
-        syncGoals: true,
-        syncLoans: true,
-        syncWishlist: true
-      };
-      try {
-        const savedPerms = localStorage.getItem(`zb_sync_permissions_${currentProfileId}`);
-        if (savedPerms) permissions = JSON.parse(savedPerms);
-      } catch (_) {}
+      let permissions = syncPermissions;
+      if (profData?.partner_permissions) {
+        permissions = profData.partner_permissions;
+        setSyncPermissions(permissions);
+        localStorage.setItem(`zb_sync_permissions_${currentProfileId}`, JSON.stringify(permissions));
+      } else {
+        try {
+          const savedPerms = localStorage.getItem(`zb_sync_permissions_${currentProfileId}`);
+          if (savedPerms) permissions = JSON.parse(savedPerms);
+        } catch (_) {}
+      }
 
       // 1. Fetch transactions (including all family transactions if linked and permission enabled)
       const familyUserIds = cachedFamilyMembers.map(m => m.id);
@@ -3778,6 +3792,19 @@ const App: React.FC = () => {
             onOpenTransferModal={() => setIsTransferOpen(true)}
             isPremiumUser={isPremiumUser}
             onOpenSubscriptionModal={() => setIsSubModalOpen(true)}
+            syncPermissions={syncPermissions}
+            onSaveSyncPermissions={async (perms) => {
+              setSyncPermissions(perms);
+              localStorage.setItem(`zb_sync_permissions_${currentProfileId}`, JSON.stringify(perms));
+              try {
+                await supabase
+                  .from('profiles')
+                  .update({ partner_permissions: perms })
+                  .eq('id', currentProfileId);
+              } catch (e) {
+                console.warn('Failed to save permissions to DB:', e);
+              }
+            }}
           />
         )}
         {activeView === 'referral' && (
