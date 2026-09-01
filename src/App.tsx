@@ -2991,6 +2991,8 @@ const App: React.FC = () => {
         setCurrency(newCurrency);
         localStorage.setItem(`zb_currency_${currentProfileId}`, newCurrency);
         localStorage.setItem(`zb_currency_manually_set_${currentProfileId}`, 'true');
+        localStorage.setItem(`zb_manual_currency_${currentProfileId}`, 'true');
+        localStorage.setItem(`zb_currency_auto_initialized_${currentProfileId}`, 'true');
         window.dispatchEvent(new Event('currencychange')); // trigger full re-render
       }
 

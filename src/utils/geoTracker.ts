@@ -198,7 +198,8 @@ export const detectLocationFromIP = async (): Promise<GeoLocationInfo> => {
 };
 
 /**
- * Initializes and auto-sets currency from IP location if not manually overridden by user
+ * Initializes and auto-sets currency from IP location ONLY ONE TIME on initial setup.
+ * Afterwards, keeps user's currency preference untouched unless manually changed in settings.
  */
 export const autoSyncCurrencyFromIP = async (
   currentProfileId?: string,
@@ -206,21 +207,32 @@ export const autoSyncCurrencyFromIP = async (
 ): Promise<string> => {
   const profileId = currentProfileId || localStorage.getItem('zb_profile_id') || '';
   
-  // If user has explicitly manually set a currency preference, keep it
-  const isManuallySet = localStorage.getItem(`zb_manual_currency_${profileId}`);
-  if (isManuallySet) {
-    const savedCurrency = localStorage.getItem(`zb_currency_${profileId}`);
-    if (savedCurrency) return savedCurrency;
+  // 1. Check if currency has already been initialized (either auto-detected once or manually set by user)
+  const isInitialized = profileId ? (
+    localStorage.getItem(`zb_currency_auto_initialized_${profileId}`) ||
+    localStorage.getItem(`zb_manual_currency_${profileId}`) ||
+    localStorage.getItem(`zb_currency_manually_set_${profileId}`)
+  ) : (
+    localStorage.getItem('zb_currency_auto_initialized')
+  );
+
+  const existingCurrency = profileId ? localStorage.getItem(`zb_currency_${profileId}`) : localStorage.getItem('zb_default_currency');
+
+  // If already initialized even once or saved previously, NEVER overwrite automatically!
+  if (isInitialized && existingCurrency) {
+    return existingCurrency;
   }
 
-  // Detect from IP address
+  // 2. Perform ONLY ONE-TIME IP Location & Currency auto-detection
   const geo = await detectLocationFromIP();
   const detectedCurrency = geo.currency || 'INR';
 
-  // Save detected currency as default
+  // Mark as auto-initialized so it NEVER runs auto-update again
   if (profileId) {
     localStorage.setItem(`zb_currency_${profileId}`, detectedCurrency);
+    localStorage.setItem(`zb_currency_auto_initialized_${profileId}`, 'true');
   }
+  localStorage.setItem('zb_currency_auto_initialized', 'true');
   localStorage.setItem('zb_default_currency', detectedCurrency);
   localStorage.setItem('zb_user_country_code', geo.countryCode);
   if (geo.phoneCode) {
