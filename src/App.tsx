@@ -1679,8 +1679,17 @@ const App: React.FC = () => {
       })
       .subscribe();
 
+    // 4-second background auto-refresh fallback interval when partner is linked
+    const partnerSyncInterval = setInterval(() => {
+      const pId = localStorage.getItem(`zb_partner_id_${currentProfileId}`);
+      if (pId || familyMembers.length > 0) {
+        fetchDataFromSupabase();
+      }
+    }, 4000);
+
     return () => {
       clearInterval(interval);
+      clearInterval(partnerSyncInterval);
       supabase.removeChannel(channel);
     };
   }, [currentProfileId]);
