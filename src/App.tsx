@@ -263,8 +263,40 @@ const App: React.FC = () => {
   const [forceUpdate, setForceUpdate] = useState<boolean>(false);
 
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    return (localStorage.getItem('zb_theme') as 'dark' | 'light') || 'dark';
+    const savedTheme = localStorage.getItem('zb_theme');
+    if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
+    // Default: Auto System Theme Detection from device preferences
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
+
+  // Listen to device system theme changes automatically
+  useEffect(() => {
+    const mediaQuery = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+    if (!mediaQuery) return;
+
+    const handleSystemThemeChange = (e: MediaQueryListEvent) => {
+      const savedThemeMode = localStorage.getItem('zb_theme_mode') || 'auto';
+      if (savedThemeMode === 'auto') {
+        const newTheme = e.matches ? 'dark' : 'light';
+        setTheme(newTheme);
+        localStorage.setItem('zb_theme', newTheme);
+      }
+    };
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleSystemThemeChange);
+    } else if ((mediaQuery as any).addListener) {
+      (mediaQuery as any).addListener(handleSystemThemeChange);
+    }
+
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener('change', handleSystemThemeChange);
+      } else if ((mediaQuery as any).removeListener) {
+        (mediaQuery as any).removeListener(handleSystemThemeChange);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const savedTheme = (localStorage.getItem('zb_theme') as 'dark' | 'light') || theme || 'dark';
