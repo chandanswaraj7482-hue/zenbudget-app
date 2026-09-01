@@ -61,6 +61,9 @@ interface DashboardProps {
   onUpgradeClick?: () => void;
   onSaveTransaction?: (tx: Omit<Transaction, 'id'>) => void;
   onDeleteAccount?: (accId: string) => void;
+  familyMembers?: { id: string; name: string; couple_code?: string }[];
+  partnerName?: string;
+  partnerId?: string;
 }
 
 const DAILY_COACH_TIPS = [
@@ -126,8 +129,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenProfile,
   onUpgradeClick,
   onDeleteAccount,
-  onSaveTransaction
+  onSaveTransaction,
+  familyMembers = [],
+  partnerName: _partnerName,
+  partnerId
 }) => {
+  const [selectedDashboardView, setSelectedDashboardView] = useState<'combined' | 'personal' | string>('combined');
   const [showShareModal, setShowShareModal] = useState(false);
   const [showAllAccountsModal, setShowAllAccountsModal] = useState(false);
   const [showAllBadges, setShowAllBadges] = useState(false);
@@ -221,7 +228,30 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
 
-  const currentMonthTransactions = transactions.filter(t => {
+  // Dynamic View Filter for Couple & Family Sync Dashboard
+  const displayTransactions = React.useMemo(() => {
+    if (!familyMembers || familyMembers.length === 0 || selectedDashboardView === 'combined') {
+      return transactions;
+    }
+    if (selectedDashboardView === 'personal') {
+      return transactions.filter(t => !t.isPartnerTransaction && (t.user_id === currentProfileId || !t.user_id));
+    }
+    const selectedMember = familyMembers.find(m => m.id === selectedDashboardView);
+    return transactions.filter(t => t.user_id === selectedDashboardView || (selectedMember && (t.partnerName === selectedMember.name || (t as any).isPartnerTransaction)));
+  }, [transactions, selectedDashboardView, familyMembers, currentProfileId]);
+
+  const displayAccounts = React.useMemo(() => {
+    if (!familyMembers || familyMembers.length === 0 || selectedDashboardView === 'combined') {
+      return accounts;
+    }
+    if (selectedDashboardView === 'personal') {
+      return accounts.filter(a => !(a as any).isFamilyAccount && (a.user_id === currentProfileId || !a.user_id));
+    }
+    const selectedMember = familyMembers.find(m => m.id === selectedDashboardView);
+    return accounts.filter(a => (a as any).isFamilyAccount || a.user_id === selectedDashboardView || (selectedMember && (a as any).ownerName === selectedMember.name));
+  }, [accounts, selectedDashboardView, familyMembers, currentProfileId]);
+
+  const currentMonthTransactions = displayTransactions.filter(t => {
     const txDate = new Date(t.date);
     return txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear;
   });
@@ -234,12 +264,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const myAccounts = accounts.filter(a => !a.user_id || a.user_id === currentProfileId);
-  const familyAccounts = accounts.filter(a => a.user_id && a.user_id !== currentProfileId);
+  const myAccounts = displayAccounts.filter(a => !a.user_id || a.user_id === currentProfileId);
+  const familyAccounts = displayAccounts.filter(a => a.user_id && a.user_id !== currentProfileId);
 
-  const totalAccountBalance = accounts && accounts.length > 0
-    ? accounts.reduce((sum, a) => sum + (a.balance || 0), 0)
-    : transactions.reduce((sum, t) => t.type === 'income' ? sum + t.amount : sum - t.amount, 0);
+  const totalAccountBalance = displayAccounts && displayAccounts.length > 0
+    ? displayAccounts.reduce((sum, a) => sum + (a.balance || 0), 0)
+    : displayTransactions.reduce((sum, t) => t.type === 'income' ? sum + t.amount : sum - t.amount, 0);
     
   const myTotalAccountBalance = myAccounts.length > 0 
     ? myAccounts.reduce((sum, a) => sum + (a.balance || 0), 0) 
@@ -657,6 +687,92 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <Plus size={15} /> {t('add_transaction')}
         </button>
       </div>
+
+      {/* 👥 Couple & Family Sync Dashboard View Switcher Bar (Only visible when family members connected!) */}
+      {familyMembers && familyMembers.length > 0 && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          overflowX: 'auto',
+          padding: '8px 12px',
+          borderRadius: '18px',
+          background: 'rgba(15, 23, 42, 0.65)',
+          border: '1px solid rgba(255, 255, 255, 0.12)',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
+        }}>
+          <span style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
+            👥 VIEW:
+          </span>
+
+          <button
+            type="button"
+            onClick={() => setSelectedDashboardView('combined')}
+            style={{
+              padding: '6px 14px',
+              borderRadius: '12px',
+              fontSize: '11px',
+              fontWeight: 800,
+              border: selectedDashboardView === 'combined' ? '1px solid rgba(34, 197, 94, 0.5)' : '1px solid rgba(255, 255, 255, 0.08)',
+              background: selectedDashboardView === 'combined' ? 'linear-gradient(135deg, rgba(34,197,94,0.25) 0%, rgba(16,185,129,0.15) 100%)' : 'rgba(255, 255, 255, 0.04)',
+              color: selectedDashboardView === 'combined' ? '#34d399' : '#94a3b8',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              transition: 'all 0.2s ease',
+              boxShadow: selectedDashboardView === 'combined' ? '0 0 12px rgba(34,197,94,0.25)' : 'none'
+            }}
+          >
+            🌐 Combined Household ({familyMembers.length + 1})
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedDashboardView('personal')}
+            style={{
+              padding: '6px 14px',
+              borderRadius: '12px',
+              fontSize: '11px',
+              fontWeight: 800,
+              border: selectedDashboardView === 'personal' ? '1px solid rgba(56, 189, 248, 0.5)' : '1px solid rgba(255, 255, 255, 0.08)',
+              background: selectedDashboardView === 'personal' ? 'linear-gradient(135deg, rgba(56,189,248,0.25) 0%, rgba(3,105,161,0.15) 100%)' : 'rgba(255, 255, 255, 0.04)',
+              color: selectedDashboardView === 'personal' ? '#38bdf8' : '#94a3b8',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              transition: 'all 0.2s ease',
+              boxShadow: selectedDashboardView === 'personal' ? '0 0 12px rgba(56,189,248,0.25)' : 'none'
+            }}
+          >
+            👤 My Personal View ({userName || 'You'})
+          </button>
+
+          {familyMembers.map(member => {
+            const isSelected = selectedDashboardView === member.id;
+            return (
+              <button
+                key={member.id}
+                type="button"
+                onClick={() => setSelectedDashboardView(member.id)}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '12px',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  border: isSelected ? '1px solid rgba(236, 72, 153, 0.5)' : '1px solid rgba(255, 255, 255, 0.08)',
+                  background: isSelected ? 'linear-gradient(135deg, rgba(236,72,153,0.25) 0%, rgba(190,18,60,0.15) 100%)' : 'rgba(255, 255, 255, 0.04)',
+                  color: isSelected ? '#f472b6' : '#94a3b8',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.2s ease',
+                  boxShadow: isSelected ? '0 0 12px rgba(236,72,153,0.25)' : 'none'
+                }}
+              >
+                👫 {member.name || 'Partner'}'s Dashboard
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Main Glass Balance Card */}
       <div className="glass-panel" style={{

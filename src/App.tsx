@@ -3541,9 +3541,11 @@ const App: React.FC = () => {
             onOpenTransfer={() => setIsTransferOpen(true)}
             onOpenLoans={() => setActiveView('loans')}
             onOpenProfile={() => setActiveView('profile')}
-            onUpgradeClick={() => setIsSubModalOpen(true)}
             onDeleteAccount={handleDeleteAccount}
             onSaveTransaction={handleSaveTransaction}
+            familyMembers={familyMembers}
+            partnerName={partnerName || undefined}
+            partnerId={partnerId || undefined}
           />
         )}
         {activeView === 'loans' && (
