@@ -1332,13 +1332,16 @@ const App: React.FC = () => {
           // Do not trigger popup on loan creation day
           shouldTrigger = false;
         } else if (freq === 'daily') {
-          shouldTrigger = todayStr >= startDateStr && todayStr <= dueStr;
+          shouldTrigger = todayStr > startDateStr && todayStr <= dueStr;
         } else if (freq === 'weekly') {
-          shouldTrigger = todayStr >= startDateStr && (todayStr === dueStr || (now.getDay() === due.getDay()));
+          const daysSinceStart = Math.floor((now.getTime() - new Date(startDateStr).getTime()) / (1000 * 60 * 60 * 24));
+          shouldTrigger = daysSinceStart >= 6 && todayStr >= startDateStr && (todayStr === dueStr || (now.getDay() === due.getDay()));
         } else if (freq === 'monthly') {
-          shouldTrigger = todayStr >= startDateStr && (todayStr === dueStr || (now.getDate() === due.getDate() && todayStr <= dueStr));
+          const daysSinceStart = Math.floor((now.getTime() - new Date(startDateStr).getTime()) / (1000 * 60 * 60 * 24));
+          shouldTrigger = daysSinceStart >= 25 && todayStr >= startDateStr && (todayStr === dueStr || (now.getDate() === due.getDate() && todayStr <= dueStr));
         } else if (freq === 'yearly') {
-          shouldTrigger = todayStr >= startDateStr && (todayStr === dueStr || (now.getDate() === due.getDate() && now.getMonth() === due.getMonth() && todayStr <= dueStr));
+          const daysSinceStart = Math.floor((now.getTime() - new Date(startDateStr).getTime()) / (1000 * 60 * 60 * 24));
+          shouldTrigger = daysSinceStart >= 350 && todayStr >= startDateStr && (todayStr === dueStr || (now.getDate() === due.getDate() && now.getMonth() === due.getMonth() && todayStr <= dueStr));
         } else {
           shouldTrigger = todayStr >= dueStr;
         }
@@ -4835,12 +4838,19 @@ const App: React.FC = () => {
 
             {activeLoanReminderModal.overdueDays > 0 ? (
               <p style={{ fontSize: '13px', color: '#ef4444', fontWeight: 800, margin: '4px 0 16px 0' }}>
-                ⚠️ {activeLoanReminderModal.overdueDays} Day(s) Overdue! (Amount: ₹{activeLoanReminderModal.remainingAmount})
+                ⚠️ {activeLoanReminderModal.overdueDays} Day(s) Overdue! (Remaining Balance: ₹{activeLoanReminderModal.remainingAmount})
               </p>
             ) : (
-              <p style={{ fontSize: '13px', color: '#cbd5e1', margin: '4px 0 16px 0' }}>
-                {activeLoanReminderModal.loan.type === 'lent' ? 'Remaining Amount To Collect:' : 'Remaining Loan Balance:'} <strong style={{ color: '#34d399' }}>₹{activeLoanReminderModal.remainingAmount}</strong>
-              </p>
+              <div style={{ margin: '4px 0 16px 0' }}>
+                {activeLoanReminderModal.loan.frequency && activeLoanReminderModal.loan.frequency !== 'one_time' && activeLoanReminderModal.loan.emiInstallment ? (
+                  <p style={{ fontSize: '14px', color: '#fff', fontWeight: 800, margin: '0 0 4px 0' }}>
+                    {activeLoanReminderModal.loan.type === 'lent' ? 'EMI To Collect:' : 'EMI To Pay:'} <strong style={{ color: '#a78bfa' }}>₹{activeLoanReminderModal.loan.emiInstallment}</strong>
+                  </p>
+                ) : null}
+                <p style={{ fontSize: '12px', color: '#cbd5e1', margin: 0 }}>
+                  {activeLoanReminderModal.loan.type === 'lent' ? 'Total Remaining:' : 'Total Remaining Balance:'} <strong style={{ color: '#34d399' }}>₹{activeLoanReminderModal.remainingAmount}</strong>
+                </p>
+              </div>
             )}
 
             {/* Wallet Selection Dropdown or No-Account Warning */}
