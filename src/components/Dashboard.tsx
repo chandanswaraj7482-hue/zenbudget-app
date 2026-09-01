@@ -622,7 +622,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingBottom: '80px' }} className="animate-fade-in">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingBottom: '140px' }} className="animate-fade-in">
 
       {/* Premium Header with Profile Avatar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', marginTop: '8px' }}>

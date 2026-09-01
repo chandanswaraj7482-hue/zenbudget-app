@@ -86,7 +86,7 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
   }, []);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '22px', paddingBottom: '90px', animation: 'fadeIn 0.3s ease-out' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '22px', paddingBottom: '140px', animation: 'fadeIn 0.3s ease-out' }}>
       
       {/* Title */}
       <div>

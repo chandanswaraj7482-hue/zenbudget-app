@@ -668,7 +668,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '80px' }} className="animate-fade-in">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '140px' }} className="animate-fade-in">
 
       {/* Header + Timeframe Toggle */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

@@ -88,7 +88,7 @@ export const Budgets: React.FC<BudgetsProps> = ({
     .reduce((sum, t) => sum + t.amount, 0);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '80px' }} className="animate-fade-in">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '140px' }} className="animate-fade-in">
       <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em', margin: 0 }}>
         {t('category_budgets')}
       </h2>
