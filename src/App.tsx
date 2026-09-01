@@ -3288,7 +3288,7 @@ const App: React.FC = () => {
   return (
     <div 
       key={langKey} 
-      style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%' }}
+      style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: '100vh', width: '100%', maxWidth: '520px', margin: '0 auto', position: 'relative' }}
       onClickCapture={(e) => {
         if (isSubscriptionExpired()) {
           const target = e.target as HTMLElement;
@@ -3365,6 +3365,9 @@ const App: React.FC = () => {
         position: 'sticky',
         top: 0,
         zIndex: 99,
+        width: '100%',
+        maxWidth: '520px',
+        margin: '0 auto',
         transition: 'all 0.2s ease'
       }}>
         {/* Branding Logo */}
@@ -3483,7 +3486,7 @@ const App: React.FC = () => {
       </header>
 
       {/* Main View Area */}
-      <main ref={mainScrollRef} className="scroll-container" style={{ padding: '20px 20px calc(95px + env(safe-area-inset-bottom)) 20px' }}>
+      <main ref={mainScrollRef} className="scroll-container" style={{ padding: '20px 20px calc(95px + env(safe-area-inset-bottom)) 20px', width: '100%', maxWidth: '520px', margin: '0 auto', boxSizing: 'border-box' }}>
         {activeView === 'dashboard' && (
           <Dashboard 
             key={langKey}
@@ -3706,7 +3709,7 @@ const App: React.FC = () => {
         left: '50%',
         transform: 'translateX(-50%)',
         width: '100%',
-        maxWidth: '480px',
+        maxWidth: '520px',
         background: 'var(--bg-nav-glass)',
         borderTop: '1px solid var(--border-divider)',
         backdropFilter: 'blur(20px) saturate(180%)',
