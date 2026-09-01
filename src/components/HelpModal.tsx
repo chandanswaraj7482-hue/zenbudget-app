@@ -770,11 +770,11 @@ User Question: ${rawText}`
                         JSON.stringify({ rating, comment, date: new Date().toISOString() })
                       );
 
-                      // Save rating to Supabase (admin panel me dikhega)
+                      // Save rating to Supabase (Admin Panel live review sync)
                       try {
                         const { data: { user } } = await supabase.auth.getUser();
                         const userName = localStorage.getItem('zb_user_name') || user?.user_metadata?.full_name || user?.user_metadata?.name || 'ZenBudget User';
-                        const userEmail = user?.email || localStorage.getItem('zb_user_email') || 'user@example.com';
+                        const userEmail = (user?.email || localStorage.getItem('zb_user_email') || 'user@example.com').trim().toLowerCase();
 
                         const trimmedComment = comment.trim();
                         const feedbackText = trimmedComment ? trimmedComment : `${rating} Star rating submitted`;
@@ -788,13 +788,24 @@ User Question: ${rawText}`
                         }]);
 
                         if (insertErr) {
-                          console.error('Supabase app_ratings insert error:', insertErr);
+                          console.warn('Supabase app_ratings insert attempt 1 warning:', insertErr);
+                          // Retry without created_at if default is handled by database
+                          const { error: retryErr } = await supabase.from('app_ratings').insert([{
+                            user_name: userName,
+                            user_email: userEmail,
+                            rating_stars: rating,
+                            feedback: feedbackText
+                          }]);
+                          if (retryErr) {
+                            console.error('Supabase app_ratings insert attempt 2 error:', retryErr);
+                          } else {
+                            console.log('✅ Rating & feedback saved to Supabase app_ratings on retry');
+                          }
                         } else {
                           console.log('✅ Rating & feedback saved to Supabase app_ratings');
                         }
                       } catch (err) {
-                        console.warn('Rating save to Supabase failed (table may not exist yet):', err);
-                        // Fallback: silently ignore, local storage already saved
+                        console.warn('Rating save to Supabase failed:', err);
                       }
 
                       setFeedbackSuccess(true);

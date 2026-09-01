@@ -419,6 +419,20 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   useEffect(() => {
     if (isOpen && isUnlocked) {
       fetchAdminData();
+
+      const ratingChannel = supabaseClient
+        .channel('admin_ratings_realtime')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'app_ratings' }, (payload: any) => {
+          if (payload.new) {
+            setRatings(prev => [payload.new, ...prev]);
+            if (onShowToast) onShowToast(`⭐ New review rating received from ${payload.new.user_name || 'User'}!`, 'info');
+          }
+        })
+        .subscribe();
+
+      return () => {
+        supabaseClient.removeChannel(ratingChannel);
+      };
     }
   }, [isOpen, isUnlocked]);
 
