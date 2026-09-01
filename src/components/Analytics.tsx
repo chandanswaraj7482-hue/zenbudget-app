@@ -486,13 +486,22 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
 
     const accountData = accounts
       .filter(a => (a.balance || 0) > 0)
-      .map((a, i) => ({
-        id: a.id,
-        name: a.name,
-        balance: a.balance || 0,
-        percentage: Math.round(((a.balance || 0) / totalBalance) * 100),
-        color: a.color || accountColors[i % accountColors.length]
-      }))
+      .map((a, i) => {
+        const isFamilyAcc = (a as any).isFamilyAccount;
+        const ownerLabel = isFamilyAcc
+          ? ((a as any).ownerName || 'Partner')
+          : null;
+        const displayName = a.name && a.name.trim() ? a.name.trim() : (isFamilyAcc ? 'Account' : 'Wallet');
+        return {
+          id: a.id,
+          name: displayName,
+          ownerLabel,
+          isFamilyAcc,
+          balance: a.balance || 0,
+          percentage: Math.round(((a.balance || 0) / totalBalance) * 100),
+          color: a.color || accountColors[i % accountColors.length]
+        };
+      })
       .sort((a, b) => b.balance - a.balance);
 
     if (accountData.length === 0) return null;
@@ -580,16 +589,46 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
                   transition: 'all 0.15s ease'
                 }}
               >
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                   <div style={{ 
                     width: '10px', 
                     height: '10px', 
                     borderRadius: '50%', 
                     backgroundColor: d.color,
-                    boxShadow: `0 0 8px ${d.color}60`
+                    boxShadow: `0 0 8px ${d.color}60`,
+                    flexShrink: 0
                   }} />
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                    <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>{d.name}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>{d.name}</span>
+                      {d.ownerLabel ? (
+                        <span style={{
+                          fontSize: '9px',
+                          fontWeight: 800,
+                          padding: '2px 6px',
+                          borderRadius: '6px',
+                          background: 'rgba(244, 114, 182, 0.15)',
+                          color: '#f472b6',
+                          border: '1px solid rgba(244,114,182,0.3)',
+                          letterSpacing: '0.02em'
+                        }}>
+                          👫 {d.ownerLabel}
+                        </span>
+                      ) : (
+                        <span style={{
+                          fontSize: '9px',
+                          fontWeight: 800,
+                          padding: '2px 6px',
+                          borderRadius: '6px',
+                          background: 'rgba(56, 189, 248, 0.1)',
+                          color: '#38bdf8',
+                          border: '1px solid rgba(56,189,248,0.2)',
+                          letterSpacing: '0.02em'
+                        }}>
+                          👤 You
+                        </span>
+                      )}
+                    </div>
                     {/* Mini Progress Bar */}
                     <div style={{ width: '60px', height: '3px', borderRadius: '2px', background: 'var(--border-card)', marginTop: '4px', overflow: 'hidden' }}>
                       <div style={{ width: `${d.percentage}%`, height: '100%', background: d.color, borderRadius: '2px' }} />
