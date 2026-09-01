@@ -248,7 +248,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                   Family's Spent
                 </span>
                 <p style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff', margin: '4px 0 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {currencySymbol}{familyTotalSpent.toLocaleString()}
+                  {currencySymbol}{Math.round(familyTotalSpent).toLocaleString()}
                 </p>
                 <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{familyTxs.length} entries</span>
               </div>
@@ -258,7 +258,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                   Your Spent
                 </span>
                 <p style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff', margin: '4px 0 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {currencySymbol}{myTotalSpent.toLocaleString()}
+                  {currencySymbol}{Math.round(myTotalSpent).toLocaleString()}
                 </p>
                 <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{myTxs.length} entries</span>
               </div>
@@ -267,7 +267,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
             {/* Combined Household Total Banner */}
             <div style={{ padding: '14px 18px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
               <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary)' }}>Total Combined Household Spent</span>
-              <span style={{ fontSize: '18px', fontWeight: 800, color: 'var(--primary)' }}>{currencySymbol}{combinedTotalSpent.toLocaleString()}</span>
+              <span style={{ fontSize: '18px', fontWeight: 800, color: 'var(--primary)' }}>{currencySymbol}{Math.round(combinedTotalSpent).toLocaleString()}</span>
             </div>
 
             {/* Money Transfer / Send Money to Partner Button */}

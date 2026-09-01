@@ -12,7 +12,7 @@ export const formatCurrency = (
     return `${currencySymbol}0`;
   }
 
-  const targetDecimals = decimals !== undefined ? decimals : (amount % 1 !== 0 ? 2 : 0);
+  const targetDecimals = decimals !== undefined ? decimals : 0;
 
   const factor = Math.pow(10, targetDecimals);
   const rounded = Math.round((amount + Number.EPSILON) * factor) / factor;
