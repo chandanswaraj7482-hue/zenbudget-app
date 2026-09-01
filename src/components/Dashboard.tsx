@@ -137,7 +137,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [selectedDashboardView, setSelectedDashboardView] = useState<'combined' | 'personal' | string>('combined');
 
   const [dateRangeFilter, setDateRangeFilter] = useState<'this_month' | 'last_month' | 'last_3_months' | 'custom'>('this_month');
-  const [showShareModal, setShowShareModal] = useState(false);
+  const [showPartnerBalanceModal, setShowPartnerBalanceModal] = useState(false);
+  const [selectedMemberDetail, setSelectedMemberDetail] = useState<any | null>(null);
   const [showAllAccountsModal, setShowAllAccountsModal] = useState(false);
   const [showAllBadges, setShowAllBadges] = useState(false);
   const [showMonthlyLetter, setShowMonthlyLetter] = useState(false);
@@ -705,15 +706,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <button
           onClick={onAddTransactionClick}
           className="glass-button active"
-          style={{ padding: '9px 12px', borderRadius: '14px', fontSize: '13px', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '5px', animation: 'pulse-glow 3s infinite' }}
+          style={{ padding: '9px 12px', borderRadius: '14px', fontSize: '13px', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '5px' }}
         >
           <Plus size={15} /> {t('add_transaction')}
         </button>
       </div>
 
-
-
-      {/* Main Glass Balance Card */}
+      {/* Main Glass Balance Card - Restored Clean Design */}
       <div className="glass-panel" style={{
         position: 'relative',
         overflow: 'hidden',
@@ -731,89 +730,43 @@ export const Dashboard: React.FC<DashboardProps> = ({
           pointerEvents: 'none'
         }} />
 
-        <span style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-secondary)', fontWeight: 700 }}>
-          {familyMembers && familyMembers.length > 0 ? '🏠 Combined Family & Couple Balance' : t('total_balance')}
-        </span>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', margin: '6px 0 14px 0', color: 'var(--text-balance)', minWidth: 0, maxWidth: '100%' }}>
-          <span style={{ fontSize: 'clamp(26px, 8vw, 38px)', fontWeight: 800, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {formatCurrency(totalBalance, currencySymbol, 0)}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+          <span style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-secondary)', fontWeight: 700 }}>
+            {t('total_balance')}
+          </span>
+
+          {familyMembers && familyMembers.length > 0 && (
+            <button
+              onClick={() => {
+                setSelectedMemberDetail(null);
+                setShowPartnerBalanceModal(true);
+              }}
+              style={{
+                background: 'linear-gradient(135deg, rgba(236,72,153,0.18) 0%, rgba(139,92,246,0.18) 100%)',
+                border: '1px solid rgba(236,72,153,0.35)',
+                color: '#f472b6',
+                padding: '6px 14px',
+                borderRadius: '20px',
+                fontSize: '12px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 2px 10px rgba(236,72,153,0.15)',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              👥 Partner Balance <ChevronRight size={13} />
+            </button>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', margin: '8px 0 16px 0', color: 'var(--text-balance)', minWidth: 0, maxWidth: '100%' }}>
+          <span style={{ fontSize: 'clamp(28px, 8vw, 40px)', fontWeight: 800, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {formatCurrency(myTotalAccountBalance || totalBalance, currencySymbol, 0)}
           </span>
         </div>
-        
-        {/* 👥 Member-Wise Name & Money Breakdown Row */}
-        {familyMembers && familyMembers.length > 0 && (
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-            marginBottom: '16px',
-            padding: '12px 14px',
-            background: 'rgba(15, 23, 42, 0.45)',
-            borderRadius: '14px',
-            border: '1px solid rgba(255, 255, 255, 0.08)'
-          }}>
-            {/* Row label */}
-            <div style={{ fontSize: '9px', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '2px' }}>
-              Wallet Breakdown
-            </div>
-
-            {/* My Personal Wallet Balance */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderRadius: '10px', background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.18)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'linear-gradient(135deg, #10b981, #34d399)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px' }}>👤</div>
-                <div>
-                  <div style={{ fontSize: '12px', fontWeight: 800, color: '#e2e8f0' }}>{userName || 'You'}</div>
-                  <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600 }}>My Wallet</div>
-                </div>
-              </div>
-              <span style={{ fontSize: '16px', color: '#34d399', fontWeight: 800 }}>
-                {formatCurrency(myTotalAccountBalance, currencySymbol, 0)}
-              </span>
-            </div>
-
-            {/* Individual Partner / Family Member Balances */}
-            {familyMembers.map((m, idx) => {
-              const partnerColors = [
-                { bg: 'rgba(56,189,248,0.08)', border: 'rgba(56,189,248,0.18)', text: '#38bdf8', grad: 'linear-gradient(135deg, #0ea5e9, #38bdf8)' },
-                { bg: 'rgba(244,114,182,0.08)', border: 'rgba(244,114,182,0.18)', text: '#f472b6', grad: 'linear-gradient(135deg, #ec4899, #f472b6)' },
-                { bg: 'rgba(167,139,250,0.08)', border: 'rgba(167,139,250,0.18)', text: '#a78bfa', grad: 'linear-gradient(135deg, #8b5cf6, #a78bfa)' },
-                { bg: 'rgba(251,191,36,0.08)', border: 'rgba(251,191,36,0.18)', text: '#fbbf24', grad: 'linear-gradient(135deg, #f59e0b, #fbbf24)' },
-              ];
-              const clr = partnerColors[idx % partnerColors.length];
-              // Filter family accounts belonging to this partner
-              const mAccounts = accounts.filter(a =>
-                (a as any).isFamilyAccount &&
-                ((a as any).ownerName === m.name || a.user_id === m.id)
-              );
-              const mBalance = mAccounts.reduce((sum, a) => sum + (a.balance || 0), 0);
-              // Show individual account breakdown if multiple wallets
-              return (
-                <div key={m.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderRadius: '10px', background: clr.bg, border: `1px solid ${clr.border}` }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: clr.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 900, color: '#fff' }}>
-                      {(m.name || 'P').charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '12px', fontWeight: 800, color: '#e2e8f0' }}>{m.name || 'Partner'}</div>
-                      <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600 }}>
-                        {mAccounts.length > 0 ? `${mAccounts.length} wallet${mAccounts.length > 1 ? 's' : ''}` : 'Partner'}
-                      </div>
-                    </div>
-                  </div>
-                  <span style={{ fontSize: '16px', color: clr.text, fontWeight: 800 }}>
-                    {formatCurrency(mBalance, currencySymbol, 0)}
-                  </span>
-                </div>
-              );
-            })}
-
-            {/* Total divider row */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 10px', borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: '2px' }}>
-              <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Combined</span>
-              <span style={{ fontSize: '15px', color: '#e2e8f0', fontWeight: 900 }}>{formatCurrency(totalBalance, currencySymbol, 0)}</span>
-            </div>
-          </div>
-        )}
 
         {/* Income / Expense Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', borderTop: '1px solid var(--border-divider)', paddingTop: '16px' }}>
@@ -838,7 +791,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--danger)' }}>
                 -{formatCurrency(expenses, currencySymbol, 0)}
               </p>
-            </div>
           </div>
         </div>
       </div>
@@ -2940,6 +2892,332 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
       )}
+
+      {/* 👥 Partner & Family Wallet Breakdown Modal */}
+      {showPartnerBalanceModal && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.85)',
+            backdropFilter: 'blur(14px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '20px'
+          }}
+          onClick={() => {
+            setShowPartnerBalanceModal(false);
+            setSelectedMemberDetail(null);
+          }}
+        >
+          <div
+            className="glass-panel"
+            style={{
+              width: '100%',
+              maxWidth: '460px',
+              maxHeight: '85vh',
+              overflowY: 'auto',
+              borderRadius: '24px',
+              padding: '22px',
+              border: '1px solid rgba(236,72,153,0.3)',
+              boxShadow: '0 0 40px rgba(236,72,153,0.15)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '18px'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {selectedMemberDetail ? (
+                  <button
+                    onClick={() => setSelectedMemberDetail(null)}
+                    style={{
+                      background: 'rgba(255,255,255,0.08)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '4px 10px',
+                      color: 'var(--text-primary)',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    ← Back
+                  </button>
+                ) : (
+                  <h3 style={{ fontSize: '17px', fontWeight: 900, margin: 0, color: '#f472b6', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    👥 Partner &amp; Family Wallets
+                  </h3>
+                )}
+              </div>
+              <button
+                onClick={() => {
+                  setShowPartnerBalanceModal(false);
+                  setSelectedMemberDetail(null);
+                }}
+                style={{
+                  background: 'rgba(255,255,255,0.08)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '30px',
+                  height: '30px',
+                  color: 'var(--text-primary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={15} />
+              </button>
+            </div>
+
+            {!selectedMemberDetail ? (
+              /* VIEW 1: Overview List */
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {/* Household Combined Balance Card */}
+                <div style={{
+                  padding: '16px',
+                  borderRadius: '16px',
+                  background: 'linear-gradient(135deg, rgba(236,72,153,0.12) 0%, rgba(99,102,241,0.12) 100%)',
+                  border: '1px solid rgba(236,72,153,0.25)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '6px'
+                }}>
+                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    🌐 Combined Household Balance
+                  </span>
+                  <span style={{ fontSize: '26px', fontWeight: 900, color: '#ffffff' }}>
+                    {formatCurrency(totalBalance, currencySymbol, 0)}
+                  </span>
+                  <div style={{ display: 'flex', gap: '16px', marginTop: '6px', fontSize: '12px', fontWeight: 700 }}>
+                    <span style={{ color: '#34d399' }}>Income: +{formatCurrency(income, currencySymbol, 0)}</span>
+                    <span style={{ color: '#f87171' }}>Expenses: -{formatCurrency(expenses, currencySymbol, 0)}</span>
+                  </div>
+                </div>
+
+                <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Connected Members ({familyMembers.length + 1}) - Click to View Details
+                </div>
+
+                {/* Member 1: YOU */}
+                <div
+                  onClick={() => {
+                    setSelectedMemberDetail({
+                      id: currentProfileId,
+                      name: userName || 'You',
+                      isMe: true,
+                      avatar: userAvatar,
+                      totalBalance: myTotalAccountBalance,
+                      accounts: myAccounts,
+                      transactions: transactions.filter(t => !t.isPartnerTransaction && (t.user_id === currentProfileId || !t.user_id))
+                    });
+                  }}
+                  style={{
+                    padding: '14px 16px',
+                    borderRadius: '16px',
+                    background: 'rgba(34, 197, 94, 0.08)',
+                    border: '1px solid rgba(34, 197, 94, 0.25)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'linear-gradient(135deg, #10b981, #34d399)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', color: '#fff', fontWeight: 900 }}>
+                      👤
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: 800, color: '#ffffff' }}>
+                        {userName || 'You'} <span style={{ fontSize: '10px', background: 'rgba(34, 197, 94, 0.2)', color: '#34d399', padding: '2px 8px', borderRadius: '10px', marginLeft: '4px' }}>YOU</span>
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                        {myAccounts.length} Personal Wallet{myAccounts.length > 1 ? 's' : ''}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '17px', fontWeight: 800, color: '#34d399' }}>
+                      {formatCurrency(myTotalAccountBalance, currencySymbol, 0)}
+                    </span>
+                    <ChevronRight size={16} style={{ color: 'var(--text-secondary)' }} />
+                  </div>
+                </div>
+
+                {/* Member 2+: Partner / Family Members */}
+                {familyMembers.map((m) => {
+                  const mAccounts = accounts.filter(a =>
+                    (a as any).isFamilyAccount &&
+                    ((a as any).ownerName === m.name || a.user_id === m.id)
+                  );
+                  const mBalance = mAccounts.reduce((sum, a) => sum + (a.balance || 0), 0);
+                  const mTx = transactions.filter(t => t.user_id === m.id || t.partnerName === m.name);
+                  const mInc = mTx.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+                  const mExp = mTx.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+
+                  return (
+                    <div
+                      key={m.id}
+                      onClick={() => {
+                        setSelectedMemberDetail({
+                          id: m.id,
+                          name: m.name || 'Partner',
+                          isMe: false,
+                          avatar: m.avatar_url,
+                          totalBalance: mBalance,
+                          accounts: mAccounts,
+                          transactions: mTx,
+                          income: mInc,
+                          expenses: mExp
+                        });
+                      }}
+                      style={{
+                        padding: '14px 16px',
+                        borderRadius: '16px',
+                        background: 'rgba(236, 72, 153, 0.08)',
+                        border: '1px solid rgba(236, 72, 153, 0.25)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'linear-gradient(135deg, #ec4899, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', color: '#fff', fontWeight: 900 }}>
+                          {(m.name || 'P').charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '14px', fontWeight: 800, color: '#ffffff' }}>
+                            {m.name || 'Partner'} <span style={{ fontSize: '10px', background: 'rgba(236, 72, 153, 0.2)', color: '#f472b6', padding: '2px 8px', borderRadius: '10px', marginLeft: '4px' }}>PARTNER</span>
+                          </div>
+                          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                            {mAccounts.length} Wallet{mAccounts.length > 1 ? 's' : ''} • Click for details
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '17px', fontWeight: 800, color: '#f472b6' }}>
+                          {formatCurrency(mBalance, currencySymbol, 0)}
+                        </span>
+                        <ChevronRight size={16} style={{ color: 'var(--text-secondary)' }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              /* VIEW 2: Selected Member Detail View */
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {/* Member Header Card */}
+                <div style={{
+                  padding: '18px',
+                  borderRadius: '18px',
+                  background: selectedMemberDetail.isMe ? 'linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(16,185,129,0.08) 100%)' : 'linear-gradient(135deg, rgba(236,72,153,0.15) 0%, rgba(139,92,246,0.08) 100%)',
+                  border: selectedMemberDetail.isMe ? '1px solid rgba(34,197,94,0.3)' : '1px solid rgba(236,72,153,0.3)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: selectedMemberDetail.isMe ? 'linear-gradient(135deg, #10b981, #34d399)' : 'linear-gradient(135deg, #ec4899, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', color: '#fff', fontWeight: 900 }}>
+                      {selectedMemberDetail.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h4 style={{ fontSize: '18px', fontWeight: 900, margin: 0, color: '#ffffff' }}>
+                        {selectedMemberDetail.name}
+                      </h4>
+                      <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                        {selectedMemberDetail.isMe ? 'Your Personal Profile' : 'Synced Partner Account'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '12px' }}>
+                    <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>Total Wallet Balance</span>
+                    <div style={{ fontSize: '28px', fontWeight: 900, color: selectedMemberDetail.isMe ? '#34d399' : '#f472b6', marginTop: '2px' }}>
+                      {formatCurrency(selectedMemberDetail.totalBalance, currencySymbol, 0)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Member Income & Expense Breakdown */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div style={{ padding: '12px 14px', borderRadius: '14px', background: 'rgba(34, 197, 94, 0.08)', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
+                    <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase' }}>Monthly Income</span>
+                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#34d399', marginTop: '4px' }}>
+                      +{formatCurrency(selectedMemberDetail.isMe ? income : (selectedMemberDetail.income || 0), currencySymbol, 0)}
+                    </div>
+                  </div>
+
+                  <div style={{ padding: '12px 14px', borderRadius: '14px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                    <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase' }}>Monthly Expenses</span>
+                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#f87171', marginTop: '4px' }}>
+                      -{formatCurrency(selectedMemberDetail.isMe ? expenses : (selectedMemberDetail.expenses || 0), currencySymbol, 0)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Member Accounts List */}
+                <div>
+                  <h5 style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>
+                    Linked Accounts ({selectedMemberDetail.accounts.length})
+                  </h5>
+                  {selectedMemberDetail.accounts.length === 0 ? (
+                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>No individual accounts linked yet.</p>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {selectedMemberDetail.accounts.map((acc: any) => (
+                        <div key={acc.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                          <div style={{ fontSize: '13px', fontWeight: 700, color: '#ffffff' }}>{acc.name}</div>
+                          <div style={{ fontSize: '14px', fontWeight: 800, color: selectedMemberDetail.isMe ? '#34d399' : '#f472b6' }}>
+                            {formatCurrency(acc.balance, currencySymbol)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Member Recent Transactions */}
+                <div>
+                  <h5 style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>
+                    Recent Transactions ({selectedMemberDetail.transactions.length})
+                  </h5>
+                  {selectedMemberDetail.transactions.length === 0 ? (
+                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>No recent transactions recorded.</p>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflowY: 'auto' }}>
+                      {selectedMemberDetail.transactions.slice(0, 10).map((tx: any) => (
+                        <div key={tx.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', borderRadius: '12px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}>
+                          <div>
+                            <div style={{ fontSize: '13px', fontWeight: 700, color: '#ffffff' }}>{tx.note || tx.category}</div>
+                            <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{tx.date} • {tx.category}</div>
+                          </div>
+                          <span style={{ fontSize: '13px', fontWeight: 800, color: tx.type === 'income' ? '#34d399' : '#f87171' }}>
+                            {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount, currencySymbol)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
-  );
+  </div>
+);
 };

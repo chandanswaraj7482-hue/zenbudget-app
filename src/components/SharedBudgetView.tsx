@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Check, Copy, LogOut, Users, UserMinus, Shield, Sliders, CheckSquare, Square, Trash2, RefreshCw, UserCheck } from 'lucide-react';
+import { ArrowLeft, Check, Copy, LogOut, Users, UserMinus, Shield, Sliders, CheckSquare, Square, Trash2, RefreshCw, UserCheck, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatCurrency } from '../utils/formatCurrency';
 
 export interface ModuleSyncPermissions {
@@ -52,6 +52,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
   const [copied, setCopied] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [permissionToast, setPermissionToast] = useState('');
+  const [showAllPermissions, setShowAllPermissions] = useState(false);
 
   // Selective module sync permissions state
   const [permissions, setPermissions] = useState<ModuleSyncPermissions>(() => {
@@ -495,49 +496,87 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                 Choose which data modules you want to share with connected members. You can edit these permissions anytime!
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '8px', marginTop: '4px' }}>
-                {[
+              {(() => {
+                const allPermissionItems = [
                   { key: 'syncTransactions', label: '💳 Shared Ledger Transactions', desc: 'Sync expense entries and income transactions' },
                   { key: 'canAddTransactions', label: '✍️ Allow Partner to Add Entries', desc: 'Partner can log new transactions into the shared ledger' },
+                  { key: 'syncAccounts', label: '🏦 Bank Accounts & Wallet Balances', desc: 'Sync bank accounts and wallet totals' },
                   { key: 'canEditTransactions', label: '✏️ Allow Partner to Edit', desc: 'Partner can modify existing transactions' },
                   { key: 'canDeleteTransactions', label: '🗑️ Allow Partner to Delete', desc: 'Partner can remove shared transactions' },
-                  { key: 'syncAccounts', label: '🏦 Bank Accounts & Wallet Balances', desc: 'Sync bank accounts and wallet totals' },
                   { key: 'syncBudgets', label: '📊 Category Budgets & Limits', desc: 'Sync shared category spending limits' },
                   { key: 'syncGoals', label: '🎯 Goals & Savings Progress', desc: 'Sync shared target savings milestones' },
                   { key: 'syncLoans', label: '🤝 Loans & Debts Ledger', desc: 'Sync borrowed and loaned money records' }
-                ].map(item => {
-                  const isChecked = permissions[item.key as keyof ModuleSyncPermissions];
-                  return (
-                    <div
-                      key={item.key}
-                      onClick={() => togglePermission(item.key as keyof ModuleSyncPermissions)}
-                      style={{
-                        padding: '10px 12px',
-                        borderRadius: '12px',
-                        background: isChecked ? 'rgba(139,92,246,0.1)' : 'rgba(255,255,255,0.02)',
-                        border: isChecked ? '1px solid rgba(139,92,246,0.3)' : '1px solid rgba(255,255,255,0.06)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease'
-                      }}
-                    >
-                      <div>
-                        <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>
-                          {item.label}
-                        </span>
-                        <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
-                          {item.desc}
-                        </span>
-                      </div>
-                      <div style={{ color: isChecked ? '#a78bfa' : 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
-                        {isChecked ? <CheckSquare size={18} /> : <Square size={18} />}
-                      </div>
+                ];
+                const visibleItems = showAllPermissions ? allPermissionItems : allPermissionItems.slice(0, 3);
+
+                return (
+                  <>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '8px', marginTop: '4px' }}>
+                      {visibleItems.map(item => {
+                        const isChecked = permissions[item.key as keyof ModuleSyncPermissions];
+                        return (
+                          <div
+                            key={item.key}
+                            onClick={() => togglePermission(item.key as keyof ModuleSyncPermissions)}
+                            style={{
+                              padding: '10px 12px',
+                              borderRadius: '12px',
+                              background: isChecked ? 'rgba(139,92,246,0.1)' : 'rgba(255,255,255,0.02)',
+                              border: isChecked ? '1px solid rgba(139,92,246,0.3)' : '1px solid rgba(255,255,255,0.06)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease'
+                            }}
+                          >
+                            <div>
+                              <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>
+                                {item.label}
+                              </span>
+                              <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
+                                {item.desc}
+                              </span>
+                            </div>
+                            <div style={{ color: isChecked ? '#a78bfa' : 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
+                              {isChecked ? <CheckSquare size={18} /> : <Square size={18} />}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
-              </div>
+
+                    {allPermissionItems.length > 3 && (
+                      <button
+                        type="button"
+                        onClick={() => setShowAllPermissions(!showAllPermissions)}
+                        style={{
+                          background: 'rgba(139,92,246,0.1)',
+                          border: '1px solid rgba(139,92,246,0.25)',
+                          borderRadius: '12px',
+                          padding: '8px 14px',
+                          color: '#a78bfa',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                          marginTop: '4px',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        {showAllPermissions ? (
+                          <>Show Less <ChevronUp size={14} /></>
+                        ) : (
+                          <>See More Permissions ({allPermissionItems.length - 3} more) <ChevronDown size={14} /></>
+                        )}
+                      </button>
+                    )}
+                  </>
+                );
+              })()}
             </div>
 
             {onDisconnectPartner && (
