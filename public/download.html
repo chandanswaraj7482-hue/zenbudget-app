@@ -7,14 +7,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Manrope', sans-serif; }
-    body { background: #09090f; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; text-align: center; }
-    .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 32px 24px; max-width: 380px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+    body { background: #09090f; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; text-align: center; }
+    .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 28px; padding: 32px 24px; max-width: 420px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
     .icon { font-size: 56px; margin-bottom: 16px; }
     h1 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
     p { font-size: 13px; color: #94a3b8; line-height: 1.5; margin-bottom: 24px; }
     .btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 16px; border-radius: 16px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; font-size: 15px; font-weight: 800; text-decoration: none; box-shadow: 0 10px 25px rgba(16,185,129,0.3); transition: transform 0.2s ease; }
     .btn:active { transform: scale(0.98); }
-    .note { margin-top: 16px; font-size: 11px; color: #64748b; }
+    .note { margin-top: 14px; font-size: 11px; color: #64748b; }
+    .fix-box { margin-top: 24px; padding: 16px; border-radius: 18px; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); text-align: left; }
+    .fix-title { font-size: 13px; font-weight: 800; color: #f59e0b; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .fix-list { font-size: 12px; color: #cbd5e1; line-height: 1.6; padding-left: 18px; }
+    .fix-list li { margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -28,6 +32,16 @@
     </a>
 
     <div class="note">If download doesn't start automatically, tap the green button above.</div>
+
+    <!-- Troubleshooting Guide for App Not Installed -->
+    <div class="fix-box">
+      <div class="fix-title">⚠️ Facing "App Not Installed" Error?</div>
+      <ol class="fix-list">
+        <li><strong>Uninstall Old Version First:</strong> If you already have ZenBudget installed, uninstall the old app completely from your phone settings before installing this update.</li>
+        <li><strong>Enable Unknown Sources:</strong> Go to Phone Settings ➔ Security / Privacy ➔ Enable "Install Unknown Apps" for Chrome or File Manager.</li>
+        <li><strong>Google Play Protect Warning:</strong> If Play Protect shows a popup, tap <em>"More Details"</em> ➔ <em>"Install Anyway"</em>.</li>
+      </ol>
+    </div>
   </div>
 
   <script>
