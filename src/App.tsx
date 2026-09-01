@@ -1938,16 +1938,17 @@ const App: React.FC = () => {
         const { data: txData, error: txErr } = await supabase
           .from('transactions')
           .select('*')
-          .in('user_id', userIds)
+          .in('user_id', txUserIds)
           .order('date', { ascending: false });
 
         if (!txErr && txData && txData.length > 0) {
           annotatedTx = txData.map(t => {
             const familyMember = cachedFamilyMembers.find(m => m.id === t.user_id);
+            const isPartner = t.user_id !== currentProfileId;
             return {
               ...t,
-              isPartnerTransaction: t.user_id !== currentProfileId,
-              partnerName: familyMember ? (familyMember.name || 'Family Member') : undefined
+              isPartnerTransaction: isPartner,
+              partnerName: isPartner ? (familyMember ? (familyMember.name || 'Partner') : 'Partner') : undefined
             };
           });
           localStorage.setItem(`zb_transactions_${currentProfileId}`, JSON.stringify(annotatedTx));
