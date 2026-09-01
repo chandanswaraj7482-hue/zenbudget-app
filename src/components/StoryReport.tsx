@@ -620,24 +620,36 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
                   if (navigator.share && blob) {
                     try {
                       const file = new File([blob], 'ZenBudget_Story_Card.png', { type: 'image/png' });
-                      await navigator.share({ title: 'My ZenBudget Wrapped', text: shareText, files: [file] });
-                      return;
-                    } catch {}
+                      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({ title: 'My ZenBudget Wrapped', text: shareText, files: [file] });
+                        return;
+                      }
+                    } catch (err) {
+                      console.warn('Native share failed', err);
+                    }
                   }
 
-                  if (navigator.share) {
+                  try {
+                    if (blob) {
+                      const clipboardItem = new ClipboardItem({
+                        [blob.type]: blob,
+                        'text/plain': new Blob([shareText], { type: 'text/plain' })
+                      });
+                      await navigator.clipboard.write([clipboardItem]);
+                    } else {
+                      await navigator.clipboard.writeText(shareText);
+                    }
+                  } catch (e) {
                     try {
-                      await navigator.share({ title: 'My ZenBudget Wrapped', text: shareText, url: appUrl });
-                      return;
-                    } catch {}
+                      await navigator.clipboard.writeText(shareText);
+                    } catch (_) {}
                   }
 
-                  await navigator.clipboard.writeText(shareText);
                   const notice = document.createElement('div');
-                  notice.innerHTML = '✨ <b>Stats & link copied to clipboard!</b>';
-                  notice.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:12px 20px;border-radius:99px;font-size:13px;font-weight:700;z-index:99999;box-shadow:0 10px 25px rgba(0,0,0,0.5);';
+                  notice.innerHTML = `🖼️ <b>Stats & Card copied to clipboard!</b><br/><span style="font-size:11px">Hit <b>Paste (Ctrl+V)</b> in your app to attach it!</span>`;
+                  notice.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:12px 20px;border-radius:16px;font-size:13px;font-weight:700;z-index:99999;box-shadow:0 10px 25px rgba(0,0,0,0.5);text-align:center;line-height:1.4;';
                   document.body.appendChild(notice);
-                  setTimeout(() => { try { document.body.removeChild(notice); } catch(_) {} }, 3000);
+                  setTimeout(() => { try { document.body.removeChild(notice); } catch(_) {} }, 4500);
                 }}
                 style={{ width: '100%', padding: '14px', borderRadius: '16px', border: 'none', background: 'linear-gradient(135deg, #22C55E 0%, #14B8A6 100%)', color: '#fff', fontSize: '14px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
               >
