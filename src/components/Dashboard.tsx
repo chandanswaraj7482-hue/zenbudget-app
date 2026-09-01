@@ -788,7 +788,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         }} />
 
         <span style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-secondary)', fontWeight: 700 }}>
-          {familyMembers && familyMembers.length > 0 ? '🌐 Combined Household Balance' : t('total_balance')}
+          {familyMembers && familyMembers.length > 0 ? '🏠 Combined Family & Couple Balance' : t('total_balance')}
         </span>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', margin: '6px 0 14px 0', color: 'var(--text-balance)', minWidth: 0, maxWidth: '100%' }}>
           <span style={{ fontSize: 'clamp(26px, 8vw, 38px)', fontWeight: 800, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -800,40 +800,74 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {familyMembers && familyMembers.length > 0 && (
           <div style={{
             display: 'flex',
-            gap: '12px',
-            flexWrap: 'wrap',
+            flexDirection: 'column',
+            gap: '8px',
             marginBottom: '16px',
-            padding: '10px 14px',
+            padding: '12px 14px',
             background: 'rgba(15, 23, 42, 0.45)',
             borderRadius: '14px',
             border: '1px solid rgba(255, 255, 255, 0.08)'
           }}>
+            {/* Row label */}
+            <div style={{ fontSize: '9px', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '2px' }}>
+              Wallet Breakdown
+            </div>
+
             {/* My Personal Wallet Balance */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: '100px' }}>
-              <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                👤 {userName || 'You'} (My Money)
-              </span>
-              <span style={{ fontSize: '15px', color: '#34d399', fontWeight: 800 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderRadius: '10px', background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.18)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'linear-gradient(135deg, #10b981, #34d399)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px' }}>👤</div>
+                <div>
+                  <div style={{ fontSize: '12px', fontWeight: 800, color: '#e2e8f0' }}>{userName || 'You'}</div>
+                  <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600 }}>My Wallet</div>
+                </div>
+              </div>
+              <span style={{ fontSize: '16px', color: '#34d399', fontWeight: 800 }}>
                 {formatCurrency(myTotalAccountBalance, currencySymbol, 0)}
               </span>
             </div>
 
             {/* Individual Partner / Family Member Balances */}
-            {familyMembers.map(m => {
-              const mAccounts = accounts.filter(a => (a as any).isFamilyAccount && ((a as any).ownerName === m.name || a.user_id === m.id));
+            {familyMembers.map((m, idx) => {
+              const partnerColors = [
+                { bg: 'rgba(56,189,248,0.08)', border: 'rgba(56,189,248,0.18)', text: '#38bdf8', grad: 'linear-gradient(135deg, #0ea5e9, #38bdf8)' },
+                { bg: 'rgba(244,114,182,0.08)', border: 'rgba(244,114,182,0.18)', text: '#f472b6', grad: 'linear-gradient(135deg, #ec4899, #f472b6)' },
+                { bg: 'rgba(167,139,250,0.08)', border: 'rgba(167,139,250,0.18)', text: '#a78bfa', grad: 'linear-gradient(135deg, #8b5cf6, #a78bfa)' },
+                { bg: 'rgba(251,191,36,0.08)', border: 'rgba(251,191,36,0.18)', text: '#fbbf24', grad: 'linear-gradient(135deg, #f59e0b, #fbbf24)' },
+              ];
+              const clr = partnerColors[idx % partnerColors.length];
+              // Filter family accounts belonging to this partner
+              const mAccounts = accounts.filter(a =>
+                (a as any).isFamilyAccount &&
+                ((a as any).ownerName === m.name || a.user_id === m.id)
+              );
               const mBalance = mAccounts.reduce((sum, a) => sum + (a.balance || 0), 0);
-              const displayMBalance = mBalance > 0 ? mBalance : familyTotalAccountBalance;
+              // Show individual account breakdown if multiple wallets
               return (
-                <div key={m.id} style={{ display: 'flex', flexDirection: 'column', gap: '2px', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '12px', minWidth: '100px' }}>
-                  <span style={{ fontSize: '10px', color: '#f472b6', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                    👫 {m.name || 'Partner'}
-                  </span>
-                  <span style={{ fontSize: '15px', color: '#38bdf8', fontWeight: 800 }}>
-                    {formatCurrency(displayMBalance, currencySymbol, 0)}
+                <div key={m.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderRadius: '10px', background: clr.bg, border: `1px solid ${clr.border}` }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: clr.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 900, color: '#fff' }}>
+                      {(m.name || 'P').charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: 800, color: '#e2e8f0' }}>{m.name || 'Partner'}</div>
+                      <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600 }}>
+                        {mAccounts.length > 0 ? `${mAccounts.length} wallet${mAccounts.length > 1 ? 's' : ''}` : 'Partner'}
+                      </div>
+                    </div>
+                  </div>
+                  <span style={{ fontSize: '16px', color: clr.text, fontWeight: 800 }}>
+                    {formatCurrency(mBalance, currencySymbol, 0)}
                   </span>
                 </div>
               );
             })}
+
+            {/* Total divider row */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 10px', borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: '2px' }}>
+              <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Combined</span>
+              <span style={{ fontSize: '15px', color: '#e2e8f0', fontWeight: 900 }}>{formatCurrency(totalBalance, currencySymbol, 0)}</span>
+            </div>
           </div>
         )}
 
