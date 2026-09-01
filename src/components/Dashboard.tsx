@@ -264,20 +264,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const myAccounts = displayAccounts.filter(a => !a.user_id || a.user_id === currentProfileId);
-  const familyAccounts = displayAccounts.filter(a => a.user_id && a.user_id !== currentProfileId);
+  const myAccounts = displayAccounts.filter(a => !(a as any).isFamilyAccount && (a.user_id === currentProfileId || !a.user_id));
+  const familyAccounts = displayAccounts.filter(a => (a as any).isFamilyAccount || (a.user_id && a.user_id !== currentProfileId));
 
   const totalAccountBalance = displayAccounts && displayAccounts.length > 0
     ? displayAccounts.reduce((sum, a) => sum + (a.balance || 0), 0)
     : displayTransactions.reduce((sum, t) => t.type === 'income' ? sum + t.amount : sum - t.amount, 0);
     
-  const myTotalAccountBalance = myAccounts.length > 0 
-    ? myAccounts.reduce((sum, a) => sum + (a.balance || 0), 0) 
-    : totalAccountBalance;
-    
-  const familyTotalAccountBalance = familyAccounts.length > 0 
-    ? familyAccounts.reduce((sum, a) => sum + (a.balance || 0), 0)
-    : 0;
+  const myTotalAccountBalance = myAccounts.reduce((sum, a) => sum + (a.balance || 0), 0);
+  const familyTotalAccountBalance = familyAccounts.reduce((sum, a) => sum + (a.balance || 0), 0);
 
   const totalBalance = totalAccountBalance;
 

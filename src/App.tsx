@@ -440,7 +440,13 @@ const App: React.FC = () => {
 
   const handleAddAccount = async (newAcc: Omit<Account, 'id'>) => {
     const accId = crypto.randomUUID();
-    const created: Account = { ...newAcc, id: accId };
+    const created: any = { 
+      ...newAcc, 
+      id: accId, 
+      user_id: currentProfileId, 
+      isFamilyAccount: false, 
+      ownerName: userName || 'You' 
+    };
     const updated = [...accounts, created];
     setAccounts(updated);
     if (currentProfileId) {
