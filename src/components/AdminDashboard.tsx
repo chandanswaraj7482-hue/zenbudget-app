@@ -1395,34 +1395,117 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                                     )}
                                   </td>
 
-                                  <td style={{ padding: '1rem' }}>
-                                    <span style={{
-                                      padding: '0.25rem 0.6rem',
-                                      borderRadius: '6px',
-                                      fontSize: '0.75rem',
-                                      fontWeight: 600,
-                                      backgroundColor: p.subscription_tier === 'premium_lifetime'
-                                        ? 'rgba(245, 158, 11, 0.2)'
-                                        : p.subscription_tier === 'premium_monthly' || p.subscription_tier === 'premium'
-                                          ? 'rgba(16, 185, 129, 0.2)'
-                                          : 'rgba(56, 189, 248, 0.2)',
-                                      color: p.subscription_tier === 'premium_lifetime'
-                                        ? '#fbbf24'
-                                        : p.subscription_tier === 'premium_monthly' || p.subscription_tier === 'premium'
-                                          ? '#34d399'
-                                          : '#38bdf8'
-                                    }}>
-                                      {p.subscription_tier || 'trial'}
-                                    </span>
-                                  </td>
+                                  {(() => {
+                                    // Calculate Purchase Count & Total Revenue spent by user
+                                    const userPayments = payments.filter(pay => 
+                                      pay.user_id === p.id || 
+                                      (resolvedEmail && pay.email && pay.email.toLowerCase().trim() === resolvedEmail.toLowerCase().trim())
+                                    );
+                                    const purchaseCount = userPayments.length;
+                                    const userTotalRevenue = userPayments.reduce((sum, pay) => sum + parseFloat(pay.amount || 0), 0);
 
-                                  <td style={{ padding: '1rem' }}>
-                                    {p.is_suspended ? (
-                                      <span style={{ color: '#f87171', fontSize: '0.75rem', fontWeight: 600 }}>🚫 Suspended</span>
-                                    ) : (
-                                      <span style={{ color: '#34d399', fontSize: '0.75rem', fontWeight: 600 }}>Active</span>
-                                    )}
-                                  </td>
+                                    // Calculate Dynamic Status (Active vs Expired / Inactive)
+                                    const now = new Date();
+                                    let statusText = 'Active';
+                                    let statusColor = '#34d399';
+                                    let statusBg = 'rgba(52, 211, 153, 0.15)';
+
+                                    if (p.is_suspended) {
+                                      statusText = '🚫 Suspended';
+                                      statusColor = '#f87171';
+                                      statusBg = 'rgba(248, 113, 113, 0.15)';
+                                    } else if (p.subscription_tier === 'premium_lifetime') {
+                                      statusText = 'Active ⚡ (Lifetime)';
+                                      statusColor = '#fbbf24';
+                                      statusBg = 'rgba(251, 191, 36, 0.15)';
+                                    } else if (p.subscription_tier?.startsWith('premium')) {
+                                      const expiresAt = p.premium_expires_at ? new Date(p.premium_expires_at) : null;
+                                      if (expiresAt) {
+                                        const daysLeft = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                                        if (daysLeft > 0) {
+                                          statusText = `Active ⚡ (${daysLeft}d left)`;
+                                          statusColor = '#34d399';
+                                          statusBg = 'rgba(52, 211, 153, 0.15)';
+                                        } else {
+                                          statusText = 'Expired / Inactive ❌';
+                                          statusColor = '#f87171';
+                                          statusBg = 'rgba(248, 113, 113, 0.15)';
+                                        }
+                                      } else {
+                                        statusText = 'Active ⚡';
+                                        statusColor = '#34d399';
+                                        statusBg = 'rgba(52, 211, 153, 0.15)';
+                                      }
+                                    } else if (p.subscription_tier === 'trial' || !p.subscription_tier) {
+                                      const trialStart = p.trial_start_date ? new Date(p.trial_start_date) : null;
+                                      if (trialStart) {
+                                        const trialEnd = new Date(trialStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+                                        const daysLeft = Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                                        if (daysLeft > 0) {
+                                          statusText = `Trial Active (${daysLeft}d left)`;
+                                          statusColor = '#38bdf8';
+                                          statusBg = 'rgba(56, 189, 248, 0.15)';
+                                        } else {
+                                          statusText = 'Trial Expired / Inactive ❌';
+                                          statusColor = '#f87171';
+                                          statusBg = 'rgba(248, 113, 113, 0.15)';
+                                        }
+                                      } else {
+                                        statusText = 'Trial Active';
+                                        statusColor = '#38bdf8';
+                                        statusBg = 'rgba(56, 189, 248, 0.15)';
+                                      }
+                                    } else if (p.subscription_tier === 'free') {
+                                      statusText = 'Inactive / Free ❌';
+                                      statusColor = '#94a3b8';
+                                      statusBg = 'rgba(148, 163, 184, 0.15)';
+                                    }
+
+                                    return (
+                                      <>
+                                        <td style={{ padding: '1rem' }}>
+                                          <span style={{
+                                            padding: '0.25rem 0.6rem',
+                                            borderRadius: '6px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 600,
+                                            backgroundColor: p.subscription_tier === 'premium_lifetime'
+                                              ? 'rgba(245, 158, 11, 0.2)'
+                                              : p.subscription_tier?.startsWith('premium')
+                                                ? 'rgba(16, 185, 129, 0.2)'
+                                                : 'rgba(56, 189, 248, 0.2)',
+                                            color: p.subscription_tier === 'premium_lifetime'
+                                              ? '#fbbf24'
+                                              : p.subscription_tier?.startsWith('premium')
+                                                ? '#34d399'
+                                                : '#38bdf8'
+                                          }}>
+                                            {p.subscription_tier || 'trial'}
+                                          </span>
+                                          <div style={{ fontSize: '0.7rem', color: purchaseCount > 0 ? '#fbbf24' : '#64748b', marginTop: '4px', fontWeight: 700 }}>
+                                            💳 Purchases: {purchaseCount > 0 ? `${purchaseCount}x (₹${userTotalRevenue.toLocaleString()})` : '0 (No Purchases)'}
+                                          </div>
+                                        </td>
+
+                                        <td style={{ padding: '1rem' }}>
+                                          <span style={{
+                                            padding: '0.25rem 0.65rem',
+                                            borderRadius: '8px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 700,
+                                            backgroundColor: statusBg,
+                                            color: statusColor,
+                                            border: `1px solid ${statusColor}40`,
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '4px'
+                                          }}>
+                                            {statusText}
+                                          </span>
+                                        </td>
+                                      </>
+                                    );
+                                  })()}
 
                                   <td style={{ padding: '1rem', textAlign: 'right' }} onClick={(e) => e.stopPropagation()}>
                                     <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end', alignItems: 'center' }}>
