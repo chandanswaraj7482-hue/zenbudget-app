@@ -419,43 +419,7 @@ const App: React.FC = () => {
 
 
 
-  // Automatic Geo IP Detection on startup
-  useEffect(() => {
-    const detectIPLocation = async () => {
-      const profileId = localStorage.getItem('zb_profile_id') || '';
-      if (profileId && localStorage.getItem(`zb_currency_${profileId}`)) return;
-      if (localStorage.getItem('zb_default_currency')) return;
-
-      try {
-        const response = await fetch('https://api.country.is/');
-        const data = await response.json();
-        if (data.country === 'IN') {
-          console.log('ZenBudget: Detected India via api.country.is. Defaulting currency to INR.');
-          localStorage.setItem('zb_default_currency', 'INR');
-          setCurrency('INR');
-          return;
-        }
-      } catch (e) {
-        console.warn('ZenBudget: country.is lookup failed, trying ipapi.co...', e);
-      }
-
-      try {
-        const response = await fetch('https://ipapi.co/json/');
-        const data = await response.json();
-        if (data.country_code === 'IN' || data.country === 'IN' || data.currency === 'INR') {
-          console.log('ZenBudget: Detected India via ipapi.co. Defaulting currency to INR.');
-          localStorage.setItem('zb_default_currency', 'INR');
-          setCurrency('INR');
-        } else if (data.currency) {
-          localStorage.setItem('zb_default_currency', data.currency);
-          setCurrency(data.currency);
-        }
-      } catch (e) {
-        console.warn('ZenBudget: Fallback Geo IP lookup failed:', e);
-      }
-    };
-    detectIPLocation();
-  }, []);
+  // Legacy IP location detect removed - currency is handled by 1-time autoSyncCurrencyFromIP
 
   useEffect(() => {
     const handleAvatarUpdate = () => {
@@ -2100,32 +2064,14 @@ const App: React.FC = () => {
         }
       }
 
-      // 4. Currency settings
+      // 4. Currency settings (Respect user preference permanently once initialized)
       const savedCurrency = localStorage.getItem(`zb_currency_${currentProfileId}`);
-      const manuallySet = localStorage.getItem(`zb_currency_manually_set_${currentProfileId}`) === 'true';
-      if (savedCurrency && manuallySet) {
+      if (savedCurrency) {
         setCurrency(savedCurrency);
       } else {
-        // Fallback: If no preference is manually saved, detect using timezone/locale first
-        const isIndia = Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Kolkata' || navigator.language.includes('IN');
-        const defaultCurr = isIndia ? 'INR' : 'USD';
-        setCurrency(defaultCurr);
-        localStorage.setItem(`zb_currency_${currentProfileId}`, defaultCurr);
-        
-        // Asynchronously check IP to refine this detection dynamically
-        try {
-          const res = await fetch('https://ipapi.co/json/');
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.country_code) {
-              const detected = data.country_code === 'IN' ? 'INR' : 'USD';
-              setCurrency(detected);
-              localStorage.setItem(`zb_currency_${currentProfileId}`, detected);
-            }
-          }
-        } catch (e) {
-          console.warn('IP location fetch skipped or blocked:', e);
-        }
+        autoSyncCurrencyFromIP(currentProfileId, (detected) => {
+          setCurrency(detected);
+        });
       }
 
     } catch (err: any) {
