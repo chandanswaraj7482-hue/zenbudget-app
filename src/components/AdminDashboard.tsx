@@ -922,6 +922,16 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   const trialCount = Math.max(0, totalUsers - totalPremiumUsers);
   const estimatedRevenue = (premiumMonthlyCount * (monthlyPrice || 149)) + (premiumYearlyCount * (yearlyPrice || 1499)) + (premiumLifetimeCount * (lifetimePrice || 2499));
 
+  const handleDeleteRating = async (ratingId: string) => {
+    setRatings(prev => prev.filter(r => r.id !== ratingId));
+    if (onShowToast) onShowToast('🗑️ Review / Rating deleted from database!', 'info');
+    try {
+      await supabaseClient.from('app_ratings').delete().eq('id', ratingId);
+    } catch (e) {
+      console.warn('Rating delete from Supabase failed:', e);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -2539,8 +2549,31 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                             </div>
                           </div>
 
-                          <div style={{ fontSize: '1.1rem', letterSpacing: '2px', backgroundColor: 'rgba(251, 191, 36, 0.15)', padding: '0.4rem 0.8rem', borderRadius: '10px', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
-                            {'⭐'.repeat(r.rating_stars || 5)}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div style={{ fontSize: '1.1rem', letterSpacing: '2px', backgroundColor: 'rgba(251, 191, 36, 0.15)', padding: '0.4rem 0.8rem', borderRadius: '10px', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
+                              {'⭐'.repeat(r.rating_stars || 5)}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteRating(r.id)}
+                              title="Delete Review"
+                              style={{
+                                padding: '0.45rem 0.75rem',
+                                borderRadius: '10px',
+                                border: '1px solid rgba(239, 68, 68, 0.3)',
+                                backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                                color: '#f87171',
+                                fontSize: '0.8rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                transition: 'all 0.2s ease'
+                              }}
+                            >
+                              <Trash2 size={14} /> Delete
+                            </button>
                           </div>
                         </div>
                       ))
