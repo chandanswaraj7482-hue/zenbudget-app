@@ -3752,7 +3752,7 @@ const App: React.FC = () => {
         left: '50%',
         transform: 'translateX(-50%)',
         width: '100%',
-        maxWidth: '480px',
+        maxWidth: '520px',
         background: 'var(--bg-nav-glass)',
         borderTop: '1px solid var(--border-divider)',
         backdropFilter: 'blur(20px) saturate(180%)',
