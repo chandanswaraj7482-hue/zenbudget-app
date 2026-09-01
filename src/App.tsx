@@ -3287,7 +3287,6 @@ const App: React.FC = () => {
 
   return (
     <div 
-      className="app-main-wrapper"
       key={langKey} 
       style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%' }}
       onClickCapture={(e) => {
