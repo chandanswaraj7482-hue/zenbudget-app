@@ -1537,17 +1537,57 @@ const App: React.FC = () => {
     }
   }, [currentProfileId, isLocked, loans, currency]);
 
+  // Helper to execute instant logout and complete local data wipe when admin deletes user profile
+  const performCompleteLogoutAndDataWipe = async () => {
+    try {
+      console.warn('ZenBudget: Profile deleted from Supabase. Executing instant client logout & data wipe.');
+      const keysToWipe: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && (k.startsWith('zb_') || k === 'has_scan_pay_access')) {
+          keysToWipe.push(k);
+        }
+      }
+      keysToWipe.forEach(k => {
+        try { localStorage.removeItem(k); } catch (_) {}
+      });
+
+      setTransactions([]);
+      setAccounts([]);
+      setBudgets([]);
+      setGoals([]);
+      setLoans([]);
+      setWishlist([]);
+      setDebts([]);
+      setCurrentProfileId('');
+      setUserName('');
+      setUserPin('0000');
+      setIsLocked(true);
+
+      try { await supabase.auth.signOut(); } catch (_) {}
+
+      triggerToast('⚠️ Your account was deleted by Administrator. All local data cleared.', 'warning');
+    } catch (err) {
+      console.warn('Error during data wipe:', err);
+    }
+  };
+
   // Realtime Admin Panel Control & Profile Sync
   useEffect(() => {
     if (!currentProfileId) return;
 
     const syncAdminProfile = async () => {
       try {
-        const { data: profData } = await supabase
+        const { data: profData, error: profErr } = await supabase
           .from('profiles')
           .select('subscription_tier, has_scan_pay_access, is_admin_unlocked, status, pin, name')
           .eq('id', currentProfileId)
           .maybeSingle();
+
+        if (!profData && !profErr && currentProfileId) {
+          await performCompleteLogoutAndDataWipe();
+          return;
+        }
 
         if (profData) {
           if (profData.subscription_tier) {
@@ -1569,7 +1609,7 @@ const App: React.FC = () => {
     };
 
     syncAdminProfile();
-    const interval = setInterval(syncAdminProfile, 4000);
+    const interval = setInterval(syncAdminProfile, 3000);
 
     const channel = supabase
       .channel(`admin_sync_${currentProfileId}`)
@@ -1589,6 +1629,9 @@ const App: React.FC = () => {
             triggerToast('🔒 Account status updated to Suspended by Admin.', 'warning');
           }
         }
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'profiles', filter: `id=eq.${currentProfileId}` }, () => {
+        performCompleteLogoutAndDataWipe();
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => {
         fetchDataFromSupabase();
@@ -1632,20 +1675,6 @@ const App: React.FC = () => {
         if (cached) cachedFamilyMembers = JSON.parse(cached);
       } catch (e) {}
 
-      // Fetch saved daily limit from database (DISABLED to prevent 400 Bad Request spam)
-      /*
-      const { data: limitData } = await supabase
-        .from('daily_limits')
-        .select('limit_amount')
-        .eq('user_id', currentProfileId)
-        .maybeSingle();
-      if (limitData && limitData.limit_amount) {
-        setDailyLimit(Number(limitData.limit_amount));
-        localStorage.setItem(`zb_daily_limit_${currentProfileId}`, String(limitData.limit_amount));
-        localStorage.setItem(`zb_currency_symbol_${currentProfileId}`, currencySymbol);
-      }
-      */
-
       // 0. Fetch profile info to sync properties (tier, expires_at)
       const { data: profData, error: profErr } = await supabase
         .from('profiles')
@@ -1654,33 +1683,7 @@ const App: React.FC = () => {
         .maybeSingle();
       
       if (!profData && !profErr && currentProfileId) {
-        console.warn('ZenBudget: Profile deleted from Supabase. Executing client logout & data wipe.');
-        const keysToWipe = [
-          `zb_transactions_${currentProfileId}`,
-          `zb_tx_cache_${currentProfileId}`,
-          `zb_budgets_${currentProfileId}`,
-          `zb_goals_${currentProfileId}`,
-          `zb_accounts_${currentProfileId}`,
-          `zb_loans_${currentProfileId}`,
-          `zb_wishlist_${currentProfileId}`,
-          `zb_debts_${currentProfileId}`,
-          `zb_couple_code_${currentProfileId}`,
-          `zb_partner_id_${currentProfileId}`,
-          `zb_partner_code_${currentProfileId}`,
-          `zb_partner_name_${currentProfileId}`
-        ];
-        keysToWipe.forEach(k => {
-          try { localStorage.removeItem(k); } catch (_) {}
-        });
-
-        setTransactions([]);
-        setBudgets([]);
-        setGoals([]);
-        setAccounts([]);
-        setLoans([]);
-        setCurrentProfileId('');
-        setIsLocked(true);
-        triggerToast('⚠️ Account deleted by Administrator.', 'warning');
+        await performCompleteLogoutAndDataWipe();
         return;
       }
 
