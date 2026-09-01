@@ -2,7 +2,10 @@
   "buildCommand": "vite build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
-  "framework": "vite",
+  "redirects": [
+    { "source": "/zenbudget.apk", "destination": "https://raw.githubusercontent.com/chandanswaraj7482-hue/zenbudget-app/main/public/zenbudget.apk", "permanent": false },
+    { "source": "/zenbudget-latest.apk", "destination": "https://raw.githubusercontent.com/chandanswaraj7482-hue/zenbudget-app/main/public/zenbudget.apk", "permanent": false }
+  ],
   "rewrites": [
     { "source": "/admin", "destination": "/admin.html" },
     { "source": "/admin/", "destination": "/admin.html" },

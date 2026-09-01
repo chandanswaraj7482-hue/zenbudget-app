@@ -258,7 +258,7 @@ const App: React.FC = () => {
   const [updateVersion, setUpdateVersion] = useState<string>('');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState<boolean>(false);
   const [dailyLimit, setDailyLimit] = useState<number>(1000);
-  const [updateUrl, setUpdateUrl] = useState<string>('https://zenbudget-tracker.vercel.app/zenbudget.apk');
+  const [updateUrl, setUpdateUrl] = useState<string>('https://raw.githubusercontent.com/chandanswaraj7482-hue/zenbudget-app/main/public/zenbudget.apk');
   const [updateReleaseNotes, setUpdateReleaseNotes] = useState<string>('Initial release.');
   const [forceUpdate, setForceUpdate] = useState<boolean>(false);
 

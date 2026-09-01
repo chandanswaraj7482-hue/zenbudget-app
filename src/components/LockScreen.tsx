@@ -1340,7 +1340,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                   </button>
                 ) : (
                   <a
-                    href="/zenbudget.apk?v=250"
+                    href="https://raw.githubusercontent.com/chandanswaraj7482-hue/zenbudget-app/main/public/zenbudget.apk"
                     download="ZenBudget-v2.5.0-latest.apk"
                     style={{
                       flex: '1 1 0%',

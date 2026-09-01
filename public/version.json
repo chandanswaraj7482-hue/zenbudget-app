@@ -1,7 +1,7 @@
 {
   "version": "2.5.0",
   "versionCode": 10,
-  "apkUrl": "https://zenbudget-tracker.vercel.app/zenbudget.apk",
+  "apkUrl": "https://raw.githubusercontent.com/chandanswaraj7482-hue/zenbudget-app/main/public/zenbudget.apk",
   "releaseNotes": "⚙️ Granular Reset Workspace Data Modal for Pro Users\n⏰ Smart Loan EMI Repayment Timing & Frequency Reminders\n⚡ Loan Repayment PhonePe / UPI linked with Scan & Pay Unlock\n🌐 Instant Multi-Language Localization Sync across all screens\n🔒 Profile Save Protection for Language & Preferences\n💎 Apple Glassmorphism UI & Instant Offline-First Supabase Sync",
   "forceUpdate": false,
   "minVersionCode": 1
