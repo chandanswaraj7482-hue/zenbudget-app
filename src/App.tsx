@@ -217,6 +217,10 @@ const App: React.FC = () => {
     return profileId ? localStorage.getItem(`zb_couple_code_${profileId}`) : null;
   });
   const [pendingPartnerCode, setPendingPartnerCode] = useState<string | null>(null);
+  const [familyGroupId, setFamilyGroupId] = useState<string | null>(() => {
+    const profileId = localStorage.getItem('zb_profile_id') || '';
+    return profileId ? localStorage.getItem(`zb_family_group_id_${profileId}`) : null;
+  });
 
   // App Rating & Review Feedback States
   const [ratingStars, setRatingStars] = useState<number>(5);
@@ -1749,6 +1753,45 @@ const App: React.FC = () => {
           localStorage.setItem(`zb_scan_pay_access_${currentProfileId}`, 'true');
         }
 
+        if (profData.family_group_id) {
+          setFamilyGroupId(profData.family_group_id);
+          localStorage.setItem(`zb_family_group_id_${currentProfileId}`, profData.family_group_id);
+        }
+
+        // 0b. Fetch active family members using TRUE group sync logic based on family_group_id
+        let fetchedFamilyMembers: { id: string; name: string; couple_code: string; subscription_tier?: string; family_group_id?: string }[] = [];
+        
+        try {
+          if (profData.family_group_id) {
+            const { data: allFamilyProfiles } = await supabase
+              .from('profiles')
+              .select('id, name, couple_code, subscription_tier, family_group_id')
+              .neq('id', currentProfileId)
+              .eq('family_group_id', profData.family_group_id);
+
+            if (allFamilyProfiles && allFamilyProfiles.length > 0) {
+              fetchedFamilyMembers = allFamilyProfiles;
+            }
+          }
+        } catch (e) {
+          console.warn('Family profile fetch error:', e);
+        }
+
+        // Fallback to cached family members if offline
+        if (fetchedFamilyMembers.length === 0 && cachedFamilyMembers.length > 0) {
+          fetchedFamilyMembers = cachedFamilyMembers;
+        }
+
+        if (fetchedFamilyMembers.length > 0) {
+          localStorage.setItem(`zb_family_members_${currentProfileId}`, JSON.stringify(fetchedFamilyMembers));
+          setFamilyMembers(fetchedFamilyMembers);
+          cachedFamilyMembers = fetchedFamilyMembers;
+        } else {
+          localStorage.removeItem(`zb_family_members_${currentProfileId}`);
+          setFamilyMembers([]);
+          cachedFamilyMembers = [];
+        }
+
         // Auto sync Google OAuth Avatar & Email
         try {
           const { data: authUserData } = await supabase.auth.getUser();
@@ -1892,62 +1935,9 @@ const App: React.FC = () => {
           setFamilyMembers([]);
           cachedFamilyMembers = [];
         } else {
-          let fetchedFamilyMembers: { id: string; name: string; couple_code: string; subscription_tier?: string }[] = [];
-          const familySyncCode = profData.partner_couple_code || userCoupleCode;
-          const cachedPartnerId = localStorage.getItem(`zb_partner_id_${currentProfileId}`);
-          
-          let orConditions: string[] = [];
-          if (familySyncCode) {
-            if (familySyncCode.startsWith('PENDING:')) {
-              setPendingPartnerCode(familySyncCode.split(':')[1]);
-            } else {
-              setPendingPartnerCode(null);
-              const codeUpper = familySyncCode.toUpperCase();
-              orConditions.push(`partner_couple_code.eq.${codeUpper}`, `couple_code.eq.${codeUpper}`);
-            }
-          }
-          if (userCoupleCode) {
-            const myCodeUpper = userCoupleCode.toUpperCase();
-            orConditions.push(`partner_couple_code.eq.${myCodeUpper}`);
-          }
-          if (cachedPartnerId && !familySyncCode?.startsWith('PENDING:')) {
-            orConditions.push(`id.eq.${cachedPartnerId}`);
-          }
+          // Family members are now fetched natively via family_group_id at the top of the function
+          // We only preserve the isSelfPremium check to clear cache if premium expires
 
-          if (orConditions.length > 0) {
-            try {
-              const { data: allFamilyProfiles } = await supabase
-                .from('profiles')
-                .select('id, name, couple_code, partner_couple_code, subscription_tier, partner_permissions')
-                .neq('id', currentProfileId)
-                .or(orConditions.join(','));
-
-              if (allFamilyProfiles && allFamilyProfiles.length > 0) {
-                fetchedFamilyMembers = allFamilyProfiles;
-              }
-            } catch (e) {
-              console.warn('Family profile fetch error:', e);
-            }
-          }
-
-          // Fallback to cached family members if offline or temporary query failure
-          if (fetchedFamilyMembers.length === 0 && cachedFamilyMembers.length > 0) {
-            fetchedFamilyMembers = cachedFamilyMembers;
-          }
-
-          if (fetchedFamilyMembers.length > 0) {
-            const firstPartner = fetchedFamilyMembers[0];
-            localStorage.setItem(`zb_partner_id_${currentProfileId}`, firstPartner.id);
-            localStorage.setItem(`zb_partner_code_${currentProfileId}`, firstPartner.couple_code);
-            localStorage.setItem(`zb_partner_name_${currentProfileId}`, firstPartner.name || 'Partner');
-            setPartnerId(firstPartner.id);
-            setPartnerCode(firstPartner.couple_code);
-            setPartnerName(firstPartner.name || 'Partner');
-            
-            localStorage.setItem(`zb_family_members_${currentProfileId}`, JSON.stringify(fetchedFamilyMembers));
-            setFamilyMembers(fetchedFamilyMembers);
-            cachedFamilyMembers = fetchedFamilyMembers;
-          }
         }
       }
 
@@ -3144,11 +3134,16 @@ const App: React.FC = () => {
     }
   };
 
-  const handleConnectPartner = async (code: string): Promise<boolean> => {
+  const handleConnectPartner = async (code: string) => {
     if (!currentProfileId) return false;
-
     const rawInput = code.trim().toUpperCase();
     if (!rawInput) return false;
+
+    if (!isPremiumUser) {
+      triggerToast('Couple & Family Sync requires an active Premium plan.', 'warning');
+      setIsSubModalOpen(true);
+      return false;
+    }
 
     const strippedInput = rawInput.replace(/[^A-Z0-9]/g, '');
     const myShareCode = coupleCode || currentProfileId.slice(0, 8).toUpperCase();
@@ -3166,7 +3161,7 @@ const App: React.FC = () => {
       // Flexible lookup matching ID slice, couple_code, referral_code, or full UUID
       const { data: allProfiles, error: partnerErr } = await supabase
         .from('profiles')
-        .select('id, name, couple_code, referral_code, subscription_tier')
+        .select('id, name, couple_code, referral_code, subscription_tier, family_group_id')
         .neq('id', currentProfileId);
 
       if (partnerErr) throw partnerErr;
@@ -3192,85 +3187,42 @@ const App: React.FC = () => {
       });
 
       if (!partnerProf) {
-        triggerToast('Invalid sync code or partner profile not found. Verify code spelling!', 'warning');
+        triggerToast('Invalid sync code or group not found. Verify code spelling!', 'warning');
         return false;
       }
 
-      const partnerShareCode = partnerProf.couple_code || partnerProf.id.slice(0, 8).toUpperCase();
-
-      // Check if partner is already pending connection with me
-      const isPartnerPendingMe = partnerProf.partner_couple_code === `PENDING:${myShareCode}`;
-
-      if (isPartnerPendingMe) {
-        // Mutual connection accepted!
-        try {
-          await supabase
-            .from('profiles')
-            .update({ partner_couple_code: partnerShareCode })
-            .eq('id', currentProfileId);
-
-          await supabase
-            .from('profiles')
-            .update({ partner_couple_code: myShareCode })
-            .eq('id', partnerProf.id);
-
-          triggerToast(`Success! You are now connected with ${partnerProf.name || 'Partner'}.`, 'success');
-          addNotification(
-            "Partner Connected! 👥",
-            `You have linked shared budgets with ${partnerProf.name || 'Partner'}. Your household spending is now synced in real-time.`,
-            'success'
-          );
-        } catch (dbErr) {
-          console.warn('Partner couple_code db sync warning:', dbErr);
-        }
-
-        localStorage.setItem(`zb_partner_id_${currentProfileId}`, partnerProf.id);
-        localStorage.setItem(`zb_partner_code_${currentProfileId}`, partnerShareCode);
-        localStorage.setItem(`zb_partner_name_${currentProfileId}`, partnerProf.name || 'Partner');
-        setPartnerId(partnerProf.id);
-        setPartnerCode(partnerShareCode);
-        setPartnerName(partnerProf.name || 'Partner');
-
-        const memberObj = { id: partnerProf.id, name: partnerProf.name || 'Partner', couple_code: partnerShareCode };
-        const updatedMembers = [memberObj];
-        localStorage.setItem(`zb_family_members_${currentProfileId}`, JSON.stringify(updatedMembers));
-        setFamilyMembers(updatedMembers);
-
-        fetchDataFromSupabase();
-
-        // Re-fetch transactions immediately for combined dual view
-        try {
-          const { data: txData } = await supabase
-            .from('transactions')
-            .select('*')
-            .in('user_id', [currentProfileId, partnerProf.id])
-            .order('date', { ascending: false });
-
-          if (txData && txData.length > 0) {
-            const annotatedTx = txData.map(t => ({
-              ...t,
-              partnerName: t.user_id === partnerProf.id ? (partnerProf.name || 'Partner') : undefined
-            }));
-            setTransactions(annotatedTx);
-            localStorage.setItem(`zb_transactions_${currentProfileId}`, JSON.stringify(annotatedTx));
-          }
-        } catch (e) { }
-
-        return true;
-      } else {
-        // Request sent, waiting for partner
-        try {
-          await supabase
-            .from('profiles')
-            .update({ partner_couple_code: `PENDING:${partnerShareCode}` })
-            .eq('id', currentProfileId);
-          triggerToast(`Request sent to ${partnerProf.name || 'Partner'}! They must enter your code to connect.`, 'success');
-        } catch (dbErr) {
-          console.warn('Pending couple_code db sync warning:', dbErr);
-          triggerToast('Error sending connection request.', 'error');
-        }
+      const isPartnerPremium = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime', 'pro'].includes(partnerProf.subscription_tier || '');
+      if (!isPartnerPremium) {
+        triggerToast('The group host does not have an active Premium plan. Both members must be Premium.', 'warning');
         return false;
       }
+
+      const targetGroupId = partnerProf.family_group_id || partnerProf.id;
+
+      try {
+        await supabase
+          .from('profiles')
+          .update({ family_group_id: targetGroupId })
+          .eq('id', currentProfileId);
+
+        setFamilyGroupId(targetGroupId);
+        localStorage.setItem(`zb_family_group_id_${currentProfileId}`, targetGroupId);
+
+        triggerToast(`Success! You have joined ${partnerProf.name || 'Partner'}'s group.`, 'success');
+        addNotification(
+          "Family Group Joined! 👥",
+          `You have successfully joined ${partnerProf.name || 'Partner'}'s budget group. Your household spending is now synced in real-time.`,
+          'success'
+        );
+      } catch (dbErr) {
+        console.warn('Family group db sync warning:', dbErr);
+        triggerToast('Error joining family group.', 'error');
+        return false;
+      }
+
+      fetchDataFromSupabase();
+      return true;
+
     } catch (err: any) {
       console.error('Partner connect error:', err);
       triggerToast(err.message || 'Failed to connect partner profile.', 'warning');
@@ -3294,22 +3246,13 @@ const App: React.FC = () => {
     try {
       await supabase
         .from('profiles')
-        .update({ partner_couple_code: null })
+        .update({ family_group_id: currentProfileId, partner_couple_code: null })
         .eq('id', currentProfileId);
-
-      if (oldPartnerId) {
-        await supabase
-          .from('profiles')
-          .update({ partner_couple_code: null })
-          .eq('id', oldPartnerId);
-      } else if (oldPartnerCode) {
-        await supabase
-          .from('profiles')
-          .update({ partner_couple_code: null })
-          .eq('couple_code', oldPartnerCode);
-      }
+      
+      setFamilyGroupId(currentProfileId);
+      localStorage.setItem(`zb_family_group_id_${currentProfileId}`, currentProfileId);
     } catch (e) {
-      console.error('Failed to disconnect partner mutually in DB:', e);
+      console.error('Failed to leave family group in DB:', e);
     }
 
     triggerToast('Disconnected member from Couple & Family group.', 'info');
