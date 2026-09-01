@@ -26,6 +26,9 @@ export const TransferModal: React.FC<TransferModalProps> = ({
 
   if (!isOpen) return null;
 
+  const myAccountsList = accounts.filter(a => !(a as any).isFamilyAccount);
+  const familyAccountsList = accounts.filter(a => (a as any).isFamilyAccount);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
@@ -41,7 +44,7 @@ export const TransferModal: React.FC<TransferModalProps> = ({
 
     const fromAcc = accounts.find(a => a.id === fromAccountId);
     if (fromAcc && fromAcc.balance < amtNum) {
-      setErrorMsg(`Insufficient balance in ${fromAcc.name} (${currencySymbol}${fromAcc.balance})!`);
+      setErrorMsg(`Insufficient balance in ${fromAcc.name} (${currencySymbol}${Math.round(fromAcc.balance)})!`);
       return;
     }
 
@@ -94,30 +97,60 @@ export const TransferModal: React.FC<TransferModalProps> = ({
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div>
-            <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{t('from_account')}</label>
+            <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+              {t('from_account')} (Paying Wallet)
+            </label>
             <select
               value={fromAccountId}
               onChange={e => setFromAccountId(e.target.value)}
               className="glass-input"
               style={{ marginTop: '4px', width: '100%', background: 'var(--bg-input)' }}
             >
-              {accounts.map(acc => (
-                <option key={acc.id} value={acc.id}>{acc.name} ({currencySymbol}{acc.balance})</option>
-              ))}
+              <optgroup label="👤 Your Personal Accounts">
+                {myAccountsList.map(acc => (
+                  <option key={acc.id} value={acc.id}>
+                    👤 {acc.name} ({currencySymbol}{Math.round(acc.balance).toLocaleString()})
+                  </option>
+                ))}
+              </optgroup>
+              {familyAccountsList.length > 0 && (
+                <optgroup label="👫 Synced Partner / Family Accounts">
+                  {familyAccountsList.map(acc => (
+                    <option key={acc.id} value={acc.id}>
+                      👫 {(acc as any).ownerName || 'Partner'} • {acc.name} ({currencySymbol}{Math.round(acc.balance).toLocaleString()})
+                    </option>
+                  ))}
+                </optgroup>
+              )}
             </select>
           </div>
 
           <div>
-            <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{t('to_account')}</label>
+            <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+              {t('to_account')} (Recipient Partner / Wallet)
+            </label>
             <select
               value={toAccountId}
               onChange={e => setToAccountId(e.target.value)}
               className="glass-input"
               style={{ marginTop: '4px', width: '100%', background: 'var(--bg-input)' }}
             >
-              {accounts.map(acc => (
-                <option key={acc.id} value={acc.id}>{acc.name} ({currencySymbol}{acc.balance})</option>
-              ))}
+              {familyAccountsList.length > 0 && (
+                <optgroup label="👫 Send Money to Partner / Family Member">
+                  {familyAccountsList.map(acc => (
+                    <option key={acc.id} value={acc.id}>
+                      💸 Send to {(acc as any).ownerName || 'Partner'} • {acc.name} ({currencySymbol}{Math.round(acc.balance).toLocaleString()})
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+              <optgroup label="👤 Your Personal Accounts (Self Transfer)">
+                {myAccountsList.map(acc => (
+                  <option key={acc.id} value={acc.id}>
+                    👤 {acc.name} ({currencySymbol}{Math.round(acc.balance).toLocaleString()})
+                  </option>
+                ))}
+              </optgroup>
             </select>
           </div>
 
