@@ -574,7 +574,19 @@ export const BankSyncView: React.FC<BankSyncViewProps> = ({ onBack, accounts, on
                       <Landmark size={20} />
                     </div>
                     <div>
-                      <p style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: '#ffffff' }}>{acc.name}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                        <p style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: '#ffffff' }}>{acc.name}</p>
+                        <span style={{ 
+                          fontSize: '10px', 
+                          fontWeight: 800, 
+                          padding: '2px 7px', 
+                          borderRadius: '6px', 
+                          background: (acc as any).isFamilyAccount ? 'rgba(236,72,153,0.2)' : 'rgba(34,197,94,0.2)', 
+                          color: (acc as any).isFamilyAccount ? '#ec4899' : '#34d399' 
+                        }}>
+                          {(acc as any).isFamilyAccount ? `👫 ${(acc as any).ownerName || 'Partner'}` : '👤 You'}
+                        </span>
+                      </div>
                       <span style={{ fontSize: '12px', color: 'var(--primary)', fontWeight: 700 }}>
                         {currencySymbol}{acc.balance.toLocaleString()}
                       </span>

@@ -798,9 +798,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <span style={{ fontSize: '13px', flexShrink: 0 }}>
                       {acc.type === 'cash' ? '🪙' : acc.type === 'upi' ? '📱' : acc.type === 'credit' ? '💳' : acc.type === 'wallet' ? '👛' : acc.type === 'custom' ? '✨' : '🏦'}
                     </span>
-                    <span style={{ fontSize: '12px', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {acc.name}
-                    </span>
+                    <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {acc.name}
+                      </span>
+                      <span style={{ 
+                        fontSize: '9px', 
+                        fontWeight: 800, 
+                        padding: '1px 5px', 
+                        borderRadius: '5px', 
+                        background: (acc as any).isFamilyAccount ? 'rgba(236,72,153,0.35)' : 'rgba(0,0,0,0.25)',
+                        color: '#ffffff',
+                        display: 'inline-block',
+                        width: 'fit-content',
+                        marginTop: '2px',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '110px'
+                      }}>
+                        {(acc as any).isFamilyAccount ? `👫 ${(acc as any).ownerName || 'Partner'}` : '👤 You'}
+                      </span>
+                    </div>
                   </div>
                   {onDeleteAccount && (
                     <button
