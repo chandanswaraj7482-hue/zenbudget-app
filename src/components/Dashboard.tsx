@@ -266,8 +266,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const myAccounts = displayAccounts.filter(a => !(a as any).isFamilyAccount && (a.user_id === currentProfileId || !a.user_id));
-  const familyAccounts = displayAccounts.filter(a => (a as any).isFamilyAccount || (a.user_id && a.user_id !== currentProfileId));
+  const myAccounts = React.useMemo(() => {
+    return displayAccounts.filter(a => {
+      if ((a as any).isFamilyAccount || (a as any).isPartnerAccount) return false;
+      if (a.user_id && currentProfileId && a.user_id !== currentProfileId) return false;
+      const owner = (a as any).ownerName;
+      if (owner && owner !== 'You' && owner !== userName && owner !== 'Me') {
+        if (familyMembers && familyMembers.some(m => m.id !== currentProfileId && (m.name === owner || m.id === a.user_id))) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [displayAccounts, currentProfileId, userName, familyMembers]);
+
+  const familyAccounts = React.useMemo(() => {
+    return displayAccounts.filter(a => !myAccounts.some(my => my.id === a.id));
+  }, [displayAccounts, myAccounts]);
 
   const totalAccountBalance = displayAccounts && displayAccounts.length > 0
     ? displayAccounts.reduce((sum, a) => sum + (a.balance || 0), 0)
