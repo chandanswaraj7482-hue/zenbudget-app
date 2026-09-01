@@ -200,10 +200,17 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                     try {
                       localStorage.setItem(mPermsKey, JSON.stringify(updated));
                       window.dispatchEvent(new Event('memberpermissionschanged'));
-                      // Sync to Supabase profiles
-                      supabase.from('profiles').update({
-                        [`perm_${m.id}`]: updated
-                      }).eq('id', currentProfileId).then(() => {}).catch(() => {});
+                      
+                      if (initialSyncPermissions && onSaveSyncPermissions) {
+                        const newGlobal = {
+                          ...initialSyncPermissions,
+                          memberPerms: {
+                            ...(initialSyncPermissions as any).memberPerms,
+                            [m.id]: updated
+                          }
+                        };
+                        onSaveSyncPermissions(newGlobal as any);
+                      }
                     } catch (_) {}
                     setPermissionToast(`Permissions for ${m.name || 'Partner'} updated!`);
                     setTimeout(() => setPermissionToast(''), 2000);
