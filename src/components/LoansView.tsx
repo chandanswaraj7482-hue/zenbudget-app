@@ -741,13 +741,32 @@ export const LoansView: React.FC<LoansViewProps> = ({
                 ({tenureMonths} {tenureMonths === 1 ? 'Month' : 'Months'} Duration)
               </span>
             </div>
-            <input
-              type="date"
-              value={dueDate}
-              onChange={e => handleDueDateChange(e.target.value)}
-              className="glass-input"
-              style={{ marginTop: '6px', width: '100%' }}
-            />
+            <div style={{ position: 'relative', marginTop: '6px' }}>
+              <input
+                type="date"
+                value={dueDate}
+                onChange={e => handleDueDateChange(e.target.value)}
+                className="glass-input custom-date-input"
+                style={{ width: '100%', paddingRight: '40px', cursor: 'pointer' }}
+              />
+              <Calendar size={18} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', pointerEvents: 'none' }} />
+              <style>
+                {`
+                  .custom-date-input::-webkit-calendar-picker-indicator {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    width: auto;
+                    height: auto;
+                    color: transparent;
+                    background: transparent;
+                    cursor: pointer;
+                  }
+                `}
+              </style>
+            </div>
           </div>
 
           {/* Quick Duration Chips */}
@@ -837,8 +856,8 @@ export const LoansView: React.FC<LoansViewProps> = ({
                     <div style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 700 }}>
                       Per {live.installmentLabel.toUpperCase()} EMI:
                     </div>
-                    <div style={{ fontSize: '15px', fontWeight: 800, color: '#a78bfa' }}>
-                      {formatCurrency(live.emiInstallment, currencySymbol)} <span style={{ fontSize: '10px' }}>({live.installmentCount}x)</span>
+                    <div style={{ fontSize: '16px', fontWeight: 900, color: '#a78bfa', marginTop: '2px' }}>
+                      {formatCurrency(live.emiInstallment, currencySymbol, live.emiInstallment % 1 !== 0 ? 2 : 0)} <span style={{ fontSize: '11px', fontWeight: 700, opacity: 0.7 }}>({live.installmentCount}x)</span>
                     </div>
                   </div>
                 </div>
