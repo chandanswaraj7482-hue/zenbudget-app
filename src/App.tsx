@@ -3000,11 +3000,18 @@ const App: React.FC = () => {
   // Convert Base USD values dynamically into active selected currency for subcomponents
   const activeRate = rates[currency] || 1;
 
-  const convertedTransactions = (transactions || []).map(t => ({
-    ...t,
-    amount: (t.amount || 0) * activeRate,
-    paidBy: partnerId && t.user_id === partnerId ? 'Partner' : 'You'
-  }));
+  const convertedTransactions = (transactions || []).map(t => {
+    let paidByName = 'You';
+    if (t.user_id && t.user_id !== currentProfileId) {
+       const mem = familyMembers.find(m => m.id === t.user_id);
+       paidByName = mem ? (mem.name || 'Partner') : (partnerName || 'Partner');
+    }
+    return {
+      ...t,
+      amount: (t.amount || 0) * activeRate,
+      paidBy: paidByName
+    };
+  });
 
   const convertedBudgets = (budgets || []).map(b => ({
     ...b,
@@ -3676,7 +3683,7 @@ const App: React.FC = () => {
           />
         )}
         {activeView === 'analytics' && (
-          <Analytics key={langKey} transactions={convertedTransactions} currencySymbol={currencySymbol} accounts={accounts} currentProfileId={currentProfileId} />
+          <Analytics key={langKey} transactions={convertedTransactions} currencySymbol={currencySymbol} accounts={accounts} currentProfileId={currentProfileId} familyMembers={familyMembers} />
         )}
         {activeView === 'profile' && (
           <ProfileView 

@@ -9,11 +9,12 @@ interface AnalyticsProps {
   currencySymbol: string;
   accounts?: Account[];
   currentProfileId: string;
+  familyMembers?: any[];
 }
 
-export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currencySymbol, accounts = [], currentProfileId }) => {
+export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currencySymbol, accounts = [], currentProfileId, familyMembers = [] }) => {
   const [timeframe, setTimeframe] = useState<'month' | 'all'>('month');
-  const [userFilter, setUserFilter] = useState<'me' | 'partner' | 'couple'>('me');
+  const [userFilter, setUserFilter] = useState<string>('me');
   const [moodTimeframe, setMoodTimeframe] = useState<MoodTimeframe>('7d');
   const [moodStartDate, setMoodStartDate] = useState<string>(() => {
     const d = new Date();
@@ -48,10 +49,12 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
     // 1. User Filter Check
     if (userFilter === 'me') {
       if (t.user_id && t.user_id !== currentProfileId) return false;
-    } else if (userFilter === 'partner') {
-      if (!t.user_id || t.user_id === currentProfileId) return false;
+    } else if (userFilter === 'couple') {
+      // Show all
+    } else {
+      // Specific partner selected
+      if (t.user_id !== userFilter) return false;
     }
-    // if 'couple', we include all
 
     // 2. Timeframe Check
     if (timeframe === 'month') {
@@ -338,25 +341,6 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
             <h4 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>Mood Trend</h4>
             <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Your emotional highs and lows</span>
           </div>
-          <select
-            value={moodTimeframe}
-            onChange={e => setMoodTimeframe(e.target.value as MoodTimeframe)}
-            style={{
-              background: 'var(--bg-input)',
-              border: '1px solid var(--border-input)',
-              color: 'var(--text-primary)',
-              borderRadius: '12px',
-              fontSize: '12px',
-              fontWeight: 700,
-              padding: '8px 12px',
-              outline: 'none',
-              cursor: 'pointer',
-              appearance: 'auto'
-            }}
-          >
-            <option value="7d">Last 7 Days</option>
-            <option value="15d">Last 15 Days</option>
-            <option value="1m">Last 1 Month</option>
             <option value="2m">Last 2 Months</option>
             <option value="5m">Last 5 Months</option>
             <option value="1y">Last 1 Year</option>
@@ -678,10 +662,37 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '80px' }} className="animate-fade-in">
 
       {/* Header + Timeframe Toggle */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em', margin: 0 }}>
-          {t('analytics_title')}
-        </h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em', margin: 0 }}>
+            {t('analytics_title')}
+          </h2>
+          {familyMembers && familyMembers.length > 0 && (
+            <select
+              value={userFilter}
+              onChange={(e) => setUserFilter(e.target.value)}
+              style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--primary)',
+                color: 'var(--primary)',
+                padding: '6px 12px',
+                borderRadius: '12px',
+                fontSize: '12px',
+                fontWeight: 800,
+                outline: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(16, 185, 129, 0.15)'
+              }}
+            >
+              <option value="me">👤 Only Me</option>
+              {familyMembers.map((m: any) => (
+                <option key={m.id} value={m.id}>👥 {m.name || 'Partner'}</option>
+              ))}
+              <option value="couple">🌍 Full Household</option>
+            </select>
+          )}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <div style={{ display: 'flex', background: 'var(--bg-dark)', border: '1px solid var(--border-card)', padding: '3px', borderRadius: '12px' }}>
           <button 
             onClick={() => setTimeframe('month')}
@@ -718,6 +729,8 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
             All Time
           </button>
         </div>
+        </div>
+      </div>
       </div>
 
       {/* Money Streak */}
