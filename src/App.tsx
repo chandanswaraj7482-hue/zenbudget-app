@@ -1961,7 +1961,7 @@ const App: React.FC = () => {
             try {
               const { data: allFamilyProfiles } = await supabase
                 .from('profiles')
-                .select('id, name, couple_code, partner_couple_code, subscription_tier')
+                .select('id, name, couple_code, partner_couple_code, subscription_tier, partner_permissions')
                 .neq('id', currentProfileId)
                 .or(orConditions.join(','));
 
@@ -2490,6 +2490,19 @@ const App: React.FC = () => {
     // Always ensure amount is a whole number (no decimals stored)
     txData = { ...txData, amount: Math.round(txData.amount) };
 
+    // Enforce edit permissions
+    if (txData.id && txData.user_id && txData.user_id !== currentProfileId) {
+      const ownerMember = familyMembers.find(m => m.id === txData.user_id);
+      let hasEditPerm = false;
+      if (ownerMember && ownerMember.partner_permissions) {
+        hasEditPerm = ownerMember.partner_permissions.canEditTransactions === true;
+      }
+      if (!hasEditPerm) {
+        triggerToast(`🔒 Permission Denied: ${txData.partnerName || 'Owner'} has not granted you Edit permission.`, 'warning');
+        return false;
+      }
+    }
+
     // Insufficient Balance Validation for Expenses and Transfers
     if (!txData.id && (txData.type === 'expense' || txData.type === 'transfer') && accounts && accounts.length > 0) {
       const selectedAcc = accounts.find(a => a.id === txData.accountId);
@@ -2542,17 +2555,15 @@ const App: React.FC = () => {
     const targetTx = transactions.find(t => t.id === id);
     // Read-only protection check: If transaction belongs to a partner, check if partner granted edit/delete permission
     if (targetTx && targetTx.user_id && targetTx.user_id !== currentProfileId) {
-      const ownerPermsRaw = localStorage.getItem(`zb_perm_${targetTx.user_id}_${currentProfileId}`);
+      const ownerMember = familyMembers.find(m => m.id === targetTx.user_id);
       let hasEditDeletePerm = false;
-      if (ownerPermsRaw) {
-        try {
-          const parsed = JSON.parse(ownerPermsRaw);
-          hasEditDeletePerm = parsed.allowEditDelete === true;
-        } catch (_) {}
+      
+      if (ownerMember && ownerMember.partner_permissions) {
+        hasEditDeletePerm = ownerMember.partner_permissions.canDeleteTransactions === true;
       }
 
       if (!hasEditDeletePerm) {
-        triggerToast(`🔒 Permission Denied: ${targetTx.partnerName || 'Owner'} has not granted you Edit/Delete permission in Couple & Family Sync.`, 'warning');
+        triggerToast(`🔒 Permission Denied: ${targetTx.partnerName || 'Owner'} has not granted you Delete permission in Couple & Family Sync.`, 'warning');
         return;
       }
     }
