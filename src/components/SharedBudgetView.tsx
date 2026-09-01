@@ -79,7 +79,15 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
   };
 
   const myShareCode = coupleCode || (currentProfileId ? currentProfileId.slice(0, 8).toUpperCase() : '');
-  const hasFamily = familyMembers.length > 0;
+  const savedPartnerId = (currentProfileId ? localStorage.getItem(`zb_partner_id_${currentProfileId}`) : null) || '';
+  const savedPartnerName = (currentProfileId ? localStorage.getItem(`zb_partner_name_${currentProfileId}`) : null) || 'Partner';
+  const savedPartnerCode = (currentProfileId ? localStorage.getItem(`zb_partner_code_${currentProfileId}`) : null) || '';
+
+  const activeFamilyMembers = familyMembers.length > 0 
+    ? familyMembers 
+    : (savedPartnerId || savedPartnerCode ? [{ id: savedPartnerId || 'partner_1', name: savedPartnerName, couple_code: savedPartnerCode }] : []);
+
+  const hasFamily = activeFamilyMembers.length > 0;
 
   // Calculate stats
   const familyTxs = (transactions || []).filter(t => t.user_id && t.user_id !== currentProfileId);
@@ -162,15 +170,15 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                 <Users size={28} />
               </div>
               <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
-                Synced with {familyMembers.length} Partner/Family Member(s)
+                Synced with {activeFamilyMembers.length} Partner/Family Member(s)
               </h3>
               
               {/* Connected Members List Card */}
               <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
                 <span style={{ fontSize: '11px', fontWeight: 800, color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'left' }}>
-                  👥 CONNECTED GROUP MEMBERS ({familyMembers.length})
+                  👥 CONNECTED GROUP MEMBERS ({activeFamilyMembers.length})
                 </span>
-                {familyMembers.map(m => (
+                {activeFamilyMembers.map(m => (
                   <div 
                     key={m.id}
                     style={{

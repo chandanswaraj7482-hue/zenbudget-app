@@ -228,7 +228,22 @@ const App: React.FC = () => {
     const profileId = localStorage.getItem('zb_profile_id') || '';
     return profileId ? localStorage.getItem(`zb_partner_name_${profileId}`) : null;
   });
-  const [familyMembers, setFamilyMembers] = useState<{ id: string, name: string, couple_code: string }[]>([]);
+  const [familyMembers, setFamilyMembers] = useState<{ id: string; name: string; couple_code: string }[]>(() => {
+    const pId = currentProfileId ? localStorage.getItem(`zb_partner_id_${currentProfileId}`) : null;
+    const cached = currentProfileId ? localStorage.getItem(`zb_family_members_${currentProfileId}`) : null;
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    if (pId || partnerId) {
+      const pName = (currentProfileId ? localStorage.getItem(`zb_partner_name_${currentProfileId}`) : null) || 'Partner';
+      const pCode = (currentProfileId ? localStorage.getItem(`zb_partner_code_${currentProfileId}`) : null) || '';
+      return [{ id: pId || partnerId || 'partner_1', name: pName, couple_code: pCode }];
+    }
+    return [];
+  });
   const [referralCount, setReferralCount] = useState<number>(() => {
     return parseInt(localStorage.getItem('zb_referral_count') || '0');
   });
