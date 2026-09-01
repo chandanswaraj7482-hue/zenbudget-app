@@ -1,18 +1,29 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Check, Copy, LogOut, Users } from 'lucide-react';
+import { ArrowLeft, Check, Copy, LogOut, Users, UserMinus, Shield, Sliders, CheckSquare, Square, Trash2, RefreshCw, UserCheck } from 'lucide-react';
+
+export interface ModuleSyncPermissions {
+  syncTransactions: boolean;
+  syncAccounts: boolean;
+  syncBudgets: boolean;
+  syncGoals: boolean;
+  syncLoans: boolean;
+  syncWishlist: boolean;
+}
 
 interface SharedBudgetViewProps {
   onBack: () => void;
   currentProfileId: string;
-  familyMembers?: { id: string, name: string, couple_code: string }[];
+  familyMembers?: { id: string; name: string; couple_code: string; email?: string }[];
   coupleCode?: string;
   onConnectPartner?: (code: string) => Promise<boolean>;
-  onDisconnectPartner?: () => void;
+  onDisconnectPartner?: (targetPartnerId?: string) => void;
   transactions?: any[];
   currencySymbol?: string;
   onOpenTransferModal?: () => void;
   isPremiumUser?: boolean;
   onOpenSubscriptionModal?: () => void;
+  syncPermissions?: ModuleSyncPermissions;
+  onSaveSyncPermissions?: (permissions: ModuleSyncPermissions) => void;
 }
 
 export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
@@ -26,12 +37,46 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
   currencySymbol = '₹',
   onOpenTransferModal,
   isPremiumUser = false,
-  onOpenSubscriptionModal
+  onOpenSubscriptionModal,
+  syncPermissions: initialSyncPermissions,
+  onSaveSyncPermissions
 }) => {
   const [partnerInputCode, setPartnerInputCode] = useState('');
   const [isLinking, setIsLinking] = useState(false);
   const [copied, setCopied] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [permissionToast, setPermissionToast] = useState('');
+
+  // Selective module sync permissions state
+  const [permissions, setPermissions] = useState<ModuleSyncPermissions>(() => {
+    if (initialSyncPermissions) return initialSyncPermissions;
+    try {
+      const saved = localStorage.getItem(`zb_sync_permissions_${currentProfileId}`);
+      if (saved) return JSON.parse(saved);
+    } catch (_) {}
+    return {
+      syncTransactions: true,
+      syncAccounts: true,
+      syncBudgets: true,
+      syncGoals: true,
+      syncLoans: true,
+      syncWishlist: true
+    };
+  });
+
+  const togglePermission = (key: keyof ModuleSyncPermissions) => {
+    const updated = { ...permissions, [key]: !permissions[key] };
+    setPermissions(updated);
+    try {
+      localStorage.setItem(`zb_sync_permissions_${currentProfileId}`, JSON.stringify(updated));
+      window.dispatchEvent(new Event('syncpermissionschanged'));
+    } catch (_) {}
+    if (onSaveSyncPermissions) {
+      onSaveSyncPermissions(updated);
+    }
+    setPermissionToast('Sync permissions updated!');
+    setTimeout(() => setPermissionToast(''), 2000);
+  };
 
   const myShareCode = coupleCode || (currentProfileId ? currentProfileId.slice(0, 8).toUpperCase() : '');
   const hasFamily = familyMembers.length > 0;
@@ -98,7 +143,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
         </button>
         <div style={{ textAlign: 'left' }}>
           <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', fontFamily: "'Manrope', sans-serif", margin: 0 }}>
-            Couple & Family Sync
+            Couple &amp; Family Sync
           </h2>
           <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
             Partners, families &amp; roommates real-time spending &amp; transfer sync.
@@ -119,14 +164,65 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
               <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
                 Synced with {familyMembers.length} Partner/Family Member(s)
               </h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', marginTop: '4px' }}>
+              
+              {/* Connected Members List Card */}
+              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 800, color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'left' }}>
+                  👥 CONNECTED GROUP MEMBERS ({familyMembers.length})
+                </span>
                 {familyMembers.map(m => (
-                  <span key={m.id} style={{ padding: '4px 8px', borderRadius: '12px', background: 'var(--primary)', color: '#fff', fontSize: '11px', fontWeight: 700 }}>
-                    {m.name || 'Member'}
-                  </span>
+                  <div 
+                    key={m.id}
+                    style={{
+                      padding: '12px 14px',
+                      borderRadius: '14px',
+                      background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '10px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left' }}>
+                      <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(34, 197, 94, 0.2)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px' }}>
+                        {(m.name || 'M').charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>
+                          {m.name || 'Group Member'}
+                        </span>
+                        <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
+                          Code: {m.couple_code || 'Connected'} • Status: <strong style={{ color: 'var(--success)' }}>Connected ⚡</strong>
+                        </span>
+                      </div>
+                    </div>
+                    {onDisconnectPartner && (
+                      <button
+                        type="button"
+                        onClick={() => onDisconnectPartner(m.id)}
+                        title="Remove / Disconnect Member"
+                        style={{
+                          padding: '6px 10px',
+                          borderRadius: '10px',
+                          border: '1px solid rgba(239, 68, 68, 0.3)',
+                          background: 'rgba(239, 68, 68, 0.12)',
+                          color: '#f87171',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        <UserMinus size={13} /> Remove
+                      </button>
+                    )}
+                  </div>
                 ))}
               </div>
-              
+
               {/* Share Code Section for inviting more */}
               <div style={{ marginTop: '10px', padding: '12px', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', width: '100%' }}>
                 <span style={{ fontSize: '11px', color: '#a78bfa', fontWeight: 700, display: 'block', marginBottom: '6px' }}>
@@ -143,7 +239,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
               <span style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
                 Real-time Couple/Family Premium Sync Active ⚡
               </span>
-            </div>
+            </div>div>
 
             {/* Household Spending Breakdown Flex */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
@@ -289,26 +385,96 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
               </div>
             </div>
 
-            <button
-              onClick={onDisconnectPartner}
-              style={{
-                padding: '12px',
-                borderRadius: '14px',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
-                background: 'rgba(239, 68, 68, 0.1)',
-                color: 'var(--danger)',
-                fontSize: '13px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                marginTop: '10px'
-              }}
-            >
-              <LogOut size={16} /> Leave Couple/Family Group
-            </button>
+            {/* SELECTIVE MODULE SYNC PERMISSIONS CARD */}
+            <div style={{
+              padding: '16px',
+              borderRadius: '16px',
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              textAlign: 'left'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <h4 style={{ fontSize: '12px', fontWeight: 800, color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Shield size={15} /> Selective Module Sync &amp; Permissions
+                </h4>
+                {permissionToast && (
+                  <span style={{ fontSize: '11px', color: 'var(--success)', fontWeight: 700 }}>
+                    {permissionToast}
+                  </span>
+                )}
+              </div>
+              <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4 }}>
+                Choose which data modules you want to share with connected members. You can edit these permissions anytime!
+              </p>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '8px', marginTop: '4px' }}>
+                {[
+                  { key: 'syncTransactions', label: '💳 Shared Ledger Transactions & Expenses', desc: 'Sync expense entries and income transactions' },
+                  { key: 'syncAccounts', label: '🏦 Bank Accounts & Wallet Balances', desc: 'Sync bank accounts and wallet totals' },
+                  { key: 'syncBudgets', label: '📊 Category Budgets & Limits', desc: 'Sync shared category spending limits' },
+                  { key: 'syncGoals', label: '🎯 Goals & Savings Progress', desc: 'Sync shared target savings milestones' },
+                  { key: 'syncLoans', label: '🤝 Loans & Debts Ledger', desc: 'Sync borrowed and loaned money records' },
+                  { key: 'syncWishlist', label: '🎁 Wishlist Items', desc: 'Sync saved wishlist items' }
+                ].map(item => {
+                  const isChecked = permissions[item.key as keyof ModuleSyncPermissions];
+                  return (
+                    <div
+                      key={item.key}
+                      onClick={() => togglePermission(item.key as keyof ModuleSyncPermissions)}
+                      style={{
+                        padding: '10px 12px',
+                        borderRadius: '12px',
+                        background: isChecked ? 'rgba(139,92,246,0.1)' : 'rgba(255,255,255,0.02)',
+                        border: isChecked ? '1px solid rgba(139,92,246,0.3)' : '1px solid rgba(255,255,255,0.06)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <div>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>
+                          {item.label}
+                        </span>
+                        <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
+                          {item.desc}
+                        </span>
+                      </div>
+                      <div style={{ color: isChecked ? '#a78bfa' : 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
+                        {isChecked ? <CheckSquare size={18} /> : <Square size={18} />}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {onDisconnectPartner && (
+              <button
+                onClick={() => onDisconnectPartner()}
+                style={{
+                  padding: '12px',
+                  borderRadius: '14px',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  color: 'var(--danger)',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  marginTop: '10px'
+                }}
+              >
+                <LogOut size={16} /> Leave Couple/Family Group
+              </button>
+            )}
           </div>
         ) : (
           /* UNCONNECTED STATE */

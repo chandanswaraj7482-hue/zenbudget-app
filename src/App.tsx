@@ -3150,10 +3150,10 @@ const App: React.FC = () => {
     }
   };
 
-  const handleDisconnectPartner = async () => {
+  const handleDisconnectPartner = async (targetPartnerId?: string) => {
     if (!currentProfileId) return;
 
-    const oldPartnerId = partnerId;
+    const oldPartnerId = targetPartnerId || partnerId;
     const oldPartnerCode = partnerCode;
 
     localStorage.removeItem(`zb_partner_id_${currentProfileId}`);
@@ -3184,7 +3184,7 @@ const App: React.FC = () => {
       console.error('Failed to disconnect partner mutually in DB:', e);
     }
 
-    triggerToast('Partner ledger disconnected.', 'info');
+    triggerToast('Disconnected member from Couple & Family group.', 'info');
     fetchDataFromSupabase();
   };
 
