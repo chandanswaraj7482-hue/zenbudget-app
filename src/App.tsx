@@ -3325,7 +3325,8 @@ const App: React.FC = () => {
       {/* Sticky Trial Expired Locked Banner */}
       {isSubscriptionExpired() && (
         <div 
-          onClick={() => { setIsSubBlocker(true); setIsSubModalOpen(true); }}
+          className="announcement-modal-wrapper"
+          onClick={(e) => { setIsSubBlocker(true); setIsSubModalOpen(true); }}
           style={{
             background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
             color: '#ffffff',
@@ -3956,7 +3957,7 @@ const App: React.FC = () => {
             animation: 'fadeIn 0.3s ease-out'
           }}
         >
-          <div style={{
+          <div className="announcement-modal-wrapper" style={{
             width: '100%',
             maxWidth: '380px',
             maxHeight: '85vh',
