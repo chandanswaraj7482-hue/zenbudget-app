@@ -422,13 +422,17 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         }
         window.dispatchEvent(new Event('profile_avatar_updated'));
 
-        console.log("LockScreen: Profile ready, unlocking...");
+        const storedLocalPin = localStorage.getItem('zb_user_pin') || localStorage.getItem(`zb_pin_${uid}`) || localStorage.getItem(`zb_pin_${userProf.id}`);
+        const effectivePin = (userProf.pin && userProf.pin !== '0000') ? userProf.pin : storedLocalPin;
+
+        console.log("LockScreen: Profile ready, effective pin check:", effectivePin ? "PIN FOUND" : "NO PIN");
         setIsLoading(false);
-        // Force users to create a PIN if they have the default '0000' or no custom PIN
-        if (!userProf.pin || userProf.pin === '0000') {
-          setStep('onboard-pin');
-        } else {
+
+        // Only ask to create a PIN for brand new users with no local or db PIN
+        if (effectivePin && effectivePin !== '0000') {
           setStep('unlock');
+        } else {
+          setStep('onboard-pin');
         }
       } else {
         setStep('onboard-pin');
@@ -823,6 +827,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         if (error) throw error;
         
         localStorage.setItem('zb_user_pin', pin);
+        localStorage.setItem(`zb_pin_${currentUserId}`, pin);
         playNotificationSound('success');
         onUnlock(
           currentUserId, 
