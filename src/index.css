@@ -761,27 +761,33 @@ div[style*="position:fixed"] {
     padding: 24px 0 !important;
   }
 
-  #root {
+  #root, .app-main-wrapper {
     max-width: 480px !important;
     width: 100% !important;
     margin: 0 auto !important;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 1px rgba(255, 255, 255, 0.15) !important;
-    border-radius: 36px !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 1px rgba(255, 255, 255, 0.15) !important;
+    border-radius: 32px !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     background: #0b0f19 !important;
     position: relative !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
-    min-height: 90vh !important;
+    min-height: 88vh !important;
+  }
+
+  /* Sticky header inside desktop container frame */
+  .app-main-wrapper header {
+    border-top-left-radius: 32px !important;
+    border-top-right-radius: 32px !important;
   }
 
   /* Keep bottom navigation bar centered inside desktop container frame */
-  div[style*="position: fixed"][style*="bottom: 0"] {
+  .app-main-wrapper nav {
     max-width: 480px !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
-    border-bottom-left-radius: 36px !important;
-    border-bottom-right-radius: 36px !important;
+    border-bottom-left-radius: 32px !important;
+    border-bottom-right-radius: 32px !important;
   }
 }
 
