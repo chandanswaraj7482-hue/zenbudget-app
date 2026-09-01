@@ -639,7 +639,10 @@ const App: React.FC = () => {
     });
   };
 
-  const handlePayLoanViaUPI = async (loan: LoanRecord, amount: number) => {
+  const [upiPayeeModal, setUpiPayeeModal] = useState<{ isOpen: boolean, loan: LoanRecord | null, amount: number, accountId: string }>({ isOpen: false, loan: null, amount: 0, accountId: '' });
+  const [upiPayeeId, setUpiPayeeId] = useState('');
+
+  const handlePayLoanViaUPI = async (loan: LoanRecord, amount: number, accountId?: string) => {
     const isUnlocked = subscriptionTier === 'premium_monthly' || 
                        subscriptionTier === 'premium_yearly' || 
                        subscriptionTier === 'premium_lifetime' || 
@@ -649,66 +652,12 @@ const App: React.FC = () => {
 
     if (!isUnlocked) {
       setIsScanPayUnlockOpen(true);
-      triggerToast('Unlock 1-Click Cashfree PhonePe Access to proceed!', 'info');
+      triggerToast('Unlock 1-Click PhonePe Access to proceed!', 'info');
       return;
     }
 
-    try {
-      const userEmail = localStorage.getItem('zb_user_email') || '';
-      const userPhone = localStorage.getItem('zb_user_phone') || '';
-      triggerToast(`Launching Cashfree PhonePe payment for ₹${amount}...`, 'info');
-
-      let payment_session_id = '';
-      try {
-        const res = await fetch('https://admin-portal-zenbudget.vercel.app/api/create-payment-session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            amount: amount,
-            planType: `loan_${loan.id}`,
-            userId: currentProfileId,
-            email: userEmail,
-            phone: userPhone
-          })
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.payment_session_id) {
-            payment_session_id = data.payment_session_id;
-          }
-        }
-      } catch (e) {
-        console.warn('Cashfree payment session fetch skipped/failed:', e);
-      }
-
-      if (payment_session_id && (window as any).Cashfree) {
-        const cf = (window as any).Cashfree({ mode: 'production' });
-        cf.checkout({
-          paymentSessionId: payment_session_id,
-          redirectTarget: '_modal'
-        }).then(async (result: any) => {
-          if (result && result.paymentDetails) {
-            handleRepayLoan(loan.id, amount, accounts[0]?.id || '1');
-            triggerToast(`Loan repayment of ₹${amount} to ${loan.personName} completed via PhonePe! 🎉`, 'success');
-            try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
-          }
-        });
-      } else {
-        // Fallback: Direct UPI App intent launch on Mobile only
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        if (isMobile) {
-          const upiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${amount}&cu=INR&tn=${encodeURIComponent(`Loan Repayment: ${loan.personName}`)}`;
-          try { window.location.href = upiUrl; } catch (e) {}
-        }
-        handleRepayLoan(loan.id, amount, accounts[0]?.id || '1');
-        triggerToast(`Loan repayment of ₹${amount} to ${loan.personName} processed! 🎉`, 'success');
-        try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (e) {}
-      }
-    } catch (err: any) {
-      handleRepayLoan(loan.id, amount, accounts[0]?.id || '1');
-      triggerToast(`Loan repayment processed! 🎉`, 'success');
-    }
+    setUpiPayeeModal({ isOpen: true, loan, amount, accountId: accountId || accounts[0]?.id || '' });
+    setUpiPayeeId('');
   };
 
   const handleDirectCashfreePayment = async (amount: number, title: string) => {
@@ -5321,7 +5270,55 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+
+      {/* UPI Payee Intent Modal */}
+      {upiPayeeModal.isOpen && upiPayeeModal.loan && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div className="glass-panel animate-slide-up" style={{ width: '100%', maxWidth: '380px', padding: '24px', borderRadius: '24px', background: 'var(--bg-card)', border: '1px solid var(--border-card)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>Send Money via UPI</h3>
+            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '20px', lineHeight: 1.5 }}>
+              Enter the receiver's UPI ID or Phone Number to directly launch your PhonePe / Netbanking app and pre-fill details.
+            </p>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (!upiPayeeId.trim()) return;
+              
+              let receiver = upiPayeeId.trim();
+              const upiUrl = `upi://pay?pa=${encodeURIComponent(receiver)}&pn=${encodeURIComponent(upiPayeeModal.loan?.personName || 'User')}&am=${upiPayeeModal.amount}&cu=INR&tn=${encodeURIComponent('Loan Repayment')}`;
+              
+              // Launch UPI App
+              window.location.href = upiUrl;
+
+              // Record repayment
+              handleRepayLoan(upiPayeeModal.loan!.id, upiPayeeModal.amount, upiPayeeModal.accountId);
+              triggerToast(`Loan repayment of ${currencySymbol}${upiPayeeModal.amount} recorded!`, 'success');
+              try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (_) {}
+
+              setUpiPayeeModal({ isOpen: false, loan: null, amount: 0, accountId: '' });
+            }} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)' }}>RECEIVER UPI ID / NUMBER</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 9876543210@ybl or username@sbi"
+                  value={upiPayeeId}
+                  onChange={e => setUpiPayeeId(e.target.value)}
+                  required
+                  className="glass-input"
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', border: '1px solid var(--border-input)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '14px', outline: 'none' }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                <button type="button" onClick={() => setUpiPayeeModal({ isOpen: false, loan: null, amount: 0, accountId: '' })} style={{ flex: 1, padding: '12px', borderRadius: '12px', border: 'none', background: 'rgba(255,255,255,0.1)', color: 'var(--text-primary)', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
+                <button type="submit" style={{ flex: 1.5, padding: '12px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', fontSize: '14px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                  ⚡ Open UPI App
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
