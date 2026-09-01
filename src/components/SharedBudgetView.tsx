@@ -651,6 +651,16 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                   type="text"
                   required
                   value={partnerInputCode}
+                  onChange={e => setPartnerInputCode(e.target.value.toUpperCase())}
+                  placeholder="Enter Partner's Code"
+                  className="glass-input"
+                  style={{ flex: 1, padding: '12px 14px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', minWidth: '150px' }}
+                />
+                <button type="submit" disabled={isConnecting} style={{ padding: '12px 20px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)', color: '#fff', fontWeight: 800, fontSize: '13px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                  {isConnecting ? 'Connecting...' : '🔗 Connect'}
+                </button>
+              </div>
+
               {pendingPartnerCode ? (
               <div style={{
                 background: 'rgba(236, 72, 153, 0.1)',

@@ -378,19 +378,24 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         // Auto-register device session for multi-device sync
         const currentDeviceId = await getOrCreateDeviceId();
         const isMobile = currentDeviceId.startsWith('mobile_');
-          
-          // Merge and save IDs
-          const newIds = ids.filter((id: string) => (isMobile ? !id.startsWith('mobile_') : !id.startsWith('desktop_')));
-          if (!newIds.includes(currentDeviceId)) newIds.push(currentDeviceId);
-          const newDeviceIdString = newIds.join('|');
-          
-          if (newDeviceIdString !== userProf.device_id) {
-            await supabase.from('profiles').update({ device_id: newDeviceIdString }).eq('id', uid);
-            userProf.device_id = newDeviceIdString;
+        try {
+          if (userProf.device_id) {
+            const ids = (userProf.device_id || '').split('|').filter(Boolean);
+            // Merge and save IDs
+            const newIds = ids.filter((id: string) => (isMobile ? !id.startsWith('mobile_') : !id.startsWith('desktop_')));
+            if (!newIds.includes(currentDeviceId)) newIds.push(currentDeviceId);
+            const newDeviceIdString = newIds.join('|');
+            
+            if (newDeviceIdString !== userProf.device_id) {
+              await supabase.from('profiles').update({ device_id: newDeviceIdString }).eq('id', uid);
+              userProf.device_id = newDeviceIdString;
+            }
+          } else {
+            await supabase.from('profiles').update({ device_id: currentDeviceId }).eq('id', uid);
+            userProf.device_id = currentDeviceId;
           }
-        } else {
-          await supabase.from('profiles').update({ device_id: currentDeviceId }).eq('id', uid);
-          userProf.device_id = currentDeviceId;
+        } catch (deviceErr) {
+          console.warn('Device session registration failed:', deviceErr);
         }
         // ------------------------------------------------
 

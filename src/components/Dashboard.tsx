@@ -135,7 +135,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
   partnerId
 }) => {
   const [selectedDashboardView, setSelectedDashboardView] = useState<'combined' | 'personal' | string>('combined');
-  const myAccounts = accounts.filter(acc => !(acc as any).isFamilyAccount);
 
   const [dateRangeFilter, setDateRangeFilter] = useState<'this_month' | 'last_month' | 'last_3_months' | 'custom'>('this_month');
   const [showShareModal, setShowShareModal] = useState(false);

@@ -341,6 +341,15 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
             <h4 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>Mood Trend</h4>
             <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Your emotional highs and lows</span>
           </div>
+          <select
+            value={moodTimeframe}
+            onChange={e => setMoodTimeframe(e.target.value as MoodTimeframe)}
+            className="glass-input"
+            style={{ padding: '6px 10px', borderRadius: '10px', fontSize: '11px', fontWeight: 700, minWidth: '120px' }}
+          >
+            <option value="7d">Last 7 Days</option>
+            <option value="15d">Last 15 Days</option>
+            <option value="1m">Last 1 Month</option>
             <option value="2m">Last 2 Months</option>
             <option value="5m">Last 5 Months</option>
             <option value="1y">Last 1 Year</option>
@@ -730,7 +739,6 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
           </button>
         </div>
         </div>
-      </div>
       </div>
 
       {/* Money Streak */}
