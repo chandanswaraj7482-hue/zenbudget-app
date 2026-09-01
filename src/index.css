@@ -49,11 +49,10 @@
 
 /* Ensure all circular avatars, badges, and icon buttons inside the application retain 100% perfect round circles and never squish into ovals */
 [style*="border-radius: 50%"],
-[style*="borderRadius: '50%'"],
-[style*="borderRadius: 50%"],
 [style*="border-radius:50%"],
 [style*="border-radius: 9999px"],
-[style*="borderRadius: '9999px'"] {
+[style*="border-radius:9999px"],
+.rounded-full {
   aspect-ratio: 1 / 1 !important;
   flex-shrink: 0 !important;
   box-sizing: border-box !important;
