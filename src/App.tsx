@@ -2994,6 +2994,9 @@ const App: React.FC = () => {
       setUserName(newName);
       setUserPin(newPin);
       localStorage.setItem('zb_user_name', newName);
+      localStorage.setItem('zb_user_pin', newPin);
+      localStorage.setItem('zb_passcode', newPin);
+      localStorage.setItem(`zb_pin_${currentProfileId}`, newPin);
       if (currentAvatar) localStorage.setItem('zb_user_avatar', currentAvatar);
       if (newEmail) localStorage.setItem('zb_user_email', newEmail);
       window.dispatchEvent(new Event('profile_avatar_updated'));
