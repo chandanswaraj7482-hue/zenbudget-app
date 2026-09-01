@@ -135,6 +135,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   partnerId
 }) => {
   const [selectedDashboardView, setSelectedDashboardView] = useState<'combined' | 'personal' | string>('combined');
+  const myAccounts = accounts.filter(acc => !(acc as any).isFamilyAccount);
+
+  const [dateRangeFilter, setDateRangeFilter] = useState<'this_month' | 'last_month' | 'last_3_months' | 'custom'>('this_month');
   const [showShareModal, setShowShareModal] = useState(false);
   const [showAllAccountsModal, setShowAllAccountsModal] = useState(false);
   const [showAllBadges, setShowAllBadges] = useState(false);
@@ -923,7 +926,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 gap: '4px'
               }}
             >
-              See All ({accounts.length}) <ChevronRight size={13} />
+              See All ({myAccounts.length}) <ChevronRight size={13} />
             </button>
             <button
               onClick={onAddAccountClick}
@@ -948,7 +951,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {/* Accounts Grid - Renders All Accounts */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px' }}>
-          {accounts.map((acc, index) => {
+          {myAccounts.map((acc, index) => {
             const defaultColors = ['#0284c7', '#ea580c', '#7c3aed', '#22c55e', '#06b6d4', '#ec4899', '#f59e0b'];
             const cardBg = acc.color || defaultColors[index % defaultColors.length];
             return (

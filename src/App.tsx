@@ -3719,7 +3719,7 @@ const App: React.FC = () => {
           />
         )}
         {activeView === 'analytics' && (
-          <Analytics key={langKey} transactions={convertedTransactions} currencySymbol={currencySymbol} accounts={accounts} />
+          <Analytics key={langKey} transactions={convertedTransactions} currencySymbol={currencySymbol} accounts={accounts} currentProfileId={currentProfileId} />
         )}
         {activeView === 'profile' && (
           <ProfileView 

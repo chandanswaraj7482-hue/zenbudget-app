@@ -8,10 +8,12 @@ interface AnalyticsProps {
   transactions: Transaction[];
   currencySymbol: string;
   accounts?: Account[];
+  currentProfileId: string;
 }
 
-export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currencySymbol, accounts = [] }) => {
+export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currencySymbol, accounts = [], currentProfileId }) => {
   const [timeframe, setTimeframe] = useState<'month' | 'all'>('month');
+  const [userFilter, setUserFilter] = useState<'me' | 'partner' | 'couple'>('me');
   const [moodTimeframe, setMoodTimeframe] = useState<MoodTimeframe>('7d');
   const [moodStartDate, setMoodStartDate] = useState<string>(() => {
     const d = new Date();
@@ -43,6 +45,15 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
   const currentYear = new Date().getFullYear();
 
   const filteredTx = transactions.filter(t => {
+    // 1. User Filter Check
+    if (userFilter === 'me') {
+      if (t.user_id && t.user_id !== currentProfileId) return false;
+    } else if (userFilter === 'partner') {
+      if (!t.user_id || t.user_id === currentProfileId) return false;
+    }
+    // if 'couple', we include all
+
+    // 2. Timeframe Check
     if (timeframe === 'month') {
       const txDate = new Date(t.date);
       return txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear;
@@ -871,19 +882,19 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
         ) : (
           <>
             {/* SVG Donut */}
-            <div style={{ position: 'relative', width: '170px', height: '170px', margin: '4px 0 10px' }}>
-              <svg width="100%" height="100%" viewBox="0 0 140 140">
+            <div style={{ position: 'relative', width: '170px', height: '170px', margin: '4px auto 10px', display: 'flex', justifyContent: 'center' }}>
+              <svg width="170" height="170" viewBox="0 0 170 170" style={{ display: 'block' }}>
                 <circle 
-                  cx="70" 
-                  cy="70" 
-                  r="52" 
+                  cx="85" 
+                  cy="85" 
+                  r="64" 
                   fill="none" 
                   stroke="var(--bg-input)" 
-                  strokeWidth="14" 
+                  strokeWidth="16" 
                 />
                 
                 {breakdownData.map((d) => {
-                  const catRadius = 52;
+                  const catRadius = 64;
                   const catCircumference = 2 * Math.PI * catRadius;
                   const percent = (d.total / totalExpense) * 100;
                   const strokeDashoffset = catCircumference - (catCircumference * percent) / 100;
@@ -893,15 +904,15 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
                   return (
                     <circle 
                       key={d.category}
-                      cx="70" 
-                      cy="70" 
+                      cx="85" 
+                      cy="85" 
                       r={catRadius} 
                       fill="none" 
                       stroke={d.meta.color} 
-                      strokeWidth="14" 
+                      strokeWidth="16" 
                       strokeDasharray={catCircumference}
                       strokeDashoffset={strokeDashoffset}
-                      transform={`rotate(${rotation} 70 70)`}
+                      transform={`rotate(${rotation} 85 85)`}
                       style={{ transition: 'stroke-dashoffset 0.5s ease-out' }}
                     />
                   );
