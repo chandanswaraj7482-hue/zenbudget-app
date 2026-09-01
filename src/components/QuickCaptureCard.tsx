@@ -57,11 +57,11 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
     let amount = 0;
     const kMatch = cleanText.match(/(\d+(?:\.\d+)?)\s*k\b/i);
     if (kMatch) {
-      amount = parseFloat(kMatch[1]) * 1000;
+      amount = Math.round(parseFloat(kMatch[1]) * 1000);
     } else {
       const numMatch = cleanText.match(/(?:(?:₹|\$|€|£|rs\.?|inr|rupees|ruppess|rupee)?\s*)(\d+(?:\.\d+)?)/i) || cleanText.match(/(\d+(?:\.\d+)?)\s*(?:rs|inr|rupees|ruppess|rupee)?/i);
       if (numMatch) {
-        amount = parseFloat(numMatch[1]);
+        amount = Math.round(parseFloat(numMatch[1]));
       }
     }
 
@@ -281,7 +281,7 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
 
     onSaveTransaction({
       title: parsed.title,
-      amount: parsed.amount,
+      amount: Math.round(parsed.amount),
       category: parsed.category,
       date: parsed.date,
       type: parsed.type,

@@ -2004,6 +2004,7 @@ const App: React.FC = () => {
             const isPartner = t.user_id !== currentProfileId;
             return {
               ...t,
+              amount: Math.round(t.amount || 0), // Always round to whole number
               isPartnerTransaction: isPartner,
               partnerName: isPartner ? (familyMember ? (familyMember.name || 'Partner') : 'Partner') : undefined
             };
@@ -2466,6 +2467,9 @@ const App: React.FC = () => {
   };
 
   const handleSaveTransaction = async (txData: Omit<Transaction, 'id'> & { id?: string }): Promise<boolean> => {
+    // Always ensure amount is a whole number (no decimals stored)
+    txData = { ...txData, amount: Math.round(txData.amount) };
+
     // Insufficient Balance Validation for Expenses and Transfers
     if (!txData.id && (txData.type === 'expense' || txData.type === 'transfer') && accounts && accounts.length > 0) {
       const selectedAcc = accounts.find(a => a.id === txData.accountId);
