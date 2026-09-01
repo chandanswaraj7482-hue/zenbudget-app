@@ -4578,13 +4578,24 @@ const App: React.FC = () => {
                       const userEmail = localStorage.getItem('zb_user_email') || `${currentProfileId.slice(0, 8)}@zenbudget.app`;
                       const feedbackText = reviewFeedback.trim() ? reviewFeedback.trim() : `${ratingStars} Star rating submitted`;
 
-                      await supabase.from('app_ratings').insert([{
+                      const { error: ratingErr } = await supabase.from('app_ratings').insert([{
+                        user_id: currentProfileId,
                         user_name: finalUserName,
                         user_email: userEmail,
                         rating_stars: ratingStars,
                         feedback: feedbackText,
                         created_at: new Date().toISOString()
                       }]);
+                      if (ratingErr) {
+                        console.warn('app_ratings insert warning:', ratingErr.message);
+                        // retry without user_id if it causes schema error
+                        await supabase.from('app_ratings').insert([{
+                          user_name: finalUserName,
+                          user_email: userEmail,
+                          rating_stars: ratingStars,
+                          feedback: feedbackText
+                        }]);
+                      }
 
                       localStorage.setItem('zb_has_submitted_review', 'true');
                       setHasSubmittedReview(true);

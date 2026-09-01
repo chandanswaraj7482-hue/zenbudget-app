@@ -773,33 +773,32 @@ User Question: ${rawText}`
                       // Save rating to Supabase (Admin Panel live review sync)
                       try {
                         const { data: { user } } = await supabase.auth.getUser();
-                        const userName = localStorage.getItem('zb_user_name') || user?.user_metadata?.full_name || user?.user_metadata?.name || 'ZenBudget User';
-                        const userEmail = (user?.email || localStorage.getItem('zb_user_email') || 'user@example.com').trim().toLowerCase();
-
+                        const ratingUserName = localStorage.getItem('zb_user_name') || user?.user_metadata?.full_name || user?.user_metadata?.name || 'ZenBudget User';
+                        const ratingUserEmail = (user?.email || localStorage.getItem('zb_user_email') || 'user@example.com').trim().toLowerCase();
+                        const ratingUserId = user?.id || localStorage.getItem('zb_profile_id') || null;
                         const trimmedComment = comment.trim();
                         const feedbackText = trimmedComment ? trimmedComment : `${rating} Star rating submitted`;
 
-                        const { error: insertErr } = await supabase.from('app_ratings').insert([{
-                          user_name: userName,
-                          user_email: userEmail,
+                        const ratingPayload: any = {
+                          user_name: ratingUserName,
+                          user_email: ratingUserEmail,
                           rating_stars: rating,
                           feedback: feedbackText,
                           created_at: new Date().toISOString()
-                        }]);
+                        };
+                        if (ratingUserId) ratingPayload.user_id = ratingUserId;
 
+                        const { error: insertErr } = await supabase.from('app_ratings').insert([ratingPayload]);
                         if (insertErr) {
-                          console.warn('Supabase app_ratings insert attempt 1 warning:', insertErr);
-                          // Retry without created_at if default is handled by database
-                          const { error: retryErr } = await supabase.from('app_ratings').insert([{
-                            user_name: userName,
-                            user_email: userEmail,
-                            rating_stars: rating,
-                            feedback: feedbackText
-                          }]);
+                          console.warn('Supabase app_ratings insert warning:', insertErr);
+                          // Retry without created_at
+                          const retryPayload: any = { user_name: ratingUserName, user_email: ratingUserEmail, rating_stars: rating, feedback: feedbackText };
+                          if (ratingUserId) retryPayload.user_id = ratingUserId;
+                          const { error: retryErr } = await supabase.from('app_ratings').insert([retryPayload]);
                           if (retryErr) {
-                            console.error('Supabase app_ratings insert attempt 2 error:', retryErr);
+                            console.error('Supabase app_ratings insert retry error:', retryErr);
                           } else {
-                            console.log('✅ Rating & feedback saved to Supabase app_ratings on retry');
+                            console.log('✅ Rating saved to Supabase app_ratings on retry');
                           }
                         } else {
                           console.log('✅ Rating & feedback saved to Supabase app_ratings');

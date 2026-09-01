@@ -420,17 +420,34 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
     if (isOpen && isUnlocked) {
       fetchAdminData();
 
+      // Manual 15-second poll to ensure ratings always appear (fallback in case realtime fails)
+      const ratingPollInterval = setInterval(() => {
+        supabaseClient
+          .from('app_ratings')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .then(({ data }) => {
+            if (data && data.length > 0) setRatings(data);
+          });
+      }, 15000);
+
       const ratingChannel = supabaseClient
-        .channel('admin_ratings_realtime')
+        .channel('admin_ratings_realtime_v2')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'app_ratings' }, (payload: any) => {
           if (payload.new) {
             setRatings(prev => [payload.new, ...prev]);
-            if (onShowToast) onShowToast(`⭐ New review rating received from ${payload.new.user_name || 'User'}!`, 'info');
+            if (onShowToast) onShowToast(`⭐ New review received from ${payload.new.user_name || 'User'}!`, 'info');
+          }
+        })
+        .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'app_ratings' }, (payload: any) => {
+          if (payload.old?.id) {
+            setRatings(prev => prev.filter(r => r.id !== payload.old.id));
           }
         })
         .subscribe();
 
       return () => {
+        clearInterval(ratingPollInterval);
         supabaseClient.removeChannel(ratingChannel);
       };
     }
