@@ -848,25 +848,33 @@ const App: React.FC = () => {
   useEffect(() => {
     if (isLocked || !currentProfileId) return;
 
-    let inactivityTimer: any = null;
-    const resetTimer = () => {
-      if (inactivityTimer) clearTimeout(inactivityTimer);
-      inactivityTimer = setTimeout(() => {
-        setIsLocked(true);
-        triggerToast('🔒 ZenBudget Auto-Locked after 5 mins of inactivity for Bank-Grade Security.', 'info');
-      }, 5 * 60 * 1000); // 5 minutes inactivity
+    let lastActivityTime = Date.now();
+    let intervalId: any = null;
+
+    const updateActivity = () => {
+      lastActivityTime = Date.now();
     };
 
-    window.addEventListener('mousemove', resetTimer);
-    window.addEventListener('keydown', resetTimer);
-    window.addEventListener('touchstart', resetTimer);
-    resetTimer();
+    window.addEventListener('mousemove', updateActivity, { passive: true });
+    window.addEventListener('keydown', updateActivity, { passive: true });
+    window.addEventListener('touchstart', updateActivity, { passive: true });
+    window.addEventListener('click', updateActivity, { passive: true });
+    window.addEventListener('scroll', updateActivity, { passive: true });
+
+    intervalId = setInterval(() => {
+      if (Date.now() - lastActivityTime >= 5 * 60 * 1000) {
+        setIsLocked(true);
+        triggerToast('🔒 ZenBudget Auto-Locked after 5 mins of inactivity for Bank-Grade Security.', 'info');
+      }
+    }, 10000); // Check every 10 seconds
 
     return () => {
-      if (inactivityTimer) clearTimeout(inactivityTimer);
-      window.removeEventListener('mousemove', resetTimer);
-      window.removeEventListener('keydown', resetTimer);
-      window.removeEventListener('touchstart', resetTimer);
+      if (intervalId) clearInterval(intervalId);
+      window.removeEventListener('mousemove', updateActivity);
+      window.removeEventListener('keydown', updateActivity);
+      window.removeEventListener('touchstart', updateActivity);
+      window.removeEventListener('click', updateActivity);
+      window.removeEventListener('scroll', updateActivity);
     };
   }, [isLocked, currentProfileId]);
 
