@@ -262,65 +262,64 @@ const App: React.FC = () => {
   const [updateReleaseNotes, setUpdateReleaseNotes] = useState<string>('Initial release.');
   const [forceUpdate, setForceUpdate] = useState<boolean>(false);
 
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    const savedTheme = localStorage.getItem('zb_theme');
-    if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
-    // Default: Auto System Theme Detection from device preferences
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  const [theme, setTheme] = useState<'system' | 'dark' | 'light'>(() => {
+    return (localStorage.getItem('zb_theme') as 'system' | 'dark' | 'light') || 'system';
   });
 
-  // Listen to device system theme changes automatically
   useEffect(() => {
-    const mediaQuery = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
-    if (!mediaQuery) return;
+    const savedThemeMode = (localStorage.getItem('zb_theme') as 'system' | 'dark' | 'light') || theme || 'system';
 
-    const handleSystemThemeChange = (e: MediaQueryListEvent) => {
-      const savedThemeMode = localStorage.getItem('zb_theme_mode') || 'auto';
-      if (savedThemeMode === 'auto') {
-        const newTheme = e.matches ? 'dark' : 'light';
-        setTheme(newTheme);
-        localStorage.setItem('zb_theme', newTheme);
+    const applyTheme = () => {
+      const isDark = savedThemeMode === 'system'
+        ? window.matchMedia('(prefers-color-scheme: dark)').matches
+        : savedThemeMode === 'dark';
+
+      const rootEl = document.getElementById('root');
+      const docEl = document.documentElement;
+      if (!isDark) {
+        document.body.classList.remove('dark-theme');
+        document.body.classList.add('light-theme');
+        docEl.classList.remove('dark-theme');
+        docEl.classList.add('light-theme');
+        if (rootEl) {
+          rootEl.classList.remove('dark-theme');
+          rootEl.classList.add('light-theme');
+        }
+      } else {
+        document.body.classList.remove('light-theme');
+        document.body.classList.add('dark-theme');
+        docEl.classList.remove('light-theme');
+        docEl.classList.add('dark-theme');
+        if (rootEl) {
+          rootEl.classList.remove('light-theme');
+          rootEl.classList.add('dark-theme');
+        }
+      }
+    };
+
+    applyTheme();
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => {
+      const mode = localStorage.getItem('zb_theme') || 'system';
+      if (mode === 'system') {
+        applyTheme();
       }
     };
 
     if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener('change', handleSystemThemeChange);
-    } else if ((mediaQuery as any).addListener) {
-      (mediaQuery as any).addListener(handleSystemThemeChange);
+      mediaQuery.addEventListener('change', handleChange);
+    } else {
+      mediaQuery.addListener(handleChange);
     }
 
     return () => {
       if (mediaQuery.removeEventListener) {
-        mediaQuery.removeEventListener('change', handleSystemThemeChange);
-      } else if ((mediaQuery as any).removeListener) {
-        (mediaQuery as any).removeListener(handleSystemThemeChange);
+        mediaQuery.removeEventListener('change', handleChange);
+      } else {
+        mediaQuery.removeListener(handleChange);
       }
     };
-  }, []);
-
-  useEffect(() => {
-    const savedTheme = (localStorage.getItem('zb_theme') as 'dark' | 'light') || theme || 'dark';
-    const rootEl = document.getElementById('root');
-    const docEl = document.documentElement;
-    if (savedTheme === 'light') {
-      document.body.classList.remove('dark-theme');
-      document.body.classList.add('light-theme');
-      docEl.classList.remove('dark-theme');
-      docEl.classList.add('light-theme');
-      if (rootEl) {
-        rootEl.classList.remove('dark-theme');
-        rootEl.classList.add('light-theme');
-      }
-    } else {
-      document.body.classList.remove('light-theme');
-      document.body.classList.add('dark-theme');
-      docEl.classList.remove('light-theme');
-      docEl.classList.add('dark-theme');
-      if (rootEl) {
-        rootEl.classList.remove('light-theme');
-        rootEl.classList.add('dark-theme');
-      }
-    }
   }, [theme]);
 
   // ─── Notification Permission Request (APK startup) ───────────────────────
@@ -1941,7 +1940,6 @@ const App: React.FC = () => {
             const familyMember = cachedFamilyMembers.find(m => m.id === t.user_id);
             return {
               ...t,
-              accountId: t.account_id || t.accountId,
               isPartnerTransaction: t.user_id !== currentProfileId,
               partnerName: familyMember ? (familyMember.name || 'Family Member') : undefined
             };
@@ -2273,8 +2271,7 @@ const App: React.FC = () => {
               category: txData.category,
               date: txData.date,
               type: txData.type,
-              notes: txData.notes,
-              account_id: txData.accountId || null
+              notes: txData.notes
             })
             .eq('id', txData.id);
           if (error) {
@@ -2369,22 +2366,9 @@ const App: React.FC = () => {
 
         // 2. Perform background database synchronization
         try {
-          const dbTxPayload = {
-            id: newTxId,
-            user_id: currentProfileId,
-            title: txData.title,
-            amount: baseUSDAmount,
-            category: txData.category,
-            date: txData.date,
-            type: txData.type,
-            notes: txData.notes || '',
-            account_id: txData.accountId || null
-          };
-          const { error } = await supabase.from('transactions').insert([dbTxPayload]);
+          const { error } = await supabase.from('transactions').insert([newTx]);
           if (error) {
             console.warn('Supabase insert sync deferred:', error.message);
-          } else {
-            console.log('Supabase transaction successfully saved to cloud!');
           }
         } catch (syncErr) {
           console.warn('Supabase insert sync connection deferred:', syncErr);
@@ -2995,8 +2979,9 @@ const App: React.FC = () => {
       setUserPin(newPin);
       localStorage.setItem('zb_user_name', newName);
       localStorage.setItem('zb_user_pin', newPin);
-      localStorage.setItem('zb_passcode', newPin);
-      localStorage.setItem(`zb_pin_${currentProfileId}`, newPin);
+      if (currentProfileId) {
+        localStorage.setItem(`zb_pin_${currentProfileId}`, newPin);
+      }
       if (currentAvatar) localStorage.setItem('zb_user_avatar', currentAvatar);
       if (newEmail) localStorage.setItem('zb_user_email', newEmail);
       window.dispatchEvent(new Event('profile_avatar_updated'));
@@ -3323,7 +3308,7 @@ const App: React.FC = () => {
   return (
     <div 
       key={langKey} 
-      style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: '100vh', width: '100%', maxWidth: '520px', margin: '0 auto', position: 'relative' }}
+      style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%' }}
       onClickCapture={(e) => {
         if (isSubscriptionExpired()) {
           const target = e.target as HTMLElement;
@@ -3360,8 +3345,7 @@ const App: React.FC = () => {
       {/* Sticky Trial Expired Locked Banner */}
       {isSubscriptionExpired() && (
         <div 
-          className="announcement-modal-wrapper"
-          onClick={(e) => { setIsSubBlocker(true); setIsSubModalOpen(true); }}
+          onClick={() => { setIsSubBlocker(true); setIsSubModalOpen(true); }}
           style={{
             background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
             color: '#ffffff',
@@ -3401,9 +3385,6 @@ const App: React.FC = () => {
         position: 'sticky',
         top: 0,
         zIndex: 99,
-        width: '100%',
-        maxWidth: '520px',
-        margin: '0 auto',
         transition: 'all 0.2s ease'
       }}>
         {/* Branding Logo */}
@@ -3522,7 +3503,7 @@ const App: React.FC = () => {
       </header>
 
       {/* Main View Area */}
-      <main ref={mainScrollRef} className="scroll-container" style={{ padding: '20px 20px calc(95px + env(safe-area-inset-bottom)) 20px', width: '100%', maxWidth: '520px', margin: '0 auto', boxSizing: 'border-box' }}>
+      <main ref={mainScrollRef} className="scroll-container" style={{ padding: '20px 20px calc(95px + env(safe-area-inset-bottom)) 20px' }}>
         {activeView === 'dashboard' && (
           <Dashboard 
             key={langKey}
@@ -3621,27 +3602,6 @@ const App: React.FC = () => {
             onToggleTheme={(newTheme) => {
               setTheme(newTheme);
               localStorage.setItem('zb_theme', newTheme);
-              const rootEl = document.getElementById('root');
-              const docEl = document.documentElement;
-              if (newTheme === 'light') {
-                document.body.classList.remove('dark-theme');
-                document.body.classList.add('light-theme');
-                docEl.classList.remove('dark-theme');
-                docEl.classList.add('light-theme');
-                if (rootEl) {
-                  rootEl.classList.remove('dark-theme');
-                  rootEl.classList.add('light-theme');
-                }
-              } else {
-                document.body.classList.remove('light-theme');
-                document.body.classList.add('dark-theme');
-                docEl.classList.remove('light-theme');
-                docEl.classList.add('dark-theme');
-                if (rootEl) {
-                  rootEl.classList.remove('light-theme');
-                  rootEl.classList.add('dark-theme');
-                }
-              }
             }}
             onBack={() => setActiveView('more')}
             onLogout={() => setShowLogoutConfirmModal(true)}
@@ -3745,7 +3705,7 @@ const App: React.FC = () => {
         left: '50%',
         transform: 'translateX(-50%)',
         width: '100%',
-        maxWidth: '520px',
+        maxWidth: '480px',
         background: 'var(--bg-nav-glass)',
         borderTop: '1px solid var(--border-divider)',
         backdropFilter: 'blur(20px) saturate(180%)',
@@ -3992,7 +3952,7 @@ const App: React.FC = () => {
             animation: 'fadeIn 0.3s ease-out'
           }}
         >
-          <div className="announcement-modal-wrapper" style={{
+          <div style={{
             width: '100%',
             maxWidth: '380px',
             maxHeight: '85vh',

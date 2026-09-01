@@ -319,12 +319,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           const { data: emailMatch } = await supabase.from('profiles').select('*').ilike('email', storedEmail).maybeSingle();
           if (emailMatch) {
             userProf = emailMatch;
-            localStorage.setItem('zb_profile_id', emailMatch.id);
-            localStorage.setItem('zb_user_name', emailMatch.name);
-            if (emailMatch.subscription_tier) {
-              localStorage.setItem('zb_subscription_tier', emailMatch.subscription_tier);
-            }
-            setUserId(emailMatch.id);
+            // Update profile id to link to current auth uid
+            await supabase.from('profiles').update({ id: uid }).eq('id', emailMatch.id);
           }
         } catch (eMatch) {
           console.warn('Email profile matching check failed:', eMatch);
@@ -380,10 +376,10 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
       console.log("LockScreen: fetchUserProfile database query result:", userProf);
       if (userProf) {
         // Auto-register device session for multi-device sync
-        try {
-          const currentDeviceId = await getOrCreateDeviceId();
-          const isMobile = currentDeviceId.startsWith('mobile_');
-          const ids = typeof userProf.device_id === 'string' ? userProf.device_id.split('|') : [];
+        const currentDeviceId = await getOrCreateDeviceId();
+        const isMobile = currentDeviceId.startsWith('mobile_');
+          
+          // Merge and save IDs
           const newIds = ids.filter((id: string) => (isMobile ? !id.startsWith('mobile_') : !id.startsWith('desktop_')));
           if (!newIds.includes(currentDeviceId)) newIds.push(currentDeviceId);
           const newDeviceIdString = newIds.join('|');
@@ -392,7 +388,10 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
             await supabase.from('profiles').update({ device_id: newDeviceIdString }).eq('id', uid);
             userProf.device_id = newDeviceIdString;
           }
-        } catch (_) {}
+        } else {
+          await supabase.from('profiles').update({ device_id: currentDeviceId }).eq('id', uid);
+          userProf.device_id = currentDeviceId;
+        }
         // ------------------------------------------------
 
         setDbProfile(userProf);
@@ -422,17 +421,13 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         }
         window.dispatchEvent(new Event('profile_avatar_updated'));
 
-        const storedLocalPin = localStorage.getItem('zb_user_pin') || localStorage.getItem(`zb_pin_${uid}`) || localStorage.getItem(`zb_pin_${userProf.id}`);
-        const effectivePin = (userProf.pin && userProf.pin !== '0000') ? userProf.pin : storedLocalPin;
-
-        console.log("LockScreen: Profile ready, effective pin check:", effectivePin ? "PIN FOUND" : "NO PIN");
+        console.log("LockScreen: Profile ready, unlocking...");
         setIsLoading(false);
-
-        // Only ask to create a PIN for brand new users with no local or db PIN
-        if (effectivePin && effectivePin !== '0000') {
-          setStep('unlock');
-        } else {
+        // Force users to create a PIN if they have the default '0000' or no custom PIN
+        if (!userProf.pin || userProf.pin === '0000') {
           setStep('onboard-pin');
+        } else {
+          setStep('unlock');
         }
       } else {
         setStep('onboard-pin');
@@ -827,7 +822,6 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         if (error) throw error;
         
         localStorage.setItem('zb_user_pin', pin);
-        localStorage.setItem(`zb_pin_${currentUserId}`, pin);
         playNotificationSound('success');
         onUnlock(
           currentUserId, 

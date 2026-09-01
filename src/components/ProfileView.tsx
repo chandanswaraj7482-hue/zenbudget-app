@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, KeyRound, Check, Eye, EyeOff, Globe, Banknote, ArrowLeft, Mail, Moon, Sun, Upload, Trash2, LogOut } from 'lucide-react';
+import { User, KeyRound, Check, Eye, EyeOff, Globe, Banknote, ArrowLeft, Mail, Moon, Sun, Smartphone, Upload, Trash2, LogOut } from 'lucide-react';
 import { t } from '../utils/i18n';
 import { detectLocationFromIP } from '../utils/geoTracker';
 
@@ -9,9 +9,9 @@ interface ProfileViewProps {
   currentCurrency: string;
   currentLanguage: string;
   currentEmail?: string;
-  currentTheme?: 'dark' | 'light';
+  currentTheme?: 'system' | 'dark' | 'light';
   onSaveProfile: (newName: string, newPin: string, newCurrency: string, newLanguage: string, newEmail?: string) => Promise<void>;
-  onToggleTheme?: (newTheme: 'dark' | 'light') => void;
+  onToggleTheme?: (newTheme: 'system' | 'dark' | 'light') => void;
   onBack?: () => void;
   onLogout?: () => void;
 }
@@ -22,7 +22,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   currentCurrency,
   currentLanguage,
   currentEmail = '',
-  currentTheme = 'dark',
+  currentTheme = 'system',
   onSaveProfile,
   onToggleTheme,
   onBack,
@@ -450,12 +450,35 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             )}
           </div>
 
-          {/* App Theme Toggle (Dark / Light) */}
+          {/* App Theme Toggle (Auto / Dark / Light) */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              App Theme Mode (Dark / Light)
+              App Theme Mode (Auto / Dark / Light)
             </label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setThemeMode('system');
+                  if (onToggleTheme) onToggleTheme('system');
+                }}
+                style={{
+                  padding: '10px 6px',
+                  borderRadius: '14px',
+                  border: themeMode === 'system' ? '2px solid var(--primary)' : '1px solid var(--border-input)',
+                  background: themeMode === 'system' ? 'rgba(34,197,94,0.15)' : 'var(--bg-input)',
+                  color: 'var(--text-primary)',
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '5px'
+                }}
+              >
+                <Smartphone size={15} /> Auto (Device)
+              </button>
               <button
                 type="button"
                 onClick={() => {
@@ -463,21 +486,21 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   if (onToggleTheme) onToggleTheme('dark');
                 }}
                 style={{
-                  padding: '12px',
+                  padding: '10px 6px',
                   borderRadius: '14px',
                   border: themeMode === 'dark' ? '2px solid var(--primary)' : '1px solid var(--border-input)',
                   background: themeMode === 'dark' ? 'rgba(34,197,94,0.15)' : 'var(--bg-input)',
                   color: 'var(--text-primary)',
                   fontWeight: 700,
-                  fontSize: '13px',
+                  fontSize: '12px',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px'
+                  gap: '5px'
                 }}
               >
-                <Moon size={16} /> Dark Mode
+                <Moon size={15} /> Dark Mode
               </button>
               <button
                 type="button"
@@ -486,21 +509,21 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   if (onToggleTheme) onToggleTheme('light');
                 }}
                 style={{
-                  padding: '12px',
+                  padding: '10px 6px',
                   borderRadius: '14px',
                   border: themeMode === 'light' ? '2px solid var(--primary)' : '1px solid var(--border-input)',
                   background: themeMode === 'light' ? 'rgba(34,197,94,0.15)' : 'var(--bg-input)',
                   color: 'var(--text-primary)',
                   fontWeight: 700,
-                  fontSize: '13px',
+                  fontSize: '12px',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px'
+                  gap: '5px'
                 }}
               >
-                <Sun size={16} /> Light Mode
+                <Sun size={15} /> Light Mode
               </button>
             </div>
           </div>

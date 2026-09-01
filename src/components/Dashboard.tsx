@@ -154,14 +154,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [challenges, setChallenges] = useState<{id: string; title: string; subtitle: string; percent: number}[]>(() => {
     const cached = localStorage.getItem(`zb_challenges`);
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed)) {
-          return parsed.filter((c: any) => c.title !== 'New Challenge 🏆 ✏️' && c.title !== 'No Takeout Challenge 🏆');
-        }
-      } catch (e) {}
-    }
+    if (cached) try { return JSON.parse(cached); } catch (e) {}
     return [];
   });
   const [showAllChallenges, setShowAllChallenges] = useState(false);
@@ -178,15 +171,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   useEffect(() => {
     const cached = localStorage.getItem(`zb_challenges_${currentProfileId}`) || localStorage.getItem('zb_challenges');
     if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed)) {
-          const filtered = parsed.filter((c: any) => c.title !== 'New Challenge 🏆 ✏️' && c.title !== 'No Takeout Challenge 🏆');
-          setChallenges(filtered);
-        } else {
-          setChallenges([]);
-        }
-      } catch (e) { setChallenges([]); }
+      try { setChallenges(JSON.parse(cached)); } catch (e) { setChallenges([]); }
     } else {
       setChallenges([]);
     }

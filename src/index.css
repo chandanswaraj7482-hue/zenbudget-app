@@ -47,12 +47,6 @@
   --bg-nav-glass: rgba(21, 32, 54, 0.85);
 }
 
-body {
-  background: radial-gradient(circle at 50% 0%, rgba(34, 197, 94, 0.08) 0%, #060810 80%) !important;
-  margin: 0;
-  padding: 0;
-}
-
 /* Ensure all circular avatars, badges, and icon buttons inside the application retain 100% perfect round circles and never squish into ovals */
 [style*="border-radius: 50%"],
 [style*="borderRadius: '50%'"],
@@ -730,6 +724,19 @@ div[style*="position:fixed"] {
   h1 { font-size: 18px !important; }
   h2 { font-size: 16px !important; }
   h3 { font-size: 14px !important; }
+
+  /* Stack flex headers vertically if space is tight */
+  div[style*="display: flex"][style*="justify-content: space-between"] {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  /* Auto grid for tiny screens */
+  div[style*="display: grid"],
+  div[style*="display:grid"] {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
 }
 
 /* 5. Safe Area Insets for Mobile Notch & Gesture Bars */
