@@ -1751,7 +1751,13 @@ const App: React.FC = () => {
         setCurrency(userLocCurrency);
         localStorage.setItem(`zb_currency_${currentProfileId}`, userLocCurrency);
 
-        localStorage.setItem('zb_user_name', profData.name);
+        if (profData.name) {
+          setUserName(profData.name);
+          localStorage.setItem('zb_user_name', profData.name);
+          if (currentProfileId) {
+            localStorage.setItem(`zb_name_${currentProfileId}`, profData.name);
+          }
+        }
         localStorage.setItem('zb_subscription_tier', profData.subscription_tier);
         localStorage.setItem('zb_trial_start_date', profData.trial_start_date);
         localStorage.setItem('zb_user_pin', profData.pin);
@@ -2930,6 +2936,7 @@ const App: React.FC = () => {
       localStorage.setItem('zb_user_pin', newPin);
       if (currentProfileId) {
         localStorage.setItem(`zb_pin_${currentProfileId}`, newPin);
+        localStorage.setItem(`zb_name_${currentProfileId}`, newName);
       }
       if (currentAvatar) localStorage.setItem('zb_user_avatar', currentAvatar);
       if (newEmail) localStorage.setItem('zb_user_email', newEmail);

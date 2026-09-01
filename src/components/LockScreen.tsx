@@ -988,7 +988,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
             if (dbProfile?.referral_code) {
               localStorage.setItem('zb_invite_code', dbProfile.referral_code);
             }
-            const targetName = dbProfile?.name || username || localStorage.getItem('zb_user_name') || 'User';
+            const targetName = dbProfile?.name || localStorage.getItem('zb_user_name') || username || 'User';
+            localStorage.setItem('zb_user_name', targetName);
             const targetTier = dbProfile?.subscription_tier || localStorage.getItem('zb_subscription_tier') || 'trial';
             const targetStart = dbProfile?.trial_start_date || localStorage.getItem('zb_trial_start_date') || new Date().toISOString();
             const targetExpires = dbProfile?.premium_expires_at || localStorage.getItem('zb_premium_expires_at') || null;
