@@ -380,10 +380,10 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
       console.log("LockScreen: fetchUserProfile database query result:", userProf);
       if (userProf) {
         // Auto-register device session for multi-device sync
-        const currentDeviceId = await getOrCreateDeviceId();
-        const isMobile = currentDeviceId.startsWith('mobile_');
-          
-          // Merge and save IDs
+        try {
+          const currentDeviceId = await getOrCreateDeviceId();
+          const isMobile = currentDeviceId.startsWith('mobile_');
+          const ids = typeof userProf.device_id === 'string' ? userProf.device_id.split('|') : [];
           const newIds = ids.filter((id: string) => (isMobile ? !id.startsWith('mobile_') : !id.startsWith('desktop_')));
           if (!newIds.includes(currentDeviceId)) newIds.push(currentDeviceId);
           const newDeviceIdString = newIds.join('|');
@@ -392,10 +392,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
             await supabase.from('profiles').update({ device_id: newDeviceIdString }).eq('id', uid);
             userProf.device_id = newDeviceIdString;
           }
-        } else {
-          await supabase.from('profiles').update({ device_id: currentDeviceId }).eq('id', uid);
-          userProf.device_id = currentDeviceId;
-        }
+        } catch (_) {}
         // ------------------------------------------------
 
         setDbProfile(userProf);
