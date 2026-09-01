@@ -1909,6 +1909,7 @@ const App: React.FC = () => {
             const familyMember = cachedFamilyMembers.find(m => m.id === t.user_id);
             return {
               ...t,
+              accountId: t.account_id || t.accountId,
               isPartnerTransaction: t.user_id !== currentProfileId,
               partnerName: familyMember ? (familyMember.name || 'Family Member') : undefined
             };
@@ -2240,7 +2241,8 @@ const App: React.FC = () => {
               category: txData.category,
               date: txData.date,
               type: txData.type,
-              notes: txData.notes
+              notes: txData.notes,
+              account_id: txData.accountId || null
             })
             .eq('id', txData.id);
           if (error) {
@@ -2335,9 +2337,22 @@ const App: React.FC = () => {
 
         // 2. Perform background database synchronization
         try {
-          const { error } = await supabase.from('transactions').insert([newTx]);
+          const dbTxPayload = {
+            id: newTxId,
+            user_id: currentProfileId,
+            title: txData.title,
+            amount: baseUSDAmount,
+            category: txData.category,
+            date: txData.date,
+            type: txData.type,
+            notes: txData.notes || '',
+            account_id: txData.accountId || null
+          };
+          const { error } = await supabase.from('transactions').insert([dbTxPayload]);
           if (error) {
             console.warn('Supabase insert sync deferred:', error.message);
+          } else {
+            console.log('Supabase transaction successfully saved to cloud!');
           }
         } catch (syncErr) {
           console.warn('Supabase insert sync connection deferred:', syncErr);

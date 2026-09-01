@@ -319,8 +319,12 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           const { data: emailMatch } = await supabase.from('profiles').select('*').ilike('email', storedEmail).maybeSingle();
           if (emailMatch) {
             userProf = emailMatch;
-            // Update profile id to link to current auth uid
-            await supabase.from('profiles').update({ id: uid }).eq('id', emailMatch.id);
+            localStorage.setItem('zb_profile_id', emailMatch.id);
+            localStorage.setItem('zb_user_name', emailMatch.name);
+            if (emailMatch.subscription_tier) {
+              localStorage.setItem('zb_subscription_tier', emailMatch.subscription_tier);
+            }
+            setUserId(emailMatch.id);
           }
         } catch (eMatch) {
           console.warn('Email profile matching check failed:', eMatch);
