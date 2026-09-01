@@ -787,23 +787,53 @@ export const Dashboard: React.FC<DashboardProps> = ({
           pointerEvents: 'none'
         }} />
 
-        <span style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-secondary)', fontWeight: 600 }}>{familyAccounts.length > 0 ? 'Combined Family Balance' : t('total_balance')}</span>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', margin: '8px 0 16px 0', color: 'var(--text-balance)', minWidth: 0, maxWidth: '100%' }}>
-          <span style={{ fontSize: 'clamp(24px, 8vw, 36px)', fontWeight: 800, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <span style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-secondary)', fontWeight: 700 }}>
+          {familyMembers && familyMembers.length > 0 ? '🌐 Combined Household Balance' : t('total_balance')}
+        </span>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', margin: '6px 0 14px 0', color: 'var(--text-balance)', minWidth: 0, maxWidth: '100%' }}>
+          <span style={{ fontSize: 'clamp(26px, 8vw, 38px)', fontWeight: 800, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {formatCurrency(totalBalance, currencySymbol, 0)}
           </span>
         </div>
         
-        {familyAccounts.length > 0 && (
-          <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-              <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>My Wallets</span>
-              <span style={{ fontSize: '14px', color: 'var(--success)', fontWeight: 800 }}>{formatCurrency(myTotalAccountBalance, currencySymbol, 0)}</span>
+        {/* 👥 Member-Wise Name & Money Breakdown Row */}
+        {familyMembers && familyMembers.length > 0 && (
+          <div style={{
+            display: 'flex',
+            gap: '12px',
+            flexWrap: 'wrap',
+            marginBottom: '16px',
+            padding: '10px 14px',
+            background: 'rgba(15, 23, 42, 0.45)',
+            borderRadius: '14px',
+            border: '1px solid rgba(255, 255, 255, 0.08)'
+          }}>
+            {/* My Personal Wallet Balance */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: '100px' }}>
+              <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                👤 {userName || 'You'} (My Money)
+              </span>
+              <span style={{ fontSize: '15px', color: '#34d399', fontWeight: 800 }}>
+                {formatCurrency(myTotalAccountBalance, currencySymbol, 0)}
+              </span>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-              <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>Family Wallets</span>
-              <span style={{ fontSize: '14px', color: 'var(--primary)', fontWeight: 800 }}>{formatCurrency(familyTotalAccountBalance, currencySymbol, 0)}</span>
-            </div>
+
+            {/* Individual Partner / Family Member Balances */}
+            {familyMembers.map(m => {
+              const mAccounts = accounts.filter(a => (a as any).isFamilyAccount && ((a as any).ownerName === m.name || a.user_id === m.id));
+              const mBalance = mAccounts.reduce((sum, a) => sum + (a.balance || 0), 0);
+              const displayMBalance = mBalance > 0 ? mBalance : familyTotalAccountBalance;
+              return (
+                <div key={m.id} style={{ display: 'flex', flexDirection: 'column', gap: '2px', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '12px', minWidth: '100px' }}>
+                  <span style={{ fontSize: '10px', color: '#f472b6', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                    👫 {m.name || 'Partner'}
+                  </span>
+                  <span style={{ fontSize: '15px', color: '#38bdf8', fontWeight: 800 }}>
+                    {formatCurrency(displayMBalance, currencySymbol, 0)}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         )}
 
