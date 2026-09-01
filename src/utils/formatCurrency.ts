@@ -17,7 +17,9 @@ export const formatCurrency = (
   const factor = Math.pow(10, targetDecimals);
   const rounded = Math.round((amount + Number.EPSILON) * factor) / factor;
 
-  const formattedNum = rounded.toLocaleString(undefined, {
+  const locale = currencySymbol === '₹' ? 'en-IN' : 'en-US';
+
+  const formattedNum = rounded.toLocaleString(locale, {
     minimumFractionDigits: targetDecimals,
     maximumFractionDigits: targetDecimals
   });

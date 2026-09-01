@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Check, Copy, LogOut, Users, UserMinus, Shield, Sliders, CheckSquare, Square, Trash2, RefreshCw, UserCheck } from 'lucide-react';
+import { formatCurrency } from '../utils/formatCurrency';
 
 export interface ModuleSyncPermissions {
   syncTransactions: boolean;
@@ -325,7 +326,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                   Family's Spent
                 </span>
                 <p style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff', margin: '4px 0 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {currencySymbol}{Math.round(familyTotalSpent).toLocaleString()}
+                  {formatCurrency(familyTotalSpent, currencySymbol, 0)}
                 </p>
                 <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{familyTxs.length} entries</span>
               </div>
@@ -335,7 +336,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                   Your Spent
                 </span>
                 <p style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff', margin: '4px 0 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {currencySymbol}{Math.round(myTotalSpent).toLocaleString()}
+                  {formatCurrency(myTotalSpent, currencySymbol, 0)}
                 </p>
                 <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{myTxs.length} entries</span>
               </div>
@@ -344,7 +345,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
             {/* Combined Household Total Banner */}
             <div style={{ padding: '14px 18px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
               <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary)' }}>Total Combined Household Spent</span>
-              <span style={{ fontSize: '18px', fontWeight: 800, color: 'var(--primary)' }}>{currencySymbol}{Math.round(combinedTotalSpent).toLocaleString()}</span>
+              <span style={{ fontSize: '18px', fontWeight: 800, color: 'var(--primary)' }}>{formatCurrency(combinedTotalSpent, currencySymbol, 0)}</span>
             </div>
 
             {/* Money Transfer / Send Money to Partner Button */}
@@ -411,7 +412,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                           </div>
                         </div>
                         <span style={{ fontSize: '14px', fontWeight: 800, color: '#f87171', flexShrink: 0, marginLeft: '8px' }}>
-                          -{currencySymbol}{(Number(tx.amount) || 0).toLocaleString()}
+                          -{formatCurrency(Number(tx.amount) || 0, currencySymbol, 0)}
                         </span>
                       </div>
                     ))}
@@ -453,7 +454,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                           </div>
                         </div>
                         <span style={{ fontSize: '14px', fontWeight: 800, color: '#4ade80', flexShrink: 0, marginLeft: '8px' }}>
-                          -{currencySymbol}{(Number(tx.amount) || 0).toLocaleString()}
+                          -{formatCurrency(Number(tx.amount) || 0, currencySymbol, 0)}
                         </span>
                       </div>
                     ))}
