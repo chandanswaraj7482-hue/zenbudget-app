@@ -115,25 +115,47 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
         boxShadow: '0 8px 24px rgba(0,0,0,0.06)'
       }}>
         
-        {/* Progress Display */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>
-              Paid Referral Qualification Progress
-            </span>
-            <h3 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--primary)', margin: '4px 0 0 0' }}>
-              {referralCount} / 10 Paid Members
-            </h3>
-          </div>
-          <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: 'rgba(34,197,94,0.15)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Gift size={24} />
-          </div>
-        </div>
+        {(() => {
+          const paidHistoryUsers = referralHistory.filter(r => r.subscription_tier && r.subscription_tier.startsWith('premium'));
+          const paidCount = Math.max(referralCount, paidHistoryUsers.length);
+          const currentLevel = Math.floor(paidCount / 10) + 1;
+          const currentLevelProgress = paidCount % 10;
+          const totalClaimedMonths = Math.floor(paidCount / 10);
 
-        {/* Progress Bar */}
-        <div style={{ width: '100%', height: '8px', borderRadius: '99px', background: 'var(--bg-input)', overflow: 'hidden' }}>
-          <div style={{ width: `${Math.min(100, (referralCount / 10) * 100)}%`, height: '100%', background: 'linear-gradient(90deg, #22c55e, #14b8a6)', transition: 'width 0.3s ease' }} />
-        </div>
+          return (
+            <>
+              {/* Progress Display */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                    <span style={{ fontSize: '11px', color: '#fbbf24', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      🏆 LEVEL {currentLevel} TASK
+                    </span>
+                    {totalClaimedMonths > 0 && (
+                      <span style={{ fontSize: '10px', background: 'rgba(34,197,94,0.15)', color: '#34d399', padding: '2px 6px', borderRadius: '6px', fontWeight: 800 }}>
+                        🎁 {totalClaimedMonths} Month(s) Earned!
+                      </span>
+                    )}
+                  </div>
+                  <h3 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--primary)', margin: 0 }}>
+                    {currentLevelProgress} / 10 Paid Members
+                  </h3>
+                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px', display: 'block' }}>
+                    {10 - currentLevelProgress} more paid members needed to unlock +1 Month Free Premium!
+                  </span>
+                </div>
+                <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: 'rgba(34,197,94,0.15)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Gift size={24} />
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              <div style={{ width: '100%', height: '10px', borderRadius: '99px', background: 'var(--bg-input)', overflow: 'hidden', border: '1px solid var(--border-input)' }}>
+                <div style={{ width: `${(currentLevelProgress / 10) * 100}%`, height: '100%', background: 'linear-gradient(90deg, #22c55e, #14b8a6)', transition: 'width 0.3s ease' }} />
+              </div>
+            </>
+          );
+        })()}
 
         {/* Your Referral Code */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid var(--border-card)', paddingTop: '16px' }}>
@@ -254,7 +276,7 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
       {/* Program Rules */}
       <div className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
         <h4 style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', margin: 0 }}>
-          How 10-Paid-User Rewards Work
+          How 10-Paid-User Rewards &amp; Recurring Levels Work
         </h4>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '12px', color: 'var(--text-primary)' }}>
           <Check size={16} color="var(--success)" /> Share your unique code with friends &amp; family
@@ -263,7 +285,10 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
           <Check size={16} color="var(--success)" /> When 10 distinct friends join and purchase any Premium plan
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '12px', color: 'var(--text-primary)' }}>
-          <Check size={16} color="var(--success)" /> You automatically unlock 1 Month Free Premium!
+          <Check size={16} color="var(--success)" /> You automatically unlock +1 Month Free Premium Reward!
+        </div>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '12px', color: '#fbbf24', fontWeight: 700 }}>
+          <Check size={16} color="#fbbf24" /> 🔄 Task resets for Level 2: Invite 10 MORE paid members to earn another +1 Month Free Premium infinitely!
         </div>
       </div>
 
