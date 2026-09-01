@@ -2024,7 +2024,7 @@ const App: React.FC = () => {
             return {
               ...a,
               ownerName: familyMember ? (familyMember.name || 'Family Member') : (a.user_id === currentProfileId ? userName : 'Unknown'),
-              isFamilyAccount: a.user_id !== currentProfileId
+              isFamilyAccount: Boolean(a.user_id && currentProfileId && a.user_id !== currentProfileId)
             };
           });
           setAccounts(annotatedAccounts);
@@ -3327,7 +3327,19 @@ const App: React.FC = () => {
   return (
     <div 
       key={langKey} 
-      style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%' }}
+      className="app-main-wrapper"
+      style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        flex: 1, 
+        minHeight: '100vh',
+        width: '100%',
+        maxWidth: '520px',
+        margin: '0 auto',
+        background: 'var(--bg-dark)',
+        boxShadow: '0 0 60px rgba(0,0,0,0.6)',
+        position: 'relative'
+      }}
       onClickCapture={(e) => {
         if (isSubscriptionExpired()) {
           const target = e.target as HTMLElement;
@@ -3522,7 +3534,7 @@ const App: React.FC = () => {
       </header>
 
       {/* Main View Area */}
-      <main ref={mainScrollRef} className="scroll-container" style={{ padding: '20px 20px calc(95px + env(safe-area-inset-bottom)) 20px' }}>
+      <main ref={mainScrollRef} className="scroll-container" style={{ padding: '20px 20px calc(110px + env(safe-area-inset-bottom)) 20px', minHeight: 'calc(100vh - 70px)' }}>
         {activeView === 'dashboard' && (
           <Dashboard 
             key={langKey}

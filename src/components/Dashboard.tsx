@@ -268,17 +268,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const myAccounts = React.useMemo(() => {
     return displayAccounts.filter(a => {
-      if ((a as any).isFamilyAccount || (a as any).isPartnerAccount) return false;
       if (a.user_id && currentProfileId && a.user_id !== currentProfileId) return false;
-      const owner = (a as any).ownerName;
-      if (owner && owner !== 'You' && owner !== userName && owner !== 'Me') {
-        if (familyMembers && familyMembers.some(m => m.id !== currentProfileId && (m.name === owner || m.id === a.user_id))) {
-          return false;
-        }
-      }
+      if ((a as any).isFamilyAccount && a.user_id && currentProfileId && a.user_id !== currentProfileId) return false;
       return true;
     });
-  }, [displayAccounts, currentProfileId, userName, familyMembers]);
+  }, [displayAccounts, currentProfileId]);
 
   const familyAccounts = React.useMemo(() => {
     return displayAccounts.filter(a => !myAccounts.some(my => my.id === a.id));
