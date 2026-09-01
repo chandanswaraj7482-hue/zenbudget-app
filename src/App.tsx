@@ -1864,20 +1864,40 @@ const App: React.FC = () => {
         } else {
           let fetchedFamilyMembers: { id: string; name: string; couple_code: string; subscription_tier?: string }[] = [];
           const familySyncCode = profData.partner_couple_code || userCoupleCode;
+          const cachedPartnerId = localStorage.getItem(`zb_partner_id_${currentProfileId}`);
           
+          let orConditions: string[] = [];
           if (familySyncCode) {
             const codeUpper = familySyncCode.toUpperCase();
-            const shortIdUpper = currentProfileId.slice(0, 8).toUpperCase();
-            
-            const { data: allFamilyProfiles } = await supabase
-              .from('profiles')
-              .select('id, name, couple_code, partner_couple_code, subscription_tier')
-              .neq('id', currentProfileId)
-              .or(`partner_couple_code.eq.${codeUpper},couple_code.eq.${codeUpper},partner_couple_code.eq.${shortIdUpper}`);
+            orConditions.push(`partner_couple_code.eq.${codeUpper}`, `couple_code.eq.${codeUpper}`);
+          }
+          if (userCoupleCode) {
+            const myCodeUpper = userCoupleCode.toUpperCase();
+            orConditions.push(`partner_couple_code.eq.${myCodeUpper}`);
+          }
+          if (cachedPartnerId) {
+            orConditions.push(`id.eq.${cachedPartnerId}`);
+          }
 
-            if (allFamilyProfiles) {
-               fetchedFamilyMembers = allFamilyProfiles;
+          if (orConditions.length > 0) {
+            try {
+              const { data: allFamilyProfiles } = await supabase
+                .from('profiles')
+                .select('id, name, couple_code, partner_couple_code, subscription_tier')
+                .neq('id', currentProfileId)
+                .or(orConditions.join(','));
+
+              if (allFamilyProfiles && allFamilyProfiles.length > 0) {
+                fetchedFamilyMembers = allFamilyProfiles;
+              }
+            } catch (e) {
+              console.warn('Family profile fetch error:', e);
             }
+          }
+
+          // Fallback to cached family members if offline or temporary query failure
+          if (fetchedFamilyMembers.length === 0 && cachedFamilyMembers.length > 0) {
+            fetchedFamilyMembers = cachedFamilyMembers;
           }
 
           if (fetchedFamilyMembers.length > 0) {
@@ -1892,22 +1912,27 @@ const App: React.FC = () => {
             localStorage.setItem(`zb_family_members_${currentProfileId}`, JSON.stringify(fetchedFamilyMembers));
             setFamilyMembers(fetchedFamilyMembers);
             cachedFamilyMembers = fetchedFamilyMembers;
-          } else {
-            localStorage.removeItem(`zb_partner_id_${currentProfileId}`);
-            localStorage.removeItem(`zb_partner_code_${currentProfileId}`);
-            localStorage.removeItem(`zb_partner_name_${currentProfileId}`);
-            localStorage.removeItem(`zb_family_members_${currentProfileId}`);
-            setPartnerId(null);
-            setPartnerCode(null);
-            setPartnerName(null);
-            setFamilyMembers([]);
-            cachedFamilyMembers = [];
           }
         }
       }
 
-      // 1. Fetch transactions (including all family transactions if linked)
-      const userIds = [currentProfileId, ...cachedFamilyMembers.map(m => m.id)];
+      // Read Module Sync Permissions for selective data sharing
+      let permissions = {
+        syncTransactions: true,
+        syncAccounts: true,
+        syncBudgets: true,
+        syncGoals: true,
+        syncLoans: true,
+        syncWishlist: true
+      };
+      try {
+        const savedPerms = localStorage.getItem(`zb_sync_permissions_${currentProfileId}`);
+        if (savedPerms) permissions = JSON.parse(savedPerms);
+      } catch (_) {}
+
+      // 1. Fetch transactions (including all family transactions if linked and permission enabled)
+      const familyUserIds = cachedFamilyMembers.map(m => m.id);
+      const txUserIds = permissions.syncTransactions ? [currentProfileId, ...familyUserIds] : [currentProfileId];
       let annotatedTx: any[] = [];
       try {
         const { data: txData, error: txErr } = await supabase
@@ -1951,12 +1976,13 @@ const App: React.FC = () => {
         }
       }
 
-      // 2. Fetch budgets
+      // 2. Fetch budgets (including family budgets if enabled)
+      const budgetUserIds = permissions.syncBudgets ? [currentProfileId, ...familyUserIds] : [currentProfileId];
       try {
         const { data: bgtData, error: bgtErr } = await supabase
           .from('budgets')
           .select('*')
-          .eq('user_id', currentProfileId);
+          .in('user_id', budgetUserIds);
 
         if (!bgtErr && bgtData) {
           const mappedBudgets: CategoryBudget[] = bgtData.map(b => ({
@@ -1974,14 +2000,14 @@ const App: React.FC = () => {
         if (cachedBgt) setBudgets(JSON.parse(cachedBgt));
       }
 
-      // 3. Accounts (including all family accounts)
-      const accountIds = userIds;
+      // 3. Accounts (including all family accounts if enabled)
+      const accountUserIds = permissions.syncAccounts ? [currentProfileId, ...familyUserIds] : [currentProfileId];
       let annotatedAccounts: any[] = [];
       try {
         const { data: accData, error: accErr } = await supabase
           .from('accounts')
           .select('*')
-          .in('user_id', accountIds)
+          .in('user_id', accountUserIds)
           .order('name');
           
         if (!accErr && accData) {
@@ -2026,12 +2052,13 @@ const App: React.FC = () => {
         }
       }
 
-      // 4. Goals — fetch from Supabase for cross-device sync
+      // 4. Goals — fetch from Supabase (including family goals if enabled)
+      const goalUserIds = permissions.syncGoals ? [currentProfileId, ...familyUserIds] : [currentProfileId];
       try {
         const { data: goalsData, error: goalsErr } = await supabase
           .from('goals')
           .select('*')
-          .eq('user_id', currentProfileId);
+          .in('user_id', goalUserIds);
         if (!goalsErr && goalsData && goalsData.length > 0) {
           const mappedGoals = goalsData.map((g: any) => ({
             id: g.id,
@@ -3103,6 +3130,11 @@ const App: React.FC = () => {
       setPartnerCode(partnerShareCode);
       setPartnerName(partnerProf.name || 'Partner');
 
+      const memberObj = { id: partnerProf.id, name: partnerProf.name || 'Partner', couple_code: partnerShareCode };
+      const updatedMembers = [memberObj];
+      localStorage.setItem(`zb_family_members_${currentProfileId}`, JSON.stringify(updatedMembers));
+      setFamilyMembers(updatedMembers);
+
       // Update both profiles in Supabase for mutual real-time sync
       try {
         await supabase
@@ -3117,6 +3149,8 @@ const App: React.FC = () => {
       } catch (dbErr) {
         console.warn('Partner couple_code db sync warning:', dbErr);
       }
+
+      fetchDataFromSupabase();
 
       // Re-fetch transactions immediately for combined dual view
       try {
