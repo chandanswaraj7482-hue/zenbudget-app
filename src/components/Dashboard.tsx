@@ -1393,7 +1393,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             type="button"
             onClick={() => {
               const newId = Date.now().toString();
-              const newCh = { id: newId, title: 'No Takeout Challenge 🏆', subtitle: 'Not started', percent: 0 };
+              const newCh = { id: newId, title: 'New Challenge', subtitle: '', percent: 0 };
               const list = [newCh, ...challenges];
               setChallenges(list);
               localStorage.setItem('zb_challenges', JSON.stringify(list));
