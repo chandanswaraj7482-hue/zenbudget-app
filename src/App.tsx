@@ -216,6 +216,7 @@ const App: React.FC = () => {
     const profileId = localStorage.getItem('zb_profile_id') || '';
     return profileId ? localStorage.getItem(`zb_couple_code_${profileId}`) : null;
   });
+  const [pendingPartnerCode, setPendingPartnerCode] = useState<string | null>(null);
 
   // App Rating & Review Feedback States
   const [ratingStars, setRatingStars] = useState<number>(5);
@@ -1925,14 +1926,19 @@ const App: React.FC = () => {
           
           let orConditions: string[] = [];
           if (familySyncCode) {
-            const codeUpper = familySyncCode.toUpperCase();
-            orConditions.push(`partner_couple_code.eq.${codeUpper}`, `couple_code.eq.${codeUpper}`);
+            if (familySyncCode.startsWith('PENDING:')) {
+              setPendingPartnerCode(familySyncCode.split(':')[1]);
+            } else {
+              setPendingPartnerCode(null);
+              const codeUpper = familySyncCode.toUpperCase();
+              orConditions.push(`partner_couple_code.eq.${codeUpper}`, `couple_code.eq.${codeUpper}`);
+            }
           }
           if (userCoupleCode) {
             const myCodeUpper = userCoupleCode.toUpperCase();
             orConditions.push(`partner_couple_code.eq.${myCodeUpper}`);
           }
-          if (cachedPartnerId) {
+          if (cachedPartnerId && !familySyncCode?.startsWith('PENDING:')) {
             orConditions.push(`id.eq.${cachedPartnerId}`);
           }
 
@@ -3203,60 +3209,79 @@ const App: React.FC = () => {
 
       const partnerShareCode = partnerProf.couple_code || partnerProf.id.slice(0, 8).toUpperCase();
 
-      localStorage.setItem(`zb_partner_id_${currentProfileId}`, partnerProf.id);
-      localStorage.setItem(`zb_partner_code_${currentProfileId}`, partnerShareCode);
-      localStorage.setItem(`zb_partner_name_${currentProfileId}`, partnerProf.name || 'Partner');
-      setPartnerId(partnerProf.id);
-      setPartnerCode(partnerShareCode);
-      setPartnerName(partnerProf.name || 'Partner');
+      // Check if partner is already pending connection with me
+      const isPartnerPendingMe = partnerProf.partner_couple_code === `PENDING:${myShareCode}`;
 
-      const memberObj = { id: partnerProf.id, name: partnerProf.name || 'Partner', couple_code: partnerShareCode };
-      const updatedMembers = [memberObj];
-      localStorage.setItem(`zb_family_members_${currentProfileId}`, JSON.stringify(updatedMembers));
-      setFamilyMembers(updatedMembers);
+      if (isPartnerPendingMe) {
+        // Mutual connection accepted!
+        try {
+          await supabase
+            .from('profiles')
+            .update({ partner_couple_code: partnerShareCode })
+            .eq('id', currentProfileId);
 
-      // Update both profiles in Supabase for mutual real-time sync
-      try {
-        await supabase
-          .from('profiles')
-          .update({ partner_couple_code: partnerShareCode })
-          .eq('id', currentProfileId);
+          await supabase
+            .from('profiles')
+            .update({ partner_couple_code: myShareCode })
+            .eq('id', partnerProf.id);
 
-        await supabase
-          .from('profiles')
-          .update({ partner_couple_code: myShareCode })
-          .eq('id', partnerProf.id);
-      } catch (dbErr) {
-        console.warn('Partner couple_code db sync warning:', dbErr);
-      }
-
-      fetchDataFromSupabase();
-
-      // Re-fetch transactions immediately for combined dual view
-      try {
-        const { data: txData } = await supabase
-          .from('transactions')
-          .select('*')
-          .in('user_id', [currentProfileId, partnerProf.id])
-          .order('date', { ascending: false });
-
-        if (txData && txData.length > 0) {
-          const annotatedTx = txData.map(t => ({
-            ...t,
-            partnerName: t.user_id === partnerProf.id ? (partnerProf.name || 'Partner') : undefined
-          }));
-          setTransactions(annotatedTx);
-          localStorage.setItem(`zb_transactions_${currentProfileId}`, JSON.stringify(annotatedTx));
+          triggerToast(`Success! You are now connected with ${partnerProf.name || 'Partner'}.`, 'success');
+          addNotification(
+            "Partner Connected! 👥",
+            `You have linked shared budgets with ${partnerProf.name || 'Partner'}. Your household spending is now synced in real-time.`,
+            'success'
+          );
+        } catch (dbErr) {
+          console.warn('Partner couple_code db sync warning:', dbErr);
         }
-      } catch (_) {}
 
-      triggerToast(`Connected successfully with ${partnerProf.name || 'Partner'}! 🎉`, 'success');
-      addNotification(
-        "Partner Connected! 👥",
-        `You have linked shared budgets with ${partnerProf.name || 'Partner'}. Your household spending is now synced in real-time.`,
-        'success'
-      );
-      return true;
+        localStorage.setItem(`zb_partner_id_${currentProfileId}`, partnerProf.id);
+        localStorage.setItem(`zb_partner_code_${currentProfileId}`, partnerShareCode);
+        localStorage.setItem(`zb_partner_name_${currentProfileId}`, partnerProf.name || 'Partner');
+        setPartnerId(partnerProf.id);
+        setPartnerCode(partnerShareCode);
+        setPartnerName(partnerProf.name || 'Partner');
+
+        const memberObj = { id: partnerProf.id, name: partnerProf.name || 'Partner', couple_code: partnerShareCode };
+        const updatedMembers = [memberObj];
+        localStorage.setItem(`zb_family_members_${currentProfileId}`, JSON.stringify(updatedMembers));
+        setFamilyMembers(updatedMembers);
+
+        fetchDataFromSupabase();
+
+        // Re-fetch transactions immediately for combined dual view
+        try {
+          const { data: txData } = await supabase
+            .from('transactions')
+            .select('*')
+            .in('user_id', [currentProfileId, partnerProf.id])
+            .order('date', { ascending: false });
+
+          if (txData && txData.length > 0) {
+            const annotatedTx = txData.map(t => ({
+              ...t,
+              partnerName: t.user_id === partnerProf.id ? (partnerProf.name || 'Partner') : undefined
+            }));
+            setTransactions(annotatedTx);
+            localStorage.setItem(`zb_transactions_${currentProfileId}`, JSON.stringify(annotatedTx));
+          }
+        } catch (e) { }
+
+        return true;
+      } else {
+        // Request sent, waiting for partner
+        try {
+          await supabase
+            .from('profiles')
+            .update({ partner_couple_code: `PENDING:${partnerShareCode}` })
+            .eq('id', currentProfileId);
+          triggerToast(`Request sent to ${partnerProf.name || 'Partner'}! They must enter your code to connect.`, 'success');
+        } catch (dbErr) {
+          console.warn('Pending couple_code db sync warning:', dbErr);
+          triggerToast('Error sending connection request.', 'error');
+        }
+        return false;
+      }
     } catch (err: any) {
       console.error('Partner connect error:', err);
       triggerToast(err.message || 'Failed to connect partner profile.', 'warning');
@@ -3744,6 +3769,7 @@ const App: React.FC = () => {
             onBack={() => setActiveView('more')}
             currentProfileId={currentProfileId}
             familyMembers={familyMembers}
+            pendingPartnerCode={pendingPartnerCode}
             coupleCode={coupleCode || ''}
             onConnectPartner={handleConnectPartner}
             onDisconnectPartner={handleDisconnectPartner}
