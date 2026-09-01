@@ -47,6 +47,18 @@
   --bg-nav-glass: rgba(21, 32, 54, 0.85);
 }
 
+/* Ensure all circular avatars, badges, and icon buttons inside the application retain 100% perfect round circles and never squish into ovals */
+[style*="border-radius: 50%"],
+[style*="borderRadius: '50%'"],
+[style*="borderRadius: 50%"],
+[style*="border-radius:50%"],
+[style*="border-radius: 9999px"],
+[style*="borderRadius: '9999px'"] {
+  aspect-ratio: 1 / 1 !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+}
+
 /* ==========================================================================
    🍏 APPLE DESIGN SYSTEM + ZENBUDGET LOGO GREEN - PREMIUM LIGHT THEME
    ========================================================================== */
@@ -661,20 +673,22 @@ div[style*="position:fixed"] {
 
   /* Buttons & Touch Targets */
   button {
-    min-height: 44px;
     touch-action: manipulation;
   }
 
-  /* Prevent small circular icon buttons from becoming vertical ovals */
-  button[style*="border-radius: 50%"],
-  button[style*="border-radius:50%"] {
-    min-height: unset;
+  /* Prevent circular buttons & icons from being stretched into tall ovals by min-height */
+  button:not([style*="border-radius: 50%"]):not([style*="borderRadius: 50%"]):not([style*="border-radius:50%"]):not([style*="border-radius: 9999px"]) {
+    min-height: 44px;
   }
 
-  /* Flexible Grid Wrappers */
-  div[style*="display: grid"],
-  div[style*="display:grid"] {
-    gap: 10px !important;
+  /* Ensure all circular icons, avatars, and badge elements stay 100% round circles with 1:1 aspect ratio */
+  [style*="border-radius: 50%"],
+  [style*="borderRadius: '50%'"],
+  [style*="borderRadius: 50%"],
+  [style*="border-radius:50%"],
+  [style*="border-radius: 9999px"] {
+    aspect-ratio: 1 / 1 !important;
+    flex-shrink: 0 !important;
   }
 }
 
