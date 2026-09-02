@@ -771,29 +771,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </span>
 
           {familyMembers && familyMembers.length > 0 && (
-            <button
-              onClick={() => {
-                setSelectedMemberDetail(null);
-                setShowPartnerBalanceModal(true);
-              }}
+            <select
+              value={selectedDashboardView}
+              onChange={(e) => setSelectedDashboardView(e.target.value)}
               style={{
-                background: 'linear-gradient(135deg, rgba(236,72,153,0.18) 0%, rgba(139,92,246,0.18) 100%)',
-                border: '1px solid rgba(236,72,153,0.35)',
-                color: '#f472b6',
-                padding: '6px 14px',
-                borderRadius: '20px',
+                background: 'var(--bg-input)',
+                border: '1px solid var(--border-input)',
+                color: 'var(--text-primary)',
+                padding: '6px 12px',
+                borderRadius: '12px',
                 fontSize: '12px',
                 fontWeight: 800,
+                outline: 'none',
                 cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                boxShadow: '0 2px 10px rgba(236,72,153,0.15)',
-                transition: 'all 0.2s ease'
+                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
               }}
             >
-              👥 Partner Balance <ChevronRight size={13} />
-            </button>
+              <option value="personal">👤 My Stats</option>
+              {familyMembers.map((m: any) => (
+                <option key={m.id} value={m.id}>👥 {m.name ? `${m.name}'s Stats` : 'Partner Stats'}</option>
+              ))}
+              <option value="combined">🌍 Combined Stats</option>
+            </select>
           )}
         </div>
 

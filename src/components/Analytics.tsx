@@ -693,11 +693,11 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
                 boxShadow: '0 2px 8px rgba(16, 185, 129, 0.15)'
               }}
             >
-              <option value="me">👤 Only Me</option>
+              <option value="me">👤 My Stats</option>
               {familyMembers.map((m: any) => (
-                <option key={m.id} value={m.id}>👥 {m.name || 'Partner'}</option>
+                <option key={m.id} value={m.id}>👥 {m.name ? `${m.name}'s Stats` : 'Partner Stats'}</option>
               ))}
-              <option value="couple">🌍 Full Household</option>
+              <option value="couple">🌍 Combined Stats</option>
             </select>
           )}
         </div>
