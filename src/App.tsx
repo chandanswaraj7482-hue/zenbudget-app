@@ -5258,7 +5258,16 @@ const App: React.FC = () => {
               const upiUrl = `upi://pay?pa=${encodeURIComponent(receiver)}&pn=${encodeURIComponent(upiPayeeModal.loan?.personName || 'User')}&am=${upiPayeeModal.amount}&cu=INR&tn=${encodeURIComponent('Loan Repayment')}`;
               
               // Launch UPI App
-              window.location.href = upiUrl;
+              if ((window as any).Capacitor && (window as any).Capacitor.isNative) {
+                import('@capacitor/app').then(({ App: CapacitorApp }) => {
+                  CapacitorApp.openUrl({ url: upiUrl }).catch(e => {
+                    console.error('Failed to open UPI app via Capacitor', e);
+                    window.location.href = upiUrl;
+                  });
+                });
+              } else {
+                window.location.href = upiUrl;
+              }
 
               // Record repayment
               handleRepayLoan(upiPayeeModal.loan!.id, upiPayeeModal.amount, upiPayeeModal.accountId);
