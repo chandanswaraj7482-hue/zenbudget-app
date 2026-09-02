@@ -730,12 +730,7 @@ div[style*="position:fixed"] {
     gap: 8px !important;
   }
 
-  /* Auto grid for tiny screens */
-  div[style*="display: grid"],
-  div[style*="display:grid"] {
-    grid-template-columns: 1fr !important;
-    gap: 8px !important;
-  }
+  /* Removed aggressive global grid override that breaks dialpads */
 }
 
 /* 5. Safe Area Insets for Mobile Notch & Gesture Bars */
