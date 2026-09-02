@@ -54,8 +54,8 @@ export const Toast: React.FC<ToastProps> = ({ toast, onClose }) => {
       top: '20px',
       left: '50%',
       transform: 'translateX(-50%)',
-      width: 'max-content',
-      minWidth: '280px',
+      width: 'auto',
+      minWidth: '300px',
       maxWidth: 'calc(100% - 40px)',
       zIndex: 1200,
       display: 'flex',
@@ -63,18 +63,20 @@ export const Toast: React.FC<ToastProps> = ({ toast, onClose }) => {
       gap: '12px',
       padding: '14px 18px',
       borderRadius: '16px',
-      background: 'rgba(20, 20, 33, 0.9)',
+      background: 'rgba(20, 20, 33, 0.95)',
       backdropFilter: 'blur(16px)',
       border: `1px solid ${details.color}50`,
       boxShadow: `0 8px 32px 0 rgba(0, 0, 0, 0.4), 0 0 15px ${details.color}20`,
       animation: 'slideDownToast 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards'
     }}>
-      <div style={{ color: details.color, display: 'flex', alignItems: 'center' }}>
+      <div style={{ color: details.color, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
         {details.icon}
       </div>
-      <span style={{ fontSize: '14px', fontWeight: 600, flex: 1, color: '#fff', textAlign: 'left' }}>
-        {toast.message}
-      </span>
+      <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+        <span style={{ fontSize: '14px', fontWeight: 600, color: '#fff', display: 'block', wordBreak: 'break-word' }}>
+          {toast.message}
+        </span>
+      </div>
       <button 
         onClick={onClose}
         style={{
@@ -84,7 +86,8 @@ export const Toast: React.FC<ToastProps> = ({ toast, onClose }) => {
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
-          padding: '2px'
+          padding: '2px',
+          flexShrink: 0
         }}
       >
         <X size={14} />
