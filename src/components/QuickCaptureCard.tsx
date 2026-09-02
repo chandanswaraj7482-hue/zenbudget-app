@@ -353,7 +353,7 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
               <Sparkles size={11} /> AI Auto-Detect
             </span>
           </div>
-          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '4px 0 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: '4px 0 0 0', lineHeight: 1.4 }}>
             Add expense, income, or transfer in natural language
           </p>
         </div>
@@ -363,6 +363,7 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', gap: '10px' }}>
         <div style={{
           display: 'flex',
+          flex: 1,
           background: 'var(--bg-input)',
           padding: '4px',
           borderRadius: '16px',
@@ -375,10 +376,11 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
               type="button"
               onClick={() => setActiveTab(tab)}
               style={{
-                padding: '7px 16px',
+                flex: 1,
+                padding: '7px 4px',
                 borderRadius: '12px',
                 border: 'none',
-                fontSize: '12px',
+                fontSize: '11px',
                 fontWeight: 800,
                 textTransform: 'capitalize',
                 cursor: 'pointer',
@@ -410,7 +412,8 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
             justifyContent: 'center',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
-            animation: isListening ? 'pulse 1.5s infinite' : 'none'
+            animation: isListening ? 'pulse 1.5s infinite' : 'none',
+            flexShrink: 0
           }}
         >
           <Mic size={18} />
