@@ -679,128 +679,67 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
 
             {/* Step 2: Connect Partner's Code */}
             <form onSubmit={handleConnect} style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '16px' }}>
-              <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Join an Existing Couple / Family Group Code
-              </label>
               
               {errorMsg && <p style={{ fontSize: '12px', color: 'var(--danger)', fontWeight: 600, margin: 0 }}>{errorMsg}</p>}
 
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <input
-                  type="text"
-                  required
-                  value={partnerInputCode}
-                  onChange={e => setPartnerInputCode(e.target.value.toUpperCase())}
-                  placeholder="Enter Partner's Code"
-                  className="glass-input"
-                  style={{ flex: 1, padding: '12px 14px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', minWidth: '150px' }}
-                />
-                <button type="submit" disabled={isLinking} style={{ padding: '12px 20px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)', color: '#fff', fontWeight: 800, fontSize: '13px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                  {isLinking ? 'Connecting...' : '🔗 Connect'}
-                </button>
-              </div>
-
-              {pendingPartnerCode ? (
-              <div style={{
-                background: 'rgba(236, 72, 153, 0.1)',
-                border: '1px solid rgba(236, 72, 153, 0.3)',
-                borderRadius: '16px',
-                padding: '24px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px'
-              }}>
-                <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#ec4899', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  ⏳ Connection Pending...
-                </h4>
-                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                  You have requested to connect with code <strong>{pendingPartnerCode}</strong>.
-                  <br/>The other person must enter your code <strong>{myShareCode}</strong> to accept.
-                </p>
-                <button
-                  onClick={() => {
-                    if (onDisconnectPartner) onDisconnectPartner();
-                    // Will clear the pending state
-                  }}
-                  style={{
-                    background: 'transparent',
-                    border: '1px solid rgba(236, 72, 153, 0.5)',
-                    color: '#ec4899',
-                    padding: '10px',
-                    borderRadius: '12px',
-                    fontSize: '13px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    marginTop: '8px'
-                  }}
-                >
-                  Cancel Request
-                </button>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <h4 style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>
-                  Join an Existing Couple / Family Group Code
-                </h4>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <input
-                    type="text"
-                    value={partnerInputCode}
-                    onChange={(e) => {
-                      setPartnerInputCode(e.target.value.toUpperCase());
-                      setErrorMsg('');
-                    }}
-                    placeholder="PASTE COUPLE / FAMILY CODE"
-                    style={{
-                      flex: 1,
-                      background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid var(--border-input)',
-                      borderRadius: '12px',
-                      padding: '12px 16px',
-                      color: 'var(--text-primary)',
-                      fontSize: '15px',
-                      fontWeight: 600,
-                      outline: 'none',
-                      textTransform: 'uppercase'
-                    }}
-                  />
+              {!pendingPartnerCode ? (
+                <>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Join an Existing Couple / Family Group Code
+                  </label>
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <input
+                      type="text"
+                      required
+                      value={partnerInputCode}
+                      onChange={e => setPartnerInputCode(e.target.value.toUpperCase())}
+                      placeholder="Enter Partner's Code"
+                      className="glass-input"
+                      style={{ flex: 1, padding: '12px 14px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', minWidth: '150px' }}
+                    />
+                    <button type="submit" disabled={isLinking} style={{ padding: '12px 20px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)', color: '#fff', fontWeight: 800, fontSize: '13px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                      {isLinking ? 'Connecting...' : '🔗 Connect'}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div style={{
+                  background: 'rgba(236, 72, 153, 0.1)',
+                  border: '1px solid rgba(236, 72, 153, 0.3)',
+                  borderRadius: '16px',
+                  padding: '24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px'
+                }}>
+                  <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#ec4899', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    ⏳ Connection Pending...
+                  </h4>
+                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                    You have requested to connect with code <strong>{pendingPartnerCode}</strong>.
+                    <br/>The other person must enter your code <strong>{myShareCode}</strong> to accept.
+                  </p>
                   <button
-                    onClick={async () => {
-                      if (!partnerInputCode) return;
-                      setIsLinking(true);
-                      setErrorMsg('');
-                      try {
-                        const success = await onConnectPartner?.(partnerInputCode);
-                        if (!success) setErrorMsg('Invalid code or connection failed.');
-                        else setPartnerInputCode('');
-                      } catch (err) {
-                        setErrorMsg('Error connecting to partner.');
-                      } finally {
-                        setIsLinking(false);
-                      }
+                    onClick={() => {
+                      if (onDisconnectPartner) onDisconnectPartner();
+                      // Will clear the pending state
                     }}
-                    disabled={!partnerInputCode || isLinking}
                     style={{
-                      background: isLinking ? 'var(--bg-input)' : 'linear-gradient(to right, #6366f1, #a855f7, #ec4899)',
-                      border: 'none',
+                      background: 'transparent',
+                      border: '1px solid rgba(236, 72, 153, 0.5)',
+                      color: '#ec4899',
+                      padding: '10px',
                       borderRadius: '12px',
-                      padding: '0 20px',
-                      color: isLinking ? 'var(--text-secondary)' : '#fff',
-                      fontSize: '14px',
+                      fontSize: '13px',
                       fontWeight: 700,
-                      cursor: partnerInputCode && !isLinking ? 'pointer' : 'not-allowed',
-                      opacity: partnerInputCode ? 1 : 0.5,
-                      whiteSpace: 'nowrap'
+                      cursor: 'pointer',
+                      marginTop: '8px'
                     }}
                   >
-                    {isLinking ? 'Linking...' : 'Join Group'}
+                    Cancel Request
                   </button>
                 </div>
-                {errorMsg && (
-                  <p style={{ color: 'var(--danger)', fontSize: '12px', margin: 0, fontWeight: 600 }}>{errorMsg}</p>
-                )}
-              </div>
-            )}
+              )}
             </form>
 
           </div>
