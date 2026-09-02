@@ -649,15 +649,14 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
               <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Your Unique Couple / Family Sync Code
               </label>
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-                <div style={{ flex: '1 1 200px', minWidth: 0, padding: '12px 14px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '16px', fontWeight: 800, color: '#a78bfa', letterSpacing: '2px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'nowrap' }}>
+                <div style={{ flex: 1, minWidth: 0, padding: '12px 14px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '16px', fontWeight: 800, color: '#a78bfa', letterSpacing: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {myShareCode}
                 </div>
                 <button
                   type="button"
                   onClick={handleCopyCode}
                   style={{
-                    flex: '1 1 120px',
                     padding: '12px 16px',
                     borderRadius: '12px',
                     border: 'none',
@@ -669,7 +668,9 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '6px'
+                    gap: '6px',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
                   }}
                 >
                   <Copy size={16} /> {copied ? 'Copied!' : 'Copy Code'}
