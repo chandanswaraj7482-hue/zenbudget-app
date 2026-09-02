@@ -1466,7 +1466,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               maxWidth: '260px',
               marginTop: '4px',
               justifyContent: 'center',
-              alignItems: 'center'
+              alignItems: 'center',
+              justifyItems: 'center'
             }}
           >
             {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((num) => (
@@ -1722,7 +1723,10 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               gap: '12px',
               width: '100%',
               maxWidth: '260px',
-              marginTop: '0px'
+              marginTop: '0px',
+              justifyContent: 'center',
+              alignItems: 'center',
+              justifyItems: 'center'
             }}
           >
             {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((num) => (
