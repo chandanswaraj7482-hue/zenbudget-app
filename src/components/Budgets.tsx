@@ -163,8 +163,8 @@ export const Budgets: React.FC<BudgetsProps> = ({
                   }}>
                     {cat.icon}
                   </div>
-                  <div>
-                    <h4 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 2px 0' }}>{cat.label}</h4>
+                  <div style={{ minWidth: 0 }}>
+                    <h4 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 2px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cat.label}</h4>
                     <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
                       Spent: <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(spent, currencySymbol)}</strong> {limit > 0 ? `of ${formatCurrency(limit, currencySymbol)}` : ''}
                     </span>
@@ -173,7 +173,7 @@ export const Budgets: React.FC<BudgetsProps> = ({
 
                 {/* Limit Editor */}
                 {isEditing ? (
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
                     <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>{currencySymbol}</span>
                     <input
                       type="text"
@@ -226,7 +226,9 @@ export const Budgets: React.FC<BudgetsProps> = ({
                       cursor: 'pointer',
                       color: limit > 0 ? 'var(--text-primary)' : 'var(--primary)',
                       boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
-                      transition: 'all 0.15s ease'
+                      transition: 'all 0.15s ease',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0
                     }}
                   >
                     {limit > 0 ? formatCurrency(limit, currencySymbol) : `+ ${t('set_limit')}`}
