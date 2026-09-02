@@ -100,6 +100,40 @@ const DAILY_COACH_TIPS = [
   "Start a side hustle or freelance gig to create a secondary source of income."
 ];
 
+const DAILY_COACH_TIPS_HI = [
+  "आज अपनी जरूरतों और इच्छाओं का विश्लेषण करें। फालतू खर्चों को 24 घंटे के लिए टाल दें।",
+  "छोटे-छोटे खर्चे (जैसे रोज की चाय या स्नैक्स) महीने के 3,000+ रुपये तक हो सकते हैं।",
+  "उन जिम या ऐप पैकेजों को अनसब्सक्राइब करें जिनका आपने 30 दिनों से उपयोग नहीं किया है।",
+  "आज अपने बिजली/पानी के बिलों की जांच करें। थोड़ी सी बचत से 15% तक खर्च कम हो सकता है।",
+  "बाहर से मंगाने के बजाय घर पर खाना बनाएं। रेस्टोरेंट के खाने पर 200% अतिरिक्त मार्जिन होता है।",
+  "50/30/20 नियम अपनाएं: 50% जरूरतों के लिए, 30% इच्छाओं के लिए, 20% बचत के लिए।",
+  "शेयरों में निवेश करने से पहले 3-6 महीने के खर्चों के बराबर इमरजेंसी फंड बनाएं।",
+  "42% ब्याज के जाल से बचने के लिए आज ही अपने क्रेडिट कार्ड का पूरा बकाया चुकाएं।",
+  "शौक की चीजों के लिए EMI से बचें। यदि आप इसे नकद में दो बार नहीं खरीद सकते, तो आप इसे वहन नहीं कर सकते।",
+  "अपनी बचत दर की समीक्षा करें। अभी 5% की वृद्धि भी लंबी अवधि में शानदार रिटर्न देती है।",
+  "कोई भी महंगी चीज खरीदने से पहले सोचें कि इसके लिए आपको कितने घंटे काम करना पड़ा है।",
+  "सुपरमार्केट जाने से पहले एक लिस्ट बनाएं। इससे फालतू खरीदारी से बचा जा सकता है।",
+  "मुद्रास्फीति को मात देने के लिए इंडेक्स फंड या सोने में निवेश करें।",
+  "जल्दी पैसा कमाने वाली योजनाओं में कभी निवेश न करें। असली संपत्ति धीरे-धीरे बनती है।",
+  "आय मिलते ही सबसे पहले बचत करें, फिर जो बचे उसे खर्च करें।",
+  "अपने निवेश को इक्विटी, म्यूचुअल फंड, सोने और फिक्स्ड इनकम में बांटें।",
+  "ZenBudget में अपने लेन-देन तुरंत दर्ज करें। सामने दिखने वाले आंकड़े फालतू खर्च रोकते हैं।",
+  "आज कोई खर्च न करने (No-spend day) का प्रयास करें। शून्य खर्च वित्तीय लचीलापन बनाता है।",
+  "महीने के बाकी दिनों के लिए अपनी जीवनशैली और मनोरंजन श्रेणियों पर एक बजट सीमा निर्धारित करें।",
+  "स्वास्थ्य ही धन है। अस्पताल के बिलों से बचने के लिए अच्छे भोजन और स्वास्थ्य पर खर्च करें।",
+  "सेल/डिस्काउंट के जाल से बचें। किसी चीज को सिर्फ इसलिए खरीदना क्योंकि वह 50% छूट पर है, फिर भी एक खर्च है।",
+  "कंपाउंड इंटरेस्ट (चक्रवृद्धि ब्याज) को समझें। यह दुनिया का आठवां अजूबा है।",
+  "हर महीने के पहले दिन अपनी बचत को स्वचालित (Automate) रूप से ट्रांसफर करें।",
+  "बचत के लक्ष्यों को निर्धारित करने के लिए अपने परिवार या पार्टनर के साथ वित्तीय लक्ष्यों पर चर्चा करें।",
+  "बेहतर दरों के लिए अपने आवर्ती बिलों (वाईफाई, फोन, बीमा) पर बातचीत करें।",
+  "अपनी वित्तीय साक्षरता बढ़ाने के लिए आज कोई पर्सनल फाइनेंस बुक या ब्लॉग पढ़ें।",
+  "महीने में एक बार अपनी कुल संपत्ति (Net worth) ट्रैक करें। बढ़ता हुआ ग्राफ आपको प्रेरित करता है।",
+  "दूसरों की देखा-देखी खर्च करने से बचें। आपको सहकर्मियों की जीवनशैली से मेल खाने की आवश्यकता नहीं है।",
+  "अपने बजट की प्रगति की समीक्षा करें। यदि आप इस सप्ताह सीमा के भीतर रहे, तो जश्न मनाएं!",
+  "अपने कौशल और शिक्षा में निवेश करें। सबसे अच्छा निवेश वह है जो आप खुद पर करते हैं।",
+  "आय का एक दूसरा स्रोत बनाने के लिए कोई पार्ट-टाइम काम या फ्रीलांस गिग शुरू करें।"
+];
+
 export const Dashboard: React.FC<DashboardProps> = ({
   currentProfileId,
   userName,
@@ -143,6 +177,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [showAllBadges, setShowAllBadges] = useState(false);
   const [showMonthlyLetter, setShowMonthlyLetter] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [activeGoalInput, setActiveGoalInput] = useState<string | null>(null);
   const [contributionAmount, setContributionAmount] = useState<string>('');
   const [showAddGoalModal, setShowAddGoalModal] = useState(false);
@@ -1056,19 +1091,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* Zen Mascot Coach Card - Dynamic AI Advice */}
       <div className="glass-panel animate-fade-in" style={{ display: 'flex', gap: '14px', padding: '16px', background: 'var(--bg-card)', alignItems: 'center', border: '1px solid var(--border-card)' }}>
-        <span style={{ fontSize: '32px' }}>🌿</span>
-        <div style={{ textAlign: 'left' }}>
+        <span style={{ fontSize: '32px', flexShrink: 0 }}>🌿</span>
+        <div style={{ textAlign: 'left', flex: 1, minWidth: 0 }}>
           <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('zen_coach')}</h4>
           <p
             data-coach-text
             style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.4, marginTop: '2px', fontWeight: 500 }}
           >
             "{(() => {
+              const activeLang = localStorage.getItem('zb_language') || 'en';
+              const coachArray = activeLang === 'hi' ? DAILY_COACH_TIPS_HI : DAILY_COACH_TIPS;
               const dayOfMonth = new Date().getDate();
-              const dailyTip = DAILY_COACH_TIPS[(dayOfMonth - 1) % DAILY_COACH_TIPS.length];
+              const dailyTip = coachArray[(dayOfMonth - 1) % coachArray.length];
 
               if (expenses === 0 && income === 0) {
-                return `${dailyTip} Start logging your transactions to get personalized budget coaching! 🧘`;
+                return activeLang === 'hi' 
+                  ? `${dailyTip} व्यक्तिगत बजट कोचिंग पाने के लिए अपने लेन-देन दर्ज करना शुरू करें! 🧘`
+                  : `${dailyTip} Start logging your transactions to get personalized budget coaching! 🧘`;
               }
 
               const savingsPct = income > 0 ? Math.round(((income - expenses) / income) * 100) : 0;
@@ -1078,16 +1117,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
               ).sort((a, b) => b[1] - a[1])[0];
 
               let statsSummary = '';
-              if (savingsPct >= 30) {
-                statsSummary = `You saved ${savingsPct}% this month — amazing work! 🌟`;
-              } else if (savingsPct >= 10) {
-                statsSummary = `Savings are at ${savingsPct}% — keep pushing it higher! 🌱`;
+              if (activeLang === 'hi') {
+                if (savingsPct >= 30) {
+                  statsSummary = `आपने इस महीने ${savingsPct}% बचाया है — बहुत बढ़िया! 🌟`;
+                } else if (savingsPct >= 10) {
+                  statsSummary = `बचत ${savingsPct}% पर है — इसे और बढ़ाने की कोशिश करें! 🌱`;
+                } else {
+                  statsSummary = `इस महीने बचत कम है। छोटे खर्चों को कम करने की कोशिश करें। ⚠️`;
+                }
+                if (topCat) {
+                  statsSummary += ` ${topCat[0]} में भारी खर्च का पता चला (${currencySymbol}${Math.round(topCat[1]).toLocaleString()})।`;
+                }
               } else {
-                statsSummary = `Savings are low this month. Try to cut down micro-spends. ⚠️`;
-              }
-
-              if (topCat) {
-                statsSummary += ` Heavy spending detected in ${topCat[0]} (${currencySymbol}${Math.round(topCat[1]).toLocaleString()}).`;
+                if (savingsPct >= 30) {
+                  statsSummary = `You saved ${savingsPct}% this month — amazing work! 🌟`;
+                } else if (savingsPct >= 10) {
+                  statsSummary = `Savings are at ${savingsPct}% — keep pushing it higher! 🌱`;
+                } else {
+                  statsSummary = `Savings are low this month. Try to cut down micro-spends. ⚠️`;
+                }
+                if (topCat) {
+                  statsSummary += ` Heavy spending detected in ${topCat[0]} (${currencySymbol}${Math.round(topCat[1]).toLocaleString()}).`;
+                }
               }
 
               return `${dailyTip} ${statsSummary}`;

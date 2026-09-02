@@ -416,7 +416,7 @@ export const ZenPet: React.FC<ZenPetProps> = ({ currentProfileId, spentPercentag
     <div className="glass-panel animate-fade-in" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-card)', position: 'relative' }}>
       
       {/* Top bar with points */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <span style={{ fontSize: '18px' }}>{isLevel2Unlocked ? '🐲' : '🐷'}</span>
           <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)' }}>
@@ -498,8 +498,8 @@ export const ZenPet: React.FC<ZenPetProps> = ({ currentProfileId, spentPercentag
           </svg>
         </div>
 
-        <div style={{ textAlign: 'left', flex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+        <div style={{ textAlign: 'left', flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)' }}>
               {isLevel2Unlocked ? 'Golden Zen Dragon' : 'Zen Piggy'}
             </span>
