@@ -1464,7 +1464,9 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               gap: '14px',
               width: '100%',
               maxWidth: '260px',
-              marginTop: '4px'
+              marginTop: '4px',
+              justifyContent: 'center',
+              alignItems: 'center'
             }}
           >
             {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((num) => (
@@ -1473,6 +1475,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                 onClick={() => handleKeypadPress(num)}
                 style={{
                   height: '56px',
+                  width: '56px',
                   borderRadius: '50%',
                   border: '1px solid var(--border-card)',
                   background: 'var(--bg-card)',
@@ -1484,7 +1487,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-                  transition: 'all 0.2s ease-out'
+                  transition: 'all 0.2s ease-out',
+                  margin: '0 auto'
                 }}
                 onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.25)'}
                 onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
@@ -1493,12 +1497,13 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               </button>
             ))}
             
-            <div style={{ height: '56px', width: '56px' }} />
+            <div style={{ height: '56px', width: '56px', margin: '0 auto' }} />
 
             <button
               onClick={() => handleKeypadPress('0')}
               style={{
                 height: '56px',
+                width: '56px',
                 borderRadius: '50%',
                 border: '1px solid var(--border-card)',
                 background: 'var(--bg-card)',
@@ -1510,7 +1515,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.2s ease',
+                margin: '0 auto'
               }}
               onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.25)'}
               onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
@@ -1522,6 +1528,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               onClick={handleBackspace}
               style={{
                 height: '56px',
+                width: '56px',
                 borderRadius: '50%',
                 border: '1px solid var(--border-card)',
                 background: 'var(--bg-card)',
@@ -1531,7 +1538,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.2s ease',
+                margin: '0 auto'
               }}
               onMouseDown={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
               onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
