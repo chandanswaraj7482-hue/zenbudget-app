@@ -5,6 +5,7 @@ import { supabase } from '../supabaseClient';
 import { launchCashfreeCheckout } from '../utils/cashfreeHelper';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
+import { triggerFireworksCelebration, playErrorSound } from '../utils/audio';
 
 interface SubscriptionModalProps {
   isOpen: boolean;
@@ -313,7 +314,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           const isTierPremium = tier === 'premium_monthly' || tier === 'premium_yearly' || tier === 'premium_lifetime' || tier === 'premium';
           if (isTierPremium) {
             setPaymentStep('success');
-            confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+            try { triggerFireworksCelebration(); } catch (_) {}
             setTimeout(() => {
               onUpgradeSuccess(billingCycle);
               onClose();
@@ -503,14 +504,14 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             </div>
 
             {/* Trial Usage Limits Card (7 Days & 10 Transactions) */}
-            <div className="glass-panel" style={{ padding: '14px', background: 'var(--bg-input)', border: '1px solid var(--border-input)', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 600 }}>
-                <span style={{ color: 'var(--text-secondary)' }}>Free Trial Period (7 Days Max):</span>
-                <span style={{ color: remainingDays > 3 ? 'var(--primary)' : 'var(--danger)', fontWeight: 800 }}>{remainingDays} / 7 Days Left</span>
+            <div className="glass-panel" style={{ padding: '12px 14px', background: 'var(--bg-input)', border: '1px solid var(--border-input)', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: 600, gap: '8px' }}>
+                <span style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>Free Trial (7 Days Max):</span>
+                <span style={{ color: remainingDays > 3 ? 'var(--primary)' : 'var(--danger)', fontWeight: 800, whiteSpace: 'nowrap', flexShrink: 0, marginLeft: 'auto' }}>{remainingDays} / 7 Days Left</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 600 }}>
-                <span style={{ color: 'var(--text-secondary)' }}>Free Transactions (10 Logs Max):</span>
-                <span style={{ color: _currentTransactionsCount >= 10 ? 'var(--danger)' : 'var(--primary)', fontWeight: 800 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: 600, gap: '8px' }}>
+                <span style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>Free Logs (10 Max):</span>
+                <span style={{ color: _currentTransactionsCount >= 10 ? 'var(--danger)' : 'var(--primary)', fontWeight: 800, whiteSpace: 'nowrap', flexShrink: 0, marginLeft: 'auto' }}>
                   {_currentTransactionsCount} / 10 Logged
                 </span>
               </div>
@@ -790,25 +791,22 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                         console.warn('Browser.open failed, launching window fallback:', browserErr);
                         try { window.open(payUrl, '_system'); } catch (e) { window.location.href = payUrl; }
                       }
-                      setPaymentStep('details');
+                      // Stay in processing — the polling useEffect will detect the webhook update
+                      setPaymentStep('processing');
                     } else {
-                      // Web / Mobile Browser: Launch Cashfree Drop-in Checkout Modal directly!
-                      onClose(); // Automatically close paywall so Cashfree popup is instantly visible!
+                      // Web / Mobile Browser: Launch Cashfree Drop-in Checkout Modal
+                      // Keep modal open in processing state so polling can detect webhook updates
+                      setPaymentStep('processing');
                       launchCashfreeCheckout(
                         payment_session_id,
                         (result: any) => {
-                          console.log('Payment successful! Unlocking premium tier:', billingCycle);
-                          if (appliedCoupon) {
-                            supabase.from('promo_coupons').select('uses_count').eq('code', appliedCoupon.code).maybeSingle()
-                              .then(({ data }) => {
-                                if (data) supabase.from('promo_coupons').update({ uses_count: (data.uses_count || 0) + 1 }).eq('code', appliedCoupon.code).then(() => {});
-                              });
-                          }
-                          onUpgradeSuccess(billingCycle);
+                          console.log('Payment intent completed. Waiting for webhook verification...');
+                          setPaymentStep('processing');
                         },
                         (err: any) => {
                           console.warn('Cashfree payment modal dismissed/failed:', err);
                           setPaymentStep('details');
+                          try { playErrorSound(); } catch (_) {}
                           window.dispatchEvent(new CustomEvent('toast-alert', { detail: { message: 'Payment incomplete or cancelled. Please try again.', type: 'error' } }));
                           if (err && typeof err === 'string' && err.includes('Cashfree SDK')) {
                             // Direct UPI Fallback intent if SDK not loaded

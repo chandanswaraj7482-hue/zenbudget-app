@@ -20,7 +20,9 @@ import {
   Pencil,
   Trash2,
   Clock,
-  Wallet
+  Wallet,
+  Share2,
+  FileText
 } from 'lucide-react';
 import type { Transaction, SavingsGoal, CategoryBudget, Account } from '../types';
 import { t } from '../utils/i18n';
@@ -197,9 +199,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
   });
 
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isZenCoachExpanded, setIsZenCoachExpanded] = useState(false);
   const [challenges, setChallenges] = useState<{id: string; title: string; subtitle: string; percent: number}[]>(() => {
     const cached = localStorage.getItem(`zb_challenges`);
-    if (cached) try { return JSON.parse(cached); } catch (e) {}
+    if (cached) {
+      try { 
+        const parsed = JSON.parse(cached); 
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) {}
+    }
     return [];
   });
   const [showAllChallenges, setShowAllChallenges] = useState(false);
@@ -216,7 +224,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
   useEffect(() => {
     const cached = localStorage.getItem(`zb_challenges_${currentProfileId}`) || localStorage.getItem('zb_challenges');
     if (cached) {
-      try { setChallenges(JSON.parse(cached)); } catch (e) { setChallenges([]); }
+      try { 
+        const parsed = JSON.parse(cached);
+        setChallenges(Array.isArray(parsed) ? parsed : []); 
+      } catch (e) { setChallenges([]); }
     } else {
       setChallenges([]);
     }
@@ -656,181 +667,156 @@ export const Dashboard: React.FC<DashboardProps> = ({
     }
     setShowShareModal(false);
   };
+  const currentHour = new Date().getHours();
+  let timeOfDayGreeting = 'GOOD MORNING';
+  let timeOfDayEmoji = '☀️';
+  if (currentHour >= 12 && currentHour < 17) {
+    timeOfDayGreeting = 'GOOD AFTERNOON';
+    timeOfDayEmoji = '🌤️';
+  } else if (currentHour >= 17) {
+    timeOfDayGreeting = 'GOOD EVENING';
+    timeOfDayEmoji = '🌙';
+  }
+
+  const DAILY_QUOTES = [
+    "Small savings today, big dreams tomorrow",
+    "Track every penny, watch your wealth grow",
+    "Your budget is a roadmap to financial freedom",
+    "Mindful spending is the secret to wealth",
+    "Discipline today equals freedom tomorrow",
+    "Pay yourself first before paying others",
+    "Invest in your future self every day"
+  ];
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+  const dailyQuote = DAILY_QUOTES[dayOfYear % DAILY_QUOTES.length];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingBottom: '140px' }} className="animate-fade-in">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingBottom: '120px' }} className="animate-fade-in dashboard-layout-container">
 
-      {/* Premium Header with Profile Avatar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', marginTop: '8px' }}>
-        <div 
-          onClick={onOpenProfile}
-          style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', flex: 1, minWidth: 0 }}
-        >
-          <div style={{
-            width: '42px',
-            height: '42px',
-            borderRadius: '50%',
-            overflow: 'hidden',
-            border: '2px solid var(--primary)',
-            boxShadow: '0 2px 10px rgba(34, 197, 94, 0.25)',
-            flexShrink: 0,
-            backgroundColor: 'var(--primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontSize: '18px',
-            fontWeight: 'bold',
-            position: 'relative'
-          }}>
-            {userName?.charAt(0)?.toUpperCase() || 'U'}
-            <img 
-              key={userAvatar || 'default'}
-              src={
-                (userAvatar && userAvatar !== 'null' && !userAvatar.includes('name=User'))
-                  ? userAvatar
-                  : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName || 'User')}&background=22c55e&color=fff&rounded=true`
-              }
-              alt="" 
-              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} 
-              onError={(e) => {
-                 (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
-          </div>
-
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            {/* Line 1: Dynamic Time Greeting Badge */}
-            <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--primary)', letterSpacing: '0.04em', textTransform: 'uppercase', lineHeight: 1 }}>
-              {(() => {
-                const hour = new Date().getHours();
-                if (hour >= 5 && hour < 12) return 'Good Morning ☀️';
-                if (hour >= 12 && hour < 17) return 'Good Afternoon 🌤️';
-                if (hour >= 17 && hour < 21) return 'Good Evening 🌆';
-                return 'Good Night 🌙';
-              })()}
-            </div>
-
-            {/* Line 2: User Name */}
-            <h1 style={{ fontSize: '16px', fontWeight: 900, color: 'var(--text-primary)', margin: '2px 0 0 0', fontFamily: "'Manrope', sans-serif", letterSpacing: '-0.02em', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+      {/* Aesthetic Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginTop: '4px', marginBottom: '2px', flexWrap: 'nowrap', width: '100%' }}>
+        <div onClick={onOpenProfile} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
+          {/* Avatar with glow */}
+          {userAvatar ? (
+             <img src={userAvatar} alt="User" style={{ width: '46px', height: '46px', borderRadius: '50%', border: '2px solid #22c55e', boxShadow: '0 0 14px rgba(34,197,94,0.3)', objectFit: 'cover', flexShrink: 0 }} />
+          ) : (
+             <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 'bold', fontSize: '20px', border: '2px solid rgba(255,255,255,0.2)', boxShadow: '0 0 14px rgba(34,197,94,0.3)', flexShrink: 0 }}>
+               {userName ? userName.charAt(0).toUpperCase() : 'U'}
+             </div>
+          )}
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', minWidth: 0, overflow: 'hidden' }}>
+            <span style={{ fontSize: '10px', color: '#22c55e', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {timeOfDayGreeting} {timeOfDayEmoji}
+            </span>
+            <h1 style={{ fontSize: '18px', fontWeight: 900, color: '#ffffff', margin: 0, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {userName || 'User'}
             </h1>
-
-            {/* Line 3: Rotating Financial Tagline */}
-            <div style={{ fontSize: '11px', color: '#34d399', fontWeight: 700, marginTop: '3px', lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {(() => {
-                const taglines = [
-                  'Track smart, live mindfully 🌿',
-                  'Your Daily Financial Companion 💰',
-                  'Master your money, one day at a time 🎯',
-                  'Every rupee saved is a step toward freedom 🚀',
-                  'Plan today, prosper tomorrow ✨',
-                  'Small savings today, big dreams tomorrow 🌟',
-                  'Control your expenses, empower your future 🛡️',
-                  'Financial peace of mind begins here 🧘‍♂️',
-                  'Smart tracking, stress-free living 🍀',
-                  'Build wealth quietly, enjoy life fully 💎'
-                ];
-                const dayOfYear = Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-                return taglines[dayOfYear % taglines.length];
-              })()}
-            </div>
+            <span style={{ fontSize: '11px', color: '#22c55e', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {dailyQuote} 🌟
+            </span>
           </div>
         </div>
-
+        
         <button
           onClick={onAddTransactionClick}
-          className="glass-button active"
-          style={{ padding: '9px 12px', borderRadius: '14px', fontSize: '13px', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '5px' }}
+          style={{ flexShrink: 0, padding: '8px 12px', borderRadius: '12px', background: '#22c55e', color: '#fff', fontSize: '12.5px', fontWeight: 800, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', boxShadow: '0 4px 12px rgba(34,197,94,0.3)', whiteSpace: 'nowrap' }}
         >
-          <Plus size={15} /> {t('add_transaction')}
+          <Plus size={15} /> Add New
         </button>
       </div>
 
-      {/* Main Glass Balance Card - Restored Clean Design */}
+      {/* Main Glass Balance Card - Premium Design with Sub-Wallets & Glow */}
       <div className="glass-panel" style={{
         position: 'relative',
         overflow: 'hidden',
         background: 'var(--bg-balance-card)',
-        border: '1px solid var(--border-balance-card)'
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '22px',
+        padding: '18px 20px',
+        marginBottom: '0px',
+        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.4)'
       }}>
-        {/* Glow effect */}
+        {/* Ambient Glow effect */}
         <div style={{
           position: 'absolute',
-          top: '-50px',
-          right: '-50px',
-          width: '150px',
-          height: '150px',
-          background: 'radial-gradient(circle, rgba(34, 197, 94, 0.25) 0%, rgba(34, 197, 94, 0) 70%)',
+          top: '-60px',
+          right: '-60px',
+          width: '180px',
+          height: '180px',
+          background: 'radial-gradient(circle, rgba(34, 197, 94, 0.28) 0%, rgba(34, 197, 94, 0) 70%)',
           pointerEvents: 'none'
         }} />
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-          <span style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-secondary)', fontWeight: 700 }}>
-            {t('total_balance')}
-          </span>
-
-          {familyMembers && familyMembers.length > 0 && (
-            <select
-              value={selectedDashboardView}
-              onChange={(e) => setSelectedDashboardView(e.target.value)}
-              style={{
-                background: 'var(--bg-input)',
-                border: '1px solid var(--border-input)',
-                color: 'var(--text-primary)',
-                padding: '6px 12px',
-                borderRadius: '12px',
-                fontSize: '12px',
-                fontWeight: 800,
-                outline: 'none',
-                cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-              }}
-            >
-              <option value="personal">👤 My Stats</option>
-              {familyMembers.map((m: any) => (
-                <option key={m.id} value={m.id}>👥 {m.name ? `${m.name}'s Stats` : 'Partner Stats'}</option>
-              ))}
-              <option value="combined">🌍 Combined Stats</option>
-            </select>
-          )}
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', margin: '8px 0 16px 0', color: 'var(--text-balance)', minWidth: 0, maxWidth: '100%' }}>
-          <span style={{ fontSize: 'clamp(28px, 8vw, 40px)', fontWeight: 800, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {formatCurrency(myTotalAccountBalance || totalBalance, currencySymbol, 0)}
+          <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#64748b', fontWeight: 700 }}>
+            {familyMembers.length > 0 ? 'COMBINED FAMILY BALANCE' : t('total_balance')}
           </span>
         </div>
 
-        {/* Income / Expense Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', borderTop: '1px solid var(--border-divider)', paddingTop: '16px' }}>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '12px', backgroundColor: 'var(--success-glow)', color: 'var(--success)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <ArrowUpRight size={20} />
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', margin: '8px 0 12px 0', color: '#ffffff', minWidth: 0, maxWidth: '100%' }}>
+          <span style={{ fontSize: 'clamp(30px, 8vw, 42px)', fontWeight: 800, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {formatCurrency(totalBalance, currencySymbol, 0)}
+          </span>
+        </div>
+
+        {/* Sub-wallets breakdown row (Only rendered when partner/family is connected) */}
+        {familyMembers.length > 0 && (
+          <div style={{ display: 'flex', gap: '24px', marginBottom: '18px', flexWrap: 'wrap' }}>
+            <div>
+              <span style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block' }}>MY WALLETS</span>
+              <span style={{ fontSize: '14px', fontWeight: 800, color: '#34d399' }}>
+                {formatCurrency(myTotalAccountBalance, currencySymbol, 0)}
+              </span>
             </div>
             <div>
-              <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('income')}</span>
-              <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--success)' }}>
+              <span style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block' }}>PARTNER WALLETS</span>
+              <span style={{ fontSize: '14px', fontWeight: 800, color: '#a78bfa' }}>
+                {formatCurrency(Math.max(0, totalBalance - myTotalAccountBalance), currencySymbol, 0)}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Income / Expense Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '16px' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', background: 'rgba(34, 197, 94, 0.06)', border: '1px solid rgba(34, 197, 94, 0.16)', borderRadius: '16px', padding: '12px 14px' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '10px', backgroundColor: 'rgba(34, 197, 94, 0.18)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <ArrowUpRight size={18} />
+            </div>
+            <div>
+              <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600 }}>{t('income')}</span>
+              <p style={{ fontSize: '14px', fontWeight: 800, color: '#34d399', margin: 0 }}>
                 +{formatCurrency(income, currencySymbol, 0)}
               </p>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '12px', backgroundColor: 'var(--danger-glow)', color: 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <ArrowDownRight size={20} />
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', background: 'rgba(239, 68, 68, 0.06)', border: '1px solid rgba(239, 68, 68, 0.16)', borderRadius: '16px', padding: '12px 14px' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '10px', backgroundColor: 'rgba(239, 68, 68, 0.18)', color: '#f87171', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <ArrowDownRight size={18} />
             </div>
             <div>
-              <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('expenses')}</span>
-              <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--danger)' }}>
+              <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600 }}>{t('expenses')}</span>
+              <p style={{ fontSize: '14px', fontWeight: 800, color: '#f87171', margin: 0 }}>
                 -{formatCurrency(expenses, currencySymbol, 0)}
               </p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* ─── My Accounts in Wallet Section (Screenshot 1) ─── */}
-      <div className="glass-panel" style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <div className="glass-panel" style={{
+        padding: '16px 18px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+        borderRadius: '20px',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        marginBottom: '0px',
+        boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
+      }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             <Wallet size={18} style={{ color: 'var(--primary)', flexShrink: 0 }} />
@@ -843,7 +829,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 background: 'rgba(34,197,94,0.1)',
                 border: '1px solid rgba(34,197,94,0.25)',
                 borderRadius: '20px',
-                padding: '4px 12px',
+                padding: '5px 14px',
                 color: 'var(--primary)',
                 fontSize: '12px',
                 fontWeight: 700,
@@ -858,8 +844,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <button
               onClick={onAddAccountClick}
               style={{
-                width: '28px',
-                height: '28px',
+                width: '30px',
+                height: '30px',
                 borderRadius: '50%',
                 border: '1px solid var(--border-card)',
                 background: 'rgba(255, 255, 255, 0.08)',
@@ -876,8 +862,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
 
-        {/* Accounts Grid - Renders All Accounts */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px' }}>
+        {/* Accounts Grid - Enforced 2 Cards Per Row (2 Columns) */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px' }}>
           {myAccounts.map((acc, index) => {
             const defaultColors = ['#0284c7', '#ea580c', '#7c3aed', '#22c55e', '#06b6d4', '#ec4899', '#f59e0b'];
             const cardBg = acc.color || defaultColors[index % defaultColors.length];
@@ -886,14 +872,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 key={acc.id}
                 style={{
                   background: cardBg,
-                  borderRadius: '14px',
+                  borderRadius: '16px',
                   padding: '12px 14px',
                   color: '#ffffff',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  minHeight: '72px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  minHeight: '74px',
+                  boxShadow: '0 4px 14px rgba(0,0,0,0.18)',
                   position: 'relative',
                   overflow: 'hidden'
                 }}
@@ -1003,11 +989,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '16px 20px',
+          padding: '14px 16px',
           background: 'var(--bg-card)',
-          border: '1px solid var(--border-card)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
           borderRadius: '20px',
-          boxShadow: 'var(--glow-shadow)'
+          marginBottom: '0px',
+          boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{ width: '36px', height: '36px', borderRadius: '12px', backgroundColor: 'rgba(16, 185, 129, 0.12)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1051,11 +1038,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '16px 20px',
+        padding: '14px 16px',
         background: 'var(--bg-card)',
-        border: '1px solid var(--border-card)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
         borderRadius: '20px',
-        boxShadow: 'var(--glow-shadow)'
+        marginBottom: '0px',
+        boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)', flexShrink: 0 }}>
@@ -1079,8 +1067,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-
-
       <PremiumHub
         transactions={transactions}
         budgets={budgets}
@@ -1089,26 +1075,32 @@ export const Dashboard: React.FC<DashboardProps> = ({
       />
 
       {/* Zen Mascot Coach Card - Dynamic AI Advice */}
-      <div className="glass-panel animate-fade-in" style={{ display: 'flex', gap: '14px', padding: '16px', background: 'var(--bg-card)', alignItems: 'center', border: '1px solid var(--border-card)' }}>
+      <div className="glass-panel animate-fade-in" style={{
+        display: 'flex',
+        gap: '12px',
+        padding: '14px 16px',
+        background: 'var(--bg-card)',
+        alignItems: 'center',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '20px',
+        marginBottom: '0px',
+        boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
+      }}>
         <span style={{ fontSize: '32px', flexShrink: 0 }}>🌿</span>
         <div style={{ textAlign: 'left', flex: 1, minWidth: 0 }}>
           <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('zen_coach')}</h4>
-          <p
-            data-coach-text
-            style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.4, marginTop: '2px', fontWeight: 500 }}
-          >
-            "{(() => {
-              const activeLang = localStorage.getItem('zb_language') || 'en';
-              const coachArray = activeLang === 'hi' ? DAILY_COACH_TIPS_HI : DAILY_COACH_TIPS;
-              const dayOfMonth = new Date().getDate();
-              const dailyTip = coachArray[(dayOfMonth - 1) % coachArray.length];
+          {(() => {
+            const activeLang = localStorage.getItem('zb_language') || 'en';
+            const coachArray = activeLang === 'hi' ? DAILY_COACH_TIPS_HI : DAILY_COACH_TIPS;
+            const dayOfMonth = new Date().getDate();
+            const dailyTip = coachArray[(dayOfMonth - 1) % coachArray.length];
 
-              if (expenses === 0 && income === 0) {
-                return activeLang === 'hi' 
-                  ? `${dailyTip} व्यक्तिगत बजट कोचिंग पाने के लिए अपने लेन-देन दर्ज करना शुरू करें! 🧘`
-                  : `${dailyTip} Start logging your transactions to get personalized budget coaching! 🧘`;
-              }
-
+            let fullCoachText = '';
+            if (expenses === 0 && income === 0) {
+              fullCoachText = activeLang === 'hi' 
+                ? `${dailyTip} व्यक्तिगत बजट कोचिंग पाने के लिए अपने लेन-देन दर्ज करना शुरू करें! 🧘`
+                : `${dailyTip} Start logging your transactions to get personalized budget coaching! 🧘`;
+            } else {
               const savingsPct = income > 0 ? Math.round(((income - expenses) / income) * 100) : 0;
               const topCat = Object.entries(
                 currentMonthTransactions.filter(t => t.type === 'expense')
@@ -1139,10 +1131,40 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   statsSummary += ` Heavy spending detected in ${topCat[0]} (${currencySymbol}${Math.round(topCat[1]).toLocaleString()}).`;
                 }
               }
+              fullCoachText = `${dailyTip} ${statsSummary}`;
+            }
 
-              return `${dailyTip} ${statsSummary}`;
-            })()}"
-          </p>
+            const truncatedText = fullCoachText.length > 85 ? fullCoachText.slice(0, 85) : fullCoachText;
+            const needsTruncation = fullCoachText.length > 85;
+
+            return (
+              <p
+                data-coach-text={fullCoachText}
+                style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.4, marginTop: '2px', fontWeight: 500, margin: 0 }}
+              >
+                "{isZenCoachExpanded || !needsTruncation ? fullCoachText : `${truncatedText}...`}"
+                {needsTruncation && (
+                  <button
+                    type="button"
+                    onClick={() => setIsZenCoachExpanded(!isZenCoachExpanded)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      color: 'var(--primary)',
+                      fontWeight: 800,
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      marginLeft: '6px',
+                      display: 'inline'
+                    }}
+                  >
+                    {isZenCoachExpanded ? 'show less' : 'more'}
+                  </button>
+                )}
+              </p>
+            );
+          })()}
         </div>
         {/* TTS Speak Button */}
         <button
@@ -1152,7 +1174,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               setIsSpeaking(false);
             } else {
               const coachEl = document.querySelector('[data-coach-text]');
-              const text = coachEl?.textContent?.replace(/"/g, '') || 'Keep building your money habits!';
+              const text = coachEl?.getAttribute('data-coach-text') || coachEl?.textContent?.replace(/"/g, '') || 'Keep building your money habits!';
               const utterance = new SpeechSynthesisUtterance(text);
 
               // Set rate and pitch for a natural, friendly tone
@@ -1165,18 +1187,26 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 hi: 'hi-IN',
                 es: 'es-ES',
                 fr: 'fr-FR',
-                de: 'de-DE'
+                de: 'de-DE',
+                ta: 'ta-IN',
+                bn: 'bn-IN',
+                mr: 'mr-IN',
+                gu: 'gu-IN',
+                te: 'te-IN'
               };
               utterance.lang = langCodeMap[activeLang] || 'en-US';
 
               const voices = window.speechSynthesis.getVoices();
               const langPrefix = activeLang;
-              const matchingVoice = voices.find(v => v.lang.startsWith(langPrefix)) || voices.find(v => v.lang.startsWith('en'));
+              const matchingVoice = voices.find(v => v.lang.toLowerCase().startsWith(langPrefix)) ||
+                                    voices.find(v => v.lang.toLowerCase().startsWith(utterance.lang.toLowerCase())) ||
+                                    voices.find(v => v.lang.toLowerCase().startsWith('en'));
               if (matchingVoice) {
                 utterance.voice = matchingVoice;
               }
 
               utterance.onend = () => setIsSpeaking(false);
+              utterance.onerror = () => setIsSpeaking(false);
               window.speechSynthesis.speak(utterance);
               setIsSpeaking(true);
             }
@@ -1630,20 +1660,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
       })()}
 
       {/* Shareable Card & Monthly Letter action row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
         <button
           onClick={() => setShowShareModal(true)}
           className="glass-panel glass-panel-hover"
-          style={{ padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '1px solid var(--border-input)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+          style={{ padding: '10px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', border: '1px solid var(--border-input)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '11.5px', fontWeight: 800, cursor: 'pointer', borderRadius: '16px', whiteSpace: 'nowrap' }}
         >
-          <span>{t('share_card')}</span>
+          <Share2 size={15} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+          <span style={{ whiteSpace: 'nowrap' }}>{t('share_card')}</span>
         </button>
         <button
           onClick={() => setShowMonthlyLetter(true)}
           className="glass-panel glass-panel-hover"
-          style={{ padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '1px solid var(--border-input)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+          style={{ padding: '10px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', border: '1px solid var(--border-input)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '11.5px', fontWeight: 800, cursor: 'pointer', borderRadius: '16px', whiteSpace: 'nowrap' }}
         >
-          <span>{t('monthly_letter')}</span>
+          <FileText size={15} style={{ color: '#3b82f6', flexShrink: 0 }} />
+          <span style={{ whiteSpace: 'nowrap' }}>{t('monthly_letter')}</span>
         </button>
       </div>
 
@@ -1990,23 +2022,24 @@ export const Dashboard: React.FC<DashboardProps> = ({
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           backgroundColor: 'rgba(0, 0, 0, 0.88)', backdropFilter: 'blur(12px)',
           display: 'flex', justifyContent: 'center', alignItems: 'center',
-          zIndex: 2000, padding: '20px'
+          zIndex: 2000, padding: '16px'
         }} onClick={() => setShowInviteModal(false)}>
           <div
             className="glass-panel animate-slide-up"
             style={{
-              width: '100%', maxWidth: '345px', padding: '24px', borderRadius: '28px',
+              width: '100%', maxWidth: '345px', padding: '18px 20px', borderRadius: '24px',
               background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(9, 9, 15, 0.98) 100%)',
               border: '1px solid rgba(236, 72, 153, 0.3)', position: 'relative',
-              textAlign: 'center', color: '#fff', boxShadow: '0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(236,72,153,0.08)'
+              textAlign: 'center', color: '#fff', boxShadow: '0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(236,72,153,0.08)',
+              maxHeight: '92vh', overflowY: 'auto'
             }}
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '20px' }}>🎁</span>
-                <h3 style={{ fontSize: '18px', fontWeight: 800, fontFamily: "'Manrope', sans-serif" }}>Invite & Earn Premium</h3>
+                <span style={{ fontSize: '18px' }}>🎁</span>
+                <h3 style={{ fontSize: '16px', fontWeight: 800, fontFamily: "'Manrope', sans-serif", margin: 0 }}>Invite & Earn Premium</h3>
               </div>
               <button
                 onClick={() => setShowInviteModal(false)}
@@ -2014,8 +2047,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   background: 'rgba(255, 255, 255, 0.05)',
                   border: 'none',
                   borderRadius: '50%',
-                  width: '28px',
-                  height: '28px',
+                  width: '26px',
+                  height: '26px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -2028,22 +2061,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             {/* Content info */}
-            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5', textAlign: 'left', marginBottom: '16px' }}>
-              Get <strong>1 Month Free Premium Reward</strong> when a friend joins using your code and purchases any plan!
+            <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.4', textAlign: 'left', marginBottom: '12px' }}>
+              Get <strong>1 Month Free Premium Reward</strong> when a friend joins using your code!
             </p>
 
             <div style={{
               background: 'rgba(255,255,255,0.02)',
               border: '1px dashed rgba(236, 72, 153, 0.4)',
-              borderRadius: '16px',
-              padding: '14px',
-              marginBottom: '20px',
+              borderRadius: '14px',
+              padding: '10px',
+              marginBottom: '12px',
               display: 'flex',
               flexDirection: 'column',
-              gap: '6px'
+              gap: '4px'
             }}>
-              <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>YOUR REFERRAL CODE</span>
-              <span style={{ fontSize: '20px', fontWeight: 800, color: 'var(--secondary)', letterSpacing: '0.05em' }}>
+              <span style={{ fontSize: '9px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>YOUR REFERRAL CODE</span>
+              <span style={{ fontSize: '18px', fontWeight: 800, color: 'var(--secondary)', letterSpacing: '0.05em' }}>
                 {(() => {
                   let inviteCode = localStorage.getItem('zb_user_referral_code') || localStorage.getItem('zb_invite_code');
                   if (!inviteCode) {
@@ -2060,18 +2093,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             {/* Steps list */}
-            <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '22px' }}>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(236,72,153,0.1)', color: '#ec4899', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '10px', fontWeight: 800, textAlign: 'center', lineHeight: '18px', paddingLeft: '5px' }}>1</span>
-                <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.85)', lineHeight: 1.4 }}>Share your link or code with a friend.</span>
+            <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(236,72,153,0.15)', color: '#ec4899', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '9px', fontWeight: 800 }}>1</span>
+                <span style={{ fontSize: '10.5px', color: 'rgba(255,255,255,0.85)' }}>Share link or code with a friend</span>
               </div>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(236,72,153,0.1)', color: '#ec4899', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '10px', fontWeight: 800, textAlign: 'center', lineHeight: '18px', paddingLeft: '5px' }}>2</span>
-                <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.85)', lineHeight: 1.4 }}>Friend enters your code at signup & joins trial.</span>
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(236,72,153,0.15)', color: '#ec4899', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '9px', fontWeight: 800 }}>2</span>
+                <span style={{ fontSize: '10.5px', color: 'rgba(255,255,255,0.85)' }}>Friend enters code at signup</span>
               </div>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(236,72,153,0.1)', color: '#ec4899', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '10px', fontWeight: 800, textAlign: 'center', lineHeight: '18px', paddingLeft: '5px' }}>3</span>
-                <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.85)', lineHeight: 1.4 }}><strong>Friend buys/upgrades plan</strong>, and your premium is automatically extended by 30 days!</span>
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(236,72,153,0.15)', color: '#ec4899', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '9px', fontWeight: 800 }}>3</span>
+                <span style={{ fontSize: '10.5px', color: 'rgba(255,255,255,0.85)' }}><strong>Get +30 Days Premium FREE!</strong> 🎉</span>
               </div>
             </div>
 
@@ -3268,6 +3301,5 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       )}
     </div>
-  </div>
-);
+  );
 };

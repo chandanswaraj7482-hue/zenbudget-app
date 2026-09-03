@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Delete, AlertCircle, CheckCircle, Mail, KeyRound, Loader2, LogOut, ArrowLeft, User, Download, Fingerprint, X, Gift, Eye, EyeOff, Globe } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { playNotificationSound } from '../utils/audio';
@@ -110,8 +110,14 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
           .then((available) => {
             if (available) {
-              setBiometricsAvailable(true);
-              console.log('LockScreen: Web biometric (WebAuthn) available');
+              // Only mark biometrics as available if user has previously registered a credential
+              const hasCredential = !!localStorage.getItem('zb_webauthn_cred_id');
+              if (hasCredential) {
+                setBiometricsAvailable(true);
+                console.log('LockScreen: Web biometric (WebAuthn) available and credential registered');
+              } else {
+                console.log('LockScreen: Web biometric hardware available but no credential registered yet');
+              }
             }
           })
           .catch((err) => {
@@ -428,14 +434,30 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
 
         console.log("LockScreen: Profile ready, unlocking...");
         setIsLoading(false);
-        // Force users to create a PIN if they have the default '0000' or no custom PIN
-        if (!userProf.pin || userProf.pin === '0000') {
-          setStep('onboard-pin');
-        } else {
+        // Check localStorage first — if user has already created a PIN before, go to unlock directly
+        const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem(`zb_pin_${uid}`);
+        const pinAlreadyCreated = localStorage.getItem('zb_pin_created') === 'true';
+        const effectivePin = localPin && localPin !== '0000' && localPin.length >= 4 ? localPin : (userProf.pin && userProf.pin !== '0000' ? userProf.pin : null);
+
+        if (effectivePin || pinAlreadyCreated) {
+          // User has a valid PIN — always go to unlock screen
+          if (!localPin || localPin !== effectivePin) {
+            if (effectivePin) localStorage.setItem('zb_user_pin', effectivePin);
+          }
           setStep('unlock');
+        } else {
+          // No valid PIN found anywhere — show create PIN screen
+          setStep('onboard-pin');
         }
       } else {
-        setStep('onboard-pin');
+        // No DB profile found — check localStorage PIN before sending to onboard
+        const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem(`zb_pin_${uid}`);
+        const pinAlreadyCreated = localStorage.getItem('zb_pin_created') === 'true';
+        if ((localPin && localPin !== '0000' && localPin.length >= 4) || pinAlreadyCreated) {
+          setStep('unlock');
+        } else {
+          setStep('onboard-pin');
+        }
         setIsLoading(false);
       }
     } catch (err: any) {
@@ -475,7 +497,14 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           setStep('unlock');
         } catch (_) { setStep('auth'); }
       } else {
-        setStep('auth');
+        // Even without session cache, if PIN was created go to unlock
+        const localPin = localStorage.getItem('zb_user_pin');
+        const pinCreated = localStorage.getItem('zb_pin_created') === 'true';
+        if (pinCreated || (localPin && localPin !== '0000' && localPin.length >= 4)) {
+          setStep('unlock');
+        } else {
+          setStep('auth');
+        }
       }
     }, 2000);
 
@@ -517,7 +546,14 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
             setStep('auth');
           }
         } else {
-          setStep('auth');
+          // No cached session — but if PIN was created before, go to unlock not auth
+          const localPin = localStorage.getItem('zb_user_pin');
+          const pinCreated = localStorage.getItem('zb_pin_created') === 'true';
+          if (pinCreated || (localPin && localPin !== '0000' && localPin.length >= 4)) {
+            setStep('unlock');
+          } else {
+            setStep('auth');
+          }
         }
       }
     } catch (err) {
@@ -625,9 +661,12 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
     }
   }
 
+  const biometricTriggered = useRef(false);
+
   // Effect to auto-trigger biometric unlock prompt on mount or step change
   useEffect(() => {
-    if (step === 'unlock' && biometricsAvailable && dbProfile) {
+    if (step === 'unlock' && biometricsAvailable && dbProfile && !biometricTriggered.current) {
+      biometricTriggered.current = true;
       triggerBiometricUnlock();
     }
   }, [step, biometricsAvailable, dbProfile]);
@@ -827,6 +866,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         if (error) throw error;
         
         localStorage.setItem('zb_user_pin', pin);
+        localStorage.setItem('zb_pin_created', 'true');
         playNotificationSound('success');
         onUnlock(
           currentUserId, 
@@ -948,6 +988,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
 
       // Store generated invite code for local UI referral sharing
       localStorage.setItem('zb_invite_code', myReferralCode);
+      localStorage.setItem('zb_user_pin', pin);
+      localStorage.setItem('zb_pin_created', 'true');
 
       playNotificationSound('success');
       onUnlock(currentUserId, newProfile.name, restoredTier, newProfile.trial_start_date, pin, restoredExpiry, null);
@@ -1071,8 +1113,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
       overflowY: 'auto',
       WebkitOverflowScrolling: 'touch',
       boxSizing: 'border-box',
-      background: 'radial-gradient(circle at 50% 30%, rgba(34, 197, 94, 0.18) 0%, rgba(9, 9, 15, 0) 70%)',
-      animation: 'fadeIn 0.5s ease-out'
+      background: 'transparent',
+      animation: 'fadeIn 0.35s ease-out'
     }}>
       <div style={{
         display: 'flex',
@@ -1088,6 +1130,32 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', margin: '20px 0' }}>
           <Loader2 size={36} className="animate-spin" style={{ color: 'var(--primary)' }} />
           <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Securing access...</span>
+        </div>
+      )}
+
+      {/* Fallback Safety: If step is unlock but profile is missing */}
+      {!isLoading && step === 'unlock' && !dbProfile && (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', textAlign: 'center', padding: '24px' }}>
+          <div style={{ fontSize: '40px' }}>🔑</div>
+          <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff', margin: 0 }}>Unlock ZenBudget</h3>
+          <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0, maxWidth: '280px' }}>
+            Session ready. Click below to continue to your dashboard or sign in again.
+          </p>
+          <button
+            onClick={() => setStep('auth')}
+            style={{
+              padding: '12px 20px',
+              borderRadius: '14px',
+              border: 'none',
+              background: 'linear-gradient(135deg, #22c55e 0%, #06b6d4 100%)',
+              color: '#ffffff',
+              fontWeight: 800,
+              fontSize: '13px',
+              cursor: 'pointer'
+            }}
+          >
+            🔓 Continue / Sign In
+          </button>
         </div>
       )}
 
@@ -1111,13 +1179,10 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '28px' }}>
             <div style={{
               width: '72px', height: '72px', borderRadius: '22px',
-              background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%)',
-              border: '1px solid rgba(34, 197, 94, 0.25)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 8px 32px rgba(34, 197, 94, 0.2)',
               marginBottom: '14px', overflow: 'hidden'
             }}>
-              <img src="/favicon.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src="/favicon.png?v=10" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <h1 style={{ fontSize: '30px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
               <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
@@ -1413,13 +1478,10 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '20px' }}>
             <div style={{
               width: '72px', height: '72px', borderRadius: '22px',
-              background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%)',
-              border: '1px solid rgba(34, 197, 94, 0.25)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 8px 32px rgba(34, 197, 94, 0.2)',
               marginBottom: '14px', overflow: 'hidden'
             }}>
-              <img src="/favicon.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src="/favicon.png?v=10" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <h2 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 4px 0', fontFamily: "'Manrope', sans-serif" }}>
               {step === 'onboard-pin' ? 'Create PIN' : 'Confirm PIN'}
@@ -1510,6 +1572,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               style={{
                 height: '56px',
                 width: '56px',
+                minWidth: '56px',
+                maxWidth: '56px',
+                minHeight: '56px',
+                maxHeight: '56px',
+                padding: 0,
                 borderRadius: '50%',
                 border: '1px solid var(--border-card)',
                 background: 'var(--bg-card)',
@@ -1681,7 +1748,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               fontWeight: 700,
               color: '#22c55e'
             }}>
-              <span>Today's Limit: Stay under ₹1,538</span>
+              <span>Today's Limit: Stay under ₹{(parseInt(localStorage.getItem('zb_daily_limit') || '1000', 10)).toLocaleString()}</span>
               <span>🤝</span>
             </div>
           </div>
@@ -1766,35 +1833,39 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                 {num}
               </button>
             ))}
-            
-            {/* Left Keypad Column: Biometrics button */}
-            <button
-              onClick={() => triggerBiometricUnlock()}
-              style={{
-                height: '60px',
-                width: '60px',
-                minWidth: '60px',
-                maxWidth: '60px',
-                minHeight: '60px',
-                maxHeight: '60px',
-                padding: 0,
-                borderRadius: '50%',
-                border: '1px solid rgba(34, 197, 94, 0.3)',
-                background: 'rgba(34, 197, 94, 0.12)',
-                color: '#22c55e',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 0 16px rgba(34, 197, 94, 0.25)',
-                transition: 'all 0.15s ease',
-                margin: '0 auto'
-              }}
-              onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.3)'}
-              onMouseUp={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.12)'}
-            >
-              <Fingerprint size={24} />
-            </button>
+
+            {/* Left Keypad Column: Biometrics button — only shown when biometrics are available */}
+            {biometricsAvailable ? (
+              <button
+                onClick={() => triggerBiometricUnlock()}
+                style={{
+                  height: '60px',
+                  width: '60px',
+                  minWidth: '60px',
+                  maxWidth: '60px',
+                  minHeight: '60px',
+                  maxHeight: '60px',
+                  padding: 0,
+                  borderRadius: '50%',
+                  border: '1px solid rgba(34, 197, 94, 0.3)',
+                  background: 'rgba(34, 197, 94, 0.12)',
+                  color: '#22c55e',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 0 16px rgba(34, 197, 94, 0.25)',
+                  transition: 'all 0.15s ease',
+                  margin: '0 auto'
+                }}
+                onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.3)'}
+                onMouseUp={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.12)'}
+              >
+                <Fingerprint size={24} />
+              </button>
+            ) : (
+              <div style={{ width: '60px', height: '60px', margin: '0 auto' }} />
+            )}
 
             {/* Center Column: 0 */}
             <button

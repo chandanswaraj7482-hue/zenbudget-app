@@ -31,20 +31,21 @@ export const launchCashfreeCheckout = async (
   const isNative = !!(window as any).Capacitor?.isNativePlatform?.() || (window as any).Capacitor?.platform === 'android' || (window as any).Capacitor?.platform === 'ios';
   const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
-  // Fix: For Native Android App or Localhost WebView, open Chrome Custom Tabs via Browser.open
-  // This bypasses the Cashfree "https://localhost is not approved" whitelist error!
-  if (isNative || isLocalhost) {
+  // Fix: For Native Android App, open Chrome Custom Tabs via Browser.open
+  if (isNative) {
     try {
       const { Browser } = await import('@capacitor/browser');
       const payUrl = `https://zenbudget-tracker.vercel.app/pay.html?session_id=${encodeURIComponent(paymentSessionId)}`;
       console.log('Launching Cashfree via Native Browser Chrome Custom Tab:', payUrl);
       await Browser.open({ url: payUrl });
-      if (onSuccess) onSuccess({ status: 'launched_in_browser' });
+      // Do NOT call onSuccess here — wait for webhook verification via DB polling
+      console.log('Payment browser launched. Waiting for webhook verification...');
       return;
     } catch (browserErr) {
       console.warn('Browser.open failed, falling back to window.open:', browserErr);
       window.open(`https://zenbudget-tracker.vercel.app/pay.html?session_id=${encodeURIComponent(paymentSessionId)}`, '_blank');
-      if (onSuccess) onSuccess({ status: 'launched_in_browser' });
+      // Do NOT call onSuccess here — wait for webhook verification via DB polling
+      console.log('Payment browser fallback launched. Waiting for webhook verification...');
       return;
     }
   }

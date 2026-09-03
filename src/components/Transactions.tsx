@@ -300,9 +300,9 @@ export const Transactions: React.FC<TransactionsProps> = ({
                         position: 'relative'
                       }}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', width: '100%' }}>
                         <div 
-                          style={{ display: 'flex', gap: '12px', alignItems: 'center', cursor: 'pointer', flex: 1 }}
+                          style={{ display: 'flex', gap: '10px', alignItems: 'center', cursor: 'pointer', flex: '1 1 0%', minWidth: 0 }}
                           onClick={() => onEditTransaction(t)}
                         >
                           <div style={{ 
@@ -313,13 +313,14 @@ export const Transactions: React.FC<TransactionsProps> = ({
                             color: t.type === 'income' ? 'var(--success)' : meta.color,
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center'
+                            justifyContent: 'center',
+                            flexShrink: 0
                           }}>
                             {getCategoryIcon(t.category, t.type)}
                           </div>
-                          <div>
-                            <h4 style={{ fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                              {t.title}
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <h4 style={{ fontSize: '13.5px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', margin: 0, lineHeight: 1.3 }}>
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>{t.title}</span>
                               {t.paidBy && (
                                 <span style={{ 
                                   fontSize: '9px', 
@@ -329,7 +330,8 @@ export const Transactions: React.FC<TransactionsProps> = ({
                                   background: t.paidBy === 'You' ? 'rgba(34,197,94,0.1)' : 'rgba(236,72,153,0.1)', 
                                   color: t.paidBy === 'You' ? 'var(--primary)' : '#ec4899',
                                   textTransform: 'uppercase',
-                                  letterSpacing: '0.05em'
+                                  letterSpacing: '0.05em',
+                                  flexShrink: 0
                                 }}>
                                   {t.paidBy}
                                 </span>
@@ -338,33 +340,35 @@ export const Transactions: React.FC<TransactionsProps> = ({
                                 <span style={{
                                   fontSize: '9px',
                                   fontWeight: 800,
-                                  padding: '2px 8px',
+                                  padding: '2px 6px',
                                   borderRadius: '8px',
                                   background: 'rgba(139,92,246,0.15)',
                                   color: '#a78bfa',
                                   textTransform: 'uppercase',
                                   letterSpacing: '0.05em',
-                                  display: 'flex',
+                                  display: 'inline-flex',
                                   alignItems: 'center',
-                                  gap: '3px'
+                                  gap: '3px',
+                                  flexShrink: 0
                                 }}>
                                   👫 {t.partnerName}
                                 </span>
                               )}
                             </h4>
                             {t.notes && (
-                              <p style={{ fontSize: '11px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>
+                              <p style={{ fontSize: '11px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0, marginTop: '2px' }}>
                                 {t.notes}
                               </p>
                             )}
                           </div>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
                           <span style={{ 
-                            fontSize: '15px', 
+                            fontSize: '14px', 
                             fontWeight: 700, 
-                            color: t.type === 'income' ? 'var(--success)' : 'var(--text-primary)' 
+                            color: t.type === 'income' ? 'var(--success)' : 'var(--text-primary)',
+                            whiteSpace: 'nowrap'
                           }}>
                             {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount, currencySymbol)}
                           </span>
@@ -376,7 +380,11 @@ export const Transactions: React.FC<TransactionsProps> = ({
                               border: 'none',
                               color: 'var(--text-muted)',
                               cursor: 'pointer',
-                              padding: '4px'
+                              padding: '4px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0
                             }}
                           >
                             <MoreVertical size={16} />

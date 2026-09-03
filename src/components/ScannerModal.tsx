@@ -600,6 +600,8 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
 
   const handleProceedToPayment = () => {
     if (!checkHasScanPayAccess()) {
+      try { stopCamera(); } catch (_) {}
+      onClose();
       if (onRequireUnlockModal) onRequireUnlockModal();
       else window.dispatchEvent(new CustomEvent('open-scanpay-unlock'));
       return;
@@ -763,18 +765,18 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
       animation: 'fadeIn 0.2s ease-out', padding: '0'
     }}>
       <div style={{
-        width: '100%', maxWidth: '440px', background: 'var(--bg-card)',
+        width: '100%', maxWidth: '440px', background: '#0b0f19',
         borderRadius: '28px 28px 0 0', padding: '0 0 32px',
-        maxHeight: '92vh', overflowY: 'auto', border: '1px solid var(--border-card)',
-        borderBottom: 'none', position: 'relative', boxShadow: '0 -10px 40px rgba(0,0,0,0.5)',
+        maxHeight: '92vh', overflowY: 'auto', border: '1px solid rgba(255, 255, 255, 0.1)',
+        borderBottom: 'none', position: 'relative', boxShadow: '0 -10px 40px rgba(0,0,0,0.8)',
         WebkitOverflowScrolling: 'touch'
       }}>
-        {/* Sticky Header */}
+        {/* Sticky Header - Solid Opaque Background */}
         <div style={{
-          position: 'sticky', top: 0, zIndex: 30, background: 'var(--bg-card)',
+          position: 'sticky', top: 0, zIndex: 30, background: '#0b0f19',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '16px 20px', borderBottom: '1px solid var(--border-input)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+          padding: '16px 20px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.4)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{ padding: '8px', borderRadius: '12px', background: 'rgba(34,197,94,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1075,15 +1077,16 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
             {/* Feeling */}
             <div style={{ marginBottom: '22px' }}>
               <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '8px' }}>How does this feel?</label>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
                 {FEELINGS.map(f => (
                   <button key={f.label} type="button" onClick={() => setFeeling(f.label)} style={{
-                    padding: '8px 14px', borderRadius: '12px',
+                    padding: '8px 6px', borderRadius: '12px',
                     border: feeling === f.label ? '2px solid var(--primary)' : '1px solid var(--border-input)',
                     background: feeling === f.label ? 'rgba(34,197,94,0.15)' : 'var(--bg-input)',
                     color: feeling === f.label ? 'var(--primary)' : 'var(--text-primary)',
                     fontSize: '12px', cursor: 'pointer', fontWeight: 800,
-                    display: 'flex', alignItems: 'center', gap: '6px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
+                    whiteSpace: 'nowrap',
                     boxShadow: feeling === f.label ? '0 2px 8px rgba(34,197,94,0.2)' : 'none',
                     transition: 'all 0.15s ease'
                   }}>
@@ -1138,6 +1141,8 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                     payloadData,
                     null,
                     () => {
+                      try { stopCamera(); } catch (_) {}
+                      onClose();
                       if (onRequireUnlockModal) onRequireUnlockModal();
                       else window.dispatchEvent(new CustomEvent('open-scanpay-unlock'));
                     }

@@ -33,6 +33,7 @@ export const PremiumHub: React.FC<PremiumHubProps> = ({
   const [showStoryModal, setShowStoryModal] = useState(false);
   const [activeStorySlide, setActiveStorySlide] = useState(0);
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
+  const [isStreakExpanded, setIsStreakExpanded] = useState(false);
   const [audio] = useState(() => {
     const a = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
     a.loop = true;
@@ -58,24 +59,35 @@ export const PremiumHub: React.FC<PremiumHubProps> = ({
 
   // 2. DYNAMIC CALCULATION FOR MONEY STREAKS (Under Budget Days)
   const calculateMoneyStreak = () => {
-    // Let's check budget limits vs daily expenses for the last 30 days
-    const totalLimit = budgets.reduce((sum, b) => sum + b.limit, 0) || 500;
-    const dailyLimit = Math.ceil(totalLimit / 30);
+    if (!transactions || transactions.length === 0) return 0;
+
+    const totalLimit = budgets.reduce((sum, b) => sum + b.limit, 0) || 15000;
+    const dailyLimit = Math.max(100, Math.ceil(totalLimit / 30));
     
     let streak = 0;
-    const today = new Date();
-    for (let i = 0; i < 30; i++) {
-      const checkDate = new Date(today);
-      checkDate.setDate(today.getDate() - i);
-      const dStr = checkDate.toISOString().split('T')[0];
-      const dayExpenses = transactions
-        .filter(t => t.date === dStr && t.type === 'expense')
-        .reduce((sum, t) => sum + t.amount, 0);
-      
-      if (dayExpenses <= dailyLimit) {
+    const now = new Date();
+    const todayStr = now.toDateString();
+
+    const todayExpenses = transactions
+      .filter(t => t.type === 'expense' && new Date(t.date).toDateString() === todayStr)
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    if (todayExpenses > 0 && todayExpenses <= dailyLimit) {
+      streak++;
+    }
+
+    for (let i = 1; i <= 30; i++) {
+      const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+      const dStr = d.toDateString();
+
+      const dayTxs = transactions.filter(t => t.type === 'expense' && new Date(t.date).toDateString() === dStr);
+      if (dayTxs.length === 0) continue;
+
+      const daySpent = dayTxs.reduce((sum, t) => sum + t.amount, 0);
+      if (daySpent <= dailyLimit) {
         streak++;
       } else {
-        break; // Streak broken
+        break;
       }
     }
     return streak;
@@ -427,42 +439,102 @@ export const PremiumHub: React.FC<PremiumHubProps> = ({
         </div>
       )}
 
-      {/* Gamified Streaks Card */}
-      <div className="glass-panel" style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-card)', border: '1px solid var(--border-card)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'rgba(245,158,11,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Flame size={22} color="#f59e0b" className="animate-pulse" />
+      {/* Gamified Streaks Card - Premium Redesign */}
+      <div className="glass-panel" style={{
+        padding: '14px 16px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+        background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(234, 179, 8, 0.03) 100%)',
+        border: '1px solid rgba(245, 158, 11, 0.25)',
+        borderRadius: '20px',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.3)'
+      }}>
+        {/* Top Header Row */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: '1 1 0%' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.18)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Flame size={18} className="animate-pulse" />
+            </div>
+            <div style={{ minWidth: 0, flex: '1 1 0%' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
+                <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)', margin: 0, whiteSpace: 'nowrap' }}>
+                  {streakCount} {streakCount === 1 ? 'Day' : 'Days'} Streak 🔥
+                </h4>
+              </div>
+              <span style={{ fontSize: '10px', fontWeight: 700, color: '#f59e0b', display: 'block', whiteSpace: 'nowrap', marginTop: '1px' }}>
+                Under Budget Goal
+              </span>
+            </div>
           </div>
-          <div style={{ textAlign: 'left' }}>
-            <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
-              {t('days_under_budget').replace('{{days}}', String(streakCount))}
-            </h4>
-            <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: 0 }}>
-              {t('streak_sub')}
-            </p>
+          <div style={{
+            fontSize: '9.5px',
+            fontWeight: 800,
+            background: 'rgba(245, 158, 11, 0.18)',
+            color: '#fbbf24',
+            border: '1px solid rgba(245, 158, 11, 0.3)',
+            padding: '3px 8px',
+            borderRadius: '10px',
+            whiteSpace: 'nowrap',
+            flexShrink: 0
+          }}>
+            ⚡ Active
           </div>
         </div>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          alignSelf: 'center',
-          fontSize: '11px',
-          fontWeight: 800,
-          background: 'rgba(245,158,11,0.15)',
-          color: '#f59e0b',
-          padding: '8px 14px',
-          borderRadius: '20px',
-          whiteSpace: 'nowrap',
-          flexShrink: 0,
-          lineHeight: '1'
-        }}>
-          {t('streak_active')}
-        </div>
+
+        {/* Subtext with Clean View Stats / Hide Stats Toggle */}
+        <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4 }}>
+          Keep daily spend under limit to grow streak!{' '}
+          <button
+            type="button"
+            onClick={() => setIsStreakExpanded(!isStreakExpanded)}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              color: '#f59e0b',
+              fontWeight: 800,
+              fontSize: '11px',
+              cursor: 'pointer',
+              marginLeft: '3px',
+              display: 'inline',
+              textDecoration: 'underline'
+            }}
+          >
+            {isStreakExpanded ? 'hide stats' : 'view stats'}
+          </button>
+        </p>
+
+        {/* Streak Progress Bar (Expanded View) */}
+        {isStreakExpanded && (
+          <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '6px', paddingTop: '4px', borderTop: '1px solid rgba(245, 158, 11, 0.15)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)' }}>
+              <span>Monthly Goal</span>
+              <span style={{ color: '#f59e0b', fontWeight: 800 }}>{streakCount} / 30 Days ({Math.min(100, Math.round((streakCount / 30) * 100))}%)</span>
+            </div>
+            <div style={{ width: '100%', height: '6px', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.08)', overflow: 'hidden' }}>
+              <div style={{
+                width: `${Math.min(100, Math.round((streakCount / 30) * 100))}%`,
+                height: '100%',
+                background: 'linear-gradient(90deg, #f59e0b 0%, #eab308 100%)',
+                borderRadius: '10px',
+                transition: 'width 0.4s ease'
+              }} />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* AI Money Coach Daily Box */}
-      <div className="glass-panel" style={{ padding: '20px', background: 'var(--bg-card)', border: '1px solid var(--border-card)', textAlign: 'left' }}>
+      <div className="glass-panel" style={{
+        padding: '14px 16px',
+        background: 'var(--bg-card)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '20px',
+        marginBottom: '0px',
+        textAlign: 'left',
+        boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
+      }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
           <Sparkles size={16} color="var(--primary)" />
           <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--primary)' }}>

@@ -88,39 +88,37 @@ export const Budgets: React.FC<BudgetsProps> = ({
     .reduce((sum, t) => sum + t.amount, 0);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '140px' }} className="animate-fade-in">
-      <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em', margin: 0 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingBottom: '140px' }} className="animate-fade-in">
+      <h2 style={{ fontSize: '20px', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em', margin: 0 }}>
         {t('category_budgets')}
       </h2>
 
-      {/* Budget Summary Card */}
+      {/* Budget Summary Card - Sleek Compact Glass Design */}
       <div className="glass-panel" style={{
-        background: 'var(--bg-card)',
-        border: '1px solid var(--border-card)',
-        borderRadius: '24px',
-        padding: '24px',
-        boxShadow: 'var(--glow-shadow)'
+        background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(6, 182, 212, 0.04) 100%)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '18px',
+        padding: '16px 18px',
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '12px', backgroundColor: 'rgba(16, 185, 129, 0.12)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Info size={18} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '15px' }}>🎯</span>
+            <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              {t('total_allocated')}
+            </span>
           </div>
-          <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            {t('total_allocated')}
-          </span>
+          <div style={{ background: 'rgba(255, 255, 255, 0.06)', padding: '4px 10px', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+            <span style={{ fontSize: '11px', color: '#cbd5e1', fontWeight: 700 }}>
+              {t('spent_this_month')}: <strong style={{ color: '#34d399' }}>{currencySymbol}{totalExpenseThisMonth.toLocaleString('en-US', { maximumFractionDigits: 0 })}</strong>
+            </span>
+          </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '10px' }}>
-          <div>
-            <span style={{ fontSize: '34px', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em', lineHeight: 1 }}>
-              {currencySymbol}{totalAllocated.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-            </span>
-          </div>
-          <div style={{ background: 'var(--bg-dark)', padding: '6px 14px', borderRadius: '12px', border: '1px solid var(--border-card)' }}>
-            <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 700 }}>
-              {t('spent_this_month')}: <strong style={{ color: 'var(--text-primary)' }}>{currencySymbol}{totalExpenseThisMonth.toLocaleString('en-US', { maximumFractionDigits: 0 })}</strong>
-            </span>
-          </div>
+        <div style={{ margin: '6px 0 2px 0' }}>
+          <span style={{ fontSize: '24px', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', lineHeight: 1 }}>
+            {currencySymbol}{totalAllocated.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+          </span>
         </div>
       </div>
 
@@ -140,20 +138,20 @@ export const Budgets: React.FC<BudgetsProps> = ({
               style={{ 
                 display: 'flex', 
                 flexDirection: 'column', 
-                gap: '14px',
+                gap: '10px',
                 background: 'var(--bg-card)',
-                border: isOver ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid var(--border-card)',
-                borderRadius: '22px',
-                padding: '20px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+                border: isOver ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '18px',
+                padding: '14px 16px',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', width: '100%' }}>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
                   <div style={{ 
-                    width: '42px', 
-                    height: '42px', 
-                    borderRadius: '14px', 
+                    width: '38px', 
+                    height: '38px', 
+                    borderRadius: '12px', 
                     backgroundColor: cat.bg, 
                     color: cat.color,
                     display: 'flex',
@@ -163,9 +161,9 @@ export const Budgets: React.FC<BudgetsProps> = ({
                   }}>
                     {cat.icon}
                   </div>
-                  <div style={{ minWidth: 0 }}>
-                    <h4 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 2px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cat.label}</h4>
-                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                  <div style={{ minWidth: 0, flex: '1 1 0%', overflow: 'hidden' }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 1px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cat.label}</h4>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       Spent: <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(spent, currencySymbol)}</strong> {limit > 0 ? `of ${formatCurrency(limit, currencySymbol)}` : ''}
                     </span>
                   </div>
@@ -173,8 +171,8 @@ export const Budgets: React.FC<BudgetsProps> = ({
 
                 {/* Limit Editor */}
                 {isEditing ? (
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
-                    <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>{currencySymbol}</span>
+                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0, marginLeft: 'auto' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)' }}>{currencySymbol}</span>
                     <input
                       type="text"
                       inputMode="numeric"
@@ -182,14 +180,14 @@ export const Budgets: React.FC<BudgetsProps> = ({
                       onChange={(e) => setLimitInput(e.target.value.replace(/[^0-9]/g, ''))}
                       placeholder="Limit"
                       style={{
-                        width: '90px',
+                        width: '78px',
                         background: 'var(--bg-dark)',
                         border: '1px solid var(--primary)',
-                        borderRadius: '10px',
-                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        padding: '6px 8px',
                         color: 'var(--text-primary)',
                         outline: 'none',
-                        fontSize: '14px',
+                        fontSize: '13px',
                         fontWeight: 700
                       }}
                       autoFocus
@@ -199,9 +197,9 @@ export const Budgets: React.FC<BudgetsProps> = ({
                       style={{
                         background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                         border: 'none',
-                        borderRadius: '10px',
-                        width: '34px',
-                        height: '34px',
+                        borderRadius: '8px',
+                        width: '30px',
+                        height: '30px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -210,7 +208,7 @@ export const Budgets: React.FC<BudgetsProps> = ({
                         boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)'
                       }}
                     >
-                      <Check size={16} />
+                      <Check size={15} />
                     </button>
                   </div>
                 ) : (
@@ -219,16 +217,17 @@ export const Budgets: React.FC<BudgetsProps> = ({
                     style={{
                       background: limit > 0 ? 'var(--bg-dark)' : 'rgba(16, 185, 129, 0.1)',
                       border: limit > 0 ? '1px solid var(--border-card)' : '1px solid rgba(16, 185, 129, 0.3)',
-                      borderRadius: '12px',
-                      padding: '8px 16px',
-                      fontSize: '13px',
+                      borderRadius: '10px',
+                      padding: '6px 12px',
+                      fontSize: '12px',
                       fontWeight: 800,
                       cursor: 'pointer',
                       color: limit > 0 ? 'var(--text-primary)' : 'var(--primary)',
                       boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
                       transition: 'all 0.15s ease',
                       whiteSpace: 'nowrap',
-                      flexShrink: 0
+                      flexShrink: 0,
+                      marginLeft: 'auto'
                     }}
                   >
                     {limit > 0 ? formatCurrency(limit, currencySymbol) : `+ ${t('set_limit')}`}

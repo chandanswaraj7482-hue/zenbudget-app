@@ -146,9 +146,9 @@ export const LoansView: React.FC<LoansViewProps> = ({
     return { 
       P, 
       R, 
-      totalInterest: Number(totalInterest.toFixed(2)), 
-      totalPayable: Number(totalPayable.toFixed(2)), 
-      emiInstallment: Number(emiInstallment.toFixed(2)), 
+      totalInterest: Math.round(totalInterest), 
+      totalPayable: Math.round(totalPayable), 
+      emiInstallment: Math.round(emiInstallment), 
       installmentCount, 
       installmentLabel, 
       durationMonths,
@@ -178,7 +178,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
       principalAmount: principalNum,
       interestRate: ratePct > 0 ? ratePct : undefined,
       interestType: ratePct > 0 ? interestType : undefined,
-      emiInstallment: Number(emiInstallment.toFixed(2)),
+      emiInstallment: Math.round(emiInstallment),
       dueDate,
       startDate: new Date().toISOString().split('T')[0],
       createdAt: new Date().toISOString(),
@@ -857,7 +857,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
                       Per {live.installmentLabel.toUpperCase()} EMI:
                     </div>
                     <div style={{ fontSize: '16px', fontWeight: 900, color: '#a78bfa', marginTop: '2px' }}>
-                      {formatCurrency(live.emiInstallment, currencySymbol, live.emiInstallment % 1 !== 0 ? 2 : 0)} <span style={{ fontSize: '11px', fontWeight: 700, opacity: 0.7 }}>({live.installmentCount}x)</span>
+                      {formatCurrency(Math.round(live.emiInstallment), currencySymbol, 0)} <span style={{ fontSize: '11px', fontWeight: 700, opacity: 0.7 }}>({live.installmentCount}x)</span>
                     </div>
                   </div>
                 </div>

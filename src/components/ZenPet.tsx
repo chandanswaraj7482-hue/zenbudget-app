@@ -410,10 +410,11 @@ export const ZenPet: React.FC<ZenPetProps> = ({ currentProfileId, spentPercentag
     saveState(points, unlockedIds, nextEquipped);
   };
 
+  const [isZenPetExpanded, setIsZenPetExpanded] = useState(false);
   const activeAccessory = ACCESSORIES.find(a => a.id === equippedId);
 
   return (
-    <div className="glass-panel animate-fade-in" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-card)', position: 'relative' }}>
+    <div className="glass-panel animate-fade-in" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px', background: 'var(--bg-card)', border: '1px solid var(--border-card)', position: 'relative' }}>
       
       {/* Top bar with points */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
@@ -512,14 +513,43 @@ export const ZenPet: React.FC<ZenPetProps> = ({ currentProfileId, spentPercentag
               })()}
             </span>
           </div>
-          <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.4', margin: 0 }}>
-            {(() => {
-              if (equippedId === 'crown') return 'Wearing Royal Crown! Your Zen Companion feels 100% thrilled, royal, and invincible!';
-              if (equippedId === 'detective_hat') return 'Wearing Detective Hat! Zen Companion feels proud, smart, and ready for budgeting.';
-              if (equippedId === 'sunglasses') return 'Wearing Cool Sunglasses! Your companion is cheered up and feeling great!';
-              return 'Zen Piggy feels low and regretful. Equip items in the shop to cheer up your companion step-by-step!';
-            })()}
-          </p>
+          {(() => {
+            const fullDesc = equippedId === 'crown' 
+              ? 'Wearing Royal Crown! Your Zen Companion feels 100% thrilled, royal, and invincible!'
+              : equippedId === 'detective_hat'
+              ? 'Wearing Detective Hat! Zen Companion feels proud, smart, and ready for budgeting.'
+              : equippedId === 'sunglasses'
+              ? 'Wearing Cool Sunglasses! Your companion is cheered up and feeling great!'
+              : 'Zen Piggy feels low and regretful. Equip items in the shop to cheer up your companion step-by-step!';
+
+            const needsTruncation = fullDesc.length > 50;
+            const truncatedText = fullDesc.length > 50 ? fullDesc.slice(0, 50) : fullDesc;
+
+            return (
+              <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '1.4', margin: 0 }}>
+                "{isZenPetExpanded || !needsTruncation ? fullDesc : `${truncatedText}...`}"
+                {needsTruncation && (
+                  <button
+                    type="button"
+                    onClick={() => setIsZenPetExpanded(!isZenPetExpanded)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      color: 'var(--primary)',
+                      fontWeight: 800,
+                      fontSize: '11px',
+                      cursor: 'pointer',
+                      marginLeft: '5px',
+                      display: 'inline'
+                    }}
+                  >
+                    {isZenPetExpanded ? 'show less' : 'more'}
+                  </button>
+                )}
+              </p>
+            );
+          })()}
 
           {/* 🌟 Step-by-Step Happiness & Bond Progress Bar */}
           <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '3px' }}>

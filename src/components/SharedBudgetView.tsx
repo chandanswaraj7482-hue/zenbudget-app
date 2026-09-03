@@ -53,6 +53,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
   const [errorMsg, setErrorMsg] = useState('');
   const [permissionToast, setPermissionToast] = useState('');
   const [showAllPermissions, setShowAllPermissions] = useState(false);
+  const [showConnectPermissionsModal, setShowConnectPermissionsModal] = useState(false);
 
   // Selective module sync permissions state
   const [permissions, setPermissions] = useState<ModuleSyncPermissions>(() => {
@@ -114,14 +115,31 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleConnect = async (e: React.FormEvent) => {
+  const handleConnect = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!partnerInputCode.trim()) return;
+    setErrorMsg('');
+
+    if (!isPremiumUser) {
+      setErrorMsg('👑 Premium Compulsory: Couple & Family Sync requires an active Premium plan for ALL members! Upgrade to connect.');
+      if (onOpenSubscriptionModal) onOpenSubscriptionModal();
+      return;
+    }
+
+    setShowConnectPermissionsModal(true);
+  };
+
+  const handleConfirmConnectionWithPermissions = async () => {
+    setShowConnectPermissionsModal(false);
     if (!partnerInputCode.trim()) return;
     if (!onConnectPartner) return;
 
     setIsLinking(true);
     setErrorMsg('');
     try {
+      if (onSaveSyncPermissions && permissions) {
+        onSaveSyncPermissions(permissions);
+      }
       const success = await onConnectPartner(partnerInputCode.trim().toUpperCase());
       if (!success) {
         setErrorMsg('Invalid code or family profile not found/not premium.');
@@ -129,7 +147,8 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
         setPartnerInputCode('');
       }
     } catch (err: any) {
-      setErrorMsg(err.message || 'Failed to connect to family group.');
+      console.error('Connection error:', err);
+      setErrorMsg(err?.message || 'Failed to connect to family group.');
     } finally {
       setIsLinking(false);
     }
@@ -138,6 +157,92 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '90px', animation: 'fadeIn 0.3s ease-out' }}>
       
+      {/* ── PERMISSIONS SETUP MODAL BEFORE CONNECTING ── */}
+      {showConnectPermissionsModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div className="glass-panel animate-slide-up" style={{ width: '100%', maxWidth: '420px', padding: '24px', borderRadius: '24px', background: 'var(--bg-card)', border: '1px solid var(--border-card)', boxShadow: '0 20px 50px rgba(0,0,0,0.6)', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Shield size={20} color="#a78bfa" />
+                <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>Configure Access & Permissions</h3>
+              </div>
+              <button type="button" onClick={() => setShowConnectPermissionsModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '16px' }}>✕</button>
+            </div>
+
+            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '18px', lineHeight: 1.5 }}>
+              Set what modules and features your connected partner or family members can view and manage. You can edit these anytime later at the bottom of this screen.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
+              {[
+                { key: 'syncTransactions', label: '💳 Shared Ledger Transactions', desc: 'Sync expense entries and income transactions' },
+                { key: 'canAddTransactions', label: '✍️ Allow Partner to Add Entries', desc: 'Partner can log new transactions into the shared ledger' },
+                { key: 'syncAccounts', label: '🏦 Bank Accounts & Wallet Balances', desc: 'Sync bank accounts and wallet totals' },
+                { key: 'canEditTransactions', label: '✏️ Allow Partner to Edit', desc: 'Partner can modify existing transactions' },
+                { key: 'canDeleteTransactions', label: '🗑️ Allow Partner to Delete', desc: 'Partner can remove shared transactions' },
+                { key: 'syncBudgets', label: '📊 Category Budgets & Limits', desc: 'Sync shared category spending limits' },
+                { key: 'syncGoals', label: '🎯 Goals & Savings Progress', desc: 'Sync shared target savings milestones' },
+                { key: 'syncLoans', label: '🤝 Loans & Debts Ledger', desc: 'Sync borrowed and loaned money records' }
+              ].map(item => {
+                const safePerms = permissions || {
+                  syncTransactions: true, syncAccounts: true, syncBudgets: true,
+                  syncGoals: true, syncLoans: true, syncWishlist: true,
+                  canAddTransactions: false, canEditTransactions: false, canDeleteTransactions: false
+                };
+                const isChecked = Boolean(safePerms[item.key as keyof ModuleSyncPermissions]);
+                return (
+                  <div
+                    key={item.key}
+                    onClick={() => togglePermission(item.key as keyof ModuleSyncPermissions)}
+                    style={{
+                      padding: '11px 13px',
+                      borderRadius: '14px',
+                      background: isChecked ? 'rgba(139,92,246,0.12)' : 'rgba(255,255,255,0.02)',
+                      border: isChecked ? '1px solid rgba(139,92,246,0.35)' : '1px solid rgba(255,255,255,0.06)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <div>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', display: 'block' }}>
+                        {item.label}
+                      </span>
+                      <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
+                        {item.desc}
+                      </span>
+                    </div>
+                    <div style={{ color: isChecked ? '#a78bfa' : 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
+                      {isChecked ? <CheckSquare size={20} /> : <Square size={20} />}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                type="button"
+                onClick={() => setShowConnectPermissionsModal(false)}
+                style={{ flex: 1, padding: '12px', borderRadius: '12px', border: 'none', background: 'rgba(255,255,255,0.08)', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmConnectionWithPermissions}
+                disabled={isLinking}
+                style={{ flex: 1.5, padding: '12px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)', color: '#fff', fontSize: '13px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+              >
+                {isLinking ? 'Connecting...' : '🚀 Confirm & Connect Group'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Title Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <button 
@@ -188,6 +293,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                 <span style={{ fontSize: '11px', fontWeight: 800, color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'left' }}>
                   👥 CONNECTED GROUP MEMBERS ({activeFamilyMembers.length})
                 </span>
+                
                 {activeFamilyMembers.map(m => {
                   const mPermsKey = `zb_perm_${currentProfileId}_${m.id}`;
                   let mPerms = { allowView: true, allowEditDelete: false, allowAddTransactions: true };
@@ -513,7 +619,12 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                   <>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '8px', marginTop: '4px' }}>
                       {visibleItems.map(item => {
-                        const isChecked = permissions[item.key as keyof ModuleSyncPermissions];
+                        const safePerms = permissions || {
+                          syncTransactions: true, syncAccounts: true, syncBudgets: true,
+                          syncGoals: true, syncLoans: true, syncWishlist: true,
+                          canAddTransactions: false, canEditTransactions: false, canDeleteTransactions: false
+                        };
+                        const isChecked = Boolean(safePerms[item.key as keyof ModuleSyncPermissions]);
                         return (
                           <div
                             key={item.key}
@@ -608,19 +719,19 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
             
             {/* Dual Premium Requirement Notice */}
             <div style={{
-              padding: '12px 14px',
+              padding: '10px 12px',
               borderRadius: '14px',
               background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.12) 0%, rgba(249, 115, 22, 0.08) 100%)',
               border: '1px solid rgba(234, 179, 8, 0.3)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              gap: '10px'
+              gap: '8px'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '16px' }}>👑</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, flex: '1 1 0%' }}>
+                <span style={{ fontSize: '14px', flexShrink: 0 }}>👑</span>
                 <span style={{ fontSize: '11px', fontWeight: 700, color: '#fbbf24', lineHeight: 1.3 }}>
-                  Couple & Family Sync requires an active <strong>Premium Plan for ALL members</strong>.
+                  Couple &amp; Family Sync requires an active Premium Plan for ALL members.
                 </span>
               </div>
               {!isPremiumUser && onOpenSubscriptionModal && (
@@ -628,7 +739,7 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                   type="button"
                   onClick={onOpenSubscriptionModal}
                   style={{
-                    padding: '6px 12px',
+                    padding: '6px 10px',
                     borderRadius: '10px',
                     border: 'none',
                     background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
@@ -636,10 +747,11 @@ export const SharedBudgetView: React.FC<SharedBudgetViewProps> = ({
                     fontSize: '11px',
                     fontWeight: 800,
                     cursor: 'pointer',
-                    whiteSpace: 'nowrap'
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
                   }}
                 >
-                  Upgrade ⭐
+                  Upgrade →
                 </button>
               )}
             </div>

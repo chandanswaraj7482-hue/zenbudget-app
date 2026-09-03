@@ -45,6 +45,7 @@
   --border-button: rgba(255, 255, 255, 0.08);
   --scroll-thumb: rgba(255, 255, 255, 0.1);
   --bg-nav-glass: rgba(21, 32, 54, 0.85);
+  --bg-base: #0b0f19;
 }
 
 /* Ensure all circular avatars, badges, and icon buttons inside the application retain 100% perfect round circles and never squish into ovals */
@@ -107,6 +108,7 @@
   --border-input: rgba(0, 0, 0, 0.08);
   --bg-input-focus: #FFFFFF;
   --scroll-thumb: rgba(0, 0, 0, 0.16);
+  --bg-base: #F2F2F7;
 }
 
 /* Global Light Mode Canvas */
@@ -567,6 +569,11 @@ body {
   }
 }
 
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
 .animate-slide-up {
   animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -579,6 +586,18 @@ body {
 .c-food { color: #f59e0b; background-color: rgba(245, 158, 11, 0.1); }
 .c-shopping { color: var(--secondary); background-color: rgba(20, 184, 166, 0.1); }
 .c-entertainment { color: #8b5cf6; background-color: rgba(139, 92, 246, 0.1); }
+
+/* Emergency Blocker for Rogue Chrome Extensions (e.g., CouponCollection / BHK Widget) */
+iframe[src*="chrome-extension://"], 
+div[id*="bhk-"], 
+div[class*="bhk-"],
+.coupon-extension-wrapper {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: -9999 !important;
+}
+
 .c-bills { color: #3b82f6; background-color: rgba(59, 130, 246, 0.1); }
 .c-travel { color: #06b6d4; background-color: rgba(6, 182, 212, 0.1); }
 .c-health { color: #10b981; background-color: rgba(16, 185, 129, 0.1); }
@@ -714,23 +733,15 @@ div[style*="position:fixed"] {
 }
 
 @media (max-width: 360px) {
-  /* Foldable & Extra Small Devices (Galaxy Fold 280px-340px) */
+  /* Foldable & Extra Small Devices */
   .glass-panel {
-    padding: 10px 8px !important;
-    border-radius: 14px !important;
+    padding: 16px 14px !important;
+    border-radius: 20px !important;
   }
 
   h1 { font-size: 18px !important; }
   h2 { font-size: 16px !important; }
   h3 { font-size: 14px !important; }
-
-  /* Stack flex headers vertically if space is tight */
-  div[style*="display: flex"][style*="justify-content: space-between"] {
-    flex-wrap: wrap !important;
-    gap: 8px !important;
-  }
-
-  /* Removed aggressive global grid override that breaks dialpads */
 }
 
 /* 5. Safe Area Insets for Mobile Notch & Gesture Bars */
@@ -742,3 +753,168 @@ div[style*="position:fixed"] {
   padding-top: max(16px, env(safe-area-inset-top, 16px)) !important;
 }
 
+
+/* Dashboard Layout Fallback */
+.dashboard-layout-container > div,
+.dashboard-layout-container > section,
+.dashboard-layout-container > .glass-panel {
+  margin-bottom: 0 !important;
+}
+.dashboard-layout-container > *:last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================================
+   🌞 LIGHT MODE — COMPREHENSIVE DARK-BG OVERRIDE RULES
+   Fix all hardcoded dark backgrounds visible in light theme
+   ============================================================ */
+
+/* Dark modal/overlay backdrops — keep dark intentionally */
+.light-theme div[style*="rgba(2, 4, 12"],
+.light-theme div[style*="rgba(5, 7, 15"],
+.light-theme div[style*="rgba(0, 0, 0, 0.8"],
+.light-theme div[style*="rgba(0, 0, 0, 0.9"],
+.light-theme div[style*="background: rgba(0,0,0,0.8"],
+.light-theme div[style*="background: rgba(0,0,0,0.9"],
+.light-theme div[style*="background-color: rgba(0,0,0,0.8"] {
+  /* Keep dark overlays dark – they are modal backdrops */
+}
+
+/* Card-level hardcoded dark backgrounds → white/light in light mode */
+.light-theme div[style*="background: #0b0f19"]:not([style*="position: fixed"]):not([style*="position:fixed"]),
+.light-theme div[style*="background: #060d1a"]:not([style*="position: fixed"]):not([style*="position:fixed"]),
+.light-theme div[style*="background: #051a14"]:not([style*="position: fixed"]):not([style*="position:fixed"]),
+.light-theme div[style*="background: #07090f"]:not([style*="position: fixed"]):not([style*="position:fixed"]),
+.light-theme div[style*="background: #09090f"]:not([style*="position: fixed"]):not([style*="position:fixed"]),
+.light-theme div[style*="background: #0a0d14"]:not([style*="position: fixed"]):not([style*="position:fixed"]),
+.light-theme div[style*="background: #0c1117"]:not([style*="position: fixed"]):not([style*="position:fixed"]),
+.light-theme div[style*="background: #111827"]:not([style*="position: fixed"]):not([style*="position:fixed"]),
+.light-theme div[style*="background: #1a1a2e"]:not([style*="position: fixed"]):not([style*="position:fixed"]) {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.08) !important;
+}
+
+/* Semi-transparent dark backgrounds on cards */
+.light-theme div[style*="background: rgba(21, 32, 54"]:not([style*="position: fixed"]):not([style*="position:fixed"]),
+.light-theme div[style*="background: rgba(15, 23, 42"]:not([style*="position: fixed"]):not([style*="position:fixed"]),
+.light-theme div[style*="background: rgba(30, 41, 59"]:not([style*="position: fixed"]):not([style*="position:fixed"]) {
+  background: #f8f8fa !important;
+}
+
+/* Sticky / header dark bars */
+.light-theme div[style*="position: sticky"][style*="background: #0b0f19"],
+.light-theme div[style*="position:sticky"][style*="background: #0b0f19"],
+.light-theme div[style*="position: sticky"][style*="background: rgb(11, 15, 25)"] {
+  background: rgba(255,255,255,0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(0,0,0,0.06) !important;
+}
+
+/* Nav glass dark background override */
+.light-theme div[style*="background: rgba(11, 15, 25"],
+.light-theme div[style*="background:rgba(11,15,25"] {
+  background: rgba(255,255,255,0.9) !important;
+  backdrop-filter: blur(16px) !important;
+  border-top: 1px solid rgba(0,0,0,0.06) !important;
+}
+
+/* Linear gradient dark cards */
+.light-theme div[style*="linear-gradient(135deg, rgba(20, 20, 33"],
+.light-theme div[style*="linear-gradient(135deg,rgba(20,20,33"],
+.light-theme div[style*="linear-gradient(145deg, #0"],
+.light-theme div[style*="linear-gradient(135deg, #0b"],
+.light-theme div[style*="linear-gradient(135deg, #07"],
+.light-theme div[style*="linear-gradient(135deg, #06"] {
+  background: linear-gradient(135deg, #ffffff 0%, rgba(16, 185, 129, 0.06) 100%) !important;
+  border-color: rgba(16, 185, 129, 0.15) !important;
+}
+
+/* Fix dark slate text colors in light mode */
+.light-theme [style*="color: #0f172a"],
+.light-theme [style*="color:#0f172a"],
+.light-theme [style*="color: #1e293b"],
+.light-theme [style*="color:#1e293b"] {
+  color: #1D1D1F !important;
+}
+
+/* Fix very dark semi-transparent rgba backgrounds used as card tint */
+.light-theme div[style*="rgba(255,255,255,0.02)"],
+.light-theme div[style*="rgba(255, 255, 255, 0.02)"],
+.light-theme div[style*="rgba(255,255,255,0.03)"],
+.light-theme div[style*="rgba(255, 255, 255, 0.03)"],
+.light-theme div[style*="rgba(255,255,255,0.04)"],
+.light-theme div[style*="rgba(255, 255, 255, 0.04)"],
+.light-theme div[style*="rgba(255,255,255,0.05)"],
+.light-theme div[style*="rgba(255, 255, 255, 0.05)"],
+.light-theme div[style*="rgba(255,255,255,0.06)"],
+.light-theme div[style*="rgba(255, 255, 255, 0.06)"],
+.light-theme div[style*="rgba(255,255,255,0.07)"],
+.light-theme div[style*="rgba(255, 255, 255, 0.07)"],
+.light-theme div[style*="rgba(255,255,255,0.08)"],
+.light-theme div[style*="rgba(255, 255, 255, 0.08)"] {
+  background: rgba(0,0,0,0.03) !important;
+  border-color: rgba(0,0,0,0.06) !important;
+}
+
+/* Fix hardcoded dark hex input backgrounds */
+.light-theme input[style*="background: rgba(255,255,255,0.0"],
+.light-theme input[style*="background: rgba(255, 255, 255, 0.0"],
+.light-theme textarea[style*="background: rgba(255,255,255,0.0"],
+.light-theme select[style*="background: rgba(255,255,255,0.0"] {
+  background: #ffffff !important;
+  border-color: #D2D2D7 !important;
+  color: #1D1D1F !important;
+}
+
+/* Fix hardcoded dark borders (white/transparent on dark bg) */
+.light-theme div[style*="border: 1px solid rgba(255, 255, 255, 0.06)"],
+.light-theme div[style*="border: 1px solid rgba(255,255,255,0.06)"],
+.light-theme div[style*="border: 1px solid rgba(255, 255, 255, 0.08)"],
+.light-theme div[style*="border: 1px solid rgba(255,255,255,0.08)"],
+.light-theme div[style*="border: 1px solid rgba(255, 255, 255, 0.1)"],
+.light-theme div[style*="border: 1px solid rgba(255,255,255,0.1)"],
+.light-theme div[style*="border: 1px solid rgba(255, 255, 255, 0.05)"],
+.light-theme div[style*="border: 1px solid rgba(255,255,255,0.05)"] {
+  border-color: rgba(0,0,0,0.07) !important;
+}
+
+/* Fix transaction list items and expense cards in light mode */
+.light-theme .glass-panel {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.06) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.03) !important;
+}
+
+/* Bottom nav text + icon fix in light mode */
+.light-theme [style*="color: #94a3b8"][style*="font-size: 10px"],
+.light-theme [style*="color: #94a3b8"][style*="font-size:10px"] {
+  color: #86868B !important;
+}
+
+/* Light mode: ensure the overall app bg is correct */
+.light-theme .app-main-wrapper {
+  background: var(--bg-base, #F2F2F7) !important;
+}
+
+/* Radial gradient dark BG used in full-screen containers */
+.light-theme [style*="background: radial-gradient(circle at 50%"]:not(button):not([style*="position: fixed"]):not([style*="position:fixed"]):not([style*="width: 6px"]):not([style*="width:6px"]) {
+  background: var(--bg-base, #F2F2F7) !important;
+}
+
+/* Hardcoded dark colored text that should be visible in light mode */
+.light-theme [style*="color: #cbd5e1"]:not(button *) {
+  color: #3a3a3c !important;
+}
+.light-theme [style*="color: #475569"]:not(button *) {
+  color: #6E6E73 !important;
+}
+.light-theme [style*="color: #334155"]:not(button *) {
+  color: #48484A !important;
+}
+.light-theme [style*="color: #1e293b"]:not(button *) {
+  color: #1D1D1F !important;
+}
+
+/* ============================================================
+   END LIGHT MODE COMPREHENSIVE FIXES
+   ============================================================ */

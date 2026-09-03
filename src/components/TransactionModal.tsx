@@ -37,6 +37,7 @@ interface TransactionModalProps {
   onTransfer?: (fromAccountId: string, toAccountId: string, amount: number, notes?: string) => void;
   onPayViaUPI?: (amount: number, title: string) => void;
   onOpenAddAccount?: () => void;
+  hasScanPayAccess?: boolean;
 }
 
 const CATEGORIES = [
@@ -63,7 +64,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   onOpenTransfer: _onOpenTransfer,
   onTransfer,
   onPayViaUPI,
-  onOpenAddAccount
+  onOpenAddAccount,
+  hasScanPayAccess
 }) => {
   const myAccounts = accounts.filter(a => !a.user_id || a.user_id === currentProfileId);
   const familyAccounts = accounts.filter(a => a.user_id && a.user_id !== currentProfileId);
@@ -103,6 +105,13 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   // Custom Date Picker States
   const [showCalendar, setShowCalendar] = useState(false);
   const [navDate, setNavDate] = useState(new Date());
+
+  // Insufficient Balance Warning Modal State
+  const [insufficientBalanceModal, setInsufficientBalanceModal] = useState<{
+    accountName: string;
+    available: number;
+    required: number;
+  } | null>(null);
 
   useEffect(() => {
     if (editingTransaction) {
@@ -490,7 +499,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
   if (!isOpen) return null;
 
-  return createPortal(
+  const mainPortal = createPortal(
     <div style={{
       position: 'fixed',
       top: 0,
@@ -1232,6 +1241,17 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 }
                 const payTitle = title.trim() || 'Expense Payment';
                 if (onPayViaUPI) {
+                  // Check access BEFORE calling - if not unlocked, dispatch unlock event directly
+                  // so unlock modal opens on top of TransactionModal
+                  const isAccessGranted = 
+                    localStorage.getItem('has_scan_pay_access') === 'true' ||
+                    hasScanPayAccess === true;
+                  if (!isAccessGranted) {
+                    // Open unlock modal WITHOUT closing this modal
+                    window.dispatchEvent(new CustomEvent('open-scanpay-unlock'));
+                    return;
+                  }
+                  // Only close and pay if already unlocked
                   onPayViaUPI(parsedAmount, payTitle);
                   onClose();
                 } else {
@@ -1256,7 +1276,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 marginTop: '4px'
               }}
             >
-              <span>⚡ Pay via Cashfree (PhonePe / Cards / Netbanking)</span>
+              <span>⚡ Pay via PhonePe / GPay</span>
             </button>
           )}
 
@@ -1572,32 +1592,35 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       }
                     } catch (e) {}
 
-                    // Method 1: Direct upi:// location dispatch (Works 100% in Native APK & Android WebView)
-                    try {
-                      window.location.href = upiUrl;
-                    } catch (e) {}
-
-                    // Method 2: Anchor click for upi:// scheme
-                    try {
-                      const a1 = document.createElement('a');
-                      a1.href = upiUrl;
-                      a1.setAttribute('target', '_system');
-                      a1.setAttribute('rel', 'noopener');
-                      document.body.appendChild(a1);
-                      a1.click();
-                      setTimeout(() => { try { document.body.removeChild(a1); } catch (_) {} }, 300);
-                    } catch (e) {}
-
-                    // Method 3: Intent scheme fallback for Mobile Chrome browser
-                    if (!Capacitor.isNativePlatform() && upiUrl.startsWith('upi://pay?')) {
-                      const intentUrl = `intent://pay?${upiUrl.replace('upi://pay?', '')}#Intent;scheme=upi;end;`;
+                    // Method 1: Mobile Deep-link launch (Only on Mobile devices to prevent desktop Chrome gesture error)
+                    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+                    if (isMobile) {
                       try {
-                        const a2 = document.createElement('a');
-                        a2.href = intentUrl;
-                        document.body.appendChild(a2);
-                        a2.click();
-                        setTimeout(() => { try { document.body.removeChild(a2); } catch (_) {} }, 300);
+                        window.location.href = upiUrl;
                       } catch (e) {}
+
+                      try {
+                        const a1 = document.createElement('a');
+                        a1.href = upiUrl;
+                        a1.setAttribute('target', '_system');
+                        a1.setAttribute('rel', 'noopener');
+                        document.body.appendChild(a1);
+                        a1.click();
+                        setTimeout(() => { try { document.body.removeChild(a1); } catch (_) {} }, 300);
+                      } catch (e) {}
+
+                      if (!Capacitor.isNativePlatform() && upiUrl.startsWith('upi://pay?')) {
+                        const intentUrl = `intent://pay?${upiUrl.replace('upi://pay?', '')}#Intent;scheme=upi;end;`;
+                        try {
+                          const a2 = document.createElement('a');
+                          a2.href = intentUrl;
+                          document.body.appendChild(a2);
+                          a2.click();
+                          setTimeout(() => { try { document.body.removeChild(a2); } catch (_) {} }, 300);
+                        } catch (e) {}
+                      }
+                    } else {
+                      setScanMessage({ text: `📱 Payee VPA (${cleanVpa}) copied! Use your mobile PhonePe/GPay to pay ₹${amountStr}.`, type: 'info' });
                     }
 
                     onClose();
@@ -1818,4 +1841,101 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     </div>,
     document.body
   );
+
+  // Insufficient Balance modal rendered as completely separate portal to document.body
+  // This ensures it covers the ENTIRE screen, not just the modal container
+  const insufficientBalancePortal = insufficientBalanceModal ? createPortal(
+    <div
+      onClick={() => setInsufficientBalanceModal(null)}
+      style={{
+        position: 'fixed',
+        top: 0, left: 0, right: 0, bottom: 0,
+        background: 'rgba(4, 6, 12, 0.97)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 2147483647,
+        padding: '20px'
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: 'linear-gradient(180deg, #1e0b0b 0%, #0f0505 100%)',
+          border: '1px solid rgba(239, 68, 68, 0.5)',
+          borderRadius: '24px',
+          padding: '28px 24px',
+          maxWidth: '360px',
+          width: '100%',
+          textAlign: 'center',
+          boxShadow: '0 24px 64px rgba(239, 68, 68, 0.4)',
+          animation: 'fadeIn 0.2s ease-out'
+        }}
+      >
+        <div style={{
+          width: '72px', height: '72px', borderRadius: '50%',
+          background: 'rgba(239, 68, 68, 0.15)',
+          border: '2px solid rgba(239, 68, 68, 0.3)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto 16px', fontSize: '36px'
+        }}>
+          ⚠️
+        </div>
+
+        <h3 style={{ fontSize: '20px', fontWeight: 900, color: '#f87171', margin: '0 0 10px 0' }}>
+          Insufficient Balance!
+        </h3>
+
+        <p style={{ fontSize: '13.5px', color: '#94a3b8', lineHeight: 1.6, margin: '0 0 18px 0' }}>
+          You don't have enough money in{' '}
+          <strong style={{ color: '#e2e8f0' }}>{insufficientBalanceModal.accountName}</strong>{' '}
+          to record this expense.
+        </p>
+
+        <div style={{
+          background: 'rgba(0, 0, 0, 0.4)', borderRadius: '14px',
+          padding: '14px 16px', marginBottom: '22px',
+          display: 'flex', flexDirection: 'column', gap: '10px'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '12.5px', color: '#64748b' }}>Available Balance:</span>
+            <span style={{ fontWeight: 800, color: '#34d399', fontSize: '14px' }}>
+              {currencySymbol}{insufficientBalanceModal.available.toLocaleString()}
+            </span>
+          </div>
+          <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)' }} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '12.5px', color: '#64748b' }}>Required Amount:</span>
+            <span style={{ fontWeight: 800, color: '#f87171', fontSize: '14px' }}>
+              {currencySymbol}{insufficientBalanceModal.required.toLocaleString()}
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setInsufficientBalanceModal(null)}
+          style={{
+            width: '100%', padding: '15px', borderRadius: '14px', border: 'none',
+            background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
+            color: '#ffffff', fontSize: '14px', fontWeight: 900, cursor: 'pointer',
+            boxShadow: '0 6px 24px rgba(239, 68, 68, 0.5)'
+          }}
+        >
+          Okay, Got It!
+        </button>
+      </div>
+    </div>,
+    document.body
+  ) : null;
+
+  return (
+    <>
+      {mainPortal}
+      {insufficientBalancePortal}
+    </>
+  );
 };
+

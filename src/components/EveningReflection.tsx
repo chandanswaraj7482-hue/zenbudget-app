@@ -28,16 +28,25 @@ export const EveningReflection: React.FC<EveningReflectionProps> = ({
 
   // Money streak: count consecutive days under budget
   const calculateStreak = () => {
+    if (!transactions || transactions.length === 0) return 0;
+
+    const dailyLimit = Math.max(100, todaysLimit || 1000);
     let streak = 0;
     const today = new Date();
-    for (let i = 0; i < 90; i++) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      const dayTx = transactions.filter(t => t.date === dStr && t.type === 'expense');
-      const daySpent = dayTx.reduce((sum, t) => sum + t.amount, 0);
-      if (daySpent <= todaysLimit || (i === 0 && daySpent === 0)) {
+    
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
+      const dateStr = d.toDateString();
+
+      const dayTxs = transactions.filter(t => new Date(t.date).toDateString() === dateStr);
+      const dayExpenses = dayTxs.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+
+      const hasActivity = dayTxs.length > 0;
+
+      if (hasActivity && dayExpenses <= dailyLimit) {
         streak++;
+      } else if (i === 0 && dayExpenses <= dailyLimit) {
+        if (hasActivity) streak++;
       } else {
         break;
       }

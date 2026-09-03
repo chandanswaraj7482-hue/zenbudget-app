@@ -10,9 +10,10 @@ interface AnalyticsProps {
   accounts?: Account[];
   currentProfileId: string;
   familyMembers?: any[];
+  isPremium?: boolean;
 }
 
-export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currencySymbol, accounts = [], currentProfileId, familyMembers = [] }) => {
+export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currencySymbol, accounts = [], currentProfileId, familyMembers = [], isPremium = false }) => {
   const [timeframe, setTimeframe] = useState<'month' | 'all'>('month');
   const [userFilter, setUserFilter] = useState<string>('me');
   const [moodTimeframe, setMoodTimeframe] = useState<MoodTimeframe>('7d');
@@ -130,25 +131,40 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
 
   // --- Money Streak ---
   const calculateStreak = () => {
-    if (transactions.length === 0) return 0;
-    // Average daily budget = total expenses / days with expenses, compare to daily
-    const allExpenseDates = [...new Set(transactions.filter(t => t.type === 'expense').map(t => t.date))].sort().reverse();
-    if (allExpenseDates.length === 0) return 0;
-    const avgDailySpend = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0) / Math.max(allExpenseDates.length, 1);
-    const dailyLimit = avgDailySpend * 1.1; // 10% buffer as "budget"
+    if (!transactions || transactions.length === 0) return 0;
+
+    const savedDailyLimit = parseInt(localStorage.getItem('zb_daily_limit') || '1000', 10);
+    const dailyLimit = Math.max(100, savedDailyLimit);
+    
     let streak = 0;
-    const today = new Date();
-    for (let i = 0; i < 365; i++) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      const dStr = d.toISOString().split('T')[0];
-      const daySpend = transactions.filter(t => t.date === dStr && t.type === 'expense').reduce((s, t) => s + t.amount, 0);
-      if (daySpend <= dailyLimit) {
+    const now = new Date();
+    const todayStr = now.toDateString();
+
+    // Check today's expenses
+    const todayExpenses = transactions
+      .filter(t => t.type === 'expense' && new Date(t.date).toDateString() === todayStr)
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    if (todayExpenses > 0 && todayExpenses <= dailyLimit) {
+      streak++;
+    }
+
+    // Check past 30 days
+    for (let i = 1; i <= 30; i++) {
+      const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+      const dStr = d.toDateString();
+
+      const dayTxs = transactions.filter(t => t.type === 'expense' && new Date(t.date).toDateString() === dStr);
+      if (dayTxs.length === 0) continue; // Skip days without logged expenses
+
+      const daySpent = dayTxs.reduce((sum, t) => sum + t.amount, 0);
+      if (daySpent <= dailyLimit) {
         streak++;
       } else {
-        break;
+        break; // Streak breaks on first over-budget day
       }
     }
+
     return streak;
   };
   const streak = calculateStreak();
@@ -676,7 +692,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
           <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em', margin: 0 }}>
             {t('analytics_title')}
           </h2>
-          {familyMembers && familyMembers.length > 0 && (
+          {isPremium && familyMembers && familyMembers.length > 0 && (
             <select
               value={userFilter}
               onChange={(e) => setUserFilter(e.target.value)}

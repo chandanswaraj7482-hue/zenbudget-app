@@ -290,35 +290,47 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
           {t('share_rewards')}
         </h3>
 
-        <div 
-          onClick={onNavigateToReferral}
-          className="glass-panel" 
-          style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', cursor: 'pointer' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(20, 184, 166, 0.15)', color: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Gift size={20} />
+        <div className="glass-panel" style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <div 
+            onClick={onNavigateToReferral}
+            style={{
+              padding: '14px',
+              borderRadius: '14px',
+              border: 'none',
+              background: 'rgba(255,255,255,0.02)',
+              cursor: 'pointer',
+              color: 'var(--text-primary)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(20, 184, 166, 0.15)', color: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Gift size={20} />
+                </div>
+                <div>
+                  <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>{t('referral_program')}</p>
+                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('referral_sub')}</span>
+                </div>
               </div>
-              <div>
-                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>{t('referral_program')}</p>
-                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('referral_sub')}</span>
-              </div>
+              <ChevronRight size={18} color="#94a3b8" />
             </div>
-            <ChevronRight size={18} color="#94a3b8" />
-          </div>
 
-          <div style={{
-            background: 'rgba(255,255,255,0.03)',
-            padding: '12px',
-            borderRadius: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            fontSize: '12px'
-          }}>
-            <span style={{ color: 'var(--text-secondary)' }}>Paid Referrals Progress:</span>
-            <span style={{ fontWeight: 800, color: 'var(--secondary)' }}>{referralCount} / 10 Paid Members</span>
+            <div style={{
+              background: 'rgba(255,255,255,0.03)',
+              padding: '10px 12px',
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontSize: '11px',
+              border: '1px solid rgba(255,255,255,0.05)'
+            }}>
+              <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>Paid Referrals Progress:</span>
+              <span style={{ fontWeight: 800, color: 'var(--secondary)' }}>{referralCount} / 10 Paid Members</span>
+            </div>
           </div>
         </div>
       </div>
@@ -457,34 +469,49 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '14px',
+              padding: '12px 14px',
               borderRadius: '14px',
               border: 'none',
               background: 'rgba(255,255,255,0.02)',
               cursor: 'pointer',
               color: 'var(--text-primary)',
-              textAlign: 'left'
+              textAlign: 'left',
+              gap: '10px',
+              width: '100%'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: '1 1 0%' }}>
               <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <RefreshCw size={20} />
               </div>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>Reset Workspace Data</p>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                  <p style={{ fontSize: '13.5px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>Reset Workspace</p>
                   {!isPremiumUser && (
-                    <span style={{ fontSize: '10px', fontWeight: 800, padding: '2px 6px', borderRadius: '6px', background: 'rgba(236,72,153,0.15)', color: '#ec4899', border: '1px solid rgba(236,72,153,0.3)' }}>
+                    <span style={{
+                      fontSize: '9px',
+                      fontWeight: 800,
+                      padding: '2px 6px',
+                      borderRadius: '6px',
+                      background: 'rgba(236,72,153,0.15)',
+                      color: '#ec4899',
+                      border: '1px solid rgba(236,72,153,0.3)',
+                      whiteSpace: 'nowrap',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '3px',
+                      flexShrink: 0
+                    }}>
                       🔒 PRO
                     </span>
                   )}
                 </div>
-                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                  {!isPremiumUser ? 'Premium feature — Upgrade to reset workspace' : 'Clear local cache or start fresh.'}
+                <span style={{ fontSize: '10.5px', color: 'var(--text-secondary)', display: 'block', marginTop: '2px' }}>
+                  {!isPremiumUser ? 'Clear local data & start fresh' : 'Clear local cache or start fresh.'}
                 </span>
               </div>
             </div>
-            <ChevronRight size={18} color="#94a3b8" />
+            <ChevronRight size={18} color="#94a3b8" style={{ flexShrink: 0 }} />
           </button>
 
           {/* Logout */}

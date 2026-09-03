@@ -37,14 +37,17 @@ export interface PaymentPayload {
  * Checks if user has unlocked Lifetime Scan & Pay access via Cashfree (₹79) or Admin override.
  */
 export function checkHasScanPayAccess(userProfile?: UserProfile | null): boolean {
-  const profileId = userProfile?.id || localStorage.getItem('zb_profile_id') || '';
+  const profileId = userProfile?.id || (typeof localStorage !== 'undefined' ? localStorage.getItem('zb_profile_id') : '') || '';
   
-  const hasLifetimeAccess = userProfile?.has_scan_pay_access === true ||
-    localStorage.getItem('has_scan_pay_access') === 'true' ||
-    (profileId && localStorage.getItem(`zb_scan_pay_access_${profileId}`) === 'true');
+  if (userProfile && typeof userProfile.has_scan_pay_access === 'boolean') {
+    if (userProfile.has_scan_pay_access) return true;
+  }
+
+  const hasLifetimeAccess = (typeof localStorage !== 'undefined' && localStorage.getItem('has_scan_pay_access') === 'true') ||
+    (profileId && typeof localStorage !== 'undefined' && localStorage.getItem(`zb_scan_pay_access_${profileId}`) === 'true');
 
   const isAdminBypassed = userProfile?.isAdminUnlocked === true ||
-    localStorage.getItem('admin_overridden') === 'true';
+    (typeof localStorage !== 'undefined' && localStorage.getItem('admin_overridden') === 'true');
 
   return Boolean(hasLifetimeAccess || isAdminBypassed);
 }
@@ -147,24 +150,30 @@ export function handleZenBudgetPaymentSystem(
   }
 
   // Step 4: Device OS Native App Intent Handshake Execution
-  try {
-    console.log("ZenBudget Payment System: Direct Intent launch ->", compiledNativeUri);
-    
-    // Direct href assignment
-    window.location.href = compiledNativeUri;
+  const isMobileDevice = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-    // Anchor dispatch fallback (works best on Safari iOS & Chrome Android)
-    const anchor = document.createElement('a');
-    anchor.href = compiledNativeUri;
-    anchor.setAttribute('target', '_self');
-    anchor.setAttribute('rel', 'noopener');
-    document.body.appendChild(anchor);
-    anchor.click();
-    setTimeout(() => {
-      try { document.body.removeChild(anchor); } catch (_) {}
-    }, 500);
-  } catch (e) {
-    console.warn("ZenBudget Payment System: Redirect failed:", e);
+  if (isMobileDevice) {
+    try {
+      console.log("ZenBudget Payment System: Direct Intent launch ->", compiledNativeUri);
+      
+      // Direct href assignment for mobile apps
+      window.location.href = compiledNativeUri;
+
+      // Anchor dispatch fallback (works best on Safari iOS & Chrome Android)
+      const anchor = document.createElement('a');
+      anchor.href = compiledNativeUri;
+      anchor.setAttribute('target', '_self');
+      anchor.setAttribute('rel', 'noopener');
+      document.body.appendChild(anchor);
+      anchor.click();
+      setTimeout(() => {
+        try { document.body.removeChild(anchor); } catch (_) {}
+      }, 500);
+    } catch (e) {
+      console.warn("ZenBudget Payment System: Redirect failed:", e);
+    }
+  } else {
+    console.log("ZenBudget Payment System: Desktop browser detected. Intent launch skipped to prevent gesture error.");
   }
 
   return true;

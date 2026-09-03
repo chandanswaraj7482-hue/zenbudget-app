@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   LayoutDashboard, 
   Receipt, 
@@ -7,7 +7,8 @@ import {
   Bell, 
   QrCode,
   BarChart3,
-  Grid
+  Grid,
+  Loader2
 } from 'lucide-react';
 import { MoreToolsView } from './components/MoreToolsView';
 import { AdminDashboard } from './components/AdminDashboard';
@@ -51,7 +52,7 @@ import { Toast } from './components/Toast';
 import type { ToastMessage } from './components/Toast';
 import { SubscriptionModal } from './components/SubscriptionModal';
 import { supabase } from './supabaseClient';
-import { playNotificationSound } from './utils/audio';
+import { playNotificationSound, playErrorSound, triggerFireworksCelebration } from './utils/audio';
 import confetti from 'canvas-confetti';
 
 const App: React.FC = () => {
@@ -164,6 +165,7 @@ const App: React.FC = () => {
   
   // Auth & Profile states
   const [isLocked, setIsLocked] = useState<boolean>(true);
+  const [isAppLoading, setIsAppLoading] = useState<boolean>(false);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
   const [showMorningBrief, setShowMorningBrief] = useState<boolean>(false);
   const [showEveningReflection, setShowEveningReflection] = useState<boolean>(false);
@@ -175,6 +177,12 @@ const App: React.FC = () => {
     return localStorage.getItem('zb_subscription_tier') || 'trial';
   });
   const isPremiumUser = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(subscriptionTier);
+  
+  const [hasScanPayAccess, setHasScanPayAccess] = useState<boolean>(() => {
+    // TEMPORARY FOR TESTING: Force false
+    return false;
+  });
+
   const [trialStartDate, setTrialStartDate] = useState<string>(() => {
     return localStorage.getItem('zb_trial_start_date') || new Date().toISOString();
   });
@@ -293,16 +301,67 @@ const App: React.FC = () => {
   const [updateVersion, setUpdateVersion] = useState<string>('');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState<boolean>(false);
   const [dailyLimit, setDailyLimit] = useState<number>(1000);
+
+  // Dynamic Calculation for Today's Limit based on Category Budgets, Income & Expenses
+  const computedDailyLimit = useMemo(() => {
+    const totalMonthlyBudget = (Array.isArray(budgets) ? budgets : []).reduce((sum, b) => sum + (b.limit || 0), 0);
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    const currentDay = now.getDate();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+    // Filter current month expenses
+    const currentMonthExpenses = (Array.isArray(transactions) ? transactions : [])
+      .filter(t => {
+        const d = new Date(t.date);
+        return t.type === 'expense' && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+      })
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    // Filter current month income
+    const currentMonthIncome = (Array.isArray(transactions) ? transactions : [])
+      .filter(t => {
+        const d = new Date(t.date);
+        return t.type === 'income' && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+      })
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    // Case 1: Category budgets configured
+    if (totalMonthlyBudget > 0) {
+      const dailyBase = Math.round(totalMonthlyBudget / daysInMonth);
+      return Math.max(500, dailyBase);
+    }
+
+    // Case 2: Income logged
+    if (currentMonthIncome > 0) {
+      const dailyFromIncome = Math.round((currentMonthIncome * 0.75) / daysInMonth);
+      return Math.max(500, dailyFromIncome);
+    }
+
+    // Case 3: Expenses logged
+    if (currentMonthExpenses > 0) {
+      const avgDaily = Math.round((currentMonthExpenses / Math.max(1, currentDay)) * 1.15);
+      return Math.max(500, avgDaily);
+    }
+
+    return 1000;
+  }, [budgets, transactions]);
+
+  useEffect(() => {
+    setDailyLimit(computedDailyLimit);
+    localStorage.setItem('zb_daily_limit', computedDailyLimit.toString());
+  }, [computedDailyLimit]);
   const [updateUrl, setUpdateUrl] = useState<string>('https://raw.githubusercontent.com/chandanswaraj7482-hue/zenbudget-app/main/public/zenbudget.apk');
   const [updateReleaseNotes, setUpdateReleaseNotes] = useState<string>('Initial release.');
   const [forceUpdate, setForceUpdate] = useState<boolean>(false);
 
   const [theme, setTheme] = useState<'system' | 'dark' | 'light'>(() => {
-    return (localStorage.getItem('zb_theme') as 'system' | 'dark' | 'light') || 'system';
+    return (localStorage.getItem('zb_theme') as 'system' | 'dark' | 'light') || 'dark';
   });
 
   useEffect(() => {
-    const savedThemeMode = (localStorage.getItem('zb_theme') as 'system' | 'dark' | 'light') || theme || 'system';
+    const savedThemeMode = (localStorage.getItem('zb_theme') as 'system' | 'dark' | 'light') || theme || 'dark';
 
     const applyTheme = () => {
       const isDark = savedThemeMode === 'system'
@@ -647,16 +706,15 @@ const App: React.FC = () => {
   const [upiPayeeId, setUpiPayeeId] = useState('');
 
   const handlePayLoanViaUPI = async (loan: LoanRecord, amount: number, accountId?: string) => {
-    const isUnlocked = subscriptionTier === 'premium_monthly' || 
-                       subscriptionTier === 'premium_yearly' || 
-                       subscriptionTier === 'premium_lifetime' || 
-                       subscriptionTier === 'premium' ||
-                       localStorage.getItem('has_scan_pay_access') === 'true' ||
-                       localStorage.getItem(`zb_scan_pay_access_${currentProfileId}`) === 'true';
+    const isUnlocked = checkHasScanPayAccess({
+      id: currentProfileId,
+      has_scan_pay_access: hasScanPayAccess,
+      isAdminUnlocked: localStorage.getItem('admin_overridden') === 'true'
+    });
 
     if (!isUnlocked) {
       setIsScanPayUnlockOpen(true);
-      triggerToast('Unlock 1-Click PhonePe Access to proceed!', 'info');
+      triggerToast('🔒 Unlock 1-Click PhonePe & UPI Access (₹79 via Cashfree) to proceed!', 'info');
       return;
     }
 
@@ -670,10 +728,17 @@ const App: React.FC = () => {
       return;
     }
 
+    const isUnlocked = checkHasScanPayAccess({ id: currentProfileId, has_scan_pay_access: hasScanPayAccess });
+
+    if (!isUnlocked) {
+      setIsScanPayUnlockOpen(true);
+      return;
+    }
+
     const userProfile = {
       id: currentProfileId,
       currency: currency,
-      has_scan_pay_access: localStorage.getItem('has_scan_pay_access') === 'true' || localStorage.getItem(`zb_scan_pay_access_${currentProfileId}`) === 'true',
+      has_scan_pay_access: hasScanPayAccess,
       isAdminUnlocked: localStorage.getItem('admin_overridden') === 'true'
     };
 
@@ -1591,6 +1656,7 @@ const App: React.FC = () => {
             localStorage.setItem('zb_premium_expires_at', profData.premium_expires_at);
           }
           if (profData.has_scan_pay_access || profData.is_admin_unlocked) {
+            setHasScanPayAccess(true);
             localStorage.setItem('has_scan_pay_access', 'true');
             localStorage.setItem(`zb_scan_pay_access_${currentProfileId}`, 'true');
           }
@@ -1621,6 +1687,7 @@ const App: React.FC = () => {
             localStorage.setItem('zb_premium_expires_at', p.premium_expires_at);
           }
           if (p.has_scan_pay_access || p.is_admin_unlocked) {
+            setHasScanPayAccess(true);
             localStorage.setItem('has_scan_pay_access', 'true');
             localStorage.setItem(`zb_scan_pay_access_${currentProfileId}`, 'true');
           }
@@ -1654,18 +1721,32 @@ const App: React.FC = () => {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'debts' }, () => {
         fetchDataFromSupabase();
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, (payload: any) => {
+        // Prevent infinite loop from self-updates on profiles
+        if (payload?.new && payload?.new?.id === currentProfileId && payload?.old) {
+          const oldP = payload.old;
+          const newP = payload.new;
+          // Only re-fetch if external critical fields changed
+          if (
+            oldP.family_group_id === newP.family_group_id &&
+            oldP.subscription_tier === newP.subscription_tier &&
+            oldP.has_scan_pay_access === newP.has_scan_pay_access
+          ) {
+            return;
+          }
+        }
         fetchDataFromSupabase();
       })
       .subscribe();
 
-    // 4-second background auto-refresh fallback interval when partner is linked
+    // 15-second background auto-refresh fallback interval when partner is linked
     const partnerSyncInterval = setInterval(() => {
       const pId = localStorage.getItem(`zb_partner_id_${currentProfileId}`);
-      if (pId || familyMembers.length > 0) {
+      const famId = localStorage.getItem(`zb_family_group_id_${currentProfileId}`);
+      if (pId || famId) {
         fetchDataFromSupabase();
       }
-    }, 4000);
+    }, 15000);
 
     return () => {
       clearInterval(interval);
@@ -2001,11 +2082,21 @@ const App: React.FC = () => {
           localStorage.setItem(`zb_budgets_cache_${currentProfileId}`, JSON.stringify(mappedBudgets));
         } else {
           const cachedBgt = localStorage.getItem(`zb_budgets_cache_${currentProfileId}`);
-          if (cachedBgt) setBudgets(JSON.parse(cachedBgt));
+          if (cachedBgt) {
+            try {
+              const parsed = JSON.parse(cachedBgt);
+              if (Array.isArray(parsed)) setBudgets(parsed);
+            } catch (_) {}
+          }
         }
       } catch (_bgtErr) {
         const cachedBgt = localStorage.getItem(`zb_budgets_cache_${currentProfileId}`);
-        if (cachedBgt) setBudgets(JSON.parse(cachedBgt));
+        if (cachedBgt) {
+          try {
+            const parsed = JSON.parse(cachedBgt);
+            if (Array.isArray(parsed)) setBudgets(parsed);
+          } catch (_) {}
+        }
       }
 
       // 3. Accounts (including all family accounts if enabled)
@@ -2972,7 +3063,7 @@ const App: React.FC = () => {
   // Convert Base USD values dynamically into active selected currency for subcomponents
   const activeRate = rates[currency] || 1;
 
-  const convertedTransactions = (transactions || []).map(t => {
+  const convertedTransactions = (Array.isArray(transactions) ? transactions : []).map(t => {
     let paidByName = 'You';
     if (t.user_id && t.user_id !== currentProfileId) {
        const mem = familyMembers.find(m => m.id === t.user_id);
@@ -2985,12 +3076,12 @@ const App: React.FC = () => {
     };
   });
 
-  const convertedBudgets = (budgets || []).map(b => ({
+  const convertedBudgets = (Array.isArray(budgets) ? budgets : []).map(b => ({
     ...b,
     limit: currency === 'INR' ? Math.round((b.limit || 0) * activeRate) : Number(((b.limit || 0) * activeRate).toFixed(2))
   }));
 
-  const convertedGoals = (goals || []).map(g => ({
+  const convertedGoals = (Array.isArray(goals) ? goals : []).map(g => ({
     ...g,
     targetAmount: currency === 'INR' ? Math.round((g.targetAmount || 0) * activeRate) : Number(((g.targetAmount || 0) * activeRate).toFixed(2)),
     currentAmount: currency === 'INR' ? Math.round((g.currentAmount || 0) * activeRate) : Number(((g.currentAmount || 0) * activeRate).toFixed(2))
@@ -3122,7 +3213,7 @@ const App: React.FC = () => {
     if (!rawInput) return false;
 
     if (!isPremiumUser) {
-      triggerToast('Couple & Family Sync requires an active Premium plan.', 'warning');
+      triggerToast('👑 Premium Compulsory: Couple & Family Sync requires an active Premium plan for ALL members! Upgrade to connect.', 'warning');
       setIsSubModalOpen(true);
       return false;
     }
@@ -3175,7 +3266,8 @@ const App: React.FC = () => {
 
       const isPartnerPremium = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime', 'pro'].includes(partnerProf.subscription_tier || '');
       if (!isPartnerPremium) {
-        triggerToast('The group host does not have an active Premium plan. Both members must be Premium.', 'warning');
+        triggerToast('👑 Premium Compulsory: Both members MUST have an active Premium Plan to connect! Partner account is on the Free plan.', 'warning');
+        setIsSubModalOpen(true);
         return false;
       }
 
@@ -3191,6 +3283,7 @@ const App: React.FC = () => {
         localStorage.setItem(`zb_family_group_id_${currentProfileId}`, targetGroupId);
 
         triggerToast(`Success! You have joined ${partnerProf.name || 'Partner'}'s group.`, 'success');
+        try { triggerFireworksCelebration(); } catch (_) {}
         addNotification(
           "Family Group Joined! 👥",
           `You have successfully joined ${partnerProf.name || 'Partner'}'s budget group. Your household spending is now synced in real-time.`,
@@ -3198,6 +3291,7 @@ const App: React.FC = () => {
         );
       } catch (dbErr) {
         console.warn('Family group db sync warning:', dbErr);
+        try { playErrorSound(); } catch (_) {}
         triggerToast('Error joining family group.', 'error');
         return false;
       }
@@ -3207,6 +3301,7 @@ const App: React.FC = () => {
 
     } catch (err: any) {
       console.error('Partner connect error:', err);
+      try { playErrorSound(); } catch (_) {}
       triggerToast(err.message || 'Failed to connect partner profile.', 'warning');
       return false;
     }
@@ -3299,10 +3394,24 @@ const App: React.FC = () => {
       }
 
       setIsLocked(false);
-      setTimeout(() => {
-        fetchDataFromSupabase();
-      }, 50);
+      setIsAppLoading(false);
+      fetchDataFromSupabase().catch(() => {});
     }} />
+        </div>
+      </div>
+    );
+  }
+
+  if (isAppLoading) {
+    return (
+      <div style={{ width: '100vw', minHeight: '100vh', display: 'flex', justifyContent: 'center', background: 'var(--bg-base)' }}>
+        <div className="app-main-wrapper" style={{ margin: '0 auto', maxWidth: '520px', width: '100%', position: 'relative', minHeight: '100vh', background: 'var(--bg-base)', boxShadow: '0 0 20px rgba(0,0,0,0.4)', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '80px', height: '80px', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px', overflow: 'hidden' }}>
+            <img src="/favicon.png?v=10" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+          <Loader2 size={40} className="animate-spin" style={{ color: 'var(--primary)', marginBottom: '20px' }} />
+          <span style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: '6px' }}>Preparing Dashboard...</span>
+          <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Syncing your latest transactions 🚀</span>
         </div>
       </div>
     );
@@ -3588,6 +3697,7 @@ const App: React.FC = () => {
             familyMembers={familyMembers}
             partnerName={partnerName || undefined}
             partnerId={partnerId || undefined}
+            onUpgradeClick={() => setIsSubModalOpen(true)}
           />
         )}
         {activeView === 'loans' && (
@@ -3632,7 +3742,7 @@ const App: React.FC = () => {
           />
         )}
         {activeView === 'analytics' && (
-          <Analytics key={langKey} transactions={convertedTransactions} currencySymbol={currencySymbol} accounts={accounts} currentProfileId={currentProfileId} familyMembers={familyMembers} />
+          <Analytics key={langKey} transactions={convertedTransactions} currencySymbol={currencySymbol} accounts={accounts} currentProfileId={currentProfileId} familyMembers={familyMembers} isPremium={isPremiumUser} />
         )}
         {activeView === 'profile' && (
           <ProfileView 
@@ -3891,6 +4001,7 @@ const App: React.FC = () => {
         onTransfer={handleTransfer}
         onPayViaUPI={handleDirectCashfreePayment}
         onOpenAddAccount={() => setIsAddAccountOpen(true)}
+        hasScanPayAccess={hasScanPayAccess}
       />
 
       {/* Custom Confirmation Glassmorphic Modal */}
@@ -4278,6 +4389,7 @@ const App: React.FC = () => {
       {/* Scan & Pay Feature Unlock Modal Paywall */}
       <ScanPayUnlockModal
         isOpen={isScanPayUnlockOpen}
+        isUnlocked={hasScanPayAccess}
         onClose={() => setIsScanPayUnlockOpen(false)}
         currencySymbol={currencySymbol}
         onUnlockSuccess={() => {
@@ -5255,24 +5367,44 @@ const App: React.FC = () => {
               if (!upiPayeeId.trim()) return;
               
               let receiver = upiPayeeId.trim();
-              const upiUrl = `upi://pay?pa=${encodeURIComponent(receiver)}&pn=${encodeURIComponent(upiPayeeModal.loan?.personName || 'User')}&am=${upiPayeeModal.amount}&cu=INR&tn=${encodeURIComponent('Loan Repayment')}`;
-              
+              const targetLoanId = upiPayeeModal.loan!.id;
+              const targetAmount = upiPayeeModal.amount;
+              const targetAccId = upiPayeeModal.accountId;
+              const personName = upiPayeeModal.loan?.personName || 'User';
+
               // Launch UPI App
-              if ((window as any).Capacitor && (window as any).Capacitor.isNative) {
-                import('@capacitor/app').then(({ App: CapacitorApp }) => {
-                  CapacitorApp.openUrl({ url: upiUrl }).catch(e => {
-                    console.error('Failed to open UPI app via Capacitor', e);
-                    window.location.href = upiUrl;
-                  });
-                });
-              } else {
-                window.location.href = upiUrl;
+              const userProf = {
+                id: currentProfileId,
+                currency: currency,
+                has_scan_pay_access: hasScanPayAccess,
+                isAdminUnlocked: localStorage.getItem('admin_overridden') === 'true'
+              };
+
+              const launched = handleZenBudgetPaymentSystem(
+                receiver.includes('@') ? 'SCAN_OR_UPI' : 'MOBILE_NUMBER',
+                receiver.includes('@') ? { targetUpiId: receiver, recipientName: personName, amount: targetAmount } : { phone: receiver, amount: targetAmount },
+                userProf,
+                () => setIsScanPayUnlockOpen(true)
+              );
+
+              if (launched) {
+                triggerToast(`Launching PhonePe / UPI App for ${personName}... 🚀`, 'info');
               }
 
-              // Record repayment
-              handleRepayLoan(upiPayeeModal.loan!.id, upiPayeeModal.amount, upiPayeeModal.accountId);
-              triggerToast(`Loan repayment of ${currencySymbol}${upiPayeeModal.amount} recorded!`, 'success');
-              try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (_) {}
+              // Ask user for confirmation instead of auto-completing repayment
+              setConfirmDialog({
+                isOpen: true,
+                title: 'Did the UPI Payment Succeed?',
+                message: `Did you complete the repayment of ${currencySymbol}${targetAmount} to ${personName} on PhonePe / UPI?`,
+                confirmText: 'Yes, Payment Completed',
+                cancelText: 'Cancel',
+                type: 'info',
+                onConfirm: async () => {
+                  handleRepayLoan(targetLoanId, targetAmount, targetAccId);
+                  triggerToast(`Loan repayment of ${currencySymbol}${targetAmount} recorded! 🎉`, 'success');
+                  try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch (_) {}
+                }
+              });
 
               setUpiPayeeModal({ isOpen: false, loan: null, amount: 0, accountId: '' });
             }} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
