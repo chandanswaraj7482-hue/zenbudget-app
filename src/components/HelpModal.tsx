@@ -786,14 +786,12 @@ User Question: ${rawText}`
                           feedback: feedbackText,
                           created_at: new Date().toISOString()
                         };
-                        if (ratingUserId) ratingPayload.user_id = ratingUserId;
 
                         const { error: insertErr } = await supabase.from('app_ratings').insert([ratingPayload]);
                         if (insertErr) {
                           console.warn('Supabase app_ratings insert warning:', insertErr);
                           // Retry without created_at
                           const retryPayload: any = { user_name: ratingUserName, user_email: ratingUserEmail, rating_stars: rating, feedback: feedbackText };
-                          if (ratingUserId) retryPayload.user_id = ratingUserId;
                           const { error: retryErr } = await supabase.from('app_ratings').insert([retryPayload]);
                           if (retryErr) {
                             console.error('Supabase app_ratings insert retry error:', retryErr);
