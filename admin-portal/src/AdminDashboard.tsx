@@ -85,226 +85,7 @@ interface AdminDashboardProps {
   onShowToast?: (msg: string, type: 'success' | 'warning' | 'info') => void;
 }
 
-// ───────────────────────────────────────────────────────────────────
-// Social Links Manager Component
-// ───────────────────────────────────────────────────────────────────
-const PRESET_SOCIALS = [
-  { platform: 'Instagram', icon: '📸', color: '#e1306c' },
-  { platform: 'Facebook', icon: '👥', color: '#1877f2' },
-  { platform: 'YouTube', icon: '▶️', color: '#ff0000' },
-  { platform: 'TikTok', icon: '🎵', color: '#69c9d0' },
-  { platform: 'Twitter/X', icon: '🐦', color: '#1da1f2' },
-];
-
-interface SocialLink {
-  id?: string;
-  platform: string;
-  url: string;
-  icon: string;
-  color: string;
-  is_active: boolean;
-}
-
-const DEFAULT_FALLBACK_LINKS: SocialLink[] = [
-  { id: 'def-insta', platform: 'Instagram', icon: '📸', url: 'https://www.instagram.com/zenbudget_tracker/', color: '#e1306c', is_active: true },
-  { id: 'def-fb', platform: 'Facebook', icon: '👥', url: 'https://www.facebook.com/people/ZenBudget/61592667931013/', color: '#1877f2', is_active: true },
-  { id: 'def-yt', platform: 'YouTube', icon: '▶️', url: 'https://www.youtube.com/channel/UCa2ewl3C6Q3qGTXjbAMeAtA', color: '#ff0000', is_active: true }
-];
-
-const SocialLinksManager: React.FC<{ supabaseClient: any }> = ({ supabaseClient }) => {
-  const [links, setLinks] = useState<SocialLink[]>(DEFAULT_FALLBACK_LINKS);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState('');
-  const [editingLink, setEditingLink] = useState<SocialLink | null>(null);
-  const [newLink, setNewLink] = useState<Partial<SocialLink>>({ platform: 'Instagram', icon: '📸', color: '#e1306c', url: '', is_active: true });
-
-  const fetchLinks = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabaseClient.from('social_links').select('*').order('created_at', { ascending: true });
-      if (!error && data && data.length > 0) {
-        setLinks(data);
-      } else {
-        try {
-          const toInsert = DEFAULT_FALLBACK_LINKS.map(({ platform, icon, url, color, is_active }) => ({ platform, icon, url, color, is_active }));
-          const { data: insertedData } = await supabaseClient.from('social_links').insert(toInsert).select();
-          if (insertedData && insertedData.length > 0) {
-            setLinks(insertedData);
-          } else {
-            setLinks(DEFAULT_FALLBACK_LINKS);
-          }
-        } catch (_) {
-          setLinks(DEFAULT_FALLBACK_LINKS);
-        }
-      }
-    } catch (e) { 
-      console.warn('social_links fetch failed:', e);
-      setLinks(DEFAULT_FALLBACK_LINKS);
-    }
-    setLoading(false);
-  };
-
-  const [customPlatformName, setCustomPlatformName] = useState('');
-
-  useEffect(() => { fetchLinks(); }, []);
-
-  const saveLink = async () => {
-    if (!newLink.url?.trim()) { setMsg('❌ URL required'); return; }
-    setSaving(true);
-    const isOther = newLink.platform === 'Other';
-    const finalPlatformName = isOther ? (customPlatformName.trim() || 'Other') : (newLink.platform || 'Instagram');
-    const preset = PRESET_SOCIALS.find(p => p.platform === newLink.platform) || PRESET_SOCIALS[0];
-    const payload = { 
-      platform: finalPlatformName, 
-      url: newLink.url.trim(), 
-      icon: isOther ? '🔗' : preset.icon, 
-      color: isOther ? '#6366f1' : preset.color, 
-      is_active: true 
-    };
-    try {
-      const { data, error } = await supabaseClient.from('social_links').insert([payload]).select();
-      if (!error && data && data.length > 0) {
-        setLinks(prev => [...prev, data[0]]);
-        setMsg('✅ Social link added!');
-      } else {
-        setLinks(prev => [...prev, { ...payload, id: 'temp-' + Date.now() }]);
-        setMsg('✅ Link added locally!');
-      }
-      setNewLink({ platform: 'Instagram', icon: '📸', color: '#e1306c', url: '', is_active: true });
-      setCustomPlatformName('');
-    } catch (e) {
-      setLinks(prev => [...prev, { ...payload, id: 'temp-' + Date.now() }]);
-      setMsg('✅ Link added!');
-    }
-    setSaving(false);
-    setTimeout(() => setMsg(''), 3000);
-  };
-
-  const updateLink = async () => {
-    if (!editingLink) return;
-    setSaving(true);
-    try {
-      if (editingLink.id && !editingLink.id.startsWith('def-') && !editingLink.id.startsWith('temp-')) {
-        await supabaseClient.from('social_links').update({ url: editingLink.url, is_active: editingLink.is_active }).eq('id', editingLink.id);
-      }
-      setLinks(prev => prev.map(l => (l.id === editingLink.id || l.platform === editingLink.platform) ? { ...l, url: editingLink.url, is_active: editingLink.is_active } : l));
-      setMsg('✅ Link updated!');
-      setEditingLink(null);
-    } catch (e) { 
-      setMsg('❌ Update failed'); 
-    }
-    setSaving(false);
-    setTimeout(() => setMsg(''), 3000);
-  };
-
-  const deleteLink = async (targetLink: SocialLink) => {
-    try {
-      if (targetLink.id && !targetLink.id.startsWith('def-') && !targetLink.id.startsWith('temp-')) {
-        await supabaseClient.from('social_links').delete().eq('id', targetLink.id);
-      }
-    } catch (_) {}
-    setLinks(prev => prev.filter(l => l.id !== targetLink.id && l.platform !== targetLink.platform));
-    setMsg('🗑️ Deleted');
-    setTimeout(() => setMsg(''), 2000);
-  };
-
-  const toggleActive = async (link: SocialLink) => {
-    const updated = !link.is_active;
-    try {
-      if (link.id && !link.id.startsWith('def-') && !link.id.startsWith('temp-')) {
-        await supabaseClient.from('social_links').update({ is_active: updated }).eq('id', link.id);
-      }
-    } catch (_) {}
-    setLinks(prev => prev.map(l => (l.id === link.id || l.platform === link.platform) ? { ...l, is_active: updated } : l));
-  };
-
-  const inputStyle: React.CSSProperties = { background: 'rgba(30,41,59,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontSize: '13px', outline: 'none', width: '100%' };
-
-  return (
-    <div>
-      <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff' }}>
-        <Share2 size={18} color="#6366f1" /> Social Links Manager
-      </h4>
-      {msg && <div style={{ padding: '10px 14px', borderRadius: '10px', background: msg.startsWith('✅') ? 'rgba(52,211,153,0.1)' : 'rgba(239,68,68,0.1)', border: `1px solid ${msg.startsWith('✅') ? 'rgba(52,211,153,0.3)' : 'rgba(239,68,68,0.3)'}`, color: '#e2e8f0', fontSize: '13px', marginBottom: '1rem' }}>{msg}</div>}
-      
-      {/* Add New Link */}
-      <div style={{ background: 'rgba(30,41,59,0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '1.2rem', marginBottom: '1.5rem' }}>
-        <h5 style={{ fontSize: '13px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '12px' }}>➕ Add New Social Link</h5>
-        <div style={{ display: 'grid', gridTemplateColumns: newLink.platform === 'Other' ? '1fr 1fr 2fr auto' : '1fr 2fr auto', gap: '10px', alignItems: 'end' }}>
-          <div>
-            <label style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>Platform</label>
-            <select value={newLink.platform} onChange={e => { const p = PRESET_SOCIALS.find(x => x.platform === e.target.value); setNewLink(prev => ({ ...prev, platform: e.target.value, icon: p?.icon || '🔗', color: p?.color || '#6366f1' })); }} style={{ ...inputStyle }}>
-              {PRESET_SOCIALS.map(p => <option key={p.platform} value={p.platform}>{p.icon} {p.platform}</option>)}
-              <option value="Other">🔗 Other</option>
-            </select>
-          </div>
-          {newLink.platform === 'Other' && (
-            <div>
-              <label style={{ fontSize: '11px', color: '#38bdf8', display: 'block', marginBottom: '4px', fontWeight: 700 }}>Custom Platform Name</label>
-              <input 
-                type="text" 
-                placeholder="e.g. Telegram, Discord" 
-                value={customPlatformName} 
-                onChange={e => setCustomPlatformName(e.target.value)} 
-                style={{ ...inputStyle, border: '1px solid #38bdf8' }} 
-              />
-            </div>
-          )}
-          <div>
-            <label style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>URL</label>
-            <input type="url" placeholder="https://..." value={newLink.url || ''} onChange={e => setNewLink(prev => ({ ...prev, url: e.target.value }))} style={inputStyle} />
-          </div>
-          <button onClick={saveLink} disabled={saving} style={{ padding: '8px 18px', borderRadius: '8px', background: '#6366f1', border: 'none', color: '#fff', fontWeight: 700, fontSize: '13px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
-            {saving ? '...' : 'Add Link'}
-          </button>
-        </div>
-      </div>
-
-      {/* Existing Links */}
-      {loading ? (
-        <div style={{ textAlign: 'center', color: '#94a3b8', padding: '2rem' }}>Loading...</div>
-      ) : links.length === 0 ? (
-        <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8', background: 'rgba(30,41,59,0.3)', borderRadius: '12px' }}>No social links yet. Add one above!</div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {links.map((link, idx) => (
-            <div key={link.id || link.platform || idx} style={{ padding: '1rem 1.2rem', borderRadius: '12px', background: 'rgba(30,41,59,0.6)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '22px' }}>{link.icon}</span>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                {editingLink?.id === link.id || editingLink?.platform === link.platform ? (
-                  <input type="url" value={editingLink?.url || ''} onChange={e => setEditingLink(prev => prev ? ({ ...prev, url: e.target.value }) : null)} style={{ ...inputStyle, width: '100%' }} />
-                ) : (
-                  <>
-                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>{link.platform}</div>
-                    <a href={link.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: '#64748b', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{link.url}</a>
-                  </>
-                )}
-              </div>
-              <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
-                <button onClick={() => toggleActive(link)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', background: link.is_active ? 'rgba(52,211,153,0.15)' : 'rgba(100,116,139,0.15)', color: link.is_active ? '#34d399' : '#64748b', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>
-                  {link.is_active ? 'Active' : 'Hidden'}
-                </button>
-                {editingLink?.id === link.id || (editingLink && editingLink.platform === link.platform) ? (
-                  <>
-                    <button onClick={updateLink} style={{ padding: '4px 12px', borderRadius: '6px', border: 'none', background: '#6366f1', color: '#fff', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>{saving ? '...' : '✓ Save'}</button>
-                    <button onClick={() => setEditingLink(null)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', background: 'rgba(255,255,255,0.08)', color: '#94a3b8', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
-                  </>
-                ) : (
-                  <button onClick={() => setEditingLink(link)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', background: 'rgba(255,255,255,0.06)', color: '#94a3b8', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}><Edit2 size={12} /></button>
-                )}
-                <button onClick={() => deleteLink(link)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', background: 'rgba(239,68,68,0.1)', color: '#f87171', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}><Trash2 size={12} /></button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
-
   isOpen,
   onClose,
   supabaseClient,
@@ -387,13 +168,76 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Multi-Currency Scan & Pay Lifetime Feature Pricing State
   const [inrScanPayPrice, setInrScanPayPrice] = useState<number>(() => getInitialPrice('inr_scan_pay_price', 79));
-  const [usdScanPayPrice, setUsdScanPayPrice] = useState<number>(() => getInitialPrice('usd_scan_pay_price', 1.99));
-  const [eurScanPayPrice, setEurScanPayPrice] = useState<number>(() => getInitialPrice('eur_scan_pay_price', 1.99));
-  const [gbpScanPayPrice, setGbpScanPayPrice] = useState<number>(() => getInitialPrice('gbp_scan_pay_price', 1.99));
-  const [cadScanPayPrice, setCadScanPayPrice] = useState<number>(() => getInitialPrice('cad_scan_pay_price', 2.99));
-  const [audScanPayPrice, setAudScanPayPrice] = useState<number>(() => getInitialPrice('aud_scan_pay_price', 2.99));
-  const [aedScanPayPrice, setAedScanPayPrice] = useState<number>(() => getInitialPrice('aed_scan_pay_price', 7.99));
-  const [sgdScanPayPrice, setSgdScanPayPrice] = useState<number>(() => getInitialPrice('sgd_scan_pay_price', 2.99));
+  const [usdScanPayPrice, setUsdScanPayPrice] = useState<number>(() => getInitialPrice('usd_scan_pay_price', 4.99));
+  const [eurScanPayPrice, setEurScanPayPrice] = useState<number>(() => getInitialPrice('eur_scan_pay_price', 4.49));
+  const [gbpScanPayPrice, setGbpScanPayPrice] = useState<number>(() => getInitialPrice('gbp_scan_pay_price', 3.99));
+  const [cadScanPayPrice, setCadScanPayPrice] = useState<number>(() => getInitialPrice('cad_scan_pay_price', 6.99));
+  const [audScanPayPrice, setAudScanPayPrice] = useState<number>(() => getInitialPrice('aud_scan_pay_price', 7.49));
+  const [aedScanPayPrice, setAedScanPayPrice] = useState<number>(() => getInitialPrice('aed_scan_pay_price', 18.99));
+  const [sgdScanPayPrice, setSgdScanPayPrice] = useState<number>(() => getInitialPrice('sgd_scan_pay_price', 6.99));
+
+  // Fetch latest live prices from Supabase on mount
+  useEffect(() => {
+    const fetchLivePricing = async () => {
+      try {
+        const { data, error } = await supabaseClient
+          .from('app_config')
+          .select('data')
+          .eq('id', 'subscription_pricing')
+          .maybeSingle();
+
+        if (data && data.data) {
+          const p = data.data;
+          localStorage.setItem('zb_dynamic_prices', JSON.stringify(p));
+          if (p.monthly) setMonthlyPrice(p.monthly);
+          if (p.yearly) setYearlyPrice(p.yearly);
+          if (p.lifetime) setLifetimePrice(p.lifetime);
+          if (p.usd_monthly) setUsdMonthlyPrice(p.usd_monthly);
+          if (p.usd_yearly) setUsdYearlyPrice(p.usd_yearly);
+          if (p.usd_lifetime) setUsdLifetimePrice(p.usd_lifetime);
+          if (p.eur_monthly) setEurMonthlyPrice(p.eur_monthly);
+          if (p.eur_yearly) setEurYearlyPrice(p.eur_yearly);
+          if (p.eur_lifetime) setEurLifetimePrice(p.eur_lifetime);
+          if (p.gbp_monthly) setGbpMonthlyPrice(p.gbp_monthly);
+          if (p.gbp_yearly) setGbpYearlyPrice(p.gbp_yearly);
+          if (p.gbp_lifetime) setGbpLifetimePrice(p.gbp_lifetime);
+          if (p.cad_monthly) setCadMonthlyPrice(p.cad_monthly);
+          if (p.cad_yearly) setCadYearlyPrice(p.cad_yearly);
+          if (p.cad_lifetime) setCadLifetimePrice(p.cad_lifetime);
+          if (p.aud_monthly) setAudMonthlyPrice(p.aud_monthly);
+          if (p.aud_yearly) setAudYearlyPrice(p.aud_yearly);
+          if (p.aud_lifetime) setAudLifetimePrice(p.aud_lifetime);
+          if (p.aed_monthly) setAedMonthlyPrice(p.aed_monthly);
+          if (p.aed_yearly) setAedYearlyPrice(p.aed_yearly);
+          if (p.aed_lifetime) setAedLifetimePrice(p.aed_lifetime);
+          if (p.sgd_monthly) setSgdMonthlyPrice(p.sgd_monthly);
+          if (p.sgd_yearly) setSgdYearlyPrice(p.sgd_yearly);
+          if (p.sgd_lifetime) setSgdLifetimePrice(p.sgd_lifetime);
+
+          if (p.inr_slot_price) setInrSlotPrice(p.inr_slot_price);
+          if (p.usd_slot_price) setUsdSlotPrice(p.usd_slot_price);
+          if (p.eur_slot_price) setEurSlotPrice(p.eur_slot_price);
+          if (p.gbp_slot_price) setGbpSlotPrice(p.gbp_slot_price);
+          if (p.cad_slot_price) setCadSlotPrice(p.cad_slot_price);
+          if (p.aud_slot_price) setAudSlotPrice(p.aud_slot_price);
+          if (p.aed_slot_price) setAedSlotPrice(p.aed_slot_price);
+          if (p.sgd_slot_price) setSgdSlotPrice(p.sgd_slot_price);
+
+          if (p.inr_scan_pay_price) setInrScanPayPrice(p.inr_scan_pay_price);
+          if (p.usd_scan_pay_price) setUsdScanPayPrice(p.usd_scan_pay_price);
+          if (p.eur_scan_pay_price) setEurScanPayPrice(p.eur_scan_pay_price);
+          if (p.gbp_scan_pay_price) setGbpScanPayPrice(p.gbp_scan_pay_price);
+          if (p.cad_scan_pay_price) setCadScanPayPrice(p.cad_scan_pay_price);
+          if (p.aud_scan_pay_price) setAudScanPayPrice(p.aud_scan_pay_price);
+          if (p.aed_scan_pay_price) setAedScanPayPrice(p.aed_scan_pay_price);
+          if (p.sgd_scan_pay_price) setSgdScanPayPrice(p.sgd_scan_pay_price);
+        }
+      } catch (err) {
+        console.warn('Error fetching live pricing in admin:', err);
+      }
+    };
+    fetchLivePricing();
+  }, []);
 
   const handleSavePricing = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -442,9 +286,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       sgd_scan_pay_price: Number(sgdScanPayPrice)
     };
     try {
-      await supabaseClient.from('app_config').upsert([{ id: 'subscription_pricing', data: pricingObj }]);
-    } catch (err) {}
+      const { error } = await supabaseClient.from('app_config').upsert([{ id: 'subscription_pricing', data: pricingObj, updated_at: new Date().toISOString() }]);
+      if (error) {
+        console.warn('Supabase app_config save warning:', error.message);
+      }
+    } catch (err) {
+      console.warn('Supabase app_config save error:', err);
+    }
     localStorage.setItem('zb_dynamic_prices', JSON.stringify(pricingObj));
+    window.dispatchEvent(new CustomEvent('zenbudget_prices_updated', { detail: pricingObj }));
     if (onShowToast) onShowToast(`Live Multi-Currency Prices updated for ${selectedPricingCurrency}!`, 'success');
   };
 
@@ -529,7 +379,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   }
 ];
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing' | 'slots' | 'social_links'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing' | 'slots'>('overview');
 
   // Data states
   const [profiles, setProfiles] = useState<ProfileRecord[]>(() => {
@@ -569,6 +419,37 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   useEffect(() => {
     if (isOpen && isUnlocked) {
       fetchAdminData();
+
+      // Manual 15-second poll to ensure ratings always appear (fallback in case realtime fails)
+      const ratingPollInterval = setInterval(() => {
+        supabaseClient
+          .from('app_ratings')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .then(({ data }) => {
+            if (data && data.length > 0) setRatings(data);
+          });
+      }, 15000);
+
+      const ratingChannel = supabaseClient
+        .channel('admin_ratings_realtime_v2')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'app_ratings' }, (payload: any) => {
+          if (payload.new) {
+            setRatings(prev => [payload.new, ...prev]);
+            if (onShowToast) onShowToast(`⭐ New review received from ${payload.new.user_name || 'User'}!`, 'info');
+          }
+        })
+        .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'app_ratings' }, (payload: any) => {
+          if (payload.old?.id) {
+            setRatings(prev => prev.filter(r => r.id !== payload.old.id));
+          }
+        })
+        .subscribe();
+
+      return () => {
+        clearInterval(ratingPollInterval);
+        supabaseClient.removeChannel(ratingChannel);
+      };
     }
   }, [isOpen, isUnlocked]);
 
@@ -803,24 +684,28 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
 
   const executeDeleteUser = async (userId: string, userName: string) => {
     try {
-      await Promise.allSettled([
-        supabaseClient.from('profiles').delete().eq('id', userId),
-        supabaseClient.from('transactions').delete().eq('user_id', userId),
-        supabaseClient.from('accounts').delete().eq('user_id', userId),
-        supabaseClient.from('budgets').delete().eq('user_id', userId),
-        supabaseClient.from('goals').delete().eq('user_id', userId),
-        supabaseClient.from('loans').delete().eq('user_id', userId),
-        supabaseClient.from('wishlist').delete().eq('user_id', userId),
-        supabaseClient.from('debts').delete().eq('user_id', userId),
-        supabaseClient.from('device_sessions').delete().eq('user_id', userId)
-      ]);
+      // First, completely delete the user from Auth using the RPC (Requires SQL setup in Supabase)
+      const { error: authError } = await supabaseClient.rpc('delete_auth_user', { target_user_id: userId });
+      if (authError) {
+         console.error('Failed to delete auth user, attempting to delete public records anyway:', authError);
+      }
+
+      await supabaseClient.from('profiles').delete().eq('id', userId);
+      await supabaseClient.from('transactions').delete().eq('user_id', userId);
+      await supabaseClient.from('accounts').delete().eq('user_id', userId);
+      await supabaseClient.from('goals').delete().eq('user_id', userId);
+      await supabaseClient.from('budgets').delete().eq('user_id', userId);
+      await supabaseClient.from('loans').delete().eq('user_id', userId);
+      await supabaseClient.from('wishlist').delete().eq('user_id', userId);
+      await supabaseClient.from('debts').delete().eq('user_id', userId);
+      await supabaseClient.from('device_sessions').delete().eq('user_id', userId);
 
       setProfiles(prev => prev.filter(p => p.id !== userId));
       setSelectedUserIds(prev => prev.filter(id => id !== userId));
       if (selectedDetailUser?.id === userId) setSelectedDetailUser(null);
       setConfirmDeleteTarget(null);
 
-      if (onShowToast) onShowToast(`User "${userName}" & all associated ledger data permanently deleted!`, 'success');
+      if (onShowToast) onShowToast(`User "${userName}" reset & deleted successfully!`, 'success');
     } catch (err: any) {
       if (onShowToast) onShowToast(`Delete failed: ${err.message}`, 'warning');
     }
@@ -829,17 +714,20 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   const executeBulkDeleteUsers = async () => {
     if (selectedUserIds.length === 0) return;
     try {
-      await Promise.allSettled([
-        supabaseClient.from('profiles').delete().in('id', selectedUserIds),
-        supabaseClient.from('transactions').delete().in('user_id', selectedUserIds),
-        supabaseClient.from('accounts').delete().in('user_id', selectedUserIds),
-        supabaseClient.from('budgets').delete().in('user_id', selectedUserIds),
-        supabaseClient.from('goals').delete().in('user_id', selectedUserIds),
-        supabaseClient.from('loans').delete().in('user_id', selectedUserIds),
-        supabaseClient.from('wishlist').delete().in('user_id', selectedUserIds),
-        supabaseClient.from('debts').delete().in('user_id', selectedUserIds),
-        supabaseClient.from('device_sessions').delete().in('user_id', selectedUserIds)
-      ]);
+      // Loop to delete auth users since our RPC takes one ID at a time
+      for (const id of selectedUserIds) {
+        await supabaseClient.rpc('delete_auth_user', { target_user_id: id });
+      }
+
+      await supabaseClient.from('profiles').delete().in('id', selectedUserIds);
+      await supabaseClient.from('transactions').delete().in('user_id', selectedUserIds);
+      await supabaseClient.from('accounts').delete().in('user_id', selectedUserIds);
+      await supabaseClient.from('goals').delete().in('user_id', selectedUserIds);
+      await supabaseClient.from('budgets').delete().in('user_id', selectedUserIds);
+      await supabaseClient.from('loans').delete().in('user_id', selectedUserIds);
+      await supabaseClient.from('wishlist').delete().in('user_id', selectedUserIds);
+      await supabaseClient.from('debts').delete().in('user_id', selectedUserIds);
+      await supabaseClient.from('device_sessions').delete().in('user_id', selectedUserIds);
 
       setProfiles(prev => prev.filter(p => !selectedUserIds.includes(p.id)));
       setSelectedUserIds([]);
@@ -847,7 +735,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
         setSelectedDetailUser(null);
       }
       setConfirmBulkDeleteOpen(false);
-      if (onShowToast) onShowToast(`${selectedUserIds.length} users & all associated ledger data permanently deleted!`, 'success');
+      if (onShowToast) onShowToast(`${selectedUserIds.length} users reset & deleted successfully!`, 'success');
     } catch (err: any) {
       if (onShowToast) onShowToast(`Bulk delete failed: ${err.message}`, 'warning');
     }
@@ -855,13 +743,17 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
 
   const handleSendBroadcast = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!bcTitle.trim() || !bcMessage.trim()) return;
+    if (!bcTitle.trim()) {
+      if (onShowToast) onShowToast('Please enter an announcement title!', 'warning');
+      return;
+    }
 
+    const finalMessage = bcMessage.trim() || bcTitle.trim();
     const newId = `bc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const newBc = {
       id: newId,
       title: bcTitle.trim(),
-      message: bcMessage.trim(),
+      message: finalMessage,
       type: bcType,
       created_at: new Date().toISOString(),
       link_url: bcLink.trim() || null,
@@ -880,20 +772,29 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
     setBcButtonText('');
     if (onShowToast) onShowToast('Broadcast announcement published to all users! 📣', 'success');
 
-    // 2. BACKGROUND SYNC: Try to persist in Supabase (fire-and-forget)
-    (async () => {
-      try {
-        const insertData: any = { title: newBc.title, message: newBc.message, type: newBc.type };
-        if (newBc.link_url) insertData.link_url = newBc.link_url;
-        if (newBc.button_text) insertData.button_text = newBc.button_text;
-        const { error } = await supabaseClient
-          .from('broadcast_notifications')
-          .insert([insertData]);
-        if (error) console.warn('Broadcast Supabase insert error (local state preserved):', error);
-      } catch (err) {
-        console.warn('Broadcast Supabase sync failed (local state preserved):', err);
+    // 2. BACKGROUND SYNC: Persist in Supabase broadcast_notifications table
+    try {
+      const insertData: any = { 
+        title: newBc.title, 
+        message: newBc.message, 
+        type: newBc.type 
+      };
+      if (newBc.link_url) insertData.link_url = newBc.link_url;
+      if (newBc.button_text) insertData.button_text = newBc.button_text;
+
+      const { data, error } = await supabaseClient
+        .from('broadcast_notifications')
+        .insert([insertData])
+        .select();
+
+      if (error) {
+        console.warn('Broadcast Supabase insert error:', error);
+      } else if (data && data.length > 0) {
+        setBroadcasts(prev => prev.map(b => b.id === newId ? { ...b, id: data[0].id } : b));
       }
-    })();
+    } catch (err) {
+      console.warn('Broadcast Supabase sync failed:', err);
+    }
   };
 
   const handleDeleteBroadcast = async (id: string) => {
@@ -1037,6 +938,16 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   const totalPremiumUsers = premiumMonthlyCount + premiumYearlyCount + premiumLifetimeCount;
   const trialCount = Math.max(0, totalUsers - totalPremiumUsers);
   const estimatedRevenue = (premiumMonthlyCount * (monthlyPrice || 149)) + (premiumYearlyCount * (yearlyPrice || 1499)) + (premiumLifetimeCount * (lifetimePrice || 2499));
+
+  const handleDeleteRating = async (ratingId: string) => {
+    setRatings(prev => prev.filter(r => r.id !== ratingId));
+    if (onShowToast) onShowToast('🗑️ Review / Rating deleted from database!', 'info');
+    try {
+      await supabaseClient.from('app_ratings').delete().eq('id', ratingId);
+    } catch (e) {
+      console.warn('Rating delete from Supabase failed:', e);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -1205,8 +1116,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                 { id: 'broadcasts', label: 'Broadcast Center', icon: Bell },
                 { id: 'coupons', label: 'Discount Coupons', icon: Gift },
                 { id: 'pricing', label: 'Pricing Control', icon: DollarSign },
-                { id: 'ratings', label: `App Ratings (${ratings.length})`, icon: Star },
-                { id: 'social_links', label: 'Social Links', icon: Share2 }
+                { id: 'ratings', label: `App Ratings (${ratings.length})`, icon: Star }
               ].map(tab => {
                 const IconComponent = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -1487,9 +1397,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                                   </td>
 
                                   <td style={{ padding: '1rem' }}>
-                                    <div style={{ color: '#a5b4fc', fontWeight: 600 }}>
-                                      {p.referral_code || p.couple_code || `ZB-${(p.name || 'USER').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6)}${(p.id || '1234').slice(0, 4).toUpperCase()}`}
-                                    </div>
+                                    <div style={{ color: '#a5b4fc', fontWeight: 600 }}>{p.referral_code || 'N/A'}</div>
                                     {totalReferred > 0 && (
                                       <button 
                                         onClick={(e) => { e.stopPropagation(); setExpandedUserId(expandedUserId === p.id ? null : p.id); }}
@@ -1504,34 +1412,117 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                                     )}
                                   </td>
 
-                                  <td style={{ padding: '1rem' }}>
-                                    <span style={{
-                                      padding: '0.25rem 0.6rem',
-                                      borderRadius: '6px',
-                                      fontSize: '0.75rem',
-                                      fontWeight: 600,
-                                      backgroundColor: p.subscription_tier === 'premium_lifetime'
-                                        ? 'rgba(245, 158, 11, 0.2)'
-                                        : p.subscription_tier === 'premium_monthly' || p.subscription_tier === 'premium'
-                                          ? 'rgba(16, 185, 129, 0.2)'
-                                          : 'rgba(56, 189, 248, 0.2)',
-                                      color: p.subscription_tier === 'premium_lifetime'
-                                        ? '#fbbf24'
-                                        : p.subscription_tier === 'premium_monthly' || p.subscription_tier === 'premium'
-                                          ? '#34d399'
-                                          : '#38bdf8'
-                                    }}>
-                                      {p.subscription_tier || 'trial'}
-                                    </span>
-                                  </td>
+                                  {(() => {
+                                    // Calculate Purchase Count & Total Revenue spent by user
+                                    const userPayments = payments.filter(pay => 
+                                      pay.user_id === p.id || 
+                                      (resolvedEmail && pay.email && pay.email.toLowerCase().trim() === resolvedEmail.toLowerCase().trim())
+                                    );
+                                    const purchaseCount = userPayments.length;
+                                    const userTotalRevenue = userPayments.reduce((sum, pay) => sum + parseFloat(pay.amount || 0), 0);
 
-                                  <td style={{ padding: '1rem' }}>
-                                    {p.is_suspended ? (
-                                      <span style={{ color: '#f87171', fontSize: '0.75rem', fontWeight: 600 }}>🚫 Suspended</span>
-                                    ) : (
-                                      <span style={{ color: '#34d399', fontSize: '0.75rem', fontWeight: 600 }}>Active</span>
-                                    )}
-                                  </td>
+                                    // Calculate Dynamic Status (Active vs Expired / Inactive)
+                                    const now = new Date();
+                                    let statusText = 'Active';
+                                    let statusColor = '#34d399';
+                                    let statusBg = 'rgba(52, 211, 153, 0.15)';
+
+                                    if (p.is_suspended) {
+                                      statusText = '🚫 Suspended';
+                                      statusColor = '#f87171';
+                                      statusBg = 'rgba(248, 113, 113, 0.15)';
+                                    } else if (p.subscription_tier === 'premium_lifetime') {
+                                      statusText = 'Active ⚡ (Lifetime)';
+                                      statusColor = '#fbbf24';
+                                      statusBg = 'rgba(251, 191, 36, 0.15)';
+                                    } else if (p.subscription_tier?.startsWith('premium')) {
+                                      const expiresAt = p.premium_expires_at ? new Date(p.premium_expires_at) : null;
+                                      if (expiresAt) {
+                                        const daysLeft = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                                        if (daysLeft > 0) {
+                                          statusText = `Active ⚡ (${daysLeft}d left)`;
+                                          statusColor = '#34d399';
+                                          statusBg = 'rgba(52, 211, 153, 0.15)';
+                                        } else {
+                                          statusText = 'Expired / Inactive ❌';
+                                          statusColor = '#f87171';
+                                          statusBg = 'rgba(248, 113, 113, 0.15)';
+                                        }
+                                      } else {
+                                        statusText = 'Active ⚡';
+                                        statusColor = '#34d399';
+                                        statusBg = 'rgba(52, 211, 153, 0.15)';
+                                      }
+                                    } else if (p.subscription_tier === 'trial' || !p.subscription_tier) {
+                                      const trialStart = p.trial_start_date ? new Date(p.trial_start_date) : null;
+                                      if (trialStart) {
+                                        const trialEnd = new Date(trialStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+                                        const daysLeft = Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                                        if (daysLeft > 0) {
+                                          statusText = `Trial Active (${daysLeft}d left)`;
+                                          statusColor = '#38bdf8';
+                                          statusBg = 'rgba(56, 189, 248, 0.15)';
+                                        } else {
+                                          statusText = 'Trial Expired / Inactive ❌';
+                                          statusColor = '#f87171';
+                                          statusBg = 'rgba(248, 113, 113, 0.15)';
+                                        }
+                                      } else {
+                                        statusText = 'Trial Active';
+                                        statusColor = '#38bdf8';
+                                        statusBg = 'rgba(56, 189, 248, 0.15)';
+                                      }
+                                    } else if (p.subscription_tier === 'free') {
+                                      statusText = 'Inactive / Free ❌';
+                                      statusColor = '#94a3b8';
+                                      statusBg = 'rgba(148, 163, 184, 0.15)';
+                                    }
+
+                                    return (
+                                      <>
+                                        <td style={{ padding: '1rem' }}>
+                                          <span style={{
+                                            padding: '0.25rem 0.6rem',
+                                            borderRadius: '6px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 600,
+                                            backgroundColor: p.subscription_tier === 'premium_lifetime'
+                                              ? 'rgba(245, 158, 11, 0.2)'
+                                              : p.subscription_tier?.startsWith('premium')
+                                                ? 'rgba(16, 185, 129, 0.2)'
+                                                : 'rgba(56, 189, 248, 0.2)',
+                                            color: p.subscription_tier === 'premium_lifetime'
+                                              ? '#fbbf24'
+                                              : p.subscription_tier?.startsWith('premium')
+                                                ? '#34d399'
+                                                : '#38bdf8'
+                                          }}>
+                                            {p.subscription_tier || 'trial'}
+                                          </span>
+                                          <div style={{ fontSize: '0.7rem', color: purchaseCount > 0 ? '#fbbf24' : '#64748b', marginTop: '4px', fontWeight: 700 }}>
+                                            💳 Purchases: {purchaseCount > 0 ? `${purchaseCount}x (₹${userTotalRevenue.toLocaleString()})` : '0 (No Purchases)'}
+                                          </div>
+                                        </td>
+
+                                        <td style={{ padding: '1rem' }}>
+                                          <span style={{
+                                            padding: '0.25rem 0.65rem',
+                                            borderRadius: '8px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 700,
+                                            backgroundColor: statusBg,
+                                            color: statusColor,
+                                            border: `1px solid ${statusColor}40`,
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '4px'
+                                          }}>
+                                            {statusText}
+                                          </span>
+                                        </td>
+                                      </>
+                                    );
+                                  })()}
 
                                   <td style={{ padding: '1rem', textAlign: 'right' }} onClick={(e) => e.stopPropagation()}>
                                     <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end', alignItems: 'center' }}>
@@ -2420,7 +2411,6 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                           }}
                         >
                           <option value="">All Plan Types (Universal)</option>
-                          <option value="subscription_all">All Subscription Plans (Monthly + Yearly + Lifetime)</option>
                           <option value="monthly">Monthly Plan (₹149)</option>
                           <option value="yearly">Yearly Plan (₹1,499)</option>
                           <option value="lifetime">Lifetime Founding Member (₹2,499)</option>
@@ -2645,9 +2635,9 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                               </span>
                             </div>
                             {/* Review Comment Text */}
-                            {((r.comment && r.comment.trim()) || (r.feedback && r.feedback.trim() && !r.feedback.includes('rating submitted')) || (r as any).review_text) ? (
+                            {((r.feedback && r.feedback.trim() && !r.feedback.includes('rating submitted')) || (r as any).comment || (r as any).review_text) ? (
                               <div style={{ fontSize: '0.85rem', color: '#e2e8f0', backgroundColor: 'rgba(15, 23, 42, 0.6)', padding: '8px 12px', borderRadius: '8px', borderLeft: '3px solid #38bdf8', marginBottom: '0.35rem', fontStyle: 'italic', fontWeight: 500 }}>
-                                💬 "{r.comment || r.feedback || (r as any).review_text}"
+                                💬 "{r.feedback || (r as any).comment || (r as any).review_text}"
                               </div>
                             ) : (
                               <div style={{ fontSize: '0.82rem', color: '#94a3b8', marginBottom: '0.35rem', fontWeight: 500 }}>
@@ -2659,8 +2649,31 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                             </div>
                           </div>
 
-                          <div style={{ fontSize: '1.1rem', letterSpacing: '2px', backgroundColor: 'rgba(251, 191, 36, 0.15)', padding: '0.4rem 0.8rem', borderRadius: '10px', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
-                            {'⭐'.repeat(r.rating_stars || 5)}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div style={{ fontSize: '1.1rem', letterSpacing: '2px', backgroundColor: 'rgba(251, 191, 36, 0.15)', padding: '0.4rem 0.8rem', borderRadius: '10px', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
+                              {'⭐'.repeat(r.rating_stars || 5)}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteRating(r.id)}
+                              title="Delete Review"
+                              style={{
+                                padding: '0.45rem 0.75rem',
+                                borderRadius: '10px',
+                                border: '1px solid rgba(239, 68, 68, 0.3)',
+                                backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                                color: '#f87171',
+                                fontSize: '0.8rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                transition: 'all 0.2s ease'
+                              }}
+                            >
+                              <Trash2 size={14} /> Delete
+                            </button>
                           </div>
                         </div>
                       ))
@@ -2668,12 +2681,6 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                   </div>
                 </div>
               )}
-
-              {/* TAB: SOCIAL LINKS MANAGEMENT */}
-              {activeTab === 'social_links' && (
-                <SocialLinksManager supabaseClient={supabaseClient} />
-              )}
-
               {/* TAB 8: PRICING CONTROL */}
               {activeTab === 'pricing' && (
                 <div>
