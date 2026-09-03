@@ -1453,7 +1453,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                                         statusColor = '#34d399';
                                         statusBg = 'rgba(52, 211, 153, 0.15)';
                                       }
-                                    } else if (p.subscription_tier === 'trial' || !p.subscription_tier) {
+                                    } else if (p.subscription_tier === 'trial' || p.subscription_tier === 'free' || !p.subscription_tier) {
                                       const trialStart = p.trial_start_date ? new Date(p.trial_start_date) : null;
                                       if (trialStart) {
                                         const trialEnd = new Date(trialStart.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -1468,14 +1468,10 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                                           statusBg = 'rgba(248, 113, 113, 0.15)';
                                         }
                                       } else {
-                                        statusText = 'Trial Active';
-                                        statusColor = '#38bdf8';
-                                        statusBg = 'rgba(56, 189, 248, 0.15)';
+                                        statusText = 'Inactive / Free ❌';
+                                        statusColor = '#94a3b8';
+                                        statusBg = 'rgba(148, 163, 184, 0.15)';
                                       }
-                                    } else if (p.subscription_tier === 'free') {
-                                      statusText = 'Inactive / Free ❌';
-                                      statusColor = '#94a3b8';
-                                      statusBg = 'rgba(148, 163, 184, 0.15)';
                                     }
 
                                     return (
