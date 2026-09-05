@@ -3461,38 +3461,6 @@ const App: React.FC = () => {
         boxShadow: '0 0 60px rgba(0,0,0,0.6)',
         position: 'relative'
       }}
-      onClickCapture={(e) => {
-        if (isSubscriptionExpired()) {
-          const target = e.target as HTMLElement;
-          // Whitelist subscription modal, announcements, and whitelisted modals
-          if (
-            target && (
-              target.closest('.subscription-modal-wrapper') ||
-              target.closest('.announcement-modal-wrapper') ||
-              target.closest('[data-allow-click="true"]')
-            )
-          ) {
-            return;
-          }
-          // If user clicks on ANY action button, input, navigation, or interactive element:
-          if (
-            target && (
-              target.closest('button') ||
-              target.closest('input') ||
-              target.closest('select') ||
-              target.closest('a') ||
-              target.closest('.glass-button') ||
-              target.closest('[role="button"]') ||
-              target.closest('nav')
-            )
-          ) {
-            e.preventDefault();
-            e.stopPropagation();
-            setIsSubBlocker(false);
-            setIsSubModalOpen(true);
-          }
-        }
-      }}
     >
       {/* Sticky Trial Expired Locked Banner */}
       {isSubscriptionExpired() && (
