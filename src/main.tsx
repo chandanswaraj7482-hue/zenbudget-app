@@ -1,7 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode, StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './App.tsx'
+import Root from './Root.tsx'
 import { bootstrapSession } from './supabaseClient'
 
 // Strip console logs in production for security
@@ -117,7 +117,7 @@ bootstrapSession().then(() => {
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <ErrorBoundary>
-        <App />
+        <Root />
       </ErrorBoundary>
     </StrictMode>,
   )
