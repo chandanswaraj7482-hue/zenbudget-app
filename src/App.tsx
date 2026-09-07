@@ -8,7 +8,8 @@ import {
   QrCode,
   BarChart3,
   Grid,
-  Loader2
+  Loader2,
+  Bot
 } from 'lucide-react';
 import { MoreToolsView } from './components/MoreToolsView';
 import { AdminDashboard } from './components/AdminDashboard';
@@ -3518,6 +3519,28 @@ const App: React.FC = () => {
         {/* Status Actions */}
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           
+          {/* AI Coach Button */}
+          <button
+            onClick={() => setIsHelpOpen(true)}
+            title="AI Coach"
+            style={{
+              background: 'linear-gradient(135deg, rgba(34,197,94,0.1) 0%, rgba(59,130,246,0.1) 100%)',
+              border: '1px solid rgba(34,197,94,0.3)',
+              borderRadius: '12px',
+              width: '36px',
+              height: '36px',
+              color: '#22c55e',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 8px rgba(34,197,94,0.15)',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <Bot size={16} />
+          </button>
+
           {/* Scanner Button */}
           <button
             onClick={() => setIsScannerOpen(true)}

@@ -352,7 +352,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
     let botResponseText = '';
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -365,7 +365,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
 
 CRITICAL INSTRUCTIONS:
 1. MATCH THE USER'S EXACT LANGUAGE: If user speaks in English, reply in English. If user speaks in Hinglish, reply in Hinglish. If user speaks in Hindi, reply in Hindi.
-2. OUT-OF-APP & GENERAL QUESTIONS: You can answer ANY question about personal finance, budgeting strategies, investing, taxes, credit scores, or money management. Be ultra helpful, smart, concise, and clear.
+2. OUT-OF-APP & GENERAL QUESTIONS: You can answer ANY question about personal finance, budgeting strategies, investing, taxes, credit scores, or money management. Be ultra helpful, smart, concise, and clear. Break down complex financial concepts into easy-to-understand bullet points.
 3. STRICT TOPIC BOUNDARY: If the user asks completely unrelated non-financial questions (e.g., cooking recipes like "egg kaise bante ha", politics, coding, general trivia), politely decline to answer. Gently remind them that you are a Financial Coach and steer the conversation back to their money, budget, or the ZenBudget app.
 4. TONALITY & STYLE: Speak like an ultra-friendly, supportive personal financial buddy. Use warm and casual words like "bro", "yaar", "buddy" naturally. Include suitable emojis to keep the conversation engaging. Never sound cold, strict, or robotic.
 5. OFFICIAL EMAIL RULE: Do NOT bring up customer support email unless the user explicitly asks for support, contact, or customer email. If asked, provide: hello.zenbudget@zohomail.in.
