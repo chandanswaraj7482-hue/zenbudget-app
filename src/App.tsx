@@ -40,6 +40,7 @@ import { AddAccountModal } from './components/AddAccountModal';
 import { t, setLanguage as setI18nLanguage } from './utils/i18n';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
+import { PushNotifications } from '@capacitor/push-notifications';
 import { autoSyncCurrencyFromIP } from './utils/geoTracker';
 import { formatCurrency } from './utils/formatCurrency';
 import type { Transaction, SavingsGoal, CategoryBudget, CategoryType, Account, LoanRecord } from './types';
@@ -793,6 +794,41 @@ const App: React.FC = () => {
       }
       setLangKey(k => k + 1); // currency change → also re-render all views
     };
+
+    // Automatic IP & Geolocation Currency Auto-Detector
+    const autoDetectCurrencyByIp = async () => {
+      const profileId = localStorage.getItem('zb_profile_id') || '';
+      const hasManualOverride = (profileId ? localStorage.getItem(`zb_currency_${profileId}`) : null) || localStorage.getItem('zb_currency_user_selected');
+      if (!hasManualOverride) {
+        try {
+          const res = await fetch('https://ipapi.co/json/');
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.currency) {
+              setCurrency(data.currency);
+              localStorage.setItem('zb_default_currency', data.currency);
+              setLangKey(k => k + 1);
+              return;
+            }
+          }
+        } catch (e) {
+          // Fallback to client browser timezone
+          const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+          if (timeZone.includes('Kolkata') || timeZone.includes('India')) {
+            setCurrency('INR');
+          } else if (timeZone.includes('London')) {
+            setCurrency('GBP');
+          } else if (timeZone.includes('Paris') || timeZone.includes('Berlin') || timeZone.includes('Madrid') || timeZone.includes('Rome')) {
+            setCurrency('EUR');
+          } else if (timeZone.includes('Tokyo')) {
+            setCurrency('JPY');
+          } else {
+            setCurrency('USD');
+          }
+        }
+      }
+    };
+    autoDetectCurrencyByIp();
     window.addEventListener('languagechange', syncLang);
     window.addEventListener('currencychange', syncCurrency);
     return () => {
@@ -948,9 +984,48 @@ const App: React.FC = () => {
     };
   }, [isLocked, currentProfileId]);
 
-  // Sync live broadcast announcements from Supabase broadcast_notifications table
+  // FCM Token Registration & Sync
   useEffect(() => {
     if (!currentProfileId) return;
+
+    if (Capacitor.isNativePlatform()) {
+      const registerPush = async () => {
+        try {
+          // Request permission to use push notifications
+          let permStatus = await PushNotifications.checkPermissions();
+          if (permStatus.receive === 'prompt') {
+            permStatus = await PushNotifications.requestPermissions();
+          }
+
+          if (permStatus.receive !== 'granted') {
+            console.warn('Push notification permission not granted');
+            return;
+          }
+
+          // Register with Apple / Google to receive push via APNS/FCM
+          await PushNotifications.register();
+
+          // On success, save the token to Supabase
+          PushNotifications.addListener('registration', async (token) => {
+            console.log('Push registration success, token: ' + token.value);
+            // Save token to profile
+            await supabase
+              .from('profiles')
+              .update({ fcm_token: token.value })
+              .eq('id', currentProfileId);
+          });
+
+          // Some issue with our setup and push will not work
+          PushNotifications.addListener('registrationError', (error: any) => {
+            console.warn('Error on registration: ' + JSON.stringify(error));
+          });
+        } catch (e) {
+          console.warn('Failed to register push notifications', e);
+        }
+      };
+      
+      registerPush();
+    }
 
     const fetchBroadcastAnnouncements = async () => {
       try {
@@ -1035,6 +1110,7 @@ const App: React.FC = () => {
         const b = payload.new;
         if (b) {
           const notificationId = `broadcast_${b.id}`;
+          
           setNotifications(prev => {
             if (prev.some(n => n.id === notificationId)) return prev;
             const updated = [
@@ -3519,28 +3595,6 @@ const App: React.FC = () => {
         {/* Status Actions */}
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           
-          {/* AI Coach Button */}
-          <button
-            onClick={() => setIsHelpOpen(true)}
-            title="AI Coach"
-            style={{
-              background: 'linear-gradient(135deg, rgba(34,197,94,0.1) 0%, rgba(59,130,246,0.1) 100%)',
-              border: '1px solid rgba(34,197,94,0.3)',
-              borderRadius: '12px',
-              width: '36px',
-              height: '36px',
-              color: '#22c55e',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(34,197,94,0.15)',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <Bot size={16} />
-          </button>
-
           {/* Scanner Button */}
           <button
             onClick={() => setIsScannerOpen(true)}
@@ -3681,6 +3735,7 @@ const App: React.FC = () => {
             onAddAccountClick={() => setIsAddAccountOpen(true)}
             onOpenBankSync={() => setActiveView('bank_sync')}
             onOpenTransfer={() => setIsTransferOpen(true)}
+            onOpenAI={() => setIsHelpOpen(true)}
             onOpenLoans={() => setActiveView('loans')}
             onOpenProfile={() => setActiveView('profile')}
             onDeleteAccount={handleDeleteAccount}

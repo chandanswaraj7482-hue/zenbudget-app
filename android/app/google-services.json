@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "447630870272",
+    "project_id": "zenbudget-68df1",
+    "storage_bucket": "zenbudget-68df1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:447630870272:android:ea49595ad663eeda7015e5",
+        "android_client_info": {
+          "package_name": "com.zenbudget.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZRt4neHa1oHX9QImiFbSMycRux4p3I6M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

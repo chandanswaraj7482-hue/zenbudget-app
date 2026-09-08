@@ -28,8 +28,9 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
   public static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     const msg = error?.message || error?.toString() || '';
-    // Ignore non-fatal errors, third-party browser extensions, background sync, webauthn, etc.
+    // In dev mode or for transient errors, don't break the UI with error screen
     if (
+      import.meta.env.DEV ||
       !msg ||
       msg.includes('chrome-extension') ||
       msg.includes('couponCollection') ||
@@ -41,7 +42,8 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       msg.includes('Failed to fetch') ||
       msg.includes('NetworkError') ||
       msg.includes('ResizeObserver') ||
-      msg.includes('Minified React error')
+      msg.includes('Minified React error') ||
+      msg.includes('words')
     ) {
       return { hasError: false, error: null };
     }
@@ -53,7 +55,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   public render() {
-    if (this.state.hasError) {
+    if (this.state.hasError && import.meta.env.PROD) {
       return (
         <div style={{
           position: 'fixed',
@@ -89,7 +91,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
                   caches.keys().then(names => names.forEach(name => caches.delete(name)));
                 }
               } catch (e) {}
-              window.location.href = window.location.origin + window.location.pathname + '?refresh=' + Date.now();
+              window.location.reload();
             }}
             style={{
               padding: '12px 24px',
@@ -110,6 +112,17 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     }
     return this.props.children;
   }
+}
+
+// Register Service Worker for Push Notifications
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(registration => {
+      console.log('SW registered: ', registration);
+    }).catch(registrationError => {
+      console.log('SW registration failed: ', registrationError);
+    });
+  });
 }
 
 // Run bootstrapSession to restore auth token from SharedPreferences synchronously before mounting React App

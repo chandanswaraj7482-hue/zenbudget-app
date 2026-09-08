@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { HelpCircle, X, Bot, Star, Mail, Send, MessageSquare, Sparkles, ThumbsUp, CheckCircle, CheckCircle2 } from 'lucide-react';
+import { GoogleGenAI } from '@google/genai';
 import type { Transaction, CategoryBudget, SavingsGoal } from '../types';
 
 interface HelpModalProps {
@@ -38,16 +39,11 @@ export const HelpModal: React.FC<HelpModalProps> = ({
   const [rating, setRating] = useState<number>(5);
   const [comment, setComment] = useState<string>('');
   const [feedbackSuccess, setFeedbackSuccess] = useState<boolean>(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: '1',
-      sender: 'bot',
-      text: `Hi ${userName}! 🌿 I'm Zen — your personal AI Financial Coach. 🧘‍♂️ I can analyze your spending habits, give smart savings advice, and help you track your money in ZenBudget. Ask me anything! 🤝✨`,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputVal, setInputVal] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isRoastMode, setIsRoastMode] = useState(false);
+  const [feedbackGiven, setFeedbackGiven] = useState<Record<string, 'up' | 'down'>>({});
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Analyze user spending activity for AI Coach
@@ -350,55 +346,42 @@ export const HelpModal: React.FC<HelpModalProps> = ({
     setIsTyping(true);
 
     let botResponseText = '';
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
+    
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              {
-                text: `You are Zen 🌿 — an ultra-intelligent, friendly personal finance mentor & ZenBudget App Master AI Coach.
+      // Create Finance Context
+      const budgetedTotal = budgets.reduce((sum, b) => sum + (b.limit || 0), 0);
+      const flexMoney = Math.max(0, totalIncome - budgetedTotal);
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      const daysRemaining = Math.max(1, daysInMonth - new Date().getDate());
+      
+      const financeContext = `
+        User Name: ${userName}
+        Total Income: ${currencySymbol}${totalIncome}
+        Total Expense: ${currencySymbol}${totalExpense}
+        Remaining Flexible: ${currencySymbol}${flexMoney}
+        Daily Safe Spend: ${currencySymbol}${Math.round(flexMoney / daysRemaining)}
+        Top Spending Category: ${topCat} (${currencySymbol}${topCatAmt})
+        Savings Rate: ${savingsPct}%
+      `;
 
-CRITICAL INSTRUCTIONS:
-1. MATCH THE USER'S EXACT LANGUAGE: If user speaks in English, reply in English. If user speaks in Hinglish, reply in Hinglish. If user speaks in Hindi, reply in Hindi.
-2. OUT-OF-APP & GENERAL QUESTIONS: You can answer ANY question about personal finance, budgeting strategies, investing, taxes, credit scores, or money management. Be ultra helpful, smart, concise, and clear. Break down complex financial concepts into easy-to-understand bullet points.
-3. STRICT TOPIC BOUNDARY: If the user asks completely unrelated non-financial questions (e.g., cooking recipes like "egg kaise bante ha", politics, coding, general trivia), politely decline to answer. Gently remind them that you are a Financial Coach and steer the conversation back to their money, budget, or the ZenBudget app.
-4. TONALITY & STYLE: Speak like an ultra-friendly, supportive personal financial buddy. Use warm and casual words like "bro", "yaar", "buddy" naturally. Include suitable emojis to keep the conversation engaging. Never sound cold, strict, or robotic.
-5. OFFICIAL EMAIL RULE: Do NOT bring up customer support email unless the user explicitly asks for support, contact, or customer email. If asked, provide: hello.zenbudget@zohomail.in.
+      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || '' });
 
-User Real Activity Context:
-- User Name: ${userName}
-- Monthly Income: ${currencySymbol}${totalIncome}
-- Monthly Expenses: ${currencySymbol}${totalExpense}
-- Monthly Savings Rate: ${savingsPct}%
-- Top Spending Category: ${topCat} (${currencySymbol}${topCatAmt})
-- Category Expenses Breakdown: ${catBreakdownText || 'None yet'}
-- Recent Transaction Logs: ${recentTxsText || 'None yet'}
-- Category Budgets: ${budgetSummaryText || 'None set'}
-- Savings Goals: ${goalSummaryText || 'None set'}
+      const systemInstruction = `You are Zen, an expert personal finance AI coach built into the ZenBudget app. You have access to the user's financial data. Answer their financial questions accurately, kindly, and concisely in Hinglish or English based on their language. 
+      CRITICAL RULE: You are strictly forbidden from answering non-financial questions (e.g., cooking recipes like biryani, coding, general knowledge, math not related to budget). If the user asks something unrelated to finance or their budget, politely refuse and steer the conversation back to their money.
+      Here is the user's current context: ${financeContext}`;
 
-User Question: ${rawText}`
-              }
-            ]
-          }]
-        })
+      const response = await ai.models.generateContent({
+          model: 'gemini-1.5-flash',
+          contents: rawText,
+          config: {
+              systemInstruction: systemInstruction,
+          }
       });
-      if (response.ok) {
-        const data = await response.json();
-        const generatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
-        if (generatedText) {
-          botResponseText = generatedText;
-        }
-      }
-    } catch (err) {
-      console.warn('Gemini API Error, using smart AI fallback:', err);
-    }
 
-    if (!botResponseText) {
+      botResponseText = response.text || "Sorry, I couldn't process that.";
+
+    } catch (err) {
+      console.warn('Gemini Error, using smart AI fallback:', err);
       botResponseText = getSmartClientFallbackResponse(rawText);
     }
 
@@ -412,6 +395,33 @@ User Question: ${rawText}`
     setMessages(prev => [...prev, botResponse]);
     setIsTyping(false);
   };
+
+  const handleMessageFeedback = async (messageId: string, type: 'up' | 'down') => {
+    setFeedbackGiven(prev => ({ ...prev, [messageId]: type }));
+    // Ideally, we would insert this into the ai_message_feedback table in Supabase
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from('ai_message_feedback').insert([{
+          user_id: user.id,
+          message_id: messageId,
+          feedback: type === 'up' ? 'thumbs_up' : 'thumbs_down',
+          created_at: new Date().toISOString()
+        }]);
+      }
+    } catch (e) {
+      console.warn("Could not save feedback", e);
+    }
+  };
+
+  const greetingTime = new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 18 ? 'Good afternoon' : 'Good evening';
+  const flexMoney = Math.max(0, totalIncome - budgets.reduce((sum, b) => sum + (b.limit || 0), 0));
+  const suggestedChips = [
+    "How's my month?",
+    "Where am I overspending?",
+    "Can I afford something?",
+    "Help me save"
+  ];
 
   return (
     <div style={{
@@ -579,43 +589,153 @@ User Question: ${rawText}`
               {/* API key is now completely hidden - works silently in background */}
 
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px', overflowY: 'auto', paddingBottom: '10px' }}>
-                {messages.map((m) => (
-                  <div 
-                    key={m.id}
-                    style={{
-                      display: 'flex',
-                      gap: '8px',
-                      alignSelf: m.sender === 'user' ? 'flex-end' : 'flex-start',
-                      maxWidth: '85%'
-                    }}
-                  >
-                    {m.sender === 'bot' && (
-                      <div style={{
-                        width: '24px',
-                        height: '24px',
-                        borderRadius: '50%',
-                        background: 'rgba(34, 197, 94, 0.1)',
+                
+                {/* AI Chat Home Screen (Always visible at top) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '10px' }}>
+                  
+                  {/* Greeting & Mode Toggle */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <h2 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
+                        {greetingTime}, {userName} 👋
+                      </h2>
+                      <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
+                        Your spending looks mostly on track.
+                      </p>
+                    </div>
+                    <button 
+                      onClick={() => setIsRoastMode(!isRoastMode)}
+                      style={{
+                        background: isRoastMode ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-input)',
+                        border: `1px solid ${isRoastMode ? 'rgba(239, 68, 68, 0.3)' : 'var(--border-input)'}`,
+                        borderRadius: '100px',
+                        padding: '4px 10px',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0
+                        gap: '6px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        color: isRoastMode ? '#ef4444' : 'var(--text-secondary)'
+                      }}
+                    >
+                      <span style={{ fontSize: '14px' }}>😂</span>
+                      <span style={{ fontSize: '10px', fontWeight: 700 }}>Roast Mode</span>
+                    </button>
+                  </div>
+
+                  {/* Overview Cards */}
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <div style={{ flex: 1, background: 'var(--bg-input)', padding: '12px', borderRadius: '16px', border: '1px solid var(--border-input)' }}>
+                      <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 700 }}>SPENT</span>
+                      <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)', marginTop: '4px' }}>{currencySymbol}{totalExpense.toLocaleString()}</div>
+                    </div>
+                    <div style={{ flex: 1, background: 'var(--bg-input)', padding: '12px', borderRadius: '16px', border: '1px solid var(--border-input)' }}>
+                      <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 700 }}>FLEXIBLE LEFT</span>
+                      <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--primary)', marginTop: '4px' }}>{currencySymbol}{Math.max(0, flexMoney - totalExpense).toLocaleString()}</div>
+                    </div>
+                  </div>
+
+                  {/* Dynamic Insight */}
+                  {topCatAmt > 0 && (
+                    <div style={{ background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)', padding: '12px', borderRadius: '16px', display: 'flex', gap: '10px' }}>
+                      <div style={{ width: '24px', height: '24px', background: 'rgba(59, 130, 246, 0.15)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Sparkles size={12} color="#3b82f6" />
+                      </div>
+                      <div>
+                        <span style={{ fontSize: '10px', fontWeight: 800, color: '#3b82f6', textTransform: 'uppercase' }}>Zen Noticed</span>
+                        <p style={{ fontSize: '12px', color: 'var(--text-primary)', margin: '4px 0 0 0', lineHeight: 1.4 }}>
+                          {topCat} spending is your highest this month at {currencySymbol}{topCatAmt.toLocaleString()}. Watch out!
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Prompt Chips - Only show before chat starts */}
+                  {messages.length === 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
+                      {suggestedChips.map(chip => (
+                        <button
+                          key={chip}
+                          onClick={() => handleSend(undefined, chip)}
+                          style={{
+                            background: 'var(--bg-input)',
+                            border: '1px solid var(--border-input)',
+                            padding: '8px 12px',
+                            borderRadius: '100px',
+                            color: 'var(--text-secondary)',
+                            fontSize: '11px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            textAlign: 'left'
+                          }}
+                        >
+                          {chip}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {messages.map((m) => (
+                  <div key={m.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignSelf: m.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
+                    <div 
+                      style={{
+                        display: 'flex',
+                        gap: '8px',
+                      }}
+                    >
+                      {m.sender === 'bot' && (
+                        <div style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: isRoastMode ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                        }}>
+                          <Bot size={13} style={{ color: isRoastMode ? '#ef4444' : 'var(--primary)' }} />
+                        </div>
+                      )}
+                      <div style={{
+                        padding: '10px 12px',
+                        borderRadius: m.sender === 'user' ? '14px 14px 2px 14px' : '2px 14px 14px 14px',
+                        background: m.sender === 'user' ? 'linear-gradient(to right, var(--primary), var(--secondary))' : 'var(--bg-input)',
+                        border: m.sender === 'user' ? 'none' : '1px solid var(--border-input)',
+                        color: m.sender === 'user' ? '#ffffff' : 'var(--text-primary)',
+                        fontSize: '12px',
+                        lineHeight: '1.5',
+                        whiteSpace: 'pre-line'
                       }}>
-                        <Bot size={13} style={{ color: 'var(--primary)' }} />
+                        {m.text}
+                        <span style={{ fontSize: '9px', color: m.sender === 'user' ? 'rgba(255,255,255,0.7)' : 'var(--text-secondary)', display: 'block', textAlign: 'right', marginTop: '4px' }}>{m.time}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Feedback Buttons for Bot Messages */}
+                    {m.sender === 'bot' && m.id !== '1' && (
+                      <div style={{ display: 'flex', gap: '8px', paddingLeft: '32px' }}>
+                        <button 
+                          onClick={() => handleMessageFeedback(m.id, 'up')}
+                          style={{
+                            background: 'none', border: 'none', cursor: 'pointer', padding: '2px', display: 'flex', alignItems: 'center', 
+                            color: feedbackGiven[m.id] === 'up' ? 'var(--primary)' : 'var(--text-muted)'
+                          }}
+                        >
+                          <ThumbsUp size={12} fill={feedbackGiven[m.id] === 'up' ? 'currentColor' : 'none'} />
+                        </button>
+                        <button 
+                          onClick={() => handleMessageFeedback(m.id, 'down')}
+                          style={{
+                            background: 'none', border: 'none', cursor: 'pointer', padding: '2px', display: 'flex', alignItems: 'center', transform: 'scaleY(-1)',
+                            color: feedbackGiven[m.id] === 'down' ? '#ef4444' : 'var(--text-muted)'
+                          }}
+                        >
+                          <ThumbsUp size={12} fill={feedbackGiven[m.id] === 'down' ? 'currentColor' : 'none'} />
+                        </button>
                       </div>
                     )}
-                    <div style={{
-                      padding: '10px 12px',
-                      borderRadius: m.sender === 'user' ? '14px 14px 2px 14px' : '2px 14px 14px 14px',
-                      background: m.sender === 'user' ? 'linear-gradient(to right, var(--primary), var(--secondary))' : 'var(--bg-input)',
-                      border: m.sender === 'user' ? 'none' : '1px solid var(--border-input)',
-                      color: m.sender === 'user' ? '#ffffff' : 'var(--text-primary)',
-                      fontSize: '12px',
-                      lineHeight: '1.4',
-                      whiteSpace: 'pre-line'
-                    }}>
-                      {m.text}
-                      <span style={{ fontSize: '9px', color: m.sender === 'user' ? 'rgba(255,255,255,0.7)' : 'var(--text-secondary)', display: 'block', textAlign: 'right', marginTop: '4px' }}>{m.time}</span>
-                    </div>
                   </div>
                 ))}
 

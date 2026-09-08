@@ -42,3 +42,5 @@ android-sdk
 # Admin portal zip archive
 admin-portal.zip
 .vercel
+
+serviceAccountKey.json

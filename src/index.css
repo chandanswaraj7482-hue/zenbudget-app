@@ -1117,6 +1117,161 @@ div[style*="position:fixed"] {
   color: #94a3b8;
 }
 
-.feature-icon {
-  font-size: 18px;
+/* ==============================================================
+   INNERHEAL STYLE ANIMATIONS
+   ============================================================== */
+@keyframes heroAnimate {
+  from { opacity: 0; transform: translateY(24px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+.hero-animate {
+  animation: heroAnimate 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.hero-animate-1 { animation-delay: 0.1s; }
+.hero-animate-2 { animation-delay: 0.2s; }
+.hero-animate-3 { animation-delay: 0.3s; }
+.hero-animate-4 { animation-delay: 0.4s; }
+.hero-animate-5 { animation-delay: 0.5s; }
+
+.bento-card {
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.bento-card:hover {
+  transform: translateY(-8px) scale(1.01) !important;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1) !important;
+}
+
+.floating-pill {
+  animation: floatPill 6s ease-in-out infinite alternate;
+}
+
+@keyframes floatPill {
+  0% { transform: translateY(0px) translateX(0px); }
+  100% { transform: translateY(-15px) translateX(5px); }
+}
+
+.floating-pill-reverse {
+  animation: floatPillReverse 8s ease-in-out infinite alternate;
+}
+
+@keyframes floatPillReverse {
+  0% { transform: translateY(0px) translateX(0px) rotate(4deg); }
+  100% { transform: translateY(15px) translateX(-5px) rotate(2deg); }
+}
+
+.icon-spin-pulse:hover svg {
+  animation: spinPulse 1s ease-in-out infinite;
+}
+
+@keyframes spinPulse {
+  0% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.15) rotate(10deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* INNERHEAL STYLE AESTHETIC CLASSES */
+
+.orb {
+  animation: orbDrift 20s ease-in-out infinite alternate;
+}
+.orb-1 { animation-delay: 0s; }
+.orb-2 { animation-delay: -5s; animation-direction: alternate-reverse; }
+.orb-3 { animation-delay: -10s; }
+
+@keyframes orbDrift {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(5%, 5%) scale(1.05); }
+  66% { transform: translate(-2%, 8%) scale(0.95); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+.hero-up {
+  opacity: 0;
+  animation: heroUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes heroUp {
+  0% { opacity: 0; transform: translateY(40px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.5s; }
+
+.float-slow {
+  animation: floatSlow 8s ease-in-out infinite alternate;
+}
+@keyframes floatSlow {
+  0% { transform: translate(-50%, -50%) translateY(0); }
+  100% { transform: translate(-50%, -50%) translateY(-20px); }
+}
+
+.float-medium {
+  animation: floatMedium 6s ease-in-out infinite alternate;
+}
+@keyframes floatMedium {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(-15px) rotate(2deg); }
+}
+
+.float-fast {
+  animation: floatFast 4s ease-in-out infinite alternate;
+}
+@keyframes floatFast {
+  0% { transform: translateY(0) rotate(-2deg); }
+  100% { transform: translateY(-10px) rotate(0deg); }
+}
+
+.glow-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 30px rgba(16,185,129,0.6) !important;
+}
+
+.glass-bento {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-bento:hover {
+  transform: translateY(-8px);
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+/* INNERHEAL AMBIENT GLOW ANIMATIONS */
+@keyframes innerhealPulse {
+  0% { transform: scale(1) translate(0, 0); opacity: 0.7; }
+  50% { transform: scale(1.15) translate(3%, -4%); opacity: 0.95; }
+  100% { transform: scale(1) translate(0, 0); opacity: 0.7; }
+}
+
+@keyframes rotateGlow {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes badgeFloat {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(1.5deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.innerheal-glow {
+  animation: innerhealPulse 12s ease-in-out infinite;
+}
+
+.innerheal-rotate {
+  animation: rotateGlow 25s linear infinite;
+}
+
+.badge-floating {
+  animation: badgeFloat 5s ease-in-out infinite;
+}
+
+

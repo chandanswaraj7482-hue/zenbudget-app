@@ -301,7 +301,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   {
     id: 'user_1',
-    name: 'Chandan Swaraj',
+    name: localStorage.getItem('zb_user_name') || localStorage.getItem('zenbudget_username') || 'Zen User',
     email: 'chandanswaraj7482@gmail.com',
     pin: '1234',
     subscription_tier: 'premium_lifetime',
@@ -379,7 +379,9 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   }
 ];
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing' | 'slots'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing' | 'slots' | 'ai_coach'>('overview');
+  const [aiReviews, setAiReviews] = useState<any[]>([]);
+  const [aiFeedback, setAiFeedback] = useState<any[]>([]);
 
   // Data states
   const [profiles, setProfiles] = useState<ProfileRecord[]>(() => {
@@ -525,6 +527,17 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
         .eq('payment_status', 'success');
 
       if (payData) setPayments(payData);
+
+      // Fetch AI Reviews (Wrapped in try/catch in case SQL migration hasn't run yet)
+      try {
+        const { data: aiRevData } = await supabaseClient.from('ai_reviews').select('*').order('created_at', { ascending: false });
+        if (aiRevData) setAiReviews(aiRevData);
+        
+        const { data: aiFeedbackData } = await supabaseClient.from('ai_message_feedback').select('*').order('created_at', { ascending: false });
+        if (aiFeedbackData) setAiFeedback(aiFeedbackData);
+      } catch (err) {
+        console.warn('Could not fetch AI Reviews, SQL migration maybe pending:', err);
+      }
 
     } catch (err) {
       console.error('Admin fetch error:', err);
@@ -762,6 +775,15 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
 
     // 1. OPTIMISTIC UPDATE: Update local state IMMEDIATELY before Supabase call
     setBroadcasts(prev => [newBc, ...prev]);
+
+    // TRIGGER PUSH NOTIFICATIONS VIA EDGE FUNCTION
+    const userTokens = profiles.map(p => p.fcm_token).filter(Boolean);
+    if (userTokens.length > 0) {
+      supabaseClient.functions.invoke('send-push', { 
+        body: { title: bcTitle.trim(), body: finalMessage, tokens: userTokens } 
+      }).catch(err => console.error('Push Notification Failed:', err));
+    }
+
     try {
       const stored = JSON.parse(localStorage.getItem('zb_admin_broadcasts') || '[]');
       localStorage.setItem('zb_admin_broadcasts', JSON.stringify([newBc, ...stored]));
@@ -1116,7 +1138,8 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                 { id: 'broadcasts', label: 'Broadcast Center', icon: Bell },
                 { id: 'coupons', label: 'Discount Coupons', icon: Gift },
                 { id: 'pricing', label: 'Pricing Control', icon: DollarSign },
-                { id: 'ratings', label: `App Ratings (${ratings.length})`, icon: Star }
+                { id: 'ratings', label: `App Ratings (${ratings.length})`, icon: Star },
+                { id: 'ai_coach', label: 'AI Coach & Reviews', icon: Bot }
               ].map(tab => {
                 const IconComponent = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -2082,7 +2105,58 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                 </div>
               )}
 
-              {/* TAB 3: BROADCAST NOTIFICATION CENTER */}
+              {/* TAB: AI COACH REVIEWS & ANALYTICS */}
+              {activeTab === 'ai_coach' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
+                  <div style={{ padding: '1.5rem', backgroundColor: 'rgba(255, 255, 255, 0.02)', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                      <div style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', padding: '0.75rem', borderRadius: '12px' }}>
+                        <Bot size={20} style={{ color: '#22c55e' }} />
+                      </div>
+                      <div>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: '#f8fafc', margin: 0 }}>Zen AI Coach V2 Analytics</h2>
+                        <p style={{ color: '#94a3b8', fontSize: '0.875rem', marginTop: '0.25rem', marginBottom: 0 }}>
+                          Monitor user engagement and feedback for the AI Financial Assistant.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+                      <div style={{ padding: '1rem', background: 'var(--bg-input)', borderRadius: '12px', border: '1px solid var(--border-input)' }}>
+                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.5rem' }}>TOTAL FEEDBACK (THUMBS UP/DOWN)</div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)' }}>{aiFeedback.length}</div>
+                      </div>
+                      <div style={{ padding: '1rem', background: 'var(--bg-input)', borderRadius: '12px', border: '1px solid var(--border-input)' }}>
+                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.5rem' }}>AI REVIEWS SUBMITTED</div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)' }}>{aiReviews.length}</div>
+                      </div>
+                    </div>
+
+                    <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#e2e8f0', marginBottom: '1rem' }}>Recent Message Feedback</h3>
+                    {aiFeedback.length === 0 ? (
+                      <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>No AI feedback recorded yet.</p>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {aiFeedback.slice(0, 20).map(f => (
+                          <div key={f.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', backgroundColor: 'var(--bg-input)', borderRadius: '12px', border: '1px solid var(--border-input)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <div style={{ padding: '8px', borderRadius: '50%', background: f.feedback === 'thumbs_up' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)' }}>
+                                <ThumbsUp size={16} fill={f.feedback === 'thumbs_up' ? '#22c55e' : '#ef4444'} style={{ transform: f.feedback === 'thumbs_down' ? 'scaleY(-1)' : 'none', color: f.feedback === 'thumbs_up' ? '#22c55e' : '#ef4444' }} />
+                              </div>
+                              <div>
+                                <div style={{ fontSize: '0.875rem', color: 'var(--text-primary)', fontWeight: 600 }}>Message ID: {f.message_id}</div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{new Date(f.created_at).toLocaleString()}</div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: BROADCAST NOTIFICATION CENTER */}
               {activeTab === 'broadcasts' && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                   {/* Create Broadcast Form */}

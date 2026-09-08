@@ -58,6 +58,7 @@ interface DashboardProps {
   onAddAccountClick?: () => void;
   onOpenBankSync?: () => void;
   onOpenTransfer?: () => void;
+  onOpenAI?: () => void;
   onOpenLoans?: () => void;
   onOpenProfile?: () => void;
   onUpgradeClick?: () => void;
@@ -161,6 +162,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onAddAccountClick,
   onOpenBankSync: _onOpenBankSync,
   onOpenTransfer: _onOpenTransfer,
+  onOpenAI,
   onOpenLoans: _onOpenLoans,
   onOpenProfile,
   onUpgradeClick,
@@ -993,7 +995,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           background: 'var(--bg-card)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
           borderRadius: '20px',
-          marginBottom: '0px',
+          marginBottom: '14px',
           boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -1032,6 +1034,45 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
       )}
+
+      {/* AI Coach Trigger Popup/Card */}
+      <div 
+        onClick={onOpenAI}
+        className="glass-panel" 
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '16px',
+          background: 'linear-gradient(135deg, rgba(34,197,94,0.08) 0%, rgba(59,130,246,0.08) 100%)',
+          border: '1px solid rgba(34,197,94,0.2)',
+          borderRadius: '20px',
+          marginBottom: '0px',
+          boxShadow: '0 8px 30px rgba(0,0,0,0.4)',
+          cursor: 'pointer',
+          position: 'relative',
+          overflow: 'hidden'
+      }}>
+        {/* Glow effect */}
+        <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '100px', height: '100px', background: 'rgba(34,197,94,0.2)', filter: 'blur(40px)', borderRadius: '50%' }}></div>
+        
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', gap: '14px' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#10b981', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(16,185,129,0.3)', flexShrink: 0 }}>
+              <Sparkles size={20} />
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                <span style={{ fontSize: '15px', fontWeight: 800, color: '#f8fafc' }}>Ask Zen AI Coach</span>
+                <span style={{ fontSize: '9px', fontWeight: 800, background: '#3b82f6', color: '#fff', padding: '2px 6px', borderRadius: '10px' }}>V2</span>
+              </div>
+              <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0, lineHeight: 1.4, paddingRight: '20px' }}>
+                Reflect on spending, get roast mode, or ask any financial question!
+              </p>
+            </div>
+          </div>
+          <ChevronRight size={20} color="#94a3b8" style={{ marginTop: '10px' }} />
+        </div>
+      </div>
 
       {/* Aesthetic Money Score Card */}
       <div className="glass-panel" style={{

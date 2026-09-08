@@ -1718,7 +1718,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               CALM YOUR MONEY
             </div>
             <p style={{ fontSize: '13px', color: 'var(--text-primary)', marginTop: '8px', marginBottom: '4px', fontWeight: 700 }}>
-              Welcome back, {dbProfile?.name || username || localStorage.getItem('zb_user_name') || 'Chandan Swaraj'}
+              Welcome back, {dbProfile?.name || username || localStorage.getItem('zb_user_name') || localStorage.getItem('zenbudget_username') || 'User'}
             </p>
           </div>
 

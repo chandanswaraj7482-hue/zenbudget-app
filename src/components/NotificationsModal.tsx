@@ -24,6 +24,20 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
   onMarkAllRead
 }) => {
   const [now, setNow] = useState(new Date());
+  const [permission, setPermission] = useState<NotificationPermission>('default');
+
+  useEffect(() => {
+    if ('Notification' in window) {
+      setPermission(Notification.permission);
+    }
+  }, [isOpen]);
+
+  const requestPermission = async () => {
+    if ('Notification' in window) {
+      const result = await Notification.requestPermission();
+      setPermission(result);
+    }
+  };
 
   // Update time reference periodically when open to keep timings updating
   useEffect(() => {
@@ -108,7 +122,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Bell size={18} style={{ color: 'var(--primary)' }} />
             <h3 style={{ fontSize: '18px', fontWeight: 800 }}>Notifications</h3>
@@ -131,6 +145,14 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
             <X size={16} />
           </button>
         </div>
+
+        {/* Permission Prompt */}
+        {permission === 'default' && (
+          <div style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)', padding: '12px', borderRadius: '12px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ fontSize: '12px', color: 'var(--text-primary)' }}>Enable push notifications?</div>
+            <button onClick={requestPermission} style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>Enable</button>
+          </div>
+        )}
 
         {/* Notification List */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '320px', overflowY: 'auto', paddingRight: '4px' }}>
