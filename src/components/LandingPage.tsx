@@ -4175,34 +4175,73 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 </div>
               ))}
 
-              {/* Action Buttons (Primary: Download Android APK, Secondary: Open Web App) */}
+              {/* Action Buttons (Dynamically Traced to Device OS) */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
                 <button 
                   onClick={() => {
                     setShowWelcomeModal(false);
-                    handleDownloadApk();
+                    if (deviceOS === 'android') handleDownloadApk();
+                    else if (deviceOS === 'ios') setShowIosGuideModal(true);
+                    else onOpenWebApp();
                   }}
                   style={{ width: '100%', padding: '15px 24px', borderRadius: '100px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', fontSize: '15px', fontWeight: 800, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 24px rgba(16,185,129,0.4)', transition: 'all 0.2s' }}
                   className="glow-btn"
                 >
-                  <Download size={20} color="#ffffff" />
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
-                    <span style={{ fontSize: '9.5px', textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.06em' }}>
-                      TRACED DEVICE: {deviceOS === 'android' ? 'ANDROID' : deviceOS === 'ios' ? 'IOS' : deviceOS === 'mac' ? 'MACOS' : 'MOBILE / DESKTOP'}
-                    </span>
-                    <span style={{ fontSize: '15px', fontWeight: 900 }}>Download Android APK (Direct)</span>
-                  </div>
+                  {deviceOS === 'android' ? (
+                    <>
+                      <Download size={20} color="#ffffff" />
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
+                        <span style={{ fontSize: '9.5px', textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.06em' }}>TRACED DEVICE: ANDROID</span>
+                        <span style={{ fontSize: '15px', fontWeight: 900 }}>Download Android APK (Direct)</span>
+                      </div>
+                    </>
+                  ) : deviceOS === 'ios' ? (
+                    <>
+                      <Smartphone size={20} color="#ffffff" />
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
+                        <span style={{ fontSize: '9.5px', textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.06em' }}>TRACED DEVICE: IOS SAFARI</span>
+                        <span style={{ fontSize: '15px', fontWeight: 900 }}>Add to iPhone / iPad</span>
+                      </div>
+                    </>
+                  ) : deviceOS === 'mac' ? (
+                    <>
+                      <Monitor size={20} color="#ffffff" />
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
+                        <span style={{ fontSize: '9.5px', textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.06em' }}>TRACED DEVICE: MACOS</span>
+                        <span style={{ fontSize: '15px', fontWeight: 900 }}>Open Mac Web App</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <Wallet size={20} color="#ffffff" />
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
+                        <span style={{ fontSize: '9.5px', textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.06em' }}>TRACED DEVICE: WEB BROWSER</span>
+                        <span style={{ fontSize: '15px', fontWeight: 900 }}>Open Web App Now</span>
+                      </div>
+                    </>
+                  )}
                 </button>
 
-                {/* Secondary Button: Open Web App */}
-                <button 
-                  onClick={() => { setShowWelcomeModal(false); onOpenWebApp(); }}
-                  style={{ width: '100%', padding: '13px 20px', borderRadius: '100px', background: isDark ? 'rgba(255,255,255,0.07)' : '#f3f4f6', color: t.text, fontSize: '13.5px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-                  className="hover-lift"
-                >
-                  <Wallet size={16} color="#10b981" />
-                  <span>Open Web App (Browser Mode)</span>
-                </button>
+                {/* Secondary Button: Alternative Action */}
+                {deviceOS === 'android' ? (
+                  <button 
+                    onClick={() => { setShowWelcomeModal(false); onOpenWebApp(); }}
+                    style={{ width: '100%', padding: '13px 20px', borderRadius: '100px', background: isDark ? 'rgba(255,255,255,0.07)' : '#f3f4f6', color: t.text, fontSize: '13.5px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                    className="hover-lift"
+                  >
+                    <Wallet size={16} color="#10b981" />
+                    <span>Open Web App (Browser Mode)</span>
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => { setShowWelcomeModal(false); handleDownloadApk(); }}
+                    style={{ width: '100%', padding: '13px 20px', borderRadius: '100px', background: isDark ? 'rgba(255,255,255,0.07)' : '#f3f4f6', color: t.text, fontSize: '13.5px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                    className="hover-lift"
+                  >
+                    <Download size={16} color="#10b981" />
+                    <span>Download Android APK (Direct)</span>
+                  </button>
+                )}
 
                 <button 
                   onClick={() => setShowWelcomeModal(false)}
