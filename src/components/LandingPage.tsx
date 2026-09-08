@@ -1308,12 +1308,13 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
     const isAiCoach = activePage === 'ai-coach';
     const isAnalytics = activePage === 'analytics';
     const isPaycheck = activePage === 'paycheck-to-paycheck';
-    const isImpulse = activePage === 'impulse-buying';
-    const isDebt = activePage === 'credit-card-debt';
-    const isEmergency = activePage === 'no-emergency-savings';
-    const isFreelance = activePage === 'irregular-income';
+    const isImpulse = activePage === 'impulse-buying' || activePage === 'impulse-spending';
+    const isDebt = activePage === 'credit-card-debt' || activePage === 'credit-debt';
+    const isEmergency = activePage === 'no-emergency-savings' || activePage === 'no-emergency-fund';
+    const isFreelance = activePage === 'irregular-income' || activePage === 'freelancer-money';
     const isSubs = activePage === 'hidden-subscriptions';
-    const isCouple = activePage === 'couples-budget';
+    const isCouple = activePage === 'couples-budget' || activePage === 'couple-finances';
+    const isStudents = activePage === 'students-pros';
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '9px', height: '100%', overflow: 'hidden' }}>
@@ -1341,7 +1342,9 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
         {/* Total Net Worth Card */}
         <div style={{ background: 'linear-gradient(135deg, #10b981 0%, #047857 100%)', borderRadius: '16px', padding: '12px 14px', color: '#ffffff', boxShadow: '0 8px 20px rgba(16,185,129,0.25)', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-          <div style={{ fontSize: '9px', opacity: 0.88, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Total Net Worth</div>
+          <div style={{ fontSize: '9px', opacity: 0.88, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            {isCouple ? 'COUPLE NET WORTH' : isFreelance ? 'FREELANCE VAULT' : 'TOTAL NET WORTH'}
+          </div>
           <div style={{ fontSize: '19px', fontWeight: 900, letterSpacing: '-0.02em' }}>{fmtCurr(348500)}</div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '8.5px', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)', padding: '3px 8px', borderRadius: '100px', fontWeight: 800, marginTop: '3px' }}>
             <span>📈 +{fmtCurr(45000)} Saved</span>
@@ -1416,8 +1419,34 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           </div>
         ) : isCouple ? (
           <div style={{ background: isDark ? 'rgba(20,184,166,0.12)' : '#ccfbf1', border: '1px solid rgba(20,184,166,0.3)', borderRadius: '14px', padding: '9px 10px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
-            <div style={{ fontSize: '9.5px', fontWeight: 800, color: '#0d9488' }}>👩‍❤️‍👨 Couple Shared Ledger</div>
-            <div style={{ fontSize: '8.5px', color: t.textSub }}>Synced Code #ZB-8821. Grocery Split: 50/50.</div>
+            <div style={{ fontSize: '9.5px', fontWeight: 800, color: '#0d9488', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Users size={12} color="#0d9488" />
+              <span>👩‍❤️‍👨 Couple Shared Ledger</span>
+            </div>
+            <div style={{ fontSize: '8px', color: t.textSub, lineHeight: 1.2 }}>
+              Synced Code <strong>#ZB-8821</strong>. Joint groceries & rent split 50/50.
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', marginTop: '2px' }}>
+              <div style={{ background: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff', padding: '4px 6px', borderRadius: '6px', border: `1px solid ${t.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: '8.5px', fontWeight: 800, color: t.text }}>Rent & Bills</div>
+                  <div style={{ fontSize: '7px', color: t.textMuted }}>Shared • 50/50</div>
+                </div>
+                <span style={{ fontSize: '8.5px', fontWeight: 900, color: '#ef4444' }}>-{fmtCurr(22000)}</span>
+              </div>
+              <div style={{ background: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff', padding: '4px 6px', borderRadius: '6px', border: `1px solid ${t.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: '8.5px', fontWeight: 800, color: t.text }}>Supermarket</div>
+                  <div style={{ fontSize: '7px', color: t.textMuted }}>Shared • 60/40</div>
+                </div>
+                <span style={{ fontSize: '8.5px', fontWeight: 900, color: '#ef4444' }}>-{fmtCurr(4500)}</span>
+              </div>
+            </div>
+          </div>
+        ) : isStudents ? (
+          <div style={{ background: isDark ? 'rgba(59,130,246,0.12)' : '#eff6ff', border: '1px solid rgba(59,130,246,0.3)', borderRadius: '14px', padding: '9px 10px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            <div style={{ fontSize: '9.5px', fontWeight: 800, color: '#2563eb' }}>🎓 SIP & Student Automation</div>
+            <div style={{ fontSize: '8.5px', color: t.textSub }}>Monthly SIP: {fmtCurr(2000)}. Compound target: {fmtCurr(1000000)}.</div>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
