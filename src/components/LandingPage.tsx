@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { Sparkles, ArrowRight, ArrowLeft, Search, Sun, Moon, Target, Shield, Users, Clock, Star, Smartphone, Brain, TrendingUp, Heart, Activity, ChevronDown, MessageCircleHeart, ChartLine, BookHeart, Lock, ArrowUpRight, Wallet, PiggyBank, Receipt, BarChart3, Banknote, CircleCheck, Circle, Flame, Play, BookOpen, MessageCircle, X, Download, Menu, CheckCircle2, ChevronRight, Zap, RefreshCw, HelpCircle, Award, Check } from 'lucide-react';
 
 interface LandingPageProps {
@@ -215,7 +215,7 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Discover your financial health score, uncover hidden subscription leaks, and receive a customized 1-on-1 step-by-step roadmap to build lasting financial peace of mind.",
     highlights: ['10 quick diagnostic questions', 'Instant score gauge & analysis', 'Impulse risk evaluation', 'Personalized savings roadmap'],
     stats: [
-      { label: 'Completed Quizzes', value: '142,000+' },
+      { label: 'Diagnostic Questions', value: '10 Items' },
       { label: 'Avg Financial Score', value: '72/100' },
       { label: 'Time Required', value: '60 sec' }
     ],
@@ -298,7 +298,7 @@ export const FEATURE_PAGES_DATA: Record<string, {
     stats: [
       { label: 'Overspending Reduction', value: '-38%' },
       { label: 'Setup Time', value: '2 mins' },
-      { label: 'Active Budgeters', value: '45,000+' }
+      { label: 'Envelope Model', value: 'Zero-Based' }
     ],
     benefits: [
       { iconName: 'Activity', title: 'Zero Cash Leaks', desc: 'No more wondering where your salary went at the end of the month.' },
@@ -329,9 +329,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Beautiful interactive charts, cash flow breakdowns, and automated vendor analysis that reveal your hidden money leaks effortlessly.",
     highlights: ['Interactive donut & trend charts', 'Recurring subscription tracking', 'Category breakdown comparison', 'Exportable PDF & CSV reports'],
     stats: [
-      { label: 'Subscriptions Found', value: '3.2 avg' },
-      { label: 'Chart Clarity', value: '100%' },
-      { label: 'Insights Generated', value: '1.2M+' }
+      { label: 'Category Charts', value: 'Interactive' },
+      { label: 'Vendor Insights', value: 'Merchant-wise' },
+      { label: 'Report Export', value: 'CSV & PDF' }
     ],
     benefits: [
       { iconName: 'ChartLine', title: 'Spot Hidden Leaks', desc: 'Identify forgotten subscriptions and daily small expenses that add up fast.' },
@@ -362,9 +362,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Turn financial discipline into an addictive, rewarding game. Every day you stay under budget or save money, your digital trees flourish.",
     highlights: ['Daily budget streak trees', 'Unlock rare species as savings grow', 'Friend & community leaderboards', 'Visual impulse reduction'],
     stats: [
-      { label: 'Forests Grown', value: '120,000+' },
-      { label: 'Streak Completion', value: '89%' },
-      { label: 'Trees Planted', value: '450K+' }
+      { label: 'Streak Tracking', value: 'Daily Growth' },
+      { label: 'Focus Mode', value: 'No-Spend Days' },
+      { label: 'Reward System', value: 'Achievement Badges' }
     ],
     benefits: [
       { iconName: 'Flame', title: 'Dopamine For Saving', desc: 'Get rewarded with visual tree growth instead of spending money for quick hits.' },
@@ -396,8 +396,8 @@ export const FEATURE_PAGES_DATA: Record<string, {
     highlights: ['Camera OCR & AI parsing', 'Automated category matching', 'Tax invoice storage', 'Multi-currency receipt support'],
     stats: [
       { label: 'Scan Speed', value: '1.4s' },
-      { label: 'Accuracy', value: '99.8%' },
-      { label: 'Bills Scanned', value: '850,000+' }
+      { label: 'Parsing Engine', value: 'Vision AI' },
+      { label: 'Backup Vault', value: 'Digital Receipts' }
     ],
     benefits: [
       { iconName: 'Receipt', title: 'Instant Logging', desc: 'No manual data entry required — just point your camera and confirm.' },
@@ -461,9 +461,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Whether saving for a new laptop, emergency cushion, or dream vacation, set automated target dates and watch your progress bar fill up.",
     highlights: ['Automated monthly target math', 'Visual milestone celebrations', 'Multiple goal buckets', 'Deposit interest forecasting'],
     stats: [
-      { label: 'Goals Completed', value: '68,000+' },
-      { label: 'Avg Time to Goal', value: '4.2 mos' },
-      { label: 'Total Saved', value: '₹14.2 Cr' }
+      { label: 'Target Math', value: 'Automated' },
+      { label: 'Milestone Alerts', value: 'Visual' },
+      { label: 'Goal Buckets', value: 'Unlimited' }
     ],
     benefits: [
       { iconName: 'Target', title: 'Clear Timelines', desc: 'Know exact monthly deposits required to hit your target by your deadline.' },
@@ -494,9 +494,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Join over 50,000+ members sharing real money-saving tips, debt elimination victory stories, and monthly low-spend challenges.",
     highlights: ['Anonymous money Q&A', 'Monthly No-Spend challenges', 'Debt payoff victory feeds', 'Expert-curated habit workshops'],
     stats: [
-      { label: 'Active Members', value: '52,400+' },
-      { label: 'Daily Money Hacks', value: '450+' },
-      { label: 'Community Rating', value: '4.9 ★' }
+      { label: 'Peer Challenges', value: 'Active' },
+      { label: 'Money Hacks', value: 'Daily Shared' },
+      { label: 'Privacy', value: 'Anonymous Option' }
     ],
     benefits: [
       { iconName: 'Users', title: 'Zero Stigma', desc: 'Ask sensitive money questions anonymously and get supportive advice.' },
@@ -527,9 +527,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "If your bank balance drops near zero before month-end, ZenBudget helps you restructure bill dates, smooth out fixed expenses, and create a 15-day salary cushion.",
     highlights: ['Salary distribution map', 'Bill timing optimization', 'Early warning balance alerts', 'First ₹10,000 buffer plan'],
     stats: [
-      { label: 'Buffer Created', value: '18 days' },
-      { label: 'Stress Reduction', value: '94%' },
-      { label: 'Users Helped', value: '28,000+' }
+      { label: 'Cushion Target', value: '15-30 Days' },
+      { label: 'Bill Due Sync', value: 'Automated' },
+      { label: 'Daily Allowance', value: 'Real-Time' }
     ],
     benefits: [
       { iconName: 'Activity', title: 'Smooth Out Bills', desc: 'Align your due dates so rent, utilities, and EMIs don’t drain your balance all at once.' },
@@ -560,9 +560,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Feel tempted by online sales or late-night shopping? ZenBudget provides a 24-hour impulse wish-list timer and emotional spending reflections to protect your hard-earned cash.",
     highlights: ['Wishlist 24-hour pause timer', 'Emotional trigger journal', 'Opportunity cost calculator', 'Regret-free spending score'],
     stats: [
-      { label: 'Impulse Money Saved', value: '₹6,400/mo' },
-      { label: 'Purchases Paused', value: '76%' },
-      { label: 'Mindful Users', value: '34,000+' }
+      { label: 'Cooling Off', value: '24 Hours' },
+      { label: 'Urge Journal', value: 'Mindful Log' },
+      { label: 'Wishlist Pause', value: '1-Tap' }
     ],
     benefits: [
       { iconName: 'Clock', title: '24-Hour Rule', desc: 'Add items to your wish-list. 76% of items lose their appeal after 24 hours.' },
@@ -593,9 +593,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Stop bleeding interest money to banks. Compare Debt Snowball vs Debt Avalanche methods to pay off credit cards and personal loans months ahead of schedule.",
     highlights: ['Snowball & Avalanche calculator', 'Interest saved tracker', 'Automated EMI payoff schedule', 'Debt-free countdown timer'],
     stats: [
-      { label: 'Months Saved', value: '14 months' },
-      { label: 'Avg Interest Saved', value: '₹32,000' },
-      { label: 'Debt Cleared', value: '₹8.4 Cr+' }
+      { label: 'Payoff Methods', value: 'Snowball & Avalanche' },
+      { label: 'Interest Math', value: 'Automated' },
+      { label: 'Payoff Tracker', value: 'Live Countdown' }
     ],
     benefits: [
       { iconName: 'Shield', title: 'Save Thousands on Interest', desc: 'Target highest interest cards first to minimize interest payouts.' },
@@ -626,9 +626,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Unexpected medical bills, car repairs, or job transitions shouldn't cause financial ruin. Build your fortress of financial security step-by-step.",
     highlights: ['Essential living cost calculator', 'Automated micro-savings', 'High-yield liquid fund tips', 'Peace of mind rating'],
     stats: [
-      { label: 'Safety Net Built', value: '3.5 mos' },
-      { label: 'Anxiety Drop', value: '-88%' },
-      { label: 'Funds Protected', value: '₹18 Cr+' }
+      { label: 'Starter Buffer', value: '₹25,000' },
+      { label: 'Full Safety Net', value: '3-6 Months' },
+      { label: 'Fund Access', value: '100% Liquid' }
     ],
     benefits: [
       { iconName: 'Shield', title: 'Total Financial Protection', desc: 'Never rely on high-interest loans or emergency borrowing again.' },
@@ -659,9 +659,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Designed specifically for freelancers, creators, and business owners. Manage high-earning months and lean months effortlessly.",
     highlights: ['Hill-and-Valley income smoother', 'Tax reserve automation', 'Lean month baseline budget', 'Invoice payment tracker'],
     stats: [
-      { label: 'Income Stability', value: '100%' },
-      { label: 'Tax Surprise Saved', value: '₹0' },
-      { label: 'Freelancers Empowered', value: '19,000+' }
+      { label: 'Income Smoother', value: 'Hill & Valley' },
+      { label: 'Tax Hold Reserve', value: '25% Auto' },
+      { label: 'Monthly Salary', value: 'Fixed Payout' }
     ],
     benefits: [
       { iconName: 'RefreshCw', title: 'Income Smoothing', desc: 'Pay yourself a steady monthly salary from a holding bucket during lean seasons.' },
@@ -692,9 +692,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Streaming apps, gym memberships, cloud storage, and trial recurring charges eat away hundreds of rupees without your knowledge. Detect and prune them instantly.",
     highlights: ['Automated subscription radar', 'Renewal date calendar alerts', 'Annual cost multiplier', '1-click cancellation guide'],
     stats: [
-      { label: 'Avg Leaks Found', value: '₹2,800/yr' },
-      { label: 'Unused Apps Cancelled', value: '3.4 per user' },
-      { label: 'Total Money Reclaimed', value: '₹4.1 Cr' }
+      { label: 'Subscription Radar', value: 'Auto-Audit' },
+      { label: 'Renewal Alert', value: '3 Days Prior' },
+      { label: 'Cost View', value: 'Annualized' }
     ],
     benefits: [
       { iconName: 'Search', title: 'Automatic Radar', desc: 'Scans recurring merchant transactions and flags hidden monthly fees.' },
@@ -725,9 +725,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Manage joint household rent, groceries, and kids' expenses while keeping individual personal spending accounts private and independent.",
     highlights: ['Joint household ledger', 'Fair proportional bill splitting', 'Shared goal progress', 'Privacy-first personal envelopes'],
     stats: [
-      { label: 'Couples Using App', value: '16,500+' },
-      { label: 'Conflict Reduction', value: '92%' },
-      { label: 'Joint Goals Met', value: '32,000+' }
+      { label: 'Shared Ledger', value: 'Real-Time Sync' },
+      { label: 'Bill Splitting', value: '50/50 & Proportional' },
+      { label: 'Personal Envelopes', value: '100% Private' }
     ],
     benefits: [
       { iconName: 'Users', title: 'Proportional Splitting', desc: 'Split bills fairly based on income ratio or 50/50 equality.' },
@@ -758,9 +758,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Start early and let compound interest work its magic. Master budgeting basics, manage pocket money, and start investing before age 25.",
     highlights: ['Pocket money & stipend tracker', 'Student loan repayment plan', 'Compound wealth simulator', 'Gen-Z money habits guide'],
     stats: [
-      { label: 'Early Investors', value: '22,000+' },
-      { label: 'Avg Monthly Savings', value: '₹3,500' },
-      { label: 'Wealth Multiplier', value: '10x' }
+      { label: 'Pocket Money', value: 'Auto-Tracked' },
+      { label: 'Starter SIP', value: '₹2,000/mo' },
+      { label: 'Compound Math', value: 'Visual' }
     ],
     benefits: [
       { iconName: 'Sparkles', title: 'Master Money Early', desc: 'Avoid common debt traps and impulse pitfalls before they start.' },
@@ -791,9 +791,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Say or type 'Paid 220 for petrol in cash' or 'Salary 45000 in SBI Bank'. ZenBudget auto-extracts amount, vendor, category, and wallet account in under 1 second.",
     highlights: ['Natural language AI parsing', 'Voice microphone 🎤 input support', 'Expense, Income & Transfer tabs', 'Multi-account bank & wallet manager'],
     stats: [
-      { label: 'Logging Time Saved', value: '85%' },
-      { label: 'AI Accuracy', value: '99.6%' },
-      { label: 'Entries Logged', value: '1.4M+' }
+      { label: 'Input Method', value: 'Natural Voice & Text' },
+      { label: 'AI Parsing', value: '< 1 Sec' },
+      { label: 'Multi-Wallet Sync', value: 'Unlimited' }
     ],
     benefits: [
       { iconName: 'Zap', title: 'Zero Form Typing', desc: 'Type naturally or speak to log transactions on the fly.' },
@@ -824,9 +824,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Celebrate your weekly and monthly financial wins with vibrant Spotify-style stories, personalized Money Scores (1-100), and 1-tap social media cards.",
     highlights: ['🎁 Weekly Money Wrapped summary', '🎵 Monthly Story (Spotify style)', 'Real-time Zen Money Score (1-100)', '1-Tap shareable social cards'],
     stats: [
-      { label: 'Stories Shared', value: '140,000+' },
-      { label: 'Money Score Accuracy', value: '98.5%' },
-      { label: 'User Engagement', value: '94%' }
+      { label: 'Weekly Wrapped', value: 'Every Sunday' },
+      { label: 'Monthly Story', value: 'Spotify Style' },
+      { label: 'Zen Money Score', value: '1-100 Gauge' }
     ],
     benefits: [
       { iconName: 'Sparkles', title: 'Fun Financial Reflection', desc: 'Transform boring numbers into beautiful animated story cards.' },
@@ -857,9 +857,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Meet Zen Piggy and Golden Dragon Draco! Your virtual pet companion reflects your financial mood in real-time. Stay under budget to increase companion happiness and unlock shop accessories.",
     highlights: ['Dynamic mood badges (Regretful 😡, Thrilled 👑)', 'Companion Item Shop & accessory equips', 'COMPANION HAPPINESS progress bar', 'Level progression (Lvl 1 Piggy ➔ Lvl 2 Dragon)'],
     stats: [
-      { label: 'Companions Adopted', value: '48,000+' },
-      { label: 'Happiness Rate', value: '88%' },
-      { label: 'Shop Items Equipped', value: '210,000+' }
+      { label: 'Starter Pet', value: 'Zen Piggy' },
+      { label: 'Mood States', value: 'Regretful 😡 to Thrilled 👑' },
+      { label: 'Evolution', value: 'Lvl 1 Piggy ➔ Lvl 2 Dragon' }
     ],
     benefits: [
       { iconName: 'Heart', title: 'Emotional Bond', desc: 'Your pet gets sad when you overspend and thrilled when you save!' },
@@ -890,9 +890,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Earn real financial rewards! Invite 10 subscribed friends to claim 1 Month Free Premium, or hit a 90-day daily budget streak to unlock Pro features forever.",
     highlights: ['🎁 10 Invites: Earn 1 Month Free Premium', '👑 90d Pro Saver: Unlock 1 Month Free Premium', 'Interactive achievement detail popups', 'Real-time daily streak counters'],
     stats: [
-      { label: 'Free Months Unlocked', value: '12,400+' },
-      { label: '90-Day Streaks Hit', value: '6,200+' },
-      { label: 'Rewards Claimed', value: '₹24.8 Lakhs' }
+      { label: '10 Friends Invite', value: '1 Month Free Pro' },
+      { label: '90-Day Streak', value: '1 Month Free Pro' },
+      { label: 'Reward Claim', value: 'Instant Unlock' }
     ],
     benefits: [
       { iconName: 'Award', title: 'Real Monetary Value', desc: 'Earn actual free premium subscription access by staying disciplined.' },
@@ -923,9 +923,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Log daily transactions for 30 days to unlock your private Monthly Letter from Zen — a beautifully written, personalized financial reflection detailing your progress, savings rate, and top category wins.",
     highlights: ['30-day compiled personal money story', 'Monthly Report lock countdown timer', 'Personalized savings & expenditure highlights', 'Downloadable PDF monthly summary'],
     stats: [
-      { label: 'Letters Unlocked', value: '35,000+' },
-      { label: '30-Day Retention', value: '91%' },
-      { label: 'Avg Rating', value: '4.95 ★' }
+      { label: 'Log Duration', value: '30 Consecutive Days' },
+      { label: 'Personal Story', value: 'AI Compiled' },
+      { label: 'PDF Export', value: '1-Tap Download' }
     ],
     benefits: [
       { iconName: 'BookOpen', title: 'Personal Reflection', desc: 'Read a warm, insightful summary letter compiled by AI from your 30-day history.' },
@@ -956,9 +956,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Stop cash leaks before they start. Set monthly spending limits per category (Food & Dining, Shopping, Entertainment, Bills & Utilities, Transport) with real-time warning indicators.",
     highlights: ['Custom per-category monthly budget caps', 'Live spent vs limit progress meters', 'High velocity spending warning alerts', '1-Tap "+ Set Limit" adjustment modal'],
     stats: [
-      { label: 'Leaks Stopped', value: '₹4,500/mo' },
-      { label: 'Categories Tracked', value: '12 per user' },
-      { label: 'Overspend Drop', value: '-72%' }
+      { label: 'Custom Limits', value: 'Per Category' },
+      { label: 'Warning Meter', value: '80% Threshold' },
+      { label: 'Velocity Alerts', value: 'High Spend' }
     ],
     benefits: [
       { iconName: 'Target', title: 'Clear Boundaries', desc: 'Know exactly how much you can spend on Swiggy or Zomato each month.' },
@@ -989,9 +989,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Understand the emotional triggers behind your spending. Log daily mood icons (😀 😭 😡 🤩 😌 😔) alongside transactions and analyze 7-day emotional spending trends.",
     highlights: ['Daily emotional mood logger (6 mood states)', '7-Day Mood Trend graph & emotional highs/lows', 'AI emotional spending insights & roast mode', 'Mindful spending reflection prompts'],
     stats: [
-      { label: 'Triggers Identified', value: '84%' },
-      { label: 'Impulse Drop', value: '-65%' },
-      { label: 'Mindful Users', value: '29,000+' }
+      { label: 'Mood States', value: '6 Emotional Icons' },
+      { label: 'Mood Trend Graph', value: '7 Days' },
+      { label: 'Reflection Prompts', value: 'Mindful AI' }
     ],
     benefits: [
       { iconName: 'Brain', title: 'Emotional Self-Awareness', desc: 'Recognize whether stress, boredom, or happiness caused you to buy.' },
@@ -1022,9 +1022,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Manage household expenses, rent, groceries, and transfers together in real time. Generate a unique group sync code (`CP-S02G-2ARG`) to connect with partners or roommates instantly.",
     highlights: ['Unique Couple/Family Sync Code generation', 'Shared ledger transactions & category expenses', 'Real-time family member tags on entries', 'P2P Transfers between personal & family wallets'],
     stats: [
-      { label: 'Groups Connected', value: '18,500+' },
-      { label: 'Money Disputes Saved', value: '100%' },
-      { label: 'Sync Speed', value: '< 1s' }
+      { label: 'Sync Code', value: '8-Digit Unique' },
+      { label: 'Shared Ledger', value: 'Real-Time Sync' },
+      { label: 'P2P Settle', value: '1-Tap Transfers' }
     ],
     benefits: [
       { iconName: 'Users', title: 'Instant Code Join', desc: 'Share your 8-digit sync code to connect instantly.' },
@@ -1055,9 +1055,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Never forget money owed or lent! Track loans taken and given with due dates, monthly interest rates (+3%/mo), cash repayments, and direct PhonePe/UPI quick pay.",
     highlights: ['Loans Taken vs Loans Given dashboard', 'Due date & interest rate (+3%/mo) calculations', 'Direct "Pay via PhonePe / UPI" button integration', 'Record Cash repayments with 1 tap'],
     stats: [
-      { label: 'Loans Tracked', value: '95,000+' },
-      { label: 'On-Time Paybacks', value: '94%' },
-      { label: 'Interest Saved', value: '₹18.5 Cr' }
+      { label: 'Dashboard', value: 'Loans Given vs Taken' },
+      { label: 'Interest Rate', value: 'Accrued Monthly' },
+      { label: 'UPI Payment', value: 'PhonePe & Google Pay' }
     ],
     benefits: [
       { iconName: 'Wallet', title: 'Total Clarity', desc: 'See exact amounts you owe or are owed by friends and family.' },
@@ -1088,9 +1088,9 @@ export const FEATURE_PAGES_DATA: Record<string, {
     description: "Simulate how your monthly savings compound over 1 to 10+ years. Adjust monthly investment sliders and compare Fixed Deposits (7%), Gold (9%), and Mutual Funds (12%) scenarios.",
     highlights: ['10-Year projected total wealth calculator', 'Interactive Monthly Investment & Time Horizon sliders', 'Scenario comparison (FD 7%, Gold 9%, Mutual Funds 12%)', 'Simulated wealth gain vs total deposited breakdown'],
     stats: [
-      { label: 'Simulations Run', value: '250,000+' },
-      { label: '10-Yr Wealth Multiplier', value: '2.8x' },
-      { label: 'Projections Created', value: '₹140 Cr+' }
+      { label: 'Time Horizon', value: '1 to 10+ Years' },
+      { label: 'Scenarios', value: 'FD 7%, Gold 9%, Mutual Funds 12%' },
+      { label: 'Investment Sliders', value: 'Interactive' }
     ],
     benefits: [
       { iconName: 'TrendingUp', title: 'Compound Magic', desc: 'See how ₹10,000/month turns into ₹23 Lakhs+ in 10 years.' },
@@ -1116,20 +1116,55 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [activePage, setActivePage] = useState<string>('home');
 
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
+
   const navigateToPage = (slug: string) => {
     setActivePage(slug);
     setActiveDropdown(null);
     setMobileMenuOpen(false);
     if (slug === 'home') {
-      history.pushState('', document.title, window.location.pathname + window.location.search);
+      if (window.location.hash) {
+        history.replaceState(null, document.title, window.location.pathname + window.location.search);
+      }
     } else {
       window.location.hash = slug;
     }
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    const forceScrollTop = () => {
+      window.scrollTo(0, 0);
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+    };
+    forceScrollTop();
+    requestAnimationFrame(forceScrollTop);
+    setTimeout(forceScrollTop, 50);
+    setTimeout(forceScrollTop, 150);
+    setTimeout(forceScrollTop, 300);
   };
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  useLayoutEffect(() => {
+    const forceScrollTop = () => {
+      window.scrollTo(0, 0);
+      try {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+      } catch (e) {}
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+      if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
+    };
+    forceScrollTop();
+    requestAnimationFrame(forceScrollTop);
+    const t1 = setTimeout(forceScrollTop, 20);
+    const t2 = setTimeout(forceScrollTop, 80);
+    const t3 = setTimeout(forceScrollTop, 200);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
   }, [activePage]);
 
   useEffect(() => {
@@ -1140,7 +1175,15 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       } else if (!hash) {
         setActivePage('home');
       }
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      const forceScrollTop = () => {
+        window.scrollTo(0, 0);
+        if (document.documentElement) document.documentElement.scrollTop = 0;
+        if (document.body) document.body.scrollTop = 0;
+      };
+      forceScrollTop();
+      requestAnimationFrame(forceScrollTop);
+      setTimeout(forceScrollTop, 50);
+      setTimeout(forceScrollTop, 150);
     };
     syncPageFromHash();
     window.addEventListener('hashchange', syncPageFromHash);
@@ -1149,7 +1192,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
   const [activeToolkit, setActiveToolkit] = useState(0);
   const [activeInsideTab, setActiveInsideTab] = useState(0);
   const [showModal, setShowModal] = useState(false);
-  const [showWelcomeModal, setShowWelcomeModal] = useState(true);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showIosGuideModal, setShowIosGuideModal] = useState(false);
   const [deviceOS, setDeviceOS] = useState<'ios' | 'android' | 'mac' | 'web'>('web');
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
@@ -1185,10 +1228,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
     setCurrentQuestionIndex(0);
     setQuizAnswers([]);
     setQuizSubmitted(false);
-    setActivePage('quiz');
-    setActiveDropdown(null);
-    setMobileMenuOpen(false);
-    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    navigateToPage('quiz');
   };
   // Feature Card Popup Modal State
   const [featureModalData, setFeatureModalData] = useState<{
@@ -1549,8 +1589,12 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       setActivePage('home');
       setTimeout(() => {
         const el = document.getElementById(id);
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+        }
+      }, 150);
       return;
     }
     const el = document.getElementById(id);
@@ -1738,11 +1782,11 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
     .typewriter-cursor {
       display: inline-block;
-      width: 3px;
-      height: 0.9em;
-      background-color: #10b981;
-      margin-left: 6px;
-      vertical-align: middle;
+      width: 3.5px;
+      height: 1em;
+      background-color: #84cc16;
+      margin-left: 4px;
+      vertical-align: text-bottom;
       animation: blinkCursor 0.8s infinite;
       border-radius: 2px;
     }
@@ -1972,21 +2016,26 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             </button>
 
             {deviceOS === 'ios' ? (
-              <button onClick={() => setShowIosGuideModal(true)} title="Add to Home Screen" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', color: t.text, padding: '8px 14px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }}>
+              <button onClick={() => setShowIosGuideModal(true)} title="Add to Home Screen (Safari PWA)" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', color: t.text, padding: '8px 14px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }}>
                 <Smartphone size={14} color="#10b981" />
-                <span>Add to Home</span>
+                <span>iOS App</span>
+              </button>
+            ) : deviceOS === 'android' ? (
+              <button onClick={handleDownloadApk} title="Download Android App APK" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', color: t.text, padding: '8px 14px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }}>
+                <Download size={14} color="#10b981" />
+                <span>Android APK</span>
               </button>
             ) : (
-              <button onClick={handleDownloadApk} title="Download Android App APK" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', color: t.text, padding: '8px 14px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }} className="desktop-only">
-                <Download size={14} color="#10b981" />
-                <span>APK</span>
+              <button onClick={onOpenWebApp} title="Open Web Version" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', color: t.text, padding: '8px 14px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }}>
+                <Wallet size={14} color="#10b981" />
+                <span>Web Version</span>
               </button>
             )}
 
-            <button onClick={onOpenWebApp} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#10b981', color: '#fff', paddingLeft: '18px', paddingRight: '6px', paddingTop: '6px', paddingBottom: '6px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 14px rgba(16,185,129,0.35)' }}>
-              <Wallet size={16} />
+            <button onClick={onOpenWebApp} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg, #10b981 0%, #047857 100%)', color: '#fff', paddingLeft: '20px', paddingRight: '8px', paddingTop: '8px', paddingBottom: '8px', borderRadius: '100px', fontSize: '14.5px', fontWeight: 800, border: 'none', cursor: 'pointer', transition: 'all 0.25s ease', boxShadow: '0 6px 20px rgba(16,185,129,0.45)' }} className="hover-lift">
+              <Wallet size={16} color="#ffffff" />
               <span>Open Web App</span>
-              <span style={{ background: 'rgba(255,255,255,0.25)', padding: '6px', borderRadius: '50%', display: 'flex' }}><ArrowRight size={14} /></span>
+              <span style={{ background: 'rgba(255,255,255,0.25)', padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ArrowRight size={14} color="#ffffff" /></span>
             </button>
 
             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{ display: 'none', background: 'transparent', border: 'none', color: t.text, cursor: 'pointer', padding: '6px' }} className="mobile-show">
@@ -2129,10 +2178,20 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             <button onClick={() => scrollTo('toolkit')} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>Toolkit</button>
             <button onClick={() => scrollTo('community')} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>Member Stories</button>
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-              <button onClick={handleDownloadApk} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : '#f3f4f6', color: t.text, padding: '12px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, border: 'none' }}>
-                <Download size={16} color="#10b981" /> Download APK
-              </button>
-              <button onClick={onOpenWebApp} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: '#10b981', color: '#fff', padding: '12px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, border: 'none' }}>
+              {deviceOS === 'ios' ? (
+                <button onClick={() => { setMobileMenuOpen(false); setShowIosGuideModal(true); }} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : '#f3f4f6', color: t.text, padding: '12px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, border: 'none' }}>
+                  <Smartphone size={16} color="#10b981" /> iOS App
+                </button>
+              ) : deviceOS === 'android' ? (
+                <button onClick={() => { setMobileMenuOpen(false); handleDownloadApk(); }} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : '#f3f4f6', color: t.text, padding: '12px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, border: 'none' }}>
+                  <Download size={16} color="#10b981" /> Android APK
+                </button>
+              ) : (
+                <button onClick={() => { setMobileMenuOpen(false); onOpenWebApp(); }} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : '#f3f4f6', color: t.text, padding: '12px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, border: 'none' }}>
+                  <Wallet size={16} color="#10b981" /> Web App
+                </button>
+              )}
+              <button onClick={() => { setMobileMenuOpen(false); onOpenWebApp(); }} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: '#10b981', color: '#fff', padding: '12px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, border: 'none' }}>
                 <Wallet size={16} /> Open Web App
               </button>
             </div>
@@ -2356,7 +2415,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     <Smartphone size={16} color="#10b981" />
                     <span>Add to iPhone (Safari)</span>
                   </button>
-                ) : (
+                ) : deviceOS === 'android' ? (
                   <button 
                     onClick={handleDownloadApk}
                     style={{ display: 'flex', alignItems: 'center', gap: '8px', background: isDark ? 'rgba(255,255,255,0.06)' : '#f3f4f6', color: t.text, padding: '14px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }}
@@ -2364,6 +2423,15 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   >
                     <Download size={16} color="#10b981" />
                     <span>Download Android APK</span>
+                  </button>
+                ) : (
+                  <button 
+                    onClick={onOpenWebApp}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', background: isDark ? 'rgba(255,255,255,0.06)' : '#f3f4f6', color: t.text, padding: '14px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }}
+                    className="hover-lift"
+                  >
+                    <Wallet size={16} color="#10b981" />
+                    <span>Open Web Version</span>
                   </button>
                 )}
               </div>
@@ -2493,7 +2561,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           <div style={{ background: '#10b981', borderRadius: '32px', padding: '48px 32px', textAlign: 'center', color: '#ffffff', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', boxShadow: '0 20px 40px rgba(16,185,129,0.3)' }}>
             <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', fontWeight: 900, margin: 0 }}>Start your financial transformation today</h2>
             <p style={{ fontSize: '16px', opacity: 0.9, maxWidth: '600px', margin: 0, lineHeight: 1.6 }}>
-              Join 50,000+ individuals using ZenBudget's zero-knowledge private budget tools to master their money.
+              Join smart budgeters using ZenBudget's zero-knowledge private budget tools to master their money.
             </p>
             <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
               <button onClick={onOpenWebApp} style={{ background: '#ffffff', color: '#10b981', padding: '14px 28px', borderRadius: '100px', fontSize: '15px', fontWeight: 800, border: 'none', cursor: 'pointer', boxShadow: '0 10px 20px rgba(0,0,0,0.15)' }} className="hover-lift">
@@ -2503,9 +2571,13 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 <button onClick={() => setShowIosGuideModal(true)} style={{ background: 'rgba(255,255,255,0.2)', color: '#ffffff', padding: '14px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: '1px solid rgba(255,255,255,0.4)', cursor: 'pointer' }} className="hover-lift">
                   Add to iPhone (Safari PWA)
                 </button>
-              ) : (
+              ) : deviceOS === 'android' ? (
                 <button onClick={handleDownloadApk} style={{ background: 'rgba(255,255,255,0.2)', color: '#ffffff', padding: '14px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: '1px solid rgba(255,255,255,0.4)', cursor: 'pointer' }} className="hover-lift">
                   Download Android APK
+                </button>
+              ) : (
+                <button onClick={onOpenWebApp} style={{ background: 'rgba(255,255,255,0.2)', color: '#ffffff', padding: '14px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: '1px solid rgba(255,255,255,0.4)', cursor: 'pointer' }} className="hover-lift">
+                  Open Web Version
                 </button>
               )}
             </div>
@@ -2517,7 +2589,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
       {/* ═══════════════ HERO SECTION (INNERHEAL STYLE ANIMATED BACKGROUND) ═══════════════ */}
       <div style={{ paddingTop: '90px', margin: '0 auto', width: 'min(1440px, calc(100vw - 1.5rem))' }}>
-        <section style={{ borderRadius: '2.5rem', overflow: 'hidden', border: `1px solid ${t.border}`, position: 'relative', paddingTop: '64px', paddingBottom: '0px', background: isDark ? '#111812' : '#f0fdf4' }}>
+        <section style={{ borderRadius: '2.5rem', overflow: 'hidden', border: `1px solid ${t.border}`, position: 'relative', paddingTop: '56px', paddingBottom: '32px', background: isDark ? 'linear-gradient(180deg, #111812 0%, #162018 100%)' : 'linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%)', boxShadow: isDark ? '0 20px 50px rgba(0,0,0,0.5)' : '0 20px 50px rgba(16,185,129,0.08)' }}>
           
           {/* Glowing Animated Background Canvas (InnerHeal Mesh & Aura) */}
           <div style={{ position: 'absolute', inset: 0, zIndex: 0, overflow: 'hidden', pointerEvents: 'none' }}>
@@ -2593,54 +2665,46 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   Track expenses effortlessly, journal with AI insights, and build healthy financial habits — all in one private, science-backed app.
                 </p>
 
-                <div className="hero-animate" style={{ display: 'flex', gap: '14px', marginBottom: '36px', flexWrap: 'wrap' }}>
+                <div className="hero-animate" style={{ display: 'flex', gap: '16px', marginBottom: '36px', flexWrap: 'wrap', alignItems: 'center' }}>
                   {deviceOS === 'ios' && (
-                    <button onClick={() => setShowIosGuideModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#ffffff', color: '#111827', padding: '14px 28px', borderRadius: '100px', border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }} className="glow-btn">
-                      <Smartphone size={20} color="#10b981" />
+                    <button onClick={() => setShowIosGuideModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', padding: '14px 28px', borderRadius: '100px', border: 'none', cursor: 'pointer', transition: 'all 0.25s ease', boxShadow: '0 12px 28px rgba(16,185,129,0.4)' }} className="hover-lift">
+                      <Smartphone size={20} color="#ffffff" />
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
-                        <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', opacity: 0.8, letterSpacing: '0.08em' }}>Safari PWA</span>
+                        <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', opacity: 0.85, letterSpacing: '0.08em' }}>Safari PWA</span>
                         <span style={{ fontSize: '16px', fontWeight: 800 }}>Add to Home Screen</span>
                       </div>
                     </button>
                   )}
 
                   {deviceOS === 'android' && (
-                    <button onClick={handleDownloadApk} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#ffffff', color: '#111827', padding: '14px 28px', borderRadius: '100px', border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }} className="glow-btn">
-                      <Download size={20} color="#10b981" />
+                    <button onClick={handleDownloadApk} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', padding: '14px 28px', borderRadius: '100px', border: 'none', cursor: 'pointer', transition: 'all 0.25s ease', boxShadow: '0 12px 28px rgba(16,185,129,0.4)' }} className="hover-lift">
+                      <Download size={20} color="#ffffff" />
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
-                        <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', opacity: 0.8, letterSpacing: '0.08em' }}>Android Package</span>
+                        <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', opacity: 0.85, letterSpacing: '0.08em' }}>Android Package</span>
                         <span style={{ fontSize: '16px', fontWeight: 800 }}>Download APK</span>
                       </div>
                     </button>
                   )}
 
-                  {deviceOS === 'web' && (
-                    <button onClick={onOpenWebApp} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#ffffff', color: '#111827', padding: '14px 28px', borderRadius: '100px', border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }} className="glow-btn">
-                      <Wallet size={20} color="#10b981" />
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
-                        <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', opacity: 0.8, letterSpacing: '0.08em' }}>Instant Web App</span>
-                        <span style={{ fontSize: '16px', fontWeight: 800 }}>Open Web App</span>
-                      </div>
-                    </button>
-                  )}
+                  {/* Primary Action: Open Web App */}
+                  <button onClick={onOpenWebApp} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'linear-gradient(135deg, #10b981 0%, #047857 100%)', color: '#ffffff', padding: '14px 28px', borderRadius: '100px', border: 'none', cursor: 'pointer', transition: 'all 0.25s ease', boxShadow: '0 12px 30px rgba(16, 185, 129, 0.45), 0 2px 8px rgba(0,0,0,0.1)' }} className="glow-btn hover-lift">
+                    <Wallet size={20} color="#ffffff" />
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
+                      <span style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.08em' }}>⚡ Instant Access</span>
+                      <span style={{ fontSize: '16px', fontWeight: 900 }}>Open Web App</span>
+                    </div>
+                    <span style={{ background: 'rgba(255,255,255,0.25)', padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: '4px' }}>
+                      <ArrowRight size={15} color="#ffffff" />
+                    </span>
+                  </button>
 
-                  {deviceOS !== 'web' && (
-                    <button onClick={onOpenWebApp} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(16, 185, 129, 0.12)', color: isDark ? '#ffffff' : '#10b981', padding: '14px 24px', borderRadius: '100px', fontSize: '15px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }} className="hover-lift">
-                      <Wallet size={18} />
-                      <span>Open Web App</span>
-                    </button>
-                  )}
-
-                  {deviceOS === 'web' && (
-                    <button onClick={handleDownloadApk} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(16, 185, 129, 0.12)', color: isDark ? '#ffffff' : '#10b981', padding: '14px 24px', borderRadius: '100px', fontSize: '15px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }} className="hover-lift">
-                      <Download size={18} color="#10b981" />
-                      <span>Download APK</span>
-                    </button>
-                  )}
-
-                  <button onClick={() => startFreshQuiz()} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(16, 185, 129, 0.12)', color: isDark ? '#ffffff' : '#10b981', padding: '14px 24px', borderRadius: '100px', fontSize: '15px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }} className="hover-lift">
-                    <HelpCircle size={18} color="#84cc16" />
+                  {/* Secondary Action: Take Free Quiz */}
+                  <button onClick={() => startFreshQuiz()} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: isDark ? 'rgba(52, 211, 153, 0.15)' : 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)', color: isDark ? '#34d399' : '#064e3b', padding: '14px 26px', borderRadius: '100px', fontSize: '15.5px', fontWeight: 800, border: `2px solid ${isDark ? '#34d399' : '#10b981'}`, cursor: 'pointer', transition: 'all 0.25s ease', boxShadow: isDark ? '0 8px 24px rgba(52, 211, 153, 0.2)' : '0 8px 24px rgba(16, 185, 129, 0.18)' }} className="hover-lift">
+                    <HelpCircle size={20} color={isDark ? '#34d399' : '#10b981'} />
                     <span>Take Free Quiz</span>
+                    <span style={{ background: isDark ? 'rgba(52,211,153,0.25)' : '#10b981', color: isDark ? '#34d399' : '#ffffff', fontSize: '10px', fontWeight: 900, padding: '3px 9px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      60s Quiz
+                    </span>
                   </button>
                 </div>
 
@@ -3725,7 +3789,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             </h2>
 
             <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.85)', marginBottom: '28px', lineHeight: 1.6, maxWidth: '480px' }}>
-              Join 50,000+ smart budgeters using ZenBudget's zero-knowledge private budget tools & AI insights to build lasting wealth.
+              Join smart budgeters using ZenBudget's zero-knowledge private budget tools & AI insights to build lasting wealth.
             </p>
             
             <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -4029,7 +4093,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   ))}
                 </div>
                 <span style={{ fontSize: '12px', fontWeight: 700, color: t.text }}>
-                  <strong style={{ color: '#84cc16' }}>50,000+</strong> people budgeting daily
+                  Smart, private & encrypted budgeting daily
                 </span>
               </div>
 
@@ -4160,7 +4224,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     <div style={{ display: 'flex', gap: '2px' }}>
                       {[...Array(5)].map((_, i) => <Star key={i} size={12} fill="#facc15" color="#facc15" />)}
                     </div>
-                    <span style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>4.9 • 15K reviews</span>
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>4.9 ★ • Smart & Private</span>
                   </div>
                 </div>
               </div>
@@ -4184,7 +4248,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 ))}
               </div>
               <span style={{ fontSize: '12.5px', fontWeight: 800, color: isDark ? '#a3e635' : '#92400e' }}>
-                50,000+ people mastering their money daily
+                Join smart budgeters building financial discipline daily
               </span>
             </div>
 

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { HelpCircle, X, Bot, Star, Mail, Send, MessageSquare, Sparkles, ThumbsUp, CheckCircle, CheckCircle2 } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
-import type { Transaction, CategoryBudget, SavingsGoal } from '../types';
+import { ZenFinancialIntelligenceEngine, resolveUserFinancialQuery } from '../utils/zenFinancialEngine';
+import type { ConversationMemoryState } from '../utils/zenFinancialEngine';
+import type { Transaction, CategoryBudget, SavingsGoal, LoanRecord } from '../types';
 
 interface HelpModalProps {
   isOpen: boolean;
@@ -13,6 +15,7 @@ interface HelpModalProps {
   userName?: string;
   initialTab?: 'faq' | 'bot' | 'feedback';
   accounts?: any[];
+  loans?: LoanRecord[];
 }
 
 interface ChatMessage {
@@ -31,7 +34,8 @@ export const HelpModal: React.FC<HelpModalProps> = ({
   currencySymbol = '₹',
   userName = 'User',
   initialTab = 'bot',
-  accounts = []
+  accounts = [],
+  loans = []
 }) => {
   if (!isOpen) return null;
 
@@ -133,28 +137,112 @@ export const HelpModal: React.FC<HelpModalProps> = ({
   function getSmartClientFallbackResponse(userMessage: string): string {
     const rawText = userMessage || '';
     const msg = rawText.toLowerCase().trim();
-    const isEng = !/[अ-ह]/.test(rawText) && !/\b(kahan|kaise|mera|meri|mere|mujhe|btao|batao|apka|aapka|kya|kab|kaun|hai|hain|rha|rhi|rhe|hoga|hogaye)\b/i.test(msg);
+    const isEng = !/[अ-ह]/.test(rawText) && !/\b(kahan|kaise|mera|meri|mere|mujhe|btao|batao|apka|aapka|kya|kab|kaun|hai|hain|rha|rhi|rhe|hoga|hogaye|bhai|yaar|karo|do|karna)\b/i.test(msg);
 
-    // 0. Account Balance & Wallet Questions
+    const safeAccs = Array.isArray(accounts) ? accounts : [];
+    const totalAccBal = safeAccs.reduce((sum, a) => sum + (Number(a?.balance) || 0), 0);
+    const accDetails = safeAccs
+      .map(a => `${a.name || 'Account'}: ${currencySymbol}${(Number(a?.balance) || 0).toLocaleString()}`)
+      .join('; ');
+
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const daysRemaining = Math.max(1, daysInMonth - new Date().getDate());
+    const flexMoney = Math.max(0, totalIncome - totalExpense);
+    const dailySafeSpend = Math.max(100, Math.round((flexMoney > 0 ? flexMoney : (totalAccBal > 0 ? totalAccBal : 1000)) / daysRemaining));
+
+    // Calculate Financial Health Score (0-100)
+    let healthScore = 55;
+    if (totalIncome > 0) {
+      if (savingsPct >= 30) healthScore += 30;
+      else if (savingsPct >= 20) healthScore += 20;
+      else if (savingsPct >= 10) healthScore += 10;
+      else healthScore -= 15;
+    }
+    if (totalExpense > 0 && totalExpense <= totalIncome * 0.75) healthScore += 15;
+    if (totalAccBal > 5000) healthScore += 10;
+    healthScore = Math.min(100, Math.max(15, healthScore));
+
+    // 0. Roast Mode Specific Responses
+    if (isRoastMode || msg.includes('roast') || msg.includes('roast me')) {
+      if (topCatAmt > 0) {
+        if (isEng) {
+          return `🔥 ROAST ALERT: Oh ${userName}, you spent ${currencySymbol}${topCatAmt.toLocaleString()} on ${topCat.toUpperCase()} this month?! 😭 Your bank account is crying for mercy! Savings rate is sitting at a tragic ${savingsPct}%. Maybe pause the impulse buys before Zen Piggy files for bankruptcy! 🐷💔`;
+        }
+        return `🔥 ROAST ALERT: Oye ${userName}! Tumne ${topCat.toUpperCase()} pe ${currencySymbol}${topCatAmt.toLocaleString()} uda diye?! 😭 Tumhara bank balance rone ki taiyari me hai! Savings rate abhi sirf ${savingsPct}% hai. Please agli party cancel karo nahi to agle hafte maggi par guzarish karna padega! 🐷💔`;
+      }
+      return isEng 
+        ? `🔥 ROAST ALERT: You haven't logged enough transactions yet, but I bet you're hiding that secret coffee subscription! Log your entries so I can roast your spending properly ☕🔥`
+        : `🔥 ROAST ALERT: Abhi tak saare kharche enter nahi kiye tumne, pakka koi secret momos ya shopping छुपा rahe ho! Log karo taaki sahi se roast kar saku ☕🔥`;
+    }
+
+    // 1. "Can I afford X?" / Impulse Buy Sanity Checker (Extracts number like 5000, 15000, 250)
+    const amountMatch = msg.match(/(\d+[\d,]*)/);
+    if (
+      msg.includes('afford') || msg.includes('buy') || msg.includes('kharid') || 
+      msg.includes('kharidu') || msg.includes('le lu') || msg.includes('le sakta') ||
+      msg.includes('can i get') || msg.includes('should i buy')
+    ) {
+      if (amountMatch) {
+        const itemAmount = parseInt(amountMatch[1].replace(/,/g, ''), 10);
+        if (itemAmount > 0) {
+          if (itemAmount <= dailySafeSpend * 3 && itemAmount <= totalAccBal * 0.2) {
+            return `✅ YES! YOU CAN SAFELY AFFORD THIS!\n\n• Item Cost: **${currencySymbol}${itemAmount.toLocaleString()}**\n• Available Wallet Balance: **${currencySymbol}${totalAccBal.toLocaleString()}**\n• Daily Safe Spending Limit: **${currencySymbol}${dailySafeSpend}/day**\n\nThis purchase stays well within your safe allowance. Go ahead and enjoy! 🛍️✨`;
+          } else if (itemAmount <= totalAccBal && itemAmount <= flexMoney) {
+            return `⚠️ CAUTION: BORDERLINE PURCHASE!\n\n• Item Cost: **${currencySymbol}${itemAmount.toLocaleString()}**\n• Available Wallet Balance: **${currencySymbol}${totalAccBal.toLocaleString()}**\n• Flexible Money Left: **${currencySymbol}${flexMoney.toLocaleString()}**\n\nBuying this will consume ${Math.round((itemAmount / (flexMoney || 1)) * 100)}% of your remaining monthly savings. We suggest applying the **48-Hour Pause Rule** before tapping buy! ⏳`;
+          } else {
+            return `🚨 NO! DO NOT BUY THIS NOW!\n\n• Item Cost: **${currencySymbol}${itemAmount.toLocaleString()}**\n• Available Wallet Balance: **${currencySymbol}${totalAccBal.toLocaleString()}**\n• Shortfall: **${currencySymbol}${(itemAmount - totalAccBal).toLocaleString()}**\n\nThis purchase exceeds your safe liquid balance. Create a dedicated **Savings Goal** in ZenBudget to save for it over the next 2-3 months! 🎯`;
+          }
+        }
+      }
+      return isEng
+        ? `🛍️ Impulse Buy Sanity Checker: Tell me the price (e.g. "Can I afford ₹8,000 for a smartwatch?") and I'll calculate if it fits your current wallet balance & monthly budget! 💡`
+        : `🛍️ Impulse Buy Check: Price ke saath poochho (e.g. "Kya main ₹8,000 ka watch le sakta hu?") — main tumhare balance aur daily budget se exact check karke bataunga! 💡`;
+    }
+
+    // 2. Monthly Audit / Scorecard ("How's my month?", "Kaise hai mera month", "monthly audit")
+    if (
+      msg.includes('audit') || msg.includes('month') || msg.includes('scorecard') || 
+      msg.includes('report') || msg.includes('kaise chal') || msg.includes('how is my') ||
+      msg.includes('health') || msg.includes('how am i')
+    ) {
+      const statusBadge = healthScore >= 75 ? '🌟 Excellent' : healthScore >= 50 ? '⚡ Fair / Moderate' : '⚠️ Action Required';
+      return `📊 ZEN FINANCIAL HEALTH SCORECARD\n\n• Health Score: **${healthScore}/100** (${statusBadge})\n• Total Wallet Balance: **${currencySymbol}${totalAccBal.toLocaleString()}**\n• Total Income This Month: **${currencySymbol}${totalIncome.toLocaleString()}**\n• Total Expenses: **${currencySymbol}${totalExpense.toLocaleString()}**\n• Net Savings Rate: **${savingsPct}%**\n• Top Spending Category: **${topCat.toUpperCase()}** (${currencySymbol}${topCatAmt.toLocaleString()})\n• Safe Daily Allowance: **${currencySymbol}${dailySafeSpend}/day** (${daysRemaining} days left)\n\n💡 **Zen Action Advice**: ${savingsPct < 20 ? `Try setting a ${currencySymbol}1,500 limit on ${topCat.toUpperCase()} to push your savings rate above 20%! 🎯` : `You are maintaining a strong savings rate! Keep allocating extra funds to your savings goals. 🚀`}`;
+    }
+
+    // 3. 50/30/20 Rule Plan
+    if (msg.includes('50/30/20') || msg.includes('50-30-20') || msg.includes('rule') || msg.includes('budgeting rule')) {
+      const baseIncome = totalIncome > 0 ? totalIncome : 50000;
+      const needs = Math.round(baseIncome * 0.5);
+      const wants = Math.round(baseIncome * 0.3);
+      const savings = Math.round(baseIncome * 0.2);
+
+      return `💡 50/30/20 BUDGETING FRAMEWORK (${totalIncome > 0 ? `Based on ${currencySymbol}${totalIncome.toLocaleString()} Income` : 'Based on ₹50,000 Benchmark'}):\n\n• **50% Needs (${currencySymbol}${needs.toLocaleString()})**: Rent, groceries, electricity, medicines & essentials.\n• **30% Wants (${currencySymbol}${wants.toLocaleString()})**: Dining out, movies, shopping & entertainment.\n• **20% Savings (${currencySymbol}${savings.toLocaleString()})**: Emergency fund, SIPs & debt repayment.\n\n📊 Your Current Spent vs Income: ${currencySymbol}${totalExpense.toLocaleString()} (${totalIncome > 0 ? Math.round((totalExpense/totalIncome)*100) : 0}% of income spent). Keep your wants under ${currencySymbol}${wants.toLocaleString()}! 🌿`;
+    }
+
+    // 4. Emergency Fund Plan
+    if (msg.includes('emergency') || msg.includes('fund') || msg.includes('bipat') || msg.includes('backup')) {
+      const monthlyNeed = totalExpense > 0 ? totalExpense : 20000;
+      const target3Mo = monthlyNeed * 3;
+      const target6Mo = monthlyNeed * 6;
+      const fundedPct = Math.min(100, Math.round((totalAccBal / target3Mo) * 100));
+
+      return `🛡️ EMERGENCY FUND ROADMAP:\n\n• Monthly Expense Velocity: **${currencySymbol}${monthlyNeed.toLocaleString()}**\n• 3-Month Minimum Target: **${currencySymbol}${target3Mo.toLocaleString()}**\n• 6-Month Gold Standard: **${currencySymbol}${target6Mo.toLocaleString()}**\n• Your Current Wallet Funded: **${currencySymbol}${totalAccBal.toLocaleString()}** (${fundedPct}% of 3-Mo target)\n\n💡 **Zen Advice**: Keep this money in a separate high-yield liquid bank account or FD. Never touch it for impulse shopping! 🌿`;
+    }
+
+    // 5. Account Balance & Wallet Questions
     if (
       msg.includes('balance') || msg.includes('account') || msg.includes('wallet') || 
       msg.includes('paisa') || msg.includes('paise') || msg.includes('kitna ha') || 
       msg.includes('kitna hai') || msg.includes('kitne hai') || msg.includes('kitna paisa') ||
       msg.includes('kitna bacha') || msg.includes('kitne bache')
     ) {
-      const safeAccs = Array.isArray(accounts) ? accounts : [];
-      const totalAccBal = safeAccs.reduce((sum, a) => sum + (Number(a?.balance) || 0), 0);
-      const accDetails = safeAccs
-        .map(a => `${a.name || 'Account'}: ${currencySymbol}${(Number(a?.balance) || 0).toLocaleString()}`)
-        .join('; ');
-
       if (isEng) {
         return `💳 Your total Wallet / Bank Account balance is **${currencySymbol}${totalAccBal.toLocaleString()}**! ${accDetails ? `\n\nAccounts Breakdown: ${accDetails}` : ''} 📊✨`;
       }
       return `💳 Aapka current Total Wallet / Bank Account balance **${currencySymbol}${totalAccBal.toLocaleString()}** hai! ${accDetails ? `\n\nAccounts Breakdown: ${accDetails}` : ''} 📊✨`;
     }
 
-    // 0.1. User Details (Name, Email)
+    // 6. User Details (Name, Email)
     if (msg.includes('mera email') || msg.includes('my email') || msg.includes('meri email') || msg.includes('email kya')) {
       const userEmail = localStorage.getItem('zb_user_email') || 'Not found';
       return isEng ? `📧 Your registered email is **${userEmail}**! ✨` : `📧 Aapki registered email id **${userEmail}** hai! ✨`;
@@ -164,7 +252,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
       return isEng ? `👤 Your registered name is **${userName || 'User'}**! ✨` : `👤 Aapka registered naam **${userName || 'User'}** hai! ✨`;
     }
 
-    // 0.2. Monthly Income / Earnings
+    // 7. Monthly Income / Earnings
     if (msg.includes('income') || msg.includes('salary') || msg.includes('kamai') || msg.includes('credited') || msg.includes('kitni aayi') || msg.includes('kitna kamaya') || msg.includes('aaya')) {
       if (isEng) {
         return `💵 Total Income / Credit this month is **${currencySymbol}${totalIncome.toLocaleString()}**! Keep tracking every credit entry to maintain an accurate ledger. 📈✨`;
@@ -172,7 +260,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
       return `💵 Iss month aapki total Income / Credit **${currencySymbol}${totalIncome.toLocaleString()}** hai! Daily entries log karke aap exact savings rate monitor kar sakte ho. 📈✨`;
     }
 
-    // 0.3. Recent Transactions Logged
+    // 8. Recent Transactions Logged
     if (msg.includes('transaction') || msg.includes('history') || msg.includes('recent') || msg.includes('pichla') || msg.includes('last entry') || msg.includes('kharcha list')) {
       if (recentTxsText) {
         if (isEng) {
@@ -182,7 +270,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
       }
     }
 
-    // 0.4. Category Budgets
+    // 9. Category Budgets
     if (msg.includes('budget') || msg.includes('limit') || msg.includes('category limit')) {
       if (budgetSummaryText) {
         if (isEng) {
@@ -192,7 +280,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
       }
     }
 
-    // 0.5. Savings Goals
+    // 10. Savings Goals
     if (msg.includes('goal') || msg.includes('target') || msg.includes('bachat target') || msg.includes('saving goal')) {
       if (goalSummaryText) {
         if (isEng) {
@@ -202,7 +290,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
       }
     }
 
-    // 1. Customer Support / Email / Contact
+    // 11. Customer Support / Email / Contact
     if ((msg.includes('email') && !msg.includes('mera') && !msg.includes('my') && !msg.includes('kya')) || msg.includes('support') || msg.includes('contact') || msg.includes('helpdesk') || msg.includes('customer') || msg.includes('mail')) {
       if (isEng) {
         return `📧 Official Support Email: **hello.zenbudget@zohomail.in**\n\nOur team is active 24/7 and usually responds within 2-4 hours! You can also leave direct feedback in the "Rate App" tab above. 🌿✨`;
@@ -210,7 +298,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
       return `📧 Official Support Email: **hello.zenbudget@zohomail.in**\n\nAap humein kisi bhi help ya query ke liye hello.zenbudget@zohomail.in par mail kar sakte ho! Aap "Rate App" tab se direct feedback bhi bhej sakte ho! 🌿✨`;
     }
 
-    // 2. Loans & EMI Tracker Questions
+    // 12. Loans & EMI Tracker Questions
     if (msg.includes('loan') || msg.includes('borrow') || msg.includes('udhaar') || msg.includes('emi') || msg.includes('lent') || msg.includes('repay')) {
       if (isEng) {
         return `💳 Loans & EMI Tracker: Track money borrowed (Loans Taken) or lent (Loans Given) with automatic due dates, late warning badges, monthly EMI breakdowns, and one-click repayments! Go to "More" -> "Loans & Borrowings". 📊`;
@@ -218,7 +306,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
       return `💳 Loans & Borrowings Tracker: Aap "Loans Taken" (liya hua udhaar) aur "Loans Given" (diya hua paisa) ka exact hisab rakh sakte ho! Isme automatic due date alerts, late warning badges, aur wallet deduction features included hain! 📊`;
     }
 
-    // 3. Highest Spending / Category Analysis (Handles typos like expenstion, expence, expanse, highest, max)
+    // 13. Highest Spending / Category Analysis (Handles typos like expenstion, expence, expanse, highest, max)
     if (
       msg.includes('kahan') || msg.includes('sabse zyada') || msg.includes('kharcha') ||
       msg.includes('highest') || msg.includes('spending') || msg.includes('expense') ||
@@ -231,7 +319,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
       return `📊 Iss month aapka sabse zyada kharcha **${topCat.toUpperCase()}** category me hua hai (${currencySymbol}${topCatAmt.toLocaleString()})! Total monthly spending: ${currencySymbol}${totalExpense.toLocaleString()}. 💡 Tip: ${topCat.toUpperCase()} par 15% budget limit set karke aap har mahine ₹2,000+ save kar sakte ho! 🌿`;
     }
 
-    // 4. Extra Savings Strategy
+    // 14. Extra Savings Strategy
     if (msg.includes('bachayein') || msg.includes('save') || msg.includes('saving') || msg.includes('5000') || msg.includes('paise kaise')) {
       if (isEng) {
         return `🎯 3 Steps to Save ${currencySymbol}5,000 Extra: 1️⃣ Transfer 20% of your income to savings right after payday. 2️⃣ Set strict monthly category budget limits. 3️⃣ Use Quick Capture to log every daily expense! 💪✨`;
@@ -239,39 +327,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
       return `🎯 Extra ${currencySymbol}5,000 bachane ke 3 simple steps: 1️⃣ Salary aate hi 20% alag savings account me transfer kar do. 2️⃣ ${topCat.toUpperCase()} category par strict monthly limit set karo. 3️⃣ Daily Quick Capture se har entry ka record rakho! 💪✨`;
     }
 
-    // 5. Spending Habits / Analysis
-    if (msg.includes('habit') || msg.includes('analyze') || msg.includes('score') || msg.includes('analysis')) {
-      if (isEng) {
-        return `🌱 Spending Habits Analysis: Your monthly savings rate is **${savingsPct}%** (Total Saved: ${currencySymbol}${totalSaved.toLocaleString()}). ${savingsPct >= 20 ? '🔥 Excellent! You are in the Pro Saver bracket!' : '⚡ Aim for a 20%+ savings rate to build a healthy emergency fund.'} 📈`;
-      }
-      return `🌱 Spending Habits Analysis: Aapka monthly savings rate **${savingsPct}%** hai! Total saved: ${currencySymbol}${totalSaved.toLocaleString()}. ${savingsPct >= 20 ? '🔥 Great job! Aap Pro Saver category me aate ho!' : '⚡ Aim for 20%+ savings rate to build a solid emergency fund.'} 📈`;
-    }
-
-    // 6. Scan & Pay / UPI Questions
-    if (msg.includes('scan') || msg.includes('upi') || msg.includes('pay') || msg.includes('qr') || msg.includes('cashfree')) {
-      if (isEng) {
-        return `⚡ Direct Scan & Pay: Tap the QR icon at the top of Dashboard. You can pay via QR code, phone number, Bank A/c (IFSC), or UPI ID with direct app deep linking! 📲`;
-      }
-      return `⚡ ZenBudget Direct Scan & Pay: App me Top QR icon tap karo. Scanned QR, Mobile number, Bank A/c (IFSC), ya UPI ID se zero-fee Direct Deep Linking se instant pay ho jata hai! 📲`;
-    }
-
-    // 7. Quick Capture / AI Voice Entry
-    if (msg.includes('quick capture') || msg.includes('voice') || msg.includes('mic') || msg.includes('bol kar')) {
-      if (isEng) {
-        return `🎙️ AI Quick Capture: Speak or type naturally on your dashboard (e.g. "Paid 220 for petrol in cash"). ZenBudget automatically detects amount, category, and wallet account! ⚡`;
-      }
-      return `🎙️ AI Quick Capture: Dashboard par card me bol kar ya likh kar (e.g. "Paid 220 for petrol in cash") entry kar sakte ho! System auto-detect karke instant save kar deta hai! ⚡`;
-    }
-
-    // 8. Security / PIN / Biometrics
-    if (msg.includes('pin') || msg.includes('lock') || msg.includes('password') || msg.includes('security') || msg.includes('biometric')) {
-      if (isEng) {
-        return `🔒 Security & Privacy: ZenBudget stores all data inside your device's native secure sandbox. PIN & Fingerprint biometrics keep your personal financial logs 100% private! 🛡️`;
-      }
-      return `🔒 Security & Privacy: ZenBudget aapka data aapke device sandbox me store karta hai. Login PIN & Biometrics (Fingerprint/Face ID) se aapka app 100% private & secure rehta hai! 🛡️`;
-    }
-
-    // 9. General Greetings (matches hi, hii, hiii, hello, hey, heyy, yo, sup, etc. using regex)
+    // 15. General Greetings
     if (/^(hi+|hello+|hey+|yo+|sup|hola|namaste|salam)\b/i.test(msg) || msg.includes('kaise ho') || msg.includes('who are you') || msg.includes('kaise hain')) {
       if (/[अ-ह]/.test(rawText) || /\b(kahan|kaise|mera|meri|mere|mujhe|btao|batao|apka|aapka|kya|kab|kaun|hai|hain|rha|rhi|rhe|hoga|hogaye|bhai|yaar|karo|do|karna)\b/i.test(msg)) {
         return `Hii ${userName || 'yaar'}! 🌿 Main Zen hu — aapka AI Financial Coach aur personal money buddy. Main aapki spending habits check kar sakta hu, savings tips de sakta hu, aur ZenBudget app ke details samjha sakta hu! Poocho yaar, kya help chahiye? 🤝✨`;
@@ -279,55 +335,20 @@ export const HelpModal: React.FC<HelpModalProps> = ({
       return `Hii ${userName || 'buddy'}! 🌿 I'm Zen — your personal AI Financial Coach & best friend. I can analyze your monthly spending habits, give you smart savings advice, and help you track every rupee in ZenBudget. Ask me anything, I'm here to help you save! 🤝✨`;
     }
 
-    // 10. Financial Concepts: 50-30-20 Rule
-    if (msg.includes('50/30/20') || msg.includes('50-30-20') || msg.includes('rule') || msg.includes('budgeting rule')) {
-      if (isEng) {
-        return `💡 The 50/30/20 Rule:\n• **50% Needs**: Rent, groceries, bills & essentials.\n• **30% Wants**: Dining out, shopping, hobbies.\n• **20% Savings**: Emergency fund, SIPs & investments.\n\nYou can track this easily in ZenBudget under "Budgets & Limits"! 📊✨`;
-      }
-      return `💡 50/30/20 Budget Rule:\n• **50% Needs**: Kiraya, ration, bills & zaruri kharche.\n• **30% Wants**: Party, shopping & entertainment.\n• **20% Savings**: Emergency fund & SIP investments.\n\nAap ZenBudget me "Budgets" set karke isko strictly maintain kar sakte ho! 📊✨`;
-    }
-
-    // 11. SIP / Mutual Funds / Investing
-    if (msg.includes('sip') || msg.includes('mutual fund') || msg.includes('invest') || msg.includes('nivesh') || msg.includes('stocks')) {
-      if (isEng) {
-        return `📈 SIP & Investing Tip:\nA Systematic Investment Plan (SIP) allows you to invest small monthly amounts (e.g. ₹500/mo) in index funds or ELSS. Over 10-15 years, compounding can turn small savings into wealth! 🚀`;
-      }
-      return `📈 SIP & Investing Tip:\nSIP (Systematic Investment Plan) se aap har mahine ₹500 se bhi Mutual Funds me invest kar sakte ho. Long term (5-10 saal) me compounding se zabardast returns milte hain! 🚀`;
-    }
-
-    // 12. Emergency Fund
-    if (msg.includes('emergency') || msg.includes('fund') || msg.includes('bipat') || msg.includes('backup')) {
-      if (isEng) {
-        return `🛡️ Emergency Fund 101:\nAlways maintain 3 to 6 months of essential living expenses in a separate high-yield liquid bank account or FD. Never touch this money for shopping or non-emergencies! 🌿`;
-      }
-      return `🛡️ Emergency Fund Rule:\nApne 3 se 6 mahine ke kharchon ka paisa alag Savings Bank Account ya Liquid FD me rakhein. Yeh medical emergency ya job switch ke waqt kaam aata hai! 🌿`;
-    }
-
-    // 13. Credit Score / CIBIL
-    if (msg.includes('credit') || msg.includes('cibil') || msg.includes('score')) {
-      if (isEng) {
-        return `💳 Credit Score / CIBIL Tips:\n1️⃣ Always pay Credit Card bills & Loan EMIs before due date.\n2️⃣ Keep Credit Utilization under 30%.\n3️⃣ Avoid applying for multiple loans simultaneously. High score (>750) gets lower interest rates! ⚡`;
-      }
-      return `💳 CIBIL / Credit Score Tips:\n1️⃣ Credit Card bill aur EMI HAMESHA due date se pehle pay karein.\n2️⃣ Total credit limit ka sirf 30% hi use karein.\n750+ CIBIL score se saste rate par loans milte hain! ⚡`;
-    }
-
-    // 14. Tax Savings (80C / New vs Old)
-    if (msg.includes('tax') || msg.includes('80c') || msg.includes('income tax')) {
-      if (isEng) {
-        return `💸 Tax Saving Options (Section 80C):\nYou can save up to ₹1.5 Lakh tax per year using:\n• ELSS Mutual Funds (Lowest 3-yr lock-in)\n• PPF (Public Provident Fund)\n• NPS (National Pension Scheme - Extra ₹50,000 under 80CCD)\n• Health Insurance (Section 80D) 📊`;
-      }
-      return `💸 Tax Saving Tips (Section 80C):\nAap saal me ₹1.5 Lakh tak tax bachaa sakte ho:\n• ELSS Mutual Funds (3 saal lock-in)\n• PPF (Public Provident Fund)\n• NPS (Extra ₹50k under 80CCD)\n• Medical Health Insurance (Sec 80D) 📊`;
-    }
-
-    // 15. Universal Intelligent Conversational Fallback with User Real-Time Context
-    const safeAccs = Array.isArray(accounts) ? accounts : [];
-    const totalAccBal = safeAccs.reduce((sum, a) => sum + (Number(a?.balance) || 0), 0);
-
+    // 16. Universal Intelligent Conversational Fallback
     if (isEng) {
-      return `🌿 Hii ${userName || 'friend'}! I'm Zen — your personal AI Financial Coach. Right now, your total wallet balance is **${currencySymbol}${totalAccBal.toLocaleString()}**, monthly income is **${currencySymbol}${totalIncome.toLocaleString()}**, total expenses are **${currencySymbol}${totalExpense.toLocaleString()}**, and top spending category is **${topCat.toUpperCase()}** (${currencySymbol}${topCatAmt.toLocaleString()}).\n\nAsk me about your balance, loans, category spending, savings goals, or any money advice! 💡✨`;
+      return `🌿 Hii ${userName || 'friend'}! I'm Zen — your personal AI Financial Coach. Right now, your total wallet balance is **${currencySymbol}${totalAccBal.toLocaleString()}**, monthly income is **${currencySymbol}${totalIncome.toLocaleString()}**, total expenses are **${currencySymbol}${totalExpense.toLocaleString()}**, and top spending category is **${topCat.toUpperCase()}** (${currencySymbol}${topCatAmt.toLocaleString()}).\n\nAsk me about your balance, loans, category spending, impulse buy checks (e.g. "Can I afford ₹5,000?"), or any money advice! 💡✨`;
     }
-    return `🌿 Hii ${userName || 'yaar'}! Main Zen hu — aapka AI Financial Coach. Abhi aapka total balance **${currencySymbol}${totalAccBal.toLocaleString()}** hai, iss month income **${currencySymbol}${totalIncome.toLocaleString()}**, total kharcha **${currencySymbol}${totalExpense.toLocaleString()}**, aur sabse zyada kharcha **${topCat.toUpperCase()}** (${currencySymbol}${topCatAmt.toLocaleString()}) me hua hai.\n\nAap mujhse balance, loans, spending habits, budgets ya kisi bhi financial topic ke baare me pooch sakte ho! 🤝✨`;
+    return `🌿 Hii ${userName || 'yaar'}! Main Zen hu — aapka AI Financial Coach. Abhi aapka total balance **${currencySymbol}${totalAccBal.toLocaleString()}** hai, iss month income **${currencySymbol}${totalIncome.toLocaleString()}**, total kharcha **${currencySymbol}${totalExpense.toLocaleString()}**, aur sabse zyada kharcha **${topCat.toUpperCase()}** (${currencySymbol}${topCatAmt.toLocaleString()}) me hua hai.\n\nAap mujhse balance, loans, spending habits, impulse buy checks (e.g. "Kya main ₹5,000 ka item le sakta hu?") ya kisi bhi financial topic ke baare me pooch sakte ho! 🤝✨`;
   }
+
+  const [conversationMemory, setConversationMemory] = useState<ConversationMemoryState>({
+    lastCategory: null,
+    lastPeriod: null,
+    lastSubject: null,
+    lastAmount: null,
+    lastMerchants: null
+  });
 
   const handleSend = async (e?: React.FormEvent, customPrompt?: string) => {
     if (e) e.preventDefault();
@@ -347,42 +368,49 @@ export const HelpModal: React.FC<HelpModalProps> = ({
 
     let botResponseText = '';
     
+    // Initialize Deterministic Financial Intelligence Engine
+    const engine = new ZenFinancialIntelligenceEngine(transactions, budgets, goals, accounts, loans);
+    const structCtx = engine.generateStructuredContext();
+    const resolvedResult = resolveUserFinancialQuery(rawText, engine, conversationMemory, userName, currencySymbol);
+
+    // Update multi-turn conversational state
+    setConversationMemory(resolvedResult.updatedState);
+
     try {
-      // Create Finance Context
-      const budgetedTotal = budgets.reduce((sum, b) => sum + (b.limit || 0), 0);
-      const flexMoney = Math.max(0, totalIncome - budgetedTotal);
-      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-      const daysRemaining = Math.max(1, daysInMonth - new Date().getDate());
-      
-      const financeContext = `
-        User Name: ${userName}
-        Total Income: ${currencySymbol}${totalIncome}
-        Total Expense: ${currencySymbol}${totalExpense}
-        Remaining Flexible: ${currencySymbol}${flexMoney}
-        Daily Safe Spend: ${currencySymbol}${Math.round(flexMoney / daysRemaining)}
-        Top Spending Category: ${topCat} (${currencySymbol}${topCatAmt})
-        Savings Rate: ${savingsPct}%
-      `;
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
+      if (apiKey) {
+        const ai = new GoogleGenAI({ apiKey });
 
-      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || '' });
+        const systemInstruction = `You are Zen, an expert personal finance AI coach built into ZenBudget.
+You MUST ALWAYS answer from verified, structured live user financial data provided below.
 
-      const systemInstruction = `You are Zen, an expert personal finance AI coach built into the ZenBudget app. You have access to the user's financial data. Answer their financial questions accurately, kindly, and concisely in Hinglish or English based on their language. 
-      CRITICAL RULE: You are strictly forbidden from answering non-financial questions (e.g., cooking recipes like biryani, coding, general knowledge, math not related to budget). If the user asks something unrelated to finance or their budget, politely refuse and steer the conversation back to their money.
-      Here is the user's current context: ${financeContext}`;
+CRITICAL FINANCIAL RULES:
+1. ALWAYS use the exact numbers from the provided structured JSON context. NEVER invent or hallucinate financial numbers.
+2. Direct Answer: Answer the user's specific question immediately with verified data.
+3. Personalized Observation: Point out category leaks, MoM change %, or pattern (e.g. weekend spending ratio or small repeated treats).
+4. One Useful Implication: Explain how this impacts their remaining flexible budget (${currencySymbol}${structCtx.flexibleRemaining}) or safe daily spend (${currencySymbol}${structCtx.safeDailySpend}/day).
+5. One Practical Next Step: Suggest a specific daily cap or budget adjustment.
+6. Tone Matching: Match user's language and tone naturally (Casual Hinglish vs Formal English).
+7. Proactive Context: If user asks about remaining budget, ALWAYS proactively mention upcoming recurring payments (${currencySymbol}${structCtx.upcomingRecurring}) and the realistic safe daily pace.
 
-      const response = await ai.models.generateContent({
+LIVE STRUCTURED FINANCIAL CONTEXT (JSON):
+${JSON.stringify(structCtx, null, 2)}`;
+
+        const response = await ai.models.generateContent({
           model: 'gemini-1.5-flash',
           contents: rawText,
           config: {
-              systemInstruction: systemInstruction,
+            systemInstruction: systemInstruction,
           }
-      });
+        });
 
-      botResponseText = response.text || "Sorry, I couldn't process that.";
-
+        botResponseText = response.text || resolvedResult.responseText;
+      } else {
+        botResponseText = resolvedResult.responseText;
+      }
     } catch (err) {
-      console.warn('Gemini Error, using smart AI fallback:', err);
-      botResponseText = getSmartClientFallbackResponse(rawText);
+      console.warn('Gemini API execution error, using deterministic Intelligence Engine response:', err);
+      botResponseText = resolvedResult.responseText;
     }
 
     const botResponse: ChatMessage = {
