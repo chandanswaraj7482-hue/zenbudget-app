@@ -57,7 +57,11 @@ import { supabase } from './supabaseClient';
 import { playNotificationSound, playErrorSound, triggerFireworksCelebration } from './utils/audio';
 import confetti from 'canvas-confetti';
 
-const App: React.FC = () => {
+interface AppProps {
+  onBackToLanding?: () => void;
+}
+
+const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   const [transactions, setTransactions] = useState<Transaction[]>(() => {
     const profileId = localStorage.getItem('zb_profile_id') || '';
     if (profileId) {
@@ -3417,7 +3421,7 @@ const App: React.FC = () => {
     return (
       <div style={{ width: '100vw', minHeight: '100vh', display: 'flex', justifyContent: 'center', background: 'var(--bg-base)' }}>
         <div className="app-main-wrapper" style={{ margin: '0 auto', maxWidth: '520px', width: '100%', position: 'relative', minHeight: '100vh', background: 'var(--bg-base)', boxShadow: '0 0 20px rgba(0,0,0,0.4)' }}>
-          <LockScreen onUnlock={(profileId, name, tier, trialStart, pin, premiumExpires) => {
+          <LockScreen onBackToLanding={onBackToLanding} onUnlock={(profileId, name, tier, trialStart, pin, premiumExpires) => {
       const validProfileId = profileId || localStorage.getItem('zb_profile_id') || 'local';
       const validName = name || localStorage.getItem('zb_user_name') || 'User';
       const validTier = tier || localStorage.getItem('zb_subscription_tier') || 'trial';

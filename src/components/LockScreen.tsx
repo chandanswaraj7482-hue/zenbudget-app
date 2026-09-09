@@ -7,6 +7,7 @@ import { Device } from '@capacitor/device';
 
 interface LockScreenProps {
   onUnlock: (userId: string, username: string, tier: string, trialStart: string, pin: string, premiumExpiresAt: string | null, trialExpireDate?: string | null) => void;
+  onBackToLanding?: () => void;
 }
 
 const getInitialsName = (userName: string, userEmail: string) => {
@@ -18,7 +19,7 @@ const getInitialsName = (userName: string, userEmail: string) => {
   return 'User';
 };
 
-export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
+export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLanding }) => {
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -1691,6 +1692,31 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
             gap: '0px'
           }}
         >
+          {onBackToLanding && (
+            <button
+              type="button"
+              onClick={onBackToLanding}
+              style={{
+                alignSelf: 'flex-start',
+                marginBottom: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                color: 'var(--text-secondary)',
+                padding: '6px 14px',
+                borderRadius: '100px',
+                fontSize: '12px',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              <Globe size={14} />
+              <span>Website Home</span>
+            </button>
+          )}
+
           {/* ── Logo & Branding ── */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '8px' }}>
             <div style={{
