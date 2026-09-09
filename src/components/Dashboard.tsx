@@ -1035,101 +1035,100 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       )}
 
-      {/* AI Coach Trigger Popup/Card */}
-      <div 
-        onClick={onOpenAI}
-        className="glass-panel" 
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          padding: '16px',
-          background: 'linear-gradient(135deg, rgba(34,197,94,0.08) 0%, rgba(59,130,246,0.08) 100%)',
-          border: '1px solid rgba(34,197,94,0.2)',
-          borderRadius: '20px',
-          marginBottom: '0px',
-          boxShadow: '0 8px 30px rgba(0,0,0,0.4)',
-          cursor: 'pointer',
-          position: 'relative',
-          overflow: 'hidden'
-      }}>
-        {/* Glow effect */}
-        <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '100px', height: '100px', background: 'rgba(34,197,94,0.2)', filter: 'blur(40px)', borderRadius: '50%' }}></div>
-        
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', gap: '14px' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#10b981', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(16,185,129,0.3)', flexShrink: 0 }}>
-              <Sparkles size={20} />
-            </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-                <span style={{ fontSize: '15px', fontWeight: 800, color: '#f8fafc' }}>Ask Zen AI Coach</span>
-                <span style={{ fontSize: '9px', fontWeight: 800, background: '#3b82f6', color: '#fff', padding: '2px 6px', borderRadius: '10px' }}>V2</span>
-              </div>
-              <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0, lineHeight: 1.4, paddingRight: '20px' }}>
-                Reflect on spending, get roast mode, or ask any financial question!
-              </p>
-            </div>
-          </div>
-          <ChevronRight size={20} color="#94a3b8" style={{ marginTop: '10px' }} />
-        </div>
-      </div>
-
-      {/* Aesthetic Money Score Card */}
-      <div className="glass-panel" style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '14px 16px',
-        background: 'var(--bg-card)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        borderRadius: '20px',
-        marginBottom: '0px',
-        boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)', flexShrink: 0 }}>
-            <span style={{ fontSize: '18px' }}>✨</span>
-          </div>
-          <div>
-            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              {t('zen_money_score')}
-            </span>
-            <p style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', margin: '2px 0 0 0' }}>
-              {zenStatus}
-            </p>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
-          <span style={{ fontSize: '28px', fontWeight: 900, fontFamily: "'Manrope', sans-serif", color: '#10b981' }}>
-            {zenScore}
-          </span>
-          <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 700 }}>/100</span>
-        </div>
-      </div>
-
-      <PremiumHub
-        transactions={transactions}
-        budgets={budgets}
-        currencySymbol={currencySymbol}
-        userName={userName}
-      />
-
-      {/* Zen Mascot Coach Card - Dynamic AI Advice */}
+      {/* Zen Mascot Coach Card - Top-Level Smart AI Command Center */}
       <div className="glass-panel animate-fade-in" style={{
         display: 'flex',
+        flexDirection: 'column',
         gap: '12px',
-        padding: '14px 16px',
-        background: 'var(--bg-card)',
-        alignItems: 'center',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        borderRadius: '20px',
+        padding: '16px',
+        background: 'linear-gradient(135deg, rgba(16,185,129,0.06) 0%, rgba(59,130,246,0.06) 100%)',
+        border: '1px solid rgba(16, 185, 129, 0.2)',
+        borderRadius: '24px',
         marginBottom: '0px',
-        boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
+        boxShadow: '0 8px 30px rgba(0,0,0,0.3)',
+        position: 'relative',
+        overflow: 'hidden'
       }}>
-        <span style={{ fontSize: '32px', flexShrink: 0 }}>🌿</span>
-        <div style={{ textAlign: 'left', flex: 1, minWidth: 0 }}>
-          <h4 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('zen_coach')}</h4>
+        {/* Top Glow Accent */}
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '120px', height: '120px', background: 'rgba(16,185,129,0.15)', filter: 'blur(35px)', borderRadius: '50%' }}></div>
+
+        {/* Coach Header & Mood Mascot */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '14px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px rgba(16,185,129,0.35)', flexShrink: 0 }}>
+              <Brain size={22} />
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <h4 style={{ fontSize: '14px', fontWeight: 900, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.01em' }}>
+                  Zen AI Coach
+                </h4>
+                <span style={{ fontSize: '9px', fontWeight: 900, background: 'rgba(16,185,129,0.2)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)', padding: '2px 7px', borderRadius: '100px', letterSpacing: '0.04em' }}>
+                  V3 SMART INTEL
+                </span>
+              </div>
+              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                24/7 Proactive Financial Advisor
+              </span>
+            </div>
+          </div>
+
+          {/* Voice Speech Assistant Button */}
+          <button
+            type="button"
+            onClick={() => {
+              if (isSpeaking) {
+                window.speechSynthesis.cancel();
+                setIsSpeaking(false);
+              } else {
+                const coachEl = document.querySelector('[data-coach-text]');
+                const text = coachEl?.getAttribute('data-coach-text') || coachEl?.textContent?.replace(/"/g, '') || 'Keep building your money habits!';
+                const utterance = new SpeechSynthesisUtterance(text);
+
+                utterance.rate = 0.95;
+                utterance.pitch = 1.05;
+
+                const activeLang = localStorage.getItem('zb_language') || 'en';
+                const langCodeMap: Record<string, string> = {
+                  en: 'en-US', hi: 'hi-IN', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', ta: 'ta-IN', bn: 'bn-IN', mr: 'mr-IN', gu: 'gu-IN', te: 'te-IN'
+                };
+                utterance.lang = langCodeMap[activeLang] || 'en-US';
+
+                const voices = window.speechSynthesis.getVoices();
+                const langPrefix = activeLang;
+                const matchingVoice = voices.find(v => v.lang.toLowerCase().startsWith(langPrefix)) ||
+                                      voices.find(v => v.lang.toLowerCase().startsWith(utterance.lang.toLowerCase())) ||
+                                      voices.find(v => v.lang.toLowerCase().startsWith('en'));
+                if (matchingVoice) utterance.voice = matchingVoice;
+
+                utterance.onend = () => setIsSpeaking(false);
+                utterance.onerror = () => setIsSpeaking(false);
+                window.speechSynthesis.speak(utterance);
+                setIsSpeaking(true);
+              }
+            }}
+            style={{
+              padding: '6px 12px',
+              borderRadius: '100px',
+              background: isSpeaking ? 'rgba(34,197,94,0.25)' : 'rgba(255,255,255,0.06)',
+              border: isSpeaking ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.12)',
+              color: isSpeaking ? 'var(--primary)' : 'var(--text-secondary)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '11px',
+              fontWeight: 800,
+              transition: 'all 0.2s'
+            }}
+          >
+            {isSpeaking ? <VolumeX size={14} /> : <Volume2 size={14} />}
+            <span>{isSpeaking ? 'Mute' : 'Listen'}</span>
+          </button>
+        </div>
+
+        {/* Dynamic AI Advice Summary */}
+        <div style={{ background: 'var(--bg-input)', padding: '12px 14px', borderRadius: '16px', border: '1px solid var(--border-input)', zIndex: 1 }}>
           {(() => {
             const activeLang = localStorage.getItem('zb_language') || 'en';
             const coachArray = activeLang === 'hi' ? DAILY_COACH_TIPS_HI : DAILY_COACH_TIPS;
@@ -1175,8 +1174,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
               fullCoachText = `${dailyTip} ${statsSummary}`;
             }
 
-            const truncatedText = fullCoachText.length > 85 ? fullCoachText.slice(0, 85) : fullCoachText;
-            const needsTruncation = fullCoachText.length > 85;
+            const truncatedText = fullCoachText.length > 95 ? fullCoachText.slice(0, 95) : fullCoachText;
+            const needsTruncation = fullCoachText.length > 95;
 
             return (
               <p
