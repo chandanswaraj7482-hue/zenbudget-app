@@ -443,12 +443,14 @@ ${JSON.stringify(structCtx, null, 2)}`;
   };
 
   const greetingTime = new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 18 ? 'Good afternoon' : 'Good evening';
-  const flexMoney = Math.max(0, totalIncome - budgets.reduce((sum, b) => sum + (b.limit || 0), 0));
   const suggestedChips = [
-    "How's my month?",
-    "Where am I overspending?",
-    "Can I afford something?",
-    "Help me save"
+    "🔥 Roast my spending",
+    "📊 How's my month?",
+    "🛍️ Can I afford ₹5,000?",
+    "💡 50/30/20 Budget Rule",
+    "🛡️ Emergency Fund Plan",
+    "🎯 How to save ₹5,000 extra?",
+    "💳 Highest expense category?"
   ];
 
   return (

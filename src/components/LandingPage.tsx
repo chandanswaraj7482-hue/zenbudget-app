@@ -1115,6 +1115,42 @@ export const FEATURE_PAGES_DATA: Record<string, {
 export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [activePage, setActivePage] = useState<string>('home');
+  const [landingAiQuery, setLandingAiQuery] = useState('');
+  const [landingAiMessages, setLandingAiMessages] = useState<Array<{ sender: 'user' | 'bot', text: string }>>([
+    { sender: 'bot', text: "Hii! 🌿 Main Zen hu — aapka 24/7 AI Money Coach. Kuch bhi poochho, jaise 'Can I afford ₹8,500?', 'Roast my spending', ya '50/30/20 rule'!" }
+  ]);
+
+  const handleLandingAiSend = (customPrompt?: string) => {
+    const text = (customPrompt || landingAiQuery).trim();
+    if (!text) return;
+
+    const newMsgs = [...landingAiMessages, { sender: 'user' as const, text }];
+    setLandingAiMessages(newMsgs);
+    setLandingAiQuery('');
+
+    setTimeout(() => {
+      const lower = text.toLowerCase();
+      let response = '';
+
+      if (lower.includes('roast')) {
+        response = "🔥 ROAST ALERT: Tumne iss hafte dining out par ₹4,200 uda diye! 😭 Bank balance rone ki taiyari me hai! Zen Piggy says: Cancel the food delivery app before your budget files for bankruptcy! 🐷💔";
+      } else if (lower.includes('afford') || lower.includes('buy') || lower.includes('kharid') || /\d+/.test(lower)) {
+        const amtMatch = lower.match(/\d+[\d,]*/);
+        const amt = amtMatch ? parseInt(amtMatch[0].replace(/,/g, ''), 10) : 5000;
+        if (amt > 20000) {
+          response = `🚨 NO! DO NOT BUY THIS NOW! Cost: ₹${amt.toLocaleString()} exceeds your safe daily spending allowance. Apply the 48-Hour Pause Rule! ⏳`;
+        } else {
+          response = `✅ YES! SAFELY AFFORDABLE! Cost: ₹${amt.toLocaleString()} is under your daily safe spend limit (₹1,500/day). Wallet Net Worth: ₹3,48,500. Enjoy! 🛍️✨`;
+        }
+      } else if (lower.includes('50/30/20') || lower.includes('rule') || lower.includes('budget')) {
+        response = "💡 50/30/20 RULE (Based on ₹50,000 income):\n• 50% Needs (₹25,000): Rent & Groceries\n• 30% Wants (₹15,000): Dining & Movies\n• 20% Savings (₹10,000): Emergency & SIPs! 🎯";
+      } else {
+        response = `🌿 Zen AI Insight: Based on your net worth (₹3,48,500) and current savings rate (34%), setting a ₹2,000 cap on weekend dining will save you ₹24,000 extra this year! 🚀`;
+      }
+
+      setLandingAiMessages(prev => [...prev, { sender: 'bot', text: response }]);
+    }, 300);
+  };
 
   useEffect(() => {
     if ('scrollRestoration' in window.history) {
@@ -1394,17 +1430,97 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
         {/* Feature & Condition Tailored Dynamic UI */}
         {isAiCoach ? (
-          <div style={{ background: isDark ? 'rgba(139,92,246,0.12)' : '#f3e8ff', border: `1px solid ${isDark ? 'rgba(139,92,246,0.3)' : '#ddd6fe'}`, borderRadius: '14px', padding: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '9.5px', fontWeight: 800, color: isDark ? '#c084fc' : '#6b21a8' }}>
-              <Brain size={13} color="#8b5cf6" />
-              <span>24/7 AI Money Coach</span>
+          <div style={{ background: isDark ? '#0d130f' : '#f9fafb', border: `1px solid ${t.border}`, borderRadius: '14px', padding: '8px', display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '4px', borderBottom: `1px solid ${t.border}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '10px', fontWeight: 800, color: '#10b981' }}>
+                <Brain size={13} />
+                <span>Zen AI Coach (Live)</span>
+              </div>
+              <span style={{ fontSize: '8px', background: 'rgba(16,185,129,0.2)', color: '#10b981', padding: '1px 5px', borderRadius: '100px', fontWeight: 800 }}>ACTIVE</span>
             </div>
-            <div style={{ fontSize: '9px', background: isDark ? 'rgba(0,0,0,0.3)' : '#ffffff', padding: '5px 7px', borderRadius: '7px', color: t.text, fontStyle: 'italic' }}>
-              "How to cut expenses by 15%?"
+
+            {/* Chat Messages Scroll Container */}
+            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px', paddingRight: '2px', maxHeight: '180px' }}>
+              {landingAiMessages.map((m, idx) => (
+                <div key={idx} style={{
+                  fontSize: '8.5px',
+                  padding: '6px 8px',
+                  borderRadius: m.sender === 'user' ? '8px 8px 0 8px' : '0 8px 8px 8px',
+                  background: m.sender === 'user' ? '#10b981' : (isDark ? 'rgba(255,255,255,0.08)' : '#ffffff'),
+                  color: m.sender === 'user' ? '#ffffff' : t.text,
+                  alignSelf: m.sender === 'user' ? 'flex-end' : 'flex-start',
+                  maxWidth: '90%',
+                  lineHeight: 1.35,
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                  whiteSpace: 'pre-line'
+                }}>
+                  {m.text}
+                </div>
+              ))}
             </div>
-            <div style={{ fontSize: '9px', color: isDark ? '#e9d5ff' : '#4c1d95', lineHeight: 1.3, fontWeight: 700 }}>
-              💡 Found 2 unused services! Cancel to save {fmtCurr(1450)}/mo.
+
+            {/* Quick Chips */}
+            <div style={{ display: 'flex', gap: '4px', overflowX: 'auto', paddingBottom: '2px' }}>
+              {[
+                { label: '🔥 Roast me', prompt: 'Roast my spending' },
+                { label: '🛍️ Afford ₹8.5k?', prompt: 'Can I afford ₹8,500?' },
+                { label: '💡 50/30/20 Rule', prompt: '50/30/20 rule' }
+              ].map((chip, cIdx) => (
+                <button
+                  key={cIdx}
+                  type="button"
+                  onClick={() => handleLandingAiSend(chip.prompt)}
+                  style={{
+                    fontSize: '7.5px',
+                    fontWeight: 700,
+                    whiteSpace: 'nowrap',
+                    padding: '3px 6px',
+                    borderRadius: '100px',
+                    background: isDark ? 'rgba(255,255,255,0.08)' : '#f3f4f6',
+                    border: `1px solid ${t.border}`,
+                    color: t.text,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {chip.label}
+                </button>
+              ))}
             </div>
+
+            {/* Input Form */}
+            <form onSubmit={(e) => { e.preventDefault(); handleLandingAiSend(); }} style={{ display: 'flex', gap: '4px' }}>
+              <input
+                type="text"
+                value={landingAiQuery}
+                onChange={(e) => setLandingAiQuery(e.target.value)}
+                placeholder="Ask Zen AI Coach..."
+                style={{
+                  flex: 1,
+                  fontSize: '8.5px',
+                  padding: '4px 7px',
+                  borderRadius: '8px',
+                  border: `1px solid ${t.border}`,
+                  background: isDark ? 'rgba(0,0,0,0.4)' : '#ffffff',
+                  color: t.text,
+                  outline: 'none'
+                }}
+              />
+              <button
+                type="submit"
+                style={{
+                  background: '#10b981',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '4px 8px',
+                  fontSize: '8.5px',
+                  fontWeight: 800,
+                  cursor: 'pointer'
+                }}
+              >
+                Send
+              </button>
+            </form>
           </div>
         ) : isAnalytics ? (
           <div style={{ background: isDark ? 'rgba(255,255,255,0.04)' : '#f8fafc', border: `1px solid ${t.border}`, borderRadius: '14px', padding: '9px 10px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
@@ -2911,25 +3027,104 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             <div style={{ background: isDark ? '#161d18' : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '2.5rem', padding: '36px', boxShadow: '0 20px 40px rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '480px' }}>
               
               {insideTabs[activeInsideTab].mockupType === 'chat' && (
-                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#f9fafb', border: `1px solid ${t.border}`, borderRadius: '2rem', overflow: 'hidden', boxShadow: '0 16px 36px rgba(0,0,0,0.12)', display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ height: '60px', background: '#10b981', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', fontWeight: 800, fontSize: '16px' }}>
+                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#f9fafb', border: `1px solid ${t.border}`, borderRadius: '2rem', overflow: 'hidden', boxShadow: '0 16px 36px rgba(0,0,0,0.12)', display: 'flex', flexDirection: 'column', height: '420px' }}>
+                  <div style={{ height: '56px', background: '#10b981', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', fontWeight: 800, fontSize: '15px', flexShrink: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <Brain size={22} />
-                      <span>ZenBudget AI Coach</span>
+                      <span>ZenBudget AI Money Coach</span>
                     </div>
-                    <span style={{ fontSize: '11px', background: 'rgba(255,255,255,0.2)', padding: '4px 10px', borderRadius: '100px' }}>Online</span>
+                    <span style={{ fontSize: '11px', background: 'rgba(255,255,255,0.2)', padding: '4px 10px', borderRadius: '100px' }}>Live Demo</span>
                   </div>
-                  <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    <div style={{ background: isDark ? 'rgba(255,255,255,0.08)' : '#ffffff', padding: '14px 18px', borderRadius: '0 18px 18px 18px', fontSize: '14px', lineHeight: 1.5, alignSelf: 'flex-start', maxWidth: '85%', border: `1px solid ${t.border}` }}>
-                      I've spent ₹4,200 on dining out this week. Am I exceeding my budget limit?
+
+                  {/* Live Chat messages area */}
+                  <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', flex: 1, overflowY: 'auto' }}>
+                    {landingAiMessages.map((m, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          background: m.sender === 'user' ? 'linear-gradient(135deg, #10b981, #059669)' : (isDark ? 'rgba(255,255,255,0.08)' : '#ffffff'),
+                          color: m.sender === 'user' ? '#ffffff' : t.text,
+                          padding: '12px 16px',
+                          borderRadius: m.sender === 'user' ? '18px 18px 0 18px' : '0 18px 18px 18px',
+                          fontSize: '13.5px',
+                          lineHeight: 1.5,
+                          alignSelf: m.sender === 'user' ? 'flex-end' : 'flex-start',
+                          maxWidth: '85%',
+                          border: m.sender === 'bot' ? `1px solid ${t.border}` : 'none',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                          whiteSpace: 'pre-line'
+                        }}
+                      >
+                        {m.text}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Interactive Quick Chips & Input Bar */}
+                  <div style={{ padding: '12px 16px', background: isDark ? 'rgba(0,0,0,0.2)' : '#ffffff', borderTop: `1px solid ${t.border}`, display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
+                      {[
+                        { label: '🔥 Roast me', prompt: 'Roast my spending' },
+                        { label: '🛍️ Afford ₹8,500?', prompt: 'Can I afford ₹8,500?' },
+                        { label: '💡 50/30/20 Rule', prompt: '50/30/20 rule' },
+                        { label: '🛡️ Emergency Fund', prompt: 'How to build emergency fund?' }
+                      ].map((chip, cIdx) => (
+                        <button
+                          key={cIdx}
+                          type="button"
+                          onClick={() => handleLandingAiSend(chip.prompt)}
+                          style={{
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            whiteSpace: 'nowrap',
+                            padding: '5px 12px',
+                            borderRadius: '100px',
+                            background: isDark ? 'rgba(255,255,255,0.08)' : '#f3f4f6',
+                            border: `1px solid ${t.border}`,
+                            color: t.text,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                          }}
+                          className="hover-lift"
+                        >
+                          {chip.label}
+                        </button>
+                      ))}
                     </div>
-                    <div style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff', padding: '14px 18px', borderRadius: '18px 0 18px 18px', fontSize: '14px', lineHeight: 1.5, alignSelf: 'flex-end', maxWidth: '85%', boxShadow: '0 4px 12px rgba(16,185,129,0.25)' }}>
-                      Yes, dining out is 30% higher than your target. Let's redirect ₹1,500 into your Emergency Fund today!
-                    </div>
-                    <div style={{ background: isDark ? 'rgba(16,185,129,0.15)' : '#ecfdf5', border: `1px solid ${isDark ? 'rgba(16,185,129,0.3)' : '#a7f3d0'}`, borderRadius: '14px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px', marginTop: '8px' }}>
-                      <Sparkles size={18} color="#10b981" />
-                      <span style={{ fontSize: '12.5px', fontWeight: 700, color: isDark ? '#a7f3d0' : '#047857' }}>AI Insight: Pausing food delivery saved you ₹3,400 this month.</span>
-                    </div>
+
+                    <form onSubmit={(e) => { e.preventDefault(); handleLandingAiSend(); }} style={{ display: 'flex', gap: '8px' }}>
+                      <input
+                        type="text"
+                        value={landingAiQuery}
+                        onChange={(e) => setLandingAiQuery(e.target.value)}
+                        placeholder="Ask Zen AI Coach anything..."
+                        style={{
+                          flex: 1,
+                          fontSize: '13px',
+                          padding: '10px 14px',
+                          borderRadius: '12px',
+                          border: `1px solid ${t.border}`,
+                          background: isDark ? 'rgba(255,255,255,0.05)' : '#f9fafb',
+                          color: t.text,
+                          outline: 'none'
+                        }}
+                      />
+                      <button
+                        type="submit"
+                        style={{
+                          background: '#10b981',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '12px',
+                          padding: '10px 16px',
+                          fontSize: '13px',
+                          fontWeight: 800,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Send
+                      </button>
+                    </form>
                   </div>
                 </div>
               )}
