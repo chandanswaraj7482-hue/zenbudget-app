@@ -1,23 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
-  <!-- Main App -->
+  <!-- Main Homepage -->
   <url>
     <loc>https://zenbudget-tracker.vercel.app/</loc>
-    <lastmod>2026-07-30</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2026-09-10</lastmod>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://zenbudget-tracker.vercel.app/zen_website.png</image:loc>
+      <image:title>ZenBudget AI Expense Tracker Dashboard</image:title>
+    </image:image>
   </url>
 
-  <!-- APK Download -->
+  <!-- Web App Login/Dashboard -->
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/zenbudget.apk</loc>
-    <lastmod>2026-07-30</lastmod>
+    <loc>https://zenbudget-tracker.vercel.app/#app</loc>
+    <lastmod>2026-09-10</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+  </url>
+
+  <!-- Financial Quiz Page -->
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/?page=quiz</loc>
+    <lastmod>2026-09-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+  </url>
+
+  <!-- Financial Toolkit -->
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/?page=toolkit</loc>
+    <lastmod>2026-09-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Community Stories -->
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/?page=community</loc>
+    <lastmod>2026-09-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- AI Coach / Zen AI Features -->
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/?page=ai-coach</loc>
+    <lastmod>2026-09-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Budget Planner -->
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/?page=budget-planner</loc>
+    <lastmod>2026-09-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Savings Goals -->
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/?page=savings-goals</loc>
+    <lastmod>2026-09-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Android APK Download Page -->
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/download.html</loc>
+    <lastmod>2026-09-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Android APK Direct File -->
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/zenbudget.apk</loc>
+    <lastmod>2026-09-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Privacy Policy -->
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/privacy.html</loc>
+    <lastmod>2026-09-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Terms & Conditions -->
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/terms.html</loc>
+    <lastmod>2026-09-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
 
 </urlset>

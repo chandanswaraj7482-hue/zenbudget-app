@@ -1113,6 +1113,15 @@ export const FEATURE_PAGES_DATA: Record<string, {
 };
 
 export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    document.getElementById('root')?.classList.add('landing-root');
+    return () => {
+      document.getElementById('root')?.classList.remove('landing-root');
+    };
+  }, []);
+
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [activePage, setActivePage] = useState<string>('home');
   const [landingAiQuery, setLandingAiQuery] = useState('');

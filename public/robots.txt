@@ -1,9 +1,38 @@
+# ZenBudget SEO Robots.txt
+# https://zenbudget-tracker.vercel.app
+
 User-agent: *
 Allow: /
 Disallow: /admin.html
+Disallow: /admin
+Disallow: /_next/
+Disallow: /api/
 
-# Sitemap location
+# Allow all major search engine crawlers
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Yandex
+Allow: /
+
+# Crawl-delay for bots that respect it
+User-agent: *
+Crawl-delay: 1
+
+# Sitemaps
 Sitemap: https://zenbudget-tracker.vercel.app/sitemap.xml
 
-# Crawl delay (be nice to small servers)
-Crawl-delay: 10
+# Host
+Host: https://zenbudget-tracker.vercel.app

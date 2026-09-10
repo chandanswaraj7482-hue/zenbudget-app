@@ -54,7 +54,7 @@ import { Toast } from './components/Toast';
 import type { ToastMessage } from './components/Toast';
 import { SubscriptionModal } from './components/SubscriptionModal';
 import { supabase } from './supabaseClient';
-import { playNotificationSound, playErrorSound, triggerFireworksCelebration } from './utils/audio';
+import { playNotificationSound, playErrorSound, triggerFireworksCelebration, playClickSound } from './utils/audio';
 import confetti from 'canvas-confetti';
 
 interface AppProps {
@@ -90,6 +90,18 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
   const mainScrollRef = useRef<HTMLElement>(null);
+
+  // Global click SFX for buttons
+  useEffect(() => {
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('button') || target.closest('[role="button"]') || target.closest('.glass-panel-hover')) {
+        playClickSound();
+      }
+    };
+    document.addEventListener('click', handleGlobalClick);
+    return () => document.removeEventListener('click', handleGlobalClick);
+  }, []);
 
   // Always reset scroll to the very top whenever the user switches views/pages
   useEffect(() => {
@@ -3313,10 +3325,13 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
     try {
       // Flexible lookup matching ID slice, couple_code, referral_code, or full UUID
+      const searchPattern = strippedInput ? `%${strippedInput}%` : `%${rawInput}%`;
       const { data: allProfiles, error: partnerErr } = await supabase
         .from('profiles')
         .select('id, name, couple_code, referral_code, subscription_tier, family_group_id')
-        .neq('id', currentProfileId);
+        .or(`couple_code.ilike.${searchPattern},referral_code.ilike.${searchPattern}`)
+        .neq('id', currentProfileId)
+        .limit(50);
 
       if (partnerErr) throw partnerErr;
 
@@ -4967,6 +4982,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         accounts={accounts}
         currencySymbol={currencySymbol}
         onTransfer={handleTransfer}
+        familyMembers={familyMembers}
       />
 
       {/* Bank Sync Modal */}

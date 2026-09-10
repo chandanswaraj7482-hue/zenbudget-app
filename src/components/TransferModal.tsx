@@ -8,6 +8,7 @@ interface TransferModalProps {
   accounts: Account[];
   currencySymbol: string;
   onTransfer: (fromAccountId: string, toAccountId: string, amount: number, notes?: string) => void;
+  familyMembers?: { id: string; name: string; couple_code?: string }[];
 }
 
 export const TransferModal: React.FC<TransferModalProps> = ({
@@ -15,7 +16,8 @@ export const TransferModal: React.FC<TransferModalProps> = ({
   onClose,
   accounts,
   currencySymbol,
-  onTransfer
+  onTransfer,
+  familyMembers = []
 }) => {
   const [step, setStep] = useState<1 | 2>(1);
   const [selectedRecipientId, setSelectedRecipientId] = useState<string>('');
@@ -28,7 +30,10 @@ export const TransferModal: React.FC<TransferModalProps> = ({
   const myAccountsList = accounts.filter(a => !(a as any).isFamilyAccount);
   const familyAccountsList = accounts.filter(a => (a as any).isFamilyAccount);
 
+  // Build recipients from familyMembers prop (connected partners/family)
   const recipientMap = new Map<string, { name: string; accounts: Account[] }>();
+  
+  // Add family accounts if they exist (legacy path)
   familyAccountsList.forEach(acc => {
     const ownerName = (acc as any).ownerName || 'Partner';
     const ownerId = (acc as any).ownerId || ownerName;
@@ -37,6 +42,22 @@ export const TransferModal: React.FC<TransferModalProps> = ({
     }
     recipientMap.get(ownerId)!.accounts.push(acc);
   });
+
+  // Add connected family members as recipients (even without shared accounts)
+  familyMembers.forEach(member => {
+    if (!recipientMap.has(member.id)) {
+      // Create a virtual "partner wallet" account for transfer tracking
+      const virtualAccount: Account = {
+        id: `family_wallet_${member.id}`,
+        name: `${member.name}'s Wallet`,
+        type: 'wallet',
+        balance: 0,
+        color: '#8b5cf6'
+      };
+      recipientMap.set(member.id, { name: member.name, accounts: [virtualAccount] });
+    }
+  });
+
   const recipients = Array.from(recipientMap.entries()).map(([id, data]) => ({ id, ...data }));
 
   const selfAsRecipient = myAccountsList.length >= 2

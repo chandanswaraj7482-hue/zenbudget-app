@@ -22,7 +22,11 @@ import {
   Clock,
   Wallet,
   Share2,
-  FileText
+  FileText,
+  VolumeX,
+  Brain,
+  BookOpen,
+  BarChart3
 } from 'lucide-react';
 import type { Transaction, SavingsGoal, CategoryBudget, Account } from '../types';
 import { t } from '../utils/i18n';
@@ -259,6 +263,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
     setClaimedBadges(nextClaimed);
     if (currentProfileId) {
       localStorage.setItem(`zb_claimed_badges_${currentProfileId}`, JSON.stringify(nextClaimed));
+    }
+
+    if (badgeId === 'invites_10' || badgeId === 'streak_90d') {
+      const futureExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      localStorage.setItem('zb_subscription_tier', 'premium_monthly');
+      localStorage.setItem('zb_premium_expires_at', futureExpiry);
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new CustomEvent('zenbudget_subscription_updated', { detail: { tier: 'premium_monthly', expiresAt: futureExpiry } }));
     }
 
     setChallenges(prev => {
@@ -1035,48 +1047,55 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       )}
 
-      {/* Zen Mascot Coach Card - Top-Level Smart AI Command Center */}
-      <div className="glass-panel animate-fade-in" style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '12px',
-        padding: '16px',
-        background: 'linear-gradient(135deg, rgba(16,185,129,0.06) 0%, rgba(59,130,246,0.06) 100%)',
-        border: '1px solid rgba(16, 185, 129, 0.2)',
-        borderRadius: '24px',
-        marginBottom: '0px',
-        boxShadow: '0 8px 30px rgba(0,0,0,0.3)',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        {/* Top Glow Accent */}
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '120px', height: '120px', background: 'rgba(16,185,129,0.15)', filter: 'blur(35px)', borderRadius: '50%' }}></div>
+      {/* Zen AI Coach Card — Clickable to open AI Chat */}
+      <div
+        className="glass-panel animate-fade-in"
+        onClick={() => onOpenAI?.()}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px',
+          padding: '14px 16px',
+          background: 'linear-gradient(135deg, rgba(16,185,129,0.06) 0%, rgba(59,130,246,0.06) 100%)',
+          border: '1px solid rgba(16, 185, 129, 0.2)',
+          borderRadius: '20px',
+          marginBottom: '0px',
+          boxShadow: '0 8px 30px rgba(0,0,0,0.3)',
+          position: 'relative',
+          overflow: 'hidden',
+          cursor: 'pointer',
+          transition: 'transform 0.15s, box-shadow 0.15s'
+        }}
+      >
+        {/* Top Glow */}
+        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '120px', height: '120px', background: 'rgba(16,185,129,0.15)', filter: 'blur(35px)', borderRadius: '50%', pointerEvents: 'none' }}></div>
 
-        {/* Coach Header & Mood Mascot */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '14px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px rgba(16,185,129,0.35)', flexShrink: 0 }}>
-              <Brain size={22} />
+        {/* Coach Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 1, flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: '1 1 auto' }}>
+            <div style={{ width: '36px', height: '36px', minWidth: '36px', borderRadius: '12px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px rgba(16,185,129,0.35)', flexShrink: 0 }}>
+              <Brain size={18} />
             </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <h4 style={{ fontSize: '14px', fontWeight: 900, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.01em' }}>
+            <div style={{ minWidth: 0, overflow: 'hidden' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                <h4 style={{ fontSize: '13px', fontWeight: 900, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
                   Zen AI Coach
                 </h4>
-                <span style={{ fontSize: '9px', fontWeight: 900, background: 'rgba(16,185,129,0.2)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)', padding: '2px 7px', borderRadius: '100px', letterSpacing: '0.04em' }}>
+                <span style={{ fontSize: '8px', fontWeight: 900, background: 'rgba(16,185,129,0.2)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)', padding: '2px 6px', borderRadius: '100px', letterSpacing: '0.04em', whiteSpace: 'nowrap', flexShrink: 0 }}>
                   V3 SMART INTEL
                 </span>
               </div>
-              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+              <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 24/7 Proactive Financial Advisor
               </span>
             </div>
           </div>
 
-          {/* Voice Speech Assistant Button */}
+          {/* Listen Button */}
           <button
             type="button"
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               if (isSpeaking) {
                 window.speechSynthesis.cancel();
                 setIsSpeaking(false);
@@ -1084,23 +1103,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 const coachEl = document.querySelector('[data-coach-text]');
                 const text = coachEl?.getAttribute('data-coach-text') || coachEl?.textContent?.replace(/"/g, '') || 'Keep building your money habits!';
                 const utterance = new SpeechSynthesisUtterance(text);
-
                 utterance.rate = 0.95;
                 utterance.pitch = 1.05;
-
                 const activeLang = localStorage.getItem('zb_language') || 'en';
                 const langCodeMap: Record<string, string> = {
                   en: 'en-US', hi: 'hi-IN', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', ta: 'ta-IN', bn: 'bn-IN', mr: 'mr-IN', gu: 'gu-IN', te: 'te-IN'
                 };
                 utterance.lang = langCodeMap[activeLang] || 'en-US';
-
                 const voices = window.speechSynthesis.getVoices();
-                const langPrefix = activeLang;
-                const matchingVoice = voices.find(v => v.lang.toLowerCase().startsWith(langPrefix)) ||
+                const matchingVoice = voices.find(v => v.lang.toLowerCase().startsWith(activeLang)) ||
                                       voices.find(v => v.lang.toLowerCase().startsWith(utterance.lang.toLowerCase())) ||
                                       voices.find(v => v.lang.toLowerCase().startsWith('en'));
                 if (matchingVoice) utterance.voice = matchingVoice;
-
                 utterance.onend = () => setIsSpeaking(false);
                 utterance.onerror = () => setIsSpeaking(false);
                 window.speechSynthesis.speak(utterance);
@@ -1108,7 +1122,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               }
             }}
             style={{
-              padding: '6px 12px',
+              padding: '5px 10px',
               borderRadius: '100px',
               background: isSpeaking ? 'rgba(34,197,94,0.25)' : 'rgba(255,255,255,0.06)',
               border: isSpeaking ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.12)',
@@ -1116,19 +1130,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
-              fontSize: '11px',
+              gap: '4px',
+              fontSize: '10px',
               fontWeight: 800,
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
+              flexShrink: 0
             }}
           >
-            {isSpeaking ? <VolumeX size={14} /> : <Volume2 size={14} />}
+            {isSpeaking ? <VolumeX size={12} /> : <Volume2 size={12} />}
             <span>{isSpeaking ? 'Mute' : 'Listen'}</span>
           </button>
         </div>
 
-        {/* Dynamic AI Advice Summary */}
-        <div style={{ background: 'var(--bg-input)', padding: '12px 14px', borderRadius: '16px', border: '1px solid var(--border-input)', zIndex: 1 }}>
+        {/* Dynamic 1-line AI Insight */}
+        <div style={{ background: 'var(--bg-input)', padding: '10px 12px', borderRadius: '14px', border: '1px solid var(--border-input)', zIndex: 1 }}>
           {(() => {
             const activeLang = localStorage.getItem('zb_language') || 'en';
             const coachArray = activeLang === 'hi' ? DAILY_COACH_TIPS_HI : DAILY_COACH_TIPS;
@@ -1137,132 +1152,136 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             let fullCoachText = '';
             if (expenses === 0 && income === 0) {
-              fullCoachText = activeLang === 'hi' 
+              fullCoachText = activeLang === 'hi'
                 ? `${dailyTip} व्यक्तिगत बजट कोचिंग पाने के लिए अपने लेन-देन दर्ज करना शुरू करें! 🧘`
                 : `${dailyTip} Start logging your transactions to get personalized budget coaching! 🧘`;
             } else {
-              const savingsPct = income > 0 ? Math.round(((income - expenses) / income) * 100) : 0;
-              const topCat = Object.entries(
+              const savingsPctVal = income > 0 ? Math.round(((income - expenses) / income) * 100) : 0;
+              const topCatEntry = Object.entries(
                 currentMonthTransactions.filter(t => t.type === 'expense')
                   .reduce((acc, t) => { acc[t.category] = (acc[t.category] || 0) + t.amount; return acc; }, {} as Record<string, number>)
               ).sort((a, b) => b[1] - a[1])[0];
 
-              let statsSummary = '';
               if (activeLang === 'hi') {
-                if (savingsPct >= 30) {
-                  statsSummary = `आपने इस महीने ${savingsPct}% बचाया है — बहुत बढ़िया! 🌟`;
-                } else if (savingsPct >= 10) {
-                  statsSummary = `बचत ${savingsPct}% पर है — इसे और बढ़ाने की कोशिश करें! 🌱`;
-                } else {
-                  statsSummary = `इस महीने बचत कम है। छोटे खर्चों को कम करने की कोशिश करें। ⚠️`;
-                }
-                if (topCat) {
-                  statsSummary += ` ${topCat[0]} में भारी खर्च का पता चला (${currencySymbol}${Math.round(topCat[1]).toLocaleString()})।`;
-                }
+                if (savingsPctVal >= 30) fullCoachText = `आपने इस महीने ${savingsPctVal}% बचाया — बहुत बढ़िया! 🌟`;
+                else if (savingsPctVal >= 10) fullCoachText = `बचत ${savingsPctVal}% पर है — और बढ़ाएं! 🌱`;
+                else fullCoachText = `इस महीने बचत कम है। छोटे खर्चों को कम करें। ⚠️`;
+                if (topCatEntry) fullCoachText += ` ${topCatEntry[0]} में भारी खर्च (${currencySymbol}${Math.round(topCatEntry[1]).toLocaleString()})।`;
               } else {
-                if (savingsPct >= 30) {
-                  statsSummary = `You saved ${savingsPct}% this month — amazing work! 🌟`;
-                } else if (savingsPct >= 10) {
-                  statsSummary = `Savings are at ${savingsPct}% — keep pushing it higher! 🌱`;
-                } else {
-                  statsSummary = `Savings are low this month. Try to cut down micro-spends. ⚠️`;
-                }
-                if (topCat) {
-                  statsSummary += ` Heavy spending detected in ${topCat[0]} (${currencySymbol}${Math.round(topCat[1]).toLocaleString()}).`;
-                }
+                if (savingsPctVal >= 30) fullCoachText = `You saved ${savingsPctVal}% this month — amazing! 🌟`;
+                else if (savingsPctVal >= 10) fullCoachText = `Savings at ${savingsPctVal}% — keep pushing! 🌱`;
+                else fullCoachText = `Savings low this month. Cut micro-spends. ⚠️`;
+                if (topCatEntry) fullCoachText += ` Heavy ${topCatEntry[0]} spending (${currencySymbol}${Math.round(topCatEntry[1]).toLocaleString()}).`;
               }
-              fullCoachText = `${dailyTip} ${statsSummary}`;
             }
-
-            const truncatedText = fullCoachText.length > 95 ? fullCoachText.slice(0, 95) : fullCoachText;
-            const needsTruncation = fullCoachText.length > 95;
 
             return (
               <p
                 data-coach-text={fullCoachText}
-                style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.4, marginTop: '2px', fontWeight: 500, margin: 0 }}
+                style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0, fontWeight: 500, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any, overflow: 'hidden', wordBreak: 'break-word' }}
               >
-                "{isZenCoachExpanded || !needsTruncation ? fullCoachText : `${truncatedText}...`}"
-                {needsTruncation && (
-                  <button
-                    type="button"
-                    onClick={() => setIsZenCoachExpanded(!isZenCoachExpanded)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      padding: 0,
-                      color: 'var(--primary)',
-                      fontWeight: 800,
-                      fontSize: '12px',
-                      cursor: 'pointer',
-                      marginLeft: '6px',
-                      display: 'inline'
-                    }}
-                  >
-                    {isZenCoachExpanded ? 'show less' : 'more'}
-                  </button>
-                )}
+                "{fullCoachText}"
               </p>
             );
           })()}
         </div>
-        {/* TTS Speak Button */}
-        <button
-          onClick={() => {
-            if (isSpeaking) {
-              window.speechSynthesis.cancel();
-              setIsSpeaking(false);
-            } else {
-              const coachEl = document.querySelector('[data-coach-text]');
-              const text = coachEl?.getAttribute('data-coach-text') || coachEl?.textContent?.replace(/"/g, '') || 'Keep building your money habits!';
-              const utterance = new SpeechSynthesisUtterance(text);
 
-              // Set rate and pitch for a natural, friendly tone
-              utterance.rate = 0.95;
-              utterance.pitch = 1.05;
+        {/* Chat CTA */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '6px 0 2px 0', zIndex: 1 }}>
+          <Sparkles size={13} color="#10b981" />
+          <span style={{ fontSize: '11px', fontWeight: 800, color: '#10b981', letterSpacing: '0.02em' }}>Chat with Zen →</span>
+        </div>
+      </div>
 
-              const activeLang = localStorage.getItem('zb_language') || 'en';
-              const langCodeMap: Record<string, string> = {
-                en: 'en-US',
-                hi: 'hi-IN',
-                es: 'es-ES',
-                fr: 'fr-FR',
-                de: 'de-DE',
-                ta: 'ta-IN',
-                bn: 'bn-IN',
-                mr: 'mr-IN',
-                gu: 'gu-IN',
-                te: 'te-IN'
-              };
-              utterance.lang = langCodeMap[activeLang] || 'en-US';
-
-              const voices = window.speechSynthesis.getVoices();
-              const langPrefix = activeLang;
-              const matchingVoice = voices.find(v => v.lang.toLowerCase().startsWith(langPrefix)) ||
-                                    voices.find(v => v.lang.toLowerCase().startsWith(utterance.lang.toLowerCase())) ||
-                                    voices.find(v => v.lang.toLowerCase().startsWith('en'));
-              if (matchingVoice) {
-                utterance.voice = matchingVoice;
-              }
-
-              utterance.onend = () => setIsSpeaking(false);
-              utterance.onerror = () => setIsSpeaking(false);
-              window.speechSynthesis.speak(utterance);
-              setIsSpeaking(true);
-            }
-          }}
+      {/* ── Weekly Money Wrap + Monthly Letter ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+        {/* Weekly Money Wrap Card */}
+        <div
+          className="glass-panel animate-fade-in"
           style={{
-            minWidth: '36px', height: '36px', borderRadius: '50%',
-            background: isSpeaking ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.05)',
-            border: isSpeaking ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.08)',
-            color: isSpeaking ? 'var(--primary)' : 'var(--text-secondary)',
-            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'all 0.2s', flexShrink: 0
+            padding: '14px',
+            borderRadius: '18px',
+            background: 'linear-gradient(145deg, rgba(139,92,246,0.12) 0%, rgba(236,72,153,0.08) 100%)',
+            border: '1px solid rgba(139,92,246,0.2)',
+            cursor: 'pointer',
+            transition: 'transform 0.15s',
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+          onClick={() => {
+            // Share as image or just show info
+            const weekExpenses = currentMonthTransactions.filter(t => {
+              if (t.type !== 'expense') return false;
+              const txDate = new Date(t.date);
+              const now = new Date();
+              const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+              return txDate >= weekAgo && txDate <= now;
+            });
+            const weekTotal = weekExpenses.reduce((s, t) => s + (Number(t.amount) || 0), 0);
+            const weekDailyAvg = Math.round(weekTotal / 7);
+            const topWeekCat = Object.entries(
+              weekExpenses.reduce((acc, t) => { acc[t.category] = (acc[t.category] || 0) + t.amount; return acc; }, {} as Record<string, number>)
+            ).sort((a, b) => b[1] - a[1])[0];
+            alert(`📊 Weekly Wrap\n\nTotal Spent: ${currencySymbol}${weekTotal.toLocaleString()}\nDaily Avg: ${currencySymbol}${weekDailyAvg.toLocaleString()}/day\nTop Category: ${topWeekCat ? `${topWeekCat[0]} (${currencySymbol}${Math.round(topWeekCat[1]).toLocaleString()})` : 'None'}`);
           }}
         >
-          <Volume2 size={16} />
-        </button>
+          <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '60px', height: '60px', background: 'rgba(139,92,246,0.15)', filter: 'blur(20px)', borderRadius: '50%', pointerEvents: 'none' }}></div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+            <div style={{ width: '28px', height: '28px', borderRadius: '10px', background: 'linear-gradient(135deg, #8b5cf6, #ec4899)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <BarChart3 size={14} color="#fff" />
+            </div>
+            <span style={{ fontSize: '10px', fontWeight: 900, color: '#c084fc', letterSpacing: '0.04em' }}>WEEKLY WRAP</span>
+          </div>
+          <div style={{ fontSize: '16px', fontWeight: 900, color: 'var(--text-primary)' }}>
+            {currencySymbol}{(() => {
+              const weekExpenses = currentMonthTransactions.filter(t => {
+                if (t.type !== 'expense') return false;
+                const txDate = new Date(t.date);
+                const now = new Date();
+                const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                return txDate >= weekAgo && txDate <= now;
+              });
+              return weekExpenses.reduce((s, t) => s + (Number(t.amount) || 0), 0).toLocaleString();
+            })()}
+          </div>
+          <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>This week's spending</span>
+          <div style={{ marginTop: '8px', fontSize: '9px', fontWeight: 800, color: '#a78bfa', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Share2 size={10} /> Share Card 📤
+          </div>
+        </div>
+
+        {/* Monthly Spotify-Style Letter Card */}
+        <div
+          className="glass-panel animate-fade-in"
+          onClick={() => onOpenStory?.()}
+          style={{
+            padding: '14px',
+            borderRadius: '18px',
+            background: 'linear-gradient(145deg, rgba(16,185,129,0.12) 0%, rgba(59,130,246,0.08) 100%)',
+            border: '1px solid rgba(16,185,129,0.2)',
+            cursor: 'pointer',
+            transition: 'transform 0.15s',
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
+          <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '60px', height: '60px', background: 'rgba(16,185,129,0.15)', filter: 'blur(20px)', borderRadius: '50%', pointerEvents: 'none' }}></div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+            <div style={{ width: '28px', height: '28px', borderRadius: '10px', background: 'linear-gradient(135deg, #10b981, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <BookOpen size={14} color="#fff" />
+            </div>
+            <span style={{ fontSize: '10px', fontWeight: 900, color: '#34d399', letterSpacing: '0.04em' }}>MONTHLY LETTER</span>
+          </div>
+          <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3 }}>
+            Your {new Date().toLocaleString('default', { month: 'long' })} Money Story 📖
+          </div>
+          <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>Spotify-style spending story</span>
+          <div style={{ marginTop: '8px', fontSize: '9px', fontWeight: 800, color: '#34d399', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            View Story →
+          </div>
+        </div>
       </div>
+
 
       {/* Zen Pet Companion */}
       <ZenPet

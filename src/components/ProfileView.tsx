@@ -62,6 +62,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       if (geo && geo.countryCode) {
         localStorage.setItem('zb_user_country_code', geo.countryCode);
       }
+      if (geo && geo.currency && !localStorage.getItem('zb_currency_user_selected')) {
+        setCurrency(geo.currency);
+        localStorage.setItem('zb_default_currency', geo.currency);
+      }
     }).catch(() => {});
   }, []);
 
@@ -586,37 +590,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 <option value="CHF" style={{ color: '#000' }}>CHF (Swiss Franc)</option>
                 <option value="HKD" style={{ color: '#000' }}>$ HKD (Hong Kong Dollar)</option>
                 <option value="KWD" style={{ color: '#000' }}>KD KWD (Kuwaiti Dinar)</option>
-                <option value="QAR" style={{ color: '#000' }}>QR QAR (Qatari Riyal)</option>
               </select>
             </div>
-            <button
-              type="button"
-              onClick={async () => {
-                const geo = await detectLocationFromIP();
-                if (geo && geo.currency) {
-                  setCurrency(geo.currency);
-                  alert(`📍 Location Traced: ${geo.countryName || geo.countryCode}! Currency updated to ${geo.currency}.`);
-                }
-              }}
-              style={{
-                alignSelf: 'flex-start',
-                background: 'rgba(16,185,129,0.1)',
-                border: '1px solid rgba(16,185,129,0.25)',
-                borderRadius: '8px',
-                padding: '4px 10px',
-                fontSize: '11px',
-                fontWeight: 700,
-                color: '#10b981',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                marginTop: '4px'
-              }}
-            >
-              <span>📍 Trace IP Location & Auto-Detect Currency</span>
-            </button>
           </div>
+
 
           {/* Multi-Language Selection */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>

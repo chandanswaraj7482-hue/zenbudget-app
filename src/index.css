@@ -298,7 +298,7 @@ html.light-theme #root {
   border: 1px solid #D2D2D7 !important;
   color: #1D1D1F !important;
   border-radius: 12px !important;
-  font-size: 14px !important;
+  font-size: 16px !important; /* Prevents iOS auto-zoom */
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
@@ -370,7 +370,7 @@ body {
     radial-gradient(ellipse 50% 40% at 80% 70%, rgba(99, 102, 241, 0.1) 0%, transparent 70%),
     radial-gradient(ellipse 40% 30% at 50% 100%, rgba(6, 182, 212, 0.08) 0%, transparent 60%);
   color: var(--text-primary);
-  height: 100vh;
+  height: 100dvh; /* Mobile browser friendly */
   width: 100vw;
   overflow: hidden;
   overscroll-behavior: none;
@@ -383,8 +383,8 @@ body {
 #root {
   width: 100%;
   max-width: 480px;
-  height: 100vh;
-  max-height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
   overflow: hidden;
   background: var(--bg-app-gradient);
   display: flex;
@@ -429,8 +429,8 @@ body {
 @media (min-width: 768px) and (max-width: 1024px) {
   #root {
     max-width: 600px;
-    height: 100vh;
-    max-height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
     border-radius: 0;
     border-left: 1px solid rgba(34, 197, 94, 0.15);
     border-right: 1px solid rgba(34, 197, 94, 0.15);
@@ -441,8 +441,8 @@ body {
 @media (min-width: 1025px) {
   #root {
     max-width: 520px;
-    height: 100vh;
-    max-height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
     border-radius: 0;
     border-left: 1px solid rgba(34, 197, 94, 0.2);
     border-right: 1px solid rgba(34, 197, 94, 0.2);
@@ -1274,4 +1274,58 @@ div[style*="position:fixed"] {
   animation: badgeFloat 5s ease-in-out infinite;
 }
 
+/* Disable mobile-frame constraints for Marketing Landing Page */
+#root.landing-root {
+  max-width: 100% !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding: 0 !important;
+  display: block !important;
+}
 
+/* Ultimate Mobile Fixes for Landing Page */
+@media (max-width: 640px) {
+  #root.landing-root {
+    overflow-x: hidden !important;
+  }
+  #root.landing-root * {
+    max-width: 100vw !important;
+    box-sizing: border-box;
+  }
+  #root.landing-root section {
+    padding: 32px 16px !important;
+    border-radius: 20px !important;
+  }
+  #root.landing-root div[style*="paddingTop: '90px'"],
+  #root.landing-root div[style*="padding-top: 90px"] {
+    padding-top: 20px !important;
+  }
+  #root.landing-root div[style*="width: '400px'"],
+  #root.landing-root div[style*="width: 400px"] {
+    width: 100% !important;
+  }
+  #root.landing-root div[style*="gap: '40px'"],
+  #root.landing-root div[style*="gap: 40px"] {
+    flex-direction: column !important;
+    gap: 20px !important;
+  }
+  #root.landing-root div[style*="gap: '60px'"],
+  #root.landing-root div[style*="gap: 60px"] {
+    flex-direction: column !important;
+    gap: 30px !important;
+  }
+  #root.landing-root [style*="fontSize: '42px'"],
+  #root.landing-root [style*="font-size: 42px"] {
+    font-size: 32px !important;
+    line-height: 1.2 !important;
+  }
+  #root.landing-root [style*="fontSize: '56px'"],
+  #root.landing-root [style*="font-size: 56px"] {
+    font-size: 38px !important;
+    line-height: 1.1 !important;
+  }
+}

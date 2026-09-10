@@ -63,6 +63,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
   const totalIncome = monthTxs.filter(t => t && t.type === 'income').reduce((s, t) => s + (Number(t.amount) || 0), 0);
   const totalExpense = monthTxs.filter(t => t && t.type === 'expense').reduce((s, t) => s + (Number(t.amount) || 0), 0);
   const totalSaved = Math.max(0, totalIncome - totalExpense);
+  const flexMoney = Math.max(0, totalIncome - totalExpense);
   const savingsPct = totalIncome > 0 ? Math.round((totalSaved / totalIncome) * 100) : 0;
 
   const catMap: Record<string, number> = {};
@@ -147,7 +148,6 @@ export const HelpModal: React.FC<HelpModalProps> = ({
 
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const daysRemaining = Math.max(1, daysInMonth - new Date().getDate());
-    const flexMoney = Math.max(0, totalIncome - totalExpense);
     const dailySafeSpend = Math.max(100, Math.round((flexMoney > 0 ? flexMoney : (totalAccBal > 0 ? totalAccBal : 1000)) / daysRemaining));
 
     // Calculate Financial Health Score (0-100)
