@@ -575,6 +575,30 @@ export function resolveUserFinancialQuery(
   // Empty State Guard - gracefully allow AI to respond to all queries
   const noTxNote = !ctx.hasEnoughData ? `\n\n*(💡 Tip: Quick Capture se 2-3 daily transactions enter karke aap exact spending pattern leaks bhi view kar sakte ho!)*` : '';
 
+  // ─── 0. OFF-TOPIC STRICT BOUNDARY GUARD ───
+  const offTopicKeywords = [
+    'egg', 'anda', 'recipe', 'maggi', 'khana kaise', 'kaise banaye', 'banta hai', 'bante ha', 'cook', 'cooking', 'biryani',
+    'cricket', 'ipl', 'match', 'free fire', 'bgmi', 'pubg', 'movie', 'film', 'song', 'gaana', 'actress', 'actor',
+    'python', 'java', 'c++', 'coding', 'program', 'weather', 'mausam', 'rain', 'temperature', 'president', 'prime minister'
+  ];
+
+  const financialAppKeywords = [
+    'paisa', 'paise', 'money', 'budget', 'save', 'saving', 'savings', 'spend', 'spending', 'expense', 'income', 'salary',
+    'loan', 'emi', 'afford', 'buy', 'kharid', 'rupee', 'rs', 'inr', 'zen', 'app', 'account', 'bank', 'balance', 'audit',
+    'score', 'roast', 'limit', 'goal', 'history', 'ledger', 'tag', 'transaction', 'transfer', 'sub', 'premium', 'cashfree',
+    'hi', 'hello', 'hey', 'sup', 'kaise ho', 'bhai', 'bro', 'naam', 'email', 'id', 'who are you', 'help'
+  ];
+
+  const isExplicitOffTopic = offTopicKeywords.some(k => qLower.includes(k));
+  const isFinancialOrAppRelated = financialAppKeywords.some(k => qLower.includes(k));
+
+  if (isExplicitOffTopic && !isFinancialOrAppRelated) {
+    const offTopicResponse = isFormalEnglish
+      ? `⚠️ **Financial AI Coach Mode Active** 💸\n\nI am your personal AI Financial Coach! 🌿 I strictly handle topics related to **personal finance, budgets, savings, wallet balance, loans, and ZenBudget app features**.\n\nFor general non-financial queries, please use Google or YouTube! But if you want to plan your grocery or monthly budget, ask away! 😉✨`
+      : `⚠️ **Financial AI Coach Mode Active** 💸\n\nMain aapka personal AI Financial Coach hu! 🌿 Main sirf **money management, budget limits, savings goals, wallet balance, loans, aur ZenBudget app** ke features handle karta hu.\n\nRecipe ya general queries ke liye Google/YouTube dekhein, par agar monthly spending ya grocery budget plan karna ho toh batao! 😉✨`;
+    return { responseText: offTopicResponse, updatedState };
+  }
+
   // ─── 1. AFFORDABILITY ENGINE ───
   const affordKeywords = ['afford', 'buy', 'kharid', 'le lu', 'le sakta', 'purchase', 'shoe', 'phone', 'watch'];
   const numberMatch = qLower.match(/(\d+[\d,]*)/);

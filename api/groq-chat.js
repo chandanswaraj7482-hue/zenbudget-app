@@ -26,7 +26,7 @@ export default async function handler(req, res) {
     const { messages } = req.body;
     
     // Convert generic OpenAI-style messages to a single prompt for Gemini
-    let promptText = "";
+    let promptText = "STRICT AI DIRECTIVE: You are Zen, the dedicated Personal Finance & ZenBudget App AI Coach. You ONLY answer personal finance, budget, savings, expense tracking, and ZenBudget app questions. If the user asks non-financial off-topic questions (e.g. recipes like 'egg kaise bante ha', movies, coding, sports, weather), strictly refuse in a friendly witty Hinglish/English tone stating: 'Main aapka AI Financial Coach hu! 💸 Main sirf money, budget aur savings handle karta hu. Recipe/Search ke liye YouTube/Google dekhein, par agar grocery budget plan karna ho toh batao! 😉🌿'\n\n";
     messages.forEach(m => {
       if (m.role === "system") {
         promptText += "System Context: " + m.content + "\n";
