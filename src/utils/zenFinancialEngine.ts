@@ -620,10 +620,86 @@ export function resolveUserFinancialQuery(
   const isCasualGreeting = /^(hi+|hello+|hey+|sup|yo|hola|namaste|bhai|bro|aur batao|kaise ho|kaisa hai|kya hal|kya haal|kya chal)/i.test(qLower) || 
     qLower.includes('aur batao') || qLower.includes('kaise ho') || qLower.includes('kaisa hai') || qLower.includes('kya hal') || qLower.includes('kya haal');
   
-  if (isCasualGreeting && !qLower.includes('food') && !qLower.includes('budget') && !qLower.includes('spend') && !qLower.includes('paisa') && !qLower.includes('balance') && !qLower.includes('afford') && !qLower.includes('buy')) {
+  if (isCasualGreeting && !qLower.includes('food') && !qLower.includes('budget') && !qLower.includes('spend') && !qLower.includes('paisa') && !qLower.includes('balance') && !qLower.includes('afford') && !qLower.includes('buy') && !qLower.includes('use') && !qLower.includes('price') && !qLower.includes('cost') && !qLower.includes('benefit') && !qLower.includes('fayda')) {
     const responseText = isFormalEnglish
-      ? `Hii ${userName || 'friend'}! 🌿 I am doing great! How is your spending and budgeting going today? Ask me about your balance, monthly expense breakdown, or if you can afford a purchase! 💬✨`
-      : `Hii ${userName || 'yaar'}! 🌿 Main bilkul mast hu! Aap batao, aaj ka kharcha kaisa chal raha hai? Agar koi wallet balance, category budget limit, ya expense detail dekhni ho toh batao! 💬✨`;
+      ? `Hii ${userName || 'friend'}! 🌿 I am doing great! How is your spending and budgeting going today? Ask me about your balance, monthly expense breakdown, how to use ZenBudget, pricing & premium, or if you can afford a purchase! 💬✨`
+      : `Hii ${userName || 'yaar'}! 🌿 Main bilkul mast hu! Aap batao, aaj ka kharcha kaisa chal raha hai? App kaise use karein, Premium pricing details, ya koi expense detail dekhni ho toh batao! 💬✨`;
+    return { responseText, updatedState };
+  }
+
+  // ─── 0.6 APP USAGE GUIDE INTENT ("app kaise use kare", "how to use", "features", "kaise chalaye") ───
+  const usageKeywords = ['kaise use', 'how to use', 'kaise chalaye', 'guide', 'features', 'kaise kaam', 'how it works', 'tutorial', 'instructions', 'kaise chalana'];
+  if (usageKeywords.some(k => qLower.includes(k)) || (qLower.includes('use') && (qLower.includes('app') || qLower.includes('application') || qLower.includes('zenbudget')))) {
+    const responseText = isFormalEnglish
+      ? `📱 **How to Use ZenBudget Effectively** 🌿\n\n` +
+        `1. 📝 **Quick Capture & Log Expenses**: Tap the **"+ Add"** button on the top right or Home screen to log income/expenses in seconds.\n` +
+        `2. 📊 **Set Category Budgets**: Define monthly budget caps (Food, Shopping, Bills) to follow the 50/30/20 savings rule.\n` +
+        `3. 👥 **Couple & Family Sync**: Sync transactions and budgets in real-time with your partner or family members (found under More Tools).\n` +
+        `4. 🛑 **Impulse Blocker**: Pause 48 hours before buying non-essentials to prevent impulse spending.\n` +
+        `5. 📈 **Wealth Compound Simulator**: Simulate long-term compound growth for your savings & investments.\n` +
+        `6. 🎁 **Weekly Wrapped & Monthly Story**: Experience Spotify-style visual recaps of your spending story.\n` +
+        `7. 🤖 **Ask Zen AI Coach 24/7**: Ask me *"Can I afford ₹5,000?"*, *"Where is my money going?"*, *"Pricing details"*, or *"Show food expense"* anytime!`
+      : `📱 **ZenBudget Application Kaise Use Karein?** 🌿\n\n` +
+        `1. 📝 **Quick Expense Entry**: Main Screen par **"+ Add"** button par tap karke 2 second me apna kharcha ya income log karein.\n` +
+        `2. 📊 **Category Budget Set Karein**: Food, Shopping, Bills ke monthly limits set karke 50/30/20 savings rule follow karein.\n` +
+        `3. 👥 **Couple & Family Sync**: Partner ya family ke saath real-time shared budget sync karein (More Tools section me).\n` +
+        `4. 🛑 **Impulse Purchase Blocker**: Koi mehenga item lene se pehle 48-hour pause timer lagayein taaki impulsive kharcha na ho.\n` +
+        `5. 📈 **Wealth Compound Simulator**: Long-term investments aur wealth growth calculate karein.\n` +
+        `6. 🎁 **Weekly Wrapped & Monthly Story**: Spotify style animated story me apni monthly money journey dekhein.\n` +
+        `7. 🤖 **Zen AI Coach (24/7 Buddy)**: Mujhse kabhi bhi poochhein — *"5000 ka shoe le lu?"*, *"Food me kitna gaya?"*, *"Premium price kya hai?"*, ya *"Safe daily limit kya hai?"*! 🚀`;
+    return { responseText, updatedState };
+  }
+
+  // ─── 0.7 PRICING & PREMIUM INTENT ("pricing", "premium cost", "kitna lagta hai", "subscription", "price") ───
+  const pricingKeywords = ['price', 'pricing', 'cost', 'kitna lagta', 'kitne ka', 'premium buy', 'subscription', 'pro plan', 'buy premium', 'pay', 'charge', 'kitna hai', 'plan', 'charge kitna'];
+  if (pricingKeywords.some(k => qLower.includes(k)) || (qLower.includes('premium') && (qLower.includes('cost') || qLower.includes('price') || qLower.includes('buy') || qLower.includes('plan') || qLower.includes('kitna') || qLower.includes('charge')))) {
+    const responseText = isFormalEnglish
+      ? `💎 **ZenBudget Premium Plans & Pricing** 👑\n\n` +
+        `• 🌟 **Free Tier**: Essential daily tracking & budget basics (100% Free Forever!).\n` +
+        `• 💳 **Pro Monthly Plan**: **₹99 / month** (Flexible monthly access)\n` +
+        `• 🏆 **Pro Annual Plan**: **₹699 / year** *(Save >40%! Best Value)*\n` +
+        `• 👑 **Lifetime VIP Pass**: **₹1,999** one-time payment for lifetime access!\n` +
+        `• 🎁 **Referral Reward**: Invite 10 friends to get **1 Month Premium 100% FREE**!\n\n` +
+        `✨ **What Premium Unlocks**:\n` +
+        `✅ Unlimited Custom Budget Categories & Accounts\n` +
+        `✅ 24/7 Unlimited Zen AI Money Coach Guidance & Deep Analytics\n` +
+        `✅ Couple & Family Real-Time Multi-Device Sync\n` +
+        `✅ PDF / Excel Ledger Data Export & Custom App Badges\n\n` +
+        `👉 Tap the **"👑 Upgrade to Premium"** button on the header or Profile Settings to upgrade instantly via UPI, Cards, or NetBanking!`
+      : `💎 **ZenBudget Premium Pricing & Plans Details** 👑\n\n` +
+        `• 🌟 **Free Plan**: Free daily expense tracking & basic budgeting (Bilkul Free Forever!).\n` +
+        `• 💳 **Pro Monthly Plan**: **₹99 / month**\n` +
+        `• 🏆 **Pro Annual Plan**: **₹699 / year** *(40%+ savings, Subse Popular!)*\n` +
+        `• 👑 **Pro Lifetime Access**: **₹1,999** (Ek baar me lifetime ke liye!)\n` +
+        `• 🎁 **Free Referral Bonus**: 10 dosto ko invite karein aur **1 Month Premium FREE** paayein!\n\n` +
+        `✨ **Premium Buy Karne Ke Benefits**:\n` +
+        `✅ Unlimited Custom Categories & Multiple Accounts\n` +
+        `✅ 24/7 Unlimited Zen AI Money Coach Advice & Deep Insights\n` +
+        `✅ Couple & Family Sync (Real-time partner sync)\n` +
+        `✅ PDF & Excel Monthly Report Export\n` +
+        `✅ Exclusive Theme Customization & VIP Badges\n\n` +
+        `👉 Header me **"👑 Upgrade to Premium"** par click karke UPI (GPay, PhonePe, Paytm) ya Card se instant buy kar sakte hain! 🚀`;
+    return { responseText, updatedState };
+  }
+
+  // ─── 0.8 APPLICATION BENEFITS INTENT ("benefits", "kya fayda hai", "kyun use kare", "why use zenbudget") ───
+  const benefitKeywords = ['benefit', 'benefits', 'fayda', 'faiyda', 'fayde', 'why use', 'kyun use', 'advantage', 'kya khas', 'speciality', 'kya fayda'];
+  if (benefitKeywords.some(k => qLower.includes(k))) {
+    const responseText = isFormalEnglish
+      ? `🌟 **Key Benefits of Using ZenBudget** 💸\n\n` +
+        `1. 💰 **Save Up to ₹15,000+ Monthly**: Stop micro-spending leaks and impulse purchases with AI guidance.\n` +
+        `2. 🧘 **Zero Month-End Money Anxiety**: ZenBudget calculates your **Safe Daily Pace (${currencySymbol}${ctx.safeDailySpend}/day)** so you never run out of cash.\n` +
+        `3. 🤖 **24/7 AI Money Coach**: Instant answers to *"Can I afford this?"* without manual math.\n` +
+        `4. 👥 **Shared Partner & Family Transparency**: Sync expenses in real-time with your couple/family.\n` +
+        `5. 🔒 **100% Private & Secure**: Encrypted local-first storage with PIN & Biometric App Lock.\n` +
+        `6. 🎮 **Gamified Money Habit**: Build daily logging discipline with Money Forest streaks & Spotify-style Wrapped stories!`
+      : `🌟 **ZenBudget Application Ke Kya Benefits Hain?** 💸\n\n` +
+        `1. 💰 **Monthly ₹15,000+ Tak Ki Savings**: Impulse buying aur chhote micro-leaks stop karke har mahine badi savings hoti hai.\n` +
+        `2. 🧘 **Month-End Tension Finish**: App aapko **Safe Daily Allowance (${currencySymbol}${ctx.safeDailySpend}/day)** batata hai jisse mahine ke aakhiri dino me paise ki tangi nahi hoti.\n` +
+        `3. 🤖 **24/7 Personal AI Coach**: Koi bhi item lene se pehle AI se instant *"Kya main ₹5,000 afford kar sakta hu?"* check kar sakte ho.\n` +
+        `4. 👥 **Partner & Family Sync**: Couple/family ke saath real-time kharcha track karke financial clarity rehti hai.\n` +
+        `5. 🔒 **100% Privacy & Security**: Aapka data completely encrypted aur local-first secure rehta hai (PIN/Biometric lock ke saath).\n` +
+        `6. 🎁 **Fun & Gamified Experience**: Money Forest streak, badges, aur Spotify-style Monthly Wrapped stories se budgeting fun ban jati hai! 🚀`;
     return { responseText, updatedState };
   }
 
