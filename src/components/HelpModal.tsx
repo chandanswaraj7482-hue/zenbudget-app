@@ -336,9 +336,10 @@ export const HelpModal: React.FC<HelpModalProps> = ({
     // 15. General Greetings & Casual Hinglish Callouts
     if (
       /^(hi+|hello+|hey+|yo+|sup|hola|namaste|salam|are+|oye+|bhai+|bro+|bol)\b/i.test(msg) ||
-      msg.includes('bhai') || msg.includes('bro') || msg.includes('kaise ho') || msg.includes('who are you') || msg.includes('kaise hain') || msg.includes('kya hal')
+      msg.includes('bhai') || msg.includes('bro') || msg.includes('kaise ho') || msg.includes('kaisa hai') || 
+      msg.includes('kaisa h') || msg.includes('aur batao') || msg.includes('who are you') || msg.includes('kaise hain') || msg.includes('kya hal')
     ) {
-      if (/[अ-ह]/.test(rawText) || /\b(kahan|kaise|mera|meri|mere|mujhe|btao|batao|apka|aapka|kya|kab|kaun|hai|hain|rha|rhi|rhe|hoga|hogaye|bhai|yaar|karo|do|karna|are|oye|bro)\b/i.test(msg)) {
+      if (/[अ-ह]/.test(rawText) || /\b(kahan|kaise|kaisa|mera|meri|mere|mujhe|btao|batao|apka|aapka|kya|kab|kaun|hai|hain|rha|rhi|rhe|hoga|hogaye|bhai|yaar|karo|do|karna|are|oye|bro)\b/i.test(msg)) {
         return `Hii ${userName || 'yaar'}! 🌿 Main Zen hu — aapka AI Financial Coach aur personal money buddy. Main aapki spending habits check kar sakta hu, savings tips de sakta hu, aur ZenBudget app ke details samjha sakta hu! Poocho yaar, kya help chahiye? 🤝✨`;
       }
       return `Hii ${userName || 'buddy'}! 🌿 I'm Zen — your personal AI Financial Coach & best friend. I can analyze your monthly spending habits, give you smart savings advice, and help you track every rupee in ZenBudget. Ask me anything, I'm here to help you save! 🤝✨`;

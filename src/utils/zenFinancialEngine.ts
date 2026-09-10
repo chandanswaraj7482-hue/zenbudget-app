@@ -599,6 +599,34 @@ export function resolveUserFinancialQuery(
     return { responseText: offTopicResponse, updatedState };
   }
 
+  // ─── 0.5 USER INFO & CASUAL GREETINGS INTENT GUARD ───
+  if (qLower.includes('email')) {
+    const userEmail = typeof localStorage !== 'undefined' 
+      ? (localStorage.getItem('zb_user_email') || localStorage.getItem('user_email') || 'hello.zenbudget@zohomail.in')
+      : 'hello.zenbudget@zohomail.in';
+    const responseText = isFormalEnglish
+      ? `📧 Your registered email ID is **${userEmail}**! ✨`
+      : `📧 Aapki registered email ID **${userEmail}** hai! ✨`;
+    return { responseText, updatedState };
+  }
+
+  if (qLower.includes('mera naam') || qLower.includes('my name') || qLower.includes('mera name') || qLower.includes('who are you') || qLower.includes('tum kaun ho') || qLower.includes('naam kya')) {
+    const responseText = isFormalEnglish
+      ? `👤 Your name is **${userName || 'User'}**! I am Zen — your personal AI Financial Coach in ZenBudget. 🌿✨`
+      : `👤 Aapka name **${userName || 'User'}** hai! Main Zen hu — aapka personal AI Financial Coach. 🌿✨`;
+    return { responseText, updatedState };
+  }
+
+  const isCasualGreeting = /^(hi+|hello+|hey+|sup|yo|hola|namaste|bhai|bro|aur batao|kaise ho|kaisa hai|kya hal|kya haal|kya chal)/i.test(qLower) || 
+    qLower.includes('aur batao') || qLower.includes('kaise ho') || qLower.includes('kaisa hai') || qLower.includes('kya hal') || qLower.includes('kya haal');
+  
+  if (isCasualGreeting && !qLower.includes('food') && !qLower.includes('budget') && !qLower.includes('spend') && !qLower.includes('paisa') && !qLower.includes('balance') && !qLower.includes('afford') && !qLower.includes('buy')) {
+    const responseText = isFormalEnglish
+      ? `Hii ${userName || 'friend'}! 🌿 I am doing great! How is your spending and budgeting going today? Ask me about your balance, monthly expense breakdown, or if you can afford a purchase! 💬✨`
+      : `Hii ${userName || 'yaar'}! 🌿 Main bilkul mast hu! Aap batao, aaj ka kharcha kaisa chal raha hai? Agar koi wallet balance, category budget limit, ya expense detail dekhni ho toh batao! 💬✨`;
+    return { responseText, updatedState };
+  }
+
   // ─── 1. AFFORDABILITY ENGINE ───
   const affordKeywords = ['afford', 'buy', 'kharid', 'le lu', 'le sakta', 'purchase', 'shoe', 'phone', 'watch'];
   const numberMatch = qLower.match(/(\d+[\d,]*)/);
@@ -724,11 +752,11 @@ export function resolveUserFinancialQuery(
     return { responseText, updatedState };
   }
 
-  // ─── 6. DEFAULT INTELLIGENT FACT-BASED FALLBACK ───
+  // ─── 6. DEFAULT INTELLIGENT CONVERSATIONAL FALLBACK ───
   const topCat = ctx.topCategories.length > 0 ? ctx.topCategories[0] : null;
   const defaultResp = isFormalEnglish
-    ? `Hii ${userName}! 🌿 Here is your live financial snapshot:\n\n• Total Wallet Balance: **${currencySymbol}${ctx.totalAccBal.toLocaleString()}**\n• Total Spent This Month: **${currencySymbol}${ctx.totalExpense.toLocaleString()}**\n• Net Savings Rate: **${ctx.savingsRate}%**\n• Top Spending Category: **${topCat ? topCat.category.toUpperCase() : 'None'}** (${currencySymbol}${topCat ? topCat.amount.toLocaleString() : 0})\n• Safe Daily Allowance: **${currencySymbol}${ctx.safeDailySpend}/day** (${ctx.daysRemaining} days remaining).\n\nAsk me specific questions like *"How is my food spending?"*, *"Can I afford ₹5,000?"*, or *"Show my weekend pattern"*!`
-    : `Hii ${userName}! 🌿 Live account snapshot dekho bro:\n\n• Total Wallet Balance: **${currencySymbol}${ctx.totalAccBal.toLocaleString()}**\n• Total Spent This Month: **${currencySymbol}${ctx.totalExpense.toLocaleString()}**\n• Savings Rate: **${ctx.savingsRate}%**\n• Top Category: **${topCat ? topCat.category.toUpperCase() : 'None'}** (${currencySymbol}${topCat ? topCat.amount.toLocaleString() : 0})\n• Safe Daily Spend: **${currencySymbol}${ctx.safeDailySpend}/day** (${ctx.daysRemaining} days left).\n\nMujhse specific poochho: *"iss month food kitna gaya?"*, *"5000 ka shoe le lu?"*, ya *"weekend pattern batao"*! 🤝✨`;
+    ? `Hii ${userName}! 🌿 I am your personal AI Financial Coach. Right now, your total wallet balance is **${currencySymbol}${ctx.totalAccBal.toLocaleString()}**, total monthly spent is **${currencySymbol}${ctx.totalExpense.toLocaleString()}**, and safe daily allowance is **${currencySymbol}${ctx.safeDailySpend}/day**.\n\nYou can ask me specific questions like:\n• *"How is my food spending?"*\n• *"Can I afford ₹5,000 for a phone?"*\n• *"What is my email?"*\n• *"Show my weekend pattern"* 💡✨`
+    : `Hii ${userName}! 🌿 Main aapka personal AI Financial Coach hu. Abhi aapka total wallet balance **${currencySymbol}${ctx.totalAccBal.toLocaleString()}**, iss month total spent **${currencySymbol}${ctx.totalExpense.toLocaleString()}**, aur safe daily spend **${currencySymbol}${ctx.safeDailySpend}/day** hai.\n\nAap mujhse specific pooch sakte ho:\n• *"iss month food kitna gaya?"*\n• *"5000 ka shoe le lu?"*\n• *"mera email kya hai?"*\n• *"weekend pattern batao"* 💡✨`;
 
   return { responseText: defaultResp, updatedState };
 }
