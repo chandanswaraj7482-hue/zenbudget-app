@@ -1116,8 +1116,12 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   useEffect(() => {
+    document.documentElement.classList.add('landing-active');
+    document.body.classList.add('landing-active');
     document.getElementById('root')?.classList.add('landing-root');
     return () => {
+      document.documentElement.classList.remove('landing-active');
+      document.body.classList.remove('landing-active');
       document.getElementById('root')?.classList.remove('landing-root');
     };
   }, []);

@@ -1274,6 +1274,20 @@ div[style*="position:fixed"] {
   animation: badgeFloat 5s ease-in-out infinite;
 }
 
+/* Universal Landing Page & Web Version Scroll Unlock */
+html.landing-active,
+body.landing-active,
+html:has(#root.landing-root),
+body:has(#root.landing-root) {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  height: auto !important;
+  min-height: 100vh !important;
+  overscroll-behavior: auto !important;
+  position: static !important;
+  display: block !important;
+}
+
 /* Disable mobile-frame constraints for Marketing Landing Page */
 #root.landing-root {
   max-width: 100% !important;
@@ -1282,7 +1296,9 @@ div[style*="position:fixed"] {
   border-radius: 0 !important;
   height: auto !important;
   max-height: none !important;
-  overflow: visible !important;
+  min-height: 100vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
   padding: 0 !important;
   display: block !important;
 }
