@@ -188,6 +188,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   const [showMorningBrief, setShowMorningBrief] = useState<boolean>(false);
   const [showEveningReflection, setShowEveningReflection] = useState<boolean>(false);
   const [showStoryReport, setShowStoryReport] = useState<boolean>(false);
+  const [storyReportType, setStoryReportType] = useState<'weekly' | 'monthly'>('weekly');
   const [currentProfileId, setCurrentProfileId] = useState<string>(() => localStorage.getItem('zb_profile_id') || '');
   const [userName, setUserName] = useState<string>(() => localStorage.getItem('zb_user_name') || '');
   
@@ -3741,7 +3742,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
               setIsModalOpen(true);
             }}
             onAddGoalProgress={handleAddGoalProgress}
-            onOpenStory={() => setShowStoryReport(true)}
+            onOpenStory={(type = 'weekly') => { setStoryReportType(type); setShowStoryReport(true); }}
             language={language}
             onAddNewGoal={handleAddNewGoal}
             subscriptionTier={subscriptionTier}
@@ -4540,6 +4541,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           currencySymbol={currencySymbol}
           trialStartDate={trialStartDate}
           budgets={convertedBudgets}
+          reportType={storyReportType}
         />
       )}
 

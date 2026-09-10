@@ -9,14 +9,24 @@ interface StoryReportProps {
   currencySymbol: string;
   trialStartDate?: string;
   budgets?: CategoryBudget[];
+  reportType?: 'weekly' | 'monthly';
 }
 
-export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions, currencySymbol, trialStartDate = '', budgets = [] }) => {
+export const StoryReport: React.FC<StoryReportProps> = ({
+  onClose,
+  transactions,
+  currencySymbol,
+  trialStartDate = '',
+  budgets = [],
+  reportType = 'weekly'
+}) => {
   const [slide, setSlide] = useState(0);
+  const isMonthly = reportType === 'monthly';
 
-  // Real weekly data calculations
+  // Real data calculations for period (weekly vs monthly)
   const now = new Date();
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const monthName = now.toLocaleString('default', { month: 'long' });
 
   // Calculate week number relative to registration or earliest transaction date
   let startDate = new Date(trialStartDate || new Date().toISOString());
@@ -35,12 +45,20 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   const weekNumber = Math.max(1, Math.floor(diffDays / 7) + 1);
 
-  const weeklyTransactions = transactions.filter(t => new Date(t.date) >= weekAgo);
-  const weeklyExpenses = weeklyTransactions.filter(t => t.type === 'expense');
-  const weeklyIncome = weeklyTransactions.filter(t => t.type === 'income');
+  // Period filtering
+  const periodTransactions = transactions.filter(t => {
+    const tDate = new Date(t.date);
+    if (isMonthly) {
+      return tDate.getMonth() === now.getMonth() && tDate.getFullYear() === now.getFullYear();
+    }
+    return tDate >= weekAgo;
+  });
 
-  const spentRaw = weeklyExpenses.reduce((sum, t) => sum + t.amount, 0);
-  const earnedRaw = weeklyIncome.reduce((sum, t) => sum + t.amount, 0);
+  const periodExpenses = periodTransactions.filter(t => t.type === 'expense');
+  const periodIncome = periodTransactions.filter(t => t.type === 'income');
+
+  const spentRaw = periodExpenses.reduce((sum, t) => sum + t.amount, 0);
+  const earnedRaw = periodIncome.reduce((sum, t) => sum + t.amount, 0);
   const spent = (currencySymbol === '₹' || currencySymbol === 'INR') ? Math.round(spentRaw) : Math.round(spentRaw * 100) / 100;
   const earned = (currencySymbol === '₹' || currencySymbol === 'INR') ? Math.round(earnedRaw) : Math.round(earnedRaw * 100) / 100;
   const saved = Math.max(0, earned - spent);
@@ -48,7 +66,7 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
   // Best day (least spending)
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const daySpending: Record<number, number> = {};
-  weeklyExpenses.forEach(t => {
+  periodExpenses.forEach(t => {
     const day = new Date(t.date).getDay();
     daySpending[day] = (daySpending[day] || 0) + t.amount;
   });
@@ -65,7 +83,7 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
 
   // Worst category (highest spending)
   const categorySpending: Record<string, number> = {};
-  weeklyExpenses.forEach(t => {
+  periodExpenses.forEach(t => {
     categorySpending[t.category] = (categorySpending[t.category] || 0) + t.amount;
   });
   let worstCategory = 'None';
@@ -191,18 +209,18 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
 
     ctx.font = 'bold 12px sans-serif';
     ctx.fillStyle = '#64748b';
-    ctx.fillText('OFFICIAL FINANCIAL WRAPPED SCREENSHOT', 360, 138);
+    ctx.fillText(isMonthly ? 'OFFICIAL MONTHLY FINANCIAL STORY SCREENSHOT' : 'OFFICIAL FINANCIAL WRAPPED SCREENSHOT', 360, 138);
 
     // Subtle Glow Circle
     ctx.beginPath();
     ctx.arc(360, 320, 140, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(34, 197, 94, 0.12)';
+    ctx.fillStyle = isMonthly ? 'rgba(168, 85, 247, 0.15)' : 'rgba(34, 197, 94, 0.12)';
     ctx.fill();
 
     // Zen Score Ring
     ctx.beginPath();
     ctx.arc(360, 320, 95, 0, Math.PI * 2);
-    ctx.strokeStyle = '#22c55e';
+    ctx.strokeStyle = isMonthly ? '#a855f7' : '#22c55e';
     ctx.lineWidth = 8;
     ctx.stroke();
 
@@ -215,7 +233,7 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
     ctx.fillText(`${score}`, 360, 345);
 
     ctx.font = 'bold 18px sans-serif';
-    ctx.fillStyle = '#22c55e';
+    ctx.fillStyle = isMonthly ? '#a855f7' : '#22c55e';
     ctx.fillText(score >= 80 ? 'Master Saver 🏆' : (score >= 50 ? 'Balanced Saver 🌱' : 'On The Way 🚀'), 360, 455);
 
     // Main Stats Phone Card Panel
@@ -231,8 +249,8 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
     ctx.textAlign = 'left';
     ctx.font = 'bold 13px sans-serif';
     ctx.fillStyle = '#94a3b8';
-    ctx.fillText('TOTAL SPENT THIS WEEK', 90, 535);
-    ctx.fillText('TOTAL SAVED THIS WEEK', 380, 535);
+    ctx.fillText(isMonthly ? 'TOTAL SPENT THIS MONTH' : 'TOTAL SPENT THIS WEEK', 90, 535);
+    ctx.fillText(isMonthly ? 'TOTAL SAVED THIS MONTH' : 'TOTAL SAVED THIS WEEK', 380, 535);
 
     ctx.font = 'bold 28px sans-serif';
     ctx.fillStyle = '#ef4444';
@@ -248,7 +266,7 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
     ctx.roundRect(90, 600, 540, 10, 5);
     ctx.fill();
 
-    ctx.fillStyle = spendRatio > 0.8 ? '#ef4444' : '#22c55e';
+    ctx.fillStyle = spendRatio > 0.8 ? '#ef4444' : (isMonthly ? '#a855f7' : '#22c55e');
     ctx.beginPath();
     ctx.roundRect(90, 600, Math.max(15, Math.min(540, 540 * spendRatio)), 10, 5);
     ctx.fill();
@@ -312,7 +330,7 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
 
   const getRealZenScore = () => {
     if (transactions.length === 0) return 50;
-    if (weeklyTransactions.length === 0) return getMonthlyZenScore();
+    if (periodTransactions.length === 0) return getMonthlyZenScore();
 
     let calculatedScore = 100; // start from 100
 
@@ -342,13 +360,13 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
     let overspentCount = 0;
     budgets.forEach(b => {
       const weeklyLimit = b.limit / 4;
-      const spentThisWeek = weeklyExpenses.filter(t => t.category === b.category).reduce((sum, t) => sum + t.amount, 0);
+      const spentThisWeek = periodExpenses.filter(t => t.category === b.category).reduce((sum, t) => sum + t.amount, 0);
       if (spentThisWeek > weeklyLimit) overspentCount++;
     });
     calculatedScore -= overspentCount * 8;
 
     // Factor 4: Mood
-    const negativeMoodCount = weeklyTransactions.filter(t =>
+    const negativeMoodCount = periodTransactions.filter(t =>
       t.notes && (t.notes.includes('Regret') || t.notes.includes('Stressed') || t.notes.includes('Regret/Sad'))
     ).length;
     calculatedScore -= negativeMoodCount * 3;
@@ -361,7 +379,7 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
     return Math.max(5, Math.min(100, calculatedScore));
   };
 
-  const score = getRealZenScore();
+  const score = isMonthly ? getMonthlyZenScore() : getRealZenScore();
 
   const handleNext = () => {
     if (slide < 3) setSlide(s => s + 1);
@@ -378,10 +396,10 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#22C55E', '#14B8A6', '#f59e0b']
+        colors: isMonthly ? ['#a855f7', '#ec4899', '#f59e0b'] : ['#22C55E', '#14B8A6', '#f59e0b']
       });
     }
-  }, [slide]);
+  }, [slide, isMonthly]);
 
   return (
     <div
@@ -400,7 +418,7 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
             <div style={{
               width: slide > i ? '100%' : slide === i ? '100%' : '0%',
               height: '100%',
-              background: '#22c55e',
+              background: isMonthly ? '#a855f7' : '#22c55e',
               transition: slide === i ? 'width 5s linear' : 'none',
               animation: slide === i ? 'fillBar 5s linear' : 'none'
             }} />
@@ -421,11 +439,15 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
         
         {slide === 0 && (
           <div className="animate-slide-up" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '24px' }}>
-            <span style={{ fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#22c55e', fontWeight: 800 }}>Weekly Story</span>
-            <h1 style={{ fontSize: '48px', fontWeight: 800, fontFamily: "'Manrope', sans-serif", lineHeight: 1.1, color: '#ffffff' }}>
-              Week {weekNumber}<br/>Wrapped
+            <span style={{ fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.12em', color: isMonthly ? '#c084fc' : '#22c55e', fontWeight: 800 }}>
+              {isMonthly ? 'Monthly Story 🎧' : 'Weekly Story 🎵'}
+            </span>
+            <h1 style={{ fontSize: '44px', fontWeight: 800, fontFamily: "'Manrope', sans-serif", lineHeight: 1.1, color: '#ffffff', whiteSpace: 'pre-line' }}>
+              {isMonthly ? `${monthName}\nStory` : `Week ${weekNumber}\nWrapped`}
             </h1>
-            <p style={{ fontSize: '18px', color: 'rgba(255, 255, 255, 0.85)' }}>Let's see how you did this week.</p>
+            <p style={{ fontSize: '18px', color: 'rgba(255, 255, 255, 0.85)' }}>
+              {isMonthly ? "Let's see how you did this month." : "Let's see how you did this week."}
+            </p>
           </div>
         )}
 
@@ -472,9 +494,9 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
               </div>
               
               {potentialSaving > 0 && (
-                <div style={{ background: 'rgba(20, 184, 166, 0.15)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(20, 184, 166, 0.3)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <TrendingDown size={20} color="#22c55e" />
-                  <p style={{ fontSize: '14px', color: '#22c55e', fontWeight: 700, margin: 0 }}>Potential Saving: {currencySymbol}{potentialSaving.toLocaleString()}</p>
+                <div style={{ background: isMonthly ? 'rgba(168, 85, 247, 0.15)' : 'rgba(20, 184, 166, 0.15)', padding: '16px', borderRadius: '16px', border: isMonthly ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid rgba(20, 184, 166, 0.3)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <TrendingDown size={20} color={isMonthly ? '#c084fc' : '#22c55e'} />
+                  <p style={{ fontSize: '14px', color: isMonthly ? '#c084fc' : '#22c55e', fontWeight: 700, margin: 0 }}>Potential Saving: {currencySymbol}{potentialSaving.toLocaleString()}</p>
                 </div>
               )}
             </div>
@@ -486,17 +508,21 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
             <h2 style={{ fontSize: '32px', fontWeight: 800, fontFamily: "'Manrope', sans-serif", color: '#ffffff' }}>Final Score</h2>
             
             <div style={{ position: 'relative', width: '200px', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(34,197,94,0.3) 0%, rgba(20,184,166,0.3) 100%)', filter: 'blur(20px)' }} />
-              <div style={{ position: 'absolute', inset: '10px', borderRadius: '50%', background: '#090d16', border: '2px solid #22c55e', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }} />
+              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: isMonthly ? 'linear-gradient(135deg, rgba(168,85,247,0.3) 0%, rgba(236,72,153,0.3) 100%)' : 'linear-gradient(135deg, rgba(34,197,94,0.3) 0%, rgba(20,184,166,0.3) 100%)', filter: 'blur(20px)' }} />
+              <div style={{ position: 'absolute', inset: '10px', borderRadius: '50%', background: '#090d16', border: isMonthly ? '2px solid #a855f7' : '2px solid #22c55e', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }} />
               <div style={{ zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <span style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>Money Score</span>
-                <span style={{ fontSize: '64px', fontWeight: 800, fontFamily: "'Manrope', sans-serif", background: 'linear-gradient(135deg, #22C55E 0%, #14B8A6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1 }}>
+                <span style={{ fontSize: '64px', fontWeight: 800, fontFamily: "'Manrope', sans-serif", background: isMonthly ? 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)' : 'linear-gradient(135deg, #22C55E 0%, #14B8A6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1 }}>
                   {score}
                 </span>
               </div>
             </div>
             <p style={{ fontSize: '18px', color: 'rgba(255, 255, 255, 0.85)', maxWidth: '250px' }}>
-              {score >= 70 ? 'Amazing week! Keep building these money habits.' : score >= 40 ? 'Good effort! Try to save a bit more next week.' : 'Tough week. Let\'s reset and do better!'}
+              {score >= 70
+                ? (isMonthly ? 'Amazing month! Keep building these money habits.' : 'Amazing week! Keep building these money habits.')
+                : score >= 40
+                  ? (isMonthly ? 'Good effort! Try to save a bit more next month.' : 'Good effort! Try to save a bit more next week.')
+                  : (isMonthly ? 'Tough month. Let\'s reset and do better next month!' : 'Tough week. Let\'s reset and do better!')}
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px', zIndex: 3010, width: '100%', maxWidth: '300px' }}>
@@ -508,7 +534,7 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'ZenBudget_Story_Card.png';
+                    a.download = isMonthly ? `ZenBudget_Monthly_Story_${monthName}.png` : 'ZenBudget_Weekly_Story.png';
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
@@ -526,7 +552,7 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
                   padding: '14px',
                   borderRadius: '16px',
                   border: 'none',
-                  background: 'linear-gradient(to right, #ec4899, #f43f5e)',
+                  background: isMonthly ? 'linear-gradient(to right, #a855f7, #ec4899)' : 'linear-gradient(to right, #ec4899, #f43f5e)',
                   color: '#fff',
                   fontSize: '14px',
                   fontWeight: 800,
@@ -544,7 +570,7 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
               {/* WhatsApp Share */}
               <button
                 onClick={() => {
-                  const shareText = `💰 My Weekly Money Wrapped on ZenBudget!\n\n• Spent: ${currencySymbol}${spent.toLocaleString()}\n• Saved: ${currencySymbol}${saved.toLocaleString()}\n• Zen Score: ${score}/100\n• Best Day: ${bestDay}\n• Top Category: ${worstCategory}\n\n📦 Download Android App (.apk): https://zenbudget-tracker.vercel.app/zenbudget.apk\n🌐 Open Web App: https://zenbudget-tracker.vercel.app/`;
+                  const shareText = `💰 My ${isMonthly ? 'Monthly' : 'Weekly'} Money ${isMonthly ? 'Story' : 'Wrapped'} on ZenBudget!\n\n• Spent: ${currencySymbol}${spent.toLocaleString()}\n• Saved: ${currencySymbol}${saved.toLocaleString()}\n• Zen Score: ${score}/100\n• Best Day: ${bestDay}\n• Top Category: ${worstCategory}\n\n📦 Download Android App (.apk): https://zenbudget-tracker.vercel.app/zenbudget.apk\n🌐 Open Web App: https://zenbudget-tracker.vercel.app/`;
                   const nativeUrl = `whatsapp://send?text=${encodeURIComponent(shareText)}`;
                   const webUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
                   
@@ -566,14 +592,14 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'ZenBudget_Story_Card.png';
+                    a.download = isMonthly ? `ZenBudget_Monthly_Story_${monthName}.png` : 'ZenBudget_Weekly_Story.png';
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
                     setTimeout(() => URL.revokeObjectURL(url), 1000);
                   }
 
-                  const shareText = `💰 My Weekly Money Wrapped on ZenBudget!\nSpent: ${currencySymbol}${spent.toLocaleString()} | Saved: ${currencySymbol}${saved.toLocaleString()}\nZen Score: ${score}/100 | Best Day: ${bestDay}\n\n📦 Get App: https://zenbudget-tracker.vercel.app/zenbudget.apk`;
+                  const shareText = `💰 My ${isMonthly ? 'Monthly' : 'Weekly'} Money ${isMonthly ? 'Story' : 'Wrapped'} on ZenBudget!\nSpent: ${currencySymbol}${spent.toLocaleString()} | Saved: ${currencySymbol}${saved.toLocaleString()}\nZen Score: ${score}/100 | Best Day: ${bestDay}\n\n📦 Get App: https://zenbudget-tracker.vercel.app/zenbudget.apk`;
                   await navigator.clipboard.writeText(shareText);
 
                   const notice = document.createElement('div');
@@ -595,7 +621,7 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
               {/* X / Twitter Share */}
               <button
                 onClick={() => {
-                  const shareText = `My Weekly Zen Score: ${score}/100 🌱\n\nSpent: ${currencySymbol}${spent.toLocaleString()} | Saved: ${currencySymbol}${saved.toLocaleString()}\nBest Day: ${bestDay} | Top: ${worstCategory}\n\nPowered by @ZenBudgetApp\n📦 Android App (.apk): https://zenbudget-tracker.vercel.app/zenbudget.apk\n🌐 Web App: https://zenbudget-tracker.vercel.app/`;
+                  const shareText = `My ${isMonthly ? 'Monthly' : 'Weekly'} Zen Score: ${score}/100 🌱\n\nSpent: ${currencySymbol}${spent.toLocaleString()} | Saved: ${currencySymbol}${saved.toLocaleString()}\nBest Day: ${bestDay} | Top: ${worstCategory}\n\nPowered by @ZenBudgetApp\n📦 Android App (.apk): https://zenbudget-tracker.vercel.app/zenbudget.apk\n🌐 Web App: https://zenbudget-tracker.vercel.app/`;
                   const nativeUrl = `twitter://post?message=${encodeURIComponent(shareText)}`;
                   const webUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
                   
@@ -615,13 +641,13 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
                   const blob = await generateStoryCardBlob();
                   const apkUrl = 'https://zenbudget-tracker.vercel.app/zenbudget.apk';
                   const appUrl = 'https://zenbudget-tracker.vercel.app/';
-                  const shareText = `💰 My Weekly Money Wrapped!\n\nSpent: ${currencySymbol}${spent.toLocaleString()}\nSaved: ${currencySymbol}${saved.toLocaleString()}\nZen Score: ${score}/100\nBest Day: ${bestDay} | Top Spend: ${worstCategory}\n\nPowered by ZenBudget\n📦 Download Android App (.apk): ${apkUrl}\n📱 Open Web App: ${appUrl}`;
+                  const shareText = `💰 My ${isMonthly ? 'Monthly' : 'Weekly'} Money ${isMonthly ? 'Story' : 'Wrapped'}!\n\nSpent: ${currencySymbol}${spent.toLocaleString()}\nSaved: ${currencySymbol}${saved.toLocaleString()}\nZen Score: ${score}/100\nBest Day: ${bestDay} | Top Spend: ${worstCategory}\n\nPowered by ZenBudget\n📦 Download Android App (.apk): ${apkUrl}\n📱 Open Web App: ${appUrl}`;
                   
                   if (navigator.share && blob) {
                     try {
-                      const file = new File([blob], 'ZenBudget_Story_Card.png', { type: 'image/png' });
+                      const file = new File([blob], isMonthly ? `ZenBudget_Monthly_Story_${monthName}.png` : 'ZenBudget_Weekly_Story.png', { type: 'image/png' });
                       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        await navigator.share({ title: 'My ZenBudget Wrapped', text: shareText, files: [file] });
+                        await navigator.share({ title: `My ZenBudget ${isMonthly ? 'Monthly Story' : 'Wrapped'}`, text: shareText, files: [file] });
                         return;
                       }
                     } catch (err) {
@@ -651,7 +677,7 @@ export const StoryReport: React.FC<StoryReportProps> = ({ onClose, transactions,
                   document.body.appendChild(notice);
                   setTimeout(() => { try { document.body.removeChild(notice); } catch(_) {} }, 4500);
                 }}
-                style={{ width: '100%', padding: '14px', borderRadius: '16px', border: 'none', background: 'linear-gradient(135deg, #22C55E 0%, #14B8A6 100%)', color: '#fff', fontSize: '14px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                style={{ width: '100%', padding: '14px', borderRadius: '16px', border: 'none', background: isMonthly ? 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)' : 'linear-gradient(135deg, #22C55E 0%, #14B8A6 100%)', color: '#fff', fontSize: '14px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
               >
                 Share ✨
               </button>

@@ -49,7 +49,7 @@ interface DashboardProps {
   onViewAllTransactionsClick: () => void;
   onEditTransaction: (tx: Transaction) => void;
   onAddGoalProgress: (goalId: string, amount: number) => void;
-  onOpenStory?: () => void;
+  onOpenStory?: (type?: 'weekly' | 'monthly') => void;
   language?: string;
   onAddNewGoal: (name: string, target: number, color: string) => void;
   subscriptionTier?: string;
@@ -1191,7 +1191,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
         <button
           type="button"
-          onClick={() => onOpenStory?.()}
+          onClick={() => onOpenStory?.('weekly')}
           style={{
             padding: '12px 14px',
             borderRadius: '16px',
@@ -1214,7 +1214,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         <button
           type="button"
-          onClick={() => onOpenStory?.()}
+          onClick={() => onOpenStory?.('monthly')}
           style={{
             padding: '12px 14px',
             borderRadius: '16px',
