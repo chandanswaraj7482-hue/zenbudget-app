@@ -620,7 +620,7 @@ export function resolveUserFinancialQuery(
   const isCasualGreeting = /^(hi+|hello+|hey+|sup|yo|hola|namaste|bhai|bro|aur batao|kaise ho|kaisa hai|kya hal|kya haal|kya chal)/i.test(qLower) || 
     qLower.includes('aur batao') || qLower.includes('kaise ho') || qLower.includes('kaisa hai') || qLower.includes('kya hal') || qLower.includes('kya haal');
   
-  if (isCasualGreeting && !qLower.includes('food') && !qLower.includes('budget') && !qLower.includes('spend') && !qLower.includes('paisa') && !qLower.includes('balance') && !qLower.includes('afford') && !qLower.includes('buy') && !qLower.includes('use') && !qLower.includes('price') && !qLower.includes('cost') && !qLower.includes('benefit') && !qLower.includes('fayda')) {
+  if (isCasualGreeting && !qLower.includes('food') && !qLower.includes('budget') && !qLower.includes('spend') && !qLower.includes('paisa') && !qLower.includes('balance') && !qLower.includes('afford') && !qLower.includes('buy') && !qLower.includes('use') && !qLower.includes('price') && !qLower.includes('cost') && !qLower.includes('benefit') && !qLower.includes('fayda') && !qLower.includes('scene') && !qLower.includes('overall') && !qLower.includes('month')) {
     const responseText = isFormalEnglish
       ? `Hii ${userName || 'friend'}! 🌿 I am doing great! How is your spending and budgeting going today? Ask me about your balance, monthly expense breakdown, how to use ZenBudget, pricing & premium, or if you can afford a purchase! 💬✨`
       : `Hii ${userName || 'yaar'}! 🌿 Main bilkul mast hu! Aap batao, aaj ka kharcha kaisa chal raha hai? App kaise use karein, Premium pricing details, ya koi expense detail dekhni ho toh batao! 💬✨`;
