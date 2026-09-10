@@ -328,8 +328,8 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
               fontSize: '11px',
               border: '1px solid rgba(255,255,255,0.05)'
             }}>
-              <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>Paid Referrals Progress:</span>
-              <span style={{ fontWeight: 800, color: 'var(--secondary)' }}>{referralCount} / 10 Paid Members</span>
+              <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>{t('referral_progress')}:</span>
+              <span style={{ fontWeight: 800, color: 'var(--secondary)' }}>{referralCount} / 10 {t('paid_members')}</span>
             </div>
           </div>
         </div>
@@ -338,7 +338,7 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
       {/* SECTION 4: ACCOUNT & APP SETTINGS */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <h3 style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
-          Account &amp; Settings
+          {t('account_settings')}
         </h3>
 
         <div className="glass-panel" style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -363,8 +363,8 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
                 <Settings size={20} />
               </div>
               <div>
-                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>Profile &amp; Preferences</p>
-                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Username, passcode, currency &amp; language settings.</span>
+                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>{t('profile_preferences')}</p>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('profile_sub')}</span>
               </div>
             </div>
             <ChevronRight size={18} color="#94a3b8" />
@@ -392,8 +392,8 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
                   <Share2 size={20} />
                 </div>
                 <div>
-                  <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>Follow Us</p>
-                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Instagram, Facebook, YouTube &amp; Social Links</span>
+                  <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>{t('follow_us')}</p>
+                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('follow_us_sub')}</span>
                 </div>
               </div>
               <ChevronRight size={18} color="#94a3b8" />
@@ -421,8 +421,8 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
                 <Sparkles size={20} />
               </div>
               <div>
-                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>ZenBudget Premium</p>
-                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Monthly ₹149 | Yearly ₹1,499 | Lifetime Founding Member</span>
+                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>{t('zenbudget_premium')}</p>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('premium_pricing_sub')}</span>
               </div>
             </div>
             <ChevronRight size={18} color="#94a3b8" />
@@ -449,8 +449,8 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
                 <Download size={20} />
               </div>
               <div>
-                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>Export CSV Report</p>
-                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Download full transaction history as CSV file.</span>
+                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>{t('export_csv')}</p>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('export_sub')}</span>
               </div>
             </div>
             <ChevronRight size={18} color="#94a3b8" />
@@ -486,7 +486,7 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
               </div>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                  <p style={{ fontSize: '13.5px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>Reset Workspace</p>
+                  <p style={{ fontSize: '13.5px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>{t('reset_data')}</p>
                   {!isPremiumUser && (
                     <span style={{
                       fontSize: '9px',
@@ -507,7 +507,7 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
                   )}
                 </div>
                 <span style={{ fontSize: '10.5px', color: 'var(--text-secondary)', display: 'block', marginTop: '2px' }}>
-                  {!isPremiumUser ? 'Clear local data & start fresh' : 'Clear local cache or start fresh.'}
+                  {t('reset_sub')}
                 </span>
               </div>
             </div>
@@ -536,11 +536,11 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
                 <LogOut size={20} />
               </div>
               <div>
-                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--danger)' }}>Sign Out Account</p>
-                <span style={{ fontSize: '11px', color: 'rgba(239, 68, 68, 0.7)' }}>Lock app session.</span>
+                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--danger)' }}>{t('logout')}</p>
+                <span style={{ fontSize: '11px', color: 'rgba(239, 68, 68, 0.7)' }}>{t('logout_sub')}</span>
               </div>
             </div>
-            <ChevronRight size={18} color="var(--danger)" />
+            <ChevronRight size={18} color="#ef4444" />
           </button>
 
         </div>

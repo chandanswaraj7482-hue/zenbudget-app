@@ -4,6 +4,7 @@ import { Mic, ArrowRight, Sparkles, Check, RefreshCw } from 'lucide-react';
 import type { Transaction, Account } from '../types';
 import confetti from 'canvas-confetti';
 import { Wallet, Plus, X } from 'lucide-react';
+import { t } from '../utils/i18n';
 
 interface QuickCaptureCardProps {
   onSaveTransaction: (tx: Omit<Transaction, 'id'>) => void;
@@ -301,9 +302,9 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
   };
 
   const getPlaceholder = () => {
-    if (activeTab === 'expense') return 'e.g. Paid 220 for petrol in cash';
-    if (activeTab === 'income') return 'e.g. Received 5000 salary in bank';
-    return 'e.g. Transferred 1500 to savings account';
+    if (activeTab === 'expense') return t('quick_capture_expense_placeholder');
+    if (activeTab === 'income') return t('quick_capture_income_placeholder');
+    return t('quick_capture_transfer_placeholder');
   };
 
   return (
@@ -334,7 +335,7 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <h3 style={{ fontSize: '17px', fontWeight: 900, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
-              Quick capture
+              {t('quick_capture')}
             </h3>
             <span style={{
               fontSize: '10px',
@@ -350,11 +351,11 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
               gap: '4px',
               whiteSpace: 'nowrap'
             }}>
-              <Sparkles size={11} /> AI Auto-Detect
+              <Sparkles size={11} /> {t('ai_auto_detect')}
             </span>
           </div>
           <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: '4px 0 0 0', lineHeight: 1.4 }}>
-            Add expense, income, or transfer in natural language
+            {t('quick_capture_sub')}
           </p>
         </div>
       </div>
@@ -382,7 +383,6 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
                 border: 'none',
                 fontSize: '11px',
                 fontWeight: 800,
-                textTransform: 'capitalize',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 background: activeTab === tab ? 'var(--bg-card-hover)' : 'transparent',
@@ -390,7 +390,7 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
                 boxShadow: activeTab === tab ? '0 2px 8px rgba(0,0,0,0.15)' : 'none'
               }}
             >
-              {tab}
+              {tab === 'expense' ? t('expenses') : tab === 'income' ? t('income') : t('transfer')}
             </button>
           ))}
         </div>

@@ -682,13 +682,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
     setShowShareModal(false);
   };
   const currentHour = new Date().getHours();
-  let timeOfDayGreeting = 'GOOD MORNING';
+  let timeOfDayGreeting = t('good_morning');
   let timeOfDayEmoji = '☀️';
   if (currentHour >= 12 && currentHour < 17) {
-    timeOfDayGreeting = 'GOOD AFTERNOON';
+    timeOfDayGreeting = t('good_afternoon');
     timeOfDayEmoji = '🌤️';
   } else if (currentHour >= 17) {
-    timeOfDayGreeting = 'GOOD EVENING';
+    timeOfDayGreeting = t('good_evening');
     timeOfDayEmoji = '🌙';
   }
 
@@ -736,7 +736,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           onClick={onAddTransactionClick}
           style={{ flexShrink: 0, padding: '8px 12px', borderRadius: '12px', background: '#22c55e', color: '#fff', fontSize: '12.5px', fontWeight: 800, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', boxShadow: '0 4px 12px rgba(34,197,94,0.3)', whiteSpace: 'nowrap' }}
         >
-          <Plus size={15} /> Add New
+          <Plus size={15} /> {t('add_new')}
         </button>
       </div>
 
@@ -853,7 +853,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 gap: '4px'
               }}
             >
-              See All ({myAccounts.length}) <ChevronRight size={13} />
+              {t('see_all')} ({myAccounts.length}) <ChevronRight size={13} />
             </button>
             <button
               onClick={onAddAccountClick}
