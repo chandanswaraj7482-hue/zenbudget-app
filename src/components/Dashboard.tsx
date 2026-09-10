@@ -1102,16 +1102,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {(() => {
         const now = new Date();
         const currentHour = now.getHours();
-        let updateTag = 'MID-DAY UPDATE';
-        let greetingTime = 'Good afternoon';
+        let updateTag = t('midday_update', { defaultValue: 'MID-DAY UPDATE' });
+        let greetingTime = t('good_afternoon', { defaultValue: 'Good afternoon' });
         let emoji = '🌤️';
         if (currentHour < 12) {
-          updateTag = 'MORNING UPDATE';
-          greetingTime = 'Good morning';
+          updateTag = t('morning_update', { defaultValue: 'MORNING UPDATE' });
+          greetingTime = t('good_morning', { defaultValue: 'Good morning' });
           emoji = '☀️';
         } else if (currentHour >= 17) {
-          updateTag = 'EVENING UPDATE';
-          greetingTime = 'Good evening';
+          updateTag = t('evening_update', { defaultValue: 'EVENING UPDATE' });
+          greetingTime = t('good_evening', { defaultValue: 'Good evening' });
           emoji = '🌙';
         }
 
@@ -1130,14 +1130,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         let messageBody = '';
         if (todayExpenses === 0) {
-          messageBody = `You've spent ${currencySymbol}0 so far. Excellent discipline! Keep it up.`;
+          messageBody = t('coach_msg_zero', { 
+            defaultValue: "You've spent {{currency}}0 so far. Excellent discipline! Keep it up.",
+            currency: currencySymbol 
+          });
         } else if (todayExpenses <= 500) {
-          messageBody = `You've spent ${formatCurrency(todayExpenses, currencySymbol, 0)} so far today. You're doing great keeping your spending in check!`;
+          messageBody = t('coach_msg_good', { 
+            defaultValue: "You've spent {{amount}} so far today. You're doing great keeping your spending in check!",
+            amount: formatCurrency(todayExpenses, currencySymbol, 0)
+          });
         } else {
-          messageBody = `You've spent ${formatCurrency(todayExpenses, currencySymbol, 0)} so far today. Stay mindful of your financial goals!`;
+          messageBody = t('coach_msg_mindful', { 
+            defaultValue: "You've spent {{amount}} so far today. Stay mindful of your financial goals!",
+            amount: formatCurrency(todayExpenses, currencySymbol, 0)
+          });
         }
 
-        const coachMessage = `"${greetingTime}, ${userName || 'Friend'}! ${messageBody} ${emoji}"`;
+        const coachMessage = `"${greetingTime}, ${userName || t('friend_default', { defaultValue: 'Friend' })}! ${messageBody} ${emoji}"`;
 
         return (
           <div
@@ -1159,11 +1168,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Sparkles size={18} style={{ color: '#10b981' }} />
                 <span style={{ fontSize: '12px', fontWeight: 900, color: '#10b981', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                  AI MONEY COACH ({updateTag})
+                  {t('ai_money_coach_tag', { defaultValue: `AI MONEY COACH (${updateTag})`, tag: updateTag })}
                 </span>
               </div>
               <span style={{ fontSize: '10px', fontWeight: 800, padding: '3px 8px', borderRadius: '100px', background: 'rgba(16,185,129,0.15)', color: '#34d399', border: '1px solid rgba(16,185,129,0.3)' }}>
-                🤖 AI Powered
+                🤖 {t('ai_powered', { defaultValue: 'AI Powered' })}
               </span>
             </div>
 
@@ -1221,7 +1230,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           }}
         >
           <BarChart3 size={15} />
-          <span>Weekly Wrapped 🎵</span>
+          <span>{t('weekly_wrapped_btn', { defaultValue: 'Weekly Wrapped 🎵' })}</span>
         </button>
 
         <button
@@ -1244,7 +1253,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           }}
         >
           <Sparkles size={15} />
-          <span>Monthly Story 🎧</span>
+          <span>{t('monthly_story_btn', { defaultValue: 'Monthly Story 🎧' })}</span>
         </button>
       </div>
 
