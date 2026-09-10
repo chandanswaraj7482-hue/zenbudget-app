@@ -1194,10 +1194,34 @@ export const Dashboard: React.FC<DashboardProps> = ({
         );
       })()}
 
-      {/* ── ZEN AI MONEY COACH CARD (With Chat with Zen Button) ── */}
+      {/* ── ZEN AI MONEY COACH CARD (Exact Photo Matched with Dynamic Spending Update & Chat Button) ── */}
       {(() => {
-        const todayIdx = new Date().getDate() % DAILY_COACH_TIPS.length;
-        const todayTip = DAILY_COACH_TIPS[todayIdx];
+        const currentHour = new Date().getHours();
+        let updateTag = 'MID-DAY UPDATE';
+        let greetingTime = 'Good afternoon';
+        let emoji = '🌤️';
+        if (currentHour < 12) {
+          updateTag = 'MORNING UPDATE';
+          greetingTime = 'Good morning';
+          emoji = '☀️';
+        } else if (currentHour >= 17) {
+          updateTag = 'EVENING UPDATE';
+          greetingTime = 'Good evening';
+          emoji = '🌙';
+        }
+
+        const todayExpenses = transactions
+          .filter(t => {
+            if (t.type !== 'expense') return false;
+            const tDate = t.date ? t.date.split('T')[0] : '';
+            const todayStr = new Date().toISOString().split('T')[0];
+            return tDate === todayStr;
+          })
+          .reduce((sum, t) => sum + t.amount, 0);
+
+        const coachMessage = todayExpenses === 0
+          ? `"${greetingTime}, ${userName || 'Friend'}! You've spent ${currencySymbol}0 so far. Excellent discipline! Keep it up. ${emoji}"`
+          : `"${greetingTime}, ${userName || 'Friend'}! You've spent ${formatCurrency(todayExpenses, currencySymbol, 0)} so far today. Stay mindful of your financial goals! ${emoji}"`;
 
         return (
           <div
@@ -1206,7 +1230,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               padding: '18px 20px',
               borderRadius: '22px',
               background: 'linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.95) 100%)',
-              border: '1px solid rgba(139,92,246,0.25)',
+              border: '1px solid rgba(16,185,129,0.25)',
               display: 'flex',
               flexDirection: 'column',
               gap: '14px',
@@ -1217,18 +1241,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Brain size={18} style={{ color: '#a78bfa' }} />
-                <span style={{ fontSize: '12px', fontWeight: 900, color: '#a78bfa', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                  ZEN AI MONEY COACH
+                <Sparkles size={18} style={{ color: '#10b981' }} />
+                <span style={{ fontSize: '12px', fontWeight: 900, color: '#10b981', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                  AI MONEY COACH ({updateTag})
                 </span>
               </div>
-              <span style={{ fontSize: '10px', fontWeight: 800, padding: '3px 8px', borderRadius: '100px', background: 'rgba(167,139,250,0.15)', color: '#c084fc', border: '1px solid rgba(167,139,250,0.3)' }}>
+              <span style={{ fontSize: '10px', fontWeight: 800, padding: '3px 8px', borderRadius: '100px', background: 'rgba(16,185,129,0.15)', color: '#34d399', border: '1px solid rgba(16,185,129,0.3)' }}>
                 🤖 AI Powered
               </span>
             </div>
 
-            <p style={{ fontSize: '13px', color: '#e2e8f0', margin: 0, lineHeight: '1.5', fontWeight: 500, fontStyle: 'italic' }}>
-              "{todayTip}"
+            <p style={{ fontSize: '14px', color: '#f1f5f9', margin: 0, lineHeight: '1.5', fontWeight: 600 }}>
+              {coachMessage}
             </p>
 
             <button
@@ -1253,7 +1277,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               }}
             >
               <Sparkles size={16} />
-              <span>Chat with Zen →</span>
+              <span>{t('chat_with_zen')}</span>
             </button>
           </div>
         );
