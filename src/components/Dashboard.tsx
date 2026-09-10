@@ -1047,226 +1047,137 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       )}
 
-      {/* Zen AI Coach Card — Clickable to open AI Chat */}
+      {/* ── AI Money Coach Card (Matches User's Exact UI Design) ── */}
       <div
         className="glass-panel animate-fade-in"
         onClick={() => onOpenAI?.()}
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '10px',
-          padding: '14px 16px',
-          background: 'linear-gradient(135deg, rgba(16,185,129,0.06) 0%, rgba(59,130,246,0.06) 100%)',
-          border: '1px solid rgba(16, 185, 129, 0.2)',
-          borderRadius: '20px',
-          marginBottom: '0px',
-          boxShadow: '0 8px 30px rgba(0,0,0,0.3)',
+          padding: '18px 20px',
+          background: 'linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(15,23,42,0.85) 100%)',
+          border: '1px solid rgba(16, 185, 129, 0.3)',
+          borderRadius: '24px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
           position: 'relative',
           overflow: 'hidden',
           cursor: 'pointer',
-          transition: 'transform 0.15s, box-shadow 0.15s'
+          transition: 'transform 0.15s'
         }}
       >
-        {/* Top Glow */}
-        <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '120px', height: '120px', background: 'rgba(16,185,129,0.15)', filter: 'blur(35px)', borderRadius: '50%', pointerEvents: 'none' }}></div>
+        {/* Glow accent */}
+        <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '100px', height: '100px', background: 'rgba(16,185,129,0.18)', filter: 'blur(30px)', borderRadius: '50%', pointerEvents: 'none' }}></div>
 
-        {/* Coach Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 1, flexWrap: 'wrap', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: '1 1 auto' }}>
-            <div style={{ width: '36px', height: '36px', minWidth: '36px', borderRadius: '12px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px rgba(16,185,129,0.35)', flexShrink: 0 }}>
-              <Brain size={18} />
-            </div>
-            <div style={{ minWidth: 0, overflow: 'hidden' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                <h4 style={{ fontSize: '13px', fontWeight: 900, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
-                  Zen AI Coach
-                </h4>
-                <span style={{ fontSize: '8px', fontWeight: 900, background: 'rgba(16,185,129,0.2)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)', padding: '2px 6px', borderRadius: '100px', letterSpacing: '0.04em', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                  V3 SMART INTEL
-                </span>
-              </div>
-              <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                24/7 Proactive Financial Advisor
-              </span>
-            </div>
-          </div>
-
-          {/* Listen Button */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (isSpeaking) {
-                window.speechSynthesis.cancel();
-                setIsSpeaking(false);
-              } else {
-                const coachEl = document.querySelector('[data-coach-text]');
-                const text = coachEl?.getAttribute('data-coach-text') || coachEl?.textContent?.replace(/"/g, '') || 'Keep building your money habits!';
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 0.95;
-                utterance.pitch = 1.05;
-                const activeLang = localStorage.getItem('zb_language') || 'en';
-                const langCodeMap: Record<string, string> = {
-                  en: 'en-US', hi: 'hi-IN', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', ta: 'ta-IN', bn: 'bn-IN', mr: 'mr-IN', gu: 'gu-IN', te: 'te-IN'
-                };
-                utterance.lang = langCodeMap[activeLang] || 'en-US';
-                const voices = window.speechSynthesis.getVoices();
-                const matchingVoice = voices.find(v => v.lang.toLowerCase().startsWith(activeLang)) ||
-                                      voices.find(v => v.lang.toLowerCase().startsWith(utterance.lang.toLowerCase())) ||
-                                      voices.find(v => v.lang.toLowerCase().startsWith('en'));
-                if (matchingVoice) utterance.voice = matchingVoice;
-                utterance.onend = () => setIsSpeaking(false);
-                utterance.onerror = () => setIsSpeaking(false);
-                window.speechSynthesis.speak(utterance);
-                setIsSpeaking(true);
-              }
-            }}
-            style={{
-              padding: '5px 10px',
-              borderRadius: '100px',
-              background: isSpeaking ? 'rgba(34,197,94,0.25)' : 'rgba(255,255,255,0.06)',
-              border: isSpeaking ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.12)',
-              color: isSpeaking ? 'var(--primary)' : 'var(--text-secondary)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              fontSize: '10px',
-              fontWeight: 800,
-              transition: 'all 0.2s',
-              flexShrink: 0
-            }}
-          >
-            {isSpeaking ? <VolumeX size={12} /> : <Volume2 size={12} />}
-            <span>{isSpeaking ? 'Mute' : 'Listen'}</span>
-          </button>
+        {/* Top Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', zIndex: 1 }}>
+          <Sparkles size={18} color="#10b981" style={{ filter: 'drop-shadow(0 0 6px rgba(16,185,129,0.5))' }} />
+          <span style={{ fontSize: '13px', fontWeight: 900, color: '#10b981', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+            AI MONEY COACH ({(() => {
+              const hr = new Date().getHours();
+              return hr < 12 ? 'MORNING UPDATE' : hr < 17 ? 'MID-DAY UPDATE' : hr < 21 ? 'EVENING UPDATE' : 'NIGHT UPDATE';
+            })()})
+          </span>
         </div>
 
-        {/* Dynamic 1-line AI Insight */}
-        <div style={{ background: 'var(--bg-input)', padding: '10px 12px', borderRadius: '14px', border: '1px solid var(--border-input)', zIndex: 1 }}>
+        {/* Quote Message */}
+        <div style={{ zIndex: 1 }}>
           {(() => {
-            const activeLang = localStorage.getItem('zb_language') || 'en';
-            const coachArray = activeLang === 'hi' ? DAILY_COACH_TIPS_HI : DAILY_COACH_TIPS;
-            const dayOfMonth = new Date().getDate();
-            const dailyTip = coachArray[(dayOfMonth - 1) % coachArray.length];
+            const hr = new Date().getHours();
+            const timeGreeting = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
+            const timeEmoji = hr < 12 ? '🌅' : hr < 17 ? '🌤️' : hr < 21 ? '🌆' : '🌙';
 
-            let fullCoachText = '';
-            if (expenses === 0 && income === 0) {
-              fullCoachText = activeLang === 'hi'
-                ? `${dailyTip} व्यक्तिगत बजट कोचिंग पाने के लिए अपने लेन-देन दर्ज करना शुरू करें! 🧘`
-                : `${dailyTip} Start logging your transactions to get personalized budget coaching! 🧘`;
-            } else {
-              const savingsPctVal = income > 0 ? Math.round(((income - expenses) / income) * 100) : 0;
-              const topCatEntry = Object.entries(
-                currentMonthTransactions.filter(t => t.type === 'expense')
-                  .reduce((acc, t) => { acc[t.category] = (acc[t.category] || 0) + t.amount; return acc; }, {} as Record<string, number>)
-              ).sort((a, b) => b[1] - a[1])[0];
+            // Today's total spent
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todaySpent = currentMonthTransactions
+              .filter(t => t.type === 'expense' && t.date && t.date.startsWith(todayStr))
+              .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
 
-              if (activeLang === 'hi') {
-                if (savingsPctVal >= 30) fullCoachText = `आपने इस महीने ${savingsPctVal}% बचाया — बहुत बढ़िया! 🌟`;
-                else if (savingsPctVal >= 10) fullCoachText = `बचत ${savingsPctVal}% पर है — और बढ़ाएं! 🌱`;
-                else fullCoachText = `इस महीने बचत कम है। छोटे खर्चों को कम करें। ⚠️`;
-                if (topCatEntry) fullCoachText += ` ${topCatEntry[0]} में भारी खर्च (${currencySymbol}${Math.round(topCatEntry[1]).toLocaleString()})।`;
-              } else {
-                if (savingsPctVal >= 30) fullCoachText = `You saved ${savingsPctVal}% this month — amazing! 🌟`;
-                else if (savingsPctVal >= 10) fullCoachText = `Savings at ${savingsPctVal}% — keep pushing! 🌱`;
-                else fullCoachText = `Savings low this month. Cut micro-spends. ⚠️`;
-                if (topCatEntry) fullCoachText += ` Heavy ${topCatEntry[0]} spending (${currencySymbol}${Math.round(topCatEntry[1]).toLocaleString()}).`;
-              }
-            }
+            const statusMsg = todaySpent === 0
+              ? 'You\'ve spent ₹0 so far. Excellent discipline! Keep it up.'
+              : todaySpent <= 500
+              ? `You've spent ${currencySymbol}${todaySpent.toLocaleString()} today. Controlled pace, great job!`
+              : `You've spent ${currencySymbol}${todaySpent.toLocaleString()} today. Watch out for impulse treats!`;
+
+            const quoteText = `"${timeGreeting}, ${userName || 'User'}! ${statusMsg} ${timeEmoji}"`;
 
             return (
               <p
-                data-coach-text={fullCoachText}
-                style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0, fontWeight: 500, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any, overflow: 'hidden', wordBreak: 'break-word' }}
+                data-coach-text={quoteText}
+                style={{
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  lineHeight: 1.5,
+                  margin: 0,
+                  fontStyle: 'normal'
+                }}
               >
-                "{fullCoachText}"
+                {quoteText}
               </p>
             );
           })()}
         </div>
-
-        {/* Chat CTA */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '6px 0 2px 0', zIndex: 1 }}>
-          <Sparkles size={13} color="#10b981" />
-          <span style={{ fontSize: '11px', fontWeight: 800, color: '#10b981', letterSpacing: '0.02em' }}>Chat with Zen →</span>
-        </div>
       </div>
 
-      {/* ── Weekly Money Wrap + Monthly Letter ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-        {/* Weekly Money Wrap Card */}
-        <div
-          className="glass-panel animate-fade-in"
-          style={{
-            padding: '14px',
-            borderRadius: '18px',
-            background: 'linear-gradient(145deg, rgba(139,92,246,0.12) 0%, rgba(236,72,153,0.08) 100%)',
-            border: '1px solid rgba(139,92,246,0.2)',
-            cursor: 'pointer',
-            transition: 'transform 0.15s',
-            position: 'relative',
-            overflow: 'hidden'
-          }}
-          onClick={() => {
-            onOpenStory?.();
-          }}
-        >
-          <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '60px', height: '60px', background: 'rgba(139,92,246,0.15)', filter: 'blur(20px)', borderRadius: '50%', pointerEvents: 'none' }}></div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-            <div style={{ width: '28px', height: '28px', borderRadius: '10px', background: 'linear-gradient(135deg, #8b5cf6, #ec4899)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <BarChart3 size={14} color="#fff" />
-            </div>
-            <span style={{ fontSize: '10px', fontWeight: 900, color: '#c084fc', letterSpacing: '0.04em' }}>WEEKLY WRAP</span>
-          </div>
-          <div style={{ fontSize: '16px', fontWeight: 900, color: 'var(--text-primary)' }}>
-            {currencySymbol}{(() => {
-              const weekExpenses = currentMonthTransactions.filter(t => {
-                if (t.type !== 'expense') return false;
-                const txDate = new Date(t.date);
-                const now = new Date();
-                const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                return txDate >= weekAgo && txDate <= now;
-              });
-              return weekExpenses.reduce((s, t) => s + (Number(t.amount) || 0), 0).toLocaleString();
-            })()}
-          </div>
-          <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>This week's spending</span>
-          <div style={{ marginTop: '8px', fontSize: '9px', fontWeight: 800, color: '#a78bfa', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Share2 size={10} /> Share Card 📤
-          </div>
-        </div>
-
-        {/* Monthly Spotify-Style Letter Card */}
-        <div
-          className="glass-panel animate-fade-in"
+      {/* ── Two Large Pill Buttons: Weekly Money Wrapped & Monthly Story ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+        {/* Left Button: Weekly Money Wrapped */}
+        <button
+          type="button"
           onClick={() => onOpenStory?.()}
           style={{
-            padding: '14px',
-            borderRadius: '18px',
-            background: 'linear-gradient(145deg, rgba(16,185,129,0.12) 0%, rgba(59,130,246,0.08) 100%)',
-            border: '1px solid rgba(16,185,129,0.2)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justify: 'center',
+            padding: '22px 14px',
+            borderRadius: '24px',
+            background: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)',
+            border: 'none',
+            color: '#ffffff',
             cursor: 'pointer',
-            transition: 'transform 0.15s',
-            position: 'relative',
-            overflow: 'hidden'
+            boxShadow: '0 8px 24px rgba(79, 70, 229, 0.35)',
+            transition: 'transform 0.15s, boxShadow 0.15s',
+            outline: 'none'
           }}
         >
-          <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '60px', height: '60px', background: 'rgba(16,185,129,0.15)', filter: 'blur(20px)', borderRadius: '50%', pointerEvents: 'none' }}></div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-            <div style={{ width: '28px', height: '28px', borderRadius: '10px', background: 'linear-gradient(135deg, #10b981, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <BookOpen size={14} color="#fff" />
-            </div>
-            <span style={{ fontSize: '10px', fontWeight: 900, color: '#34d399', letterSpacing: '0.04em' }}>MONTHLY LETTER</span>
+          <div style={{ fontSize: '24px', marginBottom: '8px' }}>🎁</div>
+          <div style={{ fontSize: '15px', fontWeight: 900, color: '#ffffff', lineHeight: 1.2, textAlign: 'center' }}>
+            Weekly Money
           </div>
-          <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3 }}>
-            Your {new Date().toLocaleString('default', { month: 'long' })} Money Story 📖
+          <div style={{ fontSize: '15px', fontWeight: 900, color: '#ffffff', lineHeight: 1.2, textAlign: 'center' }}>
+            Wrapped
           </div>
-          <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>Spotify-style spending story</span>
-          <div style={{ marginTop: '8px', fontSize: '9px', fontWeight: 800, color: '#34d399', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            View Story →
+        </button>
+
+        {/* Right Button: Monthly Story (Spotify Style) */}
+        <button
+          type="button"
+          onClick={() => onOpenStory?.()}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justify: 'center',
+            padding: '22px 14px',
+            borderRadius: '24px',
+            background: 'linear-gradient(135deg, #a855f7 0%, #d946ef 100%)',
+            border: 'none',
+            color: '#ffffff',
+            cursor: 'pointer',
+            boxShadow: '0 8px 24px rgba(168, 85, 247, 0.35)',
+            transition: 'transform 0.15s, boxShadow 0.15s',
+            outline: 'none'
+          }}
+        >
+          <div style={{ fontSize: '24px', marginBottom: '8px' }}>🎵</div>
+          <div style={{ fontSize: '15px', fontWeight: 900, color: '#ffffff', lineHeight: 1.2, textAlign: 'center' }}>
+            Monthly Story
           </div>
-        </div>
+          <div style={{ fontSize: '13px', fontWeight: 800, color: 'rgba(255,255,255,0.9)', marginTop: '2px', textAlign: 'center' }}>
+            (Spotify Style)
+          </div>
+        </button>
       </div>
 
 
