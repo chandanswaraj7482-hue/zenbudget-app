@@ -1180,6 +1180,202 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </button>
       </div>
 
+      {/* ── ZEN MONEY SCORE CARD (Photo Matched) ── */}
+      {(() => {
+        const scoreVal = (() => {
+          if (transactions.length === 0) return 0;
+          let score = 70;
+          const totalInc = transactions.filter(t => t.type === 'income').reduce((s,t) => s + t.amount, 0);
+          const totalExp = transactions.filter(t => t.type === 'expense').reduce((s,t) => s + t.amount, 0);
+          const savingsPct = totalInc > 0 ? ((totalInc - totalExp)/totalInc)*100 : 0;
+          if (savingsPct >= 30) score += 20;
+          else if (savingsPct >= 20) score += 10;
+          else if (savingsPct < 0) score -= 20;
+          if (totalExp > 0 && budgets.length > 0) {
+            const overbudget = budgets.some(b => {
+              const catSpent = transactions.filter(t => t.type === 'expense' && t.category === b.category).reduce((s,t) => s + t.amount, 0);
+              return catSpent > b.limit;
+            });
+            if (overbudget) score -= 15;
+          }
+          return Math.max(0, Math.min(100, Math.round(score)));
+        })();
+
+        const statusTitle = transactions.length === 0
+          ? 'Start Logging! 📝'
+          : scoreVal >= 75
+          ? 'On Track! 🚀'
+          : scoreVal >= 50
+          ? 'Doing Fair! 🌱'
+          : 'Needs Focus ⚠️';
+
+        return (
+          <div
+            className="glass-panel animate-fade-in"
+            style={{
+              padding: '16px 18px',
+              borderRadius: '22px',
+              background: 'linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,41,59,0.85) 100%)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              display: 'flex',
+              alignItems: 'center',
+              justify: 'space-between',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+              cursor: 'pointer'
+            }}
+            onClick={() => onOpenAI?.()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div
+                style={{
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '16px',
+                  background: 'linear-gradient(135deg, #10b981 0%, #0d9488 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justify: 'center',
+                  boxShadow: '0 4px 14px rgba(16,185,129,0.35)',
+                  flexShrink: 0
+                }}
+              >
+                <Sparkles size={20} color="#ffffff" />
+              </div>
+              <div>
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 900,
+                    color: '#a78bfa',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase',
+                    display: 'block'
+                  }}
+                >
+                  ZEN MONEY SCORE
+                </span>
+                <h3
+                  style={{
+                    fontSize: '18px',
+                    fontWeight: 900,
+                    color: '#ffffff',
+                    margin: '2px 0 0 0',
+                    letterSpacing: '-0.01em'
+                  }}
+                >
+                  {statusTitle}
+                </h3>
+              </div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <span style={{ fontSize: '28px', fontWeight: 900, color: '#2dd4bf' }}>
+                {scoreVal}
+              </span>
+              <span style={{ fontSize: '14px', fontWeight: 700, color: '#64748b' }}>
+                /100
+              </span>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ── STREAK CARD (Photo Matched) ── */}
+      {(() => {
+        const uniqueDates = new Set(transactions.map(t => t.date ? t.date.split('T')[0] : ''));
+        uniqueDates.delete('');
+        const streakDays = Math.min(30, uniqueDates.size);
+
+        return (
+          <div
+            className="glass-panel animate-fade-in"
+            style={{
+              padding: '16px 18px',
+              borderRadius: '22px',
+              background: 'linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,41,59,0.85) 100%)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.3)'
+            }}
+          >
+            {/* Top Row */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div
+                  style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '50%',
+                    background: 'rgba(245,158,11,0.15)',
+                    border: '1px solid rgba(245,158,11,0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justify: 'center',
+                    fontSize: '18px',
+                    flexShrink: 0
+                  }}
+                >
+                  🔥
+                </div>
+                <div>
+                  <h4 style={{ fontSize: '17px', fontWeight: 900, color: '#ffffff', margin: 0 }}>
+                    {streakDays} Days Streak 🔥
+                  </h4>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: '#f59e0b', display: 'block', marginTop: '1px' }}>
+                    Under Budget Goal
+                  </span>
+                </div>
+              </div>
+
+              {/* Active Badge */}
+              <div
+                style={{
+                  background: 'rgba(245,158,11,0.15)',
+                  border: '1px solid rgba(245,158,11,0.3)',
+                  padding: '4px 10px',
+                  borderRadius: '100px',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  color: '#f59e0b',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                ⚡ Active
+              </div>
+            </div>
+
+            {/* Separator */}
+            <div style={{ width: '100%', height: '1px', background: 'rgba(255,255,255,0.06)' }}></div>
+
+            {/* Bottom Note & Action Link */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '11px', color: '#818cf8', fontWeight: 600 }}>
+                Keep daily spend under limit to grow streak!
+              </span>
+              <button
+                type="button"
+                onClick={() => onViewAllTransactionsClick?.()}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#f59e0b',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  textDecoration: 'underline',
+                  cursor: 'pointer',
+                  padding: 0
+                }}
+              >
+                view stats
+              </button>
+            </div>
+          </div>
+        );
+      })()}
+
 
       {/* Zen Pet Companion */}
       <ZenPet
