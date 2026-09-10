@@ -46,18 +46,20 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
 
-  const filteredTx = transactions.filter(t => {
-    // 1. User Filter Check
+  // Helper for filtering transactions by user filter (me / couple / partner ID)
+  const userFilteredTx = transactions.filter(t => {
     if (userFilter === 'me') {
-      if (t.user_id && t.user_id !== currentProfileId) return false;
+      if ((t as any).isPartnerTransaction) return false;
+      if (t.user_id && currentProfileId && t.user_id !== currentProfileId) return false;
+      return true;
     } else if (userFilter === 'couple') {
-      // Show all
+      return true;
     } else {
-      // Specific partner selected
-      if (t.user_id !== userFilter) return false;
+      return (t as any).isPartnerTransaction || t.user_id === userFilter || (t as any).profile_id === userFilter;
     }
+  });
 
-    // 2. Timeframe Check
+  const filteredTx = userFilteredTx.filter(t => {
     if (timeframe === 'month') {
       const txDate = new Date(t.date);
       return txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear;
@@ -102,7 +104,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
       const d = new Date();
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split('T')[0];
-      const amt = transactions
+      const amt = userFilteredTx
         .filter(t => t.type === 'expense' && t.date === dateStr)
         .reduce((sum, t) => sum + t.amount, 0);
       dailyExpenses.push({
@@ -131,7 +133,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
 
   // --- Money Streak ---
   const calculateStreak = () => {
-    if (!transactions || transactions.length === 0) return 0;
+    if (!userFilteredTx || userFilteredTx.length === 0) return 0;
 
     const savedDailyLimit = parseInt(localStorage.getItem('zb_daily_limit') || '1000', 10);
     const dailyLimit = Math.max(100, savedDailyLimit);
@@ -141,7 +143,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
     const todayStr = now.toDateString();
 
     // Check today's expenses
-    const todayExpenses = transactions
+    const todayExpenses = userFilteredTx
       .filter(t => t.type === 'expense' && new Date(t.date).toDateString() === todayStr)
       .reduce((sum, t) => sum + t.amount, 0);
 
@@ -154,7 +156,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
       const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
       const dStr = d.toDateString();
 
-      const dayTxs = transactions.filter(t => t.type === 'expense' && new Date(t.date).toDateString() === dStr);
+      const dayTxs = userFilteredTx.filter(t => t.type === 'expense' && new Date(t.date).toDateString() === dStr);
       if (dayTxs.length === 0) continue; // Skip days without logged expenses
 
       const daySpent = dayTxs.reduce((sum, t) => sum + t.amount, 0);
@@ -496,7 +498,21 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
   const renderAccountBalanceChart = () => {
     if (!accounts || accounts.length === 0) return null;
 
-    const totalBalance = accounts.reduce((sum, a) => sum + (a.balance || 0), 0);
+    const filteredAccounts = accounts.filter(a => {
+      if (userFilter === 'me') {
+        if ((a as any).isFamilyAccount) return false;
+        if (a.user_id && currentProfileId && a.user_id !== currentProfileId) return false;
+        return true;
+      } else if (userFilter === 'couple') {
+        return true;
+      } else {
+        return (a as any).isFamilyAccount || a.user_id === userFilter;
+      }
+    });
+
+    if (!filteredAccounts || filteredAccounts.length === 0) return null;
+
+    const totalBalance = filteredAccounts.reduce((sum, a) => sum + (a.balance || 0), 0);
     if (totalBalance <= 0) return null;
 
     const accountColors = [
@@ -504,7 +520,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
       '#22c55e', '#ef4444', '#06b6d4', '#f97316', '#a855f7'
     ];
 
-    const accountData = accounts
+    const accountData = filteredAccounts
       .filter(a => (a.balance || 0) > 0)
       .map((a, i) => {
         const isFamilyAcc = (a as any).isFamilyAccount;
