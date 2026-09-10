@@ -820,7 +820,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      {/* ─── My Accounts in Wallet Section (Screenshot 1) ─── */}
+      {/* ─── My Accounts in Wallet Section ─── */}
       <div className="glass-panel" style={{
         padding: '16px 18px',
         display: 'flex',
@@ -875,8 +875,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </button>
           </div>
         </div>
-
-        {/* Accounts Grid - Enforced 2 Cards Per Row (2 Columns) */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px' }}>
           {myAccounts.map((acc, index) => {
             const defaultColors = ['#0284c7', '#ea580c', '#7c3aed', '#22c55e', '#06b6d4', '#ec4899', '#f59e0b'];
@@ -894,8 +892,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   justifyContent: 'space-between',
                   minHeight: '74px',
                   boxShadow: '0 4px 14px rgba(0,0,0,0.18)',
-                  position: 'relative',
-                  overflow: 'hidden'
+                  position: 'relative'
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -997,196 +994,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         />
       )}
 
-      {/* Savings Rate Card */}
-      {income > 0 && (
-        <div className="glass-panel" style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '14px 16px',
-          background: 'var(--bg-card)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          borderRadius: '20px',
-          marginBottom: '14px',
-          boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '12px', backgroundColor: 'rgba(16, 185, 129, 0.12)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <TrendingUp size={18} />
-            </div>
-            <div>
-              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                {t('monthly_savings_rate')}
-              </span>
-              <p style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', margin: '2px 0 0 0' }}>
-                {savingsRate > 0 ? `${savingsRate}% ${t('saved_rate')}` : `0% ${t('saved_rate')}`}
-              </p>
-            </div>
-          </div>
-
-          <div style={{ width: '48px', height: '48px', position: 'relative' }}>
-            <svg width="48" height="48" viewBox="0 0 36 36">
-              <circle cx="18" cy="18" r="16" fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth="3" />
-              <circle
-                cx="18"
-                cy="18"
-                r="16"
-                fill="none"
-                stroke="var(--primary)"
-                strokeWidth="3"
-                strokeDasharray="100 100"
-                strokeDashoffset={100 - Math.max(0, Math.min(100, savingsRate))}
-                strokeLinecap="round"
-                className="progress-ring-circle"
-              />
-            </svg>
-            <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '10px', fontWeight: 800, color: 'var(--text-primary)' }}>
-              {savingsRate > 0 ? `${savingsRate}%` : '0%'}
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* ── AI Money Coach Card (Matches User's Exact UI Design) ── */}
-      <div
-        className="glass-panel animate-fade-in"
-        onClick={() => onOpenAI?.()}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          padding: '18px 20px',
-          background: 'linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(15,23,42,0.85) 100%)',
-          border: '1px solid rgba(16, 185, 129, 0.3)',
-          borderRadius: '24px',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
-          position: 'relative',
-          overflow: 'hidden',
-          cursor: 'pointer',
-          transition: 'transform 0.15s'
-        }}
-      >
-        {/* Glow accent */}
-        <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '100px', height: '100px', background: 'rgba(16,185,129,0.18)', filter: 'blur(30px)', borderRadius: '50%', pointerEvents: 'none' }}></div>
-
-        {/* Top Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', zIndex: 1 }}>
-          <Sparkles size={18} color="#10b981" style={{ filter: 'drop-shadow(0 0 6px rgba(16,185,129,0.5))' }} />
-          <span style={{ fontSize: '13px', fontWeight: 900, color: '#10b981', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-            AI MONEY COACH ({(() => {
-              const hr = new Date().getHours();
-              return hr < 12 ? 'MORNING UPDATE' : hr < 17 ? 'MID-DAY UPDATE' : hr < 21 ? 'EVENING UPDATE' : 'NIGHT UPDATE';
-            })()})
-          </span>
-        </div>
-
-        {/* Quote Message */}
-        <div style={{ zIndex: 1 }}>
-          {(() => {
-            const hr = new Date().getHours();
-            const timeGreeting = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
-            const timeEmoji = hr < 12 ? '🌅' : hr < 17 ? '🌤️' : hr < 21 ? '🌆' : '🌙';
-
-            // Today's total spent
-            const todayStr = new Date().toISOString().split('T')[0];
-            const todaySpent = currentMonthTransactions
-              .filter(t => t.type === 'expense' && t.date && t.date.startsWith(todayStr))
-              .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-
-            const statusMsg = todaySpent === 0
-              ? 'You\'ve spent ₹0 so far. Excellent discipline! Keep it up.'
-              : todaySpent <= 500
-              ? `You've spent ${currencySymbol}${todaySpent.toLocaleString()} today. Controlled pace, great job!`
-              : `You've spent ${currencySymbol}${todaySpent.toLocaleString()} today. Watch out for impulse treats!`;
-
-            const quoteText = `"${timeGreeting}, ${userName || 'User'}! ${statusMsg} ${timeEmoji}"`;
-
-            return (
-              <p
-                data-coach-text={quoteText}
-                style={{
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  color: 'var(--text-primary)',
-                  lineHeight: 1.5,
-                  margin: 0,
-                  fontStyle: 'normal'
-                }}
-              >
-                {quoteText}
-              </p>
-            );
-          })()}
-        </div>
-
-        {/* Chat CTA */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '12px', paddingTop: '10px', borderTop: '1px solid rgba(16,185,129,0.15)', zIndex: 1 }}>
-          <Sparkles size={13} color="#10b981" />
-          <span style={{ fontSize: '12px', fontWeight: 800, color: '#10b981', letterSpacing: '0.02em' }}>Chat with Zen →</span>
-        </div>
-      </div>
-
-      {/* ── Two Large Pill Buttons: Weekly Money Wrapped & Monthly Story ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-        {/* Left Button: Weekly Money Wrapped */}
-        <button
-          type="button"
-          onClick={() => onOpenStory?.()}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justify: 'center',
-            padding: '22px 14px',
-            borderRadius: '24px',
-            background: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)',
-            border: 'none',
-            color: '#ffffff',
-            cursor: 'pointer',
-            boxShadow: '0 8px 24px rgba(79, 70, 229, 0.35)',
-            transition: 'transform 0.15s, boxShadow 0.15s',
-            outline: 'none'
-          }}
-        >
-          <div style={{ fontSize: '24px', marginBottom: '8px' }}>🎁</div>
-          <div style={{ fontSize: '15px', fontWeight: 900, color: '#ffffff', lineHeight: 1.2, textAlign: 'center' }}>
-            Weekly Money
-          </div>
-          <div style={{ fontSize: '15px', fontWeight: 900, color: '#ffffff', lineHeight: 1.2, textAlign: 'center' }}>
-            Wrapped
-          </div>
-        </button>
-
-        {/* Right Button: Monthly Story (Spotify Style) */}
-        <button
-          type="button"
-          onClick={() => onOpenStory?.()}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justify: 'center',
-            padding: '22px 14px',
-            borderRadius: '24px',
-            background: 'linear-gradient(135deg, #a855f7 0%, #d946ef 100%)',
-            border: 'none',
-            color: '#ffffff',
-            cursor: 'pointer',
-            boxShadow: '0 8px 24px rgba(168, 85, 247, 0.35)',
-            transition: 'transform 0.15s, boxShadow 0.15s',
-            outline: 'none'
-          }}
-        >
-          <div style={{ fontSize: '24px', marginBottom: '8px' }}>🎵</div>
-          <div style={{ fontSize: '15px', fontWeight: 900, color: '#ffffff', lineHeight: 1.2, textAlign: 'center' }}>
-            Monthly Story
-          </div>
-          <div style={{ fontSize: '13px', fontWeight: 800, color: 'rgba(255,255,255,0.9)', marginTop: '2px', textAlign: 'center' }}>
-            (Spotify Style)
-          </div>
-        </button>
-      </div>
-
-      {/* ── ZEN MONEY SCORE CARD (Photo Matched) ── */}
+      {/* ── ZEN MONEY SCORE CARD (Placed Just Below Quick Capture) ── */}
       {(() => {
         const scoreVal = (() => {
           if (transactions.length === 0) return 0;
@@ -1221,17 +1029,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
             style={{
               padding: '16px 18px',
               borderRadius: '22px',
-              background: 'linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,41,59,0.85) 100%)',
+              background: 'linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.95) 100%)',
               border: '1px solid rgba(255,255,255,0.08)',
               display: 'flex',
               alignItems: 'center',
-              justify: 'space-between',
+              justifyContent: 'space-between',
+              gap: '12px',
               boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
               cursor: 'pointer'
             }}
             onClick={() => onOpenAI?.()}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: '1 1 auto', minWidth: 0 }}>
               <div
                 style={{
                   width: '44px',
@@ -1240,14 +1049,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   background: 'linear-gradient(135deg, #10b981 0%, #0d9488 100%)',
                   display: 'flex',
                   alignItems: 'center',
-                  justify: 'center',
+                  justifyContent: 'center',
                   boxShadow: '0 4px 14px rgba(16,185,129,0.35)',
                   flexShrink: 0
                 }}
               >
                 <Sparkles size={20} color="#ffffff" />
               </div>
-              <div>
+              <div style={{ minWidth: 0, flex: '1 1 auto' }}>
                 <span
                   style={{
                     fontSize: '11px',
@@ -1262,18 +1071,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </span>
                 <h3
                   style={{
-                    fontSize: '18px',
+                    fontSize: '17px',
                     fontWeight: 900,
                     color: '#ffffff',
                     margin: '2px 0 0 0',
-                    letterSpacing: '-0.01em'
+                    letterSpacing: '-0.01em',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
                   }}
                 >
                   {statusTitle}
                 </h3>
               </div>
             </div>
-            <div style={{ textAlign: 'right' }}>
+            <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: '12px', display: 'flex', alignItems: 'baseline', gap: '2px' }}>
               <span style={{ fontSize: '28px', fontWeight: 900, color: '#2dd4bf' }}>
                 {scoreVal}
               </span>
@@ -1285,7 +1097,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         );
       })()}
 
-      {/* ── STREAK CARD (Photo Matched) ── */}
+      {/* ── STREAK CARD (Placed Just Below Score Card) ── */}
       {(() => {
         const uniqueDates = new Set(transactions.map(t => t.date ? t.date.split('T')[0] : ''));
         uniqueDates.delete('');
@@ -1297,7 +1109,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             style={{
               padding: '16px 18px',
               borderRadius: '22px',
-              background: 'linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,41,59,0.85) 100%)',
+              background: 'linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.95) 100%)',
               border: '1px solid rgba(255,255,255,0.08)',
               display: 'flex',
               flexDirection: 'column',
@@ -1317,7 +1129,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     border: '1px solid rgba(245,158,11,0.3)',
                     display: 'flex',
                     alignItems: 'center',
-                    justify: 'center',
+                    justifyContent: 'center',
                     fontSize: '18px',
                     flexShrink: 0
                   }}
@@ -1354,7 +1166,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             {/* Separator */}
-            <div style={{ width: '100%', height: '1px', background: 'rgba(255,255,255,0.06)' }}></div>
+            <div style={{ width: '100%', height: '1px', background: 'rgba(255,255,255,0.06)' }} />
 
             {/* Bottom Note & Action Link */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -1382,6 +1194,119 @@ export const Dashboard: React.FC<DashboardProps> = ({
         );
       })()}
 
+      {/* ── ZEN AI MONEY COACH CARD (With Chat with Zen Button) ── */}
+      {(() => {
+        const todayIdx = new Date().getDate() % DAILY_COACH_TIPS.length;
+        const todayTip = DAILY_COACH_TIPS[todayIdx];
+
+        return (
+          <div
+            className="glass-panel animate-fade-in"
+            style={{
+              padding: '18px 20px',
+              borderRadius: '22px',
+              background: 'linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.95) 100%)',
+              border: '1px solid rgba(139,92,246,0.25)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '14px',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Brain size={18} style={{ color: '#a78bfa' }} />
+                <span style={{ fontSize: '12px', fontWeight: 900, color: '#a78bfa', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                  ZEN AI MONEY COACH
+                </span>
+              </div>
+              <span style={{ fontSize: '10px', fontWeight: 800, padding: '3px 8px', borderRadius: '100px', background: 'rgba(167,139,250,0.15)', color: '#c084fc', border: '1px solid rgba(167,139,250,0.3)' }}>
+                🤖 AI Powered
+              </span>
+            </div>
+
+            <p style={{ fontSize: '13px', color: '#e2e8f0', margin: 0, lineHeight: '1.5', fontWeight: 500, fontStyle: 'italic' }}>
+              "{todayTip}"
+            </p>
+
+            <button
+              type="button"
+              onClick={() => onOpenAI?.()}
+              style={{
+                width: '100%',
+                padding: '11px 16px',
+                borderRadius: '14px',
+                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                color: '#ffffff',
+                border: 'none',
+                fontWeight: 800,
+                fontSize: '13px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                boxShadow: '0 4px 14px rgba(99,102,241,0.35)',
+                transition: 'transform 0.15s ease'
+              }}
+            >
+              <Sparkles size={16} />
+              <span>Chat with Zen →</span>
+            </button>
+          </div>
+        );
+      })()}
+
+      {/* ── SPOTIFY STYLE WRAPPED BUTTONS (2 PILLS) ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+        <button
+          type="button"
+          onClick={() => onOpenStory?.()}
+          style={{
+            padding: '12px 14px',
+            borderRadius: '16px',
+            background: 'linear-gradient(135deg, #4f46e5 0%, #3730a3 100%)',
+            color: '#ffffff',
+            border: '1px solid rgba(255,255,255,0.15)',
+            fontWeight: 800,
+            fontSize: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            cursor: 'pointer',
+            boxShadow: '0 4px 14px rgba(79,70,229,0.3)'
+          }}
+        >
+          <BarChart3 size={15} />
+          <span>Weekly Wrapped 🎵</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onOpenStory?.()}
+          style={{
+            padding: '12px 14px',
+            borderRadius: '16px',
+            background: 'linear-gradient(135deg, #a855f7 0%, #7e22ce 100%)',
+            color: '#ffffff',
+            border: '1px solid rgba(255,255,255,0.15)',
+            fontWeight: 800,
+            fontSize: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            cursor: 'pointer',
+            boxShadow: '0 4px 14px rgba(168,85,247,0.3)'
+          }}
+        >
+          <Sparkles size={15} />
+          <span>Monthly Story 🎧</span>
+        </button>
+      </div>
 
       {/* Zen Pet Companion */}
       <ZenPet
