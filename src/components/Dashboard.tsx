@@ -1209,20 +1209,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             overflow: 'hidden'
           }}
           onClick={() => {
-            // Share as image or just show info
-            const weekExpenses = currentMonthTransactions.filter(t => {
-              if (t.type !== 'expense') return false;
-              const txDate = new Date(t.date);
-              const now = new Date();
-              const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-              return txDate >= weekAgo && txDate <= now;
-            });
-            const weekTotal = weekExpenses.reduce((s, t) => s + (Number(t.amount) || 0), 0);
-            const weekDailyAvg = Math.round(weekTotal / 7);
-            const topWeekCat = Object.entries(
-              weekExpenses.reduce((acc, t) => { acc[t.category] = (acc[t.category] || 0) + t.amount; return acc; }, {} as Record<string, number>)
-            ).sort((a, b) => b[1] - a[1])[0];
-            alert(`📊 Weekly Wrap\n\nTotal Spent: ${currencySymbol}${weekTotal.toLocaleString()}\nDaily Avg: ${currencySymbol}${weekDailyAvg.toLocaleString()}/day\nTop Category: ${topWeekCat ? `${topWeekCat[0]} (${currencySymbol}${Math.round(topWeekCat[1]).toLocaleString()})` : 'None'}`);
+            onOpenStory?.();
           }}
         >
           <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '60px', height: '60px', background: 'rgba(139,92,246,0.15)', filter: 'blur(20px)', borderRadius: '50%', pointerEvents: 'none' }}></div>
