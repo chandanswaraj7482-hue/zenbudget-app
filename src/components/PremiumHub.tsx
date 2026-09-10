@@ -7,7 +7,9 @@ import {
   ChevronLeft, 
   ChevronRight, 
   AlertTriangle, 
-  MessageCircle
+  MessageCircle,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import type { Transaction, CategoryBudget } from '../types';
 import confetti from 'canvas-confetti';
@@ -34,18 +36,50 @@ export const PremiumHub: React.FC<PremiumHubProps> = ({
   const [activeStorySlide, setActiveStorySlide] = useState(0);
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
   const [isStreakExpanded, setIsStreakExpanded] = useState(false);
+  const [isSpeakingCoach, setIsSpeakingCoach] = useState(false);
   const [audio] = useState(() => {
     const a = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
     a.loop = true;
     return a;
   });
 
-  // Clean audio on unmount
+  // Clean audio & speech on unmount
   useEffect(() => {
     return () => {
       audio.pause();
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
     };
   }, [audio]);
+
+  const handleToggleSpeech = (textToSpeak: string) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      alert(t('speech_not_supported', { defaultValue: 'Text-to-speech is not supported on this browser.' }));
+      return;
+    }
+
+    if (isSpeakingCoach) {
+      window.speechSynthesis.cancel();
+      setIsSpeakingCoach(false);
+    } else {
+      window.speechSynthesis.cancel();
+      const cleanText = textToSpeak.replace(/["""]/g, '').trim();
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.rate = 0.95;
+      utterance.pitch = 1.0;
+
+      utterance.onend = () => {
+        setIsSpeakingCoach(false);
+      };
+      utterance.onerror = () => {
+        setIsSpeakingCoach(false);
+      };
+
+      setIsSpeakingCoach(true);
+      window.speechSynthesis.speak(utterance);
+    }
+  };
 
   const toggleMusic = () => {
     if (isPlayingMusic) {
@@ -535,11 +569,45 @@ export const PremiumHub: React.FC<PremiumHubProps> = ({
         textAlign: 'left',
         boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-          <Sparkles size={16} color="var(--primary)" />
-          <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--primary)' }}>
-            {coachInsight.title}
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Sparkles size={16} color="var(--primary)" />
+            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--primary)' }}>
+              {coachInsight.title}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => handleToggleSpeech(coachInsight.text)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              padding: '3px 10px',
+              borderRadius: '100px',
+              background: isSpeakingCoach ? 'rgba(16, 185, 129, 0.25)' : 'rgba(255, 255, 255, 0.08)',
+              border: isSpeakingCoach ? '1px solid #10b981' : '1px solid rgba(255, 255, 255, 0.2)',
+              color: isSpeakingCoach ? '#34d399' : 'var(--text-primary)',
+              fontSize: '11px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: isSpeakingCoach ? '0 0 10px rgba(16, 185, 129, 0.4)' : 'none'
+            }}
+            title={isSpeakingCoach ? "Stop sound" : "Listen to coach advice"}
+          >
+            {isSpeakingCoach ? (
+              <>
+                <VolumeX size={13} style={{ color: '#34d399' }} className="animate-pulse" />
+                <span>{t('stop', { defaultValue: 'Stop' })}</span>
+              </>
+            ) : (
+              <>
+                <Volume2 size={13} style={{ color: 'var(--primary)' }} />
+                <span>{t('listen', { defaultValue: 'Listen' })}</span>
+              </>
+            )}
+          </button>
         </div>
         <p style={{ fontSize: '13px', color: 'var(--text-primary)', lineHeight: 1.5, margin: 0, fontWeight: 500 }}>
           "{coachInsight.text}"

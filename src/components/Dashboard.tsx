@@ -224,8 +224,41 @@ export const Dashboard: React.FC<DashboardProps> = ({
       setClaimedBadges([]);
     };
     window.addEventListener('zenbudget_reset_all_data', handleResetEvent);
-    return () => window.removeEventListener('zenbudget_reset_all_data', handleResetEvent);
+    return () => {
+      window.removeEventListener('zenbudget_reset_all_data', handleResetEvent);
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
   }, []);
+
+  const handleToggleSpeech = (textToSpeak: string) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      alert(t('speech_not_supported', { defaultValue: 'Text-to-speech is not supported on this browser.' }));
+      return;
+    }
+
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    } else {
+      window.speechSynthesis.cancel();
+      const cleanText = textToSpeak.replace(/["""]/g, '').trim();
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.rate = 0.95;
+      utterance.pitch = 1.0;
+
+      utterance.onend = () => {
+        setIsSpeaking(false);
+      };
+      utterance.onerror = () => {
+        setIsSpeaking(false);
+      };
+
+      setIsSpeaking(true);
+      window.speechSynthesis.speak(utterance);
+    }
+  };
 
   useEffect(() => {
     const cached = localStorage.getItem(`zb_challenges_${currentProfileId}`) || localStorage.getItem('zb_challenges');
@@ -1164,16 +1197,50 @@ export const Dashboard: React.FC<DashboardProps> = ({
               overflow: 'hidden'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Sparkles size={18} style={{ color: '#10b981' }} />
                 <span style={{ fontSize: '12px', fontWeight: 900, color: '#10b981', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                   {t('ai_money_coach_tag', { defaultValue: `AI MONEY COACH (${updateTag})`, tag: updateTag })}
                 </span>
               </div>
-              <span style={{ fontSize: '10px', fontWeight: 800, padding: '3px 8px', borderRadius: '100px', background: 'rgba(16,185,129,0.15)', color: '#34d399', border: '1px solid rgba(16,185,129,0.3)' }}>
-                🤖 {t('ai_powered', { defaultValue: 'AI Powered' })}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '10px', fontWeight: 800, padding: '3px 8px', borderRadius: '100px', background: 'rgba(16,185,129,0.15)', color: '#34d399', border: '1px solid rgba(16,185,129,0.3)' }}>
+                  🤖 {t('ai_powered', { defaultValue: 'AI Powered' })}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleToggleSpeech(coachMessage)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '4px 12px',
+                    borderRadius: '100px',
+                    background: isSpeaking ? 'rgba(16, 185, 129, 0.25)' : 'rgba(255, 255, 255, 0.08)',
+                    border: isSpeaking ? '1px solid #10b981' : '1px solid rgba(255, 255, 255, 0.2)',
+                    color: isSpeaking ? '#34d399' : '#f8fafc',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    boxShadow: isSpeaking ? '0 0 10px rgba(16, 185, 129, 0.4)' : 'none'
+                  }}
+                  title={isSpeaking ? "Stop sound" : "Listen to coach advice"}
+                >
+                  {isSpeaking ? (
+                    <>
+                      <VolumeX size={13} style={{ color: '#34d399' }} className="animate-pulse" />
+                      <span>{t('stop', { defaultValue: 'Stop' })}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Volume2 size={13} style={{ color: '#10b981' }} />
+                      <span>{t('listen', { defaultValue: 'Listen' })}</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
             <p style={{ fontSize: '14px', color: '#f1f5f9', margin: 0, lineHeight: '1.5', fontWeight: 600 }}>
