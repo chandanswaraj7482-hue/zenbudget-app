@@ -40,6 +40,12 @@ export const HelpModal: React.FC<HelpModalProps> = ({
   if (!isOpen) return null;
 
   const [activeTab, setActiveTab] = useState<'faq' | 'bot' | 'feedback'>(initialTab);
+
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab(initialTab);
+    }
+  }, [isOpen, initialTab]);
   const [rating, setRating] = useState<number>(5);
   const [comment, setComment] = useState<string>('');
   const [feedbackSuccess, setFeedbackSuccess] = useState<boolean>(false);
@@ -501,15 +507,16 @@ ${JSON.stringify(structCtx, null, 2)}`;
         className="glass-panel"
         style={{
           width: '100%',
-          maxWidth: '360px',
-          height: '480px',
+          maxWidth: '480px',
+          height: '85vh',
+          maxHeight: '640px',
           display: 'flex',
           flexDirection: 'column',
-          padding: '20px',
-          borderRadius: '24px',
+          padding: '18px',
+          borderRadius: '26px',
           position: 'relative',
-          border: '1px solid rgba(34, 197, 94, 0.2)',
-          boxShadow: '0 0 30px rgba(34, 197, 94, 0.1)',
+          border: '1px solid rgba(16, 185, 129, 0.3)',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(16, 185, 129, 0.15)',
           animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards'
         }}
         onClick={(e) => e.stopPropagation()}
