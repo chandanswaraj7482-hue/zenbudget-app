@@ -5,12 +5,29 @@ import confetti from 'canvas-confetti';
  * Uses Web Audio API to play responsive chimes without downloading sound files.
  */
 
-export const playNotificationSound = (type: 'success' | 'warning' | 'info' | 'income' | 'error' | 'celebration') => {
+// Shared AudioContext for zero-latency audio playback
+let sharedAudioCtx: AudioContext | null = null;
+
+const getAudioContext = (): AudioContext | null => {
   try {
     const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioContextClass) return;
-    
-    const ctx = new AudioContextClass();
+    if (!AudioContextClass) return null;
+    if (!sharedAudioCtx || sharedAudioCtx.state === 'closed') {
+      sharedAudioCtx = new AudioContextClass();
+    }
+    if (sharedAudioCtx.state === 'suspended') {
+      sharedAudioCtx.resume().catch(() => {});
+    }
+    return sharedAudioCtx;
+  } catch (err) {
+    return null;
+  }
+};
+
+export const playNotificationSound = (type: 'success' | 'warning' | 'info' | 'income' | 'error' | 'celebration') => {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
     
     // Play a single oscillator tone helper
     const playTone = (freq: number, type: OscillatorType, duration: number, delay = 0, vol = 0.08) => {
@@ -49,7 +66,7 @@ export const playNotificationSound = (type: 'success' | 'warning' | 'info' | 'in
       playTone(440.00, 'sine', 0.12, 0);
     }
   } catch (err) {
-    console.warn('Audio playback failed or was blocked by browser autoplay rules:', err);
+    console.warn('Audio playback failed:', err);
   }
 };
 
@@ -58,24 +75,24 @@ export const playCelebrationSound = () => playNotificationSound('celebration');
 
 export const playClickSound = () => {
   try {
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioContextClass) return;
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
     const osc = ctx.createOscillator();
     const gainNode = ctx.createGain();
     
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(600, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.05);
+    osc.frequency.setValueAtTime(750, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.035);
     
-    gainNode.gain.setValueAtTime(0.04, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+    gainNode.gain.setValueAtTime(0.06, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.035);
     
     osc.connect(gainNode);
     gainNode.connect(ctx.destination);
     
     osc.start();
-    osc.stop(ctx.currentTime + 0.05);
+    osc.stop(ctx.currentTime + 0.035);
   } catch (err) {}
 };
 
@@ -122,3 +139,32 @@ export const triggerFireworksCelebration = () => {
     console.warn('Fireworks trigger warning:', e);
   }
 };
+
+/**
+ * 🔊 GLOBAL AUTOMATIC SFX LISTENER FOR ALL BUTTONS & INTERACTIVE ELEMENTS
+ */
+if (typeof window !== 'undefined') {
+  let lastTouchTime = 0;
+
+  const handleGlobalInteraction = (e: Event) => {
+    try {
+      const now = Date.now();
+      if (now - lastTouchTime < 30) return; // Debounce rapid multi-events
+
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+
+      // Check if target or parent is an interactive button/link/card
+      const clickableEl = target.closest('button, a, [role="button"], input[type="button"], input[type="submit"], input[type="reset"], summary, [onclick]');
+      
+      if (clickableEl) {
+        lastTouchTime = now;
+        playClickSound();
+      }
+    } catch (err) {
+      // Ignore audio errors silently
+    }
+  };
+
+  window.addEventListener('pointerdown', handleGlobalInteraction, { capture: true, passive: true });
+}
