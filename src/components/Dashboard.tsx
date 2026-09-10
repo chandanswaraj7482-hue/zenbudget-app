@@ -1117,6 +1117,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
             );
           })()}
         </div>
+
+        {/* Chat CTA */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '12px', paddingTop: '10px', borderTop: '1px solid rgba(16,185,129,0.15)', zIndex: 1 }}>
+          <Sparkles size={13} color="#10b981" />
+          <span style={{ fontSize: '12px', fontWeight: 800, color: '#10b981', letterSpacing: '0.02em' }}>Chat with Zen →</span>
+        </div>
       </div>
 
       {/* ── Two Large Pill Buttons: Weekly Money Wrapped & Monthly Story ── */}
