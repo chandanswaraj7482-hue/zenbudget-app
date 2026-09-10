@@ -2097,7 +2097,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               { label: 'Features', id: 'features', key: 'features', hasDropdown: true },
               { label: 'Conditions', id: 'conditions', key: 'conditions', hasDropdown: true },
               { label: 'Inside App', id: 'inside-app', key: 'inside app', hasDropdown: true },
-              { label: 'Financial Quiz', id: 'quiz', key: 'quiz', hasDropdown: false },
+              { label: 'Financial Quiz', id: 'quiz', key: 'quiz', hasDropdown: false, badge: 'FREE' },
               { label: 'Toolkit', id: 'toolkit', key: 'toolkit', hasDropdown: false },
               { label: 'Stories', id: 'community', key: 'stories', hasDropdown: false }
             ].map(link => (
@@ -2124,18 +2124,18 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                       scrollTo(link.id);
                     }
                   }} 
-                  style={{ padding: '8px 16px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, color: (activeDropdown === link.key || activePage === link.key) ? t.text : t.textMuted, background: (activeDropdown === link.key || activePage === link.key) ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)') : 'transparent', cursor: 'pointer', border: 'none', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  style={{ padding: '8px 16px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, color: (activeDropdown === link.key || activePage === link.key) ? t.text : t.textMuted, background: (activeDropdown === link.key || activePage === link.key) ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)') : 'transparent', cursor: 'pointer', border: 'none', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '6px' }}
                 >
-                  {link.label}
+                  <span>{link.label}</span>
+                  {link.badge && (
+                    <span style={{ background: '#10b981', color: '#fff', fontSize: '9px', fontWeight: 800, padding: '2px 6px', borderRadius: '100px', textTransform: 'uppercase' }}>
+                      {link.badge}
+                    </span>
+                  )}
                   {link.hasDropdown && <ChevronDown size={14} style={{ opacity: 0.6, transform: activeDropdown === link.key ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />}
                 </button>
               </li>
             ))}
-            <li>
-              <button onClick={() => navigateToPage('quiz')} style={{ padding: '8px 14px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, color: '#10b981', cursor: 'pointer', border: 'none', background: 'transparent', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                Quiz <span style={{ background: '#10b981', color: '#fff', fontSize: '9px', fontWeight: 800, padding: '2px 6px', borderRadius: '100px', textTransform: 'uppercase' }}>FREE</span>
-              </button>
-            </li>
           </ul>
 
           {/* Right Header Actions */}
