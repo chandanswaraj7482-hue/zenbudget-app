@@ -327,9 +327,12 @@ export const HelpModal: React.FC<HelpModalProps> = ({
       return `🎯 Extra ${currencySymbol}5,000 bachane ke 3 simple steps: 1️⃣ Salary aate hi 20% alag savings account me transfer kar do. 2️⃣ ${topCat.toUpperCase()} category par strict monthly limit set karo. 3️⃣ Daily Quick Capture se har entry ka record rakho! 💪✨`;
     }
 
-    // 15. General Greetings
-    if (/^(hi+|hello+|hey+|yo+|sup|hola|namaste|salam)\b/i.test(msg) || msg.includes('kaise ho') || msg.includes('who are you') || msg.includes('kaise hain')) {
-      if (/[अ-ह]/.test(rawText) || /\b(kahan|kaise|mera|meri|mere|mujhe|btao|batao|apka|aapka|kya|kab|kaun|hai|hain|rha|rhi|rhe|hoga|hogaye|bhai|yaar|karo|do|karna)\b/i.test(msg)) {
+    // 15. General Greetings & Casual Hinglish Callouts
+    if (
+      /^(hi+|hello+|hey+|yo+|sup|hola|namaste|salam|are+|oye+|bhai+|bro+|bol)\b/i.test(msg) ||
+      msg.includes('bhai') || msg.includes('bro') || msg.includes('kaise ho') || msg.includes('who are you') || msg.includes('kaise hain') || msg.includes('kya hal')
+    ) {
+      if (/[अ-ह]/.test(rawText) || /\b(kahan|kaise|mera|meri|mere|mujhe|btao|batao|apka|aapka|kya|kab|kaun|hai|hain|rha|rhi|rhe|hoga|hogaye|bhai|yaar|karo|do|karna|are|oye|bro)\b/i.test(msg)) {
         return `Hii ${userName || 'yaar'}! 🌿 Main Zen hu — aapka AI Financial Coach aur personal money buddy. Main aapki spending habits check kar sakta hu, savings tips de sakta hu, aur ZenBudget app ke details samjha sakta hu! Poocho yaar, kya help chahiye? 🤝✨`;
       }
       return `Hii ${userName || 'buddy'}! 🌿 I'm Zen — your personal AI Financial Coach & best friend. I can analyze your monthly spending habits, give you smart savings advice, and help you track every rupee in ZenBudget. Ask me anything, I'm here to help you save! 🤝✨`;
@@ -406,7 +409,31 @@ ${JSON.stringify(structCtx, null, 2)}`;
 
         botResponseText = response.text || resolvedResult.responseText;
       } else {
-        botResponseText = resolvedResult.responseText;
+        // Try serverless API endpoint
+        try {
+          const sysInstr = `You are Zen, an expert personal finance AI coach built into ZenBudget. Live user context: ${JSON.stringify(structCtx)}`;
+          const apiRes = await fetch('/api/groq-chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              messages: [
+                { role: 'system', content: sysInstr },
+                { role: 'user', content: rawText }
+              ]
+            })
+          });
+          if (apiRes.ok) {
+            const data = await apiRes.json();
+            const content = data?.choices?.[0]?.message?.content;
+            if (content) botResponseText = content;
+          }
+        } catch (serverlessErr) {
+          console.warn('Serverless AI call error', serverlessErr);
+        }
+
+        if (!botResponseText) {
+          botResponseText = resolvedResult.responseText;
+        }
       }
     } catch (err) {
       console.warn('Gemini API execution error, using deterministic Intelligence Engine response:', err);

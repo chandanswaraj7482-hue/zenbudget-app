@@ -572,13 +572,8 @@ export function resolveUserFinancialQuery(
   const ctx = engine.generateStructuredContext();
   const updatedState: ConversationMemoryState = { ...memoryState };
 
-  // Empty State Guard
-  if (!ctx.hasEnoughData) {
-    const emptyResponse = isFormalEnglish
-      ? `Hii ${userName}! 🌿 I don't have enough spending history logged yet to detect financial trends or give accurate budget advice.\n\nStart logging a few daily transactions using Quick Capture, and I'll immediately generate personalized insights, category leaks, and daily safe limits for you! ⚡`
-      : `Hii ${userName}! 🌿 Abhi mere paas enough spending history nahi hai.\n\nDashboard par Quick Capture se thode transactions log hone ke baad main trends, budget pace aur saving leaks properly detect karke bataunga! 🤝✨`;
-    return { responseText: emptyResponse, updatedState };
-  }
+  // Empty State Guard - gracefully allow AI to respond to all queries
+  const noTxNote = !ctx.hasEnoughData ? `\n\n*(💡 Tip: Quick Capture se 2-3 daily transactions enter karke aap exact spending pattern leaks bhi view kar sakte ho!)*` : '';
 
   // ─── 1. AFFORDABILITY ENGINE ───
   const affordKeywords = ['afford', 'buy', 'kharid', 'le lu', 'le sakta', 'purchase', 'shoe', 'phone', 'watch'];
