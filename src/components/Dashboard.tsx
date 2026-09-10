@@ -1100,7 +1100,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* ── ZEN AI MONEY COACH CARD (Exact Photo Matched with Dynamic Spending Update & Chat Button) ── */}
       {(() => {
-        const currentHour = new Date().getHours();
+        const now = new Date();
+        const currentHour = now.getHours();
         let updateTag = 'MID-DAY UPDATE';
         let greetingTime = 'Good afternoon';
         let emoji = '🌤️';
@@ -1114,18 +1115,29 @@ export const Dashboard: React.FC<DashboardProps> = ({
           emoji = '🌙';
         }
 
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const todayStr = `${year}-${month}-${day}`;
+
         const todayExpenses = transactions
           .filter(t => {
-            if (t.type !== 'expense') return false;
+            if (!t || t.type !== 'expense') return false;
             const tDate = t.date ? t.date.split('T')[0] : '';
-            const todayStr = new Date().toISOString().split('T')[0];
             return tDate === todayStr;
           })
-          .reduce((sum, t) => sum + t.amount, 0);
+          .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
 
-        const coachMessage = todayExpenses === 0
-          ? `"${greetingTime}, ${userName || 'Friend'}! You've spent ${currencySymbol}0 so far. Excellent discipline! Keep it up. ${emoji}"`
-          : `"${greetingTime}, ${userName || 'Friend'}! You've spent ${formatCurrency(todayExpenses, currencySymbol, 0)} so far today. Stay mindful of your financial goals! ${emoji}"`;
+        let messageBody = '';
+        if (todayExpenses === 0) {
+          messageBody = `You've spent ${currencySymbol}0 so far. Excellent discipline! Keep it up.`;
+        } else if (todayExpenses <= 500) {
+          messageBody = `You've spent ${formatCurrency(todayExpenses, currencySymbol, 0)} so far today. You're doing great keeping your spending in check!`;
+        } else {
+          messageBody = `You've spent ${formatCurrency(todayExpenses, currencySymbol, 0)} so far today. Stay mindful of your financial goals!`;
+        }
+
+        const coachMessage = `"${greetingTime}, ${userName || 'Friend'}! ${messageBody} ${emoji}"`;
 
         return (
           <div
