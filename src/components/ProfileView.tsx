@@ -500,11 +500,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                     fontSize: '11px', 
                     fontWeight: 800, 
                     color: calculatedAge !== null ? 'var(--primary)' : 'var(--text-muted)',
-                    background: calculatedAge !== null ? 'rgba(34, 197, 94, 0.12)' : 'rgba(255,255,255,0.05)',
-                    padding: '2px 8px',
-                    borderRadius: '8px'
+                    background: calculatedAge !== null ? 'rgba(34, 197, 94, 0.14)' : 'rgba(255,255,255,0.05)',
+                    border: calculatedAge !== null ? '1px solid rgba(34, 197, 94, 0.35)' : '1px solid rgba(255,255,255,0.08)',
+                    padding: '3px 10px',
+                    borderRadius: '100px'
                   }}>
-                    {calculatedAge !== null ? `${calculatedAge} yrs` : '- yrs'}
+                    {calculatedAge !== null ? `🎉 ${calculatedAge} yrs old` : '🎂 Age auto-calculated'}
                   </span>
                 </div>
                 <input

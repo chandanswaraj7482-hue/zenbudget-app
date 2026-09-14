@@ -42,6 +42,7 @@ import { handleZenBudgetPaymentSystem, checkHasScanPayAccess } from './utils/pay
 import { WidgetModal } from './components/WidgetModal';
 import { TransferModal } from './components/TransferModal';
 import { AddAccountModal } from './components/AddAccountModal';
+import { FinancialProfileCardModal } from './components/FinancialProfileCardModal';
 import { t, setLanguage as setI18nLanguage } from './utils/i18n';
 import { Capacitor } from '@capacitor/core';
 import { App as CapApp } from '@capacitor/app';
@@ -221,6 +222,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [showTrialUrgencyModal, setShowTrialUrgencyModal] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const [showFinancialProfileModal, setShowFinancialProfileModal] = useState(false);
 
   // Announcement popup state
   const [announcementPopup, setAnnouncementPopup] = useState<{
@@ -1616,6 +1618,33 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     }
   }, [isLocked, subscriptionTier, transactions.length]);
 
+  // 1-Time Financial Profile Card Trigger (DOB & Monthly Salary Setup)
+  useEffect(() => {
+    if (isLocked || isAppLoading || showOnboarding) return;
+
+    const effectiveId = currentProfileId || localStorage.getItem('zb_profile_id') || 'local';
+    const isCompleted = localStorage.getItem(`zb_financial_profile_completed_${effectiveId}`) === 'true';
+    const hasDismissedSession = sessionStorage.getItem('zb_financial_profile_dismissed') === 'true';
+
+    const existingDob = localStorage.getItem(`zb_dob_${effectiveId}`);
+    const existingSalary = localStorage.getItem(`zb_monthly_salary_${effectiveId}`);
+    const hasExistingData = Boolean(existingDob && existingSalary && parseFloat(existingSalary) > 0);
+
+    if (hasExistingData && !isCompleted) {
+      // If user already had both values entered earlier, auto-mark completed permanently
+      localStorage.setItem(`zb_financial_profile_completed_${effectiveId}`, 'true');
+      return;
+    }
+
+    if (!isCompleted && !hasDismissedSession) {
+      // Prompt one time when user unlocks app/logs in
+      const timer = setTimeout(() => {
+        setShowFinancialProfileModal(true);
+      }, 700);
+      return () => clearTimeout(timer);
+    }
+  }, [isLocked, isAppLoading, showOnboarding, currentProfileId]);
+
   // Dynamic daily limit calculation effect
   useEffect(() => {
     if (!currentProfileId || isLocked) return;
@@ -2055,6 +2084,16 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         if (profData.family_group_id) {
           setFamilyGroupId(profData.family_group_id);
           localStorage.setItem(`zb_family_group_id_${currentProfileId}`, profData.family_group_id);
+        }
+
+        if (profData.dob) {
+          localStorage.setItem(`zb_dob_${currentProfileId}`, profData.dob);
+        }
+        if (profData.monthly_salary !== undefined && profData.monthly_salary !== null) {
+          localStorage.setItem(`zb_monthly_salary_${currentProfileId}`, profData.monthly_salary.toString());
+        }
+        if (profData.dob && profData.monthly_salary && Number(profData.monthly_salary) > 0) {
+          localStorage.setItem(`zb_financial_profile_completed_${currentProfileId}`, 'true');
         }
 
         // 0b. Fetch active family members using TRUE group sync logic based on family_group_id
@@ -3362,10 +3401,19 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     try {
       const userPhone = localStorage.getItem('zb_user_phone') || '';
       const currentAvatar = localStorage.getItem('zb_user_avatar') || '';
+      const effectiveProfileId = currentProfileId || localStorage.getItem('zb_profile_id') || 'local';
+      const storedDob = localStorage.getItem(`zb_dob_${effectiveProfileId}`);
+      const storedSalary = localStorage.getItem(`zb_monthly_salary_${effectiveProfileId}`);
+
       const updateData: any = { name: newName, pin: newPin };
       if (newEmail) updateData.email = newEmail;
       if (userPhone) updateData.phone = userPhone;
       if (currentAvatar) updateData.avatar_url = currentAvatar;
+      if (storedDob) updateData.dob = storedDob;
+      if (storedSalary && parseFloat(storedSalary) > 0) {
+        updateData.monthly_salary = Math.round(parseFloat(storedSalary));
+        localStorage.setItem(`zb_financial_profile_completed_${effectiveProfileId}`, 'true');
+      }
 
       const { error } = await supabase
         .from('profiles')
@@ -4892,6 +4940,42 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           trialStartDate={trialStartDate}
           budgets={convertedBudgets}
           reportType={storyReportType}
+        />
+      )}
+
+      {/* 1-Time Setup Financial Profile Card Modal */}
+      {showFinancialProfileModal && (
+        <FinancialProfileCardModal
+          isOpen={showFinancialProfileModal}
+          userName={userName || 'Friend'}
+          currencySymbol={currencySymbol}
+          initialDob={localStorage.getItem(`zb_dob_${currentProfileId || 'local'}`) || ''}
+          initialSalary={Number(localStorage.getItem(`zb_monthly_salary_${currentProfileId || 'local'}`)) || undefined}
+          onClose={() => {
+            sessionStorage.setItem('zb_financial_profile_dismissed', 'true');
+            setShowFinancialProfileModal(false);
+          }}
+          onSave={async (dob: string, monthlySalary: number) => {
+            const effectiveId = currentProfileId || localStorage.getItem('zb_profile_id') || 'local';
+            localStorage.setItem(`zb_dob_${effectiveId}`, dob);
+            localStorage.setItem(`zb_monthly_salary_${effectiveId}`, monthlySalary.toString());
+            localStorage.setItem(`zb_financial_profile_completed_${effectiveId}`, 'true');
+
+            if (effectiveId !== 'local') {
+              try {
+                await supabase.from('profiles').update({
+                  dob: dob || null,
+                  monthly_salary: monthlySalary || 0
+                }).eq('id', effectiveId);
+              } catch (err) {
+                console.error('Failed to sync financial profile to Supabase', err);
+              }
+            }
+
+            setShowFinancialProfileModal(false);
+            triggerToast('✨ Profile settings saved permanently!', 'success');
+            fetchDataFromSupabase();
+          }}
         />
       )}
 
