@@ -409,27 +409,6 @@ export const WealthSimulator: React.FC<WealthSimulatorProps> = ({
                 onChange={(e) => setMonthlyInvest(Number(e.target.value))}
                 style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer' }}
               />
-              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
-                {[1000, 2500, 5000, 10000, 25000, 50000].map(amt => (
-                  <button
-                    key={amt}
-                    type="button"
-                    onClick={() => setMonthlyInvest(amt)}
-                    style={{
-                      padding: '3px 8px',
-                      borderRadius: '6px',
-                      fontSize: '10px',
-                      fontWeight: 700,
-                      border: monthlyInvest === amt ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
-                      background: monthlyInvest === amt ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.03)',
-                      color: monthlyInvest === amt ? '#34d399' : 'var(--text-secondary)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {currencySymbol}{amt >= 1000 ? `${amt / 1000}k` : amt}
-                  </button>
-                ))}
-              </div>
             </div>
 
             {/* Horizon Years Slider & Input */}
@@ -457,27 +436,6 @@ export const WealthSimulator: React.FC<WealthSimulatorProps> = ({
                 onChange={(e) => setYears(Number(e.target.value))}
                 style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer' }}
               />
-              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
-                {[3, 5, 10, 15, 20, 25, 30].map(y => (
-                  <button
-                    key={y}
-                    type="button"
-                    onClick={() => setYears(y)}
-                    style={{
-                      padding: '3px 8px',
-                      borderRadius: '6px',
-                      fontSize: '10px',
-                      fontWeight: 700,
-                      border: years === y ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
-                      background: years === y ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.03)',
-                      color: years === y ? '#34d399' : 'var(--text-secondary)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {y} Yrs
-                  </button>
-                ))}
-              </div>
             </div>
 
             {/* Asset Type Scenario Selector */}
@@ -616,30 +574,6 @@ export const WealthSimulator: React.FC<WealthSimulatorProps> = ({
                 onChange={(e) => setDepositAmount(Number(e.target.value))}
                 style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer' }}
               />
-              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
-                {(fdrdType === 'fd' 
-                  ? [25000, 50000, 100000, 250000, 500000, 1000000]
-                  : [1000, 2000, 5000, 10000, 25000]
-                ).map(amt => (
-                  <button
-                    key={amt}
-                    type="button"
-                    onClick={() => setDepositAmount(amt)}
-                    style={{
-                      padding: '3px 8px',
-                      borderRadius: '6px',
-                      fontSize: '10px',
-                      fontWeight: 700,
-                      border: depositAmount === amt ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
-                      background: depositAmount === amt ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.03)',
-                      color: depositAmount === amt ? '#34d399' : 'var(--text-secondary)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {currencySymbol}{amt >= 100000 ? `${(amt / 100000).toFixed(amt % 100000 === 0 ? 0 : 1)}L` : `${amt / 1000}k`}
-                  </button>
-                ))}
-              </div>
             </div>
 
             {/* Interest Rate Slider & Input */}
@@ -667,27 +601,6 @@ export const WealthSimulator: React.FC<WealthSimulatorProps> = ({
                 onChange={(e) => setFdRate(Number(e.target.value))}
                 style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer' }}
               />
-              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
-                {[5.5, 6.5, 7.1, 7.5, 8.0, 9.0].map(r => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => setFdRate(r)}
-                    style={{
-                      padding: '3px 8px',
-                      borderRadius: '6px',
-                      fontSize: '10px',
-                      fontWeight: 700,
-                      border: fdRate === r ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
-                      background: fdRate === r ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.03)',
-                      color: fdRate === r ? '#34d399' : 'var(--text-secondary)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {r}%
-                  </button>
-                ))}
-              </div>
             </div>
 
             {/* Time Horizon Slider & Input */}
@@ -720,27 +633,6 @@ export const WealthSimulator: React.FC<WealthSimulatorProps> = ({
                 onChange={(e) => setFdYears(Number(e.target.value))}
                 style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer' }}
               />
-              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
-                {[1, 2, 3, 5, 7, 10].map(y => (
-                  <button
-                    key={y}
-                    type="button"
-                    onClick={() => setFdYears(y)}
-                    style={{
-                      padding: '3px 8px',
-                      borderRadius: '6px',
-                      fontSize: '10px',
-                      fontWeight: 700,
-                      border: fdYears === y ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
-                      background: fdYears === y ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.03)',
-                      color: fdYears === y ? '#34d399' : 'var(--text-secondary)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {y} Yrs
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
         </div>
@@ -849,27 +741,6 @@ export const WealthSimulator: React.FC<WealthSimulatorProps> = ({
                 onChange={(e) => setAnnualIncome(Number(e.target.value))}
                 style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer' }}
               />
-              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
-                {[500000, 800000, 1200000, 1500000, 2500000, 3700000].map(amt => (
-                  <button
-                    key={amt}
-                    type="button"
-                    onClick={() => setAnnualIncome(amt)}
-                    style={{
-                      padding: '3px 8px',
-                      borderRadius: '6px',
-                      fontSize: '10px',
-                      fontWeight: 700,
-                      border: annualIncome === amt ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
-                      background: annualIncome === amt ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.03)',
-                      color: annualIncome === amt ? '#34d399' : 'var(--text-secondary)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {currencySymbol}{(amt / 100000).toFixed(amt % 100000 === 0 ? 0 : 1)}L
-                  </button>
-                ))}
-              </div>
             </div>
 
             {/* Standard Deduction Info Badge */}
@@ -910,27 +781,6 @@ export const WealthSimulator: React.FC<WealthSimulatorProps> = ({
                     onChange={(e) => setDeductions80C(Number(e.target.value))}
                     style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer' }}
                   />
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    {[50000, 100000, 150000].map(amt => (
-                      <button
-                        key={amt}
-                        type="button"
-                        onClick={() => setDeductions80C(amt)}
-                        style={{
-                          padding: '3px 8px',
-                          borderRadius: '6px',
-                          fontSize: '10px',
-                          fontWeight: 700,
-                          border: deductions80C === amt ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
-                          background: deductions80C === amt ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.03)',
-                          color: deductions80C === amt ? '#34d399' : 'var(--text-secondary)',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        ₹{(amt / 1000).toFixed(0)}k
-                      </button>
-                    ))}
-                  </div>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -957,27 +807,6 @@ export const WealthSimulator: React.FC<WealthSimulatorProps> = ({
                     onChange={(e) => setDeductions80D(Number(e.target.value))}
                     style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer' }}
                   />
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    {[15000, 25000, 50000].map(amt => (
-                      <button
-                        key={amt}
-                        type="button"
-                        onClick={() => setDeductions80D(amt)}
-                        style={{
-                          padding: '3px 8px',
-                          borderRadius: '6px',
-                          fontSize: '10px',
-                          fontWeight: 700,
-                          border: deductions80D === amt ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
-                          background: deductions80D === amt ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.03)',
-                          color: deductions80D === amt ? '#34d399' : 'var(--text-secondary)',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        ₹{(amt / 1000).toFixed(0)}k
-                      </button>
-                    ))}
-                  </div>
                 </div>
               </>
             )}
