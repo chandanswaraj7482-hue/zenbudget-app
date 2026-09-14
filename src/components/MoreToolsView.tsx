@@ -444,8 +444,8 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
               fontSize: '11px',
               border: '1px solid rgba(255,255,255,0.05)'
             }}>
-              <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>{t('referral_progress')}:</span>
-              <span style={{ fontWeight: 800, color: 'var(--secondary)' }}>{referralCount} / 10 {t('paid_members')}</span>
+              <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>{t('referral_progress', { defaultValue: 'Referral Progress' })}:</span>
+              <span style={{ fontWeight: 800, color: 'var(--secondary)' }}>{referralCount} / 10 {t('paid_members', { defaultValue: 'Paid Members' })}</span>
             </div>
           </div>
         </div>
