@@ -384,7 +384,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: (isBlocker || isExpired) ? 'rgba(5, 10, 20, 0.95)' : 'rgba(0, 0, 0, 0.85)',
+        backgroundColor: 'rgba(5, 10, 20, 0.88)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
         display: 'flex',
@@ -393,9 +393,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         zIndex: 99999,
         padding: '20px',
         animation: 'fadeIn 0.25s ease-out',
-        touchAction: (isBlocker || isExpired) ? 'none' : 'auto'
+        touchAction: 'auto'
       }} 
-      onClick={(isBlocker || isExpired) ? (e) => { e.stopPropagation(); } : onClose}
+      onClick={onClose}
     >
       <div 
         className="glass-panel"
@@ -413,59 +413,34 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top-Right Close Button - Completely Hidden When Expired or Blocker */}
-        {!(isBlocker || isExpired) ? (
-          <button 
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onClose();
-            }}
-            title="Close"
-            style={{
-              position: 'absolute',
-              top: '16px',
-              right: '16px',
-              background: 'rgba(255, 255, 255, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              borderRadius: '50%',
-              width: '34px',
-              height: '34px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              color: '#cbd5e1',
-              zIndex: 20,
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <X size={18} />
-          </button>
-        ) : (
-          <div
-            style={{
-              position: 'absolute',
-              top: '16px',
-              right: '16px',
-              background: 'rgba(239, 68, 68, 0.18)',
-              border: '1px solid rgba(239, 68, 68, 0.4)',
-              borderRadius: '100px',
-              padding: '4px 10px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              color: '#f87171',
-              fontSize: '10px',
-              fontWeight: 800,
-              letterSpacing: '0.06em',
-              textTransform: 'uppercase',
-              zIndex: 20
-            }}
-          >
-            🔒 LOCKED
-          </div>
-        )}
+        {/* Top-Right Close Button */}
+        <button 
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          title="Close"
+          style={{
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            borderRadius: '50%',
+            width: '34px',
+            height: '34px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: '#cbd5e1',
+            zIndex: 20,
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <X size={18} />
+        </button>
 
         {/* PROCESSING STEP */}
         {paymentStep === 'processing' && (

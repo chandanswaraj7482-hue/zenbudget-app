@@ -16,6 +16,8 @@ interface HelpModalProps {
   initialTab?: 'faq' | 'bot' | 'feedback';
   accounts?: any[];
   loans?: LoanRecord[];
+  isPremiumUser?: boolean;
+  onOpenSubscriptionModal?: () => void;
 }
 
 interface ChatMessage {
@@ -35,7 +37,9 @@ export const HelpModal: React.FC<HelpModalProps> = ({
   userName = 'User',
   initialTab = 'bot',
   accounts = [],
-  loans = []
+  loans = [],
+  isPremiumUser = true,
+  onOpenSubscriptionModal
 }) => {
   if (!isOpen) return null;
 
@@ -362,6 +366,12 @@ export const HelpModal: React.FC<HelpModalProps> = ({
 
   const handleSend = async (e?: React.FormEvent, customPrompt?: string) => {
     if (e) e.preventDefault();
+
+    if (isPremiumUser === false) {
+      onOpenSubscriptionModal?.();
+      return;
+    }
+
     const rawText = (customPrompt || inputVal).trim();
     if (!rawText) return;
 

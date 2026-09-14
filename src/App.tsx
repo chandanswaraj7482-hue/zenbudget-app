@@ -1443,30 +1443,32 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
   const isTrialExpired = () => isSubscriptionExpired();
 
-  const checkExpiredGuard = (): boolean => {
+  const checkExpiredGuard = (actionName = 'perform this action'): boolean => {
     if (isSubscriptionExpired()) {
-      setIsSubBlocker(true);
+      setIsSubBlocker(false);
       setIsSubModalOpen(true);
+      triggerToast(`Free trial expired! Upgrade to Premium to ${actionName}.`, 'warning');
       return true;
     }
     return false;
   };
 
-  // Automatic Subscription Pay Modal Popup on Expire
+  // Automatic Subscription Pay Modal Popup on Expire (non-blocking notification)
   useEffect(() => {
     if (!isLocked && isSubscriptionExpired()) {
-      setIsSubBlocker(true);
+      setIsSubBlocker(false);
       setIsSubModalOpen(true);
     }
   }, [isLocked, subscriptionTier, trialStartDate, premiumExpiresAt]);
 
-  // Intercept Android hardware back button when subscription is expired
+  // Handle Android hardware back button
   useEffect(() => {
     let backHandler: any;
     try {
       CapApp.addListener('backButton', () => {
-        if (isSubscriptionExpired()) {
-          triggerToast('Your 7-day free trial has expired! Please select a plan to continue.', 'warning');
+        if (isSubModalOpen) {
+          setIsSubModalOpen(false);
+          setIsSubBlocker(false);
           return;
         }
       }).then(handle => {
@@ -1480,7 +1482,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         backHandler.remove();
       }
     };
-  }, [subscriptionTier, trialStartDate, premiumExpiresAt]);
+  }, [isSubModalOpen]);
 
   // Sync profile data on unlock
   useEffect(() => {
@@ -2545,7 +2547,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
     // Check trial duration
     if (isTrialExpired()) {
-      setIsSubBlocker(true);
+      setIsSubBlocker(false);
       setIsSubModalOpen(true);
       triggerToast('Your 7-day free trial has expired! Please upgrade.', 'warning');
       return false;
@@ -2556,7 +2558,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     const todayTransactions = transactions.filter(t => t.date.startsWith(todayStr));
     
     if (todayTransactions.length >= 10) {
-      setIsSubBlocker(true);
+      setIsSubBlocker(false);
       setIsSubModalOpen(true);
       triggerToast('Daily trial transaction limit reached (max 10). Upgrade to unlock unlimited records!', 'warning');
       return false;
@@ -2568,7 +2570,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   // Handlers
   const doSaveTransaction = async (txData: Omit<Transaction, 'id'> & { id?: string }) => {
     if (isSubscriptionExpired()) {
-      setIsSubBlocker(true);
+      setIsSubBlocker(false);
       setIsSubModalOpen(true);
       triggerToast('Your 7-day free trial has expired! Please select a plan to continue.', 'warning');
       return;
@@ -2751,9 +2753,9 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
   const handleSaveTransaction = async (txData: Omit<Transaction, 'id'> & { id?: string }): Promise<boolean> => {
     if (isSubscriptionExpired()) {
-      setIsSubBlocker(true);
+      setIsSubBlocker(false);
       setIsSubModalOpen(true);
-      triggerToast('Your 7-day free trial has expired! Please select a plan to continue.', 'warning');
+      triggerToast('Free trial expired! Upgrade to Premium to log transactions.', 'warning');
       return false;
     }
 
@@ -2978,9 +2980,9 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
   const handleSaveBudget = async (category: CategoryType, limitInActiveCurrency: number) => {
     if (isSubscriptionExpired()) {
-      setIsSubBlocker(true);
+      setIsSubBlocker(false);
       setIsSubModalOpen(true);
-      triggerToast('Your 7-day free trial has expired! Please select a plan to continue.', 'warning');
+      triggerToast('Free trial expired! Upgrade to Premium to adjust budget limits.', 'warning');
       return;
     }
 
@@ -3078,9 +3080,9 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
   const handleAddNewGoal = (name: string, targetInActiveCurrency: number, color: string) => {
     if (isSubscriptionExpired()) {
-      setIsSubBlocker(true);
+      setIsSubBlocker(false);
       setIsSubModalOpen(true);
-      triggerToast('Your 7-day free trial has expired! Please select a plan to continue.', 'warning');
+      triggerToast('Free trial expired! Upgrade to Premium to create new savings goals.', 'warning');
       return;
     }
     const currentRate = rates[currency] || 1;
@@ -3099,9 +3101,9 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
   const handleEditGoal = (goalId: string, name: string, targetInActiveCurrency: number, color: string) => {
     if (isSubscriptionExpired()) {
-      setIsSubBlocker(true);
+      setIsSubBlocker(false);
       setIsSubModalOpen(true);
-      triggerToast('Your 7-day free trial has expired! Please select a plan to continue.', 'warning');
+      triggerToast('Free trial expired! Upgrade to Premium to edit savings goals.', 'warning');
       return;
     }
     const currentRate = rates[currency] || 1;
@@ -3752,32 +3754,34 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         position: 'relative'
       }}
     >
-      {/* Sticky Trial Expired Locked Banner */}
+      {/* Sticky Trial Expired Banner */}
       {isSubscriptionExpired() && (
         <div 
-          onClick={() => { setIsSubBlocker(true); setIsSubModalOpen(true); }}
+          onClick={() => { setIsSubBlocker(false); setIsSubModalOpen(true); }}
           style={{
-            background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-            color: '#ffffff',
-            padding: '12px 18px',
+            background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.16) 0%, rgba(220, 38, 38, 0.22) 100%)',
+            border: '1px solid rgba(239, 68, 68, 0.45)',
+            color: '#fca5a5',
+            padding: '10px 16px',
             borderRadius: '16px',
-            margin: '12px 16px 0 16px',
+            margin: '10px 16px 0 16px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            fontWeight: 800,
-            fontSize: '13px',
+            fontWeight: 700,
+            fontSize: '12px',
             cursor: 'pointer',
-            boxShadow: '0 6px 20px rgba(239, 68, 68, 0.45)',
-            zIndex: 100
+            boxShadow: '0 4px 16px rgba(239, 68, 68, 0.25)',
+            zIndex: 100,
+            backdropFilter: 'blur(8px)'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '16px' }}>⏳</span>
-            <span>Free Trial Expired (All Features Locked)</span>
+            <span style={{ fontSize: '15px' }}>⏳</span>
+            <span>Free Trial Expired • View-Only Mode</span>
           </div>
-          <span style={{ background: '#ffffff', color: '#dc2626', padding: '5px 14px', borderRadius: '20px', fontSize: '11px', fontWeight: 900 }}>
-            UPGRADE PRO 🚀
+          <span style={{ background: '#ef4444', color: '#ffffff', padding: '5px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 800 }}>
+            UPGRADE ⚡
           </span>
         </div>
       )}
@@ -3811,7 +3815,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           {/* Scanner Button */}
           <button
             onClick={() => {
-              if (checkExpiredGuard()) return;
+              if (checkExpiredGuard('use Scan & Pay')) return;
               setIsScannerOpen(true);
             }}
             title="Scan & Pay"
@@ -3835,10 +3839,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
           {/* Notifications Button */}
           <button 
-            onClick={() => {
-              if (checkExpiredGuard()) return;
-              setIsNotificationsOpen(true);
-            }} 
+            onClick={() => setIsNotificationsOpen(true)} 
             title="Notifications"
             style={{
               background: 'var(--bg-input)',
@@ -3972,31 +3973,29 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             goals={convertedGoals}
             currencySymbol={currencySymbol}
             onAddTransactionClick={() => {
-              if (checkExpiredGuard()) return;
+              if (checkExpiredGuard('log new transactions')) return;
               setEditingTransaction(null);
               setIsModalOpen(true);
             }}
             onViewAllTransactionsClick={() => {
-              if (checkExpiredGuard()) return;
               setActiveView('transactions');
             }}
             onEditTransaction={(tx) => {
-              if (checkExpiredGuard()) return;
+              if (checkExpiredGuard('edit transactions')) return;
               setEditingTransaction(tx);
               setIsModalOpen(true);
             }}
             onAddGoalProgress={(goalId, amount) => {
-              if (checkExpiredGuard()) return;
+              if (checkExpiredGuard('update savings goals')) return;
               handleAddGoalProgress(goalId, amount);
             }}
             onOpenStory={(type = 'weekly') => {
-              if (checkExpiredGuard()) return;
               setStoryReportType(type);
               setShowStoryReport(true);
             }}
             language={language}
             onAddNewGoal={(name, target, color) => {
-              if (checkExpiredGuard()) return;
+              if (checkExpiredGuard('create savings goals')) return;
               handleAddNewGoal(name, target, color);
             }}
             subscriptionTier={subscriptionTier}
@@ -4005,28 +4004,25 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             onEditGoal={handleEditGoal}
             onDeleteGoal={handleDeleteGoal}
             onForestClick={() => {
-              if (checkExpiredGuard()) return;
               setActiveView('forest');
             }}
             referralCount={referralCount}
             onAddAccountClick={() => {
-              if (checkExpiredGuard()) return;
+              if (checkExpiredGuard('add bank accounts')) return;
               setIsAddAccountOpen(true);
             }}
             onOpenBankSync={() => {
-              if (checkExpiredGuard()) return;
               setActiveView('bank_sync');
             }}
             onOpenTransfer={() => {
-              if (checkExpiredGuard()) return;
+              if (checkExpiredGuard('make transfers')) return;
               setIsTransferOpen(true);
             }}
             onOpenAI={() => {
-              if (checkExpiredGuard()) return;
+              if (checkExpiredGuard('chat with ZenBot AI Coach')) return;
               setIsHelpOpen(true);
             }}
             onOpenLoans={() => {
-              if (checkExpiredGuard()) return;
               setActiveView('loans');
             }}
             onOpenProfile={() => setActiveView('profile')}
@@ -4063,11 +4059,14 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             transactions={convertedTransactions}
             currencySymbol={currencySymbol}
             onEditTransaction={(tx) => {
-              if (checkExpiredGuard()) return;
+              if (checkExpiredGuard('edit transactions')) return;
               setEditingTransaction(tx);
               setIsModalOpen(true);
             }}
-            onDeleteTransaction={handleDeleteTransactionRequest}
+            onDeleteTransaction={(id) => {
+              if (checkExpiredGuard('delete transactions')) return;
+              handleDeleteTransactionRequest(id);
+            }}
             isPremiumUser={isPremiumUser}
           />
         )}
@@ -4078,6 +4077,11 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             transactions={convertedTransactions}
             currencySymbol={currencySymbol}
             onSaveBudget={handleSaveBudget}
+            isPremiumUser={isPremiumUser}
+            onOpenSubscriptionModal={() => {
+              setIsSubBlocker(false);
+              setIsSubModalOpen(true);
+            }}
           />
         )}
         {activeView === 'analytics' && (
@@ -4148,12 +4152,24 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             onNavigateToLoans={() => setActiveView('loans')}
             onOpenBankSync={() => setActiveView('bank_sync')}
             onOpenWidgetModal={() => setIsWidgetModalOpen(true)}
-            onOpenAskZen={() => setIsHelpOpen(true)}
+            onOpenAskZen={() => {
+              if (checkExpiredGuard('chat with ZenBot AI Coach')) return;
+              setIsHelpOpen(true);
+            }}
             onNavigateToMoneyForest={() => setActiveView('forest')}
             onNavigateToSettings={() => setActiveView('profile')}
-            onOpenHelp={() => setIsHelpOpen(true)}
-            onOpenSubscriptionModal={() => setIsSubModalOpen(true)}
-            onExportCSV={handleExportCSV}
+            onOpenHelp={() => {
+              if (checkExpiredGuard('chat with ZenBot AI Coach')) return;
+              setIsHelpOpen(true);
+            }}
+            onOpenSubscriptionModal={() => {
+              setIsSubBlocker(false);
+              setIsSubModalOpen(true);
+            }}
+            onExportCSV={() => {
+              if (checkExpiredGuard('export CSV reports')) return;
+              handleExportCSV();
+            }}
             onResetData={handleResetDataRequest}
             onLogout={() => setShowLogoutConfirm(true)}
             onDeleteAccount={handleDeleteAccount}
@@ -4252,7 +4268,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         zIndex: 999
       }}>
         <button
-          onClick={() => { if (checkExpiredGuard()) return; setActiveView('dashboard'); }}
+          onClick={() => setActiveView('dashboard')}
           style={{
             background: 'none',
             border: 'none',
@@ -4272,7 +4288,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         </button>
 
         <button
-          onClick={() => { if (checkExpiredGuard()) return; setActiveView('transactions'); }}
+          onClick={() => setActiveView('transactions')}
           style={{
             background: 'none',
             border: 'none',
@@ -4292,7 +4308,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         </button>
 
         <button
-          onClick={() => { if (checkExpiredGuard()) return; setActiveView('budgets'); }}
+          onClick={() => setActiveView('budgets')}
           style={{
             background: 'none',
             border: 'none',
@@ -4312,7 +4328,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         </button>
 
         <button
-          onClick={() => { if (checkExpiredGuard()) return; setActiveView('analytics'); }}
+          onClick={() => setActiveView('analytics')}
           style={{
             background: 'none',
             border: 'none',
@@ -4332,7 +4348,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         </button>
 
         <button
-          onClick={() => { if (checkExpiredGuard()) return; setActiveView('more'); }}
+          onClick={() => setActiveView('more')}
           style={{
             background: 'none',
             border: 'none',
@@ -4732,14 +4748,10 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       )}
 
       {/* Subscription Pay Modal */}
-      {(isSubModalOpen || isSubscriptionExpired()) && (
+      {isSubModalOpen && (
         <SubscriptionModal
-          isOpen={isSubModalOpen || isSubscriptionExpired()}
+          isOpen={isSubModalOpen}
           onClose={() => {
-            if (isSubscriptionExpired()) {
-              triggerToast('Your 7-day free trial has expired! Please select a plan to continue.', 'warning');
-              return;
-            }
             setIsSubModalOpen(false);
             setIsSubBlocker(false);
           }}
@@ -4751,7 +4763,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             setIsSubModalOpen(false);
             setIsSubBlocker(false);
           }}
-          isBlocker={isSubBlocker || isSubscriptionExpired()}
+          isBlocker={false}
           currency={currency}
           rates={rates}
         />
@@ -4792,6 +4804,13 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           currencySymbol={currencySymbol}
           userName={userName}
           accounts={accounts}
+          isPremiumUser={!isSubscriptionExpired()}
+          onOpenSubscriptionModal={() => {
+            setIsHelpOpen(false);
+            setIsSubBlocker(false);
+            setIsSubModalOpen(true);
+            triggerToast('Free trial expired! Upgrade to Premium to chat with ZenBot AI Coach.', 'warning');
+          }}
         />
       )}
 
