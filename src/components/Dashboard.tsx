@@ -1601,12 +1601,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
             progress: `${Math.min(1, transactions.length)}/1 Transaction Logged`
           },
           {
-            id: 'streak_7d',
-            icon: '🥈',
-            title: '7d Streak',
-            isUnlocked: hasStreakBadge,
-            requirement: 'Track your daily expenses for 7 consecutive days without breaking your daily streak!',
-            progress: `${currentStreakCount}/7 Days Streak`
+            id: 'invites_10',
+            icon: '🎁',
+            title: '10 Invites',
+            isUnlocked: has10Invites,
+            requirement: 'Invite 10 friends (who sign up & upgrade to Premium) using your referral link to earn 1 Month Free Premium!',
+            progress: `${referralCount}/10 Subscribed Friends Invited`
           },
           {
             id: 'streak_90d',
@@ -1615,6 +1615,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
             isUnlocked: currentStreakCount >= 90,
             requirement: 'Maintain a 90-day (3 Months) daily transaction streak to claim 1 Month FREE Premium Subscription!',
             progress: currentStreakCount >= 90 ? 'REWARD UNLOCKED 🔓 (1 Month Free Premium)' : `${currentStreakCount}/90 Days Daily Streak`
+          },
+          {
+            id: 'streak_7d',
+            icon: '🥈',
+            title: '7d Streak',
+            isUnlocked: hasStreakBadge,
+            requirement: 'Track your daily expenses for 7 consecutive days without breaking your daily streak!',
+            progress: `${currentStreakCount}/7 Days Streak`
           },
           {
             id: 'save_10k',
@@ -1639,14 +1647,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
             isUnlocked: hasCoffeeCtrl,
             requirement: 'Keep single coffee/cafe transactions below ₹500 across at least 5 logged transactions.',
             progress: hasCoffeeCtrl ? 'Controlled 🔓' : `${transactions.length}/5 Logs (Under ₹500 Coffee)`
-          },
-          {
-            id: 'invites_10',
-            icon: '🎁',
-            title: '10 Invites',
-            isUnlocked: has10Invites,
-            requirement: 'Invite 10 friends (who sign up & upgrade to Premium) using your referral link to earn 1 Month Free Premium!',
-            progress: `${referralCount}/10 Subscribed Friends Invited`
           },
           // Dynamic Level 2 Badges (Unlocked or visible once user progresses)
           ...(hasFirstSpend ? [{
