@@ -7,8 +7,7 @@ import {
 import { supabase } from '../supabaseClient';
 import { 
   parseCSVStatement, 
-  parseAIBankStatement, 
-  generateDemoBankStatement 
+  parseAIBankStatement
 } from '../utils/bankStatementParser';
 import type { 
   BankStatementAnalysisResult, 
@@ -23,6 +22,7 @@ interface BankStatementImporterProps {
   currencySymbol?: string;
   onRefreshData?: () => void;
   onSaveTransaction?: (tx: any) => Promise<boolean>;
+  onNavigateToLedger?: () => void;
 }
 
 export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
@@ -32,7 +32,8 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
   accounts = [],
   currencySymbol = '₹',
   onRefreshData,
-  onSaveTransaction
+  onSaveTransaction,
+  onNavigateToLedger
 }) => {
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
@@ -48,7 +49,19 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handleUploadAreaClick = () => {
+    if (!isPremiumUser) {
+      onOpenSubscriptionModal();
+      return;
+    }
+    fileInputRef.current?.click();
+  };
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isPremiumUser) {
+      onOpenSubscriptionModal();
+      return;
+    }
     const selected = e.target.files?.[0];
     if (!selected) return;
 
@@ -65,9 +78,13 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
     }
   };
 
-  const startAnalysis = async (useDemo: boolean = false) => {
-    if (!isPremiumUser && !useDemo) {
+  const startAnalysis = async () => {
+    if (!isPremiumUser) {
       onOpenSubscriptionModal();
+      return;
+    }
+    if (!file) {
+      alert('Please select a bank statement file first.');
       return;
     }
 
@@ -76,20 +93,7 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
     setStatusMessage('Reading statement file headers...');
 
     try {
-      if (useDemo || !file) {
-        // Run demo simulation
-        await new Promise(r => setTimeout(r, 600));
-        setProgressPercent(40);
-        setStatusMessage('AI Vision OCR scanning statement lines...');
-        await new Promise(r => setTimeout(r, 800));
-        setProgressPercent(75);
-        setStatusMessage('Normalizing merchant titles and categories...');
-        await new Promise(r => setTimeout(r, 600));
-        setProgressPercent(100);
-        setStatusMessage('Statement audit verified!');
-        const demo = generateDemoBankStatement('HDFC Bank');
-        setAnalysisResult(demo);
-      } else if (file.name.endsWith('.csv') || file.type.includes('csv')) {
+      if (file.name.endsWith('.csv') || file.type.includes('csv')) {
         const text = await file.text();
         setProgressPercent(45);
         setStatusMessage('Parsing statement rows and debits/credits...');
@@ -98,25 +102,31 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
         setProgressPercent(100);
         setStatusMessage('Verified successfully!');
         setAnalysisResult(res);
+        setIsProcessing(false);
       } else {
         // PDF or Image
         const reader = new FileReader();
         reader.onload = async (event) => {
           const base64 = event.target?.result as string;
           const mime = file.type || 'image/jpeg';
-          const res = await parseAIBankStatement(base64, mime, (msg, pct) => {
-            setStatusMessage(msg);
-            setProgressPercent(pct);
-          });
-          setAnalysisResult(res);
+          try {
+            const res = await parseAIBankStatement(base64, mime, (msg, pct) => {
+              setStatusMessage(msg);
+              setProgressPercent(pct);
+            });
+            setAnalysisResult(res);
+          } catch (err) {
+            console.error('AI parse error:', err);
+            alert('Failed to parse statement. Please ensure the image or PDF is clear and readable.');
+          } finally {
+            setIsProcessing(false);
+          }
         };
         reader.readAsDataURL(file);
       }
     } catch (err) {
       console.error('Statement parsing failed:', err);
-      const fallback = generateDemoBankStatement('Bank Account');
-      setAnalysisResult(fallback);
-    } finally {
+      alert('Could not parse statement. Please upload a valid bank statement file.');
       setIsProcessing(false);
     }
   };
@@ -141,6 +151,10 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
   };
 
   const handleBatchImport = async () => {
+    if (!isPremiumUser) {
+      onOpenSubscriptionModal();
+      return;
+    }
     if (!analysisResult) return;
     const toImport = analysisResult.transactions.filter(t => t.selected);
     if (toImport.length === 0) {
@@ -161,7 +175,7 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
         type: t.type,
         category: t.category.toLowerCase(),
         date: t.date,
-        notes: `Imported via Bank Assistant | ${t.rawNarration}`
+        notes: `Imported via Bank Statement | ${t.rawNarration || t.title}`
       }));
 
       if (onSaveTransaction) {
@@ -172,7 +186,7 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
             type: t.type,
             category: t.category.toLowerCase(),
             date: t.date,
-            notes: `Imported via Bank Assistant | ${t.rawNarration}`,
+            notes: `Imported via Bank Statement | ${t.rawNarration || t.title}`,
             accountId: targetAccId
           });
         }
@@ -329,22 +343,6 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
                     <Sparkles size={14} />
                     <span>Unlock Pro (From ₹149/mo)</span>
                   </button>
-
-                  <button
-                    onClick={() => startAnalysis(true)}
-                    style={{
-                      padding: '10px 16px',
-                      borderRadius: '12px',
-                      background: 'rgba(255, 255, 255, 0.06)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      color: 'var(--text-primary)',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Try Live Interactive Demo
-                  </button>
                 </div>
               </div>
             </div>
@@ -357,10 +355,10 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
         {!analysisResult && !isProcessing && !importSuccess && (
           <div>
             <div
-              onClick={() => fileInputRef.current?.click()}
+              onClick={handleUploadAreaClick}
               style={{
                 background: 'var(--bg-card)',
-                border: '2px dashed var(--border-input)',
+                border: !isPremiumUser ? '2px dashed rgba(245, 158, 11, 0.4)' : '2px dashed var(--border-input)',
                 borderRadius: '24px',
                 padding: '36px 20px',
                 textAlign: 'center',
@@ -376,27 +374,32 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
                 accept=".pdf,.csv,image/*"
                 style={{ display: 'none' }}
                 onChange={handleFileSelect}
+                disabled={!isPremiumUser}
               />
 
               <div style={{
                 width: '64px',
                 height: '64px',
                 borderRadius: '20px',
-                background: 'rgba(16, 185, 129, 0.12)',
-                color: '#10b981',
+                background: !isPremiumUser ? 'rgba(245, 158, 11, 0.15)' : 'rgba(16, 185, 129, 0.12)',
+                color: !isPremiumUser ? '#f59e0b' : '#10b981',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 margin: '0 auto 16px'
               }}>
-                <UploadCloud size={32} />
+                {!isPremiumUser ? <Lock size={32} /> : <UploadCloud size={32} />}
               </div>
 
               <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 6px' }}>
-                {file ? file.name : 'Select Bank Statement'}
+                {!isPremiumUser 
+                  ? 'Unlock Pro to Scan Statements' 
+                  : (file ? file.name : 'Select Bank Statement')}
               </h3>
               <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 0 16px' }}>
-                Supports HDFC, SBI, ICICI, Axis PDF, CSV & Passbook Photos
+                {!isPremiumUser
+                  ? 'Statement Intelligence & auto-import is a Pro exclusive feature'
+                  : 'Supports HDFC, SBI, ICICI, Axis PDF, CSV & Passbook Photos'}
               </p>
 
               <div style={{
@@ -407,10 +410,19 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
                 borderRadius: '999px',
                 background: 'var(--bg-input)',
                 fontSize: '11px',
-                color: 'var(--text-secondary)'
+                color: !isPremiumUser ? '#f59e0b' : 'var(--text-secondary)'
               }}>
-                <ShieldCheck size={14} color="#10b981" />
-                <span>100% Client-Side End-to-End Encrypted</span>
+                {!isPremiumUser ? (
+                  <>
+                    <Lock size={14} color="#f59e0b" />
+                    <span style={{ fontWeight: 700 }}>Pro Subscription Required</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck size={14} color="#10b981" />
+                    <span>100% Client-Side End-to-End Encrypted</span>
+                  </>
+                )}
               </div>
             </div>
 
@@ -432,6 +444,7 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
                   value={filePassword}
                   onChange={(e) => setFilePassword(e.target.value)}
                   placeholder="PDF Password (Optional - if your bank statement is locked)"
+                  disabled={!isPremiumUser}
                   style={{
                     width: '100%',
                     background: 'transparent',
@@ -448,47 +461,47 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
             {/* Action Buttons */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <button
-                onClick={() => startAnalysis(false)}
-                disabled={!file}
+                onClick={() => {
+                  if (!isPremiumUser) {
+                    onOpenSubscriptionModal();
+                    return;
+                  }
+                  startAnalysis();
+                }}
+                disabled={isPremiumUser && !file}
                 style={{
                   width: '100%',
                   padding: '16px',
                   borderRadius: '16px',
-                  background: file 
-                    ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
-                    : 'var(--bg-input)',
+                  background: !isPremiumUser
+                    ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+                    : file 
+                      ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
+                      : 'var(--bg-input)',
                   border: 'none',
-                  color: file ? '#ffffff' : 'var(--text-muted)',
+                  color: (!isPremiumUser || file) ? '#ffffff' : 'var(--text-muted)',
                   fontSize: '15px',
                   fontWeight: 800,
-                  cursor: file ? 'pointer' : 'not-allowed',
+                  cursor: (!isPremiumUser || file) ? 'pointer' : 'not-allowed',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  boxShadow: file ? '0 10px 25px rgba(16, 185, 129, 0.3)' : 'none',
+                  boxShadow: (!isPremiumUser || file) ? '0 10px 25px rgba(16, 185, 129, 0.3)' : 'none',
                   transition: 'all 0.2s'
                 }}
               >
-                <Zap size={18} fill={file ? '#ffffff' : 'none'} />
-                <span>Run AI Statement Intelligence</span>
-              </button>
-
-              <button
-                onClick={() => startAnalysis(true)}
-                style={{
-                  width: '100%',
-                  padding: '13px',
-                  borderRadius: '16px',
-                  background: 'transparent',
-                  border: '1px solid var(--border-input)',
-                  color: 'var(--text-primary)',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
-              >
-                Load Sample Statement Demo
+                {!isPremiumUser ? (
+                  <>
+                    <Lock size={18} />
+                    <span>Unlock Pro to Scan Statement</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap size={18} fill={file ? '#ffffff' : 'none'} />
+                    <span>Run AI Statement Intelligence</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -666,6 +679,94 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
         {/* =================================================================== */}
         {analysisResult && !isProcessing && !importSuccess && (
           <div>
+            {/* LEDGER IMPORT PROMPT / CONFIRMATION CARD */}
+            <div 
+              style={{
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.14) 0%, rgba(6, 182, 212, 0.08) 100%)',
+                border: '1.5px solid rgba(16, 185, 129, 0.4)',
+                borderRadius: '24px',
+                padding: '20px',
+                marginBottom: '16px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '14px',
+                boxShadow: '0 8px 24px rgba(16, 185, 129, 0.12)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <Sparkles size={20} />
+                </div>
+                <div>
+                  <h4 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-primary)' }}>
+                    Add Extracted Transactions to Ledger?
+                  </h4>
+                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5' }}>
+                    Statement se <strong>{analysisResult.transactions.length} transactions</strong> real-time extract ho gaye hain. Kya aap inhe apne Ledger (Transactions) me add karna chahte hain?
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  onClick={handleBatchImport}
+                  disabled={isImporting || analysisResult.transactions.filter(t => t.selected).length === 0}
+                  style={{
+                    flex: 1,
+                    padding: '13px 16px',
+                    borderRadius: '14px',
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    border: 'none',
+                    color: '#ffffff',
+                    fontSize: '13.5px',
+                    fontWeight: 800,
+                    cursor: isImporting ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
+                  }}
+                >
+                  <CheckCircle2 size={16} />
+                  <span>
+                    {isImporting 
+                      ? 'Adding to Ledger...' 
+                      : `Yes, Add ${analysisResult.transactions.filter(t => t.selected).length} to Ledger`}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setFile(null);
+                    setAnalysisResult(null);
+                  }}
+                  style={{
+                    padding: '13px 18px',
+                    borderRadius: '14px',
+                    background: 'var(--bg-input)',
+                    border: '1px solid var(--border-input)',
+                    color: 'var(--text-secondary)',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Discard
+                </button>
+              </div>
+            </div>
+
             {/* Executive Summary Card */}
             <div style={{
               background: 'var(--bg-card)',
@@ -863,7 +964,7 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
             <div style={{ display: 'flex', gap: '10px' }}>
               <button
                 onClick={handleBatchImport}
-                disabled={isImporting}
+                disabled={isImporting || analysisResult.transactions.filter(t => t.selected).length === 0}
                 style={{
                   flex: 1,
                   padding: '16px',
@@ -884,12 +985,15 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
               >
                 <Zap size={18} fill="#ffffff" />
                 <span>
-                  {isImporting ? 'Importing Transactions...' : `Batch Import ${analysisResult.transactions.filter(t => t.selected).length} Items`}
+                  {isImporting ? 'Adding to Ledger...' : `Add ${analysisResult.transactions.filter(t => t.selected).length} Transactions to Ledger`}
                 </span>
               </button>
 
               <button
-                onClick={() => setAnalysisResult(null)}
+                onClick={() => {
+                  setFile(null);
+                  setAnalysisResult(null);
+                }}
                 style={{
                   padding: '16px',
                   borderRadius: '16px',
@@ -934,29 +1038,54 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
             </div>
 
             <h3 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 8px' }}>
-              Import Complete!
+              Added to Ledger!
             </h3>
             <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
-              Successfully added <strong>{importedCount} transactions</strong> to your budget wallet. Your spending analytics have been updated!
+              Successfully added <strong>{importedCount} transactions</strong> directly into your Ledger. Your wallet balance and analytics have been updated in real-time!
             </p>
 
-            <button
-              onClick={onBack}
-              style={{
-                width: '100%',
-                padding: '16px',
-                borderRadius: '16px',
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                border: 'none',
-                color: '#ffffff',
-                fontSize: '15px',
-                fontWeight: 800,
-                cursor: 'pointer',
-                boxShadow: '0 10px 25px rgba(16, 185, 129, 0.3)'
-              }}
-            >
-              Return to Dashboard
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button
+                onClick={() => {
+                  if (onNavigateToLedger) {
+                    onNavigateToLedger();
+                  } else {
+                    onBack();
+                  }
+                }}
+                style={{
+                  width: '100%',
+                  padding: '16px',
+                  borderRadius: '16px',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  border: 'none',
+                  color: '#ffffff',
+                  fontSize: '15px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  boxShadow: '0 10px 25px rgba(16, 185, 129, 0.3)'
+                }}
+              >
+                View in Ledger (Transactions)
+              </button>
+
+              <button
+                onClick={onBack}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  borderRadius: '16px',
+                  background: 'var(--bg-input)',
+                  border: '1px solid var(--border-input)',
+                  color: 'var(--text-primary)',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                Back to Dashboard
+              </button>
+            </div>
           </div>
         )}
 

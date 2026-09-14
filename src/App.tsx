@@ -4196,6 +4196,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             currencySymbol={currencySymbol}
             onRefreshData={fetchDataFromSupabase}
             onSaveTransaction={handleSaveTransaction}
+            onNavigateToLedger={() => setActiveView('transactions')}
           />
         )}
       </main>
