@@ -565,9 +565,9 @@ export function resolveUserFinancialQuery(
   const query = (rawQuery || '').trim();
   const qLower = query.toLowerCase();
 
-  // Detect Tone
-  const isHinglishSlang = /\b(bro|bhai|yaar|scene|gaya|kitna|kaise|batao|uda|set|bol|lo|lelu|kharcha|paisa|paise)\b/i.test(qLower);
-  const isFormalEnglish = !/[अ-ह]/.test(rawQuery) && !isHinglishSlang;
+  // Detect Tone - comprehensive Hinglish & slang vocabulary recognition
+  const isHinglish = /[अ-ह]/.test(rawQuery) || /\b(mere|meri|mera|tere|teri|tera|apna|apni|apne|tum|tu|aap|kya|kyun|kyu|kaise|kaisa|kahan|kidhar|kisko|kisne|kaun|hai|hain|ho|hu|hoon|hoga|hogi|honge|banoge|banogi|banopge|bana|bane|karoge|karogi|karo|karein|karega|karegi|chal|chalo|bol|bolo|batao|bata|dekh|dekho|sun|suno|rha|raha|rahi|rahe|tha|thi|the|bhai|bro|yaar|dost|bandi|banda|ladki|ladka|gf|bf|girlfriend|boyfriend|shadi|shaadi|pyaar|pyar|ishq|mohabbat|setting|jeb|khali|paisa|paise|rupay|rupaye|kharcha|bachat|uda|udaya|lelu|lu|le|lene|dena|de|do|nahi|nhi|na|mat|haan|acha|achha|theek|thik|sahi|mast|badiya|pagal|chalo|bas|abhi|aaj|kal|parso|roz|pehle|baad|kuch|smart|cute|chahiye|mangta)\b/i.test(qLower);
+  const isFormalEnglish = !isHinglish;
 
   const ctx = engine.generateStructuredContext();
   const updatedState: ConversationMemoryState = { ...memoryState };
@@ -599,6 +599,17 @@ export function resolveUserFinancialQuery(
     return { responseText: offTopicResponse, updatedState };
   }
 
+  // ─── 0.4 ROMANCE, DATING, FLIRTING & RELATIONSHIP BANTER ───
+  const isRomanceOrDating = /\b(gf|girlfriend|bf|boyfriend|date|dating|shadi|shaadi|marry|marriage|single|pataoge|patoge|patogi|crush|setting|patana|pyaar|pyar|love|propose|romance|kiss|chumma|pappi|hug|gale)\b/i.test(qLower) ||
+    qLower.includes('banoge') || qLower.includes('banogi') || qLower.includes('banopge') || qLower.includes('gf ban') || qLower.includes('bf ban');
+
+  if (isRomanceOrDating) {
+    const responseText = isFormalEnglish
+      ? `Haha! 🙈 I'm an AI Financial Coach, not girlfriend material! 😅\n\nThough honestly, when it comes to saving money and keeping your wallet healthy, I'm the most loyal partner you'll ever find — zero shopping demands, zero expensive dinner bills, 100% budget discipline! 💸✨\n\nNow tell me, shall we actually track your expenses and boost your savings, or are we just flirting today? 😉 Ask me anything about your budget or wallet balance!`
+      : `Arey bhai! 🙈 Main ek AI Financial Coach hu, girlfriend nahi ban sakta! 😅\n\nLekin ek baat pakki hai — agar paise bachane aur monthly budget track karne ki baat aaye, toh main sabse loyal partner hu! Koi shopping ke bills nahi, koi expensive dates nahi! 💸✨\n\nWaise sach batao, wallet ka balance badhana hai ya sirf mujhse flirting chal rahi hai? 😉 Koi expense track karna ho ya budget dekhna ho toh bolo!`;
+    return { responseText, updatedState };
+  }
+
   // ─── 0.5 USER INFO & CASUAL GREETINGS INTENT GUARD ───
   if (qLower.includes('email')) {
     const userEmail = typeof localStorage !== 'undefined' 
@@ -617,11 +628,19 @@ export function resolveUserFinancialQuery(
     return { responseText, updatedState };
   }
 
-  const isKissOrLove = qLower.includes('kiss') || qLower.includes('love you') || qLower.includes('pyaar');
-  if (isKissOrLove) {
+  const isCompliment = /\b(smart|cute|sundar|khoobsurat|intelligent|genius|badhiya|mast lag|hero|swag|best ai|good job|shabash)\b/i.test(qLower) && !qLower.includes('phone') && !qLower.includes('watch');
+  if (isCompliment) {
     const responseText = isFormalEnglish
-      ? `Haha! 🙈 Aww, love you too! But seriously, what are you going to do with a kiss from an AI? 😅 Better to focus on saving some money and tracking your expenses with ZenBudget! Let's get back to those financial goals, buddy! 💸✨`
-      : `Haha! 🙈 Aww, love you too yaar! Par sach bata, ek AI se kiss le kar kya karega? 😅 Paise bacha le aur apna budget track kar le ZenBudget se! Chal ab wapas financial goals par aate hain! 💸✨`;
+      ? `Aww, thank you! 😎 I try my best to be both sharp and helpful! If I can make your wallet as handsome as your compliments, we're winning together! 🌿✨ Need to check your daily allowance or log a quick expense?`
+      : `Shukriya bhai! 😎 Tareef ke liye 100 points! Main toh smart hu hi, par agar humne milke tumhare budget ko aur smart bana diya toh maza aa jayega! 🌿✨ Batao aaj koi kharcha add karna hai ya safe limit dekhni hai?`;
+    return { responseText, updatedState };
+  }
+
+  const isMoodOrBored = /\b(bore|boring|mood off|sad|udaas|kya kare|kya karu|kya chal raha|kya haal chaal|timepass|masti)\b/i.test(qLower);
+  if (isMoodOrBored) {
+    const responseText = isFormalEnglish
+      ? `Feeling bored? Let's turn that into savings! 💡 Your safe daily spend today is **${currencySymbol}${ctx.safeDailySpend}/day**. If you don't spend it, that's extra cash in your pocket for the weekend! 🍕✨ Or ask me to roast your spending patterns!`
+      : `Bore ho rahe ho? Toh chalo ek mast financial check karte hain! 😉 Aaj tumhara safe daily spend limit **${currencySymbol}${ctx.safeDailySpend}/day** hai. Agar aaj control kar liya toh weekend pe maze hi maze! 🍕✨ Kuch naya buy karne ka mann ho toh poocho — '₹X ka item lu ya nahi?'!`;
     return { responseText, updatedState };
   }
 
@@ -847,10 +866,10 @@ export function resolveUserFinancialQuery(
   }
 
   // ─── 6. DEFAULT INTELLIGENT CONVERSATIONAL FALLBACK ───
-  const topCat = ctx.topCategories.length > 0 ? ctx.topCategories[0] : null;
+  const hasTxData = ctx.totalExpense > 0 || ctx.totalAccBal > 0;
   const defaultResp = isFormalEnglish
-    ? `Hii ${userName}! 🌿 I am your personal AI Financial Coach. Right now, your total wallet balance is **${currencySymbol}${ctx.totalAccBal.toLocaleString()}**, total monthly spent is **${currencySymbol}${ctx.totalExpense.toLocaleString()}**, and safe daily allowance is **${currencySymbol}${ctx.safeDailySpend}/day**.\n\nYou can ask me specific questions like:\n• *"How is my food spending?"*\n• *"Can I afford ₹5,000 for a phone?"*\n• *"What is my email?"*\n• *"Show my weekend pattern"* 💡✨`
-    : `Hii ${userName}! 🌿 Main aapka personal AI Financial Coach hu. Abhi aapka total wallet balance **${currencySymbol}${ctx.totalAccBal.toLocaleString()}**, iss month total spent **${currencySymbol}${ctx.totalExpense.toLocaleString()}**, aur safe daily spend **${currencySymbol}${ctx.safeDailySpend}/day** hai.\n\nAap mujhse specific pooch sakte ho:\n• *"iss month food kitna gaya?"*\n• *"5000 ka shoe le lu?"*\n• *"mera email kya hai?"*\n• *"weekend pattern batao"* 💡✨`;
+    ? `Hey ${userName}! 🌿 I'm listening! As your personal AI Financial Coach in ZenBudget, I can help you stay on top of your money, avoid unnecessary splurges, and hit your financial goals.\n\n${hasTxData ? `• Wallet Balance: **${currencySymbol}${ctx.totalAccBal.toLocaleString()}**\n• Month's Expense: **${currencySymbol}${ctx.totalExpense.toLocaleString()}**\n• Safe Daily Pace: **${currencySymbol}${ctx.safeDailySpend}/day**\n\n` : ''}You can ask me anything like:\n• *"Can I afford ₹3,000 for a jacket?"*\n• *"How much did I spend on Food this month?"*\n• *"Show my weekend spending leaks"*\n• *"How to use ZenBudget app?"*\n\nWhat's on your mind today, buddy? 💡✨`
+    : `Arey ${userName}! 🌿 Bol bhai, main sun raha hu! ZenBudget me main tera 24/7 personal AI Financial Coach aur money buddy hu.\n\n${hasTxData ? `• Tera Wallet Balance: **${currencySymbol}${ctx.totalAccBal.toLocaleString()}**\n• Iss Month Ka Kharcha: **${currencySymbol}${ctx.totalExpense.toLocaleString()}**\n• Safe Daily Limit: **${currencySymbol}${ctx.safeDailySpend}/day**\n\n` : ''}Tu mujhse bejhijhak pooch sakta hai:\n• *"3,000 ka item afford kar sakta hu kya?"*\n• *"Iss month food pe kitna uda?"*\n• *"Weekend leak pattern batao"*\n• *"ZenBudget application kaise use karein?"*\n\nBata, aaj kya plan hai ya wallet me koi naya kharcha add karna hai? 💬✨`;
 
   return { responseText: defaultResp, updatedState };
 }

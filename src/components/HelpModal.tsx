@@ -420,21 +420,41 @@ ${JSON.stringify(structCtx, null, 2)}`;
       } else {
         // Try serverless API endpoint
         try {
-          const sysInstr = `You are Zen, an expert personal finance AI coach built into ZenBudget. Live user context: ${JSON.stringify(structCtx)}`;
-          const apiRes = await fetch('/api/groq-chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              messages: [
-                { role: 'system', content: sysInstr },
-                { role: 'user', content: rawText }
-              ]
-            })
-          });
-          if (apiRes.ok) {
-            const data = await apiRes.json();
-            const content = data?.choices?.[0]?.message?.content;
-            if (content) botResponseText = content;
+          const sysInstr = `You are Zen, an expert personal finance AI coach built into ZenBudget. You are witty, charming, emotionally intelligent, and fluent in Hindi/Hinglish and English. If the user chats casually, flirts, or jokes (e.g. asking to be a girlfriend, teasing, small talk), respond playfully with charm and humor in their language, then naturally tie it back to smart budgeting and saving money. Live user financial context: ${JSON.stringify(structCtx)}`;
+          
+          const endpoints = [
+            'https://zenbudget-tracker.vercel.app/api/groq-chat',
+            'https://admin-portal-zenbudget.vercel.app/api/groq-chat',
+            '/api/groq-chat'
+          ];
+
+          for (const endpoint of endpoints) {
+            try {
+              const controller = new AbortController();
+              const timeoutId = setTimeout(() => controller.abort(), 4500);
+              const apiRes = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                signal: controller.signal,
+                body: JSON.stringify({
+                  messages: [
+                    { role: 'system', content: sysInstr },
+                    { role: 'user', content: rawText }
+                  ]
+                })
+              });
+              clearTimeout(timeoutId);
+              if (apiRes.ok) {
+                const data = await apiRes.json();
+                const content = data?.choices?.[0]?.message?.content;
+                if (content && content.trim()) {
+                  botResponseText = content.trim();
+                  break;
+                }
+              }
+            } catch {
+              // Try next endpoint or fallback to deterministic engine
+            }
           }
         } catch (serverlessErr) {
           console.warn('Serverless AI call error', serverlessErr);
