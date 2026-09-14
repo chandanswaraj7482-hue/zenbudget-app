@@ -55,7 +55,12 @@ export const PremiumHub: React.FC<PremiumHubProps> = ({
 
   const handleToggleSpeech = (textToSpeak: string) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      alert(t('speech_not_supported', { defaultValue: 'Text-to-speech is not supported on this browser.' }));
+      window.dispatchEvent(new CustomEvent('toast-alert', { 
+        detail: { 
+          message: t('speech_not_supported', { defaultValue: 'Text-to-speech is not supported on this browser.' }), 
+          type: 'warning' 
+        } 
+      }));
       return;
     }
 

@@ -98,9 +98,9 @@ export const Budgets: React.FC<BudgetsProps> = ({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '22px' }}>🎯</span> {t('my_budgets')}
+            <span style={{ fontSize: '22px' }}>🎯</span> {t('my_budgets', { defaultValue: 'My Budgets' })}
           </h2>
-          <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('budget_desc')}</span>
+          <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('budget_desc', { defaultValue: 'Set category monthly spending caps' })}</span>
         </div>
         <button
           onClick={() => setIsManageOpen(!isManageOpen)}

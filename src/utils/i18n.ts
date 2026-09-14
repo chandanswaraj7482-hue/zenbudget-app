@@ -104,6 +104,8 @@ const translations: Record<Language, Record<string, string>> = {
     'newest_first': 'Newest First',
     'oldest_first': 'Oldest First',
     'more': 'More',
+    'my_budgets': 'My Budgets',
+    'budget_desc': 'Set category monthly spending caps',
     'category_budgets': 'Category Budgets',
     'analytics_title': 'Analytics',
     'trend_analysis': 'Trend Analysis',
@@ -333,6 +335,8 @@ const translations: Record<Language, Record<string, string>> = {
     'newest_first': 'नवीनतम पहले',
     'oldest_first': 'पुराने पहले',
     'more': 'और',
+    'my_budgets': 'मेरे बजट',
+    'budget_desc': 'मासिक श्रेणी खर्च सीमा निर्धारित करें',
     'category_budgets': 'श्रेणी बजट',
     'analytics_title': 'विश्लेषण',
     'trend_analysis': 'ट्रेंड विश्लेषण',
@@ -1098,7 +1102,7 @@ export const t = (key: string, params?: Record<string, string | number>) => {
     if (params && params.defaultValue !== undefined) {
       text = String(params.defaultValue);
     } else {
-      text = key;
+      text = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     }
   }
   

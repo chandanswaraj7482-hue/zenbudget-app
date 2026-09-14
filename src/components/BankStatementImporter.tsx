@@ -23,6 +23,7 @@ interface BankStatementImporterProps {
   onRefreshData?: () => void;
   onSaveTransaction?: (tx: any) => Promise<boolean>;
   onNavigateToLedger?: () => void;
+  triggerToast?: (msg: string, type?: 'info' | 'success' | 'warning' | 'danger') => void;
 }
 
 export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
@@ -33,8 +34,19 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
   currencySymbol = '₹',
   onRefreshData,
   onSaveTransaction,
-  onNavigateToLedger
+  onNavigateToLedger,
+  triggerToast
 }) => {
+  const [localToast, setLocalToast] = useState<{ msg: string; type: 'info' | 'success' | 'warning' | 'danger' } | null>(null);
+
+  const notify = (msg: string, type: 'info' | 'success' | 'warning' | 'danger' = 'warning') => {
+    if (triggerToast) {
+      triggerToast(msg, type);
+    } else {
+      setLocalToast({ msg, type });
+      setTimeout(() => setLocalToast(null), 3500);
+    }
+  };
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [filePassword, setFilePassword] = useState<string>('');
@@ -84,7 +96,7 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
       return;
     }
     if (!file) {
-      alert('Please select a bank statement file first.');
+      notify('Please select a bank statement file first.', 'warning');
       return;
     }
 
@@ -117,7 +129,7 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
             setAnalysisResult(res);
           } catch (err) {
             console.error('AI parse error:', err);
-            alert('Failed to parse statement. Please ensure the image or PDF is clear and readable.');
+            notify('Failed to parse statement. Please ensure the image or PDF is clear and readable.', 'danger');
           } finally {
             setIsProcessing(false);
           }
@@ -126,7 +138,7 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
       }
     } catch (err) {
       console.error('Statement parsing failed:', err);
-      alert('Could not parse statement. Please upload a valid bank statement file.');
+      notify('Could not parse statement. Please upload a valid bank statement file.', 'danger');
       setIsProcessing(false);
     }
   };
@@ -158,7 +170,7 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
     if (!analysisResult) return;
     const toImport = analysisResult.transactions.filter(t => t.selected);
     if (toImport.length === 0) {
-      alert('Please select at least one transaction to import');
+      notify('Please select at least one transaction to import', 'warning');
       return;
     }
 
@@ -216,8 +228,35 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
       flexDirection: 'column',
       minHeight: '100vh',
       background: 'var(--bg-base)',
-      color: 'var(--text-primary)'
+      color: 'var(--text-primary)',
+      position: 'relative'
     }}>
+      {/* Floating Local Notification */}
+      {localToast && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 999999,
+          padding: '12px 20px',
+          borderRadius: '14px',
+          background: localToast.type === 'danger' ? 'rgba(239, 68, 68, 0.95)' : 'rgba(245, 158, 11, 0.95)',
+          color: '#ffffff',
+          fontSize: '13px',
+          fontWeight: 600,
+          boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
+          backdropFilter: 'blur(10px)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          maxWidth: '90%'
+        }}>
+          <AlertCircle size={16} />
+          <span>{localToast.msg}</span>
+        </div>
+      )}
+
       {/* Header */}
       <header style={{
         display: 'flex',

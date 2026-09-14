@@ -1371,6 +1371,17 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       }
     };
     checkForUpdates();
+
+    const handleToastAlert = (e: any) => {
+      const msg = e.detail?.message || 'Notification';
+      const t = e.detail?.type === 'error' || e.detail?.type === 'danger' ? 'warning' : (e.detail?.type || 'info');
+      triggerToast(msg, t);
+    };
+    window.addEventListener('toast-alert', handleToastAlert);
+
+    return () => {
+      window.removeEventListener('toast-alert', handleToastAlert);
+    };
   }, []);
 
   const fetchExchangeRates = async () => {
@@ -1774,46 +1785,54 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     }
   };
 
-  const handleDeleteAccount = async () => {
+  const handleDeleteAccount = () => {
     if (!currentProfileId) return;
-    const confirmDelete = window.confirm("Are you sure you want to delete your ZenBudget account? This will permanently erase all your data and cannot be undone.");
-    if (!confirmDelete) return;
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete ZenBudget Account',
+      message: 'Are you sure you want to delete your ZenBudget account? This will permanently erase all your data and cannot be undone.',
+      confirmText: 'Permanently Delete',
+      cancelText: 'Cancel',
+      type: 'danger',
+      onConfirm: async () => {
+        setConfirmDialog(null);
+        try {
+          // 1. Delete from Supabase profiles
+          const { error } = await supabase.from('profiles').delete().eq('id', currentProfileId);
+          if (error) throw error;
+          
+          // 2. Wipe local data
+          const keysToWipe: string[] = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && (k.startsWith('zb_') || k === 'has_scan_pay_access')) {
+              keysToWipe.push(k);
+            }
+          }
+          keysToWipe.forEach(k => {
+            try { localStorage.removeItem(k); } catch (_) {}
+          });
 
-    try {
-      // 1. Delete from Supabase profiles
-      const { error } = await supabase.from('profiles').delete().eq('id', currentProfileId);
-      if (error) throw error;
-      
-      // 2. Wipe local data
-      const keysToWipe: string[] = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && (k.startsWith('zb_') || k === 'has_scan_pay_access')) {
-          keysToWipe.push(k);
+          setTransactions([]);
+          setAccounts([]);
+          setBudgets([]);
+          setGoals([]);
+          setLoans([]);
+          setWishlist([]);
+          setDebts([]);
+          setCurrentProfileId('');
+          setUserName('');
+          setUserPin('0000');
+          setIsLocked(true);
+
+          try { await supabase.auth.signOut(); } catch (_) {}
+
+          triggerToast('Account successfully deleted.', 'success');
+        } catch (err: any) {
+          triggerToast(err.message || 'Failed to delete account.', 'danger');
         }
       }
-      keysToWipe.forEach(k => {
-        try { localStorage.removeItem(k); } catch (_) {}
-      });
-
-      setTransactions([]);
-      setAccounts([]);
-      setBudgets([]);
-      setGoals([]);
-      setLoans([]);
-      setWishlist([]);
-      setDebts([]);
-      setCurrentProfileId('');
-      setUserName('');
-      setUserPin('0000');
-      setIsLocked(true);
-
-      try { await supabase.auth.signOut(); } catch (_) {}
-
-      triggerToast('Account successfully deleted.', 'success');
-    } catch (err: any) {
-      triggerToast(err.message || 'Failed to delete account.', 'danger');
-    }
+    });
   };
 
   // Realtime Admin Panel Control & Profile Sync
@@ -4210,6 +4229,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             onRefreshData={fetchDataFromSupabase}
             onSaveTransaction={handleSaveTransaction}
             onNavigateToLedger={() => setActiveView('transactions')}
+            triggerToast={triggerToast}
           />
         )}
       </main>

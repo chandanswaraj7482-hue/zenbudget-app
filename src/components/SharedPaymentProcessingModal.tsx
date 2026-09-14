@@ -43,6 +43,7 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
 
   // Editable fields in ready state
   const [amount, setAmount] = useState<string>('');
+  const [inputError, setInputError] = useState<string | null>(null);
   const [merchantName, setMerchantName] = useState<string>('');
   const [category, setCategory] = useState<string>('General');
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
@@ -144,7 +145,8 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
   const handleQuickSave = async () => {
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount) || numAmount <= 0) {
-      alert('Please enter a valid amount');
+      setInputError('Please enter a valid amount');
+      window.dispatchEvent(new CustomEvent('toast-alert', { detail: { message: 'Please enter a valid amount', type: 'warning' } }));
       return;
     }
 
@@ -568,7 +570,10 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
                 <input
                   type="number"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => {
+                    setAmount(e.target.value);
+                    if (inputError) setInputError(null);
+                  }}
                   placeholder="0"
                   style={{
                     fontSize: '36px',
@@ -583,6 +588,21 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
                   }}
                 />
               </div>
+              {inputError && (
+                <div style={{
+                  marginTop: '8px',
+                  color: '#f87171',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px'
+                }}>
+                  <AlertCircle size={14} />
+                  <span>{inputError}</span>
+                </div>
+              )}
             </div>
 
             {/* Form Fields: Merchant, Category, Account */}

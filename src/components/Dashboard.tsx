@@ -234,7 +234,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const handleToggleSpeech = (textToSpeak: string) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      alert(t('speech_not_supported', { defaultValue: 'Text-to-speech is not supported on this browser.' }));
+      triggerToast(t('speech_not_supported', { defaultValue: 'Text-to-speech is not supported on this browser.' }), 'warning');
       return;
     }
 
