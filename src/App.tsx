@@ -44,6 +44,7 @@ import { TransferModal } from './components/TransferModal';
 import { AddAccountModal } from './components/AddAccountModal';
 import { t, setLanguage as setI18nLanguage } from './utils/i18n';
 import { Capacitor } from '@capacitor/core';
+import { App as CapApp } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { autoSyncCurrencyFromIP } from './utils/geoTracker';
@@ -1415,6 +1416,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     }
 
     if (subscriptionTier === 'trial' || !subscriptionTier) {
+      if (getRemainingDays() <= 0) return true;
       if (!trialStartDate) return false;
       const start = new Date(trialStartDate).getTime();
       if (!isNaN(start)) {
@@ -1445,6 +1447,28 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       setIsSubModalOpen(true);
     }
   }, [isLocked, subscriptionTier, trialStartDate, premiumExpiresAt]);
+
+  // Intercept Android hardware back button when subscription is expired
+  useEffect(() => {
+    let backHandler: any;
+    try {
+      CapApp.addListener('backButton', () => {
+        if (isSubscriptionExpired()) {
+          triggerToast('Your 7-day free trial has expired! Please select a plan to continue.', 'warning');
+          return;
+        }
+      }).then(handle => {
+        backHandler = handle;
+      });
+    } catch {
+      // outside capacitor context
+    }
+    return () => {
+      if (backHandler && backHandler.remove) {
+        backHandler.remove();
+      }
+    };
+  }, [subscriptionTier, trialStartDate, premiumExpiresAt]);
 
   // Sync profile data on unlock
   useEffect(() => {
@@ -2523,6 +2547,12 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
   // Handlers
   const doSaveTransaction = async (txData: Omit<Transaction, 'id'> & { id?: string }) => {
+    if (isSubscriptionExpired()) {
+      setIsSubBlocker(true);
+      setIsSubModalOpen(true);
+      triggerToast('Your 7-day free trial has expired! Please select a plan to continue.', 'warning');
+      return;
+    }
     let isEditing = !!txData.id;
     let nextTransactions: Transaction[] = [];
 
@@ -2700,6 +2730,13 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   };
 
   const handleSaveTransaction = async (txData: Omit<Transaction, 'id'> & { id?: string }): Promise<boolean> => {
+    if (isSubscriptionExpired()) {
+      setIsSubBlocker(true);
+      setIsSubModalOpen(true);
+      triggerToast('Your 7-day free trial has expired! Please select a plan to continue.', 'warning');
+      return false;
+    }
+
     // Always ensure amount is a whole number (no decimals stored)
     txData = { ...txData, amount: Math.round(txData.amount) };
 
@@ -2920,6 +2957,13 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   };
 
   const handleSaveBudget = async (category: CategoryType, limitInActiveCurrency: number) => {
+    if (isSubscriptionExpired()) {
+      setIsSubBlocker(true);
+      setIsSubModalOpen(true);
+      triggerToast('Your 7-day free trial has expired! Please select a plan to continue.', 'warning');
+      return;
+    }
+
     // Trial limits check: max 2 free category limits, then ₹10 per extra slot or Pro Upgrade
     if (!isPremiumUser) {
       const activeBudgets = budgets.filter(b => (b.limit || 0) > 0);
@@ -3013,6 +3057,12 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   };
 
   const handleAddNewGoal = (name: string, targetInActiveCurrency: number, color: string) => {
+    if (isSubscriptionExpired()) {
+      setIsSubBlocker(true);
+      setIsSubModalOpen(true);
+      triggerToast('Your 7-day free trial has expired! Please select a plan to continue.', 'warning');
+      return;
+    }
     const currentRate = rates[currency] || 1;
     const targetInBaseUSD = targetInActiveCurrency / currentRate;
     const newGoal: SavingsGoal = {
@@ -3028,6 +3078,12 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   };
 
   const handleEditGoal = (goalId: string, name: string, targetInActiveCurrency: number, color: string) => {
+    if (isSubscriptionExpired()) {
+      setIsSubBlocker(true);
+      setIsSubModalOpen(true);
+      triggerToast('Your 7-day free trial has expired! Please select a plan to continue.', 'warning');
+      return;
+    }
     const currentRate = rates[currency] || 1;
     const targetInBaseUSD = targetInActiveCurrency / currentRate;
     const updated = goals.map(g => {
@@ -3734,7 +3790,10 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           
           {/* Scanner Button */}
           <button
-            onClick={() => setIsScannerOpen(true)}
+            onClick={() => {
+              if (checkExpiredGuard()) return;
+              setIsScannerOpen(true);
+            }}
             title="Scan & Pay"
             style={{
               background: 'var(--bg-input)',
@@ -3756,7 +3815,10 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
           {/* Notifications Button */}
           <button 
-            onClick={() => setIsNotificationsOpen(true)} 
+            onClick={() => {
+              if (checkExpiredGuard()) return;
+              setIsNotificationsOpen(true);
+            }} 
             title="Notifications"
             style={{
               background: 'var(--bg-input)',
@@ -3890,30 +3952,63 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             goals={convertedGoals}
             currencySymbol={currencySymbol}
             onAddTransactionClick={() => {
+              if (checkExpiredGuard()) return;
               setEditingTransaction(null);
               setIsModalOpen(true);
             }}
-            onViewAllTransactionsClick={() => setActiveView('transactions')}
+            onViewAllTransactionsClick={() => {
+              if (checkExpiredGuard()) return;
+              setActiveView('transactions');
+            }}
             onEditTransaction={(tx) => {
+              if (checkExpiredGuard()) return;
               setEditingTransaction(tx);
               setIsModalOpen(true);
             }}
-            onAddGoalProgress={handleAddGoalProgress}
-            onOpenStory={(type = 'weekly') => { setStoryReportType(type); setShowStoryReport(true); }}
+            onAddGoalProgress={(goalId, amount) => {
+              if (checkExpiredGuard()) return;
+              handleAddGoalProgress(goalId, amount);
+            }}
+            onOpenStory={(type = 'weekly') => {
+              if (checkExpiredGuard()) return;
+              setStoryReportType(type);
+              setShowStoryReport(true);
+            }}
             language={language}
-            onAddNewGoal={handleAddNewGoal}
+            onAddNewGoal={(name, target, color) => {
+              if (checkExpiredGuard()) return;
+              handleAddNewGoal(name, target, color);
+            }}
             subscriptionTier={subscriptionTier}
             trialStartDate={trialStartDate}
             premiumExpiresAt={premiumExpiresAt}
             onEditGoal={handleEditGoal}
             onDeleteGoal={handleDeleteGoal}
-            onForestClick={() => setActiveView('forest')}
+            onForestClick={() => {
+              if (checkExpiredGuard()) return;
+              setActiveView('forest');
+            }}
             referralCount={referralCount}
-            onAddAccountClick={() => setIsAddAccountOpen(true)}
-            onOpenBankSync={() => setActiveView('bank_sync')}
-            onOpenTransfer={() => setIsTransferOpen(true)}
-            onOpenAI={() => setIsHelpOpen(true)}
-            onOpenLoans={() => setActiveView('loans')}
+            onAddAccountClick={() => {
+              if (checkExpiredGuard()) return;
+              setIsAddAccountOpen(true);
+            }}
+            onOpenBankSync={() => {
+              if (checkExpiredGuard()) return;
+              setActiveView('bank_sync');
+            }}
+            onOpenTransfer={() => {
+              if (checkExpiredGuard()) return;
+              setIsTransferOpen(true);
+            }}
+            onOpenAI={() => {
+              if (checkExpiredGuard()) return;
+              setIsHelpOpen(true);
+            }}
+            onOpenLoans={() => {
+              if (checkExpiredGuard()) return;
+              setActiveView('loans');
+            }}
             onOpenProfile={() => setActiveView('profile')}
             onDeleteAccount={handleDeleteBankAccount}
             onSaveTransaction={handleSaveTransaction}
@@ -3948,6 +4043,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             transactions={convertedTransactions}
             currencySymbol={currencySymbol}
             onEditTransaction={(tx) => {
+              if (checkExpiredGuard()) return;
               setEditingTransaction(tx);
               setIsModalOpen(true);
             }}
@@ -4602,10 +4698,14 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       )}
 
       {/* Subscription Pay Modal */}
-      {isSubModalOpen && (
+      {(isSubModalOpen || isSubscriptionExpired()) && (
         <SubscriptionModal
-          isOpen={isSubModalOpen}
+          isOpen={isSubModalOpen || isSubscriptionExpired()}
           onClose={() => {
+            if (isSubscriptionExpired()) {
+              triggerToast('Your 7-day free trial has expired! Please select a plan to continue.', 'warning');
+              return;
+            }
             setIsSubModalOpen(false);
             setIsSubBlocker(false);
           }}
@@ -4617,7 +4717,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             setIsSubModalOpen(false);
             setIsSubBlocker(false);
           }}
-          isBlocker={false}
+          isBlocker={isSubBlocker || isSubscriptionExpired()}
           currency={currency}
           rates={rates}
         />
