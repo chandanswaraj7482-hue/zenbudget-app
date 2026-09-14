@@ -4118,7 +4118,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         WebkitBackdropFilter: 'blur(20px) saturate(180%)',
         display: 'flex',
         justifyContent: 'space-around',
-        padding: '8px 10px calc(env(safe-area-inset-bottom) + 12px) 10px',
+        padding: '12px 10px calc(env(safe-area-inset-bottom) + 16px) 10px',
         zIndex: 999
       }}>
         <button
@@ -4129,58 +4129,76 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '3px',
+            gap: '4px',
             color: activeView === 'dashboard' ? 'var(--primary)' : 'var(--text-muted)',
             cursor: 'pointer',
-            fontSize: '9px',
+            fontSize: '10px',
             fontWeight: 600,
             transition: 'var(--transition-smooth)'
           }}
         >
-          <LayoutDashboard size={18} style={{ color: activeView === 'dashboard' ? 'var(--primary)' : undefined }} />
-          <span>Home</span>
+          <LayoutDashboard size={20} style={{ color: activeView === 'dashboard' ? 'var(--primary)' : undefined }} />
+          <span>{t('dashboard', { defaultValue: 'Home' })}</span>
         </button>
 
         <button
-          onClick={() => { if (checkExpiredGuard()) return; setIsModalOpen(true); }}
+          onClick={() => { if (checkExpiredGuard()) return; setActiveView('transactions'); }}
           style={{
             background: 'none',
             border: 'none',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '3px',
-            color: 'var(--text-muted)',
+            gap: '4px',
+            color: activeView === 'transactions' ? 'var(--primary)' : 'var(--text-muted)',
             cursor: 'pointer',
-            fontSize: '9px',
+            fontSize: '10px',
             fontWeight: 600,
             transition: 'var(--transition-smooth)'
           }}
         >
-          <div style={{ background: 'var(--primary)', borderRadius: '50%', padding: '6px', marginBottom: '2px', boxShadow: '0 4px 10px rgba(16, 185, 129, 0.3)' }}>
-             <Plus size={16} color="#fff" />
-          </div>
-          <span>Add</span>
+          <Receipt size={20} style={{ color: activeView === 'transactions' ? 'var(--primary)' : undefined }} />
+          <span>{t('ledger', { defaultValue: 'Ledger' })}</span>
         </button>
 
         <button
-          onClick={() => { if (checkExpiredGuard()) return; setIsHelpOpen(true); }}
+          onClick={() => { if (checkExpiredGuard()) return; setActiveView('budgets'); }}
           style={{
             background: 'none',
             border: 'none',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '3px',
-            color: isHelpOpen ? 'var(--primary)' : 'var(--text-muted)',
+            gap: '4px',
+            color: activeView === 'budgets' ? 'var(--primary)' : 'var(--text-muted)',
             cursor: 'pointer',
-            fontSize: '9px',
+            fontSize: '10px',
             fontWeight: 600,
             transition: 'var(--transition-smooth)'
           }}
         >
-          <MessageCircle size={18} style={{ color: isHelpOpen ? 'var(--primary)' : undefined }} />
-          <span>Chat</span>
+          <PiggyBank size={20} style={{ color: activeView === 'budgets' ? 'var(--primary)' : undefined }} />
+          <span>{t('limits', { defaultValue: 'Limits' })}</span>
+        </button>
+
+        <button
+          onClick={() => { if (checkExpiredGuard()) return; setActiveView('analytics'); }}
+          style={{
+            background: 'none',
+            border: 'none',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '4px',
+            color: activeView === 'analytics' ? 'var(--primary)' : 'var(--text-muted)',
+            cursor: 'pointer',
+            fontSize: '10px',
+            fontWeight: 600,
+            transition: 'var(--transition-smooth)'
+          }}
+        >
+          <BarChart3 size={20} style={{ color: activeView === 'analytics' ? 'var(--primary)' : undefined }} />
+          <span>{t('stats', { defaultValue: 'Stats' })}</span>
         </button>
 
         <button
@@ -4191,16 +4209,16 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '3px',
-            color: ['more', 'profile', 'wishlist', 'simulator', 'forest'].includes(activeView) ? 'var(--primary)' : 'var(--text-muted)',
+            gap: '4px',
+            color: ['more', 'profile', 'wishlist', 'simulator', 'forest', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 'var(--primary)' : 'var(--text-muted)',
             cursor: 'pointer',
-            fontSize: '9px',
+            fontSize: '10px',
             fontWeight: 600,
             transition: 'var(--transition-smooth)'
           }}
         >
-          <User size={18} style={{ color: ['more', 'profile', 'wishlist', 'simulator', 'forest'].includes(activeView) ? 'var(--primary)' : undefined }} />
-          <span>Profile</span>
+          <Grid size={20} style={{ color: ['more', 'profile', 'wishlist', 'simulator', 'forest', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 'var(--primary)' : undefined }} />
+          <span>{t('more', { defaultValue: 'More' })}</span>
         </button>
       </nav>
 
