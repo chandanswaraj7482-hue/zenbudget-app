@@ -7,6 +7,7 @@ interface WealthSimulatorProps {
   onBack: () => void;
   transactions: Transaction[];
   currencySymbol: string;
+  initialTab?: 'compound' | 'fdrd' | 'tax';
 }
 
 const ASSET_TYPES = [
@@ -19,9 +20,10 @@ const ASSET_TYPES = [
 export const WealthSimulator: React.FC<WealthSimulatorProps> = ({
   onBack,
   transactions,
-  currencySymbol
+  currencySymbol,
+  initialTab = 'compound'
 }) => {
-  const [activeTab, setActiveTab] = useState<'compound' | 'fdrd' | 'tax'>('compound');
+  const [activeTab, setActiveTab] = useState<'compound' | 'fdrd' | 'tax'>(initialTab);
 
   // --- 1. COMPOUND WEALTH SIMULATOR LOGIC ---
   const now = new Date();

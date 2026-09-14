@@ -93,6 +93,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   const [goals, setGoals] = useState<SavingsGoal[]>([]);
   
   const [activeView, setActiveView] = useState<'dashboard' | 'transactions' | 'budgets' | 'analytics' | 'profile' | 'forest' | 'wishlist' | 'simulator' | 'more' | 'shared_budget' | 'referral' | 'loans' | 'bank_sync' | 'follow_us' | 'bank_importer'>('dashboard');
+  const [simulatorTab, setSimulatorTab] = useState<'compound' | 'fdrd' | 'tax'>('compound');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
@@ -4100,17 +4101,29 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         )}
         {activeView === 'simulator' && (
           <WealthSimulator
-            key={langKey}
+            key={`${langKey}_${simulatorTab}`}
             onBack={() => setActiveView('more')}
             transactions={convertedTransactions}
             currencySymbol={currencySymbol}
+            initialTab={simulatorTab}
           />
         )}
         {activeView === 'more' && (
           <MoreToolsView
             key={langKey}
             onNavigateToImpulseBlocker={() => setActiveView('wishlist')}
-            onNavigateToSimulator={() => setActiveView('simulator')}
+            onNavigateToSimulator={() => {
+              setSimulatorTab('compound');
+              setActiveView('simulator');
+            }}
+            onNavigateToFDRD={() => {
+              setSimulatorTab('fdrd');
+              setActiveView('simulator');
+            }}
+            onNavigateToTax={() => {
+              setSimulatorTab('tax');
+              setActiveView('simulator');
+            }}
             onNavigateToSharedBudget={() => setActiveView('shared_budget')}
             onNavigateToReferral={() => setActiveView('referral')}
             onNavigateToLoans={() => setActiveView('loans')}
