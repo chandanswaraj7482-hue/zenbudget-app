@@ -13,7 +13,8 @@ import {
   CreditCard, 
   Compass, 
   HeartPulse, 
-  MoreHorizontal
+  MoreHorizontal,
+  Sparkles
 } from 'lucide-react';
 import type { Transaction, CategoryType } from '../types';
 import { formatCurrency } from '../utils/formatCurrency';
@@ -117,11 +118,128 @@ export const Transactions: React.FC<TransactionsProps> = ({
     return categoryMeta[category]?.icon || <MoreHorizontal size={18} />;
   };
 
+  // AI Insights Calculation for current month
+  const now = new Date();
+  const currentDay = now.getDate();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  const currentMonthExpenses = transactions.filter(t => {
+    if (t.type !== 'expense') return false;
+    const d = new Date(t.date);
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  });
+
+  const totalSpentSoFar = currentMonthExpenses.reduce((sum, t) => sum + t.amount, 0);
+  const dailyAvg = currentDay > 0 ? Math.round(totalSpentSoFar / currentDay) : 0;
+  const projectedMonthEnd = Math.round(dailyAvg * daysInMonth);
+
+  // Retrieve monthly salary / baseline budget
+  const profileId = localStorage.getItem('zb_profile_id') || 'local';
+  const savedSalary = Number(
+    localStorage.getItem(`zb_monthly_salary_${profileId}`) || 
+    localStorage.getItem('zb_monthly_salary_local') || 
+    localStorage.getItem('zb_monthly_salary') || 
+    localStorage.getItem('monthly_salary')
+  ) || 0;
+
+  const currentMonthIncome = transactions.filter(t => {
+    if (t.type !== 'income') return false;
+    const d = new Date(t.date);
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  }).reduce((sum, t) => sum + t.amount, 0);
+
+  const baselineSalary = savedSalary > 0 ? savedSalary : (currentMonthIncome > 0 ? currentMonthIncome : 0);
+
+  let pillText = '';
+  if (baselineSalary > 0) {
+    if (projectedMonthEnd <= baselineSalary) {
+      pillText = `You're pacing under your salary — hold daily spend near ${currencySymbol}${dailyAvg.toLocaleString()}.`;
+    } else {
+      const overBy = Math.round(projectedMonthEnd - baselineSalary);
+      const remainingDays = Math.max(1, daysInMonth - currentDay);
+      const remainingBudget = Math.max(0, baselineSalary - totalSpentSoFar);
+      const targetDaily = Math.round(remainingBudget / remainingDays);
+      pillText = `Pacing ${currencySymbol}${overBy.toLocaleString()} over salary — hold daily spend near ${currencySymbol}${targetDaily.toLocaleString()}.`;
+    }
+  } else {
+    if (totalSpentSoFar > 0) {
+      pillText = `Hold daily spend near ${currencySymbol}${dailyAvg.toLocaleString()} to maintain a healthy budget pace.`;
+    } else {
+      pillText = `Zero expenses logged so far — keep up the great discipline!`;
+    }
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '140px' }} className="animate-fade-in">
       <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em', margin: 0 }}>
         {t('transactions_title')}
       </h2>
+
+      {/* 🪄 AI INSIGHTS CARD */}
+      <div 
+        style={{
+          background: 'var(--bg-card, #18181b)',
+          border: '1px solid var(--border-card, rgba(255, 255, 255, 0.08))',
+          borderRadius: '20px',
+          padding: '18px 20px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)',
+          position: 'relative'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+          <Sparkles size={14} style={{ color: '#eab308' }} />
+          <span 
+            style={{ 
+              fontSize: '11px', 
+              fontWeight: 800, 
+              letterSpacing: '0.08em', 
+              color: '#eab308', 
+              textTransform: 'uppercase' 
+            }}
+          >
+            AI INSIGHTS
+          </span>
+        </div>
+
+        <p 
+          style={{ 
+            fontSize: '13.5px', 
+            color: 'var(--text-primary, #e4e4e7)', 
+            lineHeight: '1.55', 
+            fontWeight: 500, 
+            margin: 0 
+          }}
+        >
+          {totalSpentSoFar > 0 ? (
+            <>
+              You've spent <strong style={{ color: 'var(--text-primary, #fff)' }}>{currencySymbol}{totalSpentSoFar.toLocaleString()}</strong> so far — around <strong style={{ color: 'var(--text-primary, #fff)' }}>{currencySymbol}{dailyAvg.toLocaleString()}/day</strong> across {currentDay} of {daysInMonth} days. On this pace you're heading toward about <strong style={{ color: 'var(--text-primary, #fff)' }}>{currencySymbol}{projectedMonthEnd.toLocaleString()}</strong> by month-end.
+            </>
+          ) : (
+            <>
+              You've spent <strong style={{ color: 'var(--text-primary, #fff)' }}>{currencySymbol}0</strong> so far across {currentDay} of {daysInMonth} days. On this pace you're heading toward about <strong style={{ color: 'var(--text-primary, #fff)' }}>{currencySymbol}0</strong> by month-end.
+            </>
+          )}
+        </p>
+
+        <div 
+          style={{
+            background: '#b45309',
+            borderRadius: '12px',
+            padding: '10px 14px',
+            color: '#ffffff',
+            fontSize: '12.5px',
+            fontWeight: 700,
+            lineHeight: '1.4'
+          }}
+        >
+          {pillText}
+        </div>
+      </div>
 
       {/* Search Bar */}
       <div style={{ position: 'relative' }}>
