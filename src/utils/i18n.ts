@@ -211,10 +211,23 @@ const translations: Record<Language, Record<string, string>> = {
     'view_stats': 'view stats',
     'reset_workspace': 'Reset Workspace',
     'sign_out_account': 'Sign Out Account',
-    'lock_app_session': 'Lock app session.',
-    'good_morning': 'GOOD MORNING',
-    'good_afternoon': 'GOOD AFTERNOON',
-    'good_evening': 'GOOD EVENING'
+    'good_morning': 'Good morning',
+    'good_afternoon': 'Good afternoon',
+    'good_evening': 'Good evening',
+    'ai_money_coach_tag': 'AI MONEY COACH ({{tag}})',
+    'ai_powered': 'AI Powered',
+    'listen': 'Listen',
+    'stop': 'Stop',
+    'speech_not_supported': 'Text-to-speech is not supported on this browser.',
+    'morning_update': 'MORNING UPDATE',
+    'midday_update': 'MID-DAY UPDATE',
+    'evening_update': 'EVENING UPDATE',
+    'coach_msg_zero': "You've spent {{currency}}0 so far. Excellent discipline! Keep it up.",
+    'coach_msg_good': "You've spent {{amount}} so far today. You're doing great keeping your spending in check!",
+    'coach_msg_mindful': "You've spent {{amount}} so far today. Stay mindful of your financial goals!",
+    'friend_default': 'Friend',
+    'weekly_wrapped_btn': 'Weekly Wrapped 🎵',
+    'monthly_story_btn': 'Monthly Story 🎧'
   },
   hi: {
     'app_name': 'ZenBudget',
@@ -452,7 +465,21 @@ const translations: Record<Language, Record<string, string>> = {
     'acc_cash': 'कैश (नकद)',
     'acc_bank': 'बैंक खाता',
     'acc_upi': 'यूपीआई / वॉलेट',
-    'acc_credit': 'क्रेडिट कार्ड'
+    'acc_credit': 'क्रेडिट कार्ड',
+    'ai_money_coach_tag': 'एआई मनी कोच ({{tag}})',
+    'ai_powered': 'एआई पावर्ड',
+    'listen': 'सुनें',
+    'stop': 'रोकें',
+    'speech_not_supported': 'इस ब्राउज़र पर टेक्स्ट-टू-स्पीच समर्थित नहीं है।',
+    'morning_update': 'मॉर्निंग अपडेट',
+    'midday_update': 'दोपहर अपडेट',
+    'evening_update': 'ईवनिंग अपडेट',
+    'coach_msg_zero': 'आज आपने {{currency}}0 खर्च किए हैं। शानदार अनुशासन! इसे जारी रखें।',
+    'coach_msg_good': 'आज आपने {{amount}} खर्च किए हैं। बजट नियंत्रण में है, बहुत बढ़िया!',
+    'coach_msg_mindful': 'आज आपने {{amount}} खर्च किए हैं। अपने वित्तीय लक्ष्यों का ध्यान रखें!',
+    'friend_default': 'दोस्त',
+    'weekly_wrapped_btn': 'वीकली रैप्ड 🎵',
+    'monthly_story_btn': 'मंथली स्टोरी 🎧'
   },
   bn: {
     'app_name': 'ZenBudget',
@@ -1063,11 +1090,21 @@ export const setLanguage = (lang: Language) => {
 export const getLanguage = () => currentLanguage;
 
 export const t = (key: string, params?: Record<string, string | number>) => {
-  let text = translations[currentLanguage]?.[key] || translations['en']?.[key] || key;
+  let text = translations[currentLanguage]?.[key] || translations['en']?.[key];
+
+  if (!text) {
+    if (params && params.defaultValue !== undefined) {
+      text = String(params.defaultValue);
+    } else {
+      text = key;
+    }
+  }
   
   if (params) {
     Object.keys(params).forEach(p => {
-      text = text.replace(`{{${p}}}`, String(params[p]));
+      if (p !== 'defaultValue') {
+        text = text.replace(new RegExp(`{{${p}}}`, 'g'), String(params[p]));
+      }
     });
   }
   
