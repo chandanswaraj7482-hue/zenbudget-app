@@ -617,6 +617,22 @@ export function resolveUserFinancialQuery(
     return { responseText, updatedState };
   }
 
+  const isKissOrLove = qLower.includes('kiss') || qLower.includes('love you') || qLower.includes('pyaar');
+  if (isKissOrLove) {
+    const responseText = isFormalEnglish
+      ? `Haha! 🙈 Aww, love you too! But seriously, what are you going to do with a kiss from an AI? 😅 Better to focus on saving some money and tracking your expenses with ZenBudget! Let's get back to those financial goals, buddy! 💸✨`
+      : `Haha! 🙈 Aww, love you too yaar! Par sach bata, ek AI se kiss le kar kya karega? 😅 Paise bacha le aur apna budget track kar le ZenBudget se! Chal ab wapas financial goals par aate hain! 💸✨`;
+    return { responseText, updatedState };
+  }
+
+  const isDostOrBhai = qLower.includes('are dost') || qLower.includes('bhai kya haal') || qLower.includes('aur dost') || qLower.includes('aur bhai');
+  if (isDostOrBhai) {
+    const responseText = isFormalEnglish
+      ? `Hey buddy! I'm here. What's the plan for today? Need help managing your budget or tracking any expenses? I'm your financial sidekick! 👊✨`
+      : `Haan dost bol, aaj kya karna hai? 👊 Koi kharcha track karna hai ya naya budget set karna hai? Tera financial bhai idhar hi hai! ✨`;
+    return { responseText, updatedState };
+  }
+
   const isCasualGreeting = /^(hi+|hello+|hey+|sup|yo|hola|namaste|bhai|bro|aur batao|kaise ho|kaisa hai|kya hal|kya haal|kya chal)/i.test(qLower) || 
     qLower.includes('aur batao') || qLower.includes('kaise ho') || qLower.includes('kaisa hai') || qLower.includes('kya hal') || qLower.includes('kya haal');
   
@@ -655,29 +671,31 @@ export function resolveUserFinancialQuery(
   if (pricingKeywords.some(k => qLower.includes(k)) || (qLower.includes('premium') && (qLower.includes('cost') || qLower.includes('price') || qLower.includes('buy') || qLower.includes('plan') || qLower.includes('kitna') || qLower.includes('charge')))) {
     const responseText = isFormalEnglish
       ? `💎 **ZenBudget Premium Plans & Pricing** 👑\n\n` +
-        `• 🌟 **Free Tier**: Essential daily tracking & budget basics (100% Free Forever!).\n` +
-        `• 💳 **Pro Monthly Plan**: **₹99 / month** (Flexible monthly access)\n` +
-        `• 🏆 **Pro Annual Plan**: **₹699 / year** *(Save >40%! Best Value)*\n` +
-        `• 👑 **Lifetime VIP Pass**: **₹1,999** one-time payment for lifetime access!\n` +
+        `• 🌟 **7-Day Free Trial**: 10 transactions daily & budget basics (100% Free for 7 Days, No Credit Card!).\n` +
+        `• 💳 **Pro Monthly Plan**: **₹149 / month** (Flexible monthly access, cancel anytime)\n` +
+        `• 🏆 **Pro Annual Plan**: **₹1,499 / year** *(Save >16%! ~₹124/mo, 2 Months Free)*\n` +
+        `• 👑 **Lifetime VIP Pass**: **₹2,499** one-time payment for lifetime access!\n` +
         `• 🎁 **Referral Reward**: Invite 10 friends to get **1 Month Premium 100% FREE**!\n\n` +
         `✨ **What Premium Unlocks**:\n` +
-        `✅ Unlimited Custom Budget Categories & Accounts\n` +
+        `✅ Unlimited Daily Transactions & Custom Categories\n` +
         `✅ 24/7 Unlimited Zen AI Money Coach Guidance & Deep Analytics\n` +
+        `✅ Bank Statement Importer (CSV/PDF auto-parser)\n` +
         `✅ Couple & Family Real-Time Multi-Device Sync\n` +
-        `✅ PDF / Excel Ledger Data Export & Custom App Badges\n\n` +
-        `👉 Tap the **"👑 Upgrade to Premium"** button on the header or Profile Settings to upgrade instantly via UPI, Cards, or NetBanking!`
+        `✅ PDF / Excel Ledger Data Export & Biometric Privacy Lock\n\n` +
+        `👉 Tap the **"👑 Upgrade to Premium"** button to upgrade instantly via UPI (GPay, PhonePe, Paytm), Cards, or NetBanking!`
       : `💎 **ZenBudget Premium Pricing & Plans Details** 👑\n\n` +
-        `• 🌟 **Free Plan**: Free daily expense tracking & basic budgeting (Bilkul Free Forever!).\n` +
-        `• 💳 **Pro Monthly Plan**: **₹99 / month**\n` +
-        `• 🏆 **Pro Annual Plan**: **₹699 / year** *(40%+ savings, Subse Popular!)*\n` +
-        `• 👑 **Pro Lifetime Access**: **₹1,999** (Ek baar me lifetime ke liye!)\n` +
+        `• 🌟 **7-Day Free Trial**: 10 transactions daily & basic budgeting (Bilkul Free 7 Days Trial!).\n` +
+        `• 💳 **Pro Monthly Plan**: **₹149 / mahina** (Cancel anytime)\n` +
+        `• 🏆 **Pro Annual Plan**: **₹1,499 / saal** *(16%+ savings, ~₹124/mahina, Subse Popular!)*\n` +
+        `• 👑 **Pro Lifetime Access**: **₹2,499** (Ek baar payment, lifetime ke liye VIP access!)\n` +
         `• 🎁 **Free Referral Bonus**: 10 dosto ko invite karein aur **1 Month Premium FREE** paayein!\n\n` +
         `✨ **Premium Buy Karne Ke Benefits**:\n` +
-        `✅ Unlimited Custom Categories & Multiple Accounts\n` +
+        `✅ Unlimited Daily Transactions & Unlimited Categories\n` +
         `✅ 24/7 Unlimited Zen AI Money Coach Advice & Deep Insights\n` +
+        `✅ Bank Statement Importer (CSV / PDF Smart Parser)\n` +
         `✅ Couple & Family Sync (Real-time partner sync)\n` +
         `✅ PDF & Excel Monthly Report Export\n` +
-        `✅ Exclusive Theme Customization & VIP Badges\n\n` +
+        `✅ Biometric App Lock & VIP Badges\n\n` +
         `👉 Header me **"👑 Upgrade to Premium"** par click karke UPI (GPay, PhonePe, Paytm) ya Card se instant buy kar sakte hain! 🚀`;
     return { responseText, updatedState };
   }

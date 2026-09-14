@@ -54,15 +54,20 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
   const parseNaturalLanguage = (text: string, defaultType: 'expense' | 'income' | 'transfer') => {
     const cleanText = normalizeDigits(text.trim()).toLowerCase();
     
-    // 1. Amount Extraction (handles 220, २२०, 2.5k, ₹500, 5000, 300rs)
+    // 1. Amount Extraction (handles 220, २२०, 2.5k, ₹500, 5000, 300rs, and SMS like Rs.500)
     let amount = 0;
     const kMatch = cleanText.match(/(\d+(?:\.\d+)?)\s*k\b/i);
     if (kMatch) {
       amount = Math.round(parseFloat(kMatch[1]) * 1000);
     } else {
-      const numMatch = cleanText.match(/(?:(?:₹|\$|€|£|rs\.?|inr|rupees|ruppess|rupee)?\s*)(\d+(?:\.\d+)?)/i) || cleanText.match(/(\d+(?:\.\d+)?)\s*(?:rs|inr|rupees|ruppess|rupee)?/i);
-      if (numMatch) {
-        amount = Math.round(parseFloat(numMatch[1]));
+      const smsMatch = cleanText.match(/(?:rs\.?|inr|rupees?|₹)\s*(\d+(?:\.\d+)?)/i);
+      if (smsMatch) {
+        amount = Math.round(parseFloat(smsMatch[1]));
+      } else {
+        const numMatch = cleanText.match(/(?:(?:₹|\$|€|£|rs\.?|inr|rupees|ruppess|rupee)?\s*)(\d+(?:\.\d+)?)/i) || cleanText.match(/(\d+(?:\.\d+)?)\s*(?:rs|inr|rupees|ruppess|rupee)?/i);
+        if (numMatch) {
+          amount = Math.round(parseFloat(numMatch[1]));
+        }
       }
     }
 
@@ -76,11 +81,11 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
     } else if (defaultType === 'transfer') {
       type = 'transfer';
     } else {
-      if (/\b(transfer|transferred|bheja|send|sent|remit)\b/i.test(cleanText)) {
+      if (/\b(transfer|transferred|bheja|send|sent|remit)\b/i.test(cleanText) && !/\b(debited|credited)\b/i.test(cleanText)) {
         type = 'transfer';
-      } else if (/\b(received|got|salary|freelance|earned|income|aaya|aayi|aaye|mila|mili|mile|cashback|refund|credited)\b/i.test(cleanText)) {
+      } else if (/\b(received|got|salary|freelance|earned|income|aaya|aayi|aaye|mila|mili|mile|cashback|refund|credited|cr\.)\b/i.test(cleanText)) {
         type = 'income';
-      } else if (/\b(paid|spent|bought|kharcha|diya|diye|chukaaya|purchase|order|pay|debited)\b/i.test(cleanText)) {
+      } else if (/\b(paid|spent|bought|kharcha|diya|diye|chukaaya|purchase|order|pay|debited|dr\.)\b/i.test(cleanText)) {
         type = 'expense';
       }
     }
@@ -156,6 +161,13 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
       if (item.regex.test(cleanText)) {
         extractedTitle = item.label;
         break;
+      }
+    }
+
+    if (!extractedTitle) {
+      const smsMerchantMatch = cleanText.match(/(?:at|to|from)\s+([a-z0-9\s]+?)(?:\s+on|\s+ref|\s+via|\.|$)/i) || cleanText.match(/(?:info[:\-]?|upi[:\-]?|vpa[:\-]?)\s*([a-z0-9\s]+?)(?:\s|$)/i);
+      if (smsMerchantMatch && smsMerchantMatch[1] && smsMerchantMatch[1].trim().length > 2) {
+        extractedTitle = smsMerchantMatch[1].trim().split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
       }
     }
 
@@ -296,15 +308,15 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
     } catch (_) {}
 
     const accName = selectedAccObj ? selectedAccObj.name : 'Account';
-    setLastSavedSummary(`Saved: ${parsed.type.toUpperCase()} ${currencySymbol}${parsed.amount} (${parsed.title}) -> ${accName}`);
+    setLastSavedSummary(`Got it. Instantly ✨ Saved ${currencySymbol}${parsed.amount} for ${parsed.title}`);
     setInputQuery('');
     setTimeout(() => setLastSavedSummary(null), 4000);
   };
 
   const getPlaceholder = () => {
-    if (activeTab === 'expense') return t('quick_capture_expense_placeholder');
-    if (activeTab === 'income') return t('quick_capture_income_placeholder');
-    return t('quick_capture_transfer_placeholder');
+    if (activeTab === 'expense') return t('quick_capture_expense_placeholder', { defaultValue: 'Type or paste SMS (e.g. "Debited Rs.500 at Zomato")' });
+    if (activeTab === 'income') return t('quick_capture_income_placeholder', { defaultValue: 'Type or paste SMS (e.g. "Credited Rs.5000 from Salary")' });
+    return t('quick_capture_transfer_placeholder', { defaultValue: 'Type "Transferred Rs.500 to savings"' });
   };
 
   return (

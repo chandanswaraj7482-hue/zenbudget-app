@@ -40,6 +40,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [appLockEnabled, setAppLockEnabled] = useState<boolean>(() => localStorage.getItem('zb_app_lock_enabled') !== 'false');
+  const [biometricsEnabled, setBiometricsEnabled] = useState<boolean>(() => localStorage.getItem('zb_biometrics_enabled') !== 'false');
 
   // Auto-detect country calling code by IP location and timezone
   useEffect(() => {
@@ -172,6 +174,9 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       localStorage.setItem('zb_user_phone', phone.trim());
       localStorage.setItem('zb_user_phone_code', phoneCode);
       localStorage.setItem('zb_theme', themeMode);
+      localStorage.setItem('zb_currency_user_selected', 'true');
+      localStorage.setItem('zb_app_lock_enabled', String(appLockEnabled));
+      localStorage.setItem('zb_biometrics_enabled', String(biometricsEnabled));
       
       if (onToggleTheme && themeMode !== currentTheme) {
         onToggleTheme(themeMode);
@@ -529,6 +534,36 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               >
                 <Sun size={15} /> Light Mode
               </button>
+            </div>
+          </div>
+
+          {/* Security & App Lock */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              App Security
+            </label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: 'var(--bg-input)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-input)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '13px', fontWeight: 600 }}>Enable App Lock</span>
+                <button
+                  type="button"
+                  onClick={() => setAppLockEnabled(!appLockEnabled)}
+                  style={{ width: '40px', height: '24px', borderRadius: '12px', background: appLockEnabled ? 'var(--primary)' : 'var(--bg-card)', border: '1px solid var(--border-input)', position: 'relative', cursor: 'pointer', transition: '0.3s' }}
+                >
+                  <div style={{ position: 'absolute', top: '2px', left: appLockEnabled ? '18px' : '2px', width: '18px', height: '18px', borderRadius: '50%', background: '#fff', transition: '0.3s' }} />
+                </button>
+              </div>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '13px', fontWeight: 600 }}>Face ID / Fingerprint</span>
+                <button
+                  type="button"
+                  onClick={() => setBiometricsEnabled(!biometricsEnabled)}
+                  style={{ width: '40px', height: '24px', borderRadius: '12px', background: biometricsEnabled ? 'var(--primary)' : 'var(--bg-card)', border: '1px solid var(--border-input)', position: 'relative', cursor: 'pointer', transition: '0.3s' }}
+                >
+                  <div style={{ position: 'absolute', top: '2px', left: biometricsEnabled ? '18px' : '2px', width: '18px', height: '18px', borderRadius: '50%', background: '#fff', transition: '0.3s' }} />
+                </button>
+              </div>
             </div>
           </div>
 

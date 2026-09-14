@@ -12,6 +12,7 @@ import {
   LogOut,
   ChevronRight,
   Landmark,
+  Trash2,
   HandCoins,
   Share2
 } from 'lucide-react';
@@ -31,6 +32,7 @@ interface MoreToolsViewProps {
   onExportCSV: () => void;
   onResetData: () => void;
   onLogout: () => void;
+  onDeleteAccount?: () => void;
   userReferralCode?: string;
   referralCount?: number;
   onNavigateToLoans?: () => void;
@@ -38,6 +40,7 @@ interface MoreToolsViewProps {
   onOpenWidgetModal?: () => void;
   onNavigateToFollowUs?: () => void;
   isPremiumUser?: boolean;
+  onNavigateToBankImporter?: () => void;
 }
 
 export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
@@ -53,13 +56,15 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
   onExportCSV,
   onResetData,
   onLogout,
+  onDeleteAccount,
   userReferralCode: _userReferralCode = '',
   referralCount = 0,
   onNavigateToLoans,
   onOpenBankSync,
   onOpenWidgetModal,
   onNavigateToFollowUs,
-  isPremiumUser = false
+  isPremiumUser = false,
+  onNavigateToBankImporter
 }) => {
   const [socialLinks, setSocialLinks] = useState<Array<{ platform: string; icon: string; url: string; color: string; is_active: boolean }>>([]);
 
@@ -219,6 +224,76 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
         </div>
       </div>
 
+      {/* SECTION: PERSONAL INFO */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <h3 style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
+          Personal Info
+        </h3>
+        <div className="glass-panel" style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {(() => {
+            const profileId = localStorage.getItem('zb_profile_id') || 'local';
+            const dob = localStorage.getItem(`zb_dob_${profileId}`);
+            const salary = localStorage.getItem(`zb_monthly_salary_${profileId}`);
+            let age = '-';
+            if (dob) {
+              const dobDate = new Date(dob);
+              const diff = Date.now() - dobDate.getTime();
+              age = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25)).toString();
+            }
+            return (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px', background: 'rgba(255,255,255,0.02)', borderRadius: '14px' }}>
+                  <span style={{ fontSize: '14px', color: 'var(--text-secondary)', fontWeight: 600 }}>Age</span>
+                  <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>{age} yrs</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px', background: 'rgba(255,255,255,0.02)', borderRadius: '14px' }}>
+                  <span style={{ fontSize: '14px', color: 'var(--text-secondary)', fontWeight: 600 }}>Monthly Salary</span>
+                  <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--primary)' }}>₹{salary ? Number(salary).toLocaleString('en-IN') : '0'}</span>
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      </div>
+
+      {/* SECTION: CALCULATORS */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <h3 style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
+          Calculators
+        </h3>
+        <div className="glass-panel" style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <button
+            onClick={() => {}}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px', borderRadius: '14px', border: 'none', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', color: 'var(--text-primary)', textAlign: 'left'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
+              </div>
+              <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>FD / RD calculator</p>
+            </div>
+            <ChevronRight size={18} color="#94a3b8" />
+          </button>
+          
+          <button
+            onClick={() => {}}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px', borderRadius: '14px', border: 'none', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', color: 'var(--text-primary)', textAlign: 'left'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              </div>
+              <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>Tax estimator</p>
+            </div>
+            <ChevronRight size={18} color="#94a3b8" />
+          </button>
+        </div>
+      </div>
+
       {/* SECTION 2: ZEN & GROWTH */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <h3 style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
@@ -249,6 +324,47 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
               <div>
                 <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>{t('zen_coach_title')}</p>
                 <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('zen_coach_sub')}</span>
+              </div>
+            </div>
+            <ChevronRight size={18} color="#94a3b8" />
+          </button>
+
+          {/* Bank Statement Importer (AI Bank Assistant - PRO) */}
+          <button
+            onClick={onNavigateToBankImporter}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '14px',
+              borderRadius: '14px',
+              border: 'none',
+              background: 'rgba(255,255,255,0.02)',
+              cursor: 'pointer',
+              color: 'var(--text-primary)',
+              textAlign: 'left'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Landmark size={20} />
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>AI Bank Assistant</p>
+                  <span style={{
+                    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                    color: '#fff',
+                    fontSize: '9.5px',
+                    fontWeight: 800,
+                    padding: '2px 7px',
+                    borderRadius: '999px',
+                    letterSpacing: '0.04em'
+                  }}>
+                    🔒 PRO
+                  </span>
+                </div>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Parse PDF/CSV, auto-categorize & passbook audit</span>
               </div>
             </div>
             <ChevronRight size={18} color="#94a3b8" />
@@ -408,24 +524,28 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '14px',
-              borderRadius: '14px',
-              border: 'none',
-              background: 'rgba(255,255,255,0.02)',
+              borderRadius: '16px',
+              border: '1px solid rgba(16, 185, 129, 0.4)',
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.15) 100%)',
+              boxShadow: '0 4px 20px rgba(16, 185, 129, 0.15)',
               cursor: 'pointer',
               color: 'var(--text-primary)',
-              textAlign: 'left'
+              textAlign: 'left',
+              position: 'relative',
+              overflow: 'hidden'
             }}
           >
+            <div style={{ position: 'absolute', top: 0, right: 0, padding: '4px 10px', background: '#10b981', color: '#fff', fontSize: '9px', fontWeight: 800, borderBottomLeftRadius: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>VIP</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(251, 191, 36, 0.15)', color: '#fbbf24', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Sparkles size={20} />
               </div>
               <div>
-                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>{t('zenbudget_premium')}</p>
+                <p style={{ fontSize: '14px', fontWeight: 800, margin: 0, color: '#10b981' }}>{t('zenbudget_premium')}</p>
                 <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('premium_pricing_sub')}</span>
               </div>
             </div>
-            <ChevronRight size={18} color="#94a3b8" />
+            <ChevronRight size={18} color="#10b981" />
           </button>
 
           {/* Export Data */}
@@ -542,6 +662,37 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
             </div>
             <ChevronRight size={18} color="#ef4444" />
           </button>
+
+          {/* Delete Account */}
+          {onDeleteAccount && (
+            <button
+              onClick={onDeleteAccount}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '14px',
+                borderRadius: '14px',
+                border: '1px solid rgba(220, 38, 38, 0.4)',
+                background: 'rgba(220, 38, 38, 0.1)',
+                cursor: 'pointer',
+                color: 'var(--text-primary)',
+                textAlign: 'left',
+                marginTop: '4px'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(220, 38, 38, 0.2)', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Trash2 size={20} />
+                </div>
+                <div>
+                  <p style={{ fontSize: '14px', fontWeight: 800, margin: 0, color: '#dc2626' }}>Delete Account</p>
+                  <span style={{ fontSize: '11px', color: 'rgba(220, 38, 38, 0.8)' }}>Permanently erase all data</span>
+                </div>
+              </div>
+              <ChevronRight size={18} color="#dc2626" />
+            </button>
+          )}
 
         </div>
       </div>

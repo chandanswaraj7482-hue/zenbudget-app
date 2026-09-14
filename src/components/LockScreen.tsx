@@ -664,9 +664,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
   const biometricTriggered = useRef(false);
 
-  // Effect to auto-trigger biometric unlock prompt on mount or step change
   useEffect(() => {
-    if (step === 'unlock' && biometricsAvailable && dbProfile && !biometricTriggered.current) {
+    if (step === 'unlock' && biometricsAvailable && dbProfile && !biometricTriggered.current && localStorage.getItem('zb_biometrics_enabled') !== 'false') {
       biometricTriggered.current = true;
       triggerBiometricUnlock();
     }
@@ -1861,7 +1860,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             ))}
 
             {/* Left Keypad Column: Biometrics button — only shown when biometrics are available */}
-            {biometricsAvailable ? (
+            {biometricsAvailable && localStorage.getItem('zb_biometrics_enabled') !== 'false' ? (
               <button
                 onClick={() => triggerBiometricUnlock()}
                 style={{

@@ -510,7 +510,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                 <span style={{ color: remainingDays > 3 ? 'var(--primary)' : 'var(--danger)', fontWeight: 800, whiteSpace: 'nowrap', flexShrink: 0, marginLeft: 'auto' }}>{remainingDays} / 7 Days Left</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: 600, gap: '8px' }}>
-                <span style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>Free Logs (10 Max):</span>
+                <span style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>Daily Logs (10 Max):</span>
                 <span style={{ color: _currentTransactionsCount >= 10 ? 'var(--danger)' : 'var(--primary)', fontWeight: 800, whiteSpace: 'nowrap', flexShrink: 0, marginLeft: 'auto' }}>
                   {_currentTransactionsCount} / 10 Logged
                 </span>
@@ -847,6 +847,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '11px', color: '#94a3b8' }}>
                 <ShieldCheck size={14} color="#10b981" />
                 <span>Secure payment powered by Cashfree</span>
+              </div>
+              <div style={{ textAlign: 'center', fontSize: '9px', color: 'var(--text-muted)', marginTop: '4px', fontStyle: 'italic' }}>
+                * Auto-pay is automatically enabled via secure e-mandate. You can cancel anytime.
               </div>
             </div>
 

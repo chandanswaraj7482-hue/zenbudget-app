@@ -26,6 +26,20 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="com.zenbudget.app" />
             </intent-filter>
+
+            <!-- Intent filter for receiving shared screenshots from GPay, PhonePe, Paytm, Gallery, etc. -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+
+            <!-- Intent filter for receiving shared transaction text / receipt details from UPI & Bank apps -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
         </activity>
 
         <provider

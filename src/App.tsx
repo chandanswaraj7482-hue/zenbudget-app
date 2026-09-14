@@ -9,11 +9,15 @@ import {
   BarChart3,
   Grid,
   Loader2,
-  Bot
+  Bot,
+  Plus,
+  MessageCircle,
+  User
 } from 'lucide-react';
 import { MoreToolsView } from './components/MoreToolsView';
 import { AdminDashboard } from './components/AdminDashboard';
 import { ScannerModal } from './components/ScannerModal';
+import { SharedPaymentProcessingModal } from './components/SharedPaymentProcessingModal';
 import { NotificationsModal } from './components/NotificationsModal';
 import { HelpModal } from './components/HelpModal';
 import { LockScreen } from './components/LockScreen';
@@ -30,6 +34,7 @@ import { ReferralView } from './components/ReferralView';
 import { LoansView } from './components/LoansView';
 import { BankSyncView } from './components/BankSyncView';
 import { FollowUsView } from './components/FollowUsView';
+import { BankStatementImporter } from './components/BankStatementImporter';
 import { BankSyncModal } from './components/BankSyncModal';
 import { ScanPayUnlockModal } from './components/ScanPayUnlockModal';
 import { launchCashfreeCheckout } from './utils/cashfreeHelper';
@@ -56,6 +61,7 @@ import { SubscriptionModal } from './components/SubscriptionModal';
 import { supabase } from './supabaseClient';
 import { playNotificationSound, playErrorSound, triggerFireworksCelebration, playClickSound } from './utils/audio';
 import confetti from 'canvas-confetti';
+import { parsePaymentScreenshot, parseSharedPaymentText } from './utils/paymentScreenshotParser';
 
 interface AppProps {
   onBackToLanding?: () => void;
@@ -85,7 +91,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   const [budgets, setBudgets] = useState<CategoryBudget[]>([]);
   const [goals, setGoals] = useState<SavingsGoal[]>([]);
   
-  const [activeView, setActiveView] = useState<'dashboard' | 'transactions' | 'budgets' | 'analytics' | 'profile' | 'forest' | 'wishlist' | 'simulator' | 'more' | 'shared_budget' | 'referral' | 'loans' | 'bank_sync' | 'follow_us'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'transactions' | 'budgets' | 'analytics' | 'profile' | 'forest' | 'wishlist' | 'simulator' | 'more' | 'shared_budget' | 'referral' | 'loans' | 'bank_sync' | 'follow_us' | 'bank_importer'>('dashboard');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
@@ -126,7 +132,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     return [];
   });
 
-  const handleDeleteAccount = (accId: string) => {
+  const handleDeleteBankAccount = (accId: string) => {
     const tier = subscriptionTier || localStorage.getItem('zb_subscription_tier') || 'trial';
     const isPro = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(tier) || localStorage.getItem('admin_overridden') === 'true';
 
@@ -182,7 +188,9 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   const [isWidgetModalOpen, setIsWidgetModalOpen] = useState(false);
   
   // Auth & Profile states
-  const [isLocked, setIsLocked] = useState<boolean>(true);
+  const [isLocked, setIsLocked] = useState<boolean>(() => {
+    return localStorage.getItem('zb_profile_id') && localStorage.getItem('zb_app_lock_enabled') === 'false' ? false : true;
+  });
   const [isAppLoading, setIsAppLoading] = useState<boolean>(false);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
   const [showMorningBrief, setShowMorningBrief] = useState<boolean>(false);
@@ -298,6 +306,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
   const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false);
   const [incomingPaymentData, setIncomingPaymentData] = useState<{ vpa?: string; amount?: string; name?: string; note?: string } | null>(null);
+  const [sharedPaymentPayload, setSharedPaymentPayload] = useState<{ type: 'image' | 'text'; data: string } | null>(null);
+  const [isSharedProcessingOpen, setIsSharedProcessingOpen] = useState<boolean>(false);
   const [showGranularResetModal, setShowGranularResetModal] = useState(false);
   const [resetSelection, setResetSelection] = useState({
     transactions: true,
@@ -1297,6 +1307,22 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       setIsScannerOpen(true);
     }
 
+    // Handle incoming shared intent from Android (GPay, PhonePe, Paytm, Bank SMS, Gallery)
+    const processSharedPayload = (payload: { type: 'image' | 'text'; data: string }) => {
+      if (!payload || !payload.data) return;
+      setSharedPaymentPayload(payload);
+      setIsSharedProcessingOpen(true);
+    };
+
+    (window as any).handleIncomingSharedContent = processSharedPayload;
+
+    // Check if Android bridge passed an intent on cold start
+    const pendingIntent = (window as any).__PENDING_SHARED_INTENT__;
+    if (pendingIntent) {
+      (window as any).__PENDING_SHARED_INTENT__ = null;
+      processSharedPayload(pendingIntent);
+    }
+
     // Background update checker from Supabase app_versions & broadcast notifications
     const checkForUpdates = async () => {
       // ONLY trigger update popup inside installed mobile APK devices.
@@ -1723,6 +1749,48 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (!currentProfileId) return;
+    const confirmDelete = window.confirm("Are you sure you want to delete your ZenBudget account? This will permanently erase all your data and cannot be undone.");
+    if (!confirmDelete) return;
+
+    try {
+      // 1. Delete from Supabase profiles
+      const { error } = await supabase.from('profiles').delete().eq('id', currentProfileId);
+      if (error) throw error;
+      
+      // 2. Wipe local data
+      const keysToWipe: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && (k.startsWith('zb_') || k === 'has_scan_pay_access')) {
+          keysToWipe.push(k);
+        }
+      }
+      keysToWipe.forEach(k => {
+        try { localStorage.removeItem(k); } catch (_) {}
+      });
+
+      setTransactions([]);
+      setAccounts([]);
+      setBudgets([]);
+      setGoals([]);
+      setLoans([]);
+      setWishlist([]);
+      setDebts([]);
+      setCurrentProfileId('');
+      setUserName('');
+      setUserPin('0000');
+      setIsLocked(true);
+
+      try { await supabase.auth.signOut(); } catch (_) {}
+
+      triggerToast('Account successfully deleted.', 'success');
+    } catch (err: any) {
+      triggerToast(err.message || 'Failed to delete account.', 'danger');
+    }
+  };
+
   // Realtime Admin Panel Control & Profile Sync
   useEffect(() => {
     if (!currentProfileId) return;
@@ -1848,6 +1916,34 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       supabase.removeChannel(channel);
     };
   }, [currentProfileId]);
+
+  // Periodic Notifications for Expense Tracking
+  useEffect(() => {
+    if (!currentProfileId || isLocked) return;
+
+    // Ask for permission if not granted and if supported
+    if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+      Notification.requestPermission();
+    }
+
+    const interval = setInterval(() => {
+      const messages = [
+        "Hey! Don't forget to track your recent expenses! 💰",
+        "Just a reminder: log your spending to stay on top of your budget! 📊",
+        "Have you bought anything today? Quick capture it now! 📸",
+        "Keep your ZenBudget updated for the best financial insights! ✨"
+      ];
+      const msg = messages[Math.floor(Math.random() * messages.length)];
+
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification("ZenBudget Reminder", { body: msg, icon: '/favicon.ico' });
+      } else {
+        triggerToast(`🔔 ${msg}`, 'info');
+      }
+    }, 1000 * 60 * 60 * 4); // Every 4 hours
+
+    return () => clearInterval(interval);
+  }, [currentProfileId, isLocked]);
 
   const fetchDataFromSupabase = async () => {
     try {
@@ -2411,11 +2507,14 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       return false;
     }
 
-    // Check transaction counts
-    if (transactions.length >= 10) {
+    // Check daily transaction counts (10 per day)
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayTransactions = transactions.filter(t => t.date.startsWith(todayStr));
+    
+    if (todayTransactions.length >= 10) {
       setIsSubBlocker(true);
       setIsSubModalOpen(true);
-      triggerToast('Trial transaction limit reached (max 10). Upgrade to unlock unlimited records!', 'warning');
+      triggerToast('Daily trial transaction limit reached (max 10). Upgrade to unlock unlimited records!', 'warning');
       return false;
     }
 
@@ -3520,7 +3619,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         <div className="app-main-wrapper" style={{ margin: '0 auto', maxWidth: '520px', width: '100%', position: 'relative', minHeight: '100vh', background: 'var(--bg-base)', boxShadow: '0 0 20px rgba(0,0,0,0.4)', overflow: 'hidden' }}>
           <Onboarding 
             currencySymbol={currencySymbol} 
-            onComplete={(goal) => {
+            onComplete={async (goal, dob, monthlySalary) => {
               const effectiveId = currentProfileId || localStorage.getItem('zb_profile_id') || 'local';
               if (goal) {
                 const updatedGoals = [goal];
@@ -3530,6 +3629,24 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
                 setGoals([]);
                 localStorage.setItem(`zb_goals_${effectiveId}`, JSON.stringify([]));
               }
+              if (dob) {
+                localStorage.setItem(`zb_dob_${effectiveId}`, dob);
+              }
+              if (monthlySalary !== undefined) {
+                localStorage.setItem(`zb_monthly_salary_${effectiveId}`, monthlySalary.toString());
+              }
+              
+              if (effectiveId !== 'local') {
+                try {
+                  await supabase.from('profiles').update({
+                    dob: dob || null,
+                    monthly_salary: monthlySalary || 0
+                  }).eq('id', effectiveId);
+                } catch (err) {
+                  console.error('Failed to sync onboarding details', err);
+                }
+              }
+
               localStorage.setItem(`zb_onboarded_${effectiveId}`, 'true');
               localStorage.setItem('zb_onboarded_global', 'true');
               setShowOnboarding(false);
@@ -3719,6 +3836,46 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         </div>
       </header>
 
+      {/* Smart AI Insights Banner in Header */}
+      {(() => {
+        const h = new Date().getHours();
+        const isMorning = h >= 5 && h < 12;
+        const isEvening = h >= 18;
+        if (isMorning || isEvening) {
+          return (
+            <div 
+              className="animate-fade-in"
+              onClick={() => isMorning ? setShowMorningBrief(true) : setShowEveningReflection(true)}
+              style={{
+                margin: '12px 18px 0',
+                padding: '10px 14px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%)',
+                border: '1px solid rgba(16, 185, 129, 0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                cursor: 'pointer'
+              }}
+            >
+              <div style={{ padding: '6px', background: 'rgba(16, 185, 129, 0.15)', borderRadius: '8px', color: 'var(--primary)' }}>
+                <Sparkles size={16} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <p style={{ margin: 0, fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)' }}>
+                  {isMorning ? 'Tap for Morning Brief ☀️' : 'Tap for Evening Reflection 🌙'}
+                </p>
+                <p style={{ margin: 0, fontSize: '11px', color: 'var(--text-secondary)' }}>
+                  {isMorning ? 'Start your day with smart budget insights' : 'Review your daily spending patterns'}
+                </p>
+              </div>
+              <ArrowRight size={14} color="var(--primary)" />
+            </div>
+          );
+        }
+        return null;
+      })()}
+
       {/* Main View Area */}
       <main ref={mainScrollRef} className="scroll-container" style={{ padding: '20px 20px calc(110px + env(safe-area-inset-bottom)) 20px', minHeight: 'calc(100vh - 70px)' }}>
         {activeView === 'dashboard' && (
@@ -3758,7 +3915,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             onOpenAI={() => setIsHelpOpen(true)}
             onOpenLoans={() => setActiveView('loans')}
             onOpenProfile={() => setActiveView('profile')}
-            onDeleteAccount={handleDeleteAccount}
+            onDeleteAccount={handleDeleteBankAccount}
             onSaveTransaction={handleSaveTransaction}
             familyMembers={familyMembers}
             partnerName={partnerName || undefined}
@@ -3871,10 +4028,12 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             onExportCSV={handleExportCSV}
             onResetData={handleResetDataRequest}
             onLogout={() => setShowLogoutConfirm(true)}
+            onDeleteAccount={handleDeleteAccount}
             userReferralCode={userReferralCode}
             referralCount={referralCount}
             onNavigateToFollowUs={() => setActiveView('follow_us')}
             isPremiumUser={isPremiumUser}
+            onNavigateToBankImporter={() => setActiveView('bank_importer')}
           />
         )}
         {activeView === 'shared_budget' && (
@@ -3931,6 +4090,18 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             onBack={() => setActiveView('more')}
           />
         )}
+        {activeView === 'bank_importer' && (
+          <BankStatementImporter
+            key={langKey}
+            onBack={() => setActiveView('more')}
+            isPremiumUser={isPremiumUser}
+            onOpenSubscriptionModal={() => setIsSubModalOpen(true)}
+            accounts={accounts}
+            currencySymbol={currencySymbol}
+            onRefreshData={fetchDataFromSupabase}
+            onSaveTransaction={handleSaveTransaction}
+          />
+        )}
       </main>
 
       {/* Glass Bottom Navigation Bar */}
@@ -3947,7 +4118,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         WebkitBackdropFilter: 'blur(20px) saturate(180%)',
         display: 'flex',
         justifyContent: 'space-around',
-        padding: '12px 10px calc(env(safe-area-inset-bottom) + 16px) 10px',
+        padding: '8px 10px calc(env(safe-area-inset-bottom) + 12px) 10px',
         zIndex: 999
       }}>
         <button
@@ -3958,76 +4129,58 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '4px',
+            gap: '3px',
             color: activeView === 'dashboard' ? 'var(--primary)' : 'var(--text-muted)',
             cursor: 'pointer',
-            fontSize: '10px',
+            fontSize: '9px',
             fontWeight: 600,
             transition: 'var(--transition-smooth)'
           }}
         >
-          <LayoutDashboard size={20} style={{ color: activeView === 'dashboard' ? 'var(--primary)' : undefined }} />
-          <span>{t('dashboard')}</span>
+          <LayoutDashboard size={18} style={{ color: activeView === 'dashboard' ? 'var(--primary)' : undefined }} />
+          <span>Home</span>
         </button>
 
         <button
-          onClick={() => { if (checkExpiredGuard()) return; setActiveView('transactions'); }}
+          onClick={() => { if (checkExpiredGuard()) return; setIsModalOpen(true); }}
           style={{
             background: 'none',
             border: 'none',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '4px',
-            color: activeView === 'transactions' ? 'var(--primary)' : 'var(--text-muted)',
+            gap: '3px',
+            color: 'var(--text-muted)',
             cursor: 'pointer',
-            fontSize: '10px',
+            fontSize: '9px',
             fontWeight: 600,
             transition: 'var(--transition-smooth)'
           }}
         >
-          <Receipt size={20} style={{ color: activeView === 'transactions' ? 'var(--primary)' : undefined }} />
-          <span>{t('ledger')}</span>
+          <div style={{ background: 'var(--primary)', borderRadius: '50%', padding: '6px', marginBottom: '2px', boxShadow: '0 4px 10px rgba(16, 185, 129, 0.3)' }}>
+             <Plus size={16} color="#fff" />
+          </div>
+          <span>Add</span>
         </button>
 
         <button
-          onClick={() => { if (checkExpiredGuard()) return; setActiveView('budgets'); }}
+          onClick={() => { if (checkExpiredGuard()) return; setIsHelpOpen(true); }}
           style={{
             background: 'none',
             border: 'none',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '4px',
-            color: activeView === 'budgets' ? 'var(--primary)' : 'var(--text-muted)',
+            gap: '3px',
+            color: isHelpOpen ? 'var(--primary)' : 'var(--text-muted)',
             cursor: 'pointer',
-            fontSize: '10px',
+            fontSize: '9px',
             fontWeight: 600,
             transition: 'var(--transition-smooth)'
           }}
         >
-          <PiggyBank size={20} style={{ color: activeView === 'budgets' ? 'var(--primary)' : undefined }} />
-          <span>{t('limits')}</span>
-        </button>
-
-        <button
-          onClick={() => { if (checkExpiredGuard()) return; setActiveView('analytics'); }}
-          style={{
-            background: 'none',
-            border: 'none',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '4px',
-            color: activeView === 'analytics' ? 'var(--primary)' : 'var(--text-muted)',
-            cursor: 'pointer',
-            fontSize: '10px',
-            fontWeight: 600,
-            transition: 'var(--transition-smooth)'
-          }}
-        >
-          <BarChart3 size={20} style={{ color: activeView === 'analytics' ? 'var(--primary)' : undefined }} />
-          <span>{t('stats')}</span>
+          <MessageCircle size={18} style={{ color: isHelpOpen ? 'var(--primary)' : undefined }} />
+          <span>Chat</span>
         </button>
 
         <button
@@ -4038,16 +4191,16 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '4px',
+            gap: '3px',
             color: ['more', 'profile', 'wishlist', 'simulator', 'forest'].includes(activeView) ? 'var(--primary)' : 'var(--text-muted)',
             cursor: 'pointer',
-            fontSize: '10px',
+            fontSize: '9px',
             fontWeight: 600,
             transition: 'var(--transition-smooth)'
           }}
         >
-          <Grid size={20} style={{ color: ['more', 'profile', 'wishlist', 'simulator', 'forest'].includes(activeView) ? 'var(--primary)' : undefined }} />
-          <span>{t('more')}</span>
+          <User size={18} style={{ color: ['more', 'profile', 'wishlist', 'simulator', 'forest'].includes(activeView) ? 'var(--primary)' : undefined }} />
+          <span>Profile</span>
         </button>
       </nav>
 
@@ -4438,7 +4591,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             setIsSubModalOpen(false);
             setIsSubBlocker(false);
           }}
-          currentTransactionsCount={transactions.length}
+          currentTransactionsCount={transactions.filter(t => t.date.startsWith(new Date().toISOString().split('T')[0])).length}
           trialStartDate={trialStartDate}
           subscriptionTier={subscriptionTier}
           onUpgradeSuccess={(cycle) => {
@@ -4531,6 +4684,32 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           }}
           onPayViaCashfree={handleDirectCashfreePayment}
           onRequireUnlockModal={() => setIsScanPayUnlockOpen(true)}
+        />
+      )}
+
+      {/* Top-Notch Shared Payment Processing HUD */}
+      {isSharedProcessingOpen && sharedPaymentPayload && (
+        <SharedPaymentProcessingModal
+          isOpen={isSharedProcessingOpen}
+          payload={sharedPaymentPayload}
+          accounts={accounts}
+          currencySymbol={currencySymbol}
+          onClose={() => {
+            setIsSharedProcessingOpen(false);
+            setSharedPaymentPayload(null);
+          }}
+          onSaveTransaction={async (txData) => {
+            const ok = await handleSaveTransaction(txData);
+            if (ok) {
+              triggerToast(`✨ Expense added: ${txData.title} (${currencySymbol}${txData.amount})!`, 'success');
+              fetchDataFromSupabase();
+            }
+            return ok;
+          }}
+          onOpenFullEditor={(txData) => {
+            setEditingTransaction(txData);
+            setIsModalOpen(true);
+          }}
         />
       )}
 

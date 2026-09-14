@@ -5,6 +5,7 @@ import { supabase } from '../supabaseClient';
 import { Capacitor } from '@capacitor/core';
 import { checkHasScanPayAccess, handleZenBudgetPaymentSystem } from '../utils/paymentRouter';
 import { PhonePeLogo, GooglePayLogo, PaytmLogo } from './UPIIcons';
+import { parsePaymentScreenshot } from '../utils/paymentScreenshotParser';
 
 interface ScannerModalProps {
   isOpen: boolean;
@@ -29,12 +30,12 @@ const FEELINGS = [
   { label: 'Neutral', emoji: '😐' },
 ];
 
-const PAYMENT_TABS = ['Scan QR', 'Mobile', 'Bank A/c', 'UPI ID'];
+const PAYMENT_TABS = ['Scan QR', 'Screenshot', 'Mobile', 'Bank A/c', 'UPI ID'];
 
 export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onSuccess, onPayViaCashfree, initialData, onRequireUnlockModal }) => {
   if (!isOpen) return null;
 
-  const [activePayTab, setActivePayTab] = useState<'Scan QR' | 'Mobile' | 'Bank A/c' | 'UPI ID'>('Scan QR');
+  const [activePayTab, setActivePayTab] = useState<'Scan QR' | 'Screenshot' | 'Mobile' | 'Bank A/c' | 'UPI ID'>('Scan QR');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('General');
@@ -974,6 +975,83 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
             )}
 
             {/* Mobile Number Tab */}
+            {activePayTab === 'Screenshot' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', animation: 'fadeIn 0.3s ease-out', minHeight: '300px', justifyContent: 'center', alignItems: 'center' }}>
+                <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+                  <h3 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>
+                    <span style={{ color: 'var(--primary)' }}>No Typing.</span><br />
+                    <span style={{ color: 'var(--secondary)' }}>No Bank Logins.</span>
+                  </h3>
+                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Just share your payment screenshot. We auto-log the rest instantly.</p>
+                </div>
+                
+                {isScanning ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                    <div className="animate-spin" style={{ width: '40px', height: '40px', borderRadius: '50%', border: '3px solid rgba(34,197,94,0.2)', borderTopColor: 'var(--primary)' }} />
+                    <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--primary)' }}>Analyzing screenshot...</span>
+                  </div>
+                ) : (
+                  <label style={{
+                    width: '100%',
+                    maxWidth: '300px',
+                    height: '140px',
+                    border: '2px dashed var(--primary)',
+                    borderRadius: '24px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '12px',
+                    background: 'rgba(34, 197, 94, 0.05)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      style={{ display: 'none' }}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setIsScanning(true);
+                          try {
+                            const reader = new FileReader();
+                            reader.onload = async (event) => {
+                              try {
+                                const base64 = event.target?.result as string;
+                                if ((window as any).handleIncomingSharedContent) {
+                                  setIsScanning(false);
+                                  onClose();
+                                  (window as any).handleIncomingSharedContent({ type: 'image', data: base64 });
+                                  return;
+                                }
+                                const parsed = await parsePaymentScreenshot(base64);
+                                setIsScanning(false);
+                                if (parsed.amount) setAmount(parsed.amount);
+                                if (parsed.merchantName) setMerchantName(parsed.merchantName);
+                                if (parsed.note) setDescription(parsed.note);
+                                if (parsed.category) setCategory(parsed.category);
+                                setStep('payment');
+                              } catch (err) {
+                                setIsScanning(false);
+                              }
+                            };
+                            reader.readAsDataURL(file);
+                          } catch (err) {
+                            setIsScanning(false);
+                          }
+                        }
+                      }}
+                    />
+                    <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: 'var(--primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <FileText size={24} />
+                    </div>
+                    <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>Upload Screenshot</span>
+                  </label>
+                )}
+              </div>
+            )}
+
             {activePayTab === 'Mobile' && (
               <div style={{ marginBottom: '16px' }}>
                 <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>Mobile Number</label>

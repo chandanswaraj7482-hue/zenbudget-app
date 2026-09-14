@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
-import { Sparkles, ArrowRight, ArrowLeft, Search, Sun, Moon, Target, Shield, Users, Clock, Star, Smartphone, Brain, TrendingUp, Heart, Activity, ChevronDown, MessageCircleHeart, ChartLine, BookHeart, Lock, ArrowUpRight, Wallet, PiggyBank, Receipt, BarChart3, Banknote, CircleCheck, Circle, Flame, Play, BookOpen, MessageCircle, X, Download, Menu, CheckCircle2, ChevronRight, Zap, RefreshCw, HelpCircle, Award, Check } from 'lucide-react';
+import React, { useEffect, useState, useRef, useLayoutEffect, useMemo } from 'react';
+import { Sparkles, ArrowRight, ArrowLeft, Search, Sun, Moon, Target, Shield, Users, Clock, Star, Smartphone, Brain, TrendingUp, Heart, Activity, ChevronDown, MessageCircleHeart, ChartLine, BookHeart, Lock, ArrowUpRight, Wallet, PiggyBank, Receipt, BarChart3, Banknote, CircleCheck, Circle, Flame, Play, BookOpen, MessageCircle, X, Download, Menu, CheckCircle, CheckCircle2, ChevronRight, Zap, RefreshCw, HelpCircle, Award, Check, Monitor, Pause } from 'lucide-react';
 
 interface LandingPageProps {
   onOpenWebApp: () => void;
@@ -388,26 +388,26 @@ export const FEATURE_PAGES_DATA: Record<string, {
     slug: 'receipt-scanner',
     category: 'feature',
     categoryLabel: 'Platform Feature',
-    badge: 'AI RECEIPT SCANNER',
+    badge: 'AI RECEIPT & GPAY SCANNER',
     indexNumber: '05',
-    title: 'Snap physical paper bills & extract line items instantly',
-    subtitle: 'Zero Manual Typing',
-    description: "Scan restaurant bills, grocery receipts, or fuel invoices using your phone camera. Our AI parses amount, date, vendor, and line items in under 2 seconds.",
-    highlights: ['Camera OCR & AI parsing', 'Automated category matching', 'Tax invoice storage', 'Multi-currency receipt support'],
+    title: 'Share GPay, PhonePe screenshots & paper receipts to auto-log instantly',
+    subtitle: 'Zero Manual Typing · Direct Share Target',
+    description: "Paid via Google Pay, PhonePe, or Paytm? Tap 'Share' directly to ZenBudget. Our AI instantly parses amount, merchant name, and category, adding your expense in under 1 second.",
+    highlights: ['Direct GPay / PhonePe share target', 'AI Vision payment screenshot OCR', 'Automated merchant & category detection', 'Zero manual typing required'],
     stats: [
-      { label: 'Scan Speed', value: '1.4s' },
-      { label: 'Parsing Engine', value: 'Vision AI' },
-      { label: 'Backup Vault', value: 'Digital Receipts' }
+      { label: 'Scan Speed', value: '1.2s' },
+      { label: 'Supported Apps', value: 'GPay & PhonePe' },
+      { label: 'Manual Typing', value: '0 Seconds' }
     ],
     benefits: [
-      { iconName: 'Receipt', title: 'Instant Logging', desc: 'No manual data entry required — just point your camera and confirm.' },
-      { iconName: 'Shield', title: 'Digital Invoice Backup', desc: 'Never lose a tax-deductible receipt or warranty document again.' },
-      { iconName: 'Zap', title: 'Splitting Bills Made Easy', desc: 'Extract individual item totals to split expenses with friends accurately.' }
+      { iconName: 'Receipt', title: 'Instant GPay / PhonePe Share', desc: 'Share your payment success screen straight from Google Pay or PhonePe to log expenses instantly.' },
+      { iconName: 'Shield', title: 'Digital Invoice & OCR Backup', desc: 'Point your camera at paper restaurant and grocery receipts to extract items in 2 seconds.' },
+      { iconName: 'Zap', title: 'Zero Manual Input', desc: 'Our vision AI reads merchant name, total price, and auto-matches the category effortlessly.' }
     ],
     howItWorks: [
-      { step: '01', title: 'Snap or Upload', desc: 'Take a quick photo of any paper receipt or upload an image.' },
-      { step: '02', title: 'AI Extraction', desc: 'Our vision AI reads merchant name, total price, tax, and date.' },
-      { step: '03', title: 'Instant Save', desc: 'Transaction is auto-logged into your expense log with receipt attached.' }
+      { step: '01', title: 'Pay on GPay or PhonePe', desc: 'Complete your payment normally in Google Pay, PhonePe, or Paytm.' },
+      { step: '02', title: 'Tap Share -> ZenBudget', desc: 'From the payment success screen, tap Share and select ZenBudget.' },
+      { step: '03', title: 'Instant Auto-Log', desc: 'The expense amount, merchant name, and category are parsed and logged automatically!' }
     ],
     testimonial: {
       quote: "Scanning grocery bills after shopping takes 2 seconds now. It extracted all 14 items perfectly on the first try!",
@@ -1126,9 +1126,38 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
     };
   }, []);
 
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    try {
+      const saved = localStorage.getItem('zb_landing_theme');
+      if (saved === 'dark' || saved === 'light') return saved;
+    } catch (e) {}
+    return 'dark'; // Default is dark unless explicitly changed by user
+  });
   const [activePage, setActivePage] = useState<string>('home');
   const [landingAiQuery, setLandingAiQuery] = useState('');
+
+  const realUserData = useMemo(() => {
+    try {
+      const name = localStorage.getItem('zb_user_name') || localStorage.getItem('user_name') || 'Chandan';
+      const storedTxs = localStorage.getItem('zb_transactions') || localStorage.getItem('zb_tx_cache') || '[]';
+      const txs = JSON.parse(storedTxs);
+      
+      const storedAccs = localStorage.getItem('zb_accounts') || '[]';
+      const accs = JSON.parse(storedAccs);
+      
+      let balance = 145800;
+      if (Array.isArray(accs) && accs.length > 0) {
+        balance = accs.reduce((sum: number, a: any) => sum + (Number(a.balance) || 0), 0);
+      } else if (Array.isArray(txs) && txs.length > 0) {
+        const calc = txs.reduce((sum: number, t: any) => t.type === 'income' ? sum + Number(t.amount) : t.type === 'expense' ? sum - Number(t.amount) : sum, 0);
+        if (calc > 0) balance = calc;
+      }
+
+      return { userName: name, balance, hasRealData: Array.isArray(txs) && txs.length > 0 };
+    } catch (e) {
+      return { userName: 'Chandan', balance: 145800, hasRealData: false };
+    }
+  }, []);
   const [landingAiMessages, setLandingAiMessages] = useState<Array<{ sender: 'user' | 'bot', text: string }>>([
     { sender: 'bot', text: "Hii! 🌿 Main Zen hu — aapka 24/7 AI Money Coach. Kuch bhi poochho, jaise 'Can I afford ₹8,500?', 'Roast my spending', ya '50/30/20 rule'!" }
   ]);
@@ -1240,6 +1269,8 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
   }, []);
   const [activeToolkit, setActiveToolkit] = useState(0);
   const [activeInsideTab, setActiveInsideTab] = useState(0);
+  const [mobileFeatureSlide, setMobileFeatureSlide] = useState(0);
+  const [isMobileFeaturePaused, setIsMobileFeaturePaused] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showIosGuideModal, setShowIosGuideModal] = useState(false);
@@ -1247,6 +1278,9 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showThemeMenu, setShowThemeMenu] = useState(false);
+  const [activeScene, setActiveScene] = useState('Morning');
+  const [activeWeather, setActiveWeather] = useState('Clear');
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleDropdownMouseEnter = (key: string) => {
@@ -1342,6 +1376,14 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
     rate: 1,
     country: 'India'
   });
+
+  useEffect(() => {
+    if (isMobileFeaturePaused) return;
+    const interval = setInterval(() => {
+      setMobileFeatureSlide(prev => (prev + 1) % 4);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [isMobileFeaturePaused]);
 
   useEffect(() => {
     const fetchGeoLocation = async () => {
@@ -1677,6 +1719,14 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       setDeviceOS('web');
     }
 
+    if (!sessionStorage.getItem('zb_welcome_shown')) {
+      const timer = setTimeout(() => {
+        setShowWelcomeModal(true);
+        sessionStorage.setItem('zb_welcome_shown', 'true');
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -1707,7 +1757,13 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
     };
   }, []);
 
-  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  const toggleTheme = () => {
+    setTheme(prev => {
+      const newTheme = prev === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem('zb_landing_theme', newTheme); } catch (e) {}
+      return newTheme;
+    });
+  };
   const isDark = theme === 'dark';
 
   const scrollTo = (id: string) => {
@@ -1741,29 +1797,24 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
     setShowModal(false);
     if (deviceOS === 'ios') {
       setShowIosGuideModal(true);
-    } else if (deviceOS === 'android') {
+    } else {
       const link = document.createElement('a');
       link.href = '/zenbudget.apk';
       link.download = 'ZenBudget.apk';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    } else {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-      } else {
-        const link = document.createElement('a');
-        link.href = '/zenbudget.apk';
-        link.download = 'ZenBudget.apk';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
     }
   };
 
   const handleDownloadApk = () => {
-    handleDownloadAction();
+    setShowModal(false);
+    const link = document.createElement('a');
+    link.href = '/zenbudget.apk';
+    link.download = 'ZenBudget.apk';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // Quiz Handling
@@ -1849,7 +1900,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       height: auto !important;
       min-height: 100vh !important;
       width: 100% !important;
-      max-width: 100vw !important;
+      max-width: 100% !important;
       -webkit-overflow-scrolling: touch !important;
     }
     body {
@@ -1865,7 +1916,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       height: auto !important;
       min-height: 100vh !important;
       width: 100% !important;
-      max-width: 100vw !important;
+      max-width: 100% !important;
     }
     .glass-header {
       backdrop-filter: blur(20px) saturate(180%);
@@ -1923,18 +1974,21 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
     @media (max-width: 1024px) {
       .desktop-only { display: none !important; }
       .mobile-show { display: flex !important; }
+      .bento-card-mobile-hide { display: none !important; }
       .grid-hero { grid-template-columns: 1fr !important; gap: 32px !important; }
       .bento-grid { grid-template-columns: 1fr !important; }
       .bento-span2 { grid-column: span 1 !important; }
       .toolkit-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
       .inside-row { flex-direction: column !important; gap: 32px !important; }
       .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+      .mobile-stack { grid-template-columns: 1fr !important; gap: 24px !important; }
     }
 
     @media (max-width: 768px) {
       .quiz-container { padding: 20px 16px !important; }
       .scorecard-summary-grid { grid-template-columns: 1fr !important; }
       .scorecard-categories-grid { grid-template-columns: 1fr !important; }
+      .hero-mockup-scale { transform: scale(0.8) !important; transform-origin: top center !important; }
     }
 
     @media (max-width: 640px) {
@@ -2053,19 +2107,19 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
     { 
       title: 'Smart Budget Templates', 
       desc: 'Access pre-built budgets tailored for students, freelancers, couples, and families — rooted in proven financial frameworks. Customize at your own pace.',
-      image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=1200&auto=format&fit=crop',
+      background: 'linear-gradient(135deg, #10b981 0%, #064e3b 100%)',
       badge: 'Budget Framework'
     },
     { 
       title: 'Community Savings Challenges', 
       desc: 'You are not alone. Join collaborative savings challenges and community sessions designed to build healthy money habits alongside supportive peers.',
-      image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop',
+      background: 'linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%)',
       badge: 'Together Challenges'
     },
     { 
       title: 'Personalized Financial Planning', 
       desc: 'Receive customized plans structured around your unique goals, focusing on daily routines that support long-term wealth creation and debt elimination.',
-      image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1200&auto=format&fit=crop',
+      background: 'linear-gradient(135deg, #8b5cf6 0%, #4c1d95 100%)',
       badge: 'AI Roadmap'
     },
   ];
@@ -2083,7 +2137,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           background: isDark ? 'rgba(15, 22, 17, 0.55)' : 'rgba(255, 255, 255, 0.55)', 
           backdropFilter: 'blur(24px) saturate(190%)', WebkitBackdropFilter: 'blur(24px) saturate(190%)', 
           boxShadow: isDark ? '0 16px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)' : '0 16px 40px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.95)', 
-          width: 'min(1440px, calc(100vw - 1.5rem))', height: '72px' 
+          width: 'min(1440px, 100%)', height: '72px' 
         }}>
           {/* Logo */}
           <a onClick={e => { e.preventDefault(); navigateToPage('home'); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', textDecoration: 'none' }}>
@@ -2096,9 +2150,10 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             {[
               { label: 'Features', id: 'features', key: 'features', hasDropdown: true },
               { label: 'Conditions', id: 'conditions', key: 'conditions', hasDropdown: true },
+              { label: 'About', id: 'about', key: 'about', hasDropdown: false },
               { label: 'Inside App', id: 'inside-app', key: 'inside app', hasDropdown: true },
               { label: 'Financial Quiz', id: 'quiz', key: 'quiz', hasDropdown: false, badge: 'FREE' },
-              { label: 'Toolkit', id: 'toolkit', key: 'toolkit', hasDropdown: false },
+              { label: 'Pricing', id: 'pricing', key: 'pricing', hasDropdown: false },
               { label: 'Stories', id: 'community', key: 'stories', hasDropdown: false }
             ].map(link => (
               <li 
@@ -2110,10 +2165,12 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   onClick={() => {
                     if (link.key === 'quiz') {
                       navigateToPage('quiz');
-                    } else if (link.key === 'toolkit') {
-                      navigateToPage('toolkit');
+                    } else if (link.key === 'pricing') {
+                      navigateToPage('pricing');
                     } else if (link.key === 'stories') {
                       navigateToPage('community');
+                    } else if (link.key === 'about') {
+                      navigateToPage('about');
                     } else if (link.hasDropdown) {
                       if (activeDropdown === link.key) {
                         setActiveDropdown(null);
@@ -2140,28 +2197,29 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
           {/* Right Header Actions */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <button onClick={toggleTheme} aria-label="Toggle dark mode" style={{ width: '38px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', border: `1px solid ${t.border}`, background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.5)', backdropFilter: 'blur(10px)', cursor: 'pointer', color: t.text }}>
-              {isDark ? <Sun size={16} color="#facc15" /> : <Moon size={16} />}
+            <button 
+              onClick={toggleTheme} 
+              aria-label={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"} 
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              style={{ width: '38px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', border: `1px solid ${t.border}`, background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.5)', backdropFilter: 'blur(10px)', cursor: 'pointer', color: t.text, transition: 'all 0.2s' }}
+              className="hover-lift"
+            >
+              {isDark ? <Moon size={16} color="#a7f3d0" /> : <Sun size={16} color="#f59e0b" />}
             </button>
 
-            {deviceOS === 'ios' ? (
-              <button onClick={() => setShowIosGuideModal(true)} title="Add to Home Screen (Safari PWA)" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', color: t.text, padding: '8px 14px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }}>
+            {(deviceOS === 'ios' || deviceOS === 'mac') ? (
+              <button className="desktop-only" onClick={() => setShowIosGuideModal(true)} title="Add to Home Screen (Safari PWA)" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', color: t.text, padding: '8px 14px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }}>
                 <Smartphone size={14} color="#10b981" />
-                <span>iOS App</span>
-              </button>
-            ) : deviceOS === 'android' ? (
-              <button onClick={handleDownloadApk} title="Download Android App APK" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', color: t.text, padding: '8px 14px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }}>
-                <Download size={14} color="#10b981" />
-                <span>Android APK</span>
+                <span>Download App</span>
               </button>
             ) : (
-              <button onClick={onOpenWebApp} title="Open Web Version" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', color: t.text, padding: '8px 14px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }}>
-                <Wallet size={14} color="#10b981" />
-                <span>Web Version</span>
+              <button className="desktop-only" onClick={handleDownloadApk} title="Download Android App APK" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', color: t.text, padding: '8px 14px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }}>
+                <Download size={14} color="#10b981" />
+                <span>Download APK</span>
               </button>
             )}
 
-            <button onClick={onOpenWebApp} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg, #10b981 0%, #047857 100%)', color: '#fff', paddingLeft: '20px', paddingRight: '8px', paddingTop: '8px', paddingBottom: '8px', borderRadius: '100px', fontSize: '14.5px', fontWeight: 800, border: 'none', cursor: 'pointer', transition: 'all 0.25s ease', boxShadow: '0 6px 20px rgba(16,185,129,0.45)' }} className="hover-lift">
+            <button onClick={onOpenWebApp} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg, #10b981 0%, #047857 100%)', color: '#fff', paddingLeft: '20px', paddingRight: '8px', paddingTop: '8px', paddingBottom: '8px', borderRadius: '100px', fontSize: '14.5px', fontWeight: 800, border: 'none', cursor: 'pointer', transition: 'all 0.25s ease', boxShadow: '0 6px 20px rgba(16,185,129,0.45)' }} className="hover-lift desktop-only">
               <Wallet size={16} color="#ffffff" />
               <span>Open Web App</span>
               <span style={{ background: 'rgba(255,255,255,0.25)', padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ArrowRight size={14} color="#ffffff" /></span>
@@ -2178,7 +2236,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           <div 
             onMouseEnter={() => handleDropdownMouseEnter('features')}
             onMouseLeave={handleDropdownMouseLeave}
-            style={{ pointerEvents: 'auto', position: 'absolute', top: '78px', left: '50%', transform: 'translateX(-50%)', width: 'min(1100px, calc(100vw - 48px))', background: isDark ? 'rgba(18,25,20,0.75)' : 'rgba(255,255,255,0.75)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.8)', borderRadius: '24px', padding: '24px', boxShadow: isDark ? '0 30px 70px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15)' : '0 30px 70px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95)', zIndex: 10000, display: 'flex', flexDirection: 'column', gap: '16px' }}
+            style={{ pointerEvents: 'auto', position: 'absolute', top: '78px', left: '50%', transform: 'translateX(-50%)', width: 'min(1100px, 90vw)', background: isDark ? 'rgba(18,25,20,0.75)' : 'rgba(255,255,255,0.75)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.8)', borderRadius: '24px', padding: '24px', boxShadow: isDark ? '0 30px 70px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15)' : '0 30px 70px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95)', zIndex: 10000, display: 'flex', flexDirection: 'column', gap: '16px' }}
           >
             <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#10b981' }}>Platform Features</span>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
@@ -2221,7 +2279,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           <div 
             onMouseEnter={() => handleDropdownMouseEnter('conditions')}
             onMouseLeave={handleDropdownMouseLeave}
-            style={{ pointerEvents: 'auto', position: 'absolute', top: '78px', left: '50%', transform: 'translateX(-50%)', width: 'min(1100px, calc(100vw - 48px))', background: isDark ? 'rgba(18,25,20,0.75)' : 'rgba(255,255,255,0.75)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.8)', borderRadius: '24px', padding: '24px', boxShadow: isDark ? '0 30px 70px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15)' : '0 30px 70px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95)', zIndex: 10000, display: 'flex', flexDirection: 'column', gap: '16px' }}
+            style={{ pointerEvents: 'auto', position: 'absolute', top: '78px', left: '50%', transform: 'translateX(-50%)', width: 'min(1100px, 90vw)', background: isDark ? 'rgba(18,25,20,0.75)' : 'rgba(255,255,255,0.75)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.8)', borderRadius: '24px', padding: '24px', boxShadow: isDark ? '0 30px 70px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15)' : '0 30px 70px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95)', zIndex: 10000, display: 'flex', flexDirection: 'column', gap: '16px' }}
           >
             <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#10b981' }}>Conditions & Use Cases We Support</span>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
@@ -2264,7 +2322,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           <div 
             onMouseEnter={() => handleDropdownMouseEnter('inside app')}
             onMouseLeave={handleDropdownMouseLeave}
-            style={{ pointerEvents: 'auto', position: 'absolute', top: '78px', left: '50%', transform: 'translateX(-50%)', width: 'min(900px, calc(100vw - 48px))', background: isDark ? 'rgba(18,25,20,0.75)' : 'rgba(255,255,255,0.75)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.8)', borderRadius: '24px', padding: '24px', boxShadow: isDark ? '0 30px 70px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15)' : '0 30px 70px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95)', zIndex: 10000, display: 'flex', flexDirection: 'column' }}
+            style={{ pointerEvents: 'auto', position: 'absolute', top: '78px', left: '50%', transform: 'translateX(-50%)', width: 'min(900px, calc(100% - 48px))', background: isDark ? 'rgba(18,25,20,0.75)' : 'rgba(255,255,255,0.75)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.8)', borderRadius: '24px', padding: '24px', boxShadow: isDark ? '0 30px 70px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15)' : '0 30px 70px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95)', zIndex: 10000, display: 'flex', flexDirection: 'column' }}
           >
             <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#10b981', marginBottom: '16px' }}>Interactive App Screens</span>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px' }}>
@@ -2284,8 +2342,10 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
         {/* Mobile Nav Menu Drawer */}
         {mobileMenuOpen && (
-          <div style={{ pointerEvents: 'auto', width: 'min(1440px, calc(100vw - 1.5rem))', marginTop: '8px', background: isDark ? 'rgba(18,25,20,0.85)' : 'rgba(255,255,255,0.85)', backdropFilter: 'blur(24px) saturate(190%)', WebkitBackdropFilter: 'blur(24px) saturate(190%)', border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.8)', borderRadius: '20px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
-            <button onClick={() => scrollTo('features')} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>Features</button>
+          <div style={{ pointerEvents: 'auto', width: 'min(1440px, 100%)', marginTop: '8px', background: isDark ? 'rgba(18,25,20,0.85)' : 'rgba(255,255,255,0.85)', backdropFilter: 'blur(24px) saturate(190%)', WebkitBackdropFilter: 'blur(24px) saturate(190%)', border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.8)', borderRadius: '20px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
+            <button onClick={() => { setMobileMenuOpen(false); scrollTo('features'); }} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>Features</button>
+            <button onClick={() => { setMobileMenuOpen(false); scrollTo('conditions'); }} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>Conditions</button>
+            <button onClick={() => { setMobileMenuOpen(false); navigateToPage('about'); }} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>About</button>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <button onClick={() => scrollTo('inside-app')} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>Inside App Screens</button>
@@ -2304,7 +2364,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             </div>
 
             <button onClick={() => startFreshQuiz()} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>Financial Assessment Quiz</button>
-            <button onClick={() => scrollTo('toolkit')} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>Toolkit</button>
+            <button onClick={() => { setMobileMenuOpen(false); navigateToPage('pricing'); }} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>Pricing</button>
             <button onClick={() => scrollTo('community')} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>Member Stories</button>
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
               {deviceOS === 'ios' ? (
@@ -2330,8 +2390,980 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
       {/* ═══════════════ DEDICATED FEATURE SUBPAGE VIEW ═══════════════ */}
       
-      {/* ═══════════════ STANDALONE DEDICATED QUIZ PAGE VIEW ═══════════════ */}
-      {activePage === 'quiz' ? (
+      {/* ═══════════════ ABOUT PAGE VIEW ═══════════════ */}
+      {/* ═══════════════ ABOUT PAGE VIEW (BRAND ELEVATED) ═══════════════ */}
+      {activePage === 'about' ? (
+        <main style={{ 
+          background: t.bg, 
+          width: '100%', 
+          minHeight: '100vh', 
+          paddingTop: '108px', 
+          paddingBottom: '120px', 
+          transition: 'background 0.3s, color 0.3s',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          {/* Brand Ambient Background Glow Orbs */}
+          <div style={{ position: 'absolute', top: '5%', left: '15%', width: '500px', height: '500px', borderRadius: '50%', background: isDark ? 'radial-gradient(circle, rgba(132, 204, 22, 0.09) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(132, 204, 22, 0.12) 0%, transparent 70%)', pointerEvents: 'none', filter: 'blur(70px)' }} />
+          <div style={{ position: 'absolute', top: '35%', right: '10%', width: '600px', height: '600px', borderRadius: '50%', background: isDark ? 'radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%)', pointerEvents: 'none', filter: 'blur(80px)' }} />
+          <div style={{ position: 'absolute', bottom: '10%', left: '5%', width: '450px', height: '450px', borderRadius: '50%', background: isDark ? 'radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, transparent 70%)', pointerEvents: 'none', filter: 'blur(60px)' }} />
+
+          <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '0 24px', position: 'relative', zIndex: 10 }}>
+            
+            {/* Top Back Navigation & Official Brand Pill */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginBottom: '36px', flexWrap: 'wrap' }}>
+              <button 
+                onClick={() => navigateToPage('home')}
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '8px', 
+                  background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', 
+                  border: `1px solid ${t.border}`, 
+                  borderRadius: '100px', 
+                  padding: '9px 20px', 
+                  fontSize: '13.5px', 
+                  fontWeight: 700, 
+                  color: t.text, 
+                  cursor: 'pointer', 
+                  transition: 'all 0.2s',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                }}
+                className="hover-lift"
+              >
+                <ArrowLeft size={16} />
+                <span>Back to Home</span>
+              </button>
+
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '6px 16px',
+                borderRadius: '100px',
+                background: isDark ? 'rgba(132, 204, 22, 0.12)' : 'rgba(132, 204, 22, 0.15)',
+                border: '1px solid rgba(132, 204, 22, 0.35)',
+                fontSize: '12px',
+                fontWeight: 800,
+                color: isDark ? '#a3e635' : '#4d7c0f'
+              }}>
+                <Sparkles size={14} color="#84cc16" />
+                <span>OFFICIAL ZENBUDGET ORIGIN STORY</span>
+              </div>
+            </div>
+
+            {/* 1. HERO SECTION (BRAND ELEVATED) */}
+            <div style={{ textAlign: 'center', maxWidth: '920px', margin: '0 auto', padding: '20px 0 70px', position: 'relative' }}>
+              
+              {/* User Avatar Stack Badge */}
+              <div style={{ 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.9)', 
+                backdropFilter: 'blur(14px)', 
+                border: `1px solid ${t.border}`, 
+                padding: '6px 18px', 
+                borderRadius: '100px', 
+                marginBottom: '24px', 
+                boxShadow: '0 6px 20px rgba(0,0,0,0.06)' 
+              }}>
+                <div style={{ display: 'flex', marginRight: '10px' }}>
+                  {[
+                    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop',
+                    'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=100&auto=format&fit=crop',
+                    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop'
+                  ].map((src, i) => (
+                    <img key={i} src={src} alt="User" style={{ width: '24px', height: '24px', borderRadius: '50%', border: `2px solid ${t.cardBg}`, marginLeft: i > 0 ? '-7px' : 0, objectFit: 'cover' }} />
+                  ))}
+                </div>
+                <span style={{ fontSize: '13px', fontWeight: 800, color: t.text }}>
+                  Trusted by <span style={{ color: '#84cc16' }}>10,000+ conscious savers</span> across India & beyond
+                </span>
+              </div>
+
+              {/* Main Headline with Brand Duo Gradient (Emerald + Electric Lime) */}
+              <h1 style={{ 
+                fontSize: 'clamp(40px, 6.5vw, 76px)', 
+                lineHeight: 1.08, 
+                fontWeight: 900, 
+                color: t.text, 
+                letterSpacing: '-0.03em', 
+                marginBottom: '24px' 
+              }}>
+                Stop Fighting Your Money.<br />
+                <span style={{ 
+                  background: 'linear-gradient(135deg, #10b981 0%, #34d399 40%, #84cc16 100%)', 
+                  WebkitBackgroundClip: 'text', 
+                  WebkitTextFillColor: 'transparent' 
+                }}>
+                  Start Feeling Financially Peaceful.
+                </span>
+              </h1>
+              
+              <p style={{ 
+                fontSize: 'clamp(17px, 2vw, 20px)', 
+                lineHeight: 1.65, 
+                color: t.textSub, 
+                maxWidth: '720px', 
+                margin: '0 auto 40px',
+                fontWeight: 500
+              }}>
+                Built by real creators who spent 2 AM staring at mounting debts and rigid spreadsheets that felt like punishment. ZenBudget is your judgment-free sanctuary to track effortlessly, breathe freely, and master your financial future.
+              </p>
+
+              {/* Quick Action CTA Row */}
+              <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap', alignItems: 'center' }}>
+                <button 
+                  onClick={() => onOpenWebApp()} 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '10px', 
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
+                    border: 'none', 
+                    color: '#ffffff', 
+                    padding: '16px 32px', 
+                    borderRadius: '100px', 
+                    fontSize: '15.5px', 
+                    fontWeight: 800, 
+                    cursor: 'pointer', 
+                    transition: 'all 0.25s', 
+                    boxShadow: '0 12px 30px rgba(16,185,129,0.4)' 
+                  }} 
+                  className="hover-lift"
+                >
+                  <Wallet size={18} color="#ffffff" />
+                  <span>Open Web App</span>
+                  <ArrowRight size={16} />
+                </button>
+
+                <button 
+                  onClick={handleDownloadApk} 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '10px', 
+                    background: isDark ? 'rgba(255,255,255,0.08)' : '#ffffff', 
+                    border: `1px solid ${t.border}`, 
+                    color: t.text, 
+                    padding: '16px 28px', 
+                    borderRadius: '100px', 
+                    fontSize: '15px', 
+                    fontWeight: 800, 
+                    cursor: 'pointer', 
+                    transition: 'all 0.2s',
+                    boxShadow: '0 4px 14px rgba(0,0,0,0.06)'
+                  }} 
+                  className="hover-lift"
+                >
+                  <Download size={18} color="#84cc16" />
+                  <span>Download APK (Android)</span>
+                </button>
+              </div>
+
+              {/* 4 Brand Pillars Highlight Row */}
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
+                gap: '12px', 
+                marginTop: '56px',
+                textAlign: 'center'
+              }}>
+                {[
+                  { icon: '🛡️', title: '100% Private', desc: 'Zero data sold to loan apps' },
+                  { icon: '⚡', title: '1-Tap GPay Auto-Log', desc: 'Instant UPI screenshot parsing' },
+                  { icon: '🧠', title: 'Behavioral Science', desc: '50/30/20 & cooling timers' },
+                  { icon: '💖', title: 'Safe Daily Spend', desc: 'Real-time guilt-free limit' }
+                ].map((item, idx) => (
+                  <div key={idx} style={{
+                    padding: '16px 14px',
+                    borderRadius: '18px',
+                    background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.7)',
+                    border: `1px solid ${t.border}`,
+                    backdropFilter: 'blur(10px)'
+                  }}>
+                    <div style={{ fontSize: '20px', marginBottom: '6px' }}>{item.icon}</div>
+                    <div style={{ fontSize: '13.5px', fontWeight: 800, color: t.text }}>{item.title}</div>
+                    <div style={{ fontSize: '11px', color: t.textMuted, marginTop: '2px' }}>{item.desc}</div>
+                  </div>
+                ))}
+              </div>
+
+            </div>
+
+            {/* 2. THE ORIGIN STORY (BENTO GRID WITH FINANCIAL SANCTUARY CARD) */}
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', 
+              gap: '24px', 
+              marginBottom: '90px' 
+            }}>
+              {/* Left Column: Authentic Story Narrative */}
+              <div style={{ 
+                background: t.cardBg, 
+                border: `1px solid ${t.border}`, 
+                borderRadius: '32px', 
+                padding: 'clamp(32px, 5vw, 54px)', 
+                display: 'flex', 
+                flexDirection: 'column', 
+                justifyContent: 'center', 
+                boxShadow: isDark ? '0 20px 50px rgba(0,0,0,0.35)' : '0 20px 50px rgba(0,0,0,0.04)',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '6px 14px',
+                  background: isDark ? 'rgba(16,185,129,0.12)' : 'rgba(16,185,129,0.08)',
+                  border: '1px solid rgba(16,185,129,0.25)',
+                  borderRadius: '100px',
+                  marginBottom: '24px',
+                  width: 'fit-content'
+                }}>
+                  <span style={{ fontSize: '11.5px', fontWeight: 800, letterSpacing: '0.1em', color: '#10b981', textTransform: 'uppercase' }}>
+                    ✨ Why We Started
+                  </span>
+                </div>
+
+                <h2 style={{ 
+                  fontSize: 'clamp(30px, 3.8vw, 44px)', 
+                  lineHeight: 1.15, 
+                  fontWeight: 900, 
+                  color: t.text, 
+                  letterSpacing: '-0.02em', 
+                  marginBottom: '20px' 
+                }}>
+                  Born From Our Own <br/>
+                  <span style={{ color: '#84cc16' }}>Late-Night Money Anxieties</span>
+                </h2>
+
+                <p style={{ fontSize: '16px', lineHeight: 1.7, color: t.textSub, marginBottom: '16px' }}>
+                  Behind ZenBudget are creators who know the exact sinking sensation of checking bank apps late at night — racing pulses over impending bills, creeping credit balances, and the silent guilt of having worked hard all month with little left to show.
+                </p>
+
+                <p style={{ fontSize: '16px', lineHeight: 1.7, color: t.textSub, marginBottom: '20px' }}>
+                  When we tried other apps, we found them cold, complicated, and toxic. They pushed predatory personal loan banners, shamed us with terrifying red sirens, and demanded that we categorize 40 transactions manually every single evening.
+                </p>
+
+                <div style={{
+                  padding: '16px 20px',
+                  borderRadius: '16px',
+                  background: isDark ? 'rgba(132, 204, 22, 0.08)' : 'rgba(132, 204, 22, 0.1)',
+                  borderLeft: '4px solid #84cc16',
+                  marginBottom: '20px'
+                }}>
+                  <p style={{ fontSize: '15px', fontWeight: 700, color: t.text, margin: 0, fontStyle: 'italic', lineHeight: 1.5 }}>
+                    "If a personal finance feature increases anxiety or sells debt, it has no place in ZenBudget."
+                  </p>
+                </div>
+
+                <p style={{ fontSize: '17px', fontWeight: 800, color: '#10b981', margin: 0 }}>
+                  That judgment-free sanctuary didn't exist in the market. So we built it for ourselves, and now we share it with you.
+                </p>
+              </div>
+
+              {/* Right Column: Interactive Calming Sanctuary Card with Signature */}
+              <div style={{ 
+                background: isDark ? 'linear-gradient(145deg, rgba(16,185,129,0.12) 0%, rgba(6,78,59,0.25) 50%, rgba(132,204,22,0.1) 100%)' : 'linear-gradient(145deg, #ecfdf5 0%, #d1fae5 50%, #f7fee7 100%)', 
+                border: `1px solid ${isDark ? 'rgba(16,185,129,0.3)' : 'rgba(16,185,129,0.3)'}`, 
+                borderRadius: '32px', 
+                padding: 'clamp(32px, 5vw, 54px)', 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                textAlign: 'center', 
+                position: 'relative', 
+                overflow: 'hidden',
+                boxShadow: isDark ? '0 25px 60px rgba(0,0,0,0.45)' : '0 20px 40px rgba(0,0,0,0.06)'
+              }}>
+                <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '240px', height: '240px', background: 'rgba(132,204,22,0.18)', filter: 'blur(70px)', borderRadius: '50%' }} />
+                
+                {/* Floating Interactive Sanctuary HUD */}
+                <div style={{ 
+                  background: isDark ? 'rgba(18, 24, 20, 0.88)' : '#ffffff', 
+                  border: `1px solid ${t.border}`, 
+                  borderRadius: '26px', 
+                  padding: '36px 28px', 
+                  maxWidth: '380px', 
+                  width: '100%',
+                  boxShadow: isDark ? '0 30px 70px rgba(0,0,0,0.6)' : '0 20px 45px rgba(0,0,0,0.08)', 
+                  backdropFilter: 'blur(20px)',
+                  position: 'relative',
+                  zIndex: 10
+                }}>
+                  {/* Floating Pill Top */}
+                  <div style={{ 
+                    display: 'inline-flex', 
+                    alignItems: 'center', 
+                    gap: '6px', 
+                    padding: '6px 14px', 
+                    borderRadius: '100px', 
+                    background: 'rgba(16,185,129,0.12)', 
+                    border: '1px solid rgba(16,185,129,0.3)', 
+                    marginBottom: '20px',
+                    color: '#10b981',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    textTransform: 'uppercase'
+                  }}>
+                    <Heart size={14} fill="#10b981" />
+                    <span>The Zen Sanctuary Creed</span>
+                  </div>
+
+                  {/* Motivational Quote */}
+                  <h3 style={{ 
+                    color: t.text, 
+                    fontSize: '26px', 
+                    lineHeight: 1.3, 
+                    margin: '0 0 16px', 
+                    fontWeight: 900,
+                    letterSpacing: '-0.02em'
+                  }}>
+                    Difficult Roads Lead To <br />
+                    <span style={{ 
+                      background: 'linear-gradient(135deg, #10b981 0%, #84cc16 100%)', 
+                      WebkitBackgroundClip: 'text', 
+                      WebkitTextFillColor: 'transparent' 
+                    }}>
+                      Peaceful Destinations.
+                    </span>
+                  </h3>
+
+                  <p style={{ fontSize: '13.5px', color: t.textSub, lineHeight: 1.6, margin: '0 0 24px' }}>
+                    Money is not your master. It is simply fuel for the life and memories you want to create with the people you love.
+                  </p>
+
+                  {/* Three Interactive Guarantee Badges */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', borderRadius: '12px', background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: `1px solid ${t.border}` }}>
+                      <CheckCircle2 size={16} color="#10b981" style={{ flexShrink: 0 }} />
+                      <span style={{ fontSize: '12.5px', fontWeight: 700, color: t.text }}>100% Encrypted Local Storage</span>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', borderRadius: '12px', background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: `1px solid ${t.border}` }}>
+                      <CheckCircle2 size={16} color="#84cc16" style={{ flexShrink: 0 }} />
+                      <span style={{ fontSize: '12.5px', fontWeight: 700, color: t.text }}>Zero Trackers & Zero Ads</span>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', borderRadius: '12px', background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: `1px solid ${t.border}` }}>
+                      <CheckCircle2 size={16} color="#38bdf8" style={{ flexShrink: 0 }} />
+                      <span style={{ fontSize: '12.5px', fontWeight: 700, color: t.text }}>Daily Safe Spend Calculation</span>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            {/* 3. THE 4 SACRED PRINCIPLES (BENTO GRID) */}
+            <div style={{ marginBottom: '100px' }}>
+              <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 16px',
+                  borderRadius: '100px',
+                  background: isDark ? 'rgba(132, 204, 22, 0.12)' : 'rgba(132, 204, 22, 0.15)',
+                  border: '1px solid rgba(132, 204, 22, 0.3)',
+                  marginBottom: '14px',
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  color: isDark ? '#a3e635' : '#4d7c0f',
+                  textTransform: 'uppercase'
+                }}>
+                  <Sparkles size={13} color="#84cc16" />
+                  <span>The Zen Methodology</span>
+                </div>
+                <h2 style={{ fontSize: 'clamp(32px, 5vw, 50px)', fontWeight: 900, color: t.text, letterSpacing: '-0.025em', marginBottom: '14px' }}>
+                  The 4 Core Principles of ZenBudget
+                </h2>
+                <p style={{ color: t.textSub, fontSize: '17px', maxWidth: '640px', margin: '0 auto', lineHeight: 1.6 }}>
+                  Not just another budgeting spreadsheet — an uncompromising, empathetic design philosophy engineered for peace of mind.
+                </p>
+              </div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                
+                {/* Principle 1: Compassion First */}
+                <div style={{ 
+                  background: t.cardBg, 
+                  border: `1px solid ${t.border}`, 
+                  borderRadius: '26px', 
+                  padding: '36px', 
+                  boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.3)' : '0 10px 30px rgba(0,0,0,0.03)', 
+                  position: 'relative', 
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}>
+                  <div style={{ width: '52px', height: '52px', background: 'rgba(16,185,129,0.14)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '22px' }}>
+                    <Heart size={24} color="#10b981" />
+                  </div>
+                  <h3 style={{ fontSize: '22px', fontWeight: 800, color: t.text, marginBottom: '12px' }}>
+                    1. Compassion Over Guilt
+                  </h3>
+                  <p style={{ color: t.textSub, fontSize: '15px', lineHeight: 1.65, flex: 1 }}>
+                    Every calculation, notification, and AI response is written with empathy. We never show terrifying red alerts or shame you for a coffee. If you overspend today, our smart engine gently redistributes tomorrow's safe limit without stress.
+                  </p>
+                </div>
+
+                {/* Principle 2: Radical Privacy by Design */}
+                <div style={{ 
+                  background: t.cardBg, 
+                  border: `1px solid ${t.border}`, 
+                  borderRadius: '26px', 
+                  padding: '36px', 
+                  boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.3)' : '0 10px 30px rgba(0,0,0,0.03)', 
+                  position: 'relative', 
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}>
+                  <div style={{ width: '52px', height: '52px', background: 'rgba(56,189,248,0.14)', border: '1px solid rgba(56,189,248,0.3)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '22px' }}>
+                    <Lock size={24} color="#38bdf8" />
+                  </div>
+                  <h3 style={{ fontSize: '22px', fontWeight: 800, color: t.text, marginBottom: '12px' }}>
+                    2. 100% Privacy by Design
+                  </h3>
+                  <p style={{ color: t.textSub, fontSize: '15px', lineHeight: 1.65, flex: 1 }}>
+                    Your financial numbers are sacred. Everything is encrypted on your local device. We never harvest your data, never train public models on your receipts, and will NEVER sell your phone number to insurance or loan brokers.
+                  </p>
+                </div>
+
+                {/* Principle 3: Science-Backed Habits */}
+                <div style={{ 
+                  background: t.cardBg, 
+                  border: `1px solid ${t.border}`, 
+                  borderRadius: '26px', 
+                  padding: '36px', 
+                  boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.3)' : '0 10px 30px rgba(0,0,0,0.03)', 
+                  position: 'relative', 
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}>
+                  <div style={{ width: '52px', height: '52px', background: 'rgba(132,204,22,0.15)', border: '1px solid rgba(132,204,22,0.35)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '22px' }}>
+                    <Brain size={24} color="#84cc16" />
+                  </div>
+                  <h3 style={{ fontSize: '22px', fontWeight: 800, color: t.text, marginBottom: '12px' }}>
+                    3. Behavioral Psychology
+                  </h3>
+                  <p style={{ color: t.textSub, fontSize: '15px', lineHeight: 1.65, flex: 1 }}>
+                    Willpower alone fails. ZenBudget uses behavioral friction: automated 50/30/20 envelope allocation, impulsive purchase 24-hr cooling timers (which stop 82% of buyer's remorse), and gamified streak rewards that make saving genuinely dopamine-rich.
+                  </p>
+                </div>
+
+                {/* Principle 4: Together Over Isolation */}
+                <div style={{ 
+                  background: t.cardBg, 
+                  border: `1px solid ${t.border}`, 
+                  borderRadius: '26px', 
+                  padding: '36px', 
+                  boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.3)' : '0 10px 30px rgba(0,0,0,0.03)', 
+                  position: 'relative', 
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}>
+                  <div style={{ width: '52px', height: '52px', background: 'rgba(245,158,11,0.14)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '22px' }}>
+                    <Users size={24} color="#f59e0b" />
+                  </div>
+                  <h3 style={{ fontSize: '22px', fontWeight: 800, color: t.text, marginBottom: '12px' }}>
+                    4. Together Over Isolation
+                  </h3>
+                  <p style={{ color: t.textSub, fontSize: '15px', lineHeight: 1.65, flex: 1 }}>
+                    Money anxiety grows in silence. With optional couple budget sync, shared family accountability streaks, and celebratory milestones, you never have to navigate your financial goals alone again.
+                  </p>
+                </div>
+
+              </div>
+            </div>
+
+            {/* 4. TRANSPARENT PROMISE (CONTRAST TABLE) */}
+            <div style={{ 
+              background: isDark ? 'rgba(255,255,255,0.02)' : '#f8fafc', 
+              border: `1px solid ${t.border}`, 
+              borderRadius: '32px', 
+              padding: 'clamp(32px, 5vw, 60px)', 
+              marginBottom: '90px' 
+            }}>
+              <div style={{ textAlign: 'center', maxWidth: '720px', margin: '0 auto 48px' }}>
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '6px 16px',
+                  border: '1px solid rgba(16,185,129,0.3)',
+                  borderRadius: '100px',
+                  marginBottom: '16px',
+                  background: isDark ? 'rgba(16,185,129,0.08)' : 'rgba(16,185,129,0.05)'
+                }}>
+                  <ShieldCheck size={14} color="#10b981" />
+                  <span style={{ fontSize: '11.5px', fontWeight: 800, letterSpacing: '0.1em', color: '#10b981', textTransform: 'uppercase' }}>
+                    Radical Transparency
+                  </span>
+                </div>
+                <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', lineHeight: 1.15, fontWeight: 900, color: t.text, letterSpacing: '-0.02em' }}>
+                  No Gimmicks. No False Miracles. <br/>
+                  Our <span style={{ color: '#84cc16' }}>Honest Commitment to You.</span>
+                </h2>
+              </div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+                
+                {/* Column 1: What ZenBudget Will Never Do */}
+                <div style={{ 
+                  background: isDark ? 'rgba(239,68,68,0.06)' : 'rgba(239,68,68,0.04)', 
+                  border: '1px solid rgba(239,68,68,0.25)', 
+                  borderRadius: '24px', 
+                  padding: '30px' 
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '22px' }}>
+                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <X size={16} color="#ef4444" />
+                    </div>
+                    <h4 style={{ fontSize: '14.5px', fontWeight: 800, letterSpacing: '0.06em', color: '#ef4444', textTransform: 'uppercase', margin: 0 }}>
+                      What ZenBudget Will Never Do
+                    </h4>
+                  </div>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <li style={{ display: 'flex', gap: '12px', color: t.textSub, fontSize: '14.5px', lineHeight: 1.5 }}>
+                      <X size={16} color="#ef4444" style={{ flexShrink: 0, marginTop: '3px' }}/>
+                      <span>Sell your bank transactions or identity to debt brokers, lenders, or advertisers.</span>
+                    </li>
+                    <li style={{ display: 'flex', gap: '12px', color: t.textSub, fontSize: '14.5px', lineHeight: 1.5 }}>
+                      <X size={16} color="#ef4444" style={{ flexShrink: 0, marginTop: '3px' }}/>
+                      <span>Bombard your notifications with aggressive high-interest personal loan ads.</span>
+                    </li>
+                    <li style={{ display: 'flex', gap: '12px', color: t.textSub, fontSize: '14.5px', lineHeight: 1.5 }}>
+                      <X size={16} color="#ef4444" style={{ flexShrink: 0, marginTop: '3px' }}/>
+                      <span>Shame, guilt-trip, or judge you for unexpected weekend splurges or emergencies.</span>
+                    </li>
+                    <li style={{ display: 'flex', gap: '12px', color: t.textSub, fontSize: '14.5px', lineHeight: 1.5 }}>
+                      <X size={16} color="#ef4444" style={{ flexShrink: 0, marginTop: '3px' }}/>
+                      <span>Promise overnight crypto/get-rich illusions that end in financial heartbreak.</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Column 2: What ZenBudget Guarantees */}
+                <div style={{ 
+                  background: isDark ? 'rgba(16,185,129,0.06)' : 'rgba(16,185,129,0.04)', 
+                  border: '1px solid rgba(16,185,129,0.25)', 
+                  borderRadius: '24px', 
+                  padding: '30px' 
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '22px' }}>
+                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(16,185,129,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CheckCircle2 size={16} color="#10b981" />
+                    </div>
+                    <h4 style={{ fontSize: '14.5px', fontWeight: 800, letterSpacing: '0.06em', color: '#10b981', textTransform: 'uppercase', margin: 0 }}>
+                      What ZenBudget Guarantees You
+                    </h4>
+                  </div>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <li style={{ display: 'flex', gap: '12px', color: t.textSub, fontSize: '14.5px', lineHeight: 1.5 }}>
+                      <CheckCircle2 size={16} color="#10b981" style={{ flexShrink: 0, marginTop: '3px' }}/>
+                      <span>A clear, stress-free <strong>Safe Daily Spend</strong> limit that prevents month-end panic.</span>
+                    </li>
+                    <li style={{ display: 'flex', gap: '12px', color: t.textSub, fontSize: '14.5px', lineHeight: 1.5 }}>
+                      <CheckCircle2 size={16} color="#10b981" style={{ flexShrink: 0, marginTop: '3px' }}/>
+                      <span><strong>Instant Share-to-Log</strong> for GPay & PhonePe receipts with zero manual typing.</span>
+                    </li>
+                    <li style={{ display: 'flex', gap: '12px', color: t.textSub, fontSize: '14.5px', lineHeight: 1.5 }}>
+                      <CheckCircle2 size={16} color="#10b981" style={{ flexShrink: 0, marginTop: '3px' }}/>
+                      <span>Empathetic 24/7 AI financial guidance: ask <em>"Can I afford this vacation?"</em> anytime.</span>
+                    </li>
+                    <li style={{ display: 'flex', gap: '12px', color: t.textSub, fontSize: '14.5px', lineHeight: 1.5 }}>
+                      <CheckCircle2 size={16} color="#10b981" style={{ flexShrink: 0, marginTop: '3px' }}/>
+                      <span>A calm, serene visual sanctuary where looking at your money feels inspiring.</span>
+                    </li>
+                  </ul>
+                </div>
+
+              </div>
+            </div>
+
+            {/* 5. FOUNDER'S NOTE & CLOSING CALL TO ACTION */}
+            <div style={{ 
+              textAlign: 'center', 
+              maxWidth: '780px', 
+              margin: '0 auto', 
+              background: t.cardBg, 
+              border: `1px solid ${t.border}`, 
+              borderRadius: '36px', 
+              padding: 'clamp(36px, 5vw, 56px)', 
+              boxShadow: isDark ? '0 25px 60px rgba(0,0,0,0.35)' : '0 20px 45px rgba(0,0,0,0.04)',
+              position: 'relative'
+            }}>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '6px 16px',
+                borderRadius: '100px',
+                background: 'rgba(132, 204, 22, 0.12)',
+                border: '1px solid rgba(132, 204, 22, 0.3)',
+                fontSize: '12px',
+                fontWeight: 800,
+                color: '#84cc16',
+                marginBottom: '20px',
+                textTransform: 'uppercase'
+              }}>
+                A Message From Chandan & The ZenBudget Creators
+              </div>
+
+              <h2 style={{ 
+                fontSize: 'clamp(28px, 4vw, 44px)', 
+                fontWeight: 900, 
+                color: t.text, 
+                letterSpacing: '-0.02em', 
+                marginBottom: '20px' 
+              }}>
+                A Passionate Team. <span style={{ color: '#84cc16' }}>A Calm Life Mission.</span>
+              </h2>
+
+              <p style={{ color: t.textSub, fontSize: '16.5px', lineHeight: 1.7, marginBottom: '16px' }}>
+                We are not a faceless private equity firm trying to juice advertisement engagement metrics. We are independent designers and developers building the exact software we wanted our families to live with.
+              </p>
+
+              <p style={{ color: '#10b981', fontSize: '18px', fontWeight: 800, fontStyle: 'italic', marginBottom: '36px' }}>
+                Take a deep breath. Your peaceful financial journey begins right here today.
+              </p>
+
+              <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <button 
+                  onClick={() => onOpenWebApp()} 
+                  style={{ 
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
+                    color: '#ffffff', 
+                    border: 'none', 
+                    padding: '16px 36px', 
+                    borderRadius: '100px', 
+                    fontSize: '15.5px', 
+                    fontWeight: 800, 
+                    cursor: 'pointer', 
+                    transition: 'all 0.25s', 
+                    display: 'inline-flex', 
+                    alignItems: 'center', 
+                    gap: '10px', 
+                    boxShadow: '0 10px 28px rgba(16,185,129,0.35)' 
+                  }} 
+                  className="hover-lift"
+                >
+                  <span>Start Your Financial Zen</span> 
+                  <ArrowUpRight size={18} />
+                </button>
+
+                <button 
+                  onClick={handleDownloadApk} 
+                  style={{ 
+                    background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', 
+                    color: t.text, 
+                    border: `1px solid ${t.border}`, 
+                    padding: '16px 28px', 
+                    borderRadius: '100px', 
+                    fontSize: '15px', 
+                    fontWeight: 700, 
+                    cursor: 'pointer', 
+                    transition: 'all 0.2s',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }} 
+                  className="hover-lift"
+                >
+                  <Download size={16} color="#84cc16" />
+                  <span>Download APK</span>
+                </button>
+              </div>
+            </div>
+            
+          </div>
+        </main>
+      ) : activePage === 'pricing' ? (
+        <main style={{ paddingTop: '108px', paddingBottom: '120px', width: '100%', maxWidth: '1280px', margin: '0 auto', paddingLeft: '24px', paddingRight: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginBottom: '40px', flexWrap: 'wrap' }}>
+            <button 
+              onClick={() => navigateToPage('home')}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: isDark ? 'rgba(255,255,255,0.06)' : '#f3f4f6', border: `1px solid ${t.border}`, borderRadius: '100px', padding: '8px 18px', fontSize: '13.5px', fontWeight: 700, color: t.text, cursor: 'pointer', transition: 'all 0.2s' }}
+              className="hover-lift"
+            >
+              <ArrowLeft size={16} />
+              <span>Back to Home</span>
+            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '6px 14px', borderRadius: '100px', fontWeight: 700 }}>
+              <ShieldCheck size={14} /> Official ZenBudget APK Subscription Pricing
+            </div>
+          </div>
+          
+          <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+            <span style={{ fontSize: '13.5px', fontWeight: 800, textTransform: 'uppercase', color: '#10b981', letterSpacing: '0.14em' }}>Real & Transparent Pricing</span>
+            <h1 style={{ fontSize: 'clamp(36px, 5vw, 64px)', fontWeight: 900, lineHeight: 1.1, color: t.text, marginTop: '14px', letterSpacing: '-0.025em' }}>
+              Invest in Financial Peace of Mind
+            </h1>
+            <p style={{ fontSize: '18px', color: t.textSub, marginTop: '16px', maxWidth: '640px', margin: '16px auto 0', lineHeight: 1.6 }}>
+              Choose the right plan for your journey. No surprise renewals, no sneaky paywalls, and 100% private encrypted local data.
+            </p>
+          </div>
+          
+          {/* 4 Pricing Cards Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', maxWidth: '1240px', margin: '0 auto 64px' }}>
+            
+            {/* Tier 1: 7-Day Free Trial */}
+            <div style={{ background: t.cardBg, border: `1px solid ${t.border}`, borderRadius: '24px', padding: '36px 28px', boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.3)' : '0 10px 30px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+              <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: t.textMuted, letterSpacing: '0.1em', marginBottom: '8px' }}>STARTER</span>
+              <h3 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '8px', color: t.text }}>7-Day Free Trial</h3>
+              <p style={{ color: t.textSub, fontSize: '14px', marginBottom: '24px', minHeight: '42px', lineHeight: 1.5 }}>Perfect for getting started, test-driving AI features, and learning mindful budgeting.</p>
+              
+              <div style={{ fontSize: '42px', fontWeight: 900, marginBottom: '6px', color: t.text, display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                ₹0 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/7 days</span>
+              </div>
+              <p style={{ fontSize: '13px', color: '#10b981', marginBottom: '32px', fontWeight: 700 }}>No credit card required · 7-Day Free Trial</p>
+              
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
+                {[
+                  { text: '10 Transactions / Day', desc: 'Sufficient for most daily expenses' },
+                  { text: 'Basic Budget Tracking', desc: 'Track your spending in 5 core categories' },
+                  { text: 'Standard Analytics', desc: 'Basic charts and monthly summaries' },
+                  { text: '1 Connected Account', desc: 'Manual entry and UPI logs supported' },
+                  { text: '100% Encrypted Local Storage', desc: 'Zero data leaves your mobile device' }
+                ].map((feat, i) => (
+                  <li key={i} style={{ display: 'flex', gap: '12px' }}>
+                    <CheckCircle size={16} color="#10b981" style={{ flexShrink: 0, marginTop: '3px' }} />
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: 700, color: t.text }}>{feat.text}</div>
+                      <div style={{ fontSize: '12px', color: t.textMuted, marginTop: '2px' }}>{feat.desc}</div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              
+              <button 
+                onClick={() => onOpenWebApp()} 
+                style={{ width: '100%', padding: '14px', borderRadius: '100px', border: `2px solid ${t.border}`, background: 'transparent', color: t.text, fontSize: '14.5px', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s' }} 
+                className="hover-lift"
+              >
+                Start 7-Day Free Trial
+              </button>
+            </div>
+
+            {/* Tier 2: Pro Monthly */}
+            <div style={{ background: t.cardBg, border: `1px solid ${isDark ? 'rgba(56,189,248,0.3)' : 'rgba(56,189,248,0.4)'}`, borderRadius: '24px', padding: '36px 28px', boxShadow: isDark ? '0 15px 35px rgba(0,0,0,0.4)' : '0 15px 35px rgba(56,189,248,0.08)', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', width: 'fit-content', padding: '4px 10px', borderRadius: '100px', background: 'rgba(56,189,248,0.12)', color: '#0284c7', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
+                FLEXIBLE MONTHLY
+              </div>
+              <h3 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '8px', color: t.text }}>Pro Monthly</h3>
+              <p style={{ color: t.textSub, fontSize: '14px', marginBottom: '24px', minHeight: '42px', lineHeight: 1.5 }}>Full AI automation with monthly flexibility. Cancel with one tap anytime.</p>
+              
+              <div style={{ fontSize: '42px', fontWeight: 900, marginBottom: '6px', color: t.text, display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                ₹149 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/month</span>
+              </div>
+              <p style={{ fontSize: '13px', color: t.textMuted, marginBottom: '32px', fontWeight: 600 }}>$6.99/mo USD globally</p>
+              
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
+                {[
+                  { text: 'Unlimited Transactions', desc: 'Track every single rupee with zero caps' },
+                  { text: 'AI Camera Receipt Scanner', desc: 'Instant OCR extraction from photos' },
+                  { text: 'Smart Auto-Categorization', desc: 'Automatic food, bill, and fuel sorting' },
+                  { text: 'Unlimited Custom Envelopes', desc: 'Create tags, projects, and goals' },
+                  { text: 'Monthly PDF & Excel Export', desc: 'Download clean financial statements' }
+                ].map((feat, i) => (
+                  <li key={i} style={{ display: 'flex', gap: '12px' }}>
+                    <CheckCircle size={16} color="#0284c7" style={{ flexShrink: 0, marginTop: '3px' }} />
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: 700, color: t.text }}>{feat.text}</div>
+                      <div style={{ fontSize: '12px', color: t.textMuted, marginTop: '2px' }}>{feat.desc}</div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              
+              <button 
+                onClick={() => onOpenWebApp()} 
+                style={{ width: '100%', padding: '14px', borderRadius: '100px', border: 'none', background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)', color: '#ffffff', fontSize: '14.5px', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 8px 20px rgba(2,132,199,0.3)' }} 
+                className="hover-lift"
+              >
+                Get Pro Monthly (₹149)
+              </button>
+            </div>
+            
+            {/* Tier 3: Pro Annual (Featured) */}
+            <div style={{ background: isDark ? '#132219' : '#ffffff', border: '2.5px solid #10b981', borderRadius: '24px', padding: '36px 28px', color: t.text, boxShadow: '0 25px 50px rgba(16,185,129,0.25)', position: 'relative', display: 'flex', flexDirection: 'column', transform: 'scale(1.02)', zIndex: 2 }}>
+              <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', fontSize: '11px', fontWeight: 900, padding: '6px 18px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.08em', boxShadow: '0 6px 16px rgba(16,185,129,0.4)', whiteSpace: 'nowrap' }}>
+                🔥 MOST POPULAR · SAVE OVER 16%
+              </div>
+              
+              <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: '#10b981', letterSpacing: '0.1em', marginBottom: '8px' }}>BEST VALUE VALUE PASS</span>
+              <h3 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '8px', color: t.text }}>Pro Annual</h3>
+              <p style={{ color: t.textSub, fontSize: '14px', marginBottom: '24px', minHeight: '42px', lineHeight: 1.5 }}>Everything in Pro with dedicated AI coaching & couple sync. Best long-term value.</p>
+              
+              <div style={{ fontSize: '42px', fontWeight: 900, marginBottom: '6px', color: '#10b981', display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                ₹1,499 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/year</span>
+              </div>
+              <p style={{ fontSize: '13px', color: '#10b981', marginBottom: '32px', fontWeight: 700 }}>Only ~₹124/month · 2 Months Free</p>
+              
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
+                {[
+                  { text: 'Everything in Pro Monthly', desc: 'All unlimited features and OCR scanners' },
+                  { text: 'Unlimited AI Financial Coach', desc: '24/7 "Can I afford this?" real-time checks' },
+                  { text: 'Bank Statement Importer', desc: 'Auto-import CSV & PDF bank statements' },
+                  { text: 'Couple & Household Sync', desc: 'Real-time joint household transparency' },
+                  { text: 'Biometric App Lock & Stealth', desc: 'Fingerprint/FaceID & balance hide mode' },
+                  { text: 'Priority VIP Support', desc: 'Fast-track engineering assistance' }
+                ].map((feat, i) => (
+                  <li key={i} style={{ display: 'flex', gap: '12px' }}>
+                    <CheckCircle size={16} color="#10b981" style={{ flexShrink: 0, marginTop: '3px' }} />
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: 800, color: t.text }}>{feat.text}</div>
+                      <div style={{ fontSize: '12px', color: t.textMuted, marginTop: '2px' }}>{feat.desc}</div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              
+              <button 
+                onClick={() => onOpenWebApp()} 
+                style={{ width: '100%', padding: '15px', borderRadius: '100px', border: 'none', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', fontSize: '15px', fontWeight: 900, cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 10px 25px rgba(16,185,129,0.35)' }} 
+                className="hover-lift"
+              >
+                Get Pro Annual (₹1,499)
+              </button>
+            </div>
+
+            {/* Tier 4: Pro Lifetime (Founding Member) */}
+            <div style={{ background: t.cardBg, border: '2px solid rgba(245,158,11,0.4)', borderRadius: '24px', padding: '36px 28px', display: 'flex', flexDirection: 'column', position: 'relative', boxShadow: isDark ? '0 15px 40px rgba(245,158,11,0.12)' : '0 15px 40px rgba(245,158,11,0.06)' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', width: 'fit-content', padding: '4px 10px', borderRadius: '100px', background: 'rgba(245,158,11,0.12)', color: '#d97706', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
+                💎 FOUNDING MEMBER PASS
+              </div>
+              <h3 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '8px', color: t.text }}>Lifetime VIP</h3>
+              <p style={{ color: t.textSub, fontSize: '14px', marginBottom: '24px', minHeight: '42px', lineHeight: 1.5 }}>Pay once, yours forever. Zero recurring monthly or annual subscription fees.</p>
+              
+              <div style={{ fontSize: '42px', fontWeight: 900, marginBottom: '6px', color: t.text, display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                ₹2,499 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/one-time</span>
+              </div>
+              <p style={{ fontSize: '13px', color: '#d97706', marginBottom: '32px', fontWeight: 700 }}>Single Payment · Permanent VIP Access</p>
+              
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
+                {[
+                  { text: 'Everything in Pro Annual', desc: 'All current premium tools permanently yours' },
+                  { text: 'All Future AI Releases Included', desc: 'Never pay for future version upgrades' },
+                  { text: 'Scan & Pay Lifetime Unlock', desc: 'Built-in quick scanner integration' },
+                  { text: 'Founding Member Gold Badge', desc: 'Exclusive community recognition' },
+                  { text: 'Direct WhatsApp Developer Access', desc: 'Feature requests prioritized directly' }
+                ].map((feat, i) => (
+                  <li key={i} style={{ display: 'flex', gap: '12px' }}>
+                    <CheckCircle size={16} color="#d97706" style={{ flexShrink: 0, marginTop: '3px' }} />
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: 700, color: t.text }}>{feat.text}</div>
+                      <div style={{ fontSize: '12px', color: t.textMuted, marginTop: '2px' }}>{feat.desc}</div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              
+              <button 
+                onClick={() => onOpenWebApp()} 
+                style={{ width: '100%', padding: '14px', borderRadius: '100px', border: 'none', background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', color: '#fff', fontSize: '14.5px', fontWeight: 900, cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 8px 24px rgba(245,158,11,0.3)' }} 
+                className="hover-lift"
+              >
+                Get Lifetime Access (₹2,499)
+              </button>
+            </div>
+
+          </div>
+
+          {/* Deep Feature Comparison Matrix */}
+          <div style={{ background: t.cardBg, border: `1px solid ${t.border}`, borderRadius: '28px', padding: 'clamp(28px, 4vw, 48px)', marginBottom: '80px', overflowX: 'auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', color: '#10b981', letterSpacing: '0.12em' }}>Side-by-Side Breakdown</span>
+              <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', fontWeight: 900, color: t.text, marginTop: '8px' }}>Detailed Plan Feature Matrix</h2>
+            </div>
+
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '650px', textAlign: 'left' }}>
+              <thead>
+                <tr style={{ borderBottom: `2px solid ${t.border}` }}>
+                  <th style={{ padding: '16px 12px', color: t.textMuted, fontSize: '13px', fontWeight: 800, textTransform: 'uppercase' }}>Feature</th>
+                  <th style={{ padding: '16px 12px', color: t.text, fontSize: '14px', fontWeight: 800, textAlign: 'center' }}>7-Day Trial (₹0)</th>
+                  <th style={{ padding: '16px 12px', color: '#0284c7', fontSize: '14px', fontWeight: 800, textAlign: 'center' }}>Monthly (₹149)</th>
+                  <th style={{ padding: '16px 12px', color: '#10b981', fontSize: '14px', fontWeight: 900, textAlign: 'center' }}>Annual (₹1,499)</th>
+                  <th style={{ padding: '16px 12px', color: '#d97706', fontSize: '14px', fontWeight: 800, textAlign: 'center' }}>Lifetime (₹2,499)</th>
+                </tr>
+              </thead>
+              <tbody style={{ fontSize: '14px' }}>
+                {[
+                  { feature: 'Trial Validity / Duration', free: '7 Days Full Access', monthly: 'Ongoing (Monthly)', annual: 'Ongoing (Annual)', lifetime: 'Lifetime Forever' },
+                  { feature: 'Daily Transactions Cap', free: '10 per day', monthly: 'Unlimited', annual: 'Unlimited', lifetime: 'Unlimited' },
+                  { feature: 'Device Encrypted Local Storage', free: '✓ Included', monthly: '✓ Included', annual: '✓ Included', lifetime: '✓ Included' },
+                  { feature: 'Budget Envelopes', free: '5 Core Categories', monthly: 'Unlimited', annual: 'Unlimited', lifetime: 'Unlimited' },
+                  { feature: 'AI Camera Invoice & Receipt Scanner', free: '✕', monthly: '✓ Unlimited', annual: '✓ Unlimited', lifetime: '✓ Unlimited' },
+                  { feature: 'Bank Statement CSV/PDF Smart Parser', free: '✕', monthly: '✕', annual: '✓ Included', lifetime: '✓ Included' },
+                  { feature: '24/7 AI Coach Advice & "Can I Afford?"', free: 'Basic Nudges', monthly: '50/mo queries', annual: '✓ Unlimited', lifetime: '✓ Unlimited' },
+                  { feature: 'Couple & Household Sync', free: '✕', monthly: '✕', annual: '✓ Real-time', lifetime: '✓ Real-time' },
+                  { feature: 'App Lock (Biometrics & Privacy Shield)', free: '✕', monthly: '✓ Included', annual: '✓ Included', lifetime: '✓ Included' },
+                  { feature: 'Excel / PDF Comprehensive Statements', free: '✕', monthly: '✓ Included', annual: '✓ Included', lifetime: '✓ Included' },
+                  { feature: 'Future AI Updates & Models', free: '✕', monthly: 'Active sub only', annual: 'Active sub only', lifetime: '✓ Forever Free' },
+                ].map((row, idx) => (
+                  <tr key={idx} style={{ borderBottom: `1px solid ${t.border}` }}>
+                    <td style={{ padding: '16px 12px', fontWeight: 700, color: t.text }}>{row.feature}</td>
+                    <td style={{ padding: '16px 12px', textAlign: 'center', color: t.textSub }}>{row.free}</td>
+                    <td style={{ padding: '16px 12px', textAlign: 'center', color: '#0284c7', fontWeight: 600 }}>{row.monthly}</td>
+                    <td style={{ padding: '16px 12px', textAlign: 'center', color: '#10b981', fontWeight: 800 }}>{row.annual}</td>
+                    <td style={{ padding: '16px 12px', textAlign: 'center', color: '#d97706', fontWeight: 800 }}>{row.lifetime}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pricing FAQ */}
+          <div style={{ maxWidth: '840px', margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', color: '#10b981', letterSpacing: '0.12em' }}>Common Inquiries</span>
+              <h2 style={{ fontSize: '32px', fontWeight: 900, color: t.text, marginTop: '8px' }}>Frequently Asked Questions</h2>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {[
+                { 
+                  q: "How does the 7-Day Free Trial work?", 
+                  a: "Every new user gets a full 7-Day Free Trial with up to 10 daily transactions, no credit card required. You get to experience the core zero-based budgeting, smart envelopes, and encrypted privacy. After 7 days or when you need unlimited daily entries, you can easily upgrade to Pro Monthly (₹149), Pro Annual (₹1,499), or Lifetime VIP (₹2,499)." 
+                },
+                { 
+                  q: "What is the difference between Pro Monthly (₹149) and Pro Annual (₹1,499)?", 
+                  a: "The Monthly plan costs ₹149/mo and is billed month-to-month with total cancellation freedom. The Annual plan costs ₹1,499/year (saving you over 16% — equivalent to 2 months free) and includes advanced extras such as unlimited 24/7 AI Coach queries, bank statement CSV/PDF parsers, and couple sync." 
+                },
+                { 
+                  q: "What does the Lifetime VIP Pass (₹2,499) include?", 
+                  a: "The Lifetime Pass is a single one-time payment of ₹2,499. You will NEVER be charged another recurring monthly or yearly fee again. You receive permanent access to all existing Pro features plus all future AI upgrades and feature releases for life." 
+                },
+                { 
+                  q: "Is my payment and transaction data secure?", 
+                  a: "100% Yes. All payments are processed securely through certified gateway standards (Google Play, Apple App Store, and Cashfree 256-Bit SSL Encryption). Furthermore, ZenBudget uses private encrypted local device storage — we never sell, share, or broker your personal financial records." 
+                },
+                { 
+                  q: "What happens if I reach the 10 daily transactions limit during the trial?", 
+                  a: "The 7-Day Free Trial allows you to log 10 daily transactions. If you reach this limit, your existing records, envelopes, and reports remain safe and accessible. The counter resets at midnight (00:00), or you can upgrade to Pro for unlimited transactions anytime." 
+                },
+                { 
+                  q: "How does the Couple Budget Sync feature work?", 
+                  a: "Couple Sync allows two partners to securely pair their ZenBudget apps via encrypted end-to-end QR code or sync key. You can maintain a shared household envelope budget while keeping your personal impulse spend accounts private." 
+                }
+              ].map((faq, idx) => (
+                <div key={idx} style={{ padding: '24px', background: t.cardBg, borderRadius: '18px', border: `1px solid ${t.border}` }}>
+                  <h4 style={{ fontSize: '17px', fontWeight: 800, color: t.text, marginBottom: '10px' }}>{faq.q}</h4>
+                  <p style={{ color: t.textSub, fontSize: '15px', lineHeight: 1.6, margin: 0 }}>{faq.a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+        </main>
+      ) : activePage === 'quiz' ? (
         <main style={{ paddingTop: '108px', paddingBottom: '80px', width: '100%', maxWidth: '1280px', margin: '0 auto', paddingLeft: '24px', paddingRight: '24px' }}>
           {/* Breadcrumb & Navigation */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginBottom: '32px', flexWrap: 'wrap' }}>
@@ -2457,13 +3489,56 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
                   <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
                     <button onClick={onOpenWebApp} style={{ background: '#10b981', color: '#ffffff', padding: '14px 28px', borderRadius: '100px', fontSize: '15px', fontWeight: 800, border: 'none', cursor: 'pointer', boxShadow: '0 10px 24px rgba(16,185,129,0.3)', display: 'flex', alignItems: 'center', gap: '8px' }} className="hover-lift">
-                      <Wallet size={18} /> Launch Web App Roadmap
+                      <Wallet size={18} /> Launch Web App
                     </button>
                     <button onClick={resetQuiz} style={{ background: 'transparent', border: `1px solid ${t.border}`, color: t.text, padding: '14px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                       <RefreshCw size={14} /> Retake Assessment
                     </button>
                   </div>
                 </div>
+
+                {/* ROADMAP SECTION */}
+                <div style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '2.5rem', padding: '40px', boxShadow: '0 20px 40px rgba(0,0,0,0.05)' }}>
+                  <h3 style={{ fontSize: '24px', fontWeight: 800, color: t.text, marginBottom: '8px' }}>Your App Action Roadmap</h3>
+                  <p style={{ color: t.textSub, fontSize: '15px', marginBottom: '32px' }}>Here is how the ZenBudget App will help you improve this score.</p>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(16,185,129,0.15)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 900, fontSize: '16px' }}>1</div>
+                      <div>
+                        <h4 style={{ fontSize: '16px', fontWeight: 800, color: t.text, margin: '0 0 6px 0' }}>Sync & Capture</h4>
+                        <p style={{ margin: 0, fontSize: '14px', color: t.textSub, lineHeight: 1.5 }}>The app uses AI Quick Capture to track your exact cash flow without manual entry fatigue.</p>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(59,130,246,0.15)', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 900, fontSize: '16px' }}>2</div>
+                      <div>
+                        <h4 style={{ fontSize: '16px', fontWeight: 800, color: t.text, margin: '0 0 6px 0' }}>Analyze Leaks</h4>
+                        <p style={{ margin: 0, fontSize: '14px', color: t.textSub, lineHeight: 1.5 }}>Expense Analytics automatically highlights hidden subscriptions and impulse buying triggers.</p>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(139,92,246,0.15)', color: '#8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 900, fontSize: '16px' }}>3</div>
+                      <div>
+                        <h4 style={{ fontSize: '16px', fontWeight: 800, color: t.text, margin: '0 0 6px 0' }}>Zero-Based Planning</h4>
+                        <p style={{ margin: 0, fontSize: '14px', color: t.textSub, lineHeight: 1.5 }}>Allocate every Rupee to a purpose before the month starts using our intuitive Envelope system.</p>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(245,158,11,0.15)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 900, fontSize: '16px' }}>4</div>
+                      <div>
+                        <h4 style={{ fontSize: '16px', fontWeight: 800, color: t.text, margin: '0 0 6px 0' }}>Grow Wealth</h4>
+                        <p style={{ margin: 0, fontSize: '14px', color: t.textSub, lineHeight: 1.5 }}>Track automated Savings Goals and Debt Snowball payoffs directly inside your secure vault.</p>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
               </div>
             )}
           </div>
@@ -2717,7 +3792,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
 
       {/* ═══════════════ HERO SECTION (INNERHEAL STYLE ANIMATED BACKGROUND) ═══════════════ */}
-      <div style={{ paddingTop: '90px', margin: '0 auto', width: 'min(1440px, calc(100vw - 1.5rem))' }}>
+      <div style={{ paddingTop: '90px', margin: '0 auto', width: 'min(1440px, 100%)' }}>
         <section style={{ borderRadius: '2.5rem', overflow: 'hidden', border: `1px solid ${t.border}`, position: 'relative', paddingTop: '56px', paddingBottom: '32px', background: isDark ? 'linear-gradient(180deg, #111812 0%, #162018 100%)' : 'linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%)', boxShadow: isDark ? '0 20px 50px rgba(0,0,0,0.5)' : '0 20px 50px rgba(16,185,129,0.08)' }}>
           
           {/* Glowing Animated Background Canvas (InnerHeal Mesh & Aura) */}
@@ -2805,11 +3880,11 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     </button>
                   )}
 
-                  {deviceOS === 'android' && (
+                  {deviceOS !== 'ios' && (
                     <button onClick={handleDownloadApk} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', padding: '14px 28px', borderRadius: '100px', border: 'none', cursor: 'pointer', transition: 'all 0.25s ease', boxShadow: '0 12px 28px rgba(16,185,129,0.4)' }} className="hover-lift">
                       <Download size={20} color="#ffffff" />
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
-                        <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', opacity: 0.85, letterSpacing: '0.08em' }}>Android Package</span>
+                        <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', opacity: 0.85, letterSpacing: '0.08em' }}>Android Package (.apk)</span>
                         <span style={{ fontSize: '16px', fontWeight: 800 }}>Download APK</span>
                       </div>
                     </button>
@@ -2827,14 +3902,6 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     </span>
                   </button>
 
-                  {/* Secondary Action: Take Free Quiz */}
-                  <button onClick={() => startFreshQuiz()} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: isDark ? 'rgba(52, 211, 153, 0.15)' : 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)', color: isDark ? '#34d399' : '#064e3b', padding: '14px 26px', borderRadius: '100px', fontSize: '15.5px', fontWeight: 800, border: `2px solid ${isDark ? '#34d399' : '#10b981'}`, cursor: 'pointer', transition: 'all 0.25s ease', boxShadow: isDark ? '0 8px 24px rgba(52, 211, 153, 0.2)' : '0 8px 24px rgba(16, 185, 129, 0.18)' }} className="hover-lift">
-                    <HelpCircle size={20} color={isDark ? '#34d399' : '#10b981'} />
-                    <span>Take Free Quiz</span>
-                    <span style={{ background: isDark ? 'rgba(52,211,153,0.25)' : '#10b981', color: isDark ? '#34d399' : '#ffffff', fontSize: '10px', fontWeight: 900, padding: '3px 9px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      60s Quiz
-                    </span>
-                  </button>
                 </div>
 
                 {/* Bottom Highlights Bar (InnerHeal Style stats) */}
@@ -2846,14 +3913,14 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     <Shield size={16} color="#10b981" /> 100% Private
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13.5px', fontWeight: 700, color: t.textSub }}>
-                    <Users size={16} color="#3b82f6" /> 10,000+ Users
+                    <Users size={16} color="#3b82f6" /> <AnimatedCounter end={4000} duration={2000} />+ Users
                   </div>
                 </div>
 
               </div>
 
               {/* Hero Right Mockup Graphics - InnerHeal Inspired Dual Phones Overflowing Card Edge */}
-              <div className="hero-animate desktop-only" style={{ position: 'relative', width: '100%', height: '560px', display: 'flex', justifyContent: 'center', alignItems: 'flex-end' }}>
+              <div className="hero-animate hero-mockup-scale desktop-only" style={{ position: 'relative', width: '100%', minHeight: '400px', height: '560px', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', overflow: 'hidden' }}>
                 
                 {/* Floating Pill 1 (Top Center above phone 1): Feeling Financially Secure */}
                 <div className="floating-pill-reverse" style={{ position: 'absolute', top: '15px', left: '10px', zIndex: 38, display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '100px', background: '#ffffff', boxShadow: '0 16px 40px rgba(0,0,0,0.22)', padding: '10px 18px', color: '#111827' }}>
@@ -2886,14 +3953,14 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <div style={{ width: '26px', height: '26px', borderRadius: '8px', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '11px', fontWeight: 900 }}>ZB</div>
-                        <span style={{ fontSize: '14px', fontWeight: 800 }}>ZenBudget</span>
+                        <span style={{ fontSize: '14px', fontWeight: 800 }}>{realUserData.userName}'s Zen</span>
                       </div>
                       <span style={{ fontSize: '10px', background: '#84cc16', color: '#111827', padding: '3px 8px', borderRadius: '100px', fontWeight: 900 }}>PRO</span>
                     </div>
 
                     <div style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', borderRadius: '18px', padding: '16px', color: '#fff', boxShadow: '0 8px 20px rgba(16,185,129,0.25)' }}>
                       <div style={{ fontSize: '10px', opacity: 0.85, fontWeight: 700, letterSpacing: '0.05em' }}>NET WORTH SCORE</div>
-                      <div style={{ fontSize: '22px', fontWeight: 900, margin: '2px 0 8px' }}>₹1,45,800</div>
+                      <div style={{ fontSize: '22px', fontWeight: 900, margin: '2px 0 8px' }}>₹{realUserData.balance.toLocaleString()}</div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', background: 'rgba(255,255,255,0.2)', padding: '4px 10px', borderRadius: '100px', fontWeight: 700 }}>
                         <span>Monthly Target</span>
                         <span>₹32,000 Left</span>
@@ -2957,6 +4024,66 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
 
 
+      {/* ═══════════════ STAT COUNTER BANNER ═══════════════ */}
+      <section style={{ padding: '0 24px', maxWidth: '1440px', margin: 'clamp(40px, 8vw, 60px) auto clamp(60px, 12vw, 100px)' }}>
+        <div className="scroll-fade-up hover-lift" style={{ background: 'linear-gradient(105deg, #1c1e1a 0%, #1c1e1a 45%, #6a8844 80%, #303d21 100%)', borderRadius: '2.5rem', padding: 'clamp(32px, 6vw, 60px) clamp(24px, 5vw, 40px)', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around', gap: 'clamp(24px, 5vw, 40px)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={4000} duration={2500} />+</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Members</div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>and growing every day</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}><AnimatedCounter end={4.8} decimals={1} duration={2500} /><Star size={36} fill="#ffffff" color="#ffffff" /></div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>App Rating</div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>on the App Store</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={20} duration={2500} />+</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Categories</div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>covered by ZenBudget</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={95} duration={2500} />%</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Feel Calm</div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>within the first 30 days</div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ HOW ZENBUDGET WORKS ═══════════════ */}
+      <section style={{ padding: '40px 24px 80px', maxWidth: '1440px', margin: '0 auto', overflow: 'hidden' }}>
+        <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '64px' }}>
+          <span style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#D58B6D', marginBottom: '16px', display: 'block' }}>Getting Started</span>
+          <h2 style={{ fontSize: 'clamp(24px, 4vw, 3.4rem)', lineHeight: 1.1, fontWeight: 800, letterSpacing: '-0.02em' }}>How ZenBudget Works</h2>
+          <p style={{ color: t.textSub, fontSize: '18px', marginTop: '16px', maxWidth: '580px', margin: '16px auto 0' }}>Your journey to financial wellness, simplified into three clear steps.</p>
+        </div>
+
+        <div className="scroll-fade-up" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px', maxWidth: '1200px', margin: '0 auto' }}>
+          
+          <div className="hover-lift" style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '40px 32px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: '13px', fontWeight: 800, color: '#D58B6D', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Step 01</div>
+            <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '16px', color: t.text }}>Assess Your Status</h3>
+            <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '16px', marginBottom: '32px' }}>Take our science-backed assessment. Help AI understand your current financial landscape and what you need most right now.</p>
+            <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: '#D58B6D', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }} onClick={() => startFreshQuiz()}>Learn more <ArrowRight size={14} /></div>
+          </div>
+
+          <div className="hover-lift" style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '40px 32px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: '13px', fontWeight: 800, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Step 02</div>
+            <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '16px', color: t.text }}>Get Actionable Insights</h3>
+            <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '16px', marginBottom: '32px' }}>Review your personalized dashboard with expense metrics, spending triggers, budget patterns, and AI-powered recommendations.</p>
+            <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: '#10b981', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }} onClick={() => navigateToPage('analytics')}>Learn more <ArrowRight size={14} /></div>
+          </div>
+
+          <div className="hover-lift" style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '40px 32px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: '13px', fontWeight: 800, color: '#8b5cf6', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Step 03</div>
+            <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '16px', color: t.text }}>Start Growing</h3>
+            <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '16px', marginBottom: '32px' }}>Engage with financial tools, expense tracking, guided budgets, and our community to build lasting wealth habits.</p>
+            <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: '#8b5cf6', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }} onClick={() => navigateToPage('savings-goals')}>Learn more <ArrowRight size={14} /></div>
+          </div>
+
+        </div>
+      </section>
+
       {/* ═══════════════ BENTO GRID FEATURES ═══════════════ */}
       <section id="features" style={{ padding: '40px 24px 80px', maxWidth: '1440px', margin: '0 auto', overflow: 'hidden' }}>
         <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '64px' }}>
@@ -2967,7 +4094,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
         <div className="scroll-fade-up bento-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', maxWidth: '1200px', margin: '0 auto' }}>
           
-          <div onClick={() => selectFeatureTab(0)} className="hover-lift bento-span2" style={{ gridColumn: 'span 2', background: isDark ? 'linear-gradient(135deg, #162419, #1c2e20)' : 'linear-gradient(135deg, #e8f5e9, #f1f8e9)', border: `1px solid ${isDark ? '#2a4a2e' : '#c8e6c9'}`, borderRadius: '2.5rem', padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '280px', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
+          <div onClick={() => selectFeatureTab(0)} className={`hover-lift bento-span2 ${mobileFeatureSlide !== 0 ? 'bento-card-mobile-hide' : ''}`} style={{ gridColumn: 'span 2', background: isDark ? 'linear-gradient(135deg, #162419, #1c2e20)' : 'linear-gradient(135deg, #e8f5e9, #f1f8e9)', border: `1px solid ${isDark ? '#2a4a2e' : '#c8e6c9'}`, borderRadius: '2.5rem', padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '280px', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
             <div style={{ background: isDark ? 'rgba(255,255,255,0.1)' : '#ffffff', border: `1px solid ${isDark ? 'rgba(255,255,255,0.2)' : '#c8e6c9'}`, width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', color: '#10b981' }}>
               <MessageCircleHeart size={26} />
             </div>
@@ -2978,18 +4105,18 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             </div>
           </div>
 
-          <div onClick={() => selectFeatureTab(2)} className="hover-lift" style={{ background: isDark ? 'linear-gradient(135deg, #243028, #1a2420)' : 'linear-gradient(135deg, #dcfce7, #f0fdf4)', borderRadius: '2.5rem', padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '280px', cursor: 'pointer', border: `1px solid ${t.border}` }}>
-            <div style={{ background: isDark ? 'rgba(255,255,255,0.1)' : '#ffffff', width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', color: '#16a34a', border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#bbf7d0'}` }}>
+          <div onClick={() => selectFeatureTab(2)} className={`hover-lift ${mobileFeatureSlide !== 1 ? 'bento-card-mobile-hide' : ''}`} style={{ background: 'linear-gradient(135deg, #233127 0%, #152219 100%)', borderRadius: '2.5rem', padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '280px', cursor: 'pointer', border: `1px solid rgba(255,255,255,0.1)` }}>
+            <div style={{ background: 'rgba(255,255,255,0.1)', width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', color: '#10b981', border: `1px solid rgba(255,255,255,0.1)` }}>
               <ChartLine size={26} />
             </div>
             <div>
-              <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '12px' }}>Expense Analytics</h3>
-              <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '16px' }}>Track spending trends over time. Recognize waste, cancel unwanted subscriptions, and gain clarity.</p>
+              <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '12px', color: '#ffffff' }}>Expense Analytics</h3>
+              <p style={{ color: '#d1d5db', lineHeight: 1.6, fontSize: '16px' }}>Track spending trends over time. Recognize waste, cancel unwanted subscriptions, and gain clarity.</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#10b981', fontSize: '14px', fontWeight: 800, marginTop: '16px' }}>View Analytics Screen <ArrowRight size={14} /></div>
             </div>
           </div>
 
-          <div onClick={() => selectFeatureTab(3)} className="hover-lift" style={{ background: isDark ? 'linear-gradient(135deg, #2a1820, #2e1c26)' : 'linear-gradient(135deg, #fce4ec, #fdf2f5)', border: `1px solid ${isDark ? '#4a2a36' : '#f8bbd0'}`, borderRadius: '2.5rem', padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '280px', cursor: 'pointer' }}>
+          <div onClick={() => selectFeatureTab(3)} className={`hover-lift ${mobileFeatureSlide !== 2 ? 'bento-card-mobile-hide' : ''}`} style={{ background: isDark ? 'linear-gradient(135deg, #2a1820, #2e1c26)' : 'linear-gradient(135deg, #fce4ec, #fdf2f5)', border: `1px solid ${isDark ? '#4a2a36' : '#f8bbd0'}`, borderRadius: '2.5rem', padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '280px', cursor: 'pointer' }}>
             <div style={{ background: isDark ? 'rgba(255,255,255,0.1)' : '#ffffff', border: `1px solid ${isDark ? 'rgba(255,255,255,0.2)' : '#f8bbd0'}`, width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', color: '#D58B6D' }}>
               <BookHeart size={26} />
             </div>
@@ -3000,7 +4127,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             </div>
           </div>
 
-          <div onClick={() => selectFeatureTab(4)} className="hover-lift bento-span2" style={{ gridColumn: 'span 2', background: isDark ? 'linear-gradient(135deg, #1e1a2e, #251f38)' : 'linear-gradient(135deg, #ede7f6, #f3effe)', border: `1px solid ${isDark ? '#3a3060' : '#d1c4e9'}`, borderRadius: '2.5rem', padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '280px', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
+          <div onClick={() => selectFeatureTab(4)} className={`hover-lift bento-span2 ${mobileFeatureSlide !== 3 ? 'bento-card-mobile-hide' : ''}`} style={{ gridColumn: 'span 2', background: isDark ? 'linear-gradient(135deg, #1e1a2e, #251f38)' : 'linear-gradient(135deg, #ede7f6, #f3effe)', border: `1px solid ${isDark ? '#3a3060' : '#d1c4e9'}`, borderRadius: '2.5rem', padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '280px', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
             <div style={{ background: isDark ? 'rgba(255,255,255,0.1)' : '#ffffff', border: `1px solid ${isDark ? 'rgba(255,255,255,0.2)' : '#d1c4e9'}`, width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', color: '#8680C3' }}>
               <Target size={26} />
             </div>
@@ -3012,6 +4139,19 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           </div>
 
         </div>
+
+        {/* Mobile Indicator & Pause Control */}
+        <div className="mobile-show" style={{ display: 'none', justifyContent: 'center', alignItems: 'center', gap: '16px', marginTop: '24px' }}>
+          <div style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', borderRadius: '100px', padding: '10px 16px', display: 'flex', gap: '8px' }}>
+            {[0, 1, 2, 3].map(i => (
+              <div key={i} onClick={() => { setMobileFeatureSlide(i); setIsMobileFeaturePaused(true); }} style={{ width: mobileFeatureSlide === i ? '20px' : '8px', height: '8px', borderRadius: '4px', background: mobileFeatureSlide === i ? (isDark ? '#fff' : '#000') : (isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'), transition: 'all 0.3s ease', cursor: 'pointer' }} />
+            ))}
+          </div>
+          <button onClick={() => setIsMobileFeaturePaused(!isMobileFeaturePaused)} style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', border: 'none', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: t.text }}>
+            {isMobileFeaturePaused ? <Play size={14} fill="currentColor" /> : <Pause size={14} fill="currentColor" />}
+          </button>
+        </div>
+
       </section>
 
       {/* ═══════════════ INSIDE THE APP (INTERACTIVE IMAGE / SCREEN SHOWCASE) ═══════════════ */}
@@ -3143,34 +4283,34 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               )}
 
               {insideTabs[activeInsideTab].mockupType === 'quick-capture' && (
-                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#111827', color: '#f8fafc', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
+                <div style={{ width: '100%', maxWidth: '420px', background: t.cardBg, color: t.text, border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
                   {/* Accounts in wallet preview */}
-                  <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '14px' }}>
+                  <div style={{ background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.05)', borderRadius: '16px', padding: '14px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                      <span style={{ fontSize: '13px', fontWeight: 800, color: '#f8fafc' }}>📁 My Accounts in Wallet</span>
+                      <span style={{ fontSize: '13px', fontWeight: 800, color: t.text }}>📁 My Accounts in Wallet</span>
                       <span style={{ fontSize: '11px', color: '#10b981', fontWeight: 700 }}>See All (0) &gt;</span>
                     </div>
-                    <div style={{ border: '2px dashed rgba(255,255,255,0.15)', borderRadius: '12px', padding: '12px', textAlign: 'center', color: '#10b981', fontSize: '13px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                    <div style={{ border: isDark ? '2px dashed rgba(255,255,255,0.15)' : '2px dashed rgba(0,0,0,0.1)', borderRadius: '12px', padding: '12px', textAlign: 'center', color: '#10b981', fontSize: '13px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                       <span>Add account</span> <span>+</span>
                     </div>
                   </div>
 
                   {/* Quick capture preview */}
-                  <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '20px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '20px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontSize: '16px', fontWeight: 900 }}>Quick capture</span>
                       <span style={{ fontSize: '9px', fontWeight: 800, background: 'rgba(16,185,129,0.2)', color: '#10b981', padding: '2px 8px', borderRadius: '10px' }}>✨ AI AUTO-DETECT</span>
                     </div>
-                    <div style={{ fontSize: '11px', color: '#94a3b8' }}>Add expense, income, or transfer in natural language</div>
+                    <div style={{ fontSize: '11px', color: t.textMuted }}>Add expense, income, or transfer in natural language</div>
 
-                    <div style={{ display: 'flex', gap: '6px', background: 'rgba(0,0,0,0.4)', padding: '4px', borderRadius: '14px', alignItems: 'center' }}>
-                      <div style={{ flex: 1, background: '#1e293b', color: '#fff', textAlign: 'center', padding: '6px', borderRadius: '10px', fontSize: '11px', fontWeight: 800 }}>Expense</div>
-                      <div style={{ flex: 1, color: '#94a3b8', textAlign: 'center', padding: '6px', fontSize: '11px', fontWeight: 700 }}>Income</div>
-                      <div style={{ flex: 1, color: '#94a3b8', textAlign: 'center', padding: '6px', fontSize: '11px', fontWeight: 700 }}>Transfer</div>
-                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>🎤</div>
+                    <div style={{ display: 'flex', gap: '6px', background: isDark ? 'rgba(0,0,0,0.4)' : '#f1f5f9', padding: '4px', borderRadius: '14px', alignItems: 'center' }}>
+                      <div style={{ flex: 1, background: isDark ? '#1e293b' : '#ffffff', color: t.text, textAlign: 'center', padding: '6px', borderRadius: '10px', fontSize: '11px', fontWeight: 800 }}>Expense</div>
+                      <div style={{ flex: 1, color: t.textMuted, textAlign: 'center', padding: '6px', fontSize: '11px', fontWeight: 700 }}>Income</div>
+                      <div style={{ flex: 1, color: t.textMuted, textAlign: 'center', padding: '6px', fontSize: '11px', fontWeight: 700 }}>Transfer</div>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>🎤</div>
                     </div>
 
-                    <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px 14px', fontSize: '12px', color: '#94a3b8' }}>
+                    <div style={{ background: isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.02)', border: isDark ? '1px solid rgba(255,255,255,0.1)' : `1px solid ${t.border}`, borderRadius: '12px', padding: '12px 14px', fontSize: '12px', color: t.textMuted }}>
                       Paid 220 for petrol in cash
                     </div>
                   </div>
@@ -3178,8 +4318,8 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               )}
 
               {insideTabs[activeInsideTab].mockupType === 'stories' && (
-                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#111827', color: '#f8fafc', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
-                  <div style={{ fontSize: '14px', fontWeight: 800, color: '#94a3b8' }}>Weekly & Monthly Story Highlights</div>
+                <div style={{ width: '100%', maxWidth: '420px', background: t.cardBg, color: t.text, border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
+                  <div style={{ fontSize: '14px', fontWeight: 800, color: t.textMuted }}>Weekly & Monthly Story Highlights</div>
                   
                   {/* Side-by-side gradient story cards */}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -3195,12 +4335,12 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   </div>
 
                   {/* Story Card Result */}
-                  <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '18px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)', border: isDark ? '1px solid rgba(255,255,255,0.1)' : `1px solid ${t.border}`, borderRadius: '18px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: '11px', fontWeight: 800, color: '#10b981' }}>ZEN MONEY SCORE</span>
                       <span style={{ fontSize: '22px', fontWeight: 900, color: '#10b981' }}>94/100</span>
                     </div>
-                    <div style={{ fontSize: '12px', color: '#cbd5e1', lineHeight: 1.4 }}>
+                    <div style={{ fontSize: '12px', color: isDark ? '#cbd5e1' : t.textMuted, lineHeight: 1.4 }}>
                       "You spent ₹5,430 this week and saved ₹99,633 — amazing discipline! 🌟"
                     </div>
                   </div>
@@ -3390,23 +4530,37 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                     <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '14px', padding: '12px' }}>
                       <div style={{ fontSize: '10px', color: '#ef4444', fontWeight: 800 }}>LOANS TAKEN</div>
-                      <div style={{ fontSize: '20px', fontWeight: 900, color: '#ef4444' }}>₹5,450</div>
+                      <div style={{ fontSize: '20px', fontWeight: 900, color: '#ef4444' }}>₹1,45,000</div>
                     </div>
                     <div style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '14px', padding: '12px' }}>
                       <div style={{ fontSize: '10px', color: '#10b981', fontWeight: 800 }}>LOANS GIVEN</div>
-                      <div style={{ fontSize: '20px', fontWeight: 900, color: '#10b981' }}>₹0</div>
+                      <div style={{ fontSize: '20px', fontWeight: 900, color: '#10b981' }}>₹55,000</div>
                     </div>
                   </div>
 
-                  <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '14px', fontWeight: 800 }}>{localStorage.getItem('zb_user_name') ? `Contact (${localStorage.getItem('zb_user_name')})` : 'Aditya Verma'}</span>
-                      <span style={{ fontSize: '16px', fontWeight: 900, color: '#ef4444' }}>₹5,450</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '14px', fontWeight: 800 }}>{localStorage.getItem('zb_user_name') ? `Contact (${localStorage.getItem('zb_user_name')})` : 'Aditya Verma'}</span>
+                        <span style={{ fontSize: '16px', fontWeight: 900, color: '#ef4444' }}>₹1,45,000</span>
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#94a3b8' }}>Due Date: 2026-11-27 • (+3% /mo)</div>
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.08)', color: '#fff', textAlign: 'center', padding: '8px', borderRadius: '10px', fontSize: '11px', fontWeight: 700 }}>Record Cash</div>
+                        <div style={{ flex: 1, background: '#10b981', color: '#fff', textAlign: 'center', padding: '8px', borderRadius: '10px', fontSize: '11px', fontWeight: 800 }}>⚡ Pay via PhonePe</div>
+                      </div>
                     </div>
-                    <div style={{ fontSize: '11px', color: '#94a3b8' }}>Due Date: 2026-11-27 • (+3% /mo)</div>
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
-                      <div style={{ flex: 1, background: 'rgba(255,255,255,0.08)', color: '#fff', textAlign: 'center', padding: '8px', borderRadius: '10px', fontSize: '11px', fontWeight: 700 }}>Record Cash</div>
-                      <div style={{ flex: 1, background: '#10b981', color: '#fff', textAlign: 'center', padding: '8px', borderRadius: '10px', fontSize: '11px', fontWeight: 800 }}>⚡ Pay via PhonePe</div>
+
+                    <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '14px', fontWeight: 800 }}>Rohan Sharma</span>
+                        <span style={{ fontSize: '16px', fontWeight: 900, color: '#10b981' }}>₹55,000</span>
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#94a3b8' }}>Due Date: 2026-12-15 • (0% interest)</div>
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.08)', color: '#fff', textAlign: 'center', padding: '8px', borderRadius: '10px', fontSize: '11px', fontWeight: 700 }}>Remind via WA</div>
+                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.08)', color: '#fff', textAlign: 'center', padding: '8px', borderRadius: '10px', fontSize: '11px', fontWeight: 700 }}>Mark as Paid</div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -3586,60 +4740,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
         </div>
       </section>
 
-      {/* ═══════════════ YOUR TOOLKIT ACCORDION ═══════════════ */}
-      <section id="toolkit" style={{ padding: '40px 24px 80px', maxWidth: '1440px', margin: '0 auto', overflow: 'hidden' }}>
-        <div className="scroll-fade-up toolkit-grid" style={{ display: 'grid', gridTemplateColumns: '5fr 7fr', gap: '56px', alignItems: 'center' }}>
-          
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#D58B6D', marginBottom: '16px', display: 'block' }}>Your Toolkit</span>
-            <h2 style={{ fontSize: 'clamp(24px, 3vw, 2.8rem)', lineHeight: 1.1, fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '28px' }}>Build a Wealthier Life with Proven Tools</h2>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {toolkitItems.map((item, i) => (
-                <div key={i} onClick={() => setActiveToolkit(i)} style={{
-                  borderRadius: '2rem', overflow: 'hidden', transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)', cursor: 'pointer',
-                  background: i === activeToolkit ? '#10b981' : (isDark ? '#161d18' : '#ffffff'),
-                  color: i === activeToolkit ? '#ffffff' : t.text,
-                  border: i === activeToolkit ? '1px solid #10b981' : `1px solid ${t.border}`,
-                  boxShadow: i === activeToolkit ? '0 16px 36px rgba(16,185,129,0.25)' : 'none',
-                  transform: i === activeToolkit ? 'scale(1.02)' : 'scale(1)',
-                }}>
-                  <div style={{ padding: '20px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ fontSize: '12px', fontWeight: 800, padding: '4px 10px', borderRadius: '100px', background: i === activeToolkit ? 'rgba(255,255,255,0.2)' : (isDark ? 'rgba(255,255,255,0.1)' : '#f3f4f6'), color: i === activeToolkit ? '#ffffff' : t.textMuted }}>{item.badge}</span>
-                      <h3 style={{ fontSize: '17px', fontWeight: 800 }}>{item.title}</h3>
-                    </div>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginLeft: '12px', background: i === activeToolkit ? 'rgba(255,255,255,0.2)' : (isDark ? 'rgba(255,255,255,0.06)' : '#f3f4f6'), color: i === activeToolkit ? '#ffffff' : t.text }}>
-                      {i === activeToolkit ? <ArrowUpRight size={16} /> : <ChevronDown size={16} />}
-                    </div>
-                  </div>
-                  <div style={{ padding: i === activeToolkit ? '0 28px 28px' : '0 28px', maxHeight: i === activeToolkit ? '200px' : '0', overflow: 'hidden', opacity: i === activeToolkit ? 1 : 0, transition: 'all 0.4s ease-in-out', fontSize: '15px', lineHeight: 1.6, color: i === activeToolkit ? 'rgba(255,255,255,0.9)' : 'transparent' }}>
-                    {item.desc}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
 
-          <div style={{ borderRadius: '2.5rem', overflow: 'hidden', position: 'relative', background: '#111827', minHeight: '440px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${t.border}`, boxShadow: '0 20px 40px rgba(0,0,0,0.15)' }}>
-            <img 
-              src={toolkitItems[activeToolkit].image} 
-              alt={toolkitItems[activeToolkit].title} 
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85, transition: 'opacity 0.5s' }} 
-            />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.2), transparent)' }}></div>
-            
-            <div style={{ position: 'absolute', bottom: '32px', left: '32px', right: '32px', zIndex: 20 }}>
-              <div style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '20px', padding: '24px', color: '#fff', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
-                <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#a7f3d0', marginBottom: '6px', display: 'block' }}>{toolkitItems[activeToolkit].badge}</span>
-                <h4 style={{ fontSize: '20px', fontWeight: 800, marginBottom: '8px' }}>{toolkitItems[activeToolkit].title}</h4>
-                <p style={{ fontSize: '13.5px', color: 'rgba(255,255,255,0.8)', lineHeight: 1.5, margin: 0 }}>{toolkitItems[activeToolkit].desc}</p>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </section>
 
       {/* ═══════════════ FINANCIAL HEALTH ASSESSMENT QUIZ & SCORECARD (10 QUESTIONS) ═══════════════ */}
       <section id="assessment-quiz" style={{ padding: '80px 24px', maxWidth: '1440px', margin: '0 auto', overflow: 'hidden' }}>
@@ -3900,7 +5001,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           <h2 style={{ fontSize: 'clamp(28px, 4vw, 3.4rem)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.1 }}>Financial Experiences<br />Shared By Our Users</h2>
         </div>
 
-        <div className="scroll-fade-up" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+        <div className="scroll-fade-up" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' }}>
           
           <div className="hover-lift" style={{ background: isDark ? 'linear-gradient(135deg, #162419, #1c2e20)' : 'linear-gradient(135deg, #e8f5e9, #f4faf0)', border: `1px solid ${isDark ? '#2a4a2e' : '#c8e6c9'}`, borderRadius: '2.5rem', padding: '36px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
@@ -4182,9 +5283,9 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           {/* Company Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <span style={{ fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: t.text, marginBottom: '6px' }}>Company</span>
-            <a onClick={onOpenWebApp} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>About ZenBudget</a>
+            <a onClick={() => navigateToPage('about')} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>About ZenBudget</a>
             <a onClick={() => scrollTo('features')} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>FAQs & Help</a>
-            <a onClick={onOpenWebApp} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Contact Support</a>
+            <a href="mailto:support@zenbudget.app" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Contact Support: support@zenbudget.app</a>
             <a onClick={onOpenWebApp} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Terms and Conditions</a>
             <a onClick={onOpenWebApp} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Privacy Policy</a>
             <a onClick={handleDownloadApk} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Download Android APK</a>
@@ -4311,7 +5412,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   { icon: <Zap size={15} color="#84cc16" />, text: 'AI expense tracking — insights in 60 seconds' },
                   { icon: <Shield size={15} color="#84cc16" />, text: 'End-to-end encrypted — your data stays yours' },
                   { icon: <TrendingUp size={15} color="#84cc16" />, text: 'Science-backed zero-based budget & wealth tools' },
-                  { icon: <CheckCircle2 size={15} color="#84cc16" />, text: 'Free forever — no credit card required' },
+                  { icon: <CheckCircle2 size={15} color="#84cc16" />, text: '7-day free trial — no credit card required' },
                 ].map((f, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: isDark ? 'rgba(132,204,22,0.12)' : '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -4466,7 +5567,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 { icon: <Brain size={16} color="#10b981" />, text: 'AI expense tracking — insights in 60 seconds' },
                 { icon: <Shield size={16} color="#10b981" />, text: 'End-to-end encrypted — your data stays yours' },
                 { icon: <TrendingUp size={16} color="#10b981" />, text: 'Evidence-based wealth compound & budget tools' },
-                { icon: <CheckCircle2 size={16} color="#10b981" />, text: 'Free forever — no credit card required' }
+                { icon: <CheckCircle2 size={16} color="#10b981" />, text: '7-day free trial — no credit card required' }
               ].map((item, idx) => (
                 <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13.5px', fontWeight: 700, color: t.text }}>
                   <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: isDark ? 'rgba(16,185,129,0.15)' : '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -4553,6 +5654,72 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               </div>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════ WELCOME DOWNLOAD MODAL ═══════════════ */}
+      {showWelcomeModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(10px)', padding: '16px' }}>
+          <div className="hero-animate" style={{ width: '100%', maxWidth: '440px', background: isDark ? '#161d18' : '#ffffff', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.6)', border: `1px solid ${t.border}`, display: 'flex', flexDirection: 'column' }}>
+            
+            {/* Modal Header/Banner */}
+            <div style={{ background: 'linear-gradient(135deg, #10b981 0%, #047857 100%)', padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative' }}>
+              <button onClick={() => setShowWelcomeModal(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(0,0,0,0.2)', border: 'none', color: '#fff', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(4px)' }}>
+                <X size={16} />
+              </button>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px' }}>
+                  <img src="/favicon.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#fff' }}>ZenBudget App</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                    <div style={{ background: 'rgba(255,255,255,0.2)', padding: '2px 6px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, color: '#fff' }}>FREE</div>
+                    <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.9)', fontWeight: 600 }}>4.8 ★ Rating</span>
+                  </div>
+                </div>
+              </div>
+              
+              <h2 style={{ margin: '8px 0 0', fontSize: '24px', fontWeight: 800, color: '#fff', lineHeight: 1.2 }}>Your money deserves better care.</h2>
+              <p style={{ margin: 0, fontSize: '14px', color: 'rgba(255,255,255,0.9)', lineHeight: 1.4, fontWeight: 500 }}>AI expense tracking, zero-based budgeting, and a private wealth companion — free in your pocket.</p>
+            </div>
+            
+            {/* Modal Body */}
+            <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                  <div style={{ color: '#10b981', marginTop: '2px' }}><CheckCircle2 size={18} /></div>
+                  <span style={{ fontSize: '14px', fontWeight: 600, color: t.text, lineHeight: 1.4 }}>AI financial coach — insights in seconds</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                  <div style={{ color: '#10b981', marginTop: '2px' }}><CheckCircle2 size={18} /></div>
+                  <span style={{ fontSize: '14px', fontWeight: 600, color: t.text, lineHeight: 1.4 }}>End-to-end encrypted — your data stays yours</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                  <div style={{ color: '#10b981', marginTop: '2px' }}><CheckCircle2 size={18} /></div>
+                  <span style={{ fontSize: '14px', fontWeight: 600, color: t.text, lineHeight: 1.4 }}>7-day free trial — no credit card required</span>
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px' }}>
+                {(deviceOS === 'ios' || deviceOS === 'mac') ? (
+                  <button onClick={() => { setShowWelcomeModal(false); setShowIosGuideModal(true); }} style={{ width: '100%', padding: '16px', borderRadius: '14px', background: t.text, color: t.bg, fontSize: '16px', fontWeight: 800, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    Install iOS Web App
+                  </button>
+                ) : (
+                  <button onClick={() => { setShowWelcomeModal(false); handleDownloadApk(); }} style={{ width: '100%', padding: '16px', borderRadius: '14px', background: t.text, color: t.bg, fontSize: '16px', fontWeight: 800, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    Download Android APK
+                  </button>
+                )}
+                
+                <button onClick={() => setShowWelcomeModal(false)} style={{ width: '100%', padding: '12px', background: 'transparent', color: t.textMuted, fontSize: '14px', fontWeight: 600, border: 'none', cursor: 'pointer' }}>
+                  Not now
+                </button>
+              </div>
+            </div>
+            
           </div>
         </div>
       )}

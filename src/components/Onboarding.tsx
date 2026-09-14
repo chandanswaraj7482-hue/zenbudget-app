@@ -3,7 +3,7 @@ import { Smartphone, Bike, Home, Plane, Heart, GraduationCap, ChevronRight, Chec
 import type { SavingsGoal } from '../types';
 
 interface OnboardingProps {
-  onComplete: (goal: SavingsGoal | null) => void;
+  onComplete: (goal: SavingsGoal | null, dob?: string, monthlySalary?: number) => void;
   currencySymbol: string;
 }
 
@@ -18,7 +18,10 @@ const goalsList = [
 ];
 
 export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymbol }) => {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
+  const [dob, setDob] = useState<string>('');
+  const [monthlySalary, setMonthlySalary] = useState<string>('');
+  
   const [selectedGoal, setSelectedGoal] = useState<typeof goalsList[0] | null>(null);
   const [customGoalName, setCustomGoalName] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
@@ -29,7 +32,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymb
   };
 
   const handleNext = () => {
-    if (step === 1 && selectedGoal) {
+    if (step === 0) {
+      setStep(1);
+    } else if (step === 1 && selectedGoal) {
       if (selectedGoal.id === 'other' && !customGoalName.trim()) {
         return;
       }
@@ -40,6 +45,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymb
     } else if (step === 3) {
       setStep(4);
     } else if (step === 4) {
+      const syntheticDob = dob ? new Date(new Date().getFullYear() - Number(dob), 0, 1).toISOString().split('T')[0] : undefined;
       if (selectedGoal) {
         const goalName = selectedGoal.id === 'other' ? customGoalName.trim() : selectedGoal.name;
         onComplete({
@@ -49,7 +55,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymb
           currentAmount: 0,
           deadlineMonths: months,
           color: selectedGoal.color
-        });
+        }, syntheticDob, Number(monthlySalary) || 0);
+      } else {
+        onComplete(null, syntheticDob, Number(monthlySalary) || 0);
       }
     }
   };
@@ -88,6 +96,73 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymb
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', maxWidth: '400px', margin: '0 auto', width: '100%' }}>
         
+        {/* STEP 0: Personal Details */}
+        {step === 0 && (
+          <div className="animate-slide-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <h1 style={{ fontSize: '32px', fontWeight: 800, lineHeight: 1.1, fontFamily: "'Manrope', sans-serif" }}>
+              Tell us about<br />
+              <span style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                yourself
+              </span>
+            </h1>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Monthly Salary / Income
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', fontWeight: 600 }}>{currencySymbol}</span>
+                  <input
+                    type="number"
+                    value={monthlySalary}
+                    onChange={(e) => setMonthlySalary(e.target.value)}
+                    placeholder="e.g. 50000"
+                    style={{
+                      width: '100%',
+                      background: 'var(--bg-card)',
+                      border: '1px solid var(--border-input)',
+                      borderRadius: '16px',
+                      padding: '16px 16px 16px 40px',
+                      fontSize: '16px',
+                      color: 'var(--text-primary)',
+                      outline: 'none',
+                      transition: 'border-color 0.2s',
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
+                    onBlur={(e) => e.target.style.borderColor = 'var(--border-input)'}
+                  />
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Age
+                </label>
+                <input
+                  type="number"
+                  value={dob}
+                  onChange={(e) => setDob(e.target.value)}
+                  placeholder="e.g. 23"
+                  style={{
+                    width: '100%',
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border-input)',
+                    borderRadius: '16px',
+                    padding: '16px',
+                    fontSize: '16px',
+                    color: 'var(--text-primary)',
+                    outline: 'none',
+                    transition: 'border-color 0.2s',
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
+                  onBlur={(e) => e.target.style.borderColor = 'var(--border-input)'}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* STEP 1: What are you saving for? */}
         {step === 1 && (
           <div className="animate-slide-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>

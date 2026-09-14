@@ -737,6 +737,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
   const dailyQuote = DAILY_QUOTES[dayOfYear % DAILY_QUOTES.length];
 
+  const profileIdForSalary = currentProfileId || localStorage.getItem('zb_profile_id') || 'local';
+  const monthlySalaryStr = localStorage.getItem(`zb_monthly_salary_${profileIdForSalary}`);
+  const monthlySalary = monthlySalaryStr ? Number(monthlySalaryStr) : 0;
+  const budgetLeft = Math.max(0, monthlySalary - expenses);
+  const budgetPercent = monthlySalary > 0 ? Math.min(100, Math.round((expenses / monthlySalary) * 100)) : 0;
+  const showBudgetBar = monthlySalary > 0;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingBottom: '120px' }} className="animate-fade-in dashboard-layout-container">
 
@@ -851,6 +858,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Monthly Budget Progress Bar */}
+        {showBudgetBar && (
+          <div style={{ marginTop: '16px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#94a3b8' }}>Monthly budget</span>
+              <span style={{ fontSize: '13px', fontWeight: 800, color: '#34d399' }}>{formatCurrency(budgetLeft, currencySymbol, 0)} left</span>
+            </div>
+            <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.08)', borderRadius: '4px', overflow: 'hidden' }}>
+              <div style={{ width: `${budgetPercent}%`, height: '100%', background: budgetPercent > 90 ? '#ef4444' : budgetPercent > 75 ? '#f59e0b' : '#34d399', borderRadius: '4px', transition: 'width 0.4s ease' }} />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ─── My Accounts in Wallet Section ─── */}
@@ -1062,8 +1082,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             style={{
               padding: '16px 18px',
               borderRadius: '22px',
-              background: 'linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.95) 100%)',
-              border: '1px solid rgba(255,255,255,0.08)',
+              border: '1px solid var(--border-input)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -1187,7 +1206,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
             style={{
               padding: '18px 20px',
               borderRadius: '22px',
-              background: 'linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.95) 100%)',
               border: '1px solid rgba(16,185,129,0.25)',
               display: 'flex',
               flexDirection: 'column',

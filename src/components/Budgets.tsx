@@ -40,6 +40,10 @@ export const Budgets: React.FC<BudgetsProps> = ({
 }) => {
   const [editingCategory, setEditingCategory] = useState<CategoryType | null>(null);
   const [limitInput, setLimitInput] = useState<string>('');
+  const [hiddenCategories, setHiddenCategories] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('zb_hidden_categories') || '[]'); } catch { return []; }
+  });
+  const [isManageOpen, setIsManageOpen] = useState(false);
 
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
@@ -88,12 +92,73 @@ export const Budgets: React.FC<BudgetsProps> = ({
     .reduce((sum, t) => sum + t.amount, 0);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingBottom: '140px' }} className="animate-fade-in">
-      <h2 style={{ fontSize: '20px', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em', margin: 0 }}>
-        {t('category_budgets')}
-      </h2>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '30px', maxWidth: '100%', overflowX: 'hidden' }}>
+      
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '22px' }}>🎯</span> {t('my_budgets')}
+          </h2>
+          <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('budget_desc')}</span>
+        </div>
+        <button
+          onClick={() => setIsManageOpen(!isManageOpen)}
+          style={{
+            background: isManageOpen ? 'var(--primary)' : 'rgba(16, 185, 129, 0.1)',
+            color: isManageOpen ? '#fff' : 'var(--primary)',
+            border: 'none',
+            padding: '8px 12px',
+            borderRadius: '10px',
+            fontWeight: 800,
+            fontSize: '12px',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          {isManageOpen ? 'Done' : 'Manage Categories'}
+        </button>
+      </div>
 
-      {/* Budget Summary Card - Sleek Compact Glass Design */}
+      {isManageOpen && (
+        <div className="glass-panel animate-fade-in" style={{ padding: '16px', borderRadius: '16px', background: 'var(--bg-card)', border: '1px solid var(--border-input)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>Select Visible Categories</h3>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {CATEGORIES.map(cat => {
+              const isHidden = hiddenCategories.includes(cat.id);
+              return (
+                <button
+                  key={`manage-${cat.id}`}
+                  onClick={() => {
+                    const nextHidden = isHidden ? hiddenCategories.filter(id => id !== cat.id) : [...hiddenCategories, cat.id];
+                    setHiddenCategories(nextHidden);
+                    localStorage.setItem('zb_hidden_categories', JSON.stringify(nextHidden));
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 12px',
+                    borderRadius: '12px',
+                    border: `1px solid ${isHidden ? 'var(--border-input)' : cat.color}`,
+                    background: isHidden ? 'var(--bg-input)' : cat.bg,
+                    color: isHidden ? 'var(--text-secondary)' : cat.color,
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    opacity: isHidden ? 0.6 : 1
+                  }}
+                >
+                  {cat.icon} {cat.label} {!isHidden && <Check size={14} />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Monthly Progress Summary Card */}
       <div className="glass-panel" style={{
         background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(6, 182, 212, 0.04) 100%)',
         border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -124,7 +189,7 @@ export const Budgets: React.FC<BudgetsProps> = ({
 
       {/* Categories Budget List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-        {CATEGORIES.map((cat) => {
+        {CATEGORIES.filter(cat => !hiddenCategories.includes(cat.id) || getBudgetLimit(cat.id) > 0 || getSpentAmount(cat.id) > 0).map((cat) => {
           const limit = getBudgetLimit(cat.id);
           const spent = getSpentAmount(cat.id);
           const isEditing = editingCategory === cat.id;

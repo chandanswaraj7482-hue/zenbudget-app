@@ -113,6 +113,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     required: number;
   } | null>(null);
 
+  const [hiddenCategories, setHiddenCategories] = useState<string[]>([]);
+
   useEffect(() => {
     if (editingTransaction) {
       setType(editingTransaction.type);
@@ -136,6 +138,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     }
     setScanMessage(null);
     setShowCalendar(false);
+    try { setHiddenCategories(JSON.parse(localStorage.getItem('zb_hidden_categories') || '[]')); } catch {}
   }, [editingTransaction, isOpen]);
 
   const [impulseLockData, setImpulseLockData] = useState<ImpulseLockCheckResult | null>(null);
@@ -960,12 +963,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               <label style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Category
               </label>
-              <div style={{ 
+              <div style={{
                 display: 'grid', 
                 gridTemplateColumns: 'repeat(5, 1fr)', 
                 gap: '8px' 
               }}>
-                {CATEGORIES.map((cat) => {
+                {CATEGORIES.filter(c => !hiddenCategories.includes(c.id)).map((cat) => {
                   const isSelected = category === cat.id;
                   return (
                     <button
