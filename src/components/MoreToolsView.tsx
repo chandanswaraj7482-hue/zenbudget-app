@@ -224,37 +224,6 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
         </div>
       </div>
 
-      {/* SECTION: PERSONAL INFO */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <h3 style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
-          Personal Info
-        </h3>
-        <div className="glass-panel" style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {(() => {
-            const profileId = localStorage.getItem('zb_profile_id') || 'local';
-            const dob = localStorage.getItem(`zb_dob_${profileId}`);
-            const salary = localStorage.getItem(`zb_monthly_salary_${profileId}`);
-            let age = '-';
-            if (dob) {
-              const dobDate = new Date(dob);
-              const diff = Date.now() - dobDate.getTime();
-              age = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25)).toString();
-            }
-            return (
-              <>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px', background: 'rgba(255,255,255,0.02)', borderRadius: '14px' }}>
-                  <span style={{ fontSize: '14px', color: 'var(--text-secondary)', fontWeight: 600 }}>Age</span>
-                  <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>{age} yrs</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px', background: 'rgba(255,255,255,0.02)', borderRadius: '14px' }}>
-                  <span style={{ fontSize: '14px', color: 'var(--text-secondary)', fontWeight: 600 }}>Monthly Salary</span>
-                  <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--primary)' }}>₹{salary ? Number(salary).toLocaleString('en-IN') : '0'}</span>
-                </div>
-              </>
-            );
-          })()}
-        </div>
-      </div>
 
       {/* SECTION: CALCULATORS */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>

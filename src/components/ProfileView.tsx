@@ -43,6 +43,19 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const [appLockEnabled, setAppLockEnabled] = useState<boolean>(() => localStorage.getItem('zb_app_lock_enabled') !== 'false');
   const [biometricsEnabled, setBiometricsEnabled] = useState<boolean>(() => localStorage.getItem('zb_biometrics_enabled') !== 'false');
 
+  const profileId = localStorage.getItem('zb_profile_id') || 'local';
+  const [dob, setDob] = useState(() => localStorage.getItem(`zb_dob_${profileId}`) || '');
+  const [salary, setSalary] = useState(() => localStorage.getItem(`zb_monthly_salary_${profileId}`) || '');
+
+  const calculatedAge = (() => {
+    if (!dob) return null;
+    const dobDate = new Date(dob);
+    if (isNaN(dobDate.getTime())) return null;
+    const diff = Date.now() - dobDate.getTime();
+    const age = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+    return age >= 0 ? age : null;
+  })();
+
   // Auto-detect country calling code by IP location and timezone
   useEffect(() => {
     if (localStorage.getItem('zb_user_phone_code')) return;
@@ -177,6 +190,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       localStorage.setItem('zb_currency_user_selected', 'true');
       localStorage.setItem('zb_app_lock_enabled', String(appLockEnabled));
       localStorage.setItem('zb_biometrics_enabled', String(biometricsEnabled));
+      if (dob) {
+        localStorage.setItem(`zb_dob_${profileId}`, dob);
+      }
+      if (salary) {
+        localStorage.setItem(`zb_monthly_salary_${profileId}`, salary);
+      }
       
       if (onToggleTheme && themeMode !== currentTheme) {
         onToggleTheme(themeMode);
@@ -457,6 +476,69 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 📞 Saved Mobile Number: {phoneCode} {phone}
               </p>
             )}
+          </div>
+
+          {/* Personal Info: Age / Date of Birth & Monthly Salary */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Personal Info (Age & Salary)
+            </label>
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: '14px', 
+              background: 'var(--bg-input)', 
+              padding: '16px', 
+              borderRadius: '16px', 
+              border: '1px solid var(--border-input)' 
+            }}>
+              {/* Date of Birth & Calculated Age */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>Date of Birth</span>
+                  <span style={{ 
+                    fontSize: '11px', 
+                    fontWeight: 800, 
+                    color: calculatedAge !== null ? 'var(--primary)' : 'var(--text-muted)',
+                    background: calculatedAge !== null ? 'rgba(34, 197, 94, 0.12)' : 'rgba(255,255,255,0.05)',
+                    padding: '2px 8px',
+                    borderRadius: '8px'
+                  }}>
+                    {calculatedAge !== null ? `${calculatedAge} yrs` : '- yrs'}
+                  </span>
+                </div>
+                <input
+                  type="date"
+                  value={dob}
+                  onChange={(e) => setDob(e.target.value)}
+                  className="glass-input"
+                  style={{ fontSize: '13px', padding: '10px 12px', width: '100%', fontWeight: 600, color: 'var(--text-primary)' }}
+                />
+              </div>
+
+              {/* Monthly Salary */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>Monthly Salary</span>
+                  <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--primary)' }}>
+                    {currency === 'INR' ? '₹' : currency} {salary ? Number(salary).toLocaleString('en-IN') : '0'}
+                  </span>
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontWeight: 800, color: 'var(--primary)', fontSize: '13px' }}>
+                    {currency === 'INR' ? '₹' : currency}
+                  </span>
+                  <input
+                    type="number"
+                    value={salary}
+                    onChange={(e) => setSalary(e.target.value)}
+                    placeholder="Enter monthly salary (e.g. 50000)"
+                    className="glass-input"
+                    style={{ paddingLeft: '32px', fontSize: '13px', padding: '10px 12px 10px 32px', width: '100%', fontWeight: 700 }}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* App Theme Toggle (Auto / Dark / Light) */}
