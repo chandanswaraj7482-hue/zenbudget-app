@@ -17,6 +17,105 @@ const ASSET_TYPES = [
   { id: 'high_risk', name: 'High-Risk Growth Scenario', rate: 0.17, desc: 'High volatility, speculative growth scenario.' }
 ];
 
+interface EditableNumberPillProps {
+  value: number;
+  onChange: (val: number) => void;
+  prefix?: string;
+  suffix?: string;
+  step?: number;
+  min?: number;
+  max?: number;
+  width?: string;
+  placeholder?: string;
+}
+
+const EditableNumberPill: React.FC<EditableNumberPillProps> = ({
+  value,
+  onChange,
+  prefix,
+  suffix,
+  step = 1,
+  min = 0,
+  max,
+  width = '90px',
+  placeholder = '0'
+}) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const [rawText, setRawText] = useState<string | null>(null);
+
+  const displayVal = isFocused 
+    ? (rawText !== null ? rawText : (value === 0 ? '' : value.toString()))
+    : (value === 0 ? '0' : (step < 1 ? value.toFixed(1) : value.toLocaleString('en-IN')));
+
+  return (
+    <div style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      background: isFocused ? 'rgba(16, 185, 129, 0.16)' : 'rgba(255, 255, 255, 0.05)',
+      border: isFocused ? '1px solid #10b981' : '1px solid rgba(255, 255, 255, 0.18)',
+      borderRadius: '10px',
+      padding: '4px 8px',
+      gap: '4px',
+      boxShadow: isFocused ? '0 0 12px rgba(16, 185, 129, 0.3)' : '0 2px 5px rgba(0,0,0,0.15)',
+      transition: 'all 0.2s ease',
+      cursor: 'text'
+    }}>
+      {prefix && (
+        <span style={{ color: '#10b981', fontWeight: 800, fontSize: '13px' }}>
+          {prefix}
+        </span>
+      )}
+      <input
+        type="text"
+        inputMode="decimal"
+        value={displayVal}
+        placeholder={placeholder}
+        onFocus={() => {
+          setIsFocused(true);
+          setRawText(value === 0 ? '' : value.toString());
+        }}
+        onBlur={() => {
+          setIsFocused(false);
+          setRawText(null);
+        }}
+        onChange={(e) => {
+          const text = e.target.value;
+          setRawText(text);
+          if (text.trim() === '') {
+            onChange(0);
+            return;
+          }
+          const clean = text.replace(/,/g, '');
+          const num = parseFloat(clean);
+          if (!isNaN(num)) {
+            let finalVal = Math.max(min, num);
+            if (max !== undefined) {
+              finalVal = Math.min(max, finalVal);
+            }
+            onChange(step < 1 ? Number(finalVal.toFixed(2)) : Math.round(finalVal));
+          }
+        }}
+        style={{
+          width,
+          background: 'transparent',
+          border: 'none',
+          outline: 'none',
+          color: '#ffffff',
+          fontWeight: 800,
+          fontSize: '14px',
+          textAlign: 'right',
+          padding: 0
+        }}
+      />
+      {suffix && (
+        <span style={{ color: '#94a3b8', fontSize: '11px', fontWeight: 700 }}>
+          {suffix}
+        </span>
+      )}
+    </div>
+  );
+};
+
 export const WealthSimulator: React.FC<WealthSimulatorProps> = ({
   onBack,
   transactions,
@@ -285,46 +384,100 @@ export const WealthSimulator: React.FC<WealthSimulatorProps> = ({
           {/* Controls Form */}
           <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             
-            {/* Monthly Investment Slider */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {/* Monthly Investment Slider & Input */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
                   Monthly Investment
                 </label>
-                <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--primary)' }}>
-                  {formatCurrency(monthlyInvest, currencySymbol, 0)}/mo
-                </span>
+                <EditableNumberPill
+                  value={monthlyInvest}
+                  onChange={setMonthlyInvest}
+                  prefix={currencySymbol}
+                  suffix="/mo"
+                  step={500}
+                  min={500}
+                  width="95px"
+                />
               </div>
               <input 
                 type="range"
                 min="500"
-                max="100000"
+                max={Math.max(100000, monthlyInvest)}
                 step="500"
                 value={monthlyInvest}
                 onChange={(e) => setMonthlyInvest(Number(e.target.value))}
                 style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer' }}
               />
+              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
+                {[1000, 2500, 5000, 10000, 25000, 50000].map(amt => (
+                  <button
+                    key={amt}
+                    type="button"
+                    onClick={() => setMonthlyInvest(amt)}
+                    style={{
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      border: monthlyInvest === amt ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
+                      background: monthlyInvest === amt ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.03)',
+                      color: monthlyInvest === amt ? '#34d399' : 'var(--text-secondary)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {currencySymbol}{amt >= 1000 ? `${amt / 1000}k` : amt}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Horizon Years Slider */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {/* Horizon Years Slider & Input */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
                   Time Horizon
                 </label>
-                <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>
-                  {years} Years
-                </span>
+                <EditableNumberPill
+                  value={years}
+                  onChange={setYears}
+                  suffix="Years"
+                  step={1}
+                  min={1}
+                  max={50}
+                  width="45px"
+                />
               </div>
               <input 
                 type="range"
                 min="1"
-                max="40"
+                max={Math.max(40, years)}
                 step="1"
                 value={years}
                 onChange={(e) => setYears(Number(e.target.value))}
                 style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer' }}
               />
+              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
+                {[3, 5, 10, 15, 20, 25, 30].map(y => (
+                  <button
+                    key={y}
+                    type="button"
+                    onClick={() => setYears(y)}
+                    style={{
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      border: years === y ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
+                      background: years === y ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.03)',
+                      color: years === y ? '#34d399' : 'var(--text-secondary)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {y} Yrs
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Asset Type Scenario Selector */}
@@ -438,67 +591,156 @@ export const WealthSimulator: React.FC<WealthSimulatorProps> = ({
 
           {/* Controls Form */}
           <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {/* Amount Slider */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {/* Amount Slider & Input */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
                   {fdrdType === 'fd' ? 'Total Deposit Amount' : 'Monthly Deposit Amount'}
                 </label>
-                <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--primary)' }}>
-                  {formatCurrency(depositAmount, currencySymbol, 0)}
-                </span>
+                <EditableNumberPill
+                  value={depositAmount}
+                  onChange={setDepositAmount}
+                  prefix={currencySymbol}
+                  suffix={fdrdType === 'rd' ? '/mo' : ''}
+                  step={fdrdType === 'fd' ? 5000 : 500}
+                  min={500}
+                  width="115px"
+                />
               </div>
               <input 
                 type="range"
-                min={fdrdType === 'fd' ? 10000 : 500}
-                max={fdrdType === 'fd' ? 2000000 : 50000}
-                step={fdrdType === 'fd' ? 10000 : 500}
+                min={fdrdType === 'fd' ? 5000 : 500}
+                max={Math.max(fdrdType === 'fd' ? 2000000 : 50000, depositAmount)}
+                step={fdrdType === 'fd' ? 5000 : 500}
                 value={depositAmount}
                 onChange={(e) => setDepositAmount(Number(e.target.value))}
                 style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer' }}
               />
+              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
+                {(fdrdType === 'fd' 
+                  ? [25000, 50000, 100000, 250000, 500000, 1000000]
+                  : [1000, 2000, 5000, 10000, 25000]
+                ).map(amt => (
+                  <button
+                    key={amt}
+                    type="button"
+                    onClick={() => setDepositAmount(amt)}
+                    style={{
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      border: depositAmount === amt ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
+                      background: depositAmount === amt ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.03)',
+                      color: depositAmount === amt ? '#34d399' : 'var(--text-secondary)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {currencySymbol}{amt >= 100000 ? `${(amt / 100000).toFixed(amt % 100000 === 0 ? 0 : 1)}L` : `${amt / 1000}k`}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Interest Rate Slider */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {/* Interest Rate Slider & Input */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
                   Annual Interest Rate (%)
                 </label>
-                <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>
-                  {fdRate}% p.a.
-                </span>
+                <EditableNumberPill
+                  value={fdRate}
+                  onChange={setFdRate}
+                  suffix="% p.a."
+                  step={0.1}
+                  min={1}
+                  max={30}
+                  width="55px"
+                />
               </div>
               <input 
                 type="range"
-                min="3.5"
-                max="9.5"
+                min="1.0"
+                max={Math.max(15.0, fdRate)}
                 step="0.1"
                 value={fdRate}
                 onChange={(e) => setFdRate(Number(e.target.value))}
                 style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer' }}
               />
+              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
+                {[5.5, 6.5, 7.1, 7.5, 8.0, 9.0].map(r => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setFdRate(r)}
+                    style={{
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      border: fdRate === r ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
+                      background: fdRate === r ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.03)',
+                      color: fdRate === r ? '#34d399' : 'var(--text-secondary)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {r}%
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Time Horizon Slider */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {/* Time Horizon Slider & Input */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
-                  Tenure (Duration)
-                </label>
-                <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>
-                  {fdYears} Years ({fdYears * 12} Months)
-                </span>
+                <div>
+                  <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+                    Tenure (Duration)
+                  </label>
+                  <span style={{ fontSize: '10px', color: '#64748b', marginLeft: '6px', fontWeight: 600 }}>
+                    ({Math.round(fdYears * 12)} Mos)
+                  </span>
+                </div>
+                <EditableNumberPill
+                  value={fdYears}
+                  onChange={setFdYears}
+                  suffix="Years"
+                  step={1}
+                  min={1}
+                  max={30}
+                  width="45px"
+                />
               </div>
               <input 
                 type="range"
                 min="1"
-                max="10"
+                max={Math.max(15, fdYears)}
                 step="1"
                 value={fdYears}
                 onChange={(e) => setFdYears(Number(e.target.value))}
                 style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer' }}
               />
+              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
+                {[1, 2, 3, 5, 7, 10].map(y => (
+                  <button
+                    key={y}
+                    type="button"
+                    onClick={() => setFdYears(y)}
+                    style={{
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      border: fdYears === y ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
+                      background: fdYears === y ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.03)',
+                      color: fdYears === y ? '#34d399' : 'var(--text-secondary)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {y} Yrs
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -582,25 +824,52 @@ export const WealthSimulator: React.FC<WealthSimulatorProps> = ({
 
           {/* Controls Form */}
           <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {/* Annual Income Input */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {/* Annual Income Input & Slider */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
                   Annual Gross Salary / Income
                 </label>
-                <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--primary)' }}>
-                  {formatCurrency(annualIncome, currencySymbol, 0)}
-                </span>
+                <EditableNumberPill
+                  value={annualIncome}
+                  onChange={setAnnualIncome}
+                  prefix={currencySymbol}
+                  suffix="/yr"
+                  step={25000}
+                  min={100000}
+                  width="115px"
+                />
               </div>
               <input 
                 type="range"
-                min="300000"
-                max="5000000"
-                step="50000"
+                min="100000"
+                max={Math.max(5000000, annualIncome)}
+                step="25000"
                 value={annualIncome}
                 onChange={(e) => setAnnualIncome(Number(e.target.value))}
                 style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer' }}
               />
+              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
+                {[500000, 800000, 1200000, 1500000, 2500000, 3700000].map(amt => (
+                  <button
+                    key={amt}
+                    type="button"
+                    onClick={() => setAnnualIncome(amt)}
+                    style={{
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      border: annualIncome === amt ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
+                      background: annualIncome === amt ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.03)',
+                      color: annualIncome === amt ? '#34d399' : 'var(--text-secondary)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {currencySymbol}{(amt / 100000).toFixed(amt % 100000 === 0 ? 0 : 1)}L
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Standard Deduction Info Badge */}
@@ -617,44 +886,98 @@ export const WealthSimulator: React.FC<WealthSimulatorProps> = ({
             {/* Old Regime Extra Deductions */}
             {taxRegime === 'old' && (
               <>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)' }}>
                       Section 80C (PPF, ELSS, EPF, LIC)
                     </label>
-                    <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--primary)' }}>
-                      ₹{deductions80C.toLocaleString('en-IN')}
-                    </span>
+                    <EditableNumberPill
+                      value={deductions80C}
+                      onChange={setDeductions80C}
+                      prefix="₹"
+                      step={5000}
+                      min={0}
+                      max={150000}
+                      width="85px"
+                    />
                   </div>
                   <input 
                     type="range"
                     min="0"
                     max="150000"
-                    step="10000"
+                    step="5000"
                     value={deductions80C}
                     onChange={(e) => setDeductions80C(Number(e.target.value))}
                     style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer' }}
                   />
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    {[50000, 100000, 150000].map(amt => (
+                      <button
+                        key={amt}
+                        type="button"
+                        onClick={() => setDeductions80C(amt)}
+                        style={{
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          border: deductions80C === amt ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
+                          background: deductions80C === amt ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.03)',
+                          color: deductions80C === amt ? '#34d399' : 'var(--text-secondary)',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ₹{(amt / 1000).toFixed(0)}k
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)' }}>
                       Section 80D (Health Insurance)
                     </label>
-                    <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--primary)' }}>
-                      ₹{deductions80D.toLocaleString('en-IN')}
-                    </span>
+                    <EditableNumberPill
+                      value={deductions80D}
+                      onChange={setDeductions80D}
+                      prefix="₹"
+                      step={2500}
+                      min={0}
+                      max={50000}
+                      width="75px"
+                    />
                   </div>
                   <input 
                     type="range"
                     min="0"
                     max="50000"
-                    step="5000"
+                    step="2500"
                     value={deductions80D}
                     onChange={(e) => setDeductions80D(Number(e.target.value))}
                     style={{ width: '100%', accentColor: 'var(--primary)', cursor: 'pointer' }}
                   />
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    {[15000, 25000, 50000].map(amt => (
+                      <button
+                        key={amt}
+                        type="button"
+                        onClick={() => setDeductions80D(amt)}
+                        style={{
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          border: deductions80D === amt ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.08)',
+                          background: deductions80D === amt ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.03)',
+                          color: deductions80D === amt ? '#34d399' : 'var(--text-secondary)',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ₹{(amt / 1000).toFixed(0)}k
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </>
             )}
