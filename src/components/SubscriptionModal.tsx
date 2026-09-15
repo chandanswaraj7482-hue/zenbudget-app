@@ -349,6 +349,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   const remainingDays = getRemainingTrialDays();
   const isPremium = subscriptionTier === 'premium_monthly' || subscriptionTier === 'premium_yearly' || subscriptionTier === 'premium_lifetime' || subscriptionTier === 'premium';
   const isExpired = remainingDays <= 0 && !isPremium;
+  const effectiveIsBlocker = isBlocker || isExpired;
 
   // Get active pricing info
   const getPriceInfo = () => {
@@ -395,7 +396,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         animation: 'fadeIn 0.25s ease-out',
         touchAction: 'auto'
       }} 
-      onClick={onClose}
+      onClick={effectiveIsBlocker ? undefined : onClose}
     >
       <div 
         className="glass-panel"
@@ -413,34 +414,35 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top-Right Close Button */}
-        <button 
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
-          title="Close"
-          style={{
-            position: 'absolute',
-            top: '16px',
-            right: '16px',
-            background: 'rgba(255, 255, 255, 0.1)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            borderRadius: '50%',
-            width: '34px',
-            height: '34px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            color: '#cbd5e1',
-            zIndex: 20,
-            transition: 'all 0.2s ease'
-          }}
-        >
-          <X size={18} />
-        </button>
+        {!effectiveIsBlocker && (
+          <button 
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            title="Close"
+            style={{
+              position: 'absolute',
+              top: '16px',
+              right: '16px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              borderRadius: '50%',
+              width: '34px',
+              height: '34px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: '#cbd5e1',
+              zIndex: 20,
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <X size={18} />
+          </button>
+        )}
 
         {/* PROCESSING STEP */}
         {paymentStep === 'processing' && (
@@ -470,6 +472,30 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             </div>
             <h3 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--success)' }}>Upgrade Successful!</h3>
             <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>You are now a Premium Member of ZenBudget.</p>
+            
+            <a
+              href="/zenbudget.apk?v=premium"
+              download="ZenBudget-Premium.apk"
+              onClick={() => {
+                setTimeout(() => { window.location.href = '/zenbudget.apk?v=premium'; }, 300);
+              }}
+              style={{
+                marginTop: '10px',
+                display: 'block',
+                width: '100%',
+                padding: '14px',
+                borderRadius: '12px',
+                background: 'var(--success)',
+                color: '#fff',
+                fontSize: '14px',
+                fontWeight: 700,
+                textAlign: 'center',
+                textDecoration: 'none',
+                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)'
+              }}
+            >
+              📥 Download Premium Android APK
+            </a>
           </div>
         )}
 

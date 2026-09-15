@@ -1248,7 +1248,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
   useEffect(() => {
     const syncPageFromHash = () => {
       const hash = window.location.hash.replace(/^#\/?/, '');
-      if (hash && (hash === 'quiz' || hash === 'toolkit' || hash === 'stories' || FEATURE_PAGES_DATA[hash])) {
+      if (hash && (hash === 'about' || hash === 'quiz' || hash === 'toolkit' || hash === 'stories' || FEATURE_PAGES_DATA[hash])) {
         setActivePage(hash);
       } else if (!hash) {
         setActivePage('home');
@@ -1798,23 +1798,15 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
     if (deviceOS === 'ios') {
       setShowIosGuideModal(true);
     } else {
-      const link = document.createElement('a');
-      link.href = '/zenbudget.apk';
-      link.download = 'ZenBudget.apk';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Redirect to Web App to enforce Premium requirement for APK
+      onOpenWebApp();
     }
   };
 
   const handleDownloadApk = () => {
     setShowModal(false);
-    const link = document.createElement('a');
-    link.href = '/zenbudget.apk';
-    link.download = 'ZenBudget.apk';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Redirect to Web App to enforce Premium requirement for APK
+    onOpenWebApp();
   };
 
   // Quiz Handling
@@ -1999,6 +1991,19 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       .hero-button { width: 100% !important; justify-content: center !important; }
       .inside-tabs-bar { justify-content: flex-start !important; overflow-x: auto !important; width: 100% !important; padding-bottom: 8px !important; -webkit-overflow-scrolling: touch !important; }
       .inside-tab-btn { flex-shrink: 0 !important; font-size: 13px !important; padding: 10px 16px !important; }
+      .about-hero-btns { flex-direction: column !important; width: 100% !important; align-items: stretch !important; }
+      .about-hero-btn { width: 100% !important; justify-content: center !important; }
+      .about-origin-grid { grid-template-columns: 1fr !important; gap: 20px !important; }
+      .about-principles-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+      .about-contrast-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+      .about-story-card { padding: 24px 18px !important; border-radius: 24px !important; }
+      .about-sanctuary-card { padding: 24px 18px !important; border-radius: 24px !important; }
+      .about-hud-inner { padding: 24px 16px !important; border-radius: 20px !important; }
+    }
+
+    @media (max-width: 480px) {
+      .about-pillars-grid { grid-template-columns: 1fr !important; }
+      .about-pill-item { padding: 12px 10px !important; }
     }
   `;
 
@@ -2408,7 +2413,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           <div style={{ position: 'absolute', top: '35%', right: '10%', width: '600px', height: '600px', borderRadius: '50%', background: isDark ? 'radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%)', pointerEvents: 'none', filter: 'blur(80px)' }} />
           <div style={{ position: 'absolute', bottom: '10%', left: '5%', width: '450px', height: '450px', borderRadius: '50%', background: isDark ? 'radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, transparent 70%)', pointerEvents: 'none', filter: 'blur(60px)' }} />
 
-          <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '0 24px', position: 'relative', zIndex: 10 }}>
+          <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '0 clamp(16px, 4vw, 24px)', position: 'relative', zIndex: 10 }}>
             
             {/* Top Back Navigation & Official Brand Pill */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginBottom: '36px', flexWrap: 'wrap' }}>
@@ -2512,7 +2517,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               </p>
 
               {/* Quick Action CTA Row */}
-              <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap', alignItems: 'center' }}>
+              <div className="about-hero-btns" style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap', alignItems: 'center' }}>
                 <button 
                   onClick={() => onOpenWebApp()} 
                   style={{ 
@@ -2530,7 +2535,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     transition: 'all 0.25s', 
                     boxShadow: '0 12px 30px rgba(16,185,129,0.4)' 
                   }} 
-                  className="hover-lift"
+                  className="hover-lift about-hero-btn"
                 >
                   <Wallet size={18} color="#ffffff" />
                   <span>Open Web App</span>
@@ -2554,7 +2559,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     transition: 'all 0.2s',
                     boxShadow: '0 4px 14px rgba(0,0,0,0.06)'
                   }} 
-                  className="hover-lift"
+                  className="hover-lift about-hero-btn"
                 >
                   <Download size={18} color="#84cc16" />
                   <span>Download APK (Android)</span>
@@ -2562,9 +2567,9 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               </div>
 
               {/* 4 Brand Pillars Highlight Row */}
-              <div style={{ 
+              <div className="about-pillars-grid" style={{ 
                 display: 'grid', 
-                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 160px), 1fr))', 
                 gap: '12px', 
                 marginTop: '56px',
                 textAlign: 'center'
@@ -2575,7 +2580,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   { icon: '🧠', title: 'Behavioral Science', desc: '50/30/20 & cooling timers' },
                   { icon: '💖', title: 'Safe Daily Spend', desc: 'Real-time guilt-free limit' }
                 ].map((item, idx) => (
-                  <div key={idx} style={{
+                  <div key={idx} className="about-pill-item" style={{
                     padding: '16px 14px',
                     borderRadius: '18px',
                     background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.7)',
@@ -2592,18 +2597,18 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             </div>
 
             {/* 2. THE ORIGIN STORY (BENTO GRID WITH FINANCIAL SANCTUARY CARD) */}
-            <div style={{ 
+            <div className="about-origin-grid" style={{ 
               display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', 
               gap: '24px', 
               marginBottom: '90px' 
             }}>
               {/* Left Column: Authentic Story Narrative */}
-              <div style={{ 
+              <div className="about-story-card" style={{ 
                 background: t.cardBg, 
                 border: `1px solid ${t.border}`, 
                 borderRadius: '32px', 
-                padding: 'clamp(32px, 5vw, 54px)', 
+                padding: 'clamp(24px, 5vw, 54px)', 
                 display: 'flex', 
                 flexDirection: 'column', 
                 justifyContent: 'center', 
@@ -2628,8 +2633,8 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 </div>
 
                 <h2 style={{ 
-                  fontSize: 'clamp(30px, 3.8vw, 44px)', 
-                  lineHeight: 1.15, 
+                  fontSize: 'clamp(26px, 3.8vw, 44px)', 
+                  lineHeight: 1.18, 
                   fontWeight: 900, 
                   color: t.text, 
                   letterSpacing: '-0.02em', 
@@ -2639,11 +2644,11 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   <span style={{ color: '#84cc16' }}>Late-Night Money Anxieties</span>
                 </h2>
 
-                <p style={{ fontSize: '16px', lineHeight: 1.7, color: t.textSub, marginBottom: '16px' }}>
+                <p style={{ fontSize: '15.5px', lineHeight: 1.7, color: t.textSub, marginBottom: '16px' }}>
                   Behind ZenBudget are creators who know the exact sinking sensation of checking bank apps late at night — racing pulses over impending bills, creeping credit balances, and the silent guilt of having worked hard all month with little left to show.
                 </p>
 
-                <p style={{ fontSize: '16px', lineHeight: 1.7, color: t.textSub, marginBottom: '20px' }}>
+                <p style={{ fontSize: '15.5px', lineHeight: 1.7, color: t.textSub, marginBottom: '20px' }}>
                   When we tried other apps, we found them cold, complicated, and toxic. They pushed predatory personal loan banners, shamed us with terrifying red sirens, and demanded that we categorize 40 transactions manually every single evening.
                 </p>
 
@@ -2654,22 +2659,22 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   borderLeft: '4px solid #84cc16',
                   marginBottom: '20px'
                 }}>
-                  <p style={{ fontSize: '15px', fontWeight: 700, color: t.text, margin: 0, fontStyle: 'italic', lineHeight: 1.5 }}>
+                  <p style={{ fontSize: '14.5px', fontWeight: 700, color: t.text, margin: 0, fontStyle: 'italic', lineHeight: 1.5 }}>
                     "If a personal finance feature increases anxiety or sells debt, it has no place in ZenBudget."
                   </p>
                 </div>
 
-                <p style={{ fontSize: '17px', fontWeight: 800, color: '#10b981', margin: 0 }}>
+                <p style={{ fontSize: '16px', fontWeight: 800, color: '#10b981', margin: 0 }}>
                   That judgment-free sanctuary didn't exist in the market. So we built it for ourselves, and now we share it with you.
                 </p>
               </div>
 
               {/* Right Column: Interactive Calming Sanctuary Card with Signature */}
-              <div style={{ 
+              <div className="about-sanctuary-card" style={{ 
                 background: isDark ? 'linear-gradient(145deg, rgba(16,185,129,0.12) 0%, rgba(6,78,59,0.25) 50%, rgba(132,204,22,0.1) 100%)' : 'linear-gradient(145deg, #ecfdf5 0%, #d1fae5 50%, #f7fee7 100%)', 
                 border: `1px solid ${isDark ? 'rgba(16,185,129,0.3)' : 'rgba(16,185,129,0.3)'}`, 
                 borderRadius: '32px', 
-                padding: 'clamp(32px, 5vw, 54px)', 
+                padding: 'clamp(24px, 5vw, 54px)', 
                 display: 'flex', 
                 flexDirection: 'column', 
                 alignItems: 'center', 
@@ -2682,11 +2687,11 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '240px', height: '240px', background: 'rgba(132,204,22,0.18)', filter: 'blur(70px)', borderRadius: '50%' }} />
                 
                 {/* Floating Interactive Sanctuary HUD */}
-                <div style={{ 
+                <div className="about-hud-inner" style={{ 
                   background: isDark ? 'rgba(18, 24, 20, 0.88)' : '#ffffff', 
                   border: `1px solid ${t.border}`, 
                   borderRadius: '26px', 
-                  padding: '36px 28px', 
+                  padding: 'clamp(24px, 4vw, 36px) clamp(16px, 3vw, 28px)', 
                   maxWidth: '380px', 
                   width: '100%',
                   boxShadow: isDark ? '0 30px 70px rgba(0,0,0,0.6)' : '0 20px 45px rgba(0,0,0,0.08)', 
@@ -2786,14 +2791,14 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 </p>
               </div>
               
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+              <div className="about-principles-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '20px' }}>
                 
                 {/* Principle 1: Compassion First */}
                 <div style={{ 
                   background: t.cardBg, 
                   border: `1px solid ${t.border}`, 
                   borderRadius: '26px', 
-                  padding: '36px', 
+                  padding: 'clamp(24px, 4vw, 36px)', 
                   boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.3)' : '0 10px 30px rgba(0,0,0,0.03)', 
                   position: 'relative', 
                   overflow: 'hidden',
@@ -2816,7 +2821,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   background: t.cardBg, 
                   border: `1px solid ${t.border}`, 
                   borderRadius: '26px', 
-                  padding: '36px', 
+                  padding: 'clamp(24px, 4vw, 36px)', 
                   boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.3)' : '0 10px 30px rgba(0,0,0,0.03)', 
                   position: 'relative', 
                   overflow: 'hidden',
@@ -2839,7 +2844,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   background: t.cardBg, 
                   border: `1px solid ${t.border}`, 
                   borderRadius: '26px', 
-                  padding: '36px', 
+                  padding: 'clamp(24px, 4vw, 36px)', 
                   boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.3)' : '0 10px 30px rgba(0,0,0,0.03)', 
                   position: 'relative', 
                   overflow: 'hidden',
@@ -2862,7 +2867,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   background: t.cardBg, 
                   border: `1px solid ${t.border}`, 
                   borderRadius: '26px', 
-                  padding: '36px', 
+                  padding: 'clamp(24px, 4vw, 36px)', 
                   boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.3)' : '0 10px 30px rgba(0,0,0,0.03)', 
                   position: 'relative', 
                   overflow: 'hidden',
@@ -2913,14 +2918,14 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 </h2>
               </div>
               
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+              <div className="about-contrast-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '24px' }}>
                 
                 {/* Column 1: What ZenBudget Will Never Do */}
                 <div style={{ 
                   background: isDark ? 'rgba(239,68,68,0.06)' : 'rgba(239,68,68,0.04)', 
                   border: '1px solid rgba(239,68,68,0.25)', 
                   borderRadius: '24px', 
-                  padding: '30px' 
+                  padding: 'clamp(20px, 3.5vw, 30px)' 
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '22px' }}>
                     <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -2955,7 +2960,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   background: isDark ? 'rgba(16,185,129,0.06)' : 'rgba(16,185,129,0.04)', 
                   border: '1px solid rgba(16,185,129,0.25)', 
                   borderRadius: '24px', 
-                  padding: '30px' 
+                  padding: 'clamp(20px, 3.5vw, 30px)' 
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '22px' }}>
                     <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(16,185,129,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -3035,7 +3040,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 Take a deep breath. Your peaceful financial journey begins right here today.
               </p>
 
-              <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <div className="about-hero-btns" style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
                 <button 
                   onClick={() => onOpenWebApp()} 
                   style={{ 
@@ -3053,7 +3058,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     gap: '10px', 
                     boxShadow: '0 10px 28px rgba(16,185,129,0.35)' 
                   }} 
-                  className="hover-lift"
+                  className="about-hero-btn hover-lift"
                 >
                   <span>Start Your Financial Zen</span> 
                   <ArrowUpRight size={18} />
@@ -3075,7 +3080,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     alignItems: 'center',
                     gap: '8px'
                   }} 
-                  className="hover-lift"
+                  className="about-hero-btn hover-lift"
                 >
                   <Download size={16} color="#84cc16" />
                   <span>Download APK</span>
