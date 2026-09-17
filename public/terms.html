@@ -3,55 +3,204 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Terms of Service - ZenBudget</title>
+  <title>Terms of Service — ZenBudget AI</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="description" content="ZenBudget Terms of Service - Clear, fair terms governing your use of ZenBudget applications, free trial, lifetime licenses, and AI financial wellness tools.">
   <style>
+    :root {
+      --bg: #090e0b;
+      --card-bg: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #f8fafc;
+      --text-sub: #94a3b8;
+      --primary: #10b981;
+      --primary-light: #34d399;
+      --accent: #84cc16;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f8fafc;
+        --card-bg: #ffffff;
+        --border: rgba(0, 0, 0, 0.08);
+        --text: #0f172a;
+        --text-sub: #64748b;
+        --primary: #059669;
+        --primary-light: #10b981;
+        --accent: #65a30d;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      line-height: 1.6;
-      color: #0f172a;
-      background-color: #f8fafc;
-      margin: 0;
-      padding: 0;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 24px 16px 60px;
     }
-    .container {
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 32px;
-      background: #ffffff;
-      border-radius: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-      border: 1px solid rgba(0,0,0,0.08);
+    .wrapper { max-width: 880px; margin: 0 auto; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0 32px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+      gap: 16px;
     }
-    h1 { color: #16a34a; font-size: 28px; margin-bottom: 8px; }
-    h2 { font-size: 18px; margin-top: 24px; color: #1e293b; }
-    p, li { color: #475569; font-size: 14px; }
-    .footer { margin-top: 32px; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 16px; }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .brand img { width: 40px; height: 40px; border-radius: 12px; }
+    .brand-title { font-size: 20px; font-weight: 900; letter-spacing: -0.02em; }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 100px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+    .back-btn:hover {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--primary-light);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 4px 14px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+      line-height: 1.15;
+    }
+    .subtitle { font-size: 15px; color: var(--text-sub); margin-bottom: 36px; }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+    h2 {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--primary-light);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    p { color: var(--text-sub); font-size: 14.5px; margin-bottom: 14px; }
+    p:last-child { margin-bottom: 0; }
+    ul { margin-left: 20px; margin-bottom: 14px; color: var(--text-sub); font-size: 14.5px; }
+    li { margin-bottom: 8px; }
+    strong { color: var(--text); font-weight: 700; }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 13.5px;
+      color: var(--text-sub);
+    }
+    .footer-links a {
+      color: var(--text-sub);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--primary-light); }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Terms of Service 📜</h1>
-    <p>Last updated: August 2026</p>
+  <div class="wrapper">
+    <header>
+      <a href="/" class="brand">
+        <img src="/favicon.png" alt="ZenBudget Logo">
+        <span class="brand-title">ZenBudget</span>
+      </a>
+      <a href="/" class="back-btn">← Back to App</a>
+    </header>
 
-    <p>By accessing or using <strong>ZenBudget</strong>, you agree to be bound by these Terms of Service. Please read them carefully.</p>
+    <main>
+      <div class="hero-badge">Transparent Terms</div>
+      <h1>Terms of Service</h1>
+      <p class="subtitle">Effective Date: August 2026 • Agreement for ZenBudget Platform & Mobile Applications</p>
 
-    <h2>1. Use of Application</h2>
-    <p>ZenBudget is a personal money tracking and financial coaching application designed to help users log expenses, set category budgets, and manage financial goals.</p>
+      <div class="card">
+        <h2>📄 1. Acceptance of Terms</h2>
+        <p>By accessing or using ZenBudget (including our website, Web App, iOS PWA, Android APK, and associated services), you agree to be bound by these Terms of Service. If you disagree with any part, you may discontinue use of the platform at any time.</p>
+      </div>
 
-    <h2>2. Peer-to-Peer Deep Linking Payments</h2>
-    <p>ZenBudget provides zero-fee UPI deep link shortcuts for user convenience. All transactions triggered through UPI intent URIs occur directly between the user's banking app (e.g. PhonePe, GPay, Paytm) and the target recipient. ZenBudget acts solely as a deep link initiator and is not a payment intermediary.</p>
+      <div class="card">
+        <h2>🌱 2. Free Trial & Premium Subscriptions</h2>
+        <ul>
+          <li><strong>7-Day Free Trial:</strong> All new accounts receive full access to ZenBudget premium features for 7 days without requiring a credit card or payment commitment.</li>
+          <li><strong>Equal Tier Capabilities:</strong> All 3 paid tiers (Monthly, Annual, Lifetime) grant 100% unlocked access to AI Money Coach, Smart OCR Scanning, Multi-Device Cloud Sync, and Custom Envelope Rules.</li>
+          <li><strong>Lifetime License:</strong> Lifetime purchases provide permanent access without recurring monthly or yearly fees.</li>
+        </ul>
+      </div>
 
-    <h2>3. Subscriptions & Premium Unlocks</h2>
-    <p>Features such as Standalone Scan & Pay access are unlocked via voluntary subscription or one-time feature fees. Payment transactions are processed securely by Cashfree.</p>
+      <div class="card">
+        <h2>⚖️ 3. Financial Wellness Disclaimer</h2>
+        <p>ZenBudget is a personal productivity, expense tracking, and behavioral budgeting software. <strong>ZenBudget does not offer registered investment advice, statutory tax accounting, or legal financial counseling.</strong> Users are encouraged to exercise personal discretion when making major financial decisions.</p>
+      </div>
 
-    <h2>4. Limitation of Liability</h2>
-    <p>Users are responsible for verifying payment details (VPA, mobile number, account number, amount) prior to approving transfers in their native banking app.</p>
+      <div class="card">
+        <h2>🔐 4. Account Responsibility & Security</h2>
+        <p>You are responsible for maintaining the confidentiality of your credentials and device biometric locks. ZenBudget is not liable for unauthorized access resulting from compromised personal devices.</p>
+      </div>
 
-    <h2>5. Contact & Support</h2>
-    <p>For questions or support regarding Terms of Service, contact us at <a href="mailto:hello.zenbudget@zohomail.in">hello.zenbudget@zohomail.in</a>.</p>
+      <div class="card">
+        <h2>🚫 5. Acceptable Use Policy</h2>
+        <p>You agree not to reverse engineer, attempt unauthorized server penetration, exploit payment webhooks, or misuse AI APIs for malicious activities.</p>
+      </div>
 
-    <div class="footer">
-      &copy; 2026 ZenBudget Inc. All rights reserved.
+      <div class="card">
+        <h2>💬 6. Support & Inquiries</h2>
+        <p>For questions regarding terms, licensing, or billing inquiries, reach out to <a href="mailto:hello.zenbudget@zohomail.in" style="color: var(--primary-light); font-weight: 700;">hello.zenbudget@zohomail.in</a>.</p>
+      </div>
+    </main>
+
+    <div class="footer-links">
+      <a href="/privacy.html">Privacy Policy</a>
+      <span>•</span>
+      <a href="/terms.html">Terms of Service</a>
+      <span>•</span>
+      <a href="/security.html">Security</a>
+      <span>•</span>
+      <a href="/contact.html">Contact Support</a>
     </div>
   </div>
 </body>

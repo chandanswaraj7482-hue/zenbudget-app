@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { t } from '../utils/i18n';
 import { supabase } from '../supabaseClient';
+import { CoinCatcherGame } from './CoinCatcherGame';
 
 interface MoreToolsViewProps {
   onNavigateToImpulseBlocker: () => void;
@@ -41,8 +42,7 @@ interface MoreToolsViewProps {
   onNavigateToFollowUs?: () => void;
   isPremiumUser?: boolean;
   onNavigateToBankImporter?: () => void;
-  onNavigateToFDRD?: () => void;
-  onNavigateToTax?: () => void;
+  currencySymbol?: string;
 }
 
 export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
@@ -67,8 +67,7 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
   onNavigateToFollowUs,
   isPremiumUser = false,
   onNavigateToBankImporter,
-  onNavigateToFDRD,
-  onNavigateToTax
+  currencySymbol = '₹'
 }) => {
   const [socialLinks, setSocialLinks] = useState<Array<{ platform: string; icon: string; url: string; color: string; is_active: boolean }>>([]);
 
@@ -170,7 +169,7 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
             <ChevronRight size={18} color="#94a3b8" />
           </button>
 
-          {/* Wealth Simulator */}
+          {/* Wealth & Financial Calculators */}
           <button
             onClick={onNavigateToSimulator}
             style={{
@@ -192,7 +191,7 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
               </div>
               <div>
                 <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>{t('compound_simulator')}</p>
-                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('compound_simulator_sub')}</span>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>SIP, FD/RD & Tax Calculator</span>
               </div>
             </div>
             <ChevronRight size={18} color="#94a3b8" />
@@ -221,52 +220,6 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
               <div>
                 <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>{t('shared_budget')}</p>
                 <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('shared_budget_sub')}</span>
-              </div>
-            </div>
-            <ChevronRight size={18} color="#94a3b8" />
-          </button>
-        </div>
-      </div>
-
-      {/* SECTION: CALCULATORS */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <h3 style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
-          Calculators
-        </h3>
-        <div className="glass-panel" style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {/* FD / RD Calculator */}
-          <button
-            onClick={onNavigateToFDRD || onNavigateToSimulator}
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px', borderRadius: '14px', border: 'none', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', color: 'var(--text-primary)', textAlign: 'left'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
-              </div>
-              <div>
-                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>FD / RD calculator</p>
-                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Fixed & recurring deposit returns</span>
-              </div>
-            </div>
-            <ChevronRight size={18} color="#94a3b8" />
-          </button>
-          
-          {/* Tax Estimator */}
-          <button
-            onClick={onNavigateToTax || onNavigateToSimulator}
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px', borderRadius: '14px', border: 'none', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', color: 'var(--text-primary)', textAlign: 'left'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-              </div>
-              <div>
-                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>Tax estimator</p>
-                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>New vs Old regime tax slabs</span>
               </div>
             </div>
             <ChevronRight size={18} color="#94a3b8" />
@@ -380,6 +333,9 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
             <ChevronRight size={18} color="#94a3b8" />
           </button>
         </div>
+
+        {/* Arcade Mini-Game: Coin Catcher */}
+        <CoinCatcherGame currencySymbol={currencySymbol} userReferralCode={_userReferralCode} />
       </div>
 
       {/* SECTION 3: SHARE & REWARDS */}

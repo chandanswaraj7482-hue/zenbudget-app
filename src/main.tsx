@@ -4,6 +4,10 @@ import './index.css'
 import Root from './Root.tsx'
 import { bootstrapSession } from './supabaseClient'
 import './utils/audio'
+import { initAntiInspect } from './utils/antiInspect'
+
+// Initialize Anti-Inspect & DevTools Shield
+initAntiInspect();
 
 // Strip console logs in production for security
 if (import.meta.env.PROD) {

@@ -6,3 +6,6 @@ admin-portal.zip
 *.apk
 public/*.apk
 dist/*.apk
+zenbudget_decoded
+*.jar
+*.idsig

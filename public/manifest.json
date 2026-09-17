@@ -47,7 +47,23 @@
   ],
   "start_url": ".",
   "background_color": "#0d0e12",
-  "theme_color": "#863bff",
+  "theme_color": "#10b981",
   "display": "standalone",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "share_target": {
+    "action": "/?shared_receipt=1",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "receipt",
+          "accept": ["image/*", "application/pdf"]
+        }
+      ]
+    }
+  }
 }

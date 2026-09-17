@@ -44,17 +44,21 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const [biometricsEnabled, setBiometricsEnabled] = useState<boolean>(() => localStorage.getItem('zb_biometrics_enabled') !== 'false');
 
   const profileId = localStorage.getItem('zb_profile_id') || 'local';
-  const [dob, setDob] = useState(() => localStorage.getItem(`zb_dob_${profileId}`) || '');
+  const [age, setAge] = useState<string>(() => {
+    const savedAge = localStorage.getItem(`zb_age_${profileId}`);
+    if (savedAge) return savedAge;
+    const savedDob = localStorage.getItem(`zb_dob_${profileId}`);
+    if (savedDob) {
+      const dobDate = new Date(savedDob);
+      if (!isNaN(dobDate.getTime())) {
+        const diff = Date.now() - dobDate.getTime();
+        const a = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+        if (a > 0 && a <= 120) return a.toString();
+      }
+    }
+    return '';
+  });
   const [salary, setSalary] = useState(() => localStorage.getItem(`zb_monthly_salary_${profileId}`) || '');
-
-  const calculatedAge = (() => {
-    if (!dob) return null;
-    const dobDate = new Date(dob);
-    if (isNaN(dobDate.getTime())) return null;
-    const diff = Date.now() - dobDate.getTime();
-    const age = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
-    return age >= 0 ? age : null;
-  })();
 
   // Auto-detect country calling code by IP location and timezone
   useEffect(() => {
@@ -190,8 +194,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       localStorage.setItem('zb_currency_user_selected', 'true');
       localStorage.setItem('zb_app_lock_enabled', String(appLockEnabled));
       localStorage.setItem('zb_biometrics_enabled', String(biometricsEnabled));
-      if (dob) {
-        localStorage.setItem(`zb_dob_${profileId}`, dob);
+      if (age) {
+        localStorage.setItem(`zb_age_${profileId}`, age);
+        const birthYear = new Date().getFullYear() - parseInt(age);
+        if (!isNaN(birthYear)) {
+          localStorage.setItem(`zb_dob_${profileId}`, `${birthYear}-01-01`);
+        }
       }
       if (salary) {
         localStorage.setItem(`zb_monthly_salary_${profileId}`, salary);
@@ -492,29 +500,61 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               borderRadius: '16px', 
               border: '1px solid var(--border-input)' 
             }}>
-              {/* Date of Birth & Calculated Age */}
+              {/* Age in Years */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>Date of Birth</span>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>Your Age (in Years)</span>
                   <span style={{ 
                     fontSize: '11px', 
                     fontWeight: 800, 
-                    color: calculatedAge !== null ? 'var(--primary)' : 'var(--text-muted)',
-                    background: calculatedAge !== null ? 'rgba(34, 197, 94, 0.14)' : 'rgba(255,255,255,0.05)',
-                    border: calculatedAge !== null ? '1px solid rgba(34, 197, 94, 0.35)' : '1px solid rgba(255,255,255,0.08)',
+                    color: age ? 'var(--primary)' : 'var(--text-muted)',
+                    background: age ? 'rgba(34, 197, 94, 0.14)' : 'rgba(255,255,255,0.05)',
+                    border: age ? '1px solid rgba(34, 197, 94, 0.35)' : '1px solid rgba(255,255,255,0.08)',
                     padding: '3px 10px',
                     borderRadius: '100px'
                   }}>
-                    {calculatedAge !== null ? `🎉 ${calculatedAge} yrs old` : '🎂 Age auto-calculated'}
+                    {age ? `🎂 ${age} yrs old` : '🎂 Enter age'}
                   </span>
                 </div>
-                <input
-                  type="date"
-                  value={dob}
-                  onChange={(e) => setDob(e.target.value)}
-                  className="glass-input"
-                  style={{ fontSize: '13px', padding: '10px 12px', width: '100%', fontWeight: 600, color: 'var(--text-primary)' }}
-                />
+                <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '14px' }}>
+                    🎂
+                  </span>
+                  <input
+                    type="number"
+                    min={10}
+                    max={120}
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    placeholder="Enter your age (e.g. 24)"
+                    className="glass-input"
+                    style={{ paddingLeft: '36px', fontSize: '13px', padding: '10px 12px 10px 36px', width: '100%', fontWeight: 700, color: 'var(--text-primary)' }}
+                  />
+                </div>
+                
+                {/* Quick Age Presets */}
+                <div style={{ display: 'flex', gap: '6px', marginTop: '2px', flexWrap: 'wrap' }}>
+                  {[18, 21, 24, 28, 32, 40].map((presetAge) => (
+                    <button
+                      key={presetAge}
+                      type="button"
+                      onClick={() => setAge(presetAge.toString())}
+                      style={{
+                        padding: '4px 9px',
+                        borderRadius: '8px',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        border: age === presetAge.toString() ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.1)',
+                        background: age === presetAge.toString() ? 'rgba(34,197,94,0.18)' : 'rgba(255,255,255,0.04)',
+                        color: age === presetAge.toString() ? 'var(--primary)' : 'var(--text-secondary)',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      {presetAge} yrs
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Monthly Salary */}

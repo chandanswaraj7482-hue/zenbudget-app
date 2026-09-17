@@ -37,10 +37,21 @@ android-sdk
 
 # APK binaries
 *.apk
-!public/*.apk
 
 # Admin portal zip archive
 admin-portal.zip
 .vercel
 
 serviceAccountKey.json
+
+# Heavy image & asset binaries
+public/images/
+admin-portal/public/images/
+*.jpg
+admin-portal/public/hero-mockup.png
+
+# Temporary tools & decoded binaries
+zenbudget_decoded/
+*.jar
+*.idsig
+*.sql

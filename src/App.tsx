@@ -12,8 +12,11 @@ import {
   Bot,
   Plus,
   MessageCircle,
-  User
+  User,
+  ArrowRight,
+  Image as ImageIcon
 } from 'lucide-react';
+import { triggerSparklesExplosion } from './utils/audio';
 import { MoreToolsView } from './components/MoreToolsView';
 import { AdminDashboard } from './components/AdminDashboard';
 import { ScannerModal } from './components/ScannerModal';
@@ -43,6 +46,7 @@ import { WidgetModal } from './components/WidgetModal';
 import { TransferModal } from './components/TransferModal';
 import { AddAccountModal } from './components/AddAccountModal';
 import { FinancialProfileCardModal } from './components/FinancialProfileCardModal';
+import { NewMonthBudgetPromptModal } from './components/NewMonthBudgetPromptModal';
 import { t, setLanguage as setI18nLanguage } from './utils/i18n';
 import { Capacitor } from '@capacitor/core';
 import { App as CapApp } from '@capacitor/app';
@@ -50,6 +54,7 @@ import { Browser } from '@capacitor/browser';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { autoSyncCurrencyFromIP } from './utils/geoTracker';
 import { formatCurrency } from './utils/formatCurrency';
+import { scheduleDailyReminderNotifications, checkAndTriggerWebDailyNotification } from './utils/notificationScheduler';
 import type { Transaction, SavingsGoal, CategoryBudget, CategoryType, Account, LoanRecord } from './types';
 import { Dashboard } from './components/Dashboard';
 import { Transactions } from './components/Transactions';
@@ -223,6 +228,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   const [showTrialUrgencyModal, setShowTrialUrgencyModal] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [showFinancialProfileModal, setShowFinancialProfileModal] = useState(false);
+  const [showNewMonthBudgetPromptModal, setShowNewMonthBudgetPromptModal] = useState(false);
 
   // Announcement popup state
   const [announcementPopup, setAnnouncementPopup] = useState<{
@@ -449,24 +455,30 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     };
   }, [theme]);
 
-  // ─── Notification Permission Request (APK startup) ───────────────────────
+  // ─── Automated 4x Daily Recurring Push Notifications (9am, 1:30pm, 6:30pm, 9:30pm) ───
   useEffect(() => {
-    const requestNotificationPermission = async () => {
+    const initDailyNotifications = async () => {
       try {
-        if (Capacitor.isNativePlatform()) {
-          const { LocalNotifications } = await import('@capacitor/local-notifications');
-          const perm = await LocalNotifications.requestPermissions();
-          console.log('ZenBudget: Notification permission:', perm.display);
-        } else if ('Notification' in window && Notification.permission === 'default') {
-          await Notification.requestPermission();
-        }
+        await scheduleDailyReminderNotifications();
       } catch (e) {
-        console.warn('ZenBudget: Notification permission request failed:', e);
+        console.warn('ZenBudget: 4x Daily Notification scheduling failed:', e);
       }
     };
-    // Delay slightly so app loads first
-    const timer = setTimeout(requestNotificationPermission, 2000);
-    return () => clearTimeout(timer);
+    // Delay 1.5s after app mount so splash screen transitions smoothly
+    const timer = setTimeout(initDailyNotifications, 1500);
+
+    // Periodic check for web notification trigger if tab remains open
+    let webInterval: any = null;
+    if (!Capacitor.isNativePlatform() && typeof window !== 'undefined') {
+      webInterval = setInterval(() => {
+        checkAndTriggerWebDailyNotification();
+      }, 60000); // Check every minute
+    }
+
+    return () => {
+      clearTimeout(timer);
+      if (webInterval) clearInterval(webInterval);
+    };
   }, []);
 
   // ─── Version Check & Update Popup (Remote Supabase & local version.json) ───
@@ -566,6 +578,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   }, []);
 
   const handleAddAccount = async (newAcc: Omit<Account, 'id'>) => {
+    if (checkExpiredGuard('add bank accounts')) return;
     const accId = crypto.randomUUID();
     const created: any = { 
       ...newAcc, 
@@ -595,6 +608,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   };
 
   const handleTransfer = async (fromId: string, toId: string, amount: number, notes?: string) => {
+    if (checkExpiredGuard('make account transfers')) return;
     const fromAcc = accounts.find(a => a.id === fromId);
     const toAcc = accounts.find(a => a.id === toId);
     if (!fromAcc || !toAcc) return;
@@ -671,6 +685,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
 
   const handleAddLoan = (loanData: Omit<LoanRecord, 'id' | 'paidAmount' | 'status'>) => {
+    if (checkExpiredGuard('manage & add loans')) return;
     const loanId = crypto.randomUUID();
     const newLoan: LoanRecord = {
       ...loanData,
@@ -687,6 +702,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   };
 
   const handleRepayLoan = (loanId: string, repayAmount: number, accountId: string) => {
+    if (checkExpiredGuard('record loan repayments')) return;
     const targetLoan = loans.find(l => l.id === loanId);
     if (!targetLoan) return;
 
@@ -1320,6 +1336,76 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
     (window as any).handleIncomingSharedContent = processSharedPayload;
 
+    // Check PWA Web Share Target cache (/temp-shared-receipt)
+    if (typeof window !== 'undefined' && 'caches' in window) {
+      caches.open('shared-receipt-cache').then(async (cache) => {
+        const receiptRes = await cache.match('/temp-shared-receipt');
+        if (receiptRes) {
+          const blob = await receiptRes.blob();
+          await cache.delete('/temp-shared-receipt');
+          const reader = new FileReader();
+          reader.onload = () => {
+            if (reader.result) {
+              processSharedPayload({ type: 'image', data: reader.result as string });
+            }
+          };
+          reader.readAsDataURL(blob);
+          if (urlParams.has('shared_receipt')) {
+            window.history.replaceState({}, '', window.location.pathname);
+          }
+        } else {
+          const textRes = await cache.match('/temp-shared-text');
+          if (textRes) {
+            const text = await textRes.text();
+            await cache.delete('/temp-shared-text');
+            processSharedPayload({ type: 'text', data: text });
+            if (urlParams.has('shared_receipt')) {
+              window.history.replaceState({}, '', window.location.pathname);
+            }
+          }
+        }
+      }).catch(() => {});
+    }
+
+    // Direct Gallery & Netbanking Screenshot Upload Helper
+    const openReceiptPicker = () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (e: any) => {
+        const file = e.target?.files?.[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            if (reader.result) {
+              processSharedPayload({ type: 'image', data: reader.result as string });
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+      input.click();
+    };
+    (window as any).openReceiptPicker = openReceiptPicker;
+
+    // Window Drag & Drop screenshot listener
+    const handleDragOver = (e: DragEvent) => e.preventDefault();
+    const handleDrop = (e: DragEvent) => {
+      e.preventDefault();
+      const file = e.dataTransfer?.files?.[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (reader.result) {
+            processSharedPayload({ type: 'image', data: reader.result as string });
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    window.addEventListener('dragover', handleDragOver);
+    window.addEventListener('drop', handleDrop);
+
     // Check if Android bridge passed an intent on cold start
     const pendingIntent = (window as any).__PENDING_SHARED_INTENT__;
     if (pendingIntent) {
@@ -1429,18 +1515,15 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       return false;
     }
 
-    if (subscriptionTier === 'trial' || !subscriptionTier) {
-      if (getRemainingDays() <= 0) return true;
-      if (!trialStartDate) return false;
-      const start = new Date(trialStartDate).getTime();
-      if (!isNaN(start)) {
-        const diffDays = (Date.now() - start) / (1000 * 60 * 60 * 24);
-        return diffDays >= 7;
-      }
-      return false;
+    // Any free/trial/other tier: strictly check trial duration
+    if (getRemainingDays() <= 0) return true;
+    if (!trialStartDate) return true;
+    const start = new Date(trialStartDate).getTime();
+    if (!isNaN(start)) {
+      const diffDays = (Date.now() - start) / (1000 * 60 * 60 * 24);
+      return diffDays >= 7;
     }
-
-    return false;
+    return true;
   };
 
   const isTrialExpired = () => isSubscriptionExpired();
@@ -1455,11 +1538,19 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     return false;
   };
 
-  // Automatic Subscription Pay Modal Popup on Expire (non-blocking notification)
+  const handleNavClick = (view: 'dashboard' | 'transactions' | 'budgets' | 'analytics' | 'more') => {
+    setActiveView(view);
+  };
+
+  // Automatic Subscription Pay Modal Popup on Expire (Shows once on startup, can be dismissed to view data in read-only mode)
   useEffect(() => {
     if (!isLocked && isSubscriptionExpired()) {
-      setIsSubBlocker(false);
-      setIsSubModalOpen(true);
+      const hasAutoShown = sessionStorage.getItem('zb_expired_auto_popup');
+      if (!hasAutoShown) {
+        sessionStorage.setItem('zb_expired_auto_popup', 'true');
+        setIsSubBlocker(false);
+        setIsSubModalOpen(true);
+      }
     }
   }, [isLocked, subscriptionTier, trialStartDate, premiumExpiresAt]);
 
@@ -1644,6 +1735,27 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       return () => clearTimeout(timer);
     }
   }, [isLocked, isAppLoading, showOnboarding, currentProfileId]);
+
+  // Monthly Salary / Budget Prompt Trigger (Runs once per new month)
+  useEffect(() => {
+    if (isLocked || isAppLoading || showOnboarding || showFinancialProfileModal) return;
+
+    const effectiveId = currentProfileId || localStorage.getItem('zb_profile_id') || 'local';
+    const existingSalary = localStorage.getItem(`zb_monthly_salary_${effectiveId}`);
+
+    // Prompt only if user already has an established salary setup
+    if (!existingSalary || parseFloat(existingSalary) <= 0) return;
+
+    const currentMonthKey = new Date().toISOString().slice(0, 7); // e.g. "2026-09"
+    const isAlreadyPromptedForMonth = localStorage.getItem(`zb_salary_prompt_dismissed_${effectiveId}_${currentMonthKey}`) === 'true';
+
+    if (!isAlreadyPromptedForMonth) {
+      const timer = setTimeout(() => {
+        setShowNewMonthBudgetPromptModal(true);
+      }, 1400);
+      return () => clearTimeout(timer);
+    }
+  }, [isLocked, isAppLoading, showOnboarding, currentProfileId, showFinancialProfileModal]);
 
   // Dynamic daily limit calculation effect
   useEffect(() => {
@@ -1868,7 +1980,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
   // Realtime Admin Panel Control & Profile Sync
   useEffect(() => {
-    if (!currentProfileId) return;
+    if (!currentProfileId || currentProfileId === 'local') return;
 
     const syncAdminProfile = async () => {
       try {
@@ -1878,9 +1990,12 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           .eq('id', currentProfileId)
           .maybeSingle();
 
-        if (!profData && !profErr && currentProfileId) {
-          await performCompleteLogoutAndDataWipe();
-          return;
+        if (!profData && !profErr && currentProfileId && currentProfileId !== 'local') {
+          const { data: authSession } = await supabase.auth.getSession();
+          if (authSession?.session) {
+            await performCompleteLogoutAndDataWipe();
+            return;
+          }
         }
 
         if (profData) {
@@ -2037,9 +2152,12 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         .eq('id', currentProfileId)
         .maybeSingle();
       
-      if (!profData && !profErr && currentProfileId) {
-        await performCompleteLogoutAndDataWipe();
-        return;
+      if (!profData && !profErr && currentProfileId && currentProfileId !== 'local') {
+        const { data: authSession } = await supabase.auth.getSession();
+        if (authSession?.session) {
+          await performCompleteLogoutAndDataWipe();
+          return;
+        }
       }
 
       if (profData) {
@@ -2094,6 +2212,17 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         }
         if (profData.dob && profData.monthly_salary && Number(profData.monthly_salary) > 0) {
           localStorage.setItem(`zb_financial_profile_completed_${currentProfileId}`, 'true');
+        }
+
+        if (profData.language) {
+          setI18nLanguage(profData.language as any);
+          setLanguage(profData.language);
+          localStorage.setItem(`zb_language_${currentProfileId}`, profData.language);
+          localStorage.setItem('zb_language', profData.language);
+        }
+        if (profData.currency) {
+          setCurrency(profData.currency);
+          localStorage.setItem(`zb_currency_${currentProfileId}`, profData.currency);
         }
 
         // 0b. Fetch active family members using TRUE group sync logic based on family_group_id
@@ -2177,17 +2306,33 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             localStorage.setItem(`zb_name_${currentProfileId}`, profData.name);
           }
         }
-        localStorage.setItem('zb_subscription_tier', profData.subscription_tier);
-        localStorage.setItem('zb_trial_start_date', profData.trial_start_date);
-        localStorage.setItem('zb_user_pin', profData.pin);
+        if (profData.subscription_tier) {
+          setSubscriptionTier(profData.subscription_tier);
+          localStorage.setItem('zb_subscription_tier', profData.subscription_tier);
+        }
+        if (profData.trial_start_date) {
+          setTrialStartDate(profData.trial_start_date);
+          localStorage.setItem('zb_trial_start_date', profData.trial_start_date);
+        }
+        if (profData.trial_expire_date) {
+          localStorage.setItem('zb_trial_expire_date', profData.trial_expire_date);
+        }
+        if (profData.pin) {
+          setUserPin(profData.pin);
+          localStorage.setItem('zb_user_pin', profData.pin);
+        }
         if (profData.has_scan_pay_access) {
+          setHasScanPayAccess(true);
           localStorage.setItem(`zb_scan_pay_access_${currentProfileId}`, 'true');
         } else {
+          setHasScanPayAccess(false);
           localStorage.removeItem(`zb_scan_pay_access_${currentProfileId}`);
         }
         if (profData.premium_expires_at) {
+          setPremiumExpiresAt(profData.premium_expires_at);
           localStorage.setItem('zb_premium_expires_at', profData.premium_expires_at);
         } else {
+          setPremiumExpiresAt(null);
           localStorage.removeItem('zb_premium_expires_at');
         }
         if (profData.referred_by) {
@@ -2586,7 +2731,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
     // Check trial duration
     if (isTrialExpired()) {
-      setIsSubBlocker(false);
+      setIsSubBlocker(true);
       setIsSubModalOpen(true);
       triggerToast('Your 7-day free trial has expired! Please upgrade.', 'warning');
       return false;
@@ -2609,7 +2754,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   // Handlers
   const doSaveTransaction = async (txData: Omit<Transaction, 'id'> & { id?: string }) => {
     if (isSubscriptionExpired()) {
-      setIsSubBlocker(false);
+      setIsSubBlocker(true);
       setIsSubModalOpen(true);
       triggerToast('Your 7-day free trial has expired! Please select a plan to continue.', 'warning');
       return;
@@ -2792,7 +2937,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
   const handleSaveTransaction = async (txData: Omit<Transaction, 'id'> & { id?: string }): Promise<boolean> => {
     if (isSubscriptionExpired()) {
-      setIsSubBlocker(false);
+      setIsSubBlocker(true);
       setIsSubModalOpen(true);
       triggerToast('Free trial expired! Upgrade to Premium to log transactions.', 'warning');
       return false;
@@ -3019,7 +3164,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
   const handleSaveBudget = async (category: CategoryType, limitInActiveCurrency: number) => {
     if (isSubscriptionExpired()) {
-      setIsSubBlocker(false);
+      setIsSubBlocker(true);
       setIsSubModalOpen(true);
       triggerToast('Free trial expired! Upgrade to Premium to adjust budget limits.', 'warning');
       return;
@@ -3119,7 +3264,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
   const handleAddNewGoal = (name: string, targetInActiveCurrency: number, color: string) => {
     if (isSubscriptionExpired()) {
-      setIsSubBlocker(false);
+      setIsSubBlocker(true);
       setIsSubModalOpen(true);
       triggerToast('Free trial expired! Upgrade to Premium to create new savings goals.', 'warning');
       return;
@@ -3140,7 +3285,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
   const handleEditGoal = (goalId: string, name: string, targetInActiveCurrency: number, color: string) => {
     if (isSubscriptionExpired()) {
-      setIsSubBlocker(false);
+      setIsSubBlocker(true);
       setIsSubModalOpen(true);
       triggerToast('Free trial expired! Upgrade to Premium to edit savings goals.', 'warning');
       return;
@@ -3406,6 +3551,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       const storedSalary = localStorage.getItem(`zb_monthly_salary_${effectiveProfileId}`);
 
       const updateData: any = { name: newName, pin: newPin };
+      if (newLanguage) updateData.language = newLanguage;
+      if (newCurrency) updateData.currency = newCurrency;
       if (newEmail) updateData.email = newEmail;
       if (userPhone) updateData.phone = userPhone;
       if (currentAvatar) updateData.avatar_url = currentAvatar;
@@ -3662,7 +3809,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     return (
       <div style={{ width: '100vw', minHeight: '100vh', display: 'flex', justifyContent: 'center', background: 'var(--bg-base)' }}>
         <div className="app-main-wrapper" style={{ margin: '0 auto', maxWidth: '520px', width: '100%', position: 'relative', minHeight: '100vh', background: 'var(--bg-base)', boxShadow: '0 0 20px rgba(0,0,0,0.4)' }}>
-          <LockScreen onBackToLanding={onBackToLanding} onUnlock={(profileId, name, tier, trialStart, pin, premiumExpires) => {
+          <LockScreen onBackToLanding={onBackToLanding} onUnlock={(profileId, name, tier, trialStart, pin, premiumExpires, trialExpire) => {
       const validProfileId = profileId || localStorage.getItem('zb_profile_id') || 'local';
       const validName = name || localStorage.getItem('zb_user_name') || 'User';
       const validTier = tier || localStorage.getItem('zb_subscription_tier') || 'trial';
@@ -3675,6 +3822,10 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       setTrialStartDate(validStart);
       setUserPin(validPin);
       setPremiumExpiresAt(premiumExpires || null);
+
+      if (trialExpire) {
+        localStorage.setItem('zb_trial_expire_date', trialExpire);
+      }
 
       const activeAvatar = localStorage.getItem('zb_user_avatar') || (validName ? `https://ui-avatars.com/api/?name=${encodeURIComponent(validName)}&background=22c55e&color=fff&rounded=true` : '');
       if (activeAvatar && (!activeAvatar.includes('name=User') || validName === 'User')) {
@@ -3825,8 +3976,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '15px' }}>⏳</span>
-            <span>Free Trial Expired • View-Only Mode</span>
+            <span style={{ fontSize: '15px' }}>🔒</span>
+            <span>Read-Only Mode: Trial Expired • View Active</span>
           </div>
           <span style={{ background: '#ef4444', color: '#ffffff', padding: '5px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 800 }}>
             UPGRADE ⚡
@@ -3885,6 +4036,31 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             <QrCode size={16} />
           </button>
 
+          {/* Screenshot / Netbanking Receipt Scanner Button */}
+          <button
+            onClick={() => {
+              if (checkExpiredGuard('scan receipt screenshot')) return;
+              (window as any).openReceiptPicker?.();
+            }}
+            title="Scan Screenshot from Gallery / Netbanking"
+            style={{
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.12) 100%)',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+              borderRadius: '12px',
+              width: '36px',
+              height: '36px',
+              color: '#10b981',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <ImageIcon size={16} />
+          </button>
+
           {/* Notifications Button */}
           <button 
             onClick={() => setIsNotificationsOpen(true)} 
@@ -3941,7 +4117,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           ) : (
             <button
               onClick={() => {
-                setIsSubBlocker(false);
+                setIsSubBlocker(isSubscriptionExpired());
                 setIsSubModalOpen(true);
               }}
               style={{
@@ -4127,7 +4303,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             onSaveBudget={handleSaveBudget}
             isPremiumUser={isPremiumUser}
             onOpenSubscriptionModal={() => {
-              setIsSubBlocker(false);
+              setIsSubBlocker(isSubscriptionExpired());
               setIsSubModalOpen(true);
             }}
           />
@@ -4182,36 +4358,54 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         {activeView === 'more' && (
           <MoreToolsView
             key={langKey}
-            onNavigateToImpulseBlocker={() => setActiveView('wishlist')}
+            onNavigateToImpulseBlocker={() => {
+              if (checkExpiredGuard('use Impulse Blocker')) return;
+              setActiveView('wishlist');
+            }}
             onNavigateToSimulator={() => {
+              if (checkExpiredGuard('use Wealth Simulator')) return;
               setSimulatorTab('compound');
               setActiveView('simulator');
             }}
             onNavigateToFDRD={() => {
+              if (checkExpiredGuard('use FD/RD Calculator')) return;
               setSimulatorTab('fdrd');
               setActiveView('simulator');
             }}
             onNavigateToTax={() => {
+              if (checkExpiredGuard('use Tax Estimator')) return;
               setSimulatorTab('tax');
               setActiveView('simulator');
             }}
-            onNavigateToSharedBudget={() => setActiveView('shared_budget')}
+            onNavigateToSharedBudget={() => {
+              if (checkExpiredGuard('use Couple Budget Sync')) return;
+              setActiveView('shared_budget');
+            }}
             onNavigateToReferral={() => setActiveView('referral')}
-            onNavigateToLoans={() => setActiveView('loans')}
-            onOpenBankSync={() => setActiveView('bank_sync')}
+            onNavigateToLoans={() => {
+              if (checkExpiredGuard('manage Loans & Khata')) return;
+              setActiveView('loans');
+            }}
+            onOpenBankSync={() => {
+              if (checkExpiredGuard('use Automatic Bank Sync')) return;
+              setActiveView('bank_sync');
+            }}
             onOpenWidgetModal={() => setIsWidgetModalOpen(true)}
             onOpenAskZen={() => {
               if (checkExpiredGuard('chat with ZenBot AI Coach')) return;
               setIsHelpOpen(true);
             }}
-            onNavigateToMoneyForest={() => setActiveView('forest')}
+            onNavigateToMoneyForest={() => {
+              if (checkExpiredGuard('enter Money Forest')) return;
+              setActiveView('forest');
+            }}
             onNavigateToSettings={() => setActiveView('profile')}
             onOpenHelp={() => {
               if (checkExpiredGuard('chat with ZenBot AI Coach')) return;
               setIsHelpOpen(true);
             }}
             onOpenSubscriptionModal={() => {
-              setIsSubBlocker(false);
+              setIsSubBlocker(isSubscriptionExpired());
               setIsSubModalOpen(true);
             }}
             onExportCSV={() => {
@@ -4225,7 +4419,11 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             referralCount={referralCount}
             onNavigateToFollowUs={() => setActiveView('follow_us')}
             isPremiumUser={isPremiumUser}
-            onNavigateToBankImporter={() => setActiveView('bank_importer')}
+            onNavigateToBankImporter={() => {
+              if (checkExpiredGuard('use AI Bank Assistant')) return;
+              setActiveView('bank_importer');
+            }}
+            currencySymbol={currencySymbol}
           />
         )}
         {activeView === 'shared_budget' && (
@@ -4290,6 +4488,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             onOpenSubscriptionModal={() => setIsSubModalOpen(true)}
             accounts={accounts}
             currencySymbol={currencySymbol}
+            userReferralCode={userReferralCode}
             onRefreshData={fetchDataFromSupabase}
             onSaveTransaction={handleSaveTransaction}
             onNavigateToLedger={() => setActiveView('transactions')}
@@ -4316,7 +4515,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         zIndex: 999
       }}>
         <button
-          onClick={() => setActiveView('dashboard')}
+          onClick={() => handleNavClick('dashboard')}
           style={{
             background: 'none',
             border: 'none',
@@ -4336,7 +4535,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         </button>
 
         <button
-          onClick={() => setActiveView('transactions')}
+          onClick={() => handleNavClick('transactions')}
           style={{
             background: 'none',
             border: 'none',
@@ -4356,7 +4555,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         </button>
 
         <button
-          onClick={() => setActiveView('budgets')}
+          onClick={() => handleNavClick('budgets')}
           style={{
             background: 'none',
             border: 'none',
@@ -4376,7 +4575,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         </button>
 
         <button
-          onClick={() => setActiveView('analytics')}
+          onClick={() => handleNavClick('analytics')}
           style={{
             background: 'none',
             border: 'none',
@@ -4396,7 +4595,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         </button>
 
         <button
-          onClick={() => setActiveView('more')}
+          onClick={() => handleNavClick('more')}
           style={{
             background: 'none',
             border: 'none',
@@ -4811,7 +5010,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             setIsSubModalOpen(false);
             setIsSubBlocker(false);
           }}
-          isBlocker={false}
+          isBlocker={isSubBlocker}
           currency={currency}
           rates={rates}
         />
@@ -4855,7 +5054,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           isPremiumUser={!isSubscriptionExpired()}
           onOpenSubscriptionModal={() => {
             setIsHelpOpen(false);
-            setIsSubBlocker(false);
+            setIsSubBlocker(isSubscriptionExpired());
             setIsSubModalOpen(true);
             triggerToast('Free trial expired! Upgrade to Premium to chat with ZenBot AI Coach.', 'warning');
           }}
@@ -4920,7 +5119,13 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           onSaveTransaction={async (txData) => {
             const ok = await handleSaveTransaction(txData);
             if (ok) {
-              triggerToast(`✨ Expense added: ${txData.title} (${currencySymbol}${txData.amount})!`, 'success');
+              triggerSparklesExplosion(0.5, 0.4);
+              triggerToast(
+                txData.type === 'income'
+                  ? `💰 Income credited: ${txData.title} (+${currencySymbol}${txData.amount})!`
+                  : `✨ Expense logged: ${txData.title} (${currencySymbol}${txData.amount})!`,
+                'success'
+              );
               fetchDataFromSupabase();
             }
             return ok;
@@ -4975,6 +5180,30 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             setShowFinancialProfileModal(false);
             triggerToast('✨ Profile settings saved permanently!', 'success');
             fetchDataFromSupabase();
+          }}
+        />
+      )}
+
+      {/* New Month Salary / Budget Check Prompt Modal */}
+      {showNewMonthBudgetPromptModal && (
+        <NewMonthBudgetPromptModal
+          isOpen={showNewMonthBudgetPromptModal}
+          currentSalary={Number(localStorage.getItem(`zb_monthly_salary_${currentProfileId || 'local'}`)) || undefined}
+          currencySymbol={currencySymbol}
+          userName={userName || 'Friend'}
+          onUpdateSalary={() => {
+            const effectiveId = currentProfileId || localStorage.getItem('zb_profile_id') || 'local';
+            const currentMonthKey = new Date().toISOString().slice(0, 7);
+            localStorage.setItem(`zb_salary_prompt_dismissed_${effectiveId}_${currentMonthKey}`, 'true');
+            setShowNewMonthBudgetPromptModal(false);
+            setShowFinancialProfileModal(true);
+          }}
+          onKeepSame={() => {
+            const effectiveId = currentProfileId || localStorage.getItem('zb_profile_id') || 'local';
+            const currentMonthKey = new Date().toISOString().slice(0, 7);
+            localStorage.setItem(`zb_salary_prompt_dismissed_${effectiveId}_${currentMonthKey}`, 'true');
+            setShowNewMonthBudgetPromptModal(false);
+            triggerToast('Monthly budget kept same for this month! 👍', 'info');
           }}
         />
       )}

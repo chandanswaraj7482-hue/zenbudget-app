@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security & Encryption Architecture — ZenBudget AI</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="description" content="ZenBudget Security Standards - 256-bit AES Vault Encryption, Hardware Biometric Lock, PCI-DSS Level 1 payments, and zero UPI PIN storage.">
+  <style>
+    :root {
+      --bg: #090e0b;
+      --card-bg: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #f8fafc;
+      --text-sub: #94a3b8;
+      --primary: #10b981;
+      --primary-light: #34d399;
+      --accent: #84cc16;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f8fafc;
+        --card-bg: #ffffff;
+        --border: rgba(0, 0, 0, 0.08);
+        --text: #0f172a;
+        --text-sub: #64748b;
+        --primary: #059669;
+        --primary-light: #10b981;
+        --accent: #65a30d;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 24px 16px 60px;
+    }
+    .wrapper { max-width: 880px; margin: 0 auto; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0 32px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .brand img { width: 40px; height: 40px; border-radius: 12px; }
+    .brand-title { font-size: 20px; font-weight: 900; letter-spacing: -0.02em; }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 100px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+    .back-btn:hover {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--primary-light);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 4px 14px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+      line-height: 1.15;
+    }
+    .subtitle { font-size: 15px; color: var(--text-sub); margin-bottom: 36px; }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+    h2 {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--primary-light);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    p { color: var(--text-sub); font-size: 14.5px; margin-bottom: 14px; }
+    p:last-child { margin-bottom: 0; }
+    ul { margin-left: 20px; margin-bottom: 14px; color: var(--text-sub); font-size: 14.5px; }
+    li { margin-bottom: 8px; }
+    strong { color: var(--text); font-weight: 700; }
+    .security-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .security-box {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 18px;
+      padding: 18px;
+    }
+    .security-box h3 {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--primary-light);
+      margin-bottom: 6px;
+    }
+    .security-box p {
+      font-size: 13px;
+      margin-bottom: 0;
+    }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 13.5px;
+      color: var(--text-sub);
+    }
+    .footer-links a {
+      color: var(--text-sub);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--primary-light); }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <header>
+      <a href="/" class="brand">
+        <img src="/favicon.png" alt="ZenBudget Logo">
+        <span class="brand-title">ZenBudget</span>
+      </a>
+      <a href="/" class="back-btn">← Back to App</a>
+    </header>
+
+    <main>
+      <div class="hero-badge">Bank-Grade Defense Standards</div>
+      <h1>Security & Encryption</h1>
+      <p class="subtitle">How ZenBudget isolates and protects your financial assets and sensitive personal records.</p>
+
+      <div class="security-grid">
+        <div class="security-box">
+          <h3>🔐 256-bit AES Vault</h3>
+          <p>Military-grade encryption for local ledger records and envelope data.</p>
+        </div>
+        <div class="security-box">
+          <h3>👆 Hardware Biometrics</h3>
+          <p>Native FaceID & Fingerprint authentication via Secure Enclave.</p>
+        </div>
+        <div class="security-box">
+          <h3>🛡️ Zero UPI PIN Access</h3>
+          <p>Direct deep linking ensures PINs never pass through our servers.</p>
+        </div>
+        <div class="security-box">
+          <h3>💳 PCI-DSS Level 1</h3>
+          <p>Payment processing compliant with highest global payment standards.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>1. Local-First Device Encryption Architecture</h2>
+        <p>ZenBudget was engineered from day one on a <strong>local-first data paradigm</strong>. Your daily transactions, debt payoff plans, and custom categories reside inside your device's protected sandboxed storage, encrypted with unique hardware-derived keys.</p>
+      </div>
+
+      <div class="card">
+        <h2>2. End-to-End Transport Layer Security (TLS 1.3)</h2>
+        <p>When syncing shared couple envelopes or backing up your vault, all traffic is routed through encrypted <strong>TLS 1.3 channels with Perfect Forward Secrecy</strong>, preventing eavesdropping and man-in-the-middle attacks.</p>
+      </div>
+
+      <div class="card">
+        <h2>3. Biometric App Lock & Inactivity Guard</h2>
+        <p>Enable Biometric Lock to safeguard your app whenever you switch apps or lock your phone. ZenBudget utilizes native OS authentication (Apple TouchID/FaceID and Android BiometricPrompt) with hardware security key binding.</p>
+      </div>
+
+      <div class="card">
+        <h2>4. Zero Third-Party Tracker SDKs</h2>
+        <p>We do not embed third-party advertising SDKs, behavioral pixel trackers, or data broker beacons. Your spending behavior belongs solely to you.</p>
+      </div>
+
+      <div class="card">
+        <h2>5. Vulnerability Disclosure & Bug Bounty</h2>
+        <p>If you believe you have discovered a security vulnerability in ZenBudget, please notify our security response team immediately at <a href="mailto:hello.zenbudget@zohomail.in" style="color: var(--primary-light); font-weight: 700;">hello.zenbudget@zohomail.in</a>. We prioritize and review all reports within 24 hours.</p>
+      </div>
+    </main>
+
+    <div class="footer-links">
+      <a href="/privacy.html">Privacy Policy</a>
+      <span>•</span>
+      <a href="/terms.html">Terms of Service</a>
+      <span>•</span>
+      <a href="/security.html">Security</a>
+      <span>•</span>
+      <a href="/contact.html">Contact Support</a>
+    </div>
+  </div>
+</body>
+</html>

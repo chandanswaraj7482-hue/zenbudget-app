@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { CoinCatcherGame } from './CoinCatcherGame';
 import { 
   ChevronLeft, UploadCloud, FileText, CheckCircle2, AlertCircle, 
   Sparkles, ShieldCheck, ArrowRight, Landmark, Lock, 
@@ -24,6 +25,7 @@ interface BankStatementImporterProps {
   onSaveTransaction?: (tx: any) => Promise<boolean>;
   onNavigateToLedger?: () => void;
   triggerToast?: (msg: string, type?: 'info' | 'success' | 'warning' | 'danger') => void;
+  userReferralCode?: string;
 }
 
 export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
@@ -35,7 +37,8 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
   onRefreshData,
   onSaveTransaction,
   onNavigateToLedger,
-  triggerToast
+  triggerToast,
+  userReferralCode = ''
 }) => {
   const [localToast, setLocalToast] = useState<{ msg: string; type: 'info' | 'success' | 'warning' | 'danger' } | null>(null);
 
@@ -113,6 +116,9 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
         const res = parseCSVStatement(text);
         setProgressPercent(100);
         setStatusMessage('Verified successfully!');
+        if (res.transactions.length === 0) {
+          notify('No transactions found in this CSV. Please check the file formatting.', 'warning');
+        }
         setAnalysisResult(res);
         setIsProcessing(false);
       } else {
@@ -126,6 +132,9 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
               setStatusMessage(msg);
               setProgressPercent(pct);
             });
+            if (res.transactions.length === 0) {
+              notify('No visible transactions could be extracted. Please upload a clearer photo of your passbook or statement.', 'warning');
+            }
             setAnalysisResult(res);
           } catch (err) {
             console.error('AI parse error:', err);
@@ -387,6 +396,53 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
             </div>
           </div>
         )}
+
+        {/* Android APK 1-Tap Netbanking Share Guide */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%)',
+          border: '1px solid rgba(16, 185, 129, 0.25)',
+          borderRadius: '20px',
+          padding: '16px',
+          marginBottom: '16px',
+          display: 'flex',
+          gap: '12px',
+          alignItems: 'flex-start'
+        }}>
+          <div style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '12px',
+            background: 'linear-gradient(135deg, #10b981, #059669)',
+            color: '#fff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            marginTop: '2px'
+          }}>
+            <Landmark size={18} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--text-primary)' }}>
+                📲 1-Tap Direct Share from Netbanking APK
+              </span>
+              <span style={{ fontSize: '10px', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', padding: '2px 8px', borderRadius: '100px', fontWeight: 800 }}>
+                ANDROID APK
+              </span>
+            </div>
+            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '4px 0 8px', lineHeight: 1.5 }}>
+              Open your <strong>HDFC, SBI, ICICI, Axis, Kotak</strong> netbanking app or <strong>GPay</strong> ➔ Download/View Statement PDF ➔ Tap <strong>"Share"</strong> ➔ Select <strong>ZenBudget</strong> to auto-import instantly with zero manual file search!
+            </p>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {['HDFC Bank', 'SBI e-Pay', 'ICICI iMobile', 'Axis Mobile', 'Kotak 811', 'GPay UPI'].map((b, i) => (
+                <span key={i} style={{ fontSize: '10.5px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: 'var(--bg-input, rgba(255,255,255,0.05))', color: 'var(--text-secondary)', border: '1px solid var(--border-input, rgba(255,255,255,0.1))' }}>
+                  {b}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
 
         {/* =================================================================== */}
         {/* FILE UPLOAD CARD (WHEN NO RESULT YET)                                */}
@@ -709,6 +765,36 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
                 <CheckCircle2 size={14} />
                 <span>4. Cash Flow Audit</span>
               </div>
+            </div>
+
+            {/* Chrome Dino-style Financial Mini Game while statement is processing */}
+            <div style={{ marginTop: '22px', textAlign: 'left' }}>
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%)',
+                borderRadius: '16px',
+                padding: '12px 16px',
+                border: '1px solid rgba(16, 185, 129, 0.35)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '10px'
+              }}>
+                <span style={{ fontSize: '26px' }}>🎮</span>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: '13px', fontWeight: 800, color: '#34d399' }}>
+                    Play Zen Coin Catcher while your statement parses!
+                  </h4>
+                  <p style={{ margin: '2px 0 0 0', fontSize: '11px', color: '#94a3b8' }}>
+                    Chrome Dino style! Catch SIP coins, dodge credit card traps & share your score with friends.
+                  </p>
+                </div>
+              </div>
+              <CoinCatcherGame
+                currencySymbol={currencySymbol}
+                userReferralCode={userReferralCode}
+                defaultExpanded={true}
+                title="🎮 Dino Mode: Play While Parsing"
+              />
             </div>
           </div>
         )}
@@ -1127,6 +1213,9 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
             </div>
           </div>
         )}
+
+        {/* Financial Mini Game - Chrome Dino Style */}
+        <CoinCatcherGame currencySymbol={currencySymbol} userReferralCode={userReferralCode} />
 
       </div>
     </div>

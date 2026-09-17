@@ -7,6 +7,7 @@ import {
 import { GooglePayLogo, PhonePeLogo, PaytmLogo } from './UPIIcons';
 import { parsePaymentScreenshot, parseSharedPaymentText } from '../utils/paymentScreenshotParser';
 import type { ParsedPaymentResult } from '../utils/paymentScreenshotParser';
+import { triggerSparklesExplosion, playAddTransactionSound } from '../utils/audio';
 
 interface SharedPaymentProcessingModalProps {
   isOpen: boolean;
@@ -18,9 +19,13 @@ interface SharedPaymentProcessingModalProps {
   onOpenFullEditor: (tx: any) => void;
 }
 
-const CATEGORIES = [
+const EXPENSE_CATEGORIES = [
   'Food', 'Groceries', 'Transport', 'Shopping', 'Bills', 
   'Entertainment', 'Health', 'Education', 'Travel', 'General'
+];
+
+const INCOME_CATEGORIES = [
+  'Salary', 'Cashback', 'Refund', 'Freelance', 'Investment', 'Business', 'Bonus', 'Gift', 'Income', 'Other'
 ];
 
 export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModalProps> = ({
@@ -40,6 +45,7 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
   const [parsedData, setParsedData] = useState<ParsedPaymentResult | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [copiedUtr, setCopiedUtr] = useState(false);
+  const [transactionType, setTransactionType] = useState<'expense' | 'income'>('expense');
 
   // Editable fields in ready state
   const [amount, setAmount] = useState<string>('');
@@ -133,8 +139,10 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
   const populateFields = (result: ParsedPaymentResult, fallbackAccountId: string) => {
     setParsedData(result);
     setAmount(result.amount ? String(Math.round(parseFloat(result.amount))) : '');
-    setMerchantName(result.merchantName || 'UPI Merchant');
-    setCategory(result.category || 'General');
+    const isInc = result.type === 'income';
+    setTransactionType(isInc ? 'income' : 'expense');
+    setMerchantName(result.merchantName || (isInc ? 'Payment Sender' : 'UPI Merchant'));
+    setCategory(result.category || (isInc ? 'Income' : 'General'));
     setDate(result.date || new Date().toISOString().split('T')[0]);
     setNotes(`${result.note || ''}${result.upiRef ? ` | Ref: ${result.upiRef}` : ''}`);
     if (!selectedAccountId) {
@@ -153,17 +161,18 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
     setIsSaving(true);
     try {
       const txData = {
-        title: merchantName.trim() || 'Payment Recipient',
+        title: merchantName.trim() || (transactionType === 'income' ? 'Received Payment' : 'Payment Recipient'),
         amount: Math.round(numAmount),
         category: category.toLowerCase(),
         date: date || new Date().toISOString().split('T')[0],
         notes: notes.trim(),
-        type: 'expense' as const,
+        type: transactionType,
         accountId: selectedAccountId || (accounts[0]?.id || '')
       };
 
       const ok = await onSaveTransaction(txData);
       if (ok) {
+        triggerSparklesExplosion(0.5, 0.4);
         onClose();
       }
     } catch (err) {
@@ -176,12 +185,12 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
   const handleEditMore = () => {
     const numAmount = parseFloat(amount) || 0;
     const txData = {
-      title: merchantName.trim() || 'Payment Recipient',
+      title: merchantName.trim() || (transactionType === 'income' ? 'Received Payment' : 'Payment Recipient'),
       amount: Math.round(numAmount),
       category: category.toLowerCase(),
       date: date || new Date().toISOString().split('T')[0],
       notes: notes.trim(),
-      type: 'expense' as const,
+      type: transactionType,
       accountId: selectedAccountId || (accounts[0]?.id || '')
     };
     onOpenFullEditor(txData);
@@ -535,14 +544,79 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
                 gap: '5px',
                 padding: '4px 10px',
                 borderRadius: '999px',
-                backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                color: '#34d399',
+                backgroundColor: transactionType === 'income' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(244, 63, 94, 0.2)',
+                color: transactionType === 'income' ? '#34d399' : '#fb7185',
                 fontSize: '11px',
-                fontWeight: 600
+                fontWeight: 700
               }}>
                 <ShieldCheck size={13} />
-                <span>AI Verified</span>
+                <span>{transactionType === 'income' ? '💰 Income Detected' : '💸 Expense Detected'}</span>
               </div>
+            </div>
+
+            {/* Income vs Expense Quick Toggle */}
+            <div style={{
+              display: 'flex',
+              padding: '4px',
+              borderRadius: '16px',
+              background: 'rgba(0, 0, 0, 0.35)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              marginBottom: '16px',
+              gap: '6px'
+            }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setTransactionType('expense');
+                  if (INCOME_CATEGORIES.includes(category)) setCategory('General');
+                }}
+                style={{
+                  flex: 1,
+                  padding: '10px 12px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: transactionType === 'expense' ? 'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)' : 'transparent',
+                  color: transactionType === 'expense' ? '#ffffff' : '#94a3b8',
+                  fontSize: '13px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  boxShadow: transactionType === 'expense' ? '0 4px 14px rgba(244, 63, 94, 0.4)' : 'none',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <span>💸 Expense (Spent)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setTransactionType('income');
+                  if (EXPENSE_CATEGORIES.includes(category)) setCategory('Income');
+                }}
+                style={{
+                  flex: 1,
+                  padding: '10px 12px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: transactionType === 'income' ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'transparent',
+                  color: transactionType === 'income' ? '#ffffff' : '#94a3b8',
+                  fontSize: '13px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  boxShadow: transactionType === 'income' ? '0 4px 14px rgba(16, 185, 129, 0.4)' : 'none',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <span>💰 Income (Received)</span>
+              </button>
             </div>
 
             {/* Big Amount Card */}
@@ -550,12 +624,12 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
               padding: '18px',
               borderRadius: '20px',
               background: 'rgba(15, 23, 42, 0.8)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              border: `1px solid ${transactionType === 'income' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(244, 63, 94, 0.25)'}`,
               textAlign: 'center',
               marginBottom: '16px'
             }}>
               <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: 600 }}>
-                Total Paid Amount
+                {transactionType === 'income' ? 'Total Received / Credited' : 'Total Paid / Debited'}
               </span>
               <div style={{
                 display: 'flex',
@@ -564,8 +638,8 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
                 gap: '6px',
                 marginTop: '4px'
               }}>
-                <span style={{ fontSize: '32px', fontWeight: 800, color: '#34d399' }}>
-                  {currencySymbol}
+                <span style={{ fontSize: '32px', fontWeight: 800, color: transactionType === 'income' ? '#34d399' : '#f43f5e' }}>
+                  {transactionType === 'income' ? '+' : '-'}{currencySymbol}
                 </span>
                 <input
                   type="number"
@@ -610,7 +684,7 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
               {/* Merchant / Payee */}
               <div>
                 <label style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
-                  Merchant / Paid To
+                  {transactionType === 'income' ? 'Sender / Received From' : 'Merchant / Paid To'}
                 </label>
                 <div style={{
                   display: 'flex',
@@ -673,7 +747,7 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
                         cursor: 'pointer'
                       }}
                     >
-                      {CATEGORIES.map(c => (
+                      {(transactionType === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map(c => (
                         <option key={c} value={c} style={{ background: '#0f172a', color: '#fff' }}>
                           {c}
                         </option>
@@ -685,7 +759,7 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
                 {/* Account / Wallet */}
                 <div>
                   <label style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
-                    Debited Account
+                    {transactionType === 'income' ? 'Credited Account' : 'Debited Account'}
                   </label>
                   <div style={{
                     display: 'flex',

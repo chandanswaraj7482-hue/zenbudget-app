@@ -3,52 +3,234 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Privacy Policy - ZenBudget</title>
+  <title>Privacy Policy — ZenBudget AI</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="description" content="ZenBudget Privacy Policy - Learn how we protect your financial data with device-encrypted local storage and zero third-party data tracking.">
   <style>
+    :root {
+      --bg: #090e0b;
+      --card-bg: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #f8fafc;
+      --text-sub: #94a3b8;
+      --primary: #10b981;
+      --primary-light: #34d399;
+      --accent: #84cc16;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f8fafc;
+        --card-bg: #ffffff;
+        --border: rgba(0, 0, 0, 0.08);
+        --text: #0f172a;
+        --text-sub: #64748b;
+        --primary: #059669;
+        --primary-light: #10b981;
+        --accent: #65a30d;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      line-height: 1.6;
-      color: #0f172a;
-      background-color: #f8fafc;
-      margin: 0;
-      padding: 0;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 24px 16px 60px;
     }
-    .container {
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 32px;
-      background: #ffffff;
-      border-radius: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-      border: 1px solid rgba(0,0,0,0.08);
+    .wrapper {
+      max-width: 880px;
+      margin: 0 auto;
     }
-    h1 { color: #16a34a; font-size: 28px; margin-bottom: 8px; }
-    h2 { font-size: 18px; margin-top: 24px; color: #1e293b; }
-    p, li { color: #475569; font-size: 14px; }
-    .footer { margin-top: 32px; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 16px; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0 32px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .brand img {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+    }
+    .brand-title {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 100px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+    .back-btn:hover {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--primary-light);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 4px 14px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+      line-height: 1.15;
+    }
+    .subtitle {
+      font-size: 15px;
+      color: var(--text-sub);
+      margin-bottom: 36px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+    h2 {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--primary-light);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    p {
+      color: var(--text-sub);
+      font-size: 14.5px;
+      margin-bottom: 14px;
+    }
+    p:last-child { margin-bottom: 0; }
+    ul {
+      margin-left: 20px;
+      margin-bottom: 14px;
+      color: var(--text-sub);
+      font-size: 14.5px;
+    }
+    li { margin-bottom: 8px; }
+    strong { color: var(--text); font-weight: 700; }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 13.5px;
+      color: var(--text-sub);
+    }
+    .footer-links a {
+      color: var(--text-sub);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--primary-light); }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Privacy Policy 🌿</h1>
-    <p>Last updated: August 2026</p>
+  <div class="wrapper">
+    <header>
+      <a href="/" class="brand">
+        <img src="/favicon.png" alt="ZenBudget Logo">
+        <span class="brand-title">ZenBudget</span>
+      </a>
+      <a href="/" class="back-btn">← Back to App</a>
+    </header>
 
-    <p>Welcome to <strong>ZenBudget</strong>. Your privacy and financial security are our highest priorities. This Privacy Policy explains how we collect, use, and protect your information when you use our web application, PWA, or mobile APK.</p>
+    <main>
+      <div class="hero-badge">100% Zero-Data-Selling Pledge</div>
+      <h1>Privacy Policy</h1>
+      <p class="subtitle">Effective Date: August 2026 • Version 2.4 (Strict Financial Privacy Standard)</p>
 
-    <h2>1. Data Collection & Privacy First</h2>
-    <p>ZenBudget operates on a strict privacy-first architecture. All your daily financial entries, budgets, transactions, and custom categories are stored securely within your device's native local storage and encrypted cloud database.</p>
+      <div class="card">
+        <h2>🛡️ 1. Our Fundamental Privacy Promise</h2>
+        <p>At <strong>ZenBudget</strong>, we believe that your personal finances are strictly your business. We <strong>never sell, rent, monetize, or broker your personal financial records</strong> to advertisers, insurance agencies, credit bureaus, or third parties under any circumstance.</p>
+        <p>ZenBudget operates on local-first device encryption paired with private encrypted cloud vaults for multi-device sync.</p>
+      </div>
 
-    <h2>2. Payment & Scan & Pay Information</h2>
-    <p>ZenBudget uses Direct Deep Linking (Intent Redirection) for peer-to-peer payments. We do not store your UPI PINs, bank account passwords, or debit/credit card details on our servers. Subscription and unlock payments are handled via Cashfree's PCI-DSS compliant payment gateway.</p>
+      <div class="card">
+        <h2>📂 2. What Data We Collect & Why</h2>
+        <ul>
+          <li><strong>Account Identification:</strong> Email address and authentication tokens via Supabase Auth to enable multi-device sync and subscription status restoration.</li>
+          <li><strong>Financial Logs (Self-Reported):</strong> Expense categories, budgets, income logs, and envelope allocations inputted manually or via OCR scans.</li>
+          <li><strong>AI Camera & Receipt OCR Scans:</strong> Images captured through the AI Smart Scanner are processed transiently in memory to extract vendor names and amounts, then stored locally on your device vault.</li>
+          <li><strong>Device & Analytics Telemetry:</strong> Anonymized crash logs and app performance telemetry to improve stability and uptime.</li>
+        </ul>
+      </div>
 
-    <h2>3. Security</h2>
-    <p>We implement 256-bit encryption standards, biometric locks (Fingerprint/Face ID), and secure local sandboxing to ensure your financial records remain completely private and inaccessible to third parties.</p>
+      <div class="card">
+        <h2>🔒 3. Data Storage & Military-Grade Encryption</h2>
+        <p>All sensitive financial data is protected using <strong>AES-256 bit device-level encryption</strong> and TLS 1.3 in-transit encryption. When enabling Biometric App Lock (Fingerprint / Face ID), authentication is handled via native hardware keystores on iOS and Android with zero key exposure.</p>
+      </div>
 
-    <h2>4. Contact Us</h2>
-    <p>If you have any questions about this Privacy Policy, please email our team at <a href="mailto:hello.zenbudget@zohomail.in">hello.zenbudget@zohomail.in</a>.</p>
+      <div class="card">
+        <h2>💳 4. Banking & UPI Payment Security</h2>
+        <p>ZenBudget utilizes <strong>Direct UPI Intent Deep Linking</strong> for scan-and-pay transactions. <strong>ZenBudget never asks for, views, or stores your UPI PINs, NetBanking passwords, or CVVs.</strong> Subscription billing is processed via Cashfree Payments (PCI-DSS Level 1 certified gateway).</p>
+      </div>
 
-    <div class="footer">
-      &copy; 2026 ZenBudget Inc. All rights reserved.
+      <div class="card">
+        <h2>🗑️ 5. Data Deletion & Export Rights</h2>
+        <p>You have full ownership of your data. You can:</p>
+        <ul>
+          <li><strong>Export:</strong> Download your entire transaction ledger as CSV or JSON anytime from Settings.</li>
+          <li><strong>One-Click Permanent Deletion:</strong> Instantly wipe all local data and cloud database records with zero lingering backups via the Reset & Delete Account tool.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>📬 6. Privacy Inquiries & Support</h2>
+        <p>If you have any questions regarding your data privacy or rights under digital data protection guidelines, contact our privacy compliance officer directly at <a href="mailto:hello.zenbudget@zohomail.in" style="color: var(--primary-light); font-weight: 700;">hello.zenbudget@zohomail.in</a>.</p>
+      </div>
+    </main>
+
+    <div class="footer-links">
+      <a href="/privacy.html">Privacy Policy</a>
+      <span>•</span>
+      <a href="/terms.html">Terms of Service</a>
+      <span>•</span>
+      <a href="/security.html">Security</a>
+      <span>•</span>
+      <a href="/contact.html">Contact Support</a>
     </div>
   </div>
 </body>

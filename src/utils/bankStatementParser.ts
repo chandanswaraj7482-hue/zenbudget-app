@@ -135,9 +135,15 @@ export const parseCSVStatement = (csvText: string): BankStatementAnalysisResult 
     });
   }
 
-  // Fallback demo items if file was too short or non-standard
+  // Strict genuine data validation: NEVER inject fake demo transactions
   if (transactions.length === 0) {
-    return generateDemoBankStatement(bankName);
+    return {
+      bankName,
+      totalIncome: 0,
+      totalExpenses: 0,
+      statementPeriod: 'No transactions found',
+      transactions: []
+    };
   }
 
   return {
@@ -150,7 +156,7 @@ export const parseCSVStatement = (csvText: string): BankStatementAnalysisResult 
 };
 
 /**
- * AI Multimodal Vision Analysis for PDF/Image Bank Statements
+ * AI Multimodal Vision Analysis for PDF/Image Bank Statements (Strict Genuine Data Extraction)
  */
 export const parseAIBankStatement = async (
   base64Data: string,
@@ -167,24 +173,27 @@ export const parseAIBankStatement = async (
       const ai = new GoogleGenAI({ apiKey });
       const cleanBase64 = base64Data.split(',')[1] || base64Data;
 
-      const prompt = `Analyze this bank account statement or passbook page.
+      const prompt = `You are a bank passbook and account statement OCR extraction engine.
+Analyze this bank account statement or passbook page.
+CRITICAL RULE: Extract ONLY REAL, VISIBLE transactions from this exact image. DO NOT invent, hallucinate, or generate sample transactions. If a line is illegible or not a transaction, omit it.
+
 Extract transactions in strict JSON format:
 {
-  "bankName": string (e.g. "HDFC Bank", "SBI", "ICICI Bank"),
-  "accountNumber": string (last 4 digits like "XX4892", or empty),
-  "statementPeriod": string (e.g. "Aug 2026"),
+  "bankName": string (detected bank name, e.g. "HDFC Bank", "SBI", "ICICI Bank", "Axis Bank", "Bank Statement"),
+  "accountNumber": string (last 4 digits like "XX4892", or empty string),
+  "statementPeriod": string (e.g. "Aug 2026", or empty string),
   "transactions": [
     {
       "date": "YYYY-MM-DD",
-      "title": string (clean merchant/payee name, e.g. "Swiggy", "Amazon", "Salary - Infosys", "House Rent"),
-      "amount": number (whole number amount),
+      "title": string (clean merchant or recipient/sender name, e.g. "Swiggy", "Amazon", "Salary - Infosys", "House Rent"),
+      "amount": number (positive whole number amount),
       "type": "expense" | "income",
       "category": string ("Food", "Groceries", "Transport", "Shopping", "Bills", "Entertainment", "Health", "Income", "General"),
-      "rawNarration": string (exact line from statement)
+      "rawNarration": string (exact visible narration line from statement)
     }
   ]
 }
-Return ONLY pure JSON without markdown. Extract up to 25 clearest transactions.`;
+Return ONLY pure JSON without markdown. Extract up to 40 clearest visible transactions.`;
 
       const response = await ai.models.generateContent({
         model: 'gemini-1.5-flash',
@@ -212,43 +221,52 @@ Return ONLY pure JSON without markdown. Extract up to 25 clearest transactions.`
         let totalIncome = 0;
         let totalExpenses = 0;
 
-        const txs: ParsedBankTransaction[] = (parsed.transactions || []).map((t: any, idx: number) => {
-          const amt = Math.round(Math.abs(parseFloat(t.amount) || 0));
-          const isIncome = t.type === 'income';
-          if (isIncome) totalIncome += amt;
-          else totalExpenses += amt;
+        const txs: ParsedBankTransaction[] = (parsed.transactions || [])
+          .filter((t: any) => t && (Number(t.amount) > 0 || parseFloat(t.amount) > 0))
+          .map((t: any, idx: number) => {
+            const amt = Math.round(Math.abs(parseFloat(t.amount) || 0));
+            const isIncome = t.type === 'income';
+            if (isIncome) totalIncome += amt;
+            else totalExpenses += amt;
 
-          return {
-            id: `ai-stmt-${Date.now()}-${idx}`,
-            date: t.date || new Date().toISOString().split('T')[0],
-            title: t.title || 'Bank Transaction',
-            amount: amt,
-            type: isIncome ? 'income' : 'expense',
-            category: isIncome ? 'income' : (t.category || 'General'),
-            rawNarration: t.rawNarration || t.title || '',
-            selected: true
-          };
-        });
+            return {
+              id: `ai-stmt-${Date.now()}-${idx}`,
+              date: t.date || new Date().toISOString().split('T')[0],
+              title: t.title || 'Bank Transaction',
+              amount: amt,
+              type: isIncome ? 'income' : 'expense',
+              category: isIncome ? 'income' : (t.category || 'General'),
+              rawNarration: t.rawNarration || t.title || '',
+              selected: true
+            };
+          });
 
         onProgress?.('Analysis verified!', 100);
 
         return {
-          bankName: parsed.bankName || 'HDFC Bank',
-          accountNumber: parsed.accountNumber,
-          statementPeriod: parsed.statementPeriod || 'Recent Period',
+          bankName: parsed.bankName || 'Bank Statement',
+          accountNumber: parsed.accountNumber || '',
+          statementPeriod: parsed.statementPeriod || 'Statement Period',
           totalIncome,
           totalExpenses,
           transactions: txs
         };
       }
     } catch (err) {
-      console.warn('AI Bank statement parsing fallback:', err);
+      console.warn('AI Bank statement parsing error:', err);
     }
   }
 
-  // Fallback demo statement
-  onProgress?.('Audit verified!', 100);
-  return generateDemoBankStatement('HDFC Bank');
+  // If no transactions could be extracted, return empty real structure (NO fake demo data)
+  onProgress?.('Document scanned.', 100);
+  return {
+    bankName: 'Bank Statement',
+    accountNumber: '',
+    statementPeriod: 'Scanned Document',
+    totalIncome: 0,
+    totalExpenses: 0,
+    transactions: []
+  };
 };
 
 const normalizeDate = (raw: string): string => {

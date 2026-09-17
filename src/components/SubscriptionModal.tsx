@@ -349,7 +349,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   const remainingDays = getRemainingTrialDays();
   const isPremium = subscriptionTier === 'premium_monthly' || subscriptionTier === 'premium_yearly' || subscriptionTier === 'premium_lifetime' || subscriptionTier === 'premium';
   const isExpired = remainingDays <= 0 && !isPremium;
-  const effectiveIsBlocker = isBlocker || isExpired;
+  const effectiveIsBlocker = isBlocker;
 
   // Get active pricing info
   const getPriceInfo = () => {
@@ -659,19 +659,59 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
             </div>
 
-            {/* Premium Perks list */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '6px 0' }}>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '12px' }}>
-                <Check size={14} color="var(--success)" />
-                <span style={{ color: 'var(--text-primary)' }}>Unlimited category budgets & custom limits</span>
+            {/* Premium Perks & Trial Comparison list */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '7px',
+              padding: '10px 12px',
+              borderRadius: '12px',
+              background: 'rgba(16, 185, 129, 0.05)',
+              border: '1px solid rgba(16, 185, 129, 0.15)'
+            }}>
+              <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--brand-primary)' }}>✨ What unlocks in Pro:</span>
+                <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>Trial vs Pro</span>
               </div>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '12px' }}>
-                <Check size={14} color="var(--success)" />
-                <span style={{ color: 'var(--text-primary)' }}>🌿 Zen — AI Money Coach unlimited guidance</span>
+              
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'space-between', fontSize: '11.5px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Check size={13} color="var(--success)" />
+                  <span style={{ color: 'var(--text-primary)' }}>Unlimited Budget Envelopes</span>
+                </div>
+                <span style={{ fontSize: '10px', color: 'var(--brand-primary)', fontWeight: 700 }}>5 in Trial ➔ Unlimited</span>
               </div>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '12px' }}>
-                <Check size={14} color="var(--success)" />
-                <span style={{ color: 'var(--text-primary)' }}>Shared Budget partner & family synchronization</span>
+
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'space-between', fontSize: '11.5px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Check size={13} color="var(--success)" />
+                  <span style={{ color: 'var(--text-primary)' }}>AI Invoice & Receipt OCR Scanner</span>
+                </div>
+                <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 700 }}>✓ Instant 0.2s</span>
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'space-between', fontSize: '11.5px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Check size={13} color="var(--success)" />
+                  <span style={{ color: 'var(--text-primary)' }}>Bank Statement PDF / CSV Smart Parser</span>
+                </div>
+                <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 700 }}>✓ All Indian Banks</span>
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'space-between', fontSize: '11.5px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Check size={13} color="var(--success)" />
+                  <span style={{ color: 'var(--text-primary)' }}>24/7 AI Coach "Can I Afford?" Guidance</span>
+                </div>
+                <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 700 }}>✓ Unlimited</span>
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'space-between', fontSize: '11.5px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Check size={13} color="var(--success)" />
+                  <span style={{ color: 'var(--text-primary)' }}>Couple Shared Sync & Household Transparency</span>
+                </div>
+                <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 700 }}>✓ Real-time Sync</span>
               </div>
             </div>
 
@@ -879,6 +919,37 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               <div style={{ textAlign: 'center', fontSize: '9px', color: 'var(--text-muted)', marginTop: '4px', fontStyle: 'italic' }}>
                 * Auto-pay is automatically enabled via secure e-mandate. You can cancel anytime.
               </div>
+
+              {isExpired && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClose();
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '11px',
+                    borderRadius: '14px',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    color: '#94a3b8',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    marginTop: '8px',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#94a3b8')}
+                >
+                  <span>👁️ View My Data (Read-Only Mode)</span>
+                </button>
+              )}
             </div>
 
           </div>

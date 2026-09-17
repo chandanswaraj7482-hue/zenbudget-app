@@ -1,5 +1,5 @@
-# ZenBudget SEO Robots.txt
-# https://zenbudget-tracker.vercel.app
+# ZenBudget SEO & AI Search Engine Robots.txt
+# Official Web: https://zenbudget-tracker.vercel.app
 
 User-agent: *
 Allow: /
@@ -8,7 +8,7 @@ Disallow: /admin
 Disallow: /_next/
 Disallow: /api/
 
-# Allow all major search engine crawlers
+# Major Web Search Engine Crawlers
 User-agent: Googlebot
 Allow: /
 
@@ -27,12 +27,40 @@ Allow: /
 User-agent: Yandex
 Allow: /
 
-# Crawl-delay for bots that respect it
-User-agent: *
-Crawl-delay: 1
+# Generative AI & LLM Search Engine Crawlers (Perplexity, ChatGPT, Claude, Gemini)
+User-agent: GPTBot
+Allow: /
 
-# Sitemaps
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+# Sitemaps & AI Index
 Sitemap: https://zenbudget-tracker.vercel.app/sitemap.xml
+# LLM Context: https://zenbudget-tracker.vercel.app/llms.txt
 
 # Host
 Host: https://zenbudget-tracker.vercel.app

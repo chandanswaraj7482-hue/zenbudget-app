@@ -22,32 +22,23 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
 }) => {
   if (!isOpen) return null;
 
-  const [dob, setDob] = useState<string>(initialDob || '');
+  const [age, setAge] = useState<string>(() => {
+    const profileId = localStorage.getItem('zb_profile_id') || 'local';
+    const savedAge = localStorage.getItem(`zb_age_${profileId}`);
+    if (savedAge) return savedAge;
+    if (initialDob) {
+      const dobDate = new Date(initialDob);
+      if (!isNaN(dobDate.getTime())) {
+        const diff = Date.now() - dobDate.getTime();
+        const a = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+        if (a > 0 && a <= 120) return a.toString();
+      }
+    }
+    return '';
+  });
   const [salary, setSalary] = useState<string>(initialSalary && initialSalary > 0 ? initialSalary.toString() : '');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Dynamic Real-Time Age Calculation
-  const calculatedAge = useMemo(() => {
-    if (!dob) return null;
-    const dobDate = new Date(dob);
-    if (isNaN(dobDate.getTime())) return null;
-
-    const today = new Date();
-    let age = today.getFullYear() - dobDate.getFullYear();
-    const monthDiff = today.getMonth() - dobDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dobDate.getDate())) {
-      age--;
-    }
-
-    return age >= 0 && age <= 120 ? age : null;
-  }, [dob]);
-
-  const maxDobDate = useMemo(() => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  }, []);
 
   const handleSalaryPreset = (amount: number) => {
     setSalary(amount.toString());
@@ -55,13 +46,9 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
   };
 
   const handleSave = async () => {
-    if (!dob) {
-      setError('Please select your Date of Birth.');
-      return;
-    }
-
-    if (calculatedAge === null || calculatedAge < 5) {
-      setError('Please enter a valid Date of Birth.');
+    const parsedAge = parseInt(age);
+    if (!age || isNaN(parsedAge) || parsedAge < 10 || parsedAge > 120) {
+      setError('Please enter a valid age (e.g. 24).');
       return;
     }
 
@@ -75,7 +62,13 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
     setError(null);
 
     try {
-      await onSave(dob, Math.round(numSalary));
+      const profileId = localStorage.getItem('zb_profile_id') || 'local';
+      localStorage.setItem(`zb_age_${profileId}`, age);
+      const birthYear = new Date().getFullYear() - parsedAge;
+      const approxDob = `${birthYear}-01-01`;
+      localStorage.setItem(`zb_dob_${profileId}`, approxDob);
+
+      await onSave(approxDob, Math.round(numSalary));
       onClose();
     } catch (err: any) {
       setError(err?.message || 'Failed to save settings. Please try again.');
@@ -180,13 +173,13 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
         </div>
 
         <p style={{ fontSize: '12px', color: '#94a3b8', lineHeight: 1.5, margin: '0 0 18px 0' }}>
-          Welcome, <strong style={{ color: '#f1f5f9' }}>{userName}</strong>! Set your Date of Birth & Monthly Salary to unlock automated daily limits and wealth compounding.
+          Welcome, <strong style={{ color: '#f1f5f9' }}>{userName}</strong>! Set your Age & Monthly Salary to unlock automated daily limits and wealth compounding.
         </p>
 
         {/* Form Container */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           
-          {/* FIELD 1: Date of Birth & Dynamic Age Badge */}
+          {/* FIELD 1: Age in Years & Quick Presets */}
           <div style={{
             background: 'rgba(255, 255, 255, 0.03)',
             border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -195,17 +188,17 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
               <label style={{ fontSize: '12px', fontWeight: 700, color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Calendar size={14} style={{ color: '#10b981' }} />
-                <span>Date of Birth</span>
+                <Cake size={14} style={{ color: '#10b981' }} />
+                <span>Your Age (in Years)</span>
               </label>
 
               {/* Dynamic Age Badge */}
               <span style={{
                 fontSize: '11px',
                 fontWeight: 800,
-                color: calculatedAge !== null ? '#34d399' : '#64748b',
-                background: calculatedAge !== null ? 'rgba(16, 185, 129, 0.16)' : 'rgba(255, 255, 255, 0.05)',
-                border: calculatedAge !== null ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
+                color: age ? '#34d399' : '#64748b',
+                background: age ? 'rgba(16, 185, 129, 0.16)' : 'rgba(255, 255, 255, 0.05)',
+                border: age ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
                 padding: '3px 10px',
                 borderRadius: '100px',
                 display: 'inline-flex',
@@ -213,38 +206,69 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
                 gap: '4px',
                 transition: 'all 0.25s ease'
               }}>
-                {calculatedAge !== null ? (
-                  <span>🎉 {calculatedAge} yrs old</span>
+                {age ? (
+                  <span>🎂 {age} yrs old</span>
                 ) : (
-                  <>
-                    <Cake size={12} />
-                    <span>Age auto-calculated</span>
-                  </>
+                  <span>Enter your age</span>
                 )}
               </span>
             </div>
 
-            <input
-              type="date"
-              value={dob}
-              max={maxDobDate}
-              onChange={(e) => {
-                setDob(e.target.value);
-                if (error) setError(null);
-              }}
-              style={{
-                width: '100%',
-                padding: '11px 14px',
-                borderRadius: '12px',
-                background: 'rgba(15, 23, 42, 0.75)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                color: '#ffffff',
-                fontSize: '14px',
-                fontWeight: 600,
-                outline: 'none',
-                boxSizing: 'border-box'
-              }}
-            />
+            <div style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '14px' }}>
+                🎂
+              </span>
+              <input
+                type="number"
+                min={10}
+                max={120}
+                value={age}
+                onChange={(e) => {
+                  setAge(e.target.value);
+                  if (error) setError(null);
+                }}
+                placeholder="Enter your age (e.g. 24)"
+                style={{
+                  width: '100%',
+                  padding: '11px 14px 11px 36px',
+                  borderRadius: '12px',
+                  background: 'rgba(15, 23, 42, 0.75)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  color: '#ffffff',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            {/* Quick Age Presets */}
+            <div style={{ display: 'flex', gap: '6px', marginTop: '8px', flexWrap: 'wrap' }}>
+              {[18, 21, 24, 28, 32, 40].map((presetAge) => (
+                <button
+                  key={presetAge}
+                  type="button"
+                  onClick={() => {
+                    setAge(presetAge.toString());
+                    if (error) setError(null);
+                  }}
+                  style={{
+                    padding: '4px 9px',
+                    borderRadius: '8px',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    border: age === presetAge.toString() ? '1px solid var(--primary, #10b981)' : '1px solid rgba(255,255,255,0.1)',
+                    background: age === presetAge.toString() ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.04)',
+                    color: age === presetAge.toString() ? '#34d399' : '#94a3b8',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {presetAge} yrs
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* FIELD 2: Monthly Salary */}

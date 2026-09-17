@@ -19,8 +19,20 @@ import {
   Check,
   Star,
   Share2,
-  Link2
+  Link2,
+  Bot,
+  Layout,
+  Upload,
+  Eye,
+  CheckCircle
 } from 'lucide-react';
+import { 
+  type LandingAssetsState, 
+  INITIAL_LANDING_ASSETS, 
+  fetchRemoteLandingAssets, 
+  saveRemoteLandingAssets,
+  resolveAssetPreviewUrl
+} from './utils/landingAssetsHelper';
 
 interface RatingRecord {
   id: string;
@@ -301,7 +313,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   {
     id: 'user_1',
-    name: 'Chandan Swaraj',
+    name: localStorage.getItem('zb_user_name') || localStorage.getItem('zenbudget_username') || 'Zen User',
     email: 'chandanswaraj7482@gmail.com',
     pin: '1234',
     subscription_tier: 'premium_lifetime',
@@ -379,7 +391,16 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   }
 ];
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing' | 'slots'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing' | 'slots' | 'ai_coach' | 'landing_assets'>('overview');
+  const [aiReviews, setAiReviews] = useState<any[]>([]);
+  const [aiFeedback, setAiFeedback] = useState<any[]>([]);
+  const [landingAssets, setLandingAssets] = useState<LandingAssetsState>(INITIAL_LANDING_ASSETS);
+  const [isSavingAssets, setIsSavingAssets] = useState(false);
+  const [assetsSavedNotice, setAssetsSavedNotice] = useState(false);
+
+  useEffect(() => {
+    fetchRemoteLandingAssets().then(data => setLandingAssets(data));
+  }, []);
 
   // Data states
   const [profiles, setProfiles] = useState<ProfileRecord[]>(() => {
@@ -525,6 +546,17 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
         .eq('payment_status', 'success');
 
       if (payData) setPayments(payData);
+
+      // Fetch AI Reviews (Wrapped in try/catch in case SQL migration hasn't run yet)
+      try {
+        const { data: aiRevData } = await supabaseClient.from('ai_reviews').select('*').order('created_at', { ascending: false });
+        if (aiRevData) setAiReviews(aiRevData);
+        
+        const { data: aiFeedbackData } = await supabaseClient.from('ai_message_feedback').select('*').order('created_at', { ascending: false });
+        if (aiFeedbackData) setAiFeedback(aiFeedbackData);
+      } catch (err) {
+        console.warn('Could not fetch AI Reviews, SQL migration maybe pending:', err);
+      }
 
     } catch (err) {
       console.error('Admin fetch error:', err);
@@ -762,6 +794,15 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
 
     // 1. OPTIMISTIC UPDATE: Update local state IMMEDIATELY before Supabase call
     setBroadcasts(prev => [newBc, ...prev]);
+
+    // TRIGGER PUSH NOTIFICATIONS VIA EDGE FUNCTION
+    const userTokens = profiles.map(p => p.fcm_token).filter(Boolean);
+    if (userTokens.length > 0) {
+      supabaseClient.functions.invoke('send-push', { 
+        body: { title: bcTitle.trim(), body: finalMessage, tokens: userTokens } 
+      }).catch(err => console.error('Push Notification Failed:', err));
+    }
+
     try {
       const stored = JSON.parse(localStorage.getItem('zb_admin_broadcasts') || '[]');
       localStorage.setItem('zb_admin_broadcasts', JSON.stringify([newBc, ...stored]));
@@ -1110,13 +1151,15 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
             }}>
               {[
                 { id: 'overview', label: 'Analytics & Overview', icon: TrendingUp },
+                { id: 'landing_assets', label: '🖼️ Landing Page & Mockups CMS', icon: Layout },
                 { id: 'users', label: `User Management (${totalUsers})`, icon: Users },
                 { id: 'referrals', label: `Referrals & Revenue`, icon: Share2 },
                 { id: 'family', label: `Family Sync Links`, icon: Link2 },
                 { id: 'broadcasts', label: 'Broadcast Center', icon: Bell },
                 { id: 'coupons', label: 'Discount Coupons', icon: Gift },
                 { id: 'pricing', label: 'Pricing Control', icon: DollarSign },
-                { id: 'ratings', label: `App Ratings (${ratings.length})`, icon: Star }
+                { id: 'ratings', label: `App Ratings (${ratings.length})`, icon: Star },
+                { id: 'ai_coach', label: 'AI Coach & Reviews', icon: Bot }
               ].map(tab => {
                 const IconComponent = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -2082,7 +2125,58 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                 </div>
               )}
 
-              {/* TAB 3: BROADCAST NOTIFICATION CENTER */}
+              {/* TAB: AI COACH REVIEWS & ANALYTICS */}
+              {activeTab === 'ai_coach' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
+                  <div style={{ padding: '1.5rem', backgroundColor: 'rgba(255, 255, 255, 0.02)', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                      <div style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', padding: '0.75rem', borderRadius: '12px' }}>
+                        <Bot size={20} style={{ color: '#22c55e' }} />
+                      </div>
+                      <div>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: '#f8fafc', margin: 0 }}>Zen AI Coach V2 Analytics</h2>
+                        <p style={{ color: '#94a3b8', fontSize: '0.875rem', marginTop: '0.25rem', marginBottom: 0 }}>
+                          Monitor user engagement and feedback for the AI Financial Assistant.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+                      <div style={{ padding: '1rem', background: 'var(--bg-input)', borderRadius: '12px', border: '1px solid var(--border-input)' }}>
+                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.5rem' }}>TOTAL FEEDBACK (THUMBS UP/DOWN)</div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)' }}>{aiFeedback.length}</div>
+                      </div>
+                      <div style={{ padding: '1rem', background: 'var(--bg-input)', borderRadius: '12px', border: '1px solid var(--border-input)' }}>
+                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.5rem' }}>AI REVIEWS SUBMITTED</div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)' }}>{aiReviews.length}</div>
+                      </div>
+                    </div>
+
+                    <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#e2e8f0', marginBottom: '1rem' }}>Recent Message Feedback</h3>
+                    {aiFeedback.length === 0 ? (
+                      <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>No AI feedback recorded yet.</p>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {aiFeedback.slice(0, 20).map(f => (
+                          <div key={f.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', backgroundColor: 'var(--bg-input)', borderRadius: '12px', border: '1px solid var(--border-input)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <div style={{ padding: '8px', borderRadius: '50%', background: f.feedback === 'thumbs_up' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)' }}>
+                                <ThumbsUp size={16} fill={f.feedback === 'thumbs_up' ? '#22c55e' : '#ef4444'} style={{ transform: f.feedback === 'thumbs_down' ? 'scaleY(-1)' : 'none', color: f.feedback === 'thumbs_up' ? '#22c55e' : '#ef4444' }} />
+                              </div>
+                              <div>
+                                <div style={{ fontSize: '0.875rem', color: 'var(--text-primary)', fontWeight: 600 }}>Message ID: {f.message_id}</div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{new Date(f.created_at).toLocaleString()}</div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: BROADCAST NOTIFICATION CENTER */}
               {activeTab === 'broadcasts' && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                   {/* Create Broadcast Form */}
@@ -2916,6 +3010,341 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
               )}
 
               {/* TAB 9: EXTRA SLOTS REVENUE & USER BREAKDOWN */}
+              {activeTab === 'landing_assets' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  {/* Header Banner */}
+                  <div style={{ 
+                    padding: '24px', 
+                    borderRadius: '20px', 
+                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(15, 23, 42, 0.6) 100%)', 
+                    border: '1px solid rgba(16, 185, 129, 0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '16px'
+                  }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '24px' }}>🖼️</span>
+                        <h2 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0, color: '#fff' }}>
+                          Landing Page Images & Mockups CMS
+                        </h2>
+                      </div>
+                      <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: 0, maxWidth: '680px', lineHeight: 1.5 }}>
+                        Upload your real app screenshots or switch between default 8K illustrations and custom images for every section and phone mockup on the website.
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={async () => {
+                        setIsSavingAssets(true);
+                        const success = await saveRemoteLandingAssets(landingAssets);
+                        setIsSavingAssets(false);
+                        if (success) {
+                          setAssetsSavedNotice(true);
+                          if (onShowToast) onShowToast('Landing page images updated & published live! 🚀', 'success');
+                          setTimeout(() => setAssetsSavedNotice(false), 4000);
+                        } else {
+                          if (onShowToast) onShowToast('Saved to local storage. (Remote sync failed)', 'info');
+                        }
+                      }}
+                      disabled={isSavingAssets}
+                      style={{
+                        padding: '14px 28px',
+                        borderRadius: '14px',
+                        background: '#10b981',
+                        color: '#090e0b',
+                        fontSize: '15px',
+                        fontWeight: 900,
+                        border: 'none',
+                        cursor: isSavingAssets ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        boxShadow: '0 8px 25px rgba(16, 185, 129, 0.35)',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      {isSavingAssets ? <RefreshCw size={18} className="animate-spin" /> : <CheckCircle size={18} />}
+                      <span>{isSavingAssets ? 'Saving & Publishing...' : 'Save & Publish Live'}</span>
+                    </button>
+                  </div>
+
+                  {assetsSavedNotice && (
+                    <div style={{ padding: '14px 20px', borderRadius: '12px', background: 'rgba(16,185,129,0.2)', border: '1px solid rgba(16,185,129,0.4)', color: '#34d399', fontSize: '14px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Check size={18} />
+                      <span>All custom landing page assets are live! Refresh the landing page to see your real screenshots.</span>
+                    </div>
+                  )}
+
+                  {/* Asset Cards Grid */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '20px' }}>
+                    {Object.keys(landingAssets).map((key) => {
+                      const assetKey = key as keyof LandingAssetsState;
+                      const item = landingAssets[assetKey];
+                      const activePreviewUrl = resolveAssetPreviewUrl(item.useCustom && item.customUrl ? item.customUrl : item.defaultUrl);
+                      const isPhoneMockup = assetKey === 'heroMockup1' || assetKey === 'heroMockup2';
+
+                      return (
+                        <div 
+                          key={item.id} 
+                          style={{ 
+                            background: 'rgba(15, 23, 42, 0.65)', 
+                            border: `1px solid ${item.useCustom ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.08)'}`, 
+                            borderRadius: '20px', 
+                            padding: '20px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            gap: '16px',
+                            boxShadow: item.useCustom ? '0 10px 30px rgba(16,185,129,0.1)' : 'none'
+                          }}
+                        >
+                          <div>
+                            {/* Top Placement Badge & Switch Toggle */}
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '12px' }}>
+                              <span style={{ 
+                                fontSize: '11px', 
+                                fontWeight: 800, 
+                                textTransform: 'uppercase', 
+                                letterSpacing: '0.06em', 
+                                color: '#10b981', 
+                                background: 'rgba(16,185,129,0.12)', 
+                                padding: '4px 10px', 
+                                borderRadius: '100px',
+                                border: '1px solid rgba(16,185,129,0.25)'
+                              }}>
+                                {item.section}
+                              </span>
+
+                              {/* Toggle Switch */}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontSize: '12px', color: item.useCustom ? '#34d399' : '#94a3b8', fontWeight: 700 }}>
+                                  {item.useCustom ? 'Custom Image' : 'Default Image'}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setLandingAssets(prev => ({
+                                      ...prev,
+                                      [assetKey]: {
+                                        ...prev[assetKey],
+                                        useCustom: !prev[assetKey].useCustom
+                                      }
+                                    }));
+                                  }}
+                                  style={{
+                                    width: '44px',
+                                    height: '24px',
+                                    borderRadius: '100px',
+                                    background: item.useCustom ? '#10b981' : 'rgba(255,255,255,0.15)',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    position: 'relative',
+                                    transition: 'background 0.2s ease',
+                                    padding: '2px'
+                                  }}
+                                >
+                                  <div style={{
+                                    width: '20px',
+                                    height: '20px',
+                                    borderRadius: '50%',
+                                    background: '#ffffff',
+                                    position: 'absolute',
+                                    top: '2px',
+                                    left: item.useCustom ? '22px' : '2px',
+                                    transition: 'left 0.2s ease',
+                                    boxShadow: '0 2px 5px rgba(0,0,0,0.3)'
+                                  }} />
+                                </button>
+                              </div>
+                            </div>
+
+                            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#fff', margin: '0 0 6px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span>{item.label}</span>
+                              {isPhoneMockup && (
+                                <span style={{ fontSize: '10px', background: 'rgba(59,130,246,0.2)', border: '1px solid rgba(59,130,246,0.4)', color: '#60a5fa', padding: '2px 8px', borderRadius: '100px' }}>
+                                  📱 3D Phone Mockup
+                                </span>
+                              )}
+                            </h3>
+                            <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '0 0 14px 0', lineHeight: 1.45 }}>
+                              {item.description}
+                            </p>
+
+                            {/* Live Thumbnail Preview */}
+                            <div style={{
+                              width: '100%',
+                              height: '175px',
+                              borderRadius: '14px',
+                              overflow: 'hidden',
+                              background: '#090e0b',
+                              border: '1px solid rgba(255,255,255,0.1)',
+                              position: 'relative',
+                              marginBottom: '14px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              {activePreviewUrl ? (
+                                <img 
+                                  src={activePreviewUrl} 
+                                  alt={item.label} 
+                                  style={{ width: '100%', height: '100%', objectFit: isPhoneMockup ? 'contain' : 'cover', background: '#090e0b' }}
+                                />
+                              ) : (
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#64748b', fontSize: '13px' }}>
+                                  Interactive Code UI Active
+                                </div>
+                              )}
+                              
+                              {isPhoneMockup && (
+                                <div style={{
+                                  position: 'absolute',
+                                  top: '8px',
+                                  left: '8px',
+                                  background: 'rgba(16,185,129,0.85)',
+                                  backdropFilter: 'blur(8px)',
+                                  padding: '3px 8px',
+                                  borderRadius: '6px',
+                                  fontSize: '10px',
+                                  fontWeight: 800,
+                                  color: '#090e0b'
+                                }}>
+                                  ✓ Auto-fits in iPhone frame
+                                </div>
+                              )}
+
+                              <div style={{
+                                position: 'absolute',
+                                bottom: '8px',
+                                right: '8px',
+                                background: 'rgba(0,0,0,0.75)',
+                                backdropFilter: 'blur(8px)',
+                                padding: '3px 8px',
+                                borderRadius: '6px',
+                                fontSize: '10px',
+                                fontWeight: 700,
+                                color: '#e2e8f0'
+                              }}>
+                                {item.recommendedSize}
+                              </div>
+                            </div>
+
+                            {/* Custom Image URL / File Uploader */}
+                            {item.useCustom && (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                  <input 
+                                    type="text"
+                                    placeholder="Paste Image URL (https://...)"
+                                    value={item.customUrl}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setLandingAssets(prev => ({
+                                        ...prev,
+                                        [assetKey]: {
+                                          ...prev[assetKey],
+                                          customUrl: val
+                                        }
+                                      }));
+                                    }}
+                                    style={{
+                                      flex: 1,
+                                      padding: '8px 12px',
+                                      borderRadius: '8px',
+                                      background: 'rgba(0,0,0,0.4)',
+                                      border: '1px solid rgba(255,255,255,0.12)',
+                                      color: '#fff',
+                                      fontSize: '0.8rem',
+                                      outline: 'none'
+                                    }}
+                                  />
+                                  
+                                  {/* Local File Upload Button */}
+                                  <label style={{
+                                    padding: '8px 14px',
+                                    borderRadius: '8px',
+                                    background: 'rgba(16,185,129,0.2)',
+                                    border: '1px solid rgba(16,185,129,0.4)',
+                                    color: '#34d399',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                  }}>
+                                    <Upload size={14} />
+                                    <span>Upload</span>
+                                    <input 
+                                      type="file" 
+                                      accept="image/*" 
+                                      style={{ display: 'none' }}
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                          const reader = new FileReader();
+                                          reader.onloadend = () => {
+                                            if (typeof reader.result === 'string') {
+                                              setLandingAssets(prev => ({
+                                                ...prev,
+                                                [assetKey]: {
+                                                  ...prev[assetKey],
+                                                  customUrl: reader.result as string,
+                                                  useCustom: true
+                                                }
+                                              }));
+                                              if (onShowToast) onShowToast(`Selected image for ${item.label}! Click Save to publish.`, 'success');
+                                            }
+                                          };
+                                          reader.readAsDataURL(file);
+                                        }
+                                      }}
+                                    />
+                                  </label>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Quick Reset to Default button */}
+                          {item.useCustom && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setLandingAssets(prev => ({
+                                  ...prev,
+                                  [assetKey]: {
+                                    ...prev[assetKey],
+                                    useCustom: false,
+                                    customUrl: ''
+                                  }
+                                }));
+                              }}
+                              style={{
+                                padding: '6px 12px',
+                                borderRadius: '8px',
+                                background: 'transparent',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                color: '#94a3b8',
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                alignSelf: 'flex-start'
+                              }}
+                            >
+                              Reset to Default Image
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {activeTab === 'slots' && (
                 <div>
                   <h4 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

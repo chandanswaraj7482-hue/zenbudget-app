@@ -560,7 +560,8 @@ export function resolveUserFinancialQuery(
   engine: ZenFinancialIntelligenceEngine,
   memoryState: ConversationMemoryState,
   userName: string = 'Buddy',
-  currencySymbol: string = '₹'
+  currencySymbol: string = '₹',
+  isRoastMode: boolean = false
 ): { responseText: string; updatedState: ConversationMemoryState } {
   const query = (rawQuery || '').trim();
   const qLower = query.toLowerCase();
@@ -574,6 +575,32 @@ export function resolveUserFinancialQuery(
 
   // Empty State Guard - gracefully allow AI to respond to all queries
   const noTxNote = !ctx.hasEnoughData ? `\n\n*(💡 Tip: Quick Capture se 2-3 daily transactions enter karke aap exact spending pattern leaks bhi view kar sakte ho!)*` : '';
+
+  // ─── 0.1 SPECIAL ROAST MODE CONTROLLER ───
+  const isRoastQuery = isRoastMode || qLower.includes('roast') || qLower.includes('roast me') || qLower.includes('meri beizzati karo');
+  if (isRoastQuery) {
+    const topCat = (ctx.topExpenseCategory || 'Shopping').toUpperCase();
+    const topCatSpend = Number(ctx.topCategorySpend) || 0;
+    const savRate = Number(ctx.savingsRatePercent) || 0;
+    const safeSpend = Number(ctx.safeDailySpend) || 0;
+    const monthExp = Number(ctx.monthTotalExpenses) || 0;
+
+    let roastContent = '';
+    if (topCatSpend > 0) {
+      if (isFormalEnglish) {
+        roastContent = `🔥 **SAVAGE ROAST ACTIVATED** 🔥\n\nOh ${userName}, where do I even start?! 💀\n\n• You spent **${currencySymbol}${topCatSpend.toLocaleString()}** on **${topCat}** alone this month! Are you secretly funding their next IPO? 😭\n• Your monthly savings rate is sitting at a tragic **${savRate}%**. At this rate, your retirement plan is literally 'hoping a long-lost uncle left you an inheritance'! 🤦‍♂️💸\n• Your daily safe spend is down to **${currencySymbol}${safeSpend}/day** — that barely covers a coffee and a dream!\n\n💡 **Roast Verdict**: Close that shopping app, lock your credit card in the freezer, and let ZenBudget save whatever dignity your wallet has left! 🐷🧊🔥`;
+      } else {
+        roastContent = `🔥 **SAVAGE ROAST ACTIVATED** 🔥\n\nOye ${userName}! Sach sunne ki himmat hai na?! 💀\n\n• Tumne iss mahine akele **${topCat}** pe **${currencySymbol}${topCatSpend.toLocaleString()}** uda diye?! 😭 Bhai kya unke brand ambassador bane ghoom rahe ho?\n• Savings rate dekh ke toh rona aa jaye — sirf **${savRate}%**! 🤦‍♂️ Aise to agle 50 saal baad bhi Maggi par guzarish karni padegi!\n• Daily safe allowance ab sirf **${currencySymbol}${safeSpend}/day** bacha hai — itne me toh bas auto ka kiraya aur thoda dukh nikalta hai! 💸\n\n💡 **Roast Advice**: Zomato/Swiggy aur online shopping cart ko foran delete karo aur ZenBudget pe hisab-kitab shuru karo, warna agle hafte udhaar mangna padega! 🐷🧊🔥`;
+      }
+    } else {
+      if (isFormalEnglish) {
+        roastContent = `🔥 **ROAST INCOMING** 🔥\n\nNice try hiding your expenses, ${userName}! 🕵️‍♂️ You haven't logged enough transactions yet because you're scared of seeing where all your money vanished! Log 3 transactions right now so I can roast your late-night food deliveries properly! ☕💸💀`;
+      } else {
+        roastContent = `🔥 **ROAST INCOMING** 🔥\n\nChalaaki nahi chalegi ${userName}! 🕵️‍♂️ Abhi tak saare kharche enter nahi kiye kyunki sach dekhne se darr lag raha hai na? Jaldi se 2-3 kharche log karo taaki tumhari secret chai/shopping habits ko ache se roast kar saku! ☕💸💀`;
+      }
+    }
+    return { responseText: roastContent, updatedState };
+  }
 
   // ─── 0. OFF-TOPIC STRICT BOUNDARY GUARD ───
   const offTopicKeywords = [
@@ -682,6 +709,33 @@ export function resolveUserFinancialQuery(
         `5. 📈 **Wealth Compound Simulator**: Long-term investments aur wealth growth calculate karein.\n` +
         `6. 🎁 **Weekly Wrapped & Monthly Story**: Spotify style animated story me apni monthly money journey dekhein.\n` +
         `7. 🤖 **Zen AI Coach (24/7 Buddy)**: Mujhse kabhi bhi poochhein — *"5000 ka shoe le lu?"*, *"Food me kitna gaya?"*, *"Premium price kya hai?"*, ya *"Safe daily limit kya hai?"*! 🚀`;
+    return { responseText, updatedState };
+  }
+
+  // ─── 0.65 BEST EXPENSE TRACKER INTENT ("best expense tracker", "sabse achha app", "best budgeting app") ───
+  const bestTrackerKeywords = ['best expense tracker', 'best app', 'sabse achha', 'sabse achha app', 'sabse achha expense', 'best money manager', 'best budget app', 'sabse accha', 'best tracker', 'top expense tracker', 'top budget app', 'sabse badiya app', 'sabse badhiya'];
+  if (bestTrackerKeywords.some(k => qLower.includes(k)) || ((qLower.includes('best') || qLower.includes('achha') || qLower.includes('accha') || qLower.includes('badhiya') || qLower.includes('top')) && (qLower.includes('tracker') || qLower.includes('app') || qLower.includes('expense') || qLower.includes('budget')))) {
+    const responseText = isFormalEnglish
+      ? `👑 **Why ZenBudget is Hands-Down the #1 Best Expense Tracker App** 🌿✨\n\n` +
+        `ZenBudget isn't just another basic expense logger — it's an intelligent, privacy-first personal finance system designed to double your monthly savings!\n\n` +
+        `🏆 **6 Reasons Why ZenBudget is the Undisputed Best**:\n` +
+        `1. 🤖 **24/7 AI Money Coach**: Instant real-time guidance on *"Can I afford this?"* based on your live balance & budget limits.\n` +
+        `2. 🧘 **Safe Daily Pace Calculator**: Know your exact daily allowance (${currencySymbol}${ctx.safeDailySpend}/day) to completely eliminate month-end stress.\n` +
+        `3. 👥 **Couple & Family Live Sync**: Multi-device real-time budget sharing with your partner or family.\n` +
+        `4. 🔒 **100% Privacy & Encrypted**: Your financial data stays safely on your device with biometric & PIN locks.\n` +
+        `5. 🎁 **Spotify-Style Monthly Wrapped**: Beautiful animated visual recaps of your spending habit stories & streak badges.\n` +
+        `6. 📄 **Smart Bank Statement Parser**: Import PDF/CSV statements directly without tedious manual entry.\n\n` +
+        `🌟 *Thousands of smart budgeters choose ZenBudget every single day for 100% financial clarity!* 🚀`
+      : `👑 **ZenBudget Hi Kyun Hai Sabse Best Expense Tracker App?** 🌿✨\n\n` +
+        `ZenBudget koi aam kharcha note karne wala app nahi hai — ye ek highly intelligent, private aur super-fast money management system hai jo aapki monthly savings ko boost kar deta hai!\n\n` +
+        `🏆 **ZenBudget Sabse Best Kyun Hai (Top 6 Reasons)**:\n` +
+        `1. 🤖 **24/7 AI Personal Money Coach**: Koi bhi kharcha karne se pehle instant AI guidance — *"Kya main ₹5,000 afford kar sakta hu?"*.\n` +
+        `2. 🧘 **Safe Daily Allowance (${currencySymbol}${ctx.safeDailySpend}/day)**: Har din kitna kharcha safe hai ye app live calculate karta hai taaki mahine ke aakhiri dino me tension na ho.\n` +
+        `3. 👥 **Couple & Family Live Sync**: Partner ya family ke saath live shared budget sync karein.\n` +
+        `4. 🔒 **100% Data Privacy & Security**: Full end-to-end encryption aur biometric lock ke saath aapka financial data safe rehta hai.\n` +
+        `5. 🎁 **Spotify-Style Monthly Wrapped**: Animated visual story recaps aur Money Forest streak badges.\n` +
+        `6. 📄 **Bank Statement CSV/PDF Parser**: Direct bank statements import karein seconds me.\n\n` +
+        `🌟 *Money management aur financial freedom ke liye ZenBudget hi sabse best aur trusted app hai!* 🚀`;
     return { responseText, updatedState };
   }
 

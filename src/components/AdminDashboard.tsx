@@ -19,8 +19,20 @@ import {
   Check,
   Star,
   Share2,
-  Link2
+  Link2,
+  Bot,
+  Layout,
+  Upload,
+  Eye,
+  CheckCircle
 } from 'lucide-react';
+import { 
+  type LandingAssetsState, 
+  INITIAL_LANDING_ASSETS, 
+  fetchRemoteLandingAssets, 
+  saveRemoteLandingAssets,
+  resolveAssetPreviewUrl
+} from '../utils/landingAssetsHelper';
 
 interface RatingRecord {
   id: string;
@@ -379,9 +391,16 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   }
 ];
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing' | 'slots' | 'ai_coach'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing' | 'slots' | 'ai_coach' | 'landing_assets'>('overview');
   const [aiReviews, setAiReviews] = useState<any[]>([]);
   const [aiFeedback, setAiFeedback] = useState<any[]>([]);
+  const [landingAssets, setLandingAssets] = useState<LandingAssetsState>(INITIAL_LANDING_ASSETS);
+  const [isSavingAssets, setIsSavingAssets] = useState(false);
+  const [assetsSavedNotice, setAssetsSavedNotice] = useState(false);
+
+  useEffect(() => {
+    fetchRemoteLandingAssets().then(data => setLandingAssets(data));
+  }, []);
 
   // Data states
   const [profiles, setProfiles] = useState<ProfileRecord[]>(() => {
@@ -1132,6 +1151,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
             }}>
               {[
                 { id: 'overview', label: 'Analytics & Overview', icon: TrendingUp },
+                { id: 'landing_assets', label: '🖼️ Landing Page & Mockups CMS', icon: Layout },
                 { id: 'users', label: `User Management (${totalUsers})`, icon: Users },
                 { id: 'referrals', label: `Referrals & Revenue`, icon: Share2 },
                 { id: 'family', label: `Family Sync Links`, icon: Link2 },
@@ -2990,6 +3010,381 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
               )}
 
               {/* TAB 9: EXTRA SLOTS REVENUE & USER BREAKDOWN */}
+              {activeTab === 'landing_assets' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  {/* Header Banner */}
+                  <div style={{ 
+                    padding: '24px', 
+                    borderRadius: '20px', 
+                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(15, 23, 42, 0.6) 100%)', 
+                    border: '1px solid rgba(16, 185, 129, 0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '16px'
+                  }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '24px' }}>🖼️</span>
+                        <h2 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0, color: '#fff' }}>
+                          Landing Page Images & Mockups CMS
+                        </h2>
+                      </div>
+                      <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: 0, maxWidth: '680px', lineHeight: 1.5 }}>
+                        Upload your real app screenshots or switch between default 8K illustrations and custom images for every section and phone mockup on the website.
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={async () => {
+                        setIsSavingAssets(true);
+                        const success = await saveRemoteLandingAssets(landingAssets);
+                        setIsSavingAssets(false);
+                        if (success) {
+                          setAssetsSavedNotice(true);
+                          if (onShowToast) onShowToast('Landing page images updated & published live! 🚀', 'success');
+                          setTimeout(() => setAssetsSavedNotice(false), 4000);
+                        } else {
+                          if (onShowToast) onShowToast('Saved to local storage. (Remote sync failed)', 'info');
+                        }
+                      }}
+                      disabled={isSavingAssets}
+                      style={{
+                        padding: '14px 28px',
+                        borderRadius: '14px',
+                        background: '#10b981',
+                        color: '#090e0b',
+                        fontSize: '15px',
+                        fontWeight: 900,
+                        border: 'none',
+                        cursor: isSavingAssets ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        boxShadow: '0 8px 25px rgba(16, 185, 129, 0.35)',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      {isSavingAssets ? <RefreshCw size={18} className="animate-spin" /> : <CheckCircle size={18} />}
+                      <span>{isSavingAssets ? 'Saving & Publishing...' : 'Save & Publish Live'}</span>
+                    </button>
+                  </div>
+
+                  {assetsSavedNotice && (
+                    <div style={{ padding: '14px 20px', borderRadius: '12px', background: 'rgba(16,185,129,0.2)', border: '1px solid rgba(16,185,129,0.4)', color: '#34d399', fontSize: '14px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Check size={18} />
+                      <span>All custom landing page assets are live! Refresh the landing page to see your real screenshots.</span>
+                    </div>
+                  )}
+
+                  {/* Asset Cards Grid */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '20px' }}>
+                    {Object.keys(landingAssets).map((key) => {
+                      const assetKey = key as keyof LandingAssetsState;
+                      const item = landingAssets[assetKey];
+                      const isPhoneMockup = assetKey === 'heroMockup1' || assetKey === 'heroMockup2';
+                      
+                      // For preview, show dark screenshot if available, else generic, else default
+                      const darkUrl = item.customUrlDark || item.customUrl || '';
+                      const lightUrl = item.customUrlLight || item.customUrl || '';
+                      const previewUrl = resolveAssetPreviewUrl(item.useCustom && darkUrl ? darkUrl : item.defaultUrl);
+
+                      // Helper to handle file upload for a specific field
+                      const handleFileUpload = (field: 'customUrl' | 'customUrlDark' | 'customUrlLight') => (e: React.ChangeEvent<HTMLInputElement>) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          if (typeof reader.result === 'string') {
+                            setLandingAssets(prev => ({
+                              ...prev,
+                              [assetKey]: {
+                                ...prev[assetKey],
+                                [field]: reader.result as string,
+                                useCustom: true
+                              }
+                            }));
+                            if (onShowToast) onShowToast(`Screenshot uploaded for ${item.label}! Click Save to publish.`, 'success');
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      };
+
+                      return (
+                        <div 
+                          key={item.id} 
+                          style={{ 
+                            background: 'rgba(15, 23, 42, 0.65)', 
+                            border: `1px solid ${item.useCustom ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.08)'}`, 
+                            borderRadius: '20px', 
+                            padding: '20px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            gap: '14px',
+                            boxShadow: item.useCustom ? '0 10px 30px rgba(16,185,129,0.1)' : 'none'
+                          }}
+                        >
+                          <div>
+                            {/* Top Placement Badge & Switch Toggle */}
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '12px' }}>
+                              <span style={{ 
+                                fontSize: '10px', 
+                                fontWeight: 800, 
+                                textTransform: 'uppercase', 
+                                letterSpacing: '0.06em', 
+                                color: '#10b981', 
+                                background: 'rgba(16,185,129,0.12)', 
+                                padding: '4px 10px', 
+                                borderRadius: '100px',
+                                border: '1px solid rgba(16,185,129,0.25)'
+                              }}>
+                                {item.section}
+                              </span>
+
+                              {/* Toggle Switch */}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontSize: '12px', color: item.useCustom ? '#34d399' : '#94a3b8', fontWeight: 700 }}>
+                                  {item.useCustom ? '✓ Custom' : 'Default'}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setLandingAssets(prev => ({
+                                      ...prev,
+                                      [assetKey]: {
+                                        ...prev[assetKey],
+                                        useCustom: !prev[assetKey].useCustom
+                                      }
+                                    }));
+                                  }}
+                                  style={{
+                                    width: '44px',
+                                    height: '24px',
+                                    borderRadius: '100px',
+                                    background: item.useCustom ? '#10b981' : 'rgba(255,255,255,0.15)',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    position: 'relative',
+                                    transition: 'background 0.2s ease',
+                                    padding: '2px'
+                                  }}
+                                >
+                                  <div style={{
+                                    width: '20px',
+                                    height: '20px',
+                                    borderRadius: '50%',
+                                    background: '#ffffff',
+                                    position: 'absolute',
+                                    top: '2px',
+                                    left: item.useCustom ? '22px' : '2px',
+                                    transition: 'left 0.2s ease',
+                                    boxShadow: '0 2px 5px rgba(0,0,0,0.3)'
+                                  }} />
+                                </button>
+                              </div>
+                            </div>
+
+                            <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#fff', margin: '0 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                              <span>{item.label}</span>
+                              {isPhoneMockup && (
+                                <span style={{ fontSize: '10px', background: 'rgba(59,130,246,0.2)', border: '1px solid rgba(59,130,246,0.4)', color: '#60a5fa', padding: '2px 8px', borderRadius: '100px', whiteSpace: 'nowrap' }}>
+                                  📱 Auto-fits in 3D iPhone
+                                </span>
+                              )}
+                            </h3>
+                            <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: '0 0 12px 0', lineHeight: 1.4 }}>
+                              {item.description}
+                            </p>
+
+                            {/* Live Preview */}
+                            <div style={{
+                              width: '100%',
+                              height: '170px',
+                              borderRadius: '14px',
+                              overflow: 'hidden',
+                              background: '#090e0b',
+                              border: '1px solid rgba(255,255,255,0.1)',
+                              position: 'relative',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              marginBottom: '12px'
+                            }}>
+                              {previewUrl ? (
+                                <img 
+                                  src={previewUrl} 
+                                  alt={item.label} 
+                                  style={{ width: '100%', height: '100%', objectFit: isPhoneMockup ? 'contain' : 'cover', background: '#090e0b' }}
+                                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                />
+                              ) : (
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#64748b', fontSize: '13px' }}>
+                                  No image set
+                                </div>
+                              )}
+                              <div style={{
+                                position: 'absolute',
+                                bottom: '8px',
+                                right: '8px',
+                                background: 'rgba(0,0,0,0.75)',
+                                backdropFilter: 'blur(8px)',
+                                padding: '3px 8px',
+                                borderRadius: '6px',
+                                fontSize: '10px',
+                                fontWeight: 700,
+                                color: '#e2e8f0'
+                              }}>
+                                {item.recommendedSize}
+                              </div>
+                            </div>
+
+                            {/* Upload Section — shown when custom is ON */}
+                            {item.useCustom && (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+
+                                {/* If phone mockup → show Dark & Light separate uploaders */}
+                                {isPhoneMockup ? (
+                                  <>
+                                    {/* Dark Mode Screenshot */}
+                                    <div style={{ padding: '10px 12px', borderRadius: '12px', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                        <span style={{ fontSize: '12px', fontWeight: 800, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                          🌙 Dark Mode Screenshot
+                                        </span>
+                                        {item.customUrlDark && <span style={{ fontSize: '10px', color: '#34d399', fontWeight: 700 }}>✓ Uploaded</span>}
+                                      </div>
+                                      <div style={{ display: 'flex', gap: '8px' }}>
+                                        <input 
+                                          type="text"
+                                          placeholder="Paste dark mode image URL..."
+                                          value={item.customUrlDark || ''}
+                                          onChange={(e) => {
+                                            setLandingAssets(prev => ({
+                                              ...prev,
+                                              [assetKey]: { ...prev[assetKey], customUrlDark: e.target.value }
+                                            }));
+                                          }}
+                                          style={{ flex: 1, padding: '7px 10px', borderRadius: '8px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.78rem', outline: 'none' }}
+                                        />
+                                        <label style={{
+                                          padding: '7px 12px', borderRadius: '8px',
+                                          background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.4)',
+                                          color: '#c4b5fd', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer',
+                                          display: 'flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap'
+                                        }}>
+                                          <Upload size={13} /> Upload
+                                          <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileUpload('customUrlDark')} />
+                                        </label>
+                                      </div>
+                                    </div>
+
+                                    {/* Light Mode Screenshot */}
+                                    <div style={{ padding: '10px 12px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                        <span style={{ fontSize: '12px', fontWeight: 800, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                          ☀️ Light Mode Screenshot
+                                        </span>
+                                        {item.customUrlLight && <span style={{ fontSize: '10px', color: '#34d399', fontWeight: 700 }}>✓ Uploaded</span>}
+                                      </div>
+                                      <div style={{ display: 'flex', gap: '8px' }}>
+                                        <input 
+                                          type="text"
+                                          placeholder="Paste light mode image URL..."
+                                          value={item.customUrlLight || ''}
+                                          onChange={(e) => {
+                                            setLandingAssets(prev => ({
+                                              ...prev,
+                                              [assetKey]: { ...prev[assetKey], customUrlLight: e.target.value }
+                                            }));
+                                          }}
+                                          style={{ flex: 1, padding: '7px 10px', borderRadius: '8px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.78rem', outline: 'none' }}
+                                        />
+                                        <label style={{
+                                          padding: '7px 12px', borderRadius: '8px',
+                                          background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.35)',
+                                          color: '#fbbf24', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer',
+                                          display: 'flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap'
+                                        }}>
+                                          <Upload size={13} /> Upload
+                                          <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileUpload('customUrlLight')} />
+                                        </label>
+                                      </div>
+                                    </div>
+
+                                    <p style={{ fontSize: '11px', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
+                                      💡 Upload separate screenshots for dark & light mode. Landing page auto-picks the right one based on visitor's theme. If you upload only one, it's used for both.
+                                    </p>
+                                  </>
+                                ) : (
+                                  /* Non-phone assets: single upload */
+                                  <div style={{ display: 'flex', gap: '8px' }}>
+                                    <input 
+                                      type="text"
+                                      placeholder="Paste Image URL (https://...)"
+                                      value={item.customUrl}
+                                      onChange={(e) => {
+                                        setLandingAssets(prev => ({
+                                          ...prev,
+                                          [assetKey]: { ...prev[assetKey], customUrl: e.target.value }
+                                        }));
+                                      }}
+                                      style={{ flex: 1, padding: '8px 12px', borderRadius: '8px', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: '0.8rem', outline: 'none' }}
+                                    />
+                                    <label style={{
+                                      padding: '8px 14px', borderRadius: '8px',
+                                      background: 'rgba(16,185,129,0.2)', border: '1px solid rgba(16,185,129,0.4)',
+                                      color: '#34d399', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer',
+                                      display: 'flex', alignItems: 'center', gap: '6px'
+                                    }}>
+                                      <Upload size={14} /> Upload
+                                      <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileUpload('customUrl')} />
+                                    </label>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Quick Reset to Default button */}
+                          {item.useCustom && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setLandingAssets(prev => ({
+                                  ...prev,
+                                  [assetKey]: {
+                                    ...prev[assetKey],
+                                    useCustom: false,
+                                    customUrl: '',
+                                    customUrlDark: '',
+                                    customUrlLight: ''
+                                  }
+                                }));
+                              }}
+                              style={{
+                                padding: '6px 12px',
+                                borderRadius: '8px',
+                                background: 'transparent',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                color: '#94a3b8',
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                alignSelf: 'flex-start'
+                              }}
+                            >
+                              Reset to Default Image
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {activeTab === 'slots' && (
                 <div>
                   <h4 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

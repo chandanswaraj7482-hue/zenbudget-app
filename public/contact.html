@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Support & Help Center — ZenBudget AI</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="description" content="ZenBudget Help & Contact Support - Get in touch with our support engineers for billing assistance, account recovery, bug reports, or feature requests.">
+  <style>
+    :root {
+      --bg: #090e0b;
+      --card-bg: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #f8fafc;
+      --text-sub: #94a3b8;
+      --primary: #10b981;
+      --primary-light: #34d399;
+      --accent: #84cc16;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f8fafc;
+        --card-bg: #ffffff;
+        --border: rgba(0, 0, 0, 0.08);
+        --text: #0f172a;
+        --text-sub: #64748b;
+        --primary: #059669;
+        --primary-light: #10b981;
+        --accent: #65a30d;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 24px 16px 60px;
+    }
+    .wrapper { max-width: 880px; margin: 0 auto; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0 32px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .brand img { width: 40px; height: 40px; border-radius: 12px; }
+    .brand-title { font-size: 20px; font-weight: 900; letter-spacing: -0.02em; }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 100px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+    .back-btn:hover {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--primary-light);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 4px 14px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+      line-height: 1.15;
+    }
+    .subtitle { font-size: 15px; color: var(--text-sub); margin-bottom: 36px; }
+    
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+    .contact-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+    .contact-card h3 {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .contact-card p {
+      font-size: 13.5px;
+      color: var(--text-sub);
+      margin-bottom: 16px;
+    }
+    .contact-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--primary-light);
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 14px;
+    }
+    .contact-link:hover { text-decoration: underline; }
+
+    .faq-section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 28px;
+      margin-top: 24px;
+    }
+    .faq-item {
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .faq-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .faq-q {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .faq-a {
+      font-size: 13.5px;
+      color: var(--text-sub);
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 13.5px;
+      color: var(--text-sub);
+    }
+    .footer-links a {
+      color: var(--text-sub);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--primary-light); }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <header>
+      <a href="/" class="brand">
+        <img src="/favicon.png" alt="ZenBudget Logo">
+        <span class="brand-title">ZenBudget</span>
+      </a>
+      <a href="/" class="back-btn">← Back to App</a>
+    </header>
+
+    <main>
+      <div class="hero-badge">24/7 Dedicated Helpdesk</div>
+      <h1>Contact Support & Help</h1>
+      <p class="subtitle">Have questions or need assistance with your subscription or data sync? We're here to help.</p>
+
+      <div class="contact-grid">
+        <div class="contact-card">
+          <div>
+            <h3>📧 Email Support</h3>
+            <p>Direct ticket system with dedicated human engineers. Guaranteed response within 2 hours.</p>
+          </div>
+          <a href="mailto:hello.zenbudget@zohomail.in" class="contact-link">hello.zenbudget@zohomail.in →</a>
+        </div>
+
+        <div class="contact-card">
+          <div>
+            <h3>⚡ Live Web App</h3>
+            <p>Launch the web app directly in your browser or install on macOS, iOS, and Android.</p>
+          </div>
+          <a href="/" class="contact-link">Open Web App →</a>
+        </div>
+
+        <div class="contact-card">
+          <div>
+            <h3>📦 Android Direct APK</h3>
+            <p>Download the latest standalone native APK with offline storage & biometrics.</p>
+          </div>
+          <a href="/zenbudget.apk" class="contact-link" download>Download APK →</a>
+        </div>
+      </div>
+
+      <div class="faq-section">
+        <h2 style="font-size: 18px; font-weight: 800; color: var(--primary-light); margin-bottom: 16px;">Frequently Asked Questions</h2>
+        
+        <div class="faq-item">
+          <div class="faq-q">How do I restore my lifetime or yearly subscription?</div>
+          <div class="faq-a">Simply sign in with the exact same email address used during checkout. ZenBudget will automatically verify your license from the encrypted cloud vault.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Can I use ZenBudget on iPhone / Mac?</div>
+          <div class="faq-a">Yes! ZenBudget is a modern standalone PWA. On iPhone, tap Safari's Share button [↑] → "Add to Home Screen". On Mac, click "Add to Dock" in Safari or the Install icon in Chrome.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">Are my bank credentials stored?</div>
+          <div class="faq-a">Never. ZenBudget operates with local-first encryption and direct UPI intent deep links. We never store or ask for banking passwords or UPI PINs.</div>
+        </div>
+      </div>
+    </main>
+
+    <div class="footer-links">
+      <a href="/privacy.html">Privacy Policy</a>
+      <span>•</span>
+      <a href="/terms.html">Terms of Service</a>
+      <span>•</span>
+      <a href="/security.html">Security</a>
+      <span>•</span>
+      <a href="/contact.html">Contact Support</a>
+    </div>
+  </div>
+</body>
+</html>

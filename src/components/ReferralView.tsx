@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Gift, Copy, Check } from 'lucide-react';
+import { ArrowLeft, Gift, Copy, Check, Share2 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
 interface ReferralViewProps {
@@ -41,11 +41,32 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
     fetchHistory();
   }, [userReferralCode]);
 
+  const getViralInviteMessage = () => {
+    const code = userReferralCode || 'ZENBUDGET';
+    const link = `https://zenbudget-tracker.vercel.app/?ref=${encodeURIComponent(code)}`;
+    return `🚨 *Reality Check:* 83% of people lose ₹4,500+ every month to untracked small spends & hidden charges! 💸\n\n💡 I have been using *ZenBudget AI* to automatically track my daily kharcha, scan bank passbooks & block impulse buys — saving ₹5,000+ every month!\n\n🎁 Use my VIP Referral Code: *${code}* to unlock exclusive Premium savings tools:\n\n📲 *Download Android APK / Try Free App:* \n👉 ${link}\n\n⚡ _(Stop financial leaks today & take 100% control of your money!)_`;
+  };
+
   const handleCopyCode = () => {
     if (!userReferralCode) return;
     navigator.clipboard.writeText(userReferralCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShareInvite = async () => {
+    const msg = getViralInviteMessage();
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Join ZenBudget AI Money Manager',
+          text: msg,
+        });
+        return;
+      } catch (e) {}
+    }
+    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+    window.open(waUrl, '_blank');
   };
 
   const handleClaim = async (e: React.FormEvent) => {
@@ -162,18 +183,21 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
           <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
             Your Shareable Referral Code
           </label>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <div style={{ flex: 1, padding: '12px 14px', borderRadius: '12px', background: 'var(--bg-input)', border: '1px solid var(--border-input)', fontSize: '16px', fontWeight: 800, color: 'var(--primary)', letterSpacing: '2px' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 180px', padding: '12px 14px', borderRadius: '12px', background: 'var(--bg-input)', border: '1px solid var(--border-input)', fontSize: '16px', fontWeight: 800, color: 'var(--primary)', letterSpacing: '2px' }}>
               {userReferralCode || 'ZB-REF-CODE'}
             </div>
             <button
               onClick={handleCopyCode}
               style={{
-                padding: '12px 18px',
+                padding: '12px 16px',
                 borderRadius: '12px',
                 border: 'none',
-                background: copied ? '#10b981' : '#14b8a6',
-                color: '#fff',
+                background: copied ? '#10b981' : 'var(--bg-input)',
+                color: copied ? '#fff' : 'var(--text-primary)',
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                borderColor: copied ? '#10b981' : 'var(--border-input)',
                 fontSize: '13px',
                 fontWeight: 700,
                 cursor: 'pointer',
@@ -183,6 +207,25 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
               }}
             >
               <Copy size={16} /> {copied ? 'Copied!' : 'Copy'}
+            </button>
+            <button
+              onClick={handleShareInvite}
+              style={{
+                padding: '12px 18px',
+                borderRadius: '12px',
+                border: 'none',
+                background: 'linear-gradient(135deg, #10b981, #14b8a6)',
+                color: '#fff',
+                fontSize: '13px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 4px 12px rgba(16,185,129,0.25)'
+              }}
+            >
+              <Share2 size={16} /> Share VIP Invite
             </button>
           </div>
         </div>
