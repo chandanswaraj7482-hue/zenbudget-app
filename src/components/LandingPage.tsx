@@ -2113,19 +2113,22 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       title: 'Smart Budget Templates', 
       desc: 'Access pre-built budgets tailored for students, freelancers, couples, and families — rooted in proven financial frameworks. Customize at your own pace.',
       background: 'linear-gradient(135deg, #10b981 0%, #064e3b 100%)',
-      badge: 'Budget Framework'
+      badge: 'Budget Framework',
+      image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&auto=format&fit=crop'
     },
     { 
       title: 'Community Savings Challenges', 
       desc: 'You are not alone. Join collaborative savings challenges and community sessions designed to build healthy money habits alongside supportive peers.',
       background: 'linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%)',
-      badge: 'Together Challenges'
+      badge: 'Together Challenges',
+      image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&auto=format&fit=crop'
     },
     { 
       title: 'Personalized Financial Planning', 
       desc: 'Receive customized plans structured around your unique goals, focusing on daily routines that support long-term wealth creation and debt elimination.',
       background: 'linear-gradient(135deg, #8b5cf6 0%, #4c1d95 100%)',
-      badge: 'AI Roadmap'
+      badge: 'AI Roadmap',
+      image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop'
     },
   ];
 
