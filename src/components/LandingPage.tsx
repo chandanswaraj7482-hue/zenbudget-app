@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useLayoutEffect, useMemo } from 'react';
-import { Sparkles, ArrowRight, ArrowLeft, Search, Sun, Moon, Target, Shield, Users, Clock, Star, Smartphone, Brain, TrendingUp, Heart, Activity, ChevronDown, MessageCircleHeart, ChartLine, BookHeart, Lock, ArrowUpRight, Wallet, PiggyBank, Receipt, BarChart3, Banknote, CircleCheck, Circle, Flame, Play, BookOpen, MessageCircle, X, Download, Menu, CheckCircle, CheckCircle2, ChevronRight, Zap, RefreshCw, HelpCircle, Award, Check, Monitor, Pause } from 'lucide-react';
+import { Sparkles, ArrowRight, ArrowLeft, Search, Sun, Moon, Target, Shield, Users, Clock, Star, Smartphone, Brain, TrendingUp, Heart, Activity, ChevronDown, MessageCircleHeart, ChartLine, BookHeart, Lock, ArrowUpRight, Wallet, PiggyBank, Receipt, BarChart3, Banknote, CircleCheck, Circle, Flame, Play, BookOpen, MessageCircle, X, Download, Menu, CheckCircle, CheckCircle2, ChevronRight, Zap, RefreshCw, HelpCircle, Award, Check, Monitor, Pause, ShieldCheck } from 'lucide-react';
 
 interface LandingPageProps {
   onOpenWebApp: () => void;
@@ -2158,6 +2158,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               { label: 'About', id: 'about', key: 'about', hasDropdown: false },
               { label: 'Inside App', id: 'inside-app', key: 'inside app', hasDropdown: true },
               { label: 'Financial Quiz', id: 'quiz', key: 'quiz', hasDropdown: false, badge: 'FREE' },
+              { label: 'Toolkit', id: 'toolkit', key: 'toolkit', hasDropdown: false },
               { label: 'Pricing', id: 'pricing', key: 'pricing', hasDropdown: false },
               { label: 'Stories', id: 'community', key: 'stories', hasDropdown: false }
             ].map(link => (
@@ -2170,6 +2171,8 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   onClick={() => {
                     if (link.key === 'quiz') {
                       navigateToPage('quiz');
+                    } else if (link.key === 'toolkit') {
+                      navigateToPage('toolkit');
                     } else if (link.key === 'pricing') {
                       navigateToPage('pricing');
                     } else if (link.key === 'stories') {
@@ -2369,6 +2372,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             </div>
 
             <button onClick={() => startFreshQuiz()} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>Financial Assessment Quiz</button>
+            <button onClick={() => { setMobileMenuOpen(false); navigateToPage('toolkit'); }} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>Toolkit</button>
             <button onClick={() => { setMobileMenuOpen(false); navigateToPage('pricing'); }} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>Pricing</button>
             <button onClick={() => scrollTo('community')} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>Member Stories</button>
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
