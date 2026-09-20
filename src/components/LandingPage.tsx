@@ -1805,8 +1805,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
   const handleDownloadApk = () => {
     setShowModal(false);
-    // Redirect to Web App to enforce Premium requirement for APK
-    onOpenWebApp();
+    window.location.href = '/zenbudget.apk';
   };
 
   // Quiz Handling

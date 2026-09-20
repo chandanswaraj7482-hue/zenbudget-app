@@ -2548,18 +2548,6 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
               const parsed = JSON.parse(cachedAccs);
               if (Array.isArray(parsed) && parsed.length > 0) {
                 setAccounts(parsed);
-                // Upload cached accounts to Supabase for future cross-device access
-                for (const acc of parsed) {
-                  await supabase.from('accounts').upsert({
-                    id: acc.id,
-                    user_id: currentProfileId,
-                    name: acc.name,
-                    type: acc.type || 'savings',
-                    balance: acc.balance || 0,
-                    color: acc.color || '#10b981',
-                    icon: acc.icon || '💰'
-                  }, { onConflict: 'id' });
-                }
               }
             } catch (_) {}
           }

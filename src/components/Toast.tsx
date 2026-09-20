@@ -27,20 +27,20 @@ export const Toast: React.FC<ToastProps> = ({ toast, onClose }) => {
     switch (toast.type) {
       case 'success':
         return {
-          color: 'var(--success)',
-          bg: 'var(--success-glow)',
+          color: '#10b981', // Hardcoded hex for safe opacity appending
+          bg: 'rgba(16, 185, 129, 0.15)',
           icon: <CheckCircle size={18} />
         };
       case 'warning':
         return {
-          color: 'var(--danger)',
-          bg: 'var(--danger-glow)',
+          color: '#ef4444',
+          bg: 'rgba(239, 68, 68, 0.15)',
           icon: <AlertTriangle size={18} />
         };
       default:
         return {
-          color: 'var(--primary)',
-          bg: 'var(--primary-glow)',
+          color: '#3b82f6',
+          bg: 'rgba(59, 130, 246, 0.15)',
           icon: <Info size={18} />
         };
     }
@@ -65,15 +65,16 @@ export const Toast: React.FC<ToastProps> = ({ toast, onClose }) => {
       borderRadius: '16px',
       background: 'rgba(20, 20, 33, 0.95)',
       backdropFilter: 'blur(16px)',
-      border: `1px solid ${details.color}50`,
+      border: `1px solid ${details.color}40`,
       boxShadow: `0 8px 32px 0 rgba(0, 0, 0, 0.4), 0 0 15px ${details.color}20`,
-      animation: 'slideDownToast 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards'
+      animation: 'slideDownToast 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+      boxSizing: 'border-box'
     }}>
       <div style={{ color: details.color, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
         {details.icon}
       </div>
       <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-        <span style={{ fontSize: '14px', fontWeight: 600, color: '#fff', display: 'block', wordBreak: 'break-word' }}>
+        <span style={{ fontSize: '14px', fontWeight: 600, color: '#fff', display: 'block', wordBreak: 'break-word', lineHeight: '1.4' }}>
           {toast.message}
         </span>
       </div>
@@ -82,12 +83,13 @@ export const Toast: React.FC<ToastProps> = ({ toast, onClose }) => {
         style={{
           background: 'none',
           border: 'none',
-          color: 'var(--text-muted)',
+          color: '#94a3b8',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
-          padding: '2px',
-          flexShrink: 0
+          padding: '4px',
+          flexShrink: 0,
+          outline: 'none'
         }}
       >
         <X size={14} />

@@ -207,17 +207,17 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
   const spawnItem = useCallback((canvasWidth: number): FallingItem => {
     const gs = gameStateRef.current;
     
-    // Challenging danger trap ratio (32% - 45% danger obstacles to dodge)
-    let trapChance = 0.32;
-    if (gs.score > 700) trapChance = 0.44;
-    else if (gs.score > 250) trapChance = 0.38;
+    // Challenging danger trap ratio (Much harder now!)
+    let trapChance = 0.55;
+    if (gs.score > 700) trapChance = 0.75;
+    else if (gs.score > 250) trapChance = 0.65;
     
     // Rare 3% chance of life recovery shield
     const heartChance = gs.lives < 3 ? 0.04 : 0.01;
     const roll = Math.random();
 
-    // Gentle, readable falling speed (not hyper-fast, but challenging to navigate)
-    const diffMultiplier = 1 + Math.min(0.40, (gs.difficulty - 1) * 0.04);
+    // Faster falling speed to make it challenging
+    const diffMultiplier = 1 + Math.min(1.20, (gs.difficulty - 1) * 0.15);
 
     if (roll < heartChance) {
       // 💖 Extra Heart / Shield
@@ -228,7 +228,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         value: 50,
         emoji: '💖',
         label: 'Health Shield',
-        speed: (0.90 + Math.random() * 0.35) * diffMultiplier,
+        speed: (1.30 + Math.random() * 0.50) * diffMultiplier,
         size: 26
       };
     } else if (roll < heartChance + trapChance) {
@@ -242,7 +242,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         value: -1,
         emoji: exp.emoji,
         label: exp.label,
-        speed: (0.95 + Math.random() * 0.40) * diffMultiplier,
+        speed: (1.40 + Math.random() * 0.70) * diffMultiplier,
         size: exp.size
       };
     } else {
@@ -343,12 +343,12 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         gs.invulnerableTimer--;
       }
 
-      // Smooth difficulty scaling
-      gs.difficulty = 1 + Math.floor(gs.frameCount / 700) * 0.2;
+      // Fast difficulty scaling
+      gs.difficulty = 1 + Math.floor(gs.frameCount / 400) * 0.35;
 
       // Spawning with clean spacing
       gs.spawnTimer++;
-      const spawnRate = Math.max(34, 52 - Math.floor(gs.difficulty * 2));
+      const spawnRate = Math.max(18, 40 - Math.floor(gs.difficulty * 4));
       if (gs.spawnTimer >= spawnRate) {
         gs.items.push(spawnItem(W));
         gs.spawnTimer = 0;
