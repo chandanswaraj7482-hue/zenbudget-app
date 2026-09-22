@@ -1084,7 +1084,16 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
-      localStorage.removeItem('zb_local_session_profile');
+      const keysToWipe: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && (k.startsWith('zb_transactions') || k.startsWith('zb_accounts') || k.startsWith('zb_budgets') || k.startsWith('zb_goals') || k.startsWith('zb_debts') || k.startsWith('zb_loans') || k === 'zb_local_session_profile' || k === 'zb_profile_id' || k === 'zb_user_pin' || k === 'zb_pin_created' || k === 'zb_user_name' || k === 'zb_user_avatar')) {
+          keysToWipe.push(k);
+        }
+      }
+      keysToWipe.forEach(k => {
+        try { localStorage.removeItem(k); } catch (_) {}
+      });
       setUserId('');
       setUsername('');
       setDbProfile(null);
