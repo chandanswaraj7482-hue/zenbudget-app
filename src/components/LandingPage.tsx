@@ -2484,7 +2484,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   ))}
                 </div>
                 <span style={{ fontSize: '13px', fontWeight: 800, color: t.text }}>
-                  Trusted by <span style={{ color: '#84cc16' }}>10,000+ conscious savers</span> across India & beyond
+                  Trusted by <span style={{ color: '#84cc16' }}>4,000+ conscious savers</span> across India & beyond
                 </span>
               </div>
 
@@ -3800,10 +3800,10 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
       {/* ═══════════════ HERO SECTION (INNERHEAL STYLE ANIMATED BACKGROUND) ═══════════════ */}
       <div style={{ paddingTop: '90px', margin: '0 auto', width: 'min(1440px, 100%)' }}>
-        <section style={{ borderRadius: '2.5rem', overflow: 'hidden', border: `1px solid ${t.border}`, position: 'relative', paddingTop: '56px', paddingBottom: '32px', background: isDark ? 'linear-gradient(180deg, #111812 0%, #162018 100%)' : 'linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%)', boxShadow: isDark ? '0 20px 50px rgba(0,0,0,0.5)' : '0 20px 50px rgba(16,185,129,0.08)' }}>
+        <section style={{ borderRadius: '2.5rem', border: `1px solid ${t.border}`, position: 'relative', paddingTop: '56px', paddingBottom: '32px', background: isDark ? 'linear-gradient(180deg, #111812 0%, #162018 100%)' : 'linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%)', boxShadow: isDark ? '0 20px 50px rgba(0,0,0,0.5)' : '0 20px 50px rgba(16,185,129,0.08)' }}>
           
           {/* Glowing Animated Background Canvas (InnerHeal Mesh & Aura) */}
-          <div style={{ position: 'absolute', inset: 0, zIndex: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+          <div style={{ position: 'absolute', inset: 0, zIndex: 0, overflow: 'hidden', borderRadius: '2.5rem', pointerEvents: 'none' }}>
             
             {/* Primary Glowing Organic Light Beam behind phone mockups */}
             <div className="innerheal-rotate" style={{ position: 'absolute', top: '-25%', right: '-10%', width: '75%', height: '120%', background: isDark ? 'radial-gradient(circle, rgba(163,230,53,0.22) 0%, rgba(16,185,129,0.28) 40%, rgba(5,150,105,0.05) 70%, transparent 85%)' : 'radial-gradient(circle, rgba(134,239,172,0.55) 0%, rgba(74,222,128,0.35) 45%, transparent 75%)', filter: 'blur(80px)', opacity: 0.9 }}></div>
@@ -3851,7 +3851,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Star size={14} fill="#84cc16" color="#84cc16" />
-                    <span style={{ fontSize: '13px', fontWeight: 800, color: t.text }}>Trusted by <span style={{ color: '#84cc16' }}>10,000+</span> active users</span>
+                    <span style={{ fontSize: '13px', fontWeight: 800, color: t.text }}>Trusted by <span style={{ color: '#84cc16' }}>4,000+</span> active users</span>
                   </div>
                 </div>
 
@@ -4411,7 +4411,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               )}
 
               {insideTabs[activeInsideTab].mockupType === 'companion' && (
-                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#111827', color: '#f8fafc', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
+                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : t.cardBg, color: t.text, border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: isDark ? '0 16px 36px rgba(0,0,0,0.4)' : '0 16px 36px rgba(16,185,129,0.08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontSize: '20px' }}>🐷</span>
@@ -4419,20 +4419,20 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontSize: '11px', fontWeight: 800, color: '#fbbf24', background: 'rgba(251,191,36,0.1)', padding: '2px 8px', borderRadius: '8px', border: '1px solid rgba(251,191,36,0.2)' }}>⚡ 180 pts</span>
-                      <span style={{ fontSize: '11px', fontWeight: 700, background: 'rgba(255,255,255,0.08)', padding: '4px 10px', borderRadius: '8px' }}>🛍️ Shop</span>
+                      <span style={{ fontSize: '11px', fontWeight: 700, background: isDark ? 'rgba(255,255,255,0.08)' : '#f1f5f9', color: t.text, padding: '4px 10px', borderRadius: '8px' }}>🛍️ Shop</span>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '14px', alignItems: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px', padding: '16px' }}>
-                    <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#fda4af', border: '2px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px' }}>
+                  <div style={{ display: 'flex', gap: '14px', alignItems: 'center', background: isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc', border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0'}`, borderRadius: '18px', padding: '16px' }}>
+                    <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#fda4af', border: `2px solid ${isDark ? '#1e293b' : '#ffffff'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
                       🐷
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
                         <span style={{ fontSize: '14px', fontWeight: 800 }}>Zen Piggy</span>
-                        <span style={{ fontSize: '9px', fontWeight: 800, background: 'rgba(239,68,68,0.2)', color: '#ef4444', padding: '2px 6px', borderRadius: '6px' }}>Regretful 😡</span>
+                        <span style={{ fontSize: '9px', fontWeight: 800, background: 'rgba(239,68,68,0.15)', color: '#ef4444', padding: '2px 6px', borderRadius: '6px' }}>Regretful 😡</span>
                       </div>
-                      <div style={{ fontSize: '11px', color: '#94a3b8', lineHeight: 1.3 }}>
+                      <div style={{ fontSize: '11px', color: t.textMuted, lineHeight: 1.3 }}>
                         *Zen Piggy feels low and regretful. Equip items in shop...* <span style={{ color: '#10b981', fontWeight: 700 }}>more</span>
                       </div>
                     </div>
@@ -4838,22 +4838,22 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                 <span style={{ fontSize: '13px', fontWeight: 800, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                  Question {currentQuestionIndex + 1} of {QUIZ_QUESTIONS.length}
+                  Question {currentQuestionIndex + 1} of {activeQuizQuestions.length}
                 </span>
                 <span style={{ fontSize: '13px', fontWeight: 700, color: t.textMuted }}>
-                  {Math.round(((currentQuestionIndex + 1) / QUIZ_QUESTIONS.length) * 100)}% Completed
+                  {Math.round(((currentQuestionIndex + 1) / activeQuizQuestions.length) * 100)}% Completed
                 </span>
               </div>
               <div style={{ width: '100%', height: '8px', background: isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb', borderRadius: '100px', overflow: 'hidden', marginBottom: '32px' }}>
-                <div style={{ width: `${((currentQuestionIndex + 1) / QUIZ_QUESTIONS.length) * 100}%`, height: '100%', background: '#10b981', borderRadius: '100px', transition: 'width 0.4s' }}></div>
+                <div style={{ width: `${((currentQuestionIndex + 1) / activeQuizQuestions.length) * 100}%`, height: '100%', background: '#10b981', borderRadius: '100px', transition: 'width 0.4s' }}></div>
               </div>
 
               <h3 style={{ fontSize: '22px', fontWeight: 800, lineHeight: 1.3, marginBottom: '28px' }}>
-                {QUIZ_QUESTIONS[currentQuestionIndex].question}
+                {activeQuizQuestions[currentQuestionIndex].question}
               </h3>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                {QUIZ_QUESTIONS[currentQuestionIndex].options.map((opt, i) => (
+                {activeQuizQuestions[currentQuestionIndex].options.map((opt, i) => (
                   <button 
                     key={i} 
                     onClick={() => handleSelectQuizOption(opt.points)}

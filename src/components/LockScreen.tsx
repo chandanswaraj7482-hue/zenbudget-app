@@ -800,7 +800,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         const { error } = await supabase.auth.signInWithOAuth({ 
           provider,
           options: {
-            redirectTo: window.location.origin
+            redirectTo: window.location.origin + (window.location.pathname === '/' ? '' : window.location.pathname)
           }
         });
         if (error) throw error;
@@ -1133,31 +1133,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         </div>
       )}
 
-      {/* Fallback Safety: If step is unlock but profile is missing */}
-      {!isLoading && step === 'unlock' && !dbProfile && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', textAlign: 'center', padding: '24px' }}>
-          <div style={{ fontSize: '40px' }}>🔑</div>
-          <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff', margin: 0 }}>Unlock ZenBudget</h3>
-          <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0, maxWidth: '280px' }}>
-            Session ready. Click below to continue to your dashboard or sign in again.
-          </p>
-          <button
-            onClick={() => setStep('auth')}
-            style={{
-              padding: '12px 20px',
-              borderRadius: '14px',
-              border: 'none',
-              background: 'linear-gradient(135deg, #22c55e 0%, #06b6d4 100%)',
-              color: '#ffffff',
-              fontWeight: 800,
-              fontSize: '13px',
-              cursor: 'pointer'
-            }}
-          >
-            🔓 Continue / Sign In
-          </button>
-        </div>
-      )}
+
 
       {/* STEP: Sign In / Sign Up Auth Screen */}
       {!isLoading && step === 'auth' && (

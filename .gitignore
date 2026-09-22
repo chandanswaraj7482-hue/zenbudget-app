@@ -36,7 +36,6 @@ admin-build
 android-sdk
 
 # APK binaries
-*.apk
 
 # Admin portal zip archive
 admin-portal.zip
