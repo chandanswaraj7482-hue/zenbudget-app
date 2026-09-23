@@ -3487,55 +3487,60 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   </p>
 
                   <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <button onClick={onOpenWebApp} style={{ background: '#10b981', color: '#ffffff', padding: '14px 28px', borderRadius: '100px', fontSize: '15px', fontWeight: 800, border: 'none', cursor: 'pointer', boxShadow: '0 10px 24px rgba(16,185,129,0.3)', display: 'flex', alignItems: 'center', gap: '8px' }} className="hover-lift">
-                      <Wallet size={18} /> Launch Web App
+                    <button onClick={onOpenWebApp} style={{ background: 'linear-gradient(135deg, #10b981 0%, #047857 100%)', color: '#ffffff', padding: '16px 32px', borderRadius: '100px', fontSize: '16px', fontWeight: 900, border: 'none', cursor: 'pointer', boxShadow: '0 10px 24px rgba(16,185,129,0.35)', display: 'flex', alignItems: 'center', gap: '10px' }} className="hover-lift">
+                      <Lock size={18} /> Unlock My Action Plan
                     </button>
-                    <button onClick={resetQuiz} style={{ background: 'transparent', border: `1px solid ${t.border}`, color: t.text, padding: '14px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <button onClick={resetQuiz} style={{ background: 'transparent', border: `1px solid ${t.border}`, color: t.text, padding: '16px 28px', borderRadius: '100px', fontSize: '15px', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                       <RefreshCw size={14} /> Retake Assessment
                     </button>
                   </div>
                 </div>
 
-                {/* ROADMAP SECTION */}
-                <div style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '2.5rem', padding: '40px', boxShadow: '0 20px 40px rgba(0,0,0,0.05)' }}>
-                  <h3 style={{ fontSize: '24px', fontWeight: 800, color: t.text, marginBottom: '8px' }}>Your App Action Roadmap</h3>
-                  <p style={{ color: t.textSub, fontSize: '15px', marginBottom: '32px' }}>Here is how the ZenBudget App will help you improve this score.</p>
+                {/* PSYCHOLOGICAL CONVERSION SECTION */}
+                <div className="hero-animate" style={{ background: isDark ? 'linear-gradient(145deg, rgba(16,185,129,0.1) 0%, rgba(15,23,18,0.9) 100%)' : 'linear-gradient(145deg, #f0fdf4 0%, #ffffff 100%)', border: `1px solid ${isDark ? 'rgba(16,185,129,0.2)' : '#bbf7d0'}`, borderRadius: '2.5rem', padding: 'clamp(32px, 5vw, 48px) clamp(24px, 4vw, 40px)', boxShadow: isDark ? '0 20px 50px rgba(0,0,0,0.5)' : '0 20px 50px rgba(16,185,129,0.15)' }}>
+                  <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#fef3c7', color: '#b45309', padding: '6px 12px', borderRadius: '100px', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>
+                      <Flame size={14} /> High Match Found
+                    </div>
+                    <h3 style={{ fontSize: 'clamp(24px, 4vw, 32px)', fontWeight: 900, color: t.text, marginBottom: '12px', lineHeight: 1.2 }}>Stop Losing Money to Hidden Triggers</h3>
+                    <p style={{ color: t.textSub, fontSize: '16px', lineHeight: 1.6, maxWidth: '500px', margin: '0 auto' }}>Based on your score, you share the exact same spending gaps as <strong style={{ color: t.text }}>4,200+ users</strong> who have already achieved financial calm using ZenBudget's automated system.</p>
+                  </div>
                   
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '40px' }}>
                     
-                    <div style={{ display: 'flex', gap: '16px' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(16,185,129,0.15)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 900, fontSize: '16px' }}>1</div>
+                    <div style={{ display: 'flex', gap: '16px', background: isDark ? 'rgba(0,0,0,0.25)' : '#ffffff', padding: '24px', borderRadius: '20px', border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : '#e5e7eb'}`, boxShadow: '0 10px 25px rgba(0,0,0,0.03)' }}>
+                      <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'rgba(239,68,68,0.1)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <TrendingDown size={24} />
+                      </div>
                       <div>
-                        <h4 style={{ fontSize: '16px', fontWeight: 800, color: t.text, margin: '0 0 6px 0' }}>Sync & Capture</h4>
-                        <p style={{ margin: 0, fontSize: '14px', color: t.textSub, lineHeight: 1.5 }}>The app uses AI Quick Capture to track your exact cash flow without manual entry fatigue.</p>
+                        <h4 style={{ fontSize: '16px', fontWeight: 800, color: t.text, margin: '0 0 6px 0' }}>The Problem</h4>
+                        <p style={{ margin: 0, fontSize: '14px', color: t.textSub, lineHeight: 1.5 }}>Unplanned impulse spending and forgotten subscriptions are silently draining your wealth.</p>
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '16px' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(59,130,246,0.15)', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 900, fontSize: '16px' }}>2</div>
-                      <div>
-                        <h4 style={{ fontSize: '16px', fontWeight: 800, color: t.text, margin: '0 0 6px 0' }}>Analyze Leaks</h4>
-                        <p style={{ margin: 0, fontSize: '14px', color: t.textSub, lineHeight: 1.5 }}>Expense Analytics automatically highlights hidden subscriptions and impulse buying triggers.</p>
+                    <div style={{ display: 'flex', gap: '16px', background: isDark ? 'rgba(0,0,0,0.25)' : '#ffffff', padding: '24px', borderRadius: '20px', border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : '#e5e7eb'}`, boxShadow: '0 10px 25px rgba(0,0,0,0.03)' }}>
+                      <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'rgba(16,185,129,0.1)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <ShieldCheck size={24} />
                       </div>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '16px' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(139,92,246,0.15)', color: '#8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 900, fontSize: '16px' }}>3</div>
                       <div>
-                        <h4 style={{ fontSize: '16px', fontWeight: 800, color: t.text, margin: '0 0 6px 0' }}>Zero-Based Planning</h4>
-                        <p style={{ margin: 0, fontSize: '14px', color: t.textSub, lineHeight: 1.5 }}>Allocate every Rupee to a purpose before the month starts using our intuitive Envelope system.</p>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '16px' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(245,158,11,0.15)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 900, fontSize: '16px' }}>4</div>
-                      <div>
-                        <h4 style={{ fontSize: '16px', fontWeight: 800, color: t.text, margin: '0 0 6px 0' }}>Grow Wealth</h4>
-                        <p style={{ margin: 0, fontSize: '14px', color: t.textSub, lineHeight: 1.5 }}>Track automated Savings Goals and Debt Snowball payoffs directly inside your secure vault.</p>
+                        <h4 style={{ fontSize: '16px', fontWeight: 800, color: t.text, margin: '0 0 6px 0' }}>The Solution</h4>
+                        <p style={{ margin: 0, fontSize: '14px', color: t.textSub, lineHeight: 1.5 }}>Zero-Based Planning ensures every single Rupee has a strict purpose before the month even starts.</p>
                       </div>
                     </div>
 
                   </div>
+
+                  <div style={{ background: isDark ? 'rgba(16,185,129,0.08)' : '#ecfdf5', border: `1px dashed ${isDark ? 'rgba(16,185,129,0.3)' : '#6ee7b7'}`, borderRadius: '20px', padding: '32px', textAlign: 'center' }}>
+                    <h4 style={{ fontSize: '20px', fontWeight: 800, color: t.text, marginBottom: '12px' }}>Your 30-Day Fix is Ready</h4>
+                    <p style={{ fontSize: '15px', color: t.textSub, marginBottom: '24px', maxWidth: '400px', margin: '0 auto 24px' }}>We've generated a personalized AI roadmap tailored strictly to your test results.</p>
+                    <button onClick={onOpenWebApp} style={{ background: isDark ? '#ffffff' : '#111827', color: isDark ? '#111827' : '#ffffff', padding: '16px 36px', borderRadius: '100px', fontSize: '16px', fontWeight: 900, border: 'none', cursor: 'pointer', boxShadow: '0 10px 20px rgba(0,0,0,0.2)', width: '100%', maxWidth: '300px' }} className="hover-lift">
+                      Claim My Custom Plan Now
+                    </button>
+                    <div style={{ fontSize: '12px', color: t.textMuted, marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontWeight: 600 }}>
+                      <Lock size={12} /> 100% Private & Secure Space
+                    </div>
+                  </div>
+
                 </div>
 
               </div>
