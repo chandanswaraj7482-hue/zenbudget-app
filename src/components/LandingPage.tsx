@@ -2138,13 +2138,13 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       {/* ═══════════════ HEADER ═══════════════ */}
       <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', pointerEvents: 'none' }}>
         <div style={{ 
-          pointerEvents: 'auto', marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', padding: '0 24px', transition: 'all 0.3s', 
-          border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid rgba(255, 255, 255, 0.75)', 
-          borderRadius: '3rem', 
-          background: isDark ? 'rgba(15, 22, 17, 0.55)' : 'rgba(255, 255, 255, 0.55)', 
-          backdropFilter: 'blur(24px) saturate(190%)', WebkitBackdropFilter: 'blur(24px) saturate(190%)', 
-          boxShadow: isDark ? '0 16px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)' : '0 16px 40px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.95)', 
-          width: 'min(1440px, 100%)', height: '72px' 
+          pointerEvents: 'auto', marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', padding: '0 20px', transition: 'all 0.3s', 
+          border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(255, 255, 255, 0.8)', 
+          borderRadius: '24px', 
+          background: isDark ? 'rgba(10, 15, 12, 0.65)' : 'rgba(255, 255, 255, 0.8)', 
+          backdropFilter: 'blur(32px) saturate(200%)', WebkitBackdropFilter: 'blur(32px) saturate(200%)', 
+          boxShadow: isDark ? '0 16px 40px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.1)' : '0 16px 40px rgba(0,0,0,0.05), inset 0 1px 1px rgba(255,255,255,1)', 
+          width: 'min(1200px, 92%)', height: '64px' 
         }}>
           {/* Logo */}
           <a onClick={e => { e.preventDefault(); navigateToPage('home'); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', textDecoration: 'none' }}>
