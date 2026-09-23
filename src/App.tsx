@@ -2212,7 +2212,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           localStorage.setItem(`zb_financial_profile_completed_${currentProfileId}`, 'true');
         }
 
-        if (profData.language) {
+        if (profData.language && profData.language !== localStorage.getItem('zb_language')) {
           setI18nLanguage(profData.language as any);
           setLanguage(profData.language);
           localStorage.setItem(`zb_language_${currentProfileId}`, profData.language);
@@ -3997,11 +3997,11 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         transition: 'all 0.2s ease'
       }}>
         {/* Branding Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', flexShrink: 0 }}>
           <span style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '-0.03em', fontFamily: "'Manrope', sans-serif" }}>
             <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
           </span>
-          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#22c55e', boxShadow: '0 0 8px #22c55e' }} />
+          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#22c55e', boxShadow: '0 0 8px #22c55e', flexShrink: 0 }} />
         </div>
 
         {/* Status Actions */}
@@ -5006,7 +5006,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             setIsSubModalOpen(false);
             setIsSubBlocker(false);
           }}
-          isBlocker={isSubBlocker}
+          isBlocker={false}
           currency={currency}
           rates={rates}
         />

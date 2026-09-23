@@ -694,9 +694,15 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       setErrorMsg('Please accept the Terms & Conditions & Privacy Policy to proceed.');
       return;
     }
-    if (authMode === 'signup' && password.length < 6) {
-      setErrorMsg('Password must be at least 6 characters long.');
-      return;
+    if (authMode === 'signup') {
+      if (password.length < 6) {
+        setErrorMsg('Password must be at least 6 characters long.');
+        return;
+      }
+      if (!/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/\d/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
+        setErrorMsg('Password must contain at least one lowercase letter, one uppercase letter, one digit, and one symbol.');
+        return;
+      }
     }
     setIsLoading(true);
     setErrorMsg('');
@@ -800,7 +806,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         const { error } = await supabase.auth.signInWithOAuth({ 
           provider,
           options: {
-            redirectTo: window.location.origin + (window.location.pathname === '/' ? '' : window.location.pathname)
+            redirectTo: window.location.origin + '/#app'
           }
         });
         if (error) throw error;
@@ -1087,7 +1093,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       const keysToWipe: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && (k.startsWith('zb_transactions') || k.startsWith('zb_accounts') || k.startsWith('zb_budgets') || k.startsWith('zb_goals') || k.startsWith('zb_debts') || k.startsWith('zb_loans') || k === 'zb_local_session_profile' || k === 'zb_profile_id' || k === 'zb_user_pin' || k === 'zb_pin_created' || k === 'zb_user_name' || k === 'zb_user_avatar')) {
+        if (k && (k.startsWith('zb_transactions') || k.startsWith('zb_accounts') || k.startsWith('zb_budgets') || k.startsWith('zb_goals') || k.startsWith('zb_debts') || k.startsWith('zb_loans') || k === 'zb_local_session_profile' || k === 'zb_profile_id' || k === 'zb_user_pin' || k === 'zb_pin_created' || k === 'zb_user_name' || k === 'zb_user_avatar' || k === 'zb_user_email' || k === 'zb_google_avatar')) {
           keysToWipe.push(k);
         }
       }
