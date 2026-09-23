@@ -1340,7 +1340,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
   };
 
   // Typewriter Animation State
-  const typewriterWords = ["Savings", "Financial Freedom", "Smart Budgets", "Wealth Building", "Debt Elimination"];
+  const typewriterWords = ["Went", "Disappeared", "Vanished", "Leaked", "Evaporated"];
   const [typedText, setTypedText] = useState('');
   const [wordIndex, setWordIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -3103,10 +3103,10 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           <div style={{ textAlign: 'center', marginBottom: '56px' }}>
             <span style={{ fontSize: '13.5px', fontWeight: 800, textTransform: 'uppercase', color: '#10b981', letterSpacing: '0.14em' }}>Real & Transparent Pricing</span>
             <h1 style={{ fontSize: 'clamp(36px, 5vw, 64px)', fontWeight: 900, lineHeight: 1.1, color: t.text, marginTop: '14px', letterSpacing: '-0.025em' }}>
-              Invest in Financial Peace of Mind
+              Costs Less Than One Impulse Order a Month.
             </h1>
             <p style={{ fontSize: '18px', color: t.textSub, marginTop: '16px', maxWidth: '640px', margin: '16px auto 0', lineHeight: 1.6 }}>
-              Choose the right plan for your journey. No surprise renewals, no sneaky paywalls, and 100% private encrypted local data.
+              Our average user saves enough to pay for 10 years of ZenBudget PRO in their first 2 weeks. No surprise renewals, 100% private encrypted local data.
             </p>
           </div>
           
@@ -3116,13 +3116,13 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             {/* Tier 1: 7-Day Free Trial */}
             <div style={{ background: t.cardBg, border: `1px solid ${t.border}`, borderRadius: '24px', padding: '36px 28px', boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.3)' : '0 10px 30px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', position: 'relative' }}>
               <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: t.textMuted, letterSpacing: '0.1em', marginBottom: '8px' }}>STARTER</span>
-              <h3 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '8px', color: t.text }}>7-Day Free Trial</h3>
-              <p style={{ color: t.textSub, fontSize: '14px', marginBottom: '24px', minHeight: '42px', lineHeight: 1.5 }}>Perfect for getting started, test-driving AI features, and learning mindful budgeting.</p>
+              <h3 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '8px', color: t.text }}>7-Day Free Detox</h3>
+              <p style={{ color: t.textSub, fontSize: '14px', marginBottom: '24px', minHeight: '42px', lineHeight: 1.5 }}>Perfect for test-driving AI features, finding leaks, and seeing immediate savings.</p>
               
               <div style={{ fontSize: '42px', fontWeight: 900, marginBottom: '6px', color: t.text, display: 'flex', alignItems: 'baseline', gap: '6px' }}>
                 ₹0 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/7 days</span>
               </div>
-              <p style={{ fontSize: '13px', color: '#10b981', marginBottom: '32px', fontWeight: 700 }}>No credit card required · 7-Day Free Trial</p>
+              <p style={{ fontSize: '13px', color: '#10b981', marginBottom: '32px', fontWeight: 700 }}>No credit card required to start</p>
               
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
                 {[
@@ -3154,15 +3154,15 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             {/* Tier 2: Pro Monthly */}
             <div style={{ background: t.cardBg, border: `1px solid ${isDark ? 'rgba(56,189,248,0.3)' : 'rgba(56,189,248,0.4)'}`, borderRadius: '24px', padding: '36px 28px', boxShadow: isDark ? '0 15px 35px rgba(0,0,0,0.4)' : '0 15px 35px rgba(56,189,248,0.08)', display: 'flex', flexDirection: 'column', position: 'relative' }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', width: 'fit-content', padding: '4px 10px', borderRadius: '100px', background: 'rgba(56,189,248,0.12)', color: '#0284c7', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
-                FLEXIBLE MONTHLY
+                THE COMMITMENT
               </div>
               <h3 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '8px', color: t.text }}>Pro Monthly</h3>
-              <p style={{ color: t.textSub, fontSize: '14px', marginBottom: '24px', minHeight: '42px', lineHeight: 1.5 }}>Full AI automation with monthly flexibility. Cancel with one tap anytime.</p>
+              <p style={{ color: t.textSub, fontSize: '14px', marginBottom: '24px', minHeight: '42px', lineHeight: 1.5 }}>Full AI automation to crush impulse buying. Cancel anytime if you slip up.</p>
               
               <div style={{ fontSize: '42px', fontWeight: 900, marginBottom: '6px', color: t.text, display: 'flex', alignItems: 'baseline', gap: '6px' }}>
                 ₹149 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/month</span>
               </div>
-              <p style={{ fontSize: '13px', color: t.textMuted, marginBottom: '32px', fontWeight: 600 }}>$6.99/mo USD globally</p>
+              <p style={{ fontSize: '13px', color: t.textMuted, marginBottom: '32px', fontWeight: 600 }}>Costs less than a premium coffee</p>
               
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
                 {[
@@ -3194,17 +3194,17 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             {/* Tier 3: Pro Annual (Featured) */}
             <div style={{ background: isDark ? '#132219' : '#ffffff', border: '2.5px solid #10b981', borderRadius: '24px', padding: '36px 28px', color: t.text, boxShadow: '0 25px 50px rgba(16,185,129,0.25)', position: 'relative', display: 'flex', flexDirection: 'column', transform: 'scale(1.02)', zIndex: 2 }}>
               <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', fontSize: '11px', fontWeight: 900, padding: '6px 18px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.08em', boxShadow: '0 6px 16px rgba(16,185,129,0.4)', whiteSpace: 'nowrap' }}>
-                🔥 MOST POPULAR · SAVE OVER 16%
+                🔥 NO-BRAINER · SAVE OVER 16%
               </div>
               
-              <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: '#10b981', letterSpacing: '0.1em', marginBottom: '8px' }}>BEST VALUE VALUE PASS</span>
+              <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: '#10b981', letterSpacing: '0.1em', marginBottom: '8px' }}>THE WEALTH BUILDER</span>
               <h3 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '8px', color: t.text }}>Pro Annual</h3>
-              <p style={{ color: t.textSub, fontSize: '14px', marginBottom: '24px', minHeight: '42px', lineHeight: 1.5 }}>Everything in Pro with dedicated AI coaching & couple sync. Best long-term value.</p>
+              <p style={{ color: t.textSub, fontSize: '14px', marginBottom: '24px', minHeight: '42px', lineHeight: 1.5 }}>Commit to changing your financial life. Get 2 months completely free.</p>
               
               <div style={{ fontSize: '42px', fontWeight: 900, marginBottom: '6px', color: '#10b981', display: 'flex', alignItems: 'baseline', gap: '6px' }}>
                 ₹1,499 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/year</span>
               </div>
-              <p style={{ fontSize: '13px', color: '#10b981', marginBottom: '32px', fontWeight: 700 }}>Only ~₹124/month · 2 Months Free</p>
+              <p style={{ fontSize: '13px', color: '#10b981', marginBottom: '32px', fontWeight: 700 }}>Only ~₹124/month. Literally a rounding error.</p>
               
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
                 {[
@@ -3862,15 +3862,15 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
                 {/* Main Hero Title with Typing Animation */}
                 <h1 className="hero-animate hero-title" style={{ fontSize: 'clamp(2.4rem, 5vw, 3.8rem)', fontWeight: 900, lineHeight: 1.08, letterSpacing: '-0.03em', marginBottom: '20px', color: t.text }}>
-                  Master your money<br />through{' '}
-                  <span style={{ color: '#84cc16', display: 'inline-flex', alignItems: 'center', fontWeight: 900 }}>
+                  Stop Wondering Where<br />Your Money{' '}
+                  <span style={{ color: '#ef4444', display: 'inline-flex', alignItems: 'center', fontWeight: 900 }}>
                     <span>{typedText}</span>
                     <span className="typewriter-cursor"></span>
                   </span>
                 </h1>
 
-                <p className="hero-animate" style={{ fontSize: 'clamp(16px, 2vw, 19px)', fontWeight: 500, lineHeight: 1.6, color: t.textSub, maxWidth: '520px', marginBottom: '32px' }}>
-                  Track expenses effortlessly, journal with AI insights, and build healthy financial habits — all in one private, science-backed app.
+                <p className="hero-animate" style={{ fontSize: 'clamp(16px, 2vw, 19px)', fontWeight: 500, lineHeight: 1.6, color: t.textSub, maxWidth: '540px', marginBottom: '32px' }}>
+                  Identify hidden leaks, crush impulse spending, and build wealth on autopilot. Join <strong style={{ color: t.text }}>4,200+ users</strong> who saved an average of ₹8,400 in their first 30 days.
                 </p>
 
                 <div className="hero-animate" style={{ display: 'flex', gap: '16px', marginBottom: '36px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -3895,16 +3895,18 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   )}
 
                   {/* Primary Action: Open Web App */}
-                  <button onClick={onOpenWebApp} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'linear-gradient(135deg, #10b981 0%, #047857 100%)', color: '#ffffff', padding: '14px 28px', borderRadius: '100px', border: 'none', cursor: 'pointer', transition: 'all 0.25s ease', boxShadow: '0 12px 30px rgba(16, 185, 129, 0.45), 0 2px 8px rgba(0,0,0,0.1)' }} className="glow-btn hover-lift">
-                    <Wallet size={20} color="#ffffff" />
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
-                      <span style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.08em' }}>⚡ Instant Access</span>
-                      <span style={{ fontSize: '16px', fontWeight: 900 }}>Open Web App</span>
-                    </div>
-                    <span style={{ background: 'rgba(255,255,255,0.25)', padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: '4px' }}>
-                      <ArrowRight size={15} color="#ffffff" />
-                    </span>
-                  </button>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                    <button onClick={onOpenWebApp} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'linear-gradient(135deg, #10b981 0%, #047857 100%)', color: '#ffffff', padding: '14px 28px', borderRadius: '100px', border: 'none', cursor: 'pointer', transition: 'all 0.25s ease', boxShadow: '0 12px 30px rgba(16, 185, 129, 0.45), 0 2px 8px rgba(0,0,0,0.1)' }} className="glow-btn hover-lift">
+                      <Lock size={20} color="#ffffff" />
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
+                        <span style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.08em' }}>⚡ 100% Free Access</span>
+                        <span style={{ fontSize: '16px', fontWeight: 900 }}>Start My Financial Detox</span>
+                      </div>
+                      <span style={{ background: 'rgba(255,255,255,0.25)', padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: '4px' }}>
+                        <ArrowRight size={15} color="#ffffff" />
+                      </span>
+                    </button>
+                  </div>
 
                 </div>
 
@@ -4032,24 +4034,24 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       <section style={{ padding: '0 24px', maxWidth: '1440px', margin: 'clamp(40px, 8vw, 60px) auto clamp(60px, 12vw, 100px)' }}>
         <div className="scroll-fade-up hover-lift" style={{ background: 'linear-gradient(105deg, #1c1e1a 0%, #1c1e1a 45%, #6a8844 80%, #303d21 100%)', borderRadius: '2.5rem', padding: 'clamp(32px, 6vw, 60px) clamp(24px, 5vw, 40px)', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around', gap: 'clamp(24px, 5vw, 40px)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={4000} duration={2500} />+</div>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={4200} duration={2500} />+</div>
             <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Members</div>
-            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>and growing every day</div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>securing their future today</div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}><AnimatedCounter end={4.8} decimals={1} duration={2500} /><Star size={36} fill="#ffffff" color="#ffffff" /></div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>App Rating</div>
-            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>on the App Store</div>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>₹<AnimatedCounter end={2.4} decimals={1} duration={2500} />Cr+</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Debt Paid Off</div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>by our community</div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={20} duration={2500} />+</div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Categories</div>
-            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>covered by ZenBudget</div>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={14} duration={2500} /> Days</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Average Time</div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>to spot invisible leaks</div>
           </div>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={95} duration={2500} />%</div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Feel Calm</div>
-            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>within the first 30 days</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Users Save Money</div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>in their very first month</div>
           </div>
         </div>
       </section>
@@ -4057,32 +4059,32 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       {/* ═══════════════ HOW ZENBUDGET WORKS ═══════════════ */}
       <section style={{ padding: '40px 24px 80px', maxWidth: '1440px', margin: '0 auto', overflow: 'hidden' }}>
         <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '64px' }}>
-          <span style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#D58B6D', marginBottom: '16px', display: 'block' }}>Getting Started</span>
-          <h2 style={{ fontSize: 'clamp(24px, 4vw, 3.4rem)', lineHeight: 1.1, fontWeight: 800, letterSpacing: '-0.02em' }}>How ZenBudget Works</h2>
-          <p style={{ color: t.textSub, fontSize: '18px', marginTop: '16px', maxWidth: '580px', margin: '16px auto 0' }}>Your journey to financial wellness, simplified into three clear steps.</p>
+          <span style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#D58B6D', marginBottom: '16px', display: 'block' }}>The 3-Step Process</span>
+          <h2 style={{ fontSize: 'clamp(24px, 4vw, 3.4rem)', lineHeight: 1.1, fontWeight: 800, letterSpacing: '-0.02em' }}>How We Plug The Leaks</h2>
+          <p style={{ color: t.textSub, fontSize: '18px', marginTop: '16px', maxWidth: '580px', margin: '16px auto 0' }}>Stop treating symptoms and cure the root cause of your financial anxiety.</p>
         </div>
 
         <div className="scroll-fade-up" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px', maxWidth: '1200px', margin: '0 auto' }}>
           
           <div className="hover-lift" style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '40px 32px', display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: '13px', fontWeight: 800, color: '#D58B6D', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Step 01</div>
-            <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '16px', color: t.text }}>Assess Your Status</h3>
-            <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '16px', marginBottom: '32px' }}>Take our science-backed assessment. Help AI understand your current financial landscape and what you need most right now.</p>
-            <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: '#D58B6D', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }} onClick={() => startFreshQuiz()}>Learn more <ArrowRight size={14} /></div>
+            <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '16px', color: t.text }}>Diagnose the Leak</h3>
+            <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '16px', marginBottom: '32px' }}>Take our deep-dive psychological assessment. The AI instantly finds exactly where your money is vanishing—before the month ends.</p>
+            <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: '#D58B6D', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }} onClick={() => startFreshQuiz()}>Diagnose My Finances <ArrowRight size={14} /></div>
           </div>
 
           <div className="hover-lift" style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '40px 32px', display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: '13px', fontWeight: 800, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Step 02</div>
-            <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '16px', color: t.text }}>Get Actionable Insights</h3>
-            <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '16px', marginBottom: '32px' }}>Review your personalized dashboard with expense metrics, spending triggers, budget patterns, and AI-powered recommendations.</p>
-            <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: '#10b981', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }} onClick={() => navigateToPage('analytics')}>Learn more <ArrowRight size={14} /></div>
+            <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '16px', color: t.text }}>The 30-Day Detox</h3>
+            <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '16px', marginBottom: '32px' }}>Follow your AI-tailored plan to crush impulse spending. No more manual entry—AI quick-captures everything while coaching you.</p>
+            <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: '#10b981', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }} onClick={() => navigateToPage('analytics')}>View Dashboard <ArrowRight size={14} /></div>
           </div>
 
           <div className="hover-lift" style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '40px 32px', display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: '13px', fontWeight: 800, color: '#8b5cf6', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Step 03</div>
-            <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '16px', color: t.text }}>Start Growing</h3>
-            <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '16px', marginBottom: '32px' }}>Engage with financial tools, expense tracking, guided budgets, and our community to build lasting wealth habits.</p>
-            <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: '#8b5cf6', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }} onClick={() => navigateToPage('savings-goals')}>Learn more <ArrowRight size={14} /></div>
+            <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '16px', color: t.text }}>Autopilot Wealth</h3>
+            <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '16px', marginBottom: '32px' }}>Give every single rupee a job. Watch your debt shrink and your savings snowball so you never feel guilty spending again.</p>
+            <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: '#8b5cf6', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }} onClick={() => navigateToPage('savings-goals')}>Start Growing <ArrowRight size={14} /></div>
           </div>
 
         </div>
@@ -5146,43 +5148,46 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(52, 211, 153, 0.15)', border: '1px solid rgba(52, 211, 153, 0.4)', borderRadius: '100px', padding: '6px 14px', marginBottom: '16px' }}>
               <Sparkles size={14} color="#34d399" />
               <span style={{ fontSize: '11px', fontWeight: 800, color: '#6ee7b7', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                INSTANT ACCESS ANYWHERE • ZERO ADS
+                YOUR FUTURE SELF IS BEGGING YOU
               </span>
             </div>
 
             <h2 style={{ fontSize: 'clamp(26px, 3.8vw, 40px)', fontWeight: 900, color: '#ffffff', lineHeight: 1.15, marginBottom: '14px', letterSpacing: '-0.03em' }}>
-              Focus on your wealth.<br />
+              Every day you wait is<br />
               <span style={{ background: 'linear-gradient(135deg, #a7f3d0 0%, #34d399 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Anywhere. Anytime.
+                another day of financial anxiety.
               </span>
             </h2>
 
             <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.85)', marginBottom: '28px', lineHeight: 1.6, maxWidth: '480px' }}>
-              Join smart budgeters using ZenBudget's zero-knowledge private budget tools & AI insights to build lasting wealth.
+              Stop procrastinating on your wealth. Take the 3-minute assessment and get your custom action plan before you make your next impulse purchase.
             </p>
             
             <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', alignItems: 'center' }}>
               <button 
-                onClick={handleDownloadApk} 
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  setTimeout(() => startFreshQuiz(), 500);
+                }} 
                 style={{ 
                   background: 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)', 
                   color: '#064e3b', 
-                  padding: '14px 28px', 
+                  padding: '16px 32px', 
                   borderRadius: '100px', 
-                  fontSize: '14.5px', 
+                  fontSize: '16px', 
                   fontWeight: 900, 
                   border: 'none', 
                   cursor: 'pointer', 
                   display: 'flex', 
                   alignItems: 'center', 
-                  gap: '9px', 
+                  gap: '10px', 
                   boxShadow: '0 12px 30px rgba(0,0,0,0.3)',
                   transition: 'all 0.25s' 
                 }} 
-                className="glow-btn"
+                className="glow-btn hover-lift"
               >
-                <Download size={18} color="#059669" />
-                <span>Download Android APK</span>
+                <Brain size={18} color="#059669" />
+                <span>Take The Free Assessment</span>
               </button>
 
               <button 
@@ -5191,9 +5196,9 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   background: 'rgba(255,255,255,0.12)', 
                   color: '#ffffff', 
                   border: '1px solid rgba(255,255,255,0.3)', 
-                  padding: '14px 26px', 
+                  padding: '16px 28px', 
                   borderRadius: '100px', 
-                  fontSize: '14.5px', 
+                  fontSize: '15px', 
                   fontWeight: 800, 
                   cursor: 'pointer', 
                   display: 'flex', 
@@ -5205,7 +5210,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 className="hover-lift"
               >
                 <Wallet size={18} color="#34d399" />
-                <span>Open Instant Web App</span>
+                <span>Skip to Web App</span>
               </button>
             </div>
 
