@@ -2153,13 +2153,13 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           </a>
 
           {/* Desktop Nav Links */}
-          <ul style={{ display: 'flex', alignItems: 'center', gap: '4px', listStyle: 'none' }} className="desktop-only">
+          <ul style={{ display: 'flex', alignItems: 'center', gap: '2px', listStyle: 'none' }} className="desktop-only">
             {[
               { label: 'Features', id: 'features', key: 'features', hasDropdown: true },
               { label: 'Conditions', id: 'conditions', key: 'conditions', hasDropdown: true },
               { label: 'About', id: 'about', key: 'about', hasDropdown: false },
               { label: 'Inside App', id: 'inside-app', key: 'inside app', hasDropdown: true },
-              { label: 'Financial Quiz', id: 'quiz', key: 'quiz', hasDropdown: false, badge: 'FREE' },
+              { label: 'Quiz', id: 'quiz', key: 'quiz', hasDropdown: false, badge: 'FREE' },
               { label: 'Pricing', id: 'pricing', key: 'pricing', hasDropdown: false },
               { label: 'Stories', id: 'community', key: 'stories', hasDropdown: false }
             ].map(link => (
@@ -2170,25 +2170,17 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               >
                 <button 
                   onClick={() => {
-                    if (link.key === 'quiz') {
-                      navigateToPage('quiz');
-                    } else if (link.key === 'pricing') {
-                      navigateToPage('pricing');
-                    } else if (link.key === 'stories') {
-                      navigateToPage('community');
-                    } else if (link.key === 'about') {
-                      navigateToPage('about');
-                    } else if (link.hasDropdown) {
-                      if (activeDropdown === link.key) {
-                        setActiveDropdown(null);
-                      } else {
-                        handleDropdownMouseEnter(link.key);
-                      }
-                    } else {
-                      scrollTo(link.id);
-                    }
+                    if (link.key === 'quiz') navigateToPage('quiz');
+                    else if (link.key === 'pricing') navigateToPage('pricing');
+                    else if (link.key === 'stories') navigateToPage('community');
+                    else if (link.key === 'about') navigateToPage('about');
+                    else if (link.hasDropdown) {
+                      if (activeDropdown === link.key) setActiveDropdown(null);
+                      else handleDropdownMouseEnter(link.key);
+                    } else scrollTo(link.id);
                   }} 
-                  style={{ padding: '8px 16px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, color: (activeDropdown === link.key || activePage === link.key) ? t.text : t.textMuted, background: (activeDropdown === link.key || activePage === link.key) ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)') : 'transparent', cursor: 'pointer', border: 'none', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  style={{ whiteSpace: 'nowrap', padding: '8px 12px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, color: (activeDropdown === link.key || activePage === link.key) ? t.text : t.textMuted, background: (activeDropdown === link.key || activePage === link.key) ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)') : 'transparent', cursor: 'pointer', border: 'none', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  className="hover-bg"
                 >
                   <span>{link.label}</span>
                   {link.badge && (
@@ -2203,32 +2195,32 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           </ul>
 
           {/* Right Header Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button 
               onClick={toggleTheme} 
               aria-label={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"} 
               title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-              style={{ width: '38px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', border: `1px solid ${t.border}`, background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.5)', backdropFilter: 'blur(10px)', cursor: 'pointer', color: t.text, transition: 'all 0.2s' }}
+              style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', border: `1px solid ${t.border}`, background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.5)', backdropFilter: 'blur(10px)', cursor: 'pointer', color: t.text, transition: 'all 0.2s' }}
               className="hover-lift"
             >
               {isDark ? <Moon size={16} color="#a7f3d0" /> : <Sun size={16} color="#f59e0b" />}
             </button>
 
             {(deviceOS === 'ios' || deviceOS === 'mac') ? (
-              <button className="desktop-only" onClick={() => setShowIosGuideModal(true)} title="Add to Home Screen (Safari PWA)" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', color: t.text, padding: '8px 14px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }}>
+              <button className="desktop-only" onClick={() => setShowIosGuideModal(true)} title="Add to Home Screen (Safari PWA)" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', color: t.text, padding: '6px 12px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
                 <Smartphone size={14} color="#10b981" />
-                <span>Download App</span>
+                <span>Get App</span>
               </button>
             ) : (
-              <button className="desktop-only" onClick={handleDownloadApk} title="Download Android App APK" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', color: t.text, padding: '8px 14px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }}>
+              <button className="desktop-only" onClick={handleDownloadApk} title="Download Android App APK" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', color: t.text, padding: '6px 12px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
                 <Download size={14} color="#10b981" />
-                <span>Download APK</span>
+                <span>APK</span>
               </button>
             )}
 
-            <button onClick={onOpenWebApp} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg, #10b981 0%, #047857 100%)', color: '#fff', paddingLeft: '20px', paddingRight: '8px', paddingTop: '8px', paddingBottom: '8px', borderRadius: '100px', fontSize: '14.5px', fontWeight: 800, border: 'none', cursor: 'pointer', transition: 'all 0.25s ease', boxShadow: '0 6px 20px rgba(16,185,129,0.45)' }} className="hover-lift desktop-only">
+            <button onClick={onOpenWebApp} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg, #10b981 0%, #047857 100%)', color: '#fff', paddingLeft: '16px', paddingRight: '6px', paddingTop: '6px', paddingBottom: '6px', borderRadius: '100px', fontSize: '14px', fontWeight: 800, border: 'none', cursor: 'pointer', transition: 'all 0.25s ease', boxShadow: '0 6px 16px rgba(16,185,129,0.35)', whiteSpace: 'nowrap' }} className="hover-lift desktop-only">
               <Wallet size={16} color="#ffffff" />
-              <span>Open Web App</span>
+              <span>Open App</span>
               <span style={{ background: 'rgba(255,255,255,0.25)', padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ArrowRight size={14} color="#ffffff" /></span>
             </button>
 
