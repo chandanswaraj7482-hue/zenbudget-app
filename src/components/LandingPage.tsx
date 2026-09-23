@@ -3927,7 +3927,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               </div>
 
               {/* Hero Right Mockup Graphics - InnerHeal Inspired Dual Phones Overflowing Card Edge */}
-              <div className="hero-animate hero-mockup-scale desktop-only" style={{ position: 'relative', width: '100%', minHeight: '400px', height: '560px', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', overflow: 'hidden' }}>
+              <div className="hero-animate hero-mockup-scale desktop-only" style={{ position: 'relative', width: '100%', minHeight: '400px', height: '560px', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', overflow: 'visible' }}>
                 
                 {/* Floating Pill 1 (Top Center above phone 1): Feeling Financially Secure */}
                 <div className="floating-pill-reverse" style={{ position: 'absolute', top: '15px', left: '10px', zIndex: 38, display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '100px', background: '#ffffff', boxShadow: '0 16px 40px rgba(0,0,0,0.22)', padding: '10px 18px', color: '#111827' }}>
