@@ -127,14 +127,15 @@ export const parsePaymentScreenshot = async (
       const base64Data = base64DataUrl.split(',')[1] || base64DataUrl;
       const mimeType = base64DataUrl.includes('image/png') ? 'image/png' : 'image/jpeg';
 
-      const prompt = `Analyze this mobile payment receipt / screenshot (from Google Pay, PhonePe, Paytm, CRED, HDFC, SBI, or Netbanking app).
+      const prompt = `You are a strict data extraction AI analyzing a mobile payment receipt/screenshot. 
+CRITICAL RULE: DO NOT MAKE UP OR HALLUCINATE ANY DATA. If a value is not clearly visible in the image, return an empty string "" (or null for numbers).
 Extract the following information in strict valid JSON format:
 {
-  "amount": number (just the amount in numbers, e.g. 450),
-  "merchantName": string (payee or sender name, e.g. "Swiggy", "Ramesh Kumar", "Salary"),
-  "type": "expense" | "income" (CRITICAL: set to "income" if money was received, credited, cashback, or refund; set to "expense" if money was paid, debited, or sent),
+  "amount": number (extract ONLY the exact amount paid/received. If not found, return null),
+  "merchantName": string (extract ONLY the exact payee or sender name. If not found, return ""),
+  "type": "expense" | "income" (CRITICAL: return "income" ONLY if the image explicitly shows money received, credited, cashback, or refund. Return "expense" if it shows money paid, debited, sent, or a payment to a merchant. If unsure, return "expense"),
   "category": string (choose best from: "Food", "Groceries", "Transport", "Shopping", "Bills", "Salary", "Cashback", "Entertainment", "Health", "Investment", "General"),
-  "upiRef": string (12-digit UTR/UPI reference if visible, or empty string),
+  "upiRef": string (extract the exact 12-digit UTR/UPI reference if visible, else ""),
   "appSource": string ("gpay" | "phonepe" | "paytm" | "bank" | "general")
 }
 Return ONLY pure JSON without markdown code blocks.`;
@@ -142,7 +143,7 @@ Return ONLY pure JSON without markdown code blocks.`;
       onProgress?.('extracting', 80, 'Auto-detecting Income vs Expense, Merchant & Category...');
 
       const response = await ai.models.generateContent({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-flash-latest',
         contents: [
           {
             role: 'user',

@@ -2173,6 +2173,34 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                       </div>
                     )}
                   </div>
+                  
+                  {/* AI Coach Detailed Reviews Section */}
+                  <div style={{ padding: '1.5rem', backgroundColor: 'rgba(255, 255, 255, 0.02)', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                    <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#e2e8f0', marginBottom: '1rem' }}>Detailed App Reviews (AI Coach Section)</h3>
+                    {aiReviews.length === 0 ? (
+                      <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>No AI coach reviews submitted yet.</p>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {aiReviews.slice(0, 50).map(r => (
+                          <div key={r.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '1rem', backgroundColor: 'var(--bg-input)', borderRadius: '12px', border: '1px solid var(--border-input)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div style={{ fontWeight: 800, color: '#eab308' }}>★ {r.rating} / 5</div>
+                                <div style={{ fontSize: '0.875rem', color: 'var(--text-primary)', fontWeight: 600 }}>{r.user_name || 'Anonymous User'}</div>
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{new Date(r.created_at).toLocaleString()}</div>
+                            </div>
+                            {r.review_text && (
+                              <div style={{ fontSize: '0.875rem', color: '#cbd5e1', fontStyle: 'italic', backgroundColor: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px' }}>
+                                "{r.review_text}"
+                              </div>
+                            )}
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Profile ID: {r.profile_id}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 

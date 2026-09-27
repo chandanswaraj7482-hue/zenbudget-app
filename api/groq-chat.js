@@ -16,7 +16,7 @@ export default async function handler(req, res) {
 
   try {
     // If user prefers Gemini API
-    const apiKey = process.env.GEMINI_API_KEY || process.env.GROQ_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GROQ_API_KEY || process.env.VITE_GEMINI_API_KEY;
     
     if (!apiKey) {
       return res.status(500).json({ error: "Missing API Key in environment variables" });

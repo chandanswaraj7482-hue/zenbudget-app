@@ -24,7 +24,8 @@ export const cleanUpCashfreeOverlays = () => {
 export const launchCashfreeCheckout = async (
   paymentSessionId: string,
   onSuccess: (res: any) => void,
-  onFailure?: (err: any) => void
+  onFailure?: (err: any) => void,
+  environment?: string
 ) => {
   cleanUpCashfreeOverlays();
 
@@ -85,7 +86,10 @@ export const launchCashfreeCheckout = async (
     document.body.appendChild(closeBtn);
   } catch (e) {}
 
-  const cf = (window as any).Cashfree({ mode: 'production' });
+  // Determine mode: if environment is explicitly sandbox, or if it's localhost, or if payment session looks like sandbox.
+  // Sometimes sandbox sessions start with session_xxx
+  const mode = (environment === 'sandbox' || paymentSessionId.includes('sandbox')) ? 'sandbox' : 'production';
+  const cf = (window as any).Cashfree({ mode });
 
   try {
     cf.checkout({

@@ -350,10 +350,19 @@ export const HelpModal: React.FC<HelpModalProps> = ({
     }
 
     // 16. Universal Intelligent Conversational Fallback
-    if (isEng) {
-      return `🌿 Hii ${userName || 'friend'}! I'm Zen — your personal AI Financial Coach. Right now, your total wallet balance is **${currencySymbol}${totalAccBal.toLocaleString()}**, monthly income is **${currencySymbol}${totalIncome.toLocaleString()}**, total expenses are **${currencySymbol}${totalExpense.toLocaleString()}**, and top spending category is **${topCat.toUpperCase()}** (${currencySymbol}${topCatAmt.toLocaleString()}).\n\nAsk me about your balance, loans, category spending, impulse buy checks (e.g. "Can I afford ₹5,000?"), or any money advice! 💡✨`;
-    }
-    return `🌿 Hii ${userName || 'yaar'}! Main Zen hu — aapka AI Financial Coach. Abhi aapka total balance **${currencySymbol}${totalAccBal.toLocaleString()}** hai, iss month income **${currencySymbol}${totalIncome.toLocaleString()}**, total kharcha **${currencySymbol}${totalExpense.toLocaleString()}**, aur sabse zyada kharcha **${topCat.toUpperCase()}** (${currencySymbol}${topCatAmt.toLocaleString()}) me hua hai.\n\nAap mujhse balance, loans, spending habits, impulse buy checks (e.g. "Kya main ₹5,000 ka item le sakta hu?") ya kisi bhi financial topic ke baare me pooch sakte ho! 🤝✨`;
+    const engFallbacks = [
+      `🌿 Hii ${userName || 'friend'}! I'm Zen — your personal AI Financial Coach. Right now, your total wallet balance is **${currencySymbol}${totalAccBal.toLocaleString()}**, and top spending category is **${topCat.toUpperCase()}** (${currencySymbol}${topCatAmt.toLocaleString()}).\n\nTry asking me: "Can I afford ₹5,000?" or "What is my highest expense?" 💡✨`,
+      `Hey ${userName || 'there'}! Zen here! 🌿 Looks like you've spent **${currencySymbol}${totalExpense.toLocaleString()}** so far this month against an income of **${currencySymbol}${totalIncome.toLocaleString()}**.\n\nNeed advice? Ask me about your budget, loans, or say "monthly audit" for a health check! 📊`,
+      `Hello ${userName || 'friend'}! I am Zen, your AI assistant. Did you know your current balance is **${currencySymbol}${totalAccBal.toLocaleString()}**? \n\nI can analyze your spending, check impulse buys, or explain the 50/30/20 rule. What's on your mind? 🤖💸`
+    ];
+    const hinFallbacks = [
+      `🌿 Hii ${userName || 'yaar'}! Main Zen hu — aapka AI Financial Coach. Abhi aapka total balance **${currencySymbol}${totalAccBal.toLocaleString()}** hai, aur sabse zyada kharcha **${topCat.toUpperCase()}** (${currencySymbol}${topCatAmt.toLocaleString()}) me hua hai.\n\nAap mujhse pooch sakte ho: "Kya main ₹5,000 ka phone le sakta hu?" ya "mera kharcha batao" 🤝✨`,
+      `Hey ${userName || 'dost'}! Zen here! 🌿 Iss month aapka total kharcha **${currencySymbol}${totalExpense.toLocaleString()}** chal raha hai.\n\nAgar aapko monthly scorecard dekhna hai toh boliye "monthly audit", ya fir apne category budget ke baare me pooch lijiye! 📊`,
+      `Namaste ${userName || 'yaar'}! Main aapka money buddy Zen hu. Aapka current balance **${currencySymbol}${totalAccBal.toLocaleString()}** hai. \n\nMujhe koi bhi sawaal poocho jaise: "emergency fund kitna hona chahiye?" ya "sabse zyada paise kahan kharch hue?" 🤖💸`
+    ];
+    
+    const randomIdx = Math.floor(Math.random() * 3);
+    return isEng ? engFallbacks[randomIdx] : hinFallbacks[randomIdx];
   }
 
   const [conversationMemory, setConversationMemory] = useState<ConversationMemoryState>({

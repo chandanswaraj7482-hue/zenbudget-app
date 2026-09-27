@@ -600,7 +600,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           const credIdBuffer = Uint8Array.from(atob(storedCredId), c => c.charCodeAt(0));
           await navigator.credentials.get({
             publicKey: {
-              challenge: crypto.getRandomValues(new Uint8Array(32)),
+              challenge: typeof crypto !== 'undefined' ? crypto.getRandomValues(new Uint8Array(32)) : new Uint8Array(32),
               timeout: 60000,
               userVerification: 'required',
               allowCredentials: [{
@@ -615,7 +615,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           // First time: Register a new biometric credential
           const credential = await navigator.credentials.create({
             publicKey: {
-              challenge: crypto.getRandomValues(new Uint8Array(32)),
+              challenge: typeof crypto !== 'undefined' ? crypto.getRandomValues(new Uint8Array(32)) : new Uint8Array(32),
               rp: { name: 'ZenBudget', id: window.location.hostname },
               user: {
                 id: new TextEncoder().encode(userId || 'zenbudget-user'),
@@ -829,7 +829,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
     } catch (e) {
       let localId = localStorage.getItem('zb_fallback_device_id');
       if (!localId) {
-        localId = typeof crypto.randomUUID === 'function' 
+        localId = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function' 
           ? crypto.randomUUID() 
           : Math.random().toString(36).substring(2) + Date.now().toString(36);
         localStorage.setItem('zb_fallback_device_id', localId);

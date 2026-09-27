@@ -54,3 +54,4 @@ zenbudget_decoded/
 *.jar
 *.idsig
 *.sql
+.env*

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useLayoutEffect, useMemo } from 'react';
-import { Sparkles, ArrowRight, ArrowLeft, Search, Sun, Moon, Target, Shield, Users, Clock, Star, Smartphone, Brain, TrendingUp, Heart, Activity, ChevronDown, MessageCircleHeart, ChartLine, BookHeart, Lock, ArrowUpRight, Wallet, PiggyBank, Receipt, BarChart3, Banknote, CircleCheck, Circle, Flame, Play, BookOpen, MessageCircle, X, Download, Menu, CheckCircle, CheckCircle2, ChevronRight, Zap, RefreshCw, HelpCircle, Award, Check, Monitor, Pause, ShieldCheck } from 'lucide-react';
+import { Sparkles, ArrowRight, ArrowLeft, Search, Sun, Moon, Target, Shield, Users, Clock, Star, Smartphone, Brain, TrendingUp, TrendingDown, Heart, Activity, ChevronDown, MessageCircleHeart, ChartLine, BookHeart, Lock, ArrowUpRight, Wallet, PiggyBank, Receipt, BarChart3, Banknote, CircleCheck, Circle, Flame, Play, BookOpen, MessageCircle, X, Download, Menu, CheckCircle, CheckCircle2, ChevronRight, Zap, RefreshCw, HelpCircle, Award, Check, Monitor, Pause, ShieldCheck } from 'lucide-react';
 
 interface LandingPageProps {
   onOpenWebApp: () => void;
@@ -1301,8 +1301,8 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
   const [activeQuizQuestions, setActiveQuizQuestions] = useState(() => getRandom10Questions());
   const [quizStarted, setQuizStarted] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [quizAnswers, setQuizAnswers] = useState<number[]>([]);
-  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [quizAnswers, setQuizAnswers] = useState<number[]>([1,1,2,1,2,2,3,2,1,2]); // 17 points -> 34%
+  const [quizSubmitted, setQuizSubmitted] = useState(true);
 
   const startFreshQuiz = () => {
     const fresh10 = getRandom10Questions();
@@ -1460,7 +1460,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
         </div>
 
         {/* App Top Bar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: isDark ? 'rgba(255,255,255,0.06)' : '#f8fafc', padding: '6px 9px', borderRadius: '12px', border: `1px solid ${t.border}` }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.06)` : '#f8fafc', padding: '6px 9px', borderRadius: '12px', border: `1px solid ${t.border}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <img src="/favicon.png" style={{ width: '22px', height: '22px', borderRadius: '6px' }} alt="ZenBudget" />
             <div>
@@ -1477,7 +1477,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             {isCouple ? 'COUPLE NET WORTH' : isFreelance ? 'FREELANCE VAULT' : 'TOTAL NET WORTH'}
           </div>
           <div style={{ fontSize: '19px', fontWeight: 900, letterSpacing: '-0.02em' }}>{fmtCurr(348500)}</div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '8.5px', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)', padding: '3px 8px', borderRadius: '100px', fontWeight: 800, marginTop: '3px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '8.5px', background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(4px)', padding: '3px 8px', borderRadius: '100px', fontWeight: 800, marginTop: '3px' }}>
             <span>📈 +{fmtCurr(45000)} Saved</span>
             <span>⚡ 94% Healthy</span>
           </div>
@@ -1501,7 +1501,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   fontSize: '8.5px',
                   padding: '6px 8px',
                   borderRadius: m.sender === 'user' ? '8px 8px 0 8px' : '0 8px 8px 8px',
-                  background: m.sender === 'user' ? '#10b981' : (isDark ? 'rgba(255,255,255,0.08)' : '#ffffff'),
+                  background: m.sender === 'user' ? '#10b981' : (isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)` : '#ffffff'),
                   color: m.sender === 'user' ? '#ffffff' : t.text,
                   alignSelf: m.sender === 'user' ? 'flex-end' : 'flex-start',
                   maxWidth: '90%',
@@ -1531,7 +1531,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     whiteSpace: 'nowrap',
                     padding: '3px 6px',
                     borderRadius: '100px',
-                    background: isDark ? 'rgba(255,255,255,0.08)' : '#f3f4f6',
+                    background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)` : '#f3f4f6',
                     border: `1px solid ${t.border}`,
                     color: t.text,
                     cursor: 'pointer'
@@ -1578,7 +1578,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             </form>
           </div>
         ) : isAnalytics ? (
-          <div style={{ background: isDark ? 'rgba(255,255,255,0.04)' : '#f8fafc', border: `1px solid ${t.border}`, borderRadius: '14px', padding: '9px 10px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+          <div style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.04)` : '#f8fafc', border: `1px solid ${t.border}`, borderRadius: '14px', padding: '9px 10px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9.5px', fontWeight: 800, color: t.text }}>
               <span>Category Breakdown</span>
               <span style={{ color: '#10b981' }}>Monthly</span>
@@ -1592,7 +1592,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   <span>{c.cat}</span>
                   <span>{fmtCurr(c.amt)}</span>
                 </div>
-                <div style={{ width: '100%', height: '4px', background: isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0', borderRadius: '100px' }}>
+                <div style={{ width: '100%', height: '4px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : '#e2e8f0', borderRadius: '100px' }}>
                   <div style={{ width: `${c.pct}%`, height: '100%', background: c.color, borderRadius: '100px' }}></div>
                 </div>
               </div>
@@ -1638,14 +1638,14 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               Synced Code <strong>#ZB-8821</strong>. Joint groceries & rent split 50/50.
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', marginTop: '2px' }}>
-              <div style={{ background: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff', padding: '4px 6px', borderRadius: '6px', border: `1px solid ${t.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.05)` : '#ffffff', padding: '4px 6px', borderRadius: '6px', border: `1px solid ${t.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontSize: '8.5px', fontWeight: 800, color: t.text }}>Rent & Bills</div>
                   <div style={{ fontSize: '7px', color: t.textMuted }}>Shared • 50/50</div>
                 </div>
                 <span style={{ fontSize: '8.5px', fontWeight: 900, color: '#ef4444' }}>-{fmtCurr(22000)}</span>
               </div>
-              <div style={{ background: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff', padding: '4px 6px', borderRadius: '6px', border: `1px solid ${t.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.05)` : '#ffffff', padding: '4px 6px', borderRadius: '6px', border: `1px solid ${t.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontSize: '8.5px', fontWeight: 800, color: t.text }}>Supermarket</div>
                   <div style={{ fontSize: '7px', color: t.textMuted }}>Shared • 60/40</div>
@@ -1661,7 +1661,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-            <div style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '12px', padding: '7px 9px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.03)` : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '12px', padding: '7px 9px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span style={{ fontSize: '11px' }}>🍔</span>
                 <div>
@@ -1671,7 +1671,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               </div>
               <span style={{ fontSize: '9.5px', fontWeight: 900, color: '#ef4444' }}>-{fmtCurr(420)}</span>
             </div>
-            <div style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '12px', padding: '7px 9px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.03)` : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '12px', padding: '7px 9px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span style={{ fontSize: '11px' }}>💼</span>
                 <div>
@@ -1694,7 +1694,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
         {/* iOS Drag Bar */}
         <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '1px' }}>
-          <div style={{ width: '80px', height: '3px', background: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.25)', borderRadius: '100px' }}></div>
+          <div style={{ width: '80px', height: '3px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.35)` : 'rgba(0,0,0,0.25)', borderRadius: '100px' }}></div>
         </div>
       </div>
     );
@@ -1805,7 +1805,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
   const handleDownloadApk = () => {
     setShowModal(false);
-    window.location.href = '/zenbudget.apk';
+    window.location.href = '/download.html';
   };
 
   // Quiz Handling
@@ -1874,12 +1874,12 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
   const t = {
     bg: isDark ? '#0d110e' : '#FAFAF8',
     text: isDark ? '#ffffff' : '#1f2937',
-    textMuted: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(31,41,55,0.6)',
-    textSub: isDark ? 'rgba(255,255,255,0.75)' : 'rgba(31,41,55,0.75)',
+    textMuted: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.6)` : 'rgba(31,41,55,0.6)',
+    textSub: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.75)` : 'rgba(31,41,55,0.75)',
     headerBg: isDark ? 'rgba(13,17,14,0.92)' : 'rgba(255,255,255,0.92)',
-    border: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+    border: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)` : 'rgba(0,0,0,0.08)',
     cardBg: isDark ? '#161d18' : '#ffffff',
-    inputBg: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+    inputBg: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.06)` : 'rgba(0,0,0,0.04)',
   };
 
   const css = `
@@ -1961,6 +1961,8 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       animation: blinkCursor 0.8s infinite;
       border-radius: 2px;
     }
+
+    .mobile-show { display: none; }
 
     @media (max-width: 1024px) {
       .desktop-only { display: none !important; }
@@ -2136,19 +2138,15 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       <style>{css}</style>
 
       {/* ═══════════════ HEADER ═══════════════ */}
-      <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', pointerEvents: 'none' }}>
+      <header style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', pointerEvents: mobileMenuOpen ? 'auto' : 'none' }}>
         <div style={{ 
-          pointerEvents: 'auto', marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', padding: '0 20px', transition: 'all 0.3s', 
-          border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(255, 255, 255, 0.8)', 
-          borderRadius: '24px', 
-          background: isDark ? 'rgba(10, 15, 12, 0.65)' : 'rgba(255, 255, 255, 0.8)', 
-          backdropFilter: 'blur(32px) saturate(200%)', WebkitBackdropFilter: 'blur(32px) saturate(200%)', 
-          boxShadow: isDark ? '0 16px 40px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.1)' : '0 16px 40px rgba(0,0,0,0.05), inset 0 1px 1px rgba(255,255,255,1)', 
-          width: 'min(1200px, 92%)', height: '64px' 
+          pointerEvents: 'auto', marginTop: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', padding: '0 32px', transition: 'all 0.3s', 
+          background: 'transparent',
+          width: 'min(1240px, 96%)', height: '64px' 
         }}>
           {/* Logo */}
           <a onClick={e => { e.preventDefault(); navigateToPage('home'); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', textDecoration: 'none' }}>
-            <img src="/favicon.png" alt="ZenBudget Logo" style={{ width: '34px', height: '34px', borderRadius: '12px' }} />
+            <img src="/logo.png" alt="ZenBudget Logo" style={{ width: '34px', height: '34px', borderRadius: '12px' }} />
             <span style={{ fontSize: '18px', fontWeight: 800, color: t.text, letterSpacing: '-0.02em' }}>ZenBudget</span>
           </a>
 
@@ -2179,7 +2177,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                       else handleDropdownMouseEnter(link.key);
                     } else scrollTo(link.id);
                   }} 
-                  style={{ whiteSpace: 'nowrap', padding: '8px 12px', borderRadius: '12px', fontSize: '14px', fontWeight: 600, color: (activeDropdown === link.key || activePage === link.key) ? t.text : t.textMuted, background: (activeDropdown === link.key || activePage === link.key) ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)') : 'transparent', cursor: 'pointer', border: 'none', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  style={{ whiteSpace: 'nowrap', padding: '8px 12px', borderRadius: '12px', fontSize: '15px', fontWeight: 600, color: (activeDropdown === link.key || activePage === link.key) ? t.text : t.textMuted, background: 'transparent', cursor: 'pointer', border: 'none', transition: 'color 0.2s', display: 'flex', alignItems: 'center', gap: '4px' }}
                   className="hover-bg"
                 >
                   <span>{link.label}</span>
@@ -2195,36 +2193,24 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           </ul>
 
           {/* Right Header Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <button 
               onClick={toggleTheme} 
               aria-label={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"} 
               title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-              style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', border: `1px solid ${t.border}`, background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.5)', backdropFilter: 'blur(10px)', cursor: 'pointer', color: t.text, transition: 'all 0.2s' }}
-              className="hover-lift"
+              style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', border: 'none', background: 'transparent', cursor: 'pointer', color: t.textMuted, transition: 'color 0.2s' }}
+              className="desktop-only"
             >
-              {isDark ? <Moon size={16} color="#a7f3d0" /> : <Sun size={16} color="#f59e0b" />}
+              {isDark ? <Moon size={18} /> : <Sun size={18} />}
             </button>
 
-            {(deviceOS === 'ios' || deviceOS === 'mac') ? (
-              <button className="desktop-only" onClick={() => setShowIosGuideModal(true)} title="Add to Home Screen (Safari PWA)" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', color: t.text, padding: '6px 12px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
-                <Smartphone size={14} color="#10b981" />
-                <span>Get App</span>
-              </button>
-            ) : (
-              <button className="desktop-only" onClick={handleDownloadApk} title="Download Android App APK" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', color: t.text, padding: '6px 12px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
-                <Download size={14} color="#10b981" />
-                <span>APK</span>
-              </button>
-            )}
-
-            <button onClick={onOpenWebApp} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg, #10b981 0%, #047857 100%)', color: '#fff', paddingLeft: '16px', paddingRight: '6px', paddingTop: '6px', paddingBottom: '6px', borderRadius: '100px', fontSize: '14px', fontWeight: 800, border: 'none', cursor: 'pointer', transition: 'all 0.25s ease', boxShadow: '0 6px 16px rgba(16,185,129,0.35)', whiteSpace: 'nowrap' }} className="hover-lift desktop-only">
-              <Wallet size={16} color="#ffffff" />
-              <span>Open App</span>
-              <span style={{ background: 'rgba(255,255,255,0.25)', padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ArrowRight size={14} color="#ffffff" /></span>
+            <button onClick={() => setShowIosGuideModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#1c1917', color: '#fff', padding: '12px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 14px rgba(0,0,0,0.1)' }} className="desktop-only">
+              <Smartphone size={16} color="#fff" />
+              <span>Download App</span>
+              <ArrowRight size={16} color="#fff" />
             </button>
 
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{ display: 'none', background: 'transparent', border: 'none', color: t.text, cursor: 'pointer', padding: '6px' }} className="mobile-show">
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{ background: 'transparent', border: 'none', color: t.text, cursor: 'pointer', padding: '6px' }} className="mobile-show">
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
@@ -2235,7 +2221,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           <div 
             onMouseEnter={() => handleDropdownMouseEnter('features')}
             onMouseLeave={handleDropdownMouseLeave}
-            style={{ pointerEvents: 'auto', position: 'absolute', top: '78px', left: '50%', transform: 'translateX(-50%)', width: 'min(1100px, 90vw)', background: isDark ? 'rgba(18,25,20,0.75)' : 'rgba(255,255,255,0.75)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.8)', borderRadius: '24px', padding: '24px', boxShadow: isDark ? '0 30px 70px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15)' : '0 30px 70px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95)', zIndex: 10000, display: 'flex', flexDirection: 'column', gap: '16px' }}
+            style={{ pointerEvents: 'auto', position: 'absolute', top: '78px', left: '50%', transform: 'translateX(-50%)', width: 'min(1100px, 90vw)', background: isDark ? 'rgba(18,25,20,0.75)' : 'rgba(255,255,255,0.75)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: isDark ? `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.12)` : `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.8)`, borderRadius: '24px', padding: '24px', boxShadow: isDark ? '0 30px 70px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15)' : '0 30px 70px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95)', zIndex: 10000, display: 'flex', flexDirection: 'column', gap: '16px' }}
           >
             <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#10b981' }}>Platform Features</span>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
@@ -2252,10 +2238,10 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 <div 
                   key={i} 
                   onClick={() => navigateToPage(item.slug)}
-                  style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', cursor: 'pointer', padding: '12px', borderRadius: '16px', transition: 'all 0.2s', background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.5)', border: `1px solid ${t.border}`, backdropFilter: 'blur(10px)' }} 
+                  style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', cursor: 'pointer', padding: '12px', borderRadius: '16px', transition: 'all 0.2s', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.04)` : 'rgba(255,255,255,0.5)', border: `1px solid ${t.border}`, backdropFilter: 'blur(10px)' }} 
                   className="hover-lift"
                 >
-                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: isDark ? 'rgba(255,255,255,0.08)' : '#ffffff', border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)` : '#ffffff', border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     {item.icon}
                   </div>
                   <div>
@@ -2278,7 +2264,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           <div 
             onMouseEnter={() => handleDropdownMouseEnter('conditions')}
             onMouseLeave={handleDropdownMouseLeave}
-            style={{ pointerEvents: 'auto', position: 'absolute', top: '78px', left: '50%', transform: 'translateX(-50%)', width: 'min(1100px, 90vw)', background: isDark ? 'rgba(18,25,20,0.75)' : 'rgba(255,255,255,0.75)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.8)', borderRadius: '24px', padding: '24px', boxShadow: isDark ? '0 30px 70px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15)' : '0 30px 70px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95)', zIndex: 10000, display: 'flex', flexDirection: 'column', gap: '16px' }}
+            style={{ pointerEvents: 'auto', position: 'absolute', top: '78px', left: '50%', transform: 'translateX(-50%)', width: 'min(1100px, 90vw)', background: isDark ? 'rgba(18,25,20,0.75)' : 'rgba(255,255,255,0.75)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: isDark ? `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.12)` : `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.8)`, borderRadius: '24px', padding: '24px', boxShadow: isDark ? '0 30px 70px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15)' : '0 30px 70px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95)', zIndex: 10000, display: 'flex', flexDirection: 'column', gap: '16px' }}
           >
             <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#10b981' }}>Conditions & Use Cases We Support</span>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
@@ -2295,10 +2281,10 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 <div 
                   key={i} 
                   onClick={() => navigateToPage(item.slug)}
-                  style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', cursor: 'pointer', padding: '12px', borderRadius: '16px', transition: 'all 0.2s', background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.5)', border: `1px solid ${t.border}`, backdropFilter: 'blur(10px)' }} 
+                  style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', cursor: 'pointer', padding: '12px', borderRadius: '16px', transition: 'all 0.2s', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.04)` : 'rgba(255,255,255,0.5)', border: `1px solid ${t.border}`, backdropFilter: 'blur(10px)' }} 
                   className="hover-lift"
                 >
-                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: isDark ? 'rgba(255,255,255,0.08)' : '#ffffff', border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)` : '#ffffff', border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     {item.icon}
                   </div>
                   <div>
@@ -2321,7 +2307,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           <div 
             onMouseEnter={() => handleDropdownMouseEnter('inside app')}
             onMouseLeave={handleDropdownMouseLeave}
-            style={{ pointerEvents: 'auto', position: 'absolute', top: '78px', left: '50%', transform: 'translateX(-50%)', width: 'min(900px, calc(100% - 48px))', background: isDark ? 'rgba(18,25,20,0.75)' : 'rgba(255,255,255,0.75)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.8)', borderRadius: '24px', padding: '24px', boxShadow: isDark ? '0 30px 70px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15)' : '0 30px 70px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95)', zIndex: 10000, display: 'flex', flexDirection: 'column' }}
+            style={{ pointerEvents: 'auto', position: 'absolute', top: '78px', left: '50%', transform: 'translateX(-50%)', width: 'min(900px, calc(100% - 48px))', background: isDark ? 'rgba(18,25,20,0.75)' : 'rgba(255,255,255,0.75)', backdropFilter: 'blur(28px) saturate(190%)', WebkitBackdropFilter: 'blur(28px) saturate(190%)', border: isDark ? `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.12)` : `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.8)`, borderRadius: '24px', padding: '24px', boxShadow: isDark ? '0 30px 70px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15)' : '0 30px 70px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95)', zIndex: 10000, display: 'flex', flexDirection: 'column' }}
           >
             <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#10b981', marginBottom: '16px' }}>Interactive App Screens</span>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px' }}>
@@ -2329,7 +2315,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 <button 
                   key={i} 
                   onClick={() => selectFeatureTab(i)} 
-                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '14px 10px', borderRadius: '16px', background: activeInsideTab === i ? '#10b981' : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'), color: activeInsideTab === i ? '#ffffff' : t.text, border: 'none', cursor: 'pointer', transition: 'all 0.2s' }}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '14px 10px', borderRadius: '16px', background: activeInsideTab === i ? '#10b981' : (isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.06)` : 'rgba(0,0,0,0.04)'), color: activeInsideTab === i ? '#ffffff' : t.text, border: 'none', cursor: 'pointer', transition: 'all 0.2s' }}
                 >
                   {tab.icon}
                   <span style={{ fontSize: '12px', fontWeight: 700 }}>{tab.label}</span>
@@ -2340,47 +2326,51 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
         )}
 
         {/* Mobile Nav Menu Drawer */}
+        {/* Mobile Nav Menu Drawer (Full Screen Sheet) */}
         {mobileMenuOpen && (
-          <div style={{ pointerEvents: 'auto', width: 'min(1440px, 100%)', marginTop: '8px', background: isDark ? 'rgba(18,25,20,0.85)' : 'rgba(255,255,255,0.85)', backdropFilter: 'blur(24px) saturate(190%)', WebkitBackdropFilter: 'blur(24px) saturate(190%)', border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,255,255,0.8)', borderRadius: '20px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
-            <button onClick={() => { setMobileMenuOpen(false); scrollTo('features'); }} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>Features</button>
-            <button onClick={() => { setMobileMenuOpen(false); scrollTo('conditions'); }} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>Conditions</button>
-            <button onClick={() => { setMobileMenuOpen(false); navigateToPage('about'); }} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>About</button>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <button onClick={() => scrollTo('inside-app')} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>Inside App Screens</button>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', paddingLeft: '12px' }}>
-                {insideTabs.map((tab, i) => (
-                  <button 
-                    key={i} 
-                    onClick={() => selectFeatureTab(i)} 
-                    style={{ textAlign: 'left', padding: '8px 12px', background: activeInsideTab === i ? 'rgba(16,185,129,0.15)' : 'transparent', border: 'none', borderRadius: '10px', color: activeInsideTab === i ? '#10b981' : t.textSub, fontSize: '13.5px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
-                  >
-                    {tab.icon}
-                    <span>{tab.label}</span>
-                  </button>
-                ))}
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: t.bg, zIndex: 1000000, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: `1px solid ${t.border}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '32px', height: '32px', background: '#10b981', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Sparkles size={16} color="white" />
+                </div>
+                <span style={{ fontSize: '18px', fontWeight: 900, color: t.text, letterSpacing: '-0.02em' }}>ZenBudget</span>
               </div>
+              <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'transparent', border: 'none', color: t.text, cursor: 'pointer', padding: '4px' }}>
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '24px', gap: '32px' }}>
+              <button onClick={() => { setMobileMenuOpen(false); scrollTo('features'); }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'transparent', border: 'none', color: t.text, fontSize: '18px', fontWeight: 700, cursor: 'pointer' }}>
+                Features <ChevronDown size={18} color={t.textSub} />
+              </button>
+              <button onClick={() => { setMobileMenuOpen(false); scrollTo('conditions'); }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'transparent', border: 'none', color: t.text, fontSize: '18px', fontWeight: 700, cursor: 'pointer' }}>
+                Conditions <ChevronDown size={18} color={t.textSub} />
+              </button>
+              <button onClick={() => { setMobileMenuOpen(false); navigateToPage('about'); }} style={{ textAlign: 'left', background: 'transparent', border: 'none', color: t.text, fontSize: '18px', fontWeight: 700, cursor: 'pointer' }}>
+                About
+              </button>
+              <button onClick={() => { setMobileMenuOpen(false); scrollTo('community'); }} style={{ textAlign: 'left', background: 'transparent', border: 'none', color: t.text, fontSize: '18px', fontWeight: 700, cursor: 'pointer' }}>
+                Insights
+              </button>
+              <button onClick={() => { setMobileMenuOpen(false); navigateToPage('pricing'); }} style={{ textAlign: 'left', background: 'transparent', border: 'none', color: t.text, fontSize: '18px', fontWeight: 700, cursor: 'pointer' }}>
+                Pricing
+              </button>
             </div>
 
-            <button onClick={() => startFreshQuiz()} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>Financial Assessment Quiz</button>
-            <button onClick={() => { setMobileMenuOpen(false); navigateToPage('pricing'); }} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>Pricing</button>
-            <button onClick={() => scrollTo('community')} style={{ textAlign: 'left', padding: '10px', background: 'transparent', border: 'none', color: t.text, fontSize: '15px', fontWeight: 700 }}>Member Stories</button>
-            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-              {deviceOS === 'ios' ? (
-                <button onClick={() => { setMobileMenuOpen(false); setShowIosGuideModal(true); }} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : '#f3f4f6', color: t.text, padding: '12px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, border: 'none' }}>
-                  <Smartphone size={16} color="#10b981" /> iOS App
-                </button>
-              ) : deviceOS === 'android' ? (
-                <button onClick={() => { setMobileMenuOpen(false); handleDownloadApk(); }} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : '#f3f4f6', color: t.text, padding: '12px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, border: 'none' }}>
-                  <Download size={16} color="#10b981" /> Android APK
+            <div style={{ padding: '24px', borderTop: `1px solid ${t.border}`, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {deviceOS === 'ios' || deviceOS === 'mac' ? (
+                <button onClick={() => { setMobileMenuOpen(false); setShowIosGuideModal(true); }} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#27272a', color: '#fff', padding: '16px', borderRadius: '100px', fontSize: '16px', fontWeight: 700, border: 'none', cursor: 'pointer' }}>
+                  Download on iOS
                 </button>
               ) : (
-                <button onClick={() => { setMobileMenuOpen(false); onOpenWebApp(); }} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : '#f3f4f6', color: t.text, padding: '12px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, border: 'none' }}>
-                  <Wallet size={16} color="#10b981" /> Web App
+                <button onClick={() => { setMobileMenuOpen(false); handleDownloadApk(); }} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#27272a', color: '#fff', padding: '16px', borderRadius: '100px', fontSize: '16px', fontWeight: 700, border: 'none', cursor: 'pointer' }}>
+                  Download Android APK
                 </button>
               )}
-              <button onClick={() => { setMobileMenuOpen(false); onOpenWebApp(); }} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: '#10b981', color: '#fff', padding: '12px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, border: 'none' }}>
-                <Wallet size={16} /> Open Web App
+              <button onClick={() => { setMobileMenuOpen(false); startFreshQuiz(); }} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#ecfccb', color: '#3f6212', padding: '16px', borderRadius: '100px', fontSize: '16px', fontWeight: 700, border: 'none', cursor: 'pointer' }}>
+                Take Free Assessment
               </button>
             </div>
           </div>
@@ -2417,7 +2407,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   display: 'flex', 
                   alignItems: 'center', 
                   gap: '8px', 
-                  background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', 
+                  background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.06)` : 'rgba(0,0,0,0.04)', 
                   border: `1px solid ${t.border}`, 
                   borderRadius: '100px', 
                   padding: '9px 20px', 
@@ -2458,7 +2448,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               <div style={{ 
                 display: 'inline-flex', 
                 alignItems: 'center', 
-                background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.9)', 
+                background: isDark ? 'rgba(255,255,255,0.06)' : '#ffffff', 
                 backdropFilter: 'blur(14px)', 
                 border: `1px solid ${t.border}`, 
                 padding: '6px 18px', 
@@ -2542,7 +2532,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     display: 'flex', 
                     alignItems: 'center', 
                     gap: '10px', 
-                    background: isDark ? 'rgba(255,255,255,0.08)' : '#ffffff', 
+                    background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)` : '#ffffff', 
                     border: `1px solid ${t.border}`, 
                     color: t.text, 
                     padding: '16px 28px', 
@@ -2577,7 +2567,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   <div key={idx} className="about-pill-item" style={{
                     padding: '16px 14px',
                     borderRadius: '18px',
-                    background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.7)',
+                    background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.03)` : 'rgba(255,255,255,0.7)',
                     border: `1px solid ${t.border}`,
                     backdropFilter: 'blur(10px)'
                   }}>
@@ -2693,6 +2683,11 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   position: 'relative',
                   zIndex: 10
                 }}>
+                  {/* Sanctuary Image */}
+                  <div style={{ width: '100%', height: '180px', borderRadius: '16px', marginBottom: '20px', overflow: 'hidden', border: `1px solid ${t.border}` }}>
+                    <img src="/zen-sanctuary.jpg" alt="Zen Sanctuary" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+
                   {/* Floating Pill Top */}
                   <div style={{ 
                     display: 'inline-flex', 
@@ -2737,17 +2732,17 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
                   {/* Three Interactive Guarantee Badges */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', borderRadius: '12px', background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: `1px solid ${t.border}` }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', borderRadius: '12px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.03)` : 'rgba(0,0,0,0.02)', border: `1px solid ${t.border}` }}>
                       <CheckCircle2 size={16} color="#10b981" style={{ flexShrink: 0 }} />
                       <span style={{ fontSize: '12.5px', fontWeight: 700, color: t.text }}>100% Encrypted Local Storage</span>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', borderRadius: '12px', background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: `1px solid ${t.border}` }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', borderRadius: '12px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.03)` : 'rgba(0,0,0,0.02)', border: `1px solid ${t.border}` }}>
                       <CheckCircle2 size={16} color="#84cc16" style={{ flexShrink: 0 }} />
                       <span style={{ fontSize: '12.5px', fontWeight: 700, color: t.text }}>Zero Trackers & Zero Ads</span>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', borderRadius: '12px', background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: `1px solid ${t.border}` }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', borderRadius: '12px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.03)` : 'rgba(0,0,0,0.02)', border: `1px solid ${t.border}` }}>
                       <CheckCircle2 size={16} color="#38bdf8" style={{ flexShrink: 0 }} />
                       <span style={{ fontSize: '12.5px', fontWeight: 700, color: t.text }}>Daily Safe Spend Calculation</span>
                     </div>
@@ -2884,7 +2879,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
             {/* 4. TRANSPARENT PROMISE (CONTRAST TABLE) */}
             <div style={{ 
-              background: isDark ? 'rgba(255,255,255,0.02)' : '#f8fafc', 
+              background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.02)` : '#f8fafc', 
               border: `1px solid ${t.border}`, 
               borderRadius: '32px', 
               padding: 'clamp(32px, 5vw, 60px)', 
@@ -3061,7 +3056,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 <button 
                   onClick={handleDownloadApk} 
                   style={{ 
-                    background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', 
+                    background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.06)` : 'rgba(0,0,0,0.04)', 
                     color: t.text, 
                     border: `1px solid ${t.border}`, 
                     padding: '16px 28px', 
@@ -3089,7 +3084,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginBottom: '40px', flexWrap: 'wrap' }}>
             <button 
               onClick={() => navigateToPage('home')}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: isDark ? 'rgba(255,255,255,0.06)' : '#f3f4f6', border: `1px solid ${t.border}`, borderRadius: '100px', padding: '8px 18px', fontSize: '13.5px', fontWeight: 700, color: t.text, cursor: 'pointer', transition: 'all 0.2s' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.06)` : '#f3f4f6', border: `1px solid ${t.border}`, borderRadius: '100px', padding: '8px 18px', fontSize: '13.5px', fontWeight: 700, color: t.text, cursor: 'pointer', transition: 'all 0.2s' }}
               className="hover-lift"
             >
               <ArrowLeft size={16} />
@@ -3368,7 +3363,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginBottom: '32px', flexWrap: 'wrap' }}>
             <button 
               onClick={() => navigateToPage('home')}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: isDark ? 'rgba(255,255,255,0.06)' : '#f3f4f6', border: `1px solid ${t.border}`, borderRadius: '100px', padding: '8px 18px', fontSize: '13.5px', fontWeight: 700, color: t.text, cursor: 'pointer', transition: 'all 0.2s' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.06)` : '#f3f4f6', border: `1px solid ${t.border}`, borderRadius: '100px', padding: '8px 18px', fontSize: '13.5px', fontWeight: 700, color: t.text, cursor: 'pointer', transition: 'all 0.2s' }}
               className="hover-lift"
             >
               <ArrowLeft size={16} />
@@ -3424,7 +3419,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     {Math.round(((currentQuestionIndex + 1) / activeQuizQuestions.length) * 100)}% Completed
                   </span>
                 </div>
-                <div style={{ width: '100%', height: '8px', background: isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb', borderRadius: '100px', overflow: 'hidden', marginBottom: '32px' }}>
+                <div style={{ width: '100%', height: '8px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : '#e5e7eb', borderRadius: '100px', overflow: 'hidden', marginBottom: '32px' }}>
                   <div style={{ width: `${((currentQuestionIndex + 1) / activeQuizQuestions.length) * 100}%`, height: '100%', background: '#10b981', borderRadius: '100px', transition: 'width 0.4s' }}></div>
                 </div>
 
@@ -3438,12 +3433,12 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                       key={i} 
                       onClick={() => handleSelectQuizOption(opt.points)}
                       style={{ 
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 24px', borderRadius: '18px', textAlign: 'left', border: `1px solid ${t.border}`, background: isDark ? 'rgba(255,255,255,0.04)' : '#f9fafb', color: t.text, cursor: 'pointer', transition: 'all 0.2s'
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 24px', borderRadius: '18px', textAlign: 'left', border: `1px solid ${t.border}`, background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.04)` : '#f9fafb', color: t.text, cursor: 'pointer', transition: 'all 0.2s'
                       }} 
                       className="hover-lift"
                     >
                       <span style={{ fontSize: '15px', fontWeight: 600, lineHeight: 1.4 }}>{opt.text}</span>
-                      <span style={{ fontSize: '11px', fontWeight: 800, padding: '4px 10px', borderRadius: '100px', background: isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb', color: t.textMuted, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 800, padding: '4px 10px', borderRadius: '100px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : '#e5e7eb', color: t.textMuted, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                         {opt.tag}
                       </span>
                     </button>
@@ -3508,7 +3503,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '40px' }}>
                     
-                    <div style={{ display: 'flex', gap: '16px', background: isDark ? 'rgba(0,0,0,0.25)' : '#ffffff', padding: '24px', borderRadius: '20px', border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : '#e5e7eb'}`, boxShadow: '0 10px 25px rgba(0,0,0,0.03)' }}>
+                    <div style={{ display: 'flex', gap: '16px', background: isDark ? 'rgba(0,0,0,0.25)' : '#ffffff', padding: '24px', borderRadius: '20px', border: `1px solid ${isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.05)` : '#e5e7eb'}`, boxShadow: '0 10px 25px rgba(0,0,0,0.03)' }}>
                       <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'rgba(239,68,68,0.1)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <TrendingDown size={24} />
                       </div>
@@ -3518,7 +3513,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '16px', background: isDark ? 'rgba(0,0,0,0.25)' : '#ffffff', padding: '24px', borderRadius: '20px', border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : '#e5e7eb'}`, boxShadow: '0 10px 25px rgba(0,0,0,0.03)' }}>
+                    <div style={{ display: 'flex', gap: '16px', background: isDark ? 'rgba(0,0,0,0.25)' : '#ffffff', padding: '24px', borderRadius: '20px', border: `1px solid ${isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.05)` : '#e5e7eb'}`, boxShadow: '0 10px 25px rgba(0,0,0,0.03)' }}>
                       <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'rgba(16,185,129,0.1)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <ShieldCheck size={24} />
                       </div>
@@ -3553,7 +3548,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginBottom: '32px', flexWrap: 'wrap' }}>
             <button 
               onClick={() => navigateToPage('home')}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: isDark ? 'rgba(255,255,255,0.06)' : '#f3f4f6', border: `1px solid ${t.border}`, borderRadius: '100px', padding: '8px 18px', fontSize: '13.5px', fontWeight: 700, color: t.text, cursor: 'pointer', transition: 'all 0.2s' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.06)` : '#f3f4f6', border: `1px solid ${t.border}`, borderRadius: '100px', padding: '8px 18px', fontSize: '13.5px', fontWeight: 700, color: t.text, cursor: 'pointer', transition: 'all 0.2s' }}
               className="hover-lift"
             >
               <ArrowLeft size={16} />
@@ -3617,7 +3612,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 {deviceOS === 'ios' ? (
                   <button 
                     onClick={() => setShowIosGuideModal(true)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px', background: isDark ? 'rgba(255,255,255,0.06)' : '#f3f4f6', color: t.text, padding: '14px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.06)` : '#f3f4f6', color: t.text, padding: '14px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }}
                     className="hover-lift"
                   >
                     <Smartphone size={16} color="#10b981" />
@@ -3626,7 +3621,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 ) : deviceOS === 'android' ? (
                   <button 
                     onClick={handleDownloadApk}
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px', background: isDark ? 'rgba(255,255,255,0.06)' : '#f3f4f6', color: t.text, padding: '14px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.06)` : '#f3f4f6', color: t.text, padding: '14px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }}
                     className="hover-lift"
                   >
                     <Download size={16} color="#10b981" />
@@ -3635,7 +3630,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 ) : (
                   <button 
                     onClick={onOpenWebApp}
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px', background: isDark ? 'rgba(255,255,255,0.06)' : '#f3f4f6', color: t.text, padding: '14px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.06)` : '#f3f4f6', color: t.text, padding: '14px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', transition: 'all 0.2s' }}
                     className="hover-lift"
                   >
                     <Wallet size={16} color="#10b981" />
@@ -3687,7 +3682,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           </div>
 
           {/* Key Stats Bar */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', background: isDark ? 'rgba(255,255,255,0.03)' : '#f9fafb', border: `1px solid ${t.border}`, borderRadius: '24px', padding: '32px', marginBottom: '64px' }} className="mobile-stack">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.03)` : '#f9fafb', border: `1px solid ${t.border}`, borderRadius: '24px', padding: '32px', marginBottom: '64px' }} className="mobile-stack">
             {FEATURE_PAGES_DATA[activePage].stats.map((st, sIdx) => (
               <div key={sIdx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '6px' }}>
                 <span style={{ fontSize: '32px', fontWeight: 900, color: '#10b981', letterSpacing: '-0.02em' }}>{st.value}</span>
@@ -3717,8 +3712,8 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             <h2 style={{ fontSize: '28px', fontWeight: 800, color: t.text, marginBottom: '24px', textAlign: 'center' }}>How It Works in 3 Simple Steps</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }} className="mobile-stack">
               {FEATURE_PAGES_DATA[activePage].howItWorks.map((hw, hIdx) => (
-                <div key={hIdx} style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#f9fafb', border: `1px solid ${t.border}`, borderRadius: '24px', padding: '28px', position: 'relative' }}>
-                  <span style={{ position: 'absolute', top: '24px', right: '24px', fontSize: '36px', fontWeight: 900, color: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }}>{hw.step}</span>
+                <div key={hIdx} style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.03)` : '#f9fafb', border: `1px solid ${t.border}`, borderRadius: '24px', padding: '28px', position: 'relative' }}>
+                  <span style={{ position: 'absolute', top: '24px', right: '24px', fontSize: '36px', fontWeight: 900, color: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)` : 'rgba(0,0,0,0.06)' }}>{hw.step}</span>
                   <div style={{ fontSize: '14px', fontWeight: 800, color: '#10b981', marginBottom: '8px' }}>STEP {hw.step}</div>
                   <h3 style={{ fontSize: '18px', fontWeight: 800, color: t.text, margin: '0 0 10px' }}>{hw.title}</h3>
                   <p style={{ fontSize: '14px', color: t.textSub, lineHeight: 1.6, margin: 0 }}>{hw.desc}</p>
@@ -3754,7 +3749,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }} className="mobile-stack">
               {Object.values(FEATURE_PAGES_DATA).filter(p => p.slug !== activePage).slice(0, 4).map((pItem, pIdx) => (
-                <div key={pIdx} onClick={() => navigateToPage(pItem.slug)} style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '20px', padding: '20px', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '8px' }} className="hover-lift">
+                <div key={pIdx} onClick={() => navigateToPage(pItem.slug)} style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.03)` : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '20px', padding: '20px', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '8px' }} className="hover-lift">
                   <span style={{ fontSize: '11px', fontWeight: 800, color: '#10b981', letterSpacing: '0.08em' }}>{pItem.badge}</span>
                   <div style={{ fontSize: '15px', fontWeight: 800, color: t.text }}>{pItem.title}</div>
                   <div style={{ fontSize: '12.5px', color: t.textMuted, display: 'flex', alignItems: 'center', gap: '4px', marginTop: 'auto', paddingTop: '8px' }}>
@@ -3776,15 +3771,15 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 Open Web App Now
               </button>
               {deviceOS === 'ios' ? (
-                <button onClick={() => setShowIosGuideModal(true)} style={{ background: 'rgba(255,255,255,0.2)', color: '#ffffff', padding: '14px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: '1px solid rgba(255,255,255,0.4)', cursor: 'pointer' }} className="hover-lift">
+                <button onClick={() => setShowIosGuideModal(true)} style={{ background: 'rgba(0,0,0,0.2)', color: '#ffffff', padding: '14px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.4)`, cursor: 'pointer' }} className="hover-lift">
                   Add to iPhone (Safari PWA)
                 </button>
               ) : deviceOS === 'android' ? (
-                <button onClick={handleDownloadApk} style={{ background: 'rgba(255,255,255,0.2)', color: '#ffffff', padding: '14px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: '1px solid rgba(255,255,255,0.4)', cursor: 'pointer' }} className="hover-lift">
+                <button onClick={handleDownloadApk} style={{ background: 'rgba(0,0,0,0.2)', color: '#ffffff', padding: '14px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.4)`, cursor: 'pointer' }} className="hover-lift">
                   Download Android APK
                 </button>
               ) : (
-                <button onClick={onOpenWebApp} style={{ background: 'rgba(255,255,255,0.2)', color: '#ffffff', padding: '14px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: '1px solid rgba(255,255,255,0.4)', cursor: 'pointer' }} className="hover-lift">
+                <button onClick={onOpenWebApp} style={{ background: 'rgba(0,0,0,0.2)', color: '#ffffff', padding: '14px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.4)`, cursor: 'pointer' }} className="hover-lift">
                   Open Web Version
                 </button>
               )}
@@ -3836,7 +3831,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 
                 {/* User Avatar Stack & Ratings */}
-                <div className="hero-animate" style={{ display: 'flex', alignItems: 'center', background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.85)', backdropFilter: 'blur(12px)', border: `1px solid ${t.border}`, padding: '6px 16px', borderRadius: '100px', marginBottom: '20px', boxShadow: '0 4px 14px rgba(0,0,0,0.08)' }}>
+                <div className="hero-animate" style={{ display: 'flex', alignItems: 'center', background: isDark ? 'rgba(255,255,255,0.06)' : '#ffffff', backdropFilter: 'blur(12px)', border: `1px solid ${t.border}`, padding: '6px 16px', borderRadius: '100px', marginBottom: '20px', boxShadow: '0 4px 14px rgba(0,0,0,0.08)' }}>
                   <div style={{ display: 'flex', marginRight: '10px' }}>
                     {[
                       'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop',
@@ -3902,7 +3897,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                         <span style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.08em' }}>⚡ 100% Free Access</span>
                         <span style={{ fontSize: '16px', fontWeight: 900 }}>Start My Financial Detox</span>
                       </div>
-                      <span style={{ background: 'rgba(255,255,255,0.25)', padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: '4px' }}>
+                      <span style={{ background: 'rgba(0,0,0,0.25)', padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: '4px' }}>
                         <ArrowRight size={15} color="#ffffff" />
                       </span>
                     </button>
@@ -3967,7 +3962,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     <div style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', borderRadius: '18px', padding: '16px', color: '#fff', boxShadow: '0 8px 20px rgba(16,185,129,0.25)' }}>
                       <div style={{ fontSize: '10px', opacity: 0.85, fontWeight: 700, letterSpacing: '0.05em' }}>NET WORTH SCORE</div>
                       <div style={{ fontSize: '22px', fontWeight: 900, margin: '2px 0 8px' }}>₹{realUserData.balance.toLocaleString()}</div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', background: 'rgba(255,255,255,0.2)', padding: '4px 10px', borderRadius: '100px', fontWeight: 700 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', background: 'rgba(0,0,0,0.2)', padding: '4px 10px', borderRadius: '100px', fontWeight: 700 }}>
                         <span>Monthly Target</span>
                         <span>₹32,000 Left</span>
                       </div>
@@ -3978,7 +3973,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                         <span>Monthly Budget Used</span>
                         <span style={{ color: '#10b981' }}>64% Healthy</span>
                       </div>
-                      <div style={{ width: '100%', height: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb', borderRadius: '100px', overflow: 'hidden' }}>
+                      <div style={{ width: '100%', height: '6px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : '#e5e7eb', borderRadius: '100px', overflow: 'hidden' }}>
                         <div style={{ width: '64%', height: '100%', background: '#10b981', borderRadius: '100px' }}></div>
                       </div>
                     </div>
@@ -4032,7 +4027,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
       {/* ═══════════════ STAT COUNTER BANNER ═══════════════ */}
       <section style={{ padding: '0 24px', maxWidth: '1440px', margin: 'clamp(40px, 8vw, 60px) auto clamp(60px, 12vw, 100px)' }}>
-        <div className="scroll-fade-up hover-lift" style={{ background: 'linear-gradient(105deg, #1c1e1a 0%, #1c1e1a 45%, #6a8844 80%, #303d21 100%)', borderRadius: '2.5rem', padding: 'clamp(32px, 6vw, 60px) clamp(24px, 5vw, 40px)', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around', gap: 'clamp(24px, 5vw, 40px)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="scroll-fade-up hover-lift" style={{ background: 'linear-gradient(105deg, #1c1e1a 0%, #1c1e1a 45%, #6a8844 80%, #303d21 100%)', borderRadius: '2.5rem', padding: 'clamp(32px, 6vw, 60px) clamp(24px, 5vw, 40px)', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around', gap: 'clamp(24px, 5vw, 40px)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.05)` }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={4200} duration={2500} />+</div>
             <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Members</div>
@@ -4066,21 +4061,21 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
         <div className="scroll-fade-up" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px', maxWidth: '1200px', margin: '0 auto' }}>
           
-          <div className="hover-lift" style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '40px 32px', display: 'flex', flexDirection: 'column' }}>
+          <div className="hover-lift" style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.03)` : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '40px 32px', display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: '13px', fontWeight: 800, color: '#D58B6D', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Step 01</div>
             <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '16px', color: t.text }}>Diagnose the Leak</h3>
             <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '16px', marginBottom: '32px' }}>Take our deep-dive psychological assessment. The AI instantly finds exactly where your money is vanishing—before the month ends.</p>
             <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: '#D58B6D', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }} onClick={() => startFreshQuiz()}>Diagnose My Finances <ArrowRight size={14} /></div>
           </div>
 
-          <div className="hover-lift" style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '40px 32px', display: 'flex', flexDirection: 'column' }}>
+          <div className="hover-lift" style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.03)` : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '40px 32px', display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: '13px', fontWeight: 800, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Step 02</div>
             <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '16px', color: t.text }}>The 30-Day Detox</h3>
             <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '16px', marginBottom: '32px' }}>Follow your AI-tailored plan to crush impulse spending. No more manual entry—AI quick-captures everything while coaching you.</p>
             <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: '#10b981', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }} onClick={() => navigateToPage('analytics')}>View Dashboard <ArrowRight size={14} /></div>
           </div>
 
-          <div className="hover-lift" style={{ background: isDark ? 'rgba(255,255,255,0.03)' : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '40px 32px', display: 'flex', flexDirection: 'column' }}>
+          <div className="hover-lift" style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.03)` : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '40px 32px', display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: '13px', fontWeight: 800, color: '#8b5cf6', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Step 03</div>
             <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '16px', color: t.text }}>Autopilot Wealth</h3>
             <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '16px', marginBottom: '32px' }}>Give every single rupee a job. Watch your debt shrink and your savings snowball so you never feel guilty spending again.</p>
@@ -4111,14 +4106,14 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 }}>
                   <div style={{ padding: '20px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ fontSize: '12px', fontWeight: 800, padding: '4px 10px', borderRadius: '100px', background: i === activeToolkit ? 'rgba(255,255,255,0.2)' : (isDark ? 'rgba(255,255,255,0.1)' : '#f3f4f6'), color: i === activeToolkit ? '#ffffff' : t.textMuted }}>{item.badge}</span>
+                      <span style={{ fontSize: '12px', fontWeight: 800, padding: '4px 10px', borderRadius: '100px', background: i === activeToolkit ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.2)` : (isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : '#f3f4f6'), color: i === activeToolkit ? '#ffffff' : t.textMuted }}>{item.badge}</span>
                       <h3 style={{ fontSize: '17px', fontWeight: 800 }}>{item.title}</h3>
                     </div>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginLeft: '12px', background: i === activeToolkit ? 'rgba(255,255,255,0.2)' : (isDark ? 'rgba(255,255,255,0.06)' : '#f3f4f6'), color: i === activeToolkit ? '#ffffff' : t.text }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginLeft: '12px', background: i === activeToolkit ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.2)` : (isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.06)` : '#f3f4f6'), color: i === activeToolkit ? '#ffffff' : t.text }}>
                       {i === activeToolkit ? <ArrowUpRight size={16} /> : <ChevronDown size={16} />}
                     </div>
                   </div>
-                  <div style={{ padding: i === activeToolkit ? '0 28px 28px' : '0 28px', maxHeight: i === activeToolkit ? '200px' : '0', overflow: 'hidden', opacity: i === activeToolkit ? 1 : 0, transition: 'all 0.4s ease-in-out', fontSize: '15px', lineHeight: 1.6, color: i === activeToolkit ? 'rgba(255,255,255,0.9)' : 'transparent' }}>
+                  <div style={{ padding: i === activeToolkit ? '0 28px 28px' : '0 28px', maxHeight: i === activeToolkit ? '200px' : '0', overflow: 'hidden', opacity: i === activeToolkit ? 1 : 0, transition: 'all 0.4s ease-in-out', fontSize: '15px', lineHeight: 1.6, color: i === activeToolkit ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.9)` : 'transparent' }}>
                     {item.desc}
                   </div>
                 </div>
@@ -4132,13 +4127,13 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               alt={toolkitItems[activeToolkit].title} 
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85, transition: 'opacity 0.5s' }} 
             />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.2), transparent)' }}></div>
+            <div style={{ position: 'absolute', inset: 0, background: isDark ? 'linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.2), transparent)' : 'linear-gradient(to top, rgba(255,255,255,0.9), rgba(255,255,255,0.2), transparent)' }}></div>
             
             <div style={{ position: 'absolute', bottom: '32px', left: '32px', right: '32px', zIndex: 20 }}>
-              <div style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '20px', padding: '24px', color: '#fff', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
-                <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#a7f3d0', marginBottom: '6px', display: 'block' }}>{toolkitItems[activeToolkit].badge}</span>
+              <div style={{ background: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.75)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)', border: `1px solid rgba(255,255,255,0.4)`, borderRadius: '20px', padding: '24px', color: isDark ? '#fff' : '#111827', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
+                <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', color: isDark ? '#a7f3d0' : '#047857', marginBottom: '6px', display: 'block' }}>{toolkitItems[activeToolkit].badge}</span>
                 <h4 style={{ fontSize: '20px', fontWeight: 800, marginBottom: '8px' }}>{toolkitItems[activeToolkit].title}</h4>
-                <p style={{ fontSize: '13.5px', color: 'rgba(255,255,255,0.8)', lineHeight: 1.5, margin: 0 }}>{toolkitItems[activeToolkit].desc}</p>
+                <p style={{ fontSize: '13.5px', color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(17,24,39,0.8)', lineHeight: 1.5, margin: 0 }}>{toolkitItems[activeToolkit].desc}</p>
               </div>
             </div>
           </div>
@@ -4157,7 +4152,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
         <div className="scroll-fade-up bento-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', maxWidth: '1200px', margin: '0 auto' }}>
           
           <div onClick={() => selectFeatureTab(0)} className={`hover-lift bento-span2 ${mobileFeatureSlide !== 0 ? 'bento-card-mobile-hide' : ''}`} style={{ gridColumn: 'span 2', background: isDark ? 'linear-gradient(135deg, #162419, #1c2e20)' : 'linear-gradient(135deg, #e8f5e9, #f1f8e9)', border: `1px solid ${isDark ? '#2a4a2e' : '#c8e6c9'}`, borderRadius: '2.5rem', padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '280px', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ background: isDark ? 'rgba(255,255,255,0.1)' : '#ffffff', border: `1px solid ${isDark ? 'rgba(255,255,255,0.2)' : '#c8e6c9'}`, width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', color: '#10b981' }}>
+            <div style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : '#ffffff', border: `1px solid ${isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.2)` : '#c8e6c9'}`, width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', color: '#10b981' }}>
               <MessageCircleHeart size={26} />
             </div>
             <div style={{ position: 'relative', zIndex: 10 }}>
@@ -4168,7 +4163,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           </div>
 
           <div onClick={() => selectFeatureTab(2)} className={`hover-lift ${mobileFeatureSlide !== 1 ? 'bento-card-mobile-hide' : ''}`} style={{ background: 'linear-gradient(135deg, #233127 0%, #152219 100%)', borderRadius: '2.5rem', padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '280px', cursor: 'pointer', border: `1px solid rgba(255,255,255,0.1)` }}>
-            <div style={{ background: 'rgba(255,255,255,0.1)', width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', color: '#10b981', border: `1px solid rgba(255,255,255,0.1)` }}>
+            <div style={{ background: 'rgba(0,0,0,0.1)', width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', color: '#10b981', border: `1px solid rgba(255,255,255,0.1)` }}>
               <ChartLine size={26} />
             </div>
             <div>
@@ -4179,7 +4174,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           </div>
 
           <div onClick={() => selectFeatureTab(3)} className={`hover-lift ${mobileFeatureSlide !== 2 ? 'bento-card-mobile-hide' : ''}`} style={{ background: isDark ? 'linear-gradient(135deg, #2a1820, #2e1c26)' : 'linear-gradient(135deg, #fce4ec, #fdf2f5)', border: `1px solid ${isDark ? '#4a2a36' : '#f8bbd0'}`, borderRadius: '2.5rem', padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '280px', cursor: 'pointer' }}>
-            <div style={{ background: isDark ? 'rgba(255,255,255,0.1)' : '#ffffff', border: `1px solid ${isDark ? 'rgba(255,255,255,0.2)' : '#f8bbd0'}`, width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', color: '#D58B6D' }}>
+            <div style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : '#ffffff', border: `1px solid ${isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.2)` : '#f8bbd0'}`, width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', color: '#D58B6D' }}>
               <BookHeart size={26} />
             </div>
             <div>
@@ -4190,7 +4185,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           </div>
 
           <div onClick={() => selectFeatureTab(4)} className={`hover-lift bento-span2 ${mobileFeatureSlide !== 3 ? 'bento-card-mobile-hide' : ''}`} style={{ gridColumn: 'span 2', background: isDark ? 'linear-gradient(135deg, #1e1a2e, #251f38)' : 'linear-gradient(135deg, #ede7f6, #f3effe)', border: `1px solid ${isDark ? '#3a3060' : '#d1c4e9'}`, borderRadius: '2.5rem', padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '280px', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ background: isDark ? 'rgba(255,255,255,0.1)' : '#ffffff', border: `1px solid ${isDark ? 'rgba(255,255,255,0.2)' : '#d1c4e9'}`, width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', color: '#8680C3' }}>
+            <div style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : '#ffffff', border: `1px solid ${isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.2)` : '#d1c4e9'}`, width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', color: '#8680C3' }}>
               <Target size={26} />
             </div>
             <div style={{ position: 'relative', zIndex: 10 }}>
@@ -4204,12 +4199,12 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
         {/* Mobile Indicator & Pause Control */}
         <div className="mobile-show" style={{ display: 'none', justifyContent: 'center', alignItems: 'center', gap: '16px', marginTop: '24px' }}>
-          <div style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', borderRadius: '100px', padding: '10px 16px', display: 'flex', gap: '8px' }}>
+          <div style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.06)` : 'rgba(0,0,0,0.05)', borderRadius: '100px', padding: '10px 16px', display: 'flex', gap: '8px' }}>
             {[0, 1, 2, 3].map(i => (
-              <div key={i} onClick={() => { setMobileFeatureSlide(i); setIsMobileFeaturePaused(true); }} style={{ width: mobileFeatureSlide === i ? '20px' : '8px', height: '8px', borderRadius: '4px', background: mobileFeatureSlide === i ? (isDark ? '#fff' : '#000') : (isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'), transition: 'all 0.3s ease', cursor: 'pointer' }} />
+              <div key={i} onClick={() => { setMobileFeatureSlide(i); setIsMobileFeaturePaused(true); }} style={{ width: mobileFeatureSlide === i ? '20px' : '8px', height: '8px', borderRadius: '4px', background: mobileFeatureSlide === i ? (isDark ? '#fff' : '#000') : (isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.2)` : 'rgba(0,0,0,0.2)'), transition: 'all 0.3s ease', cursor: 'pointer' }} />
             ))}
           </div>
-          <button onClick={() => setIsMobileFeaturePaused(!isMobileFeaturePaused)} style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', border: 'none', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: t.text }}>
+          <button onClick={() => setIsMobileFeaturePaused(!isMobileFeaturePaused)} style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.06)` : 'rgba(0,0,0,0.05)', border: 'none', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: t.text }}>
             {isMobileFeaturePaused ? <Play size={14} fill="currentColor" /> : <Pause size={14} fill="currentColor" />}
           </button>
         </div>
@@ -4248,7 +4243,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                       <Brain size={22} />
                       <span>ZenBudget AI Money Coach</span>
                     </div>
-                    <span style={{ fontSize: '11px', background: 'rgba(255,255,255,0.2)', padding: '4px 10px', borderRadius: '100px' }}>Live Demo</span>
+                    <span style={{ fontSize: '11px', background: 'rgba(0,0,0,0.2)', padding: '4px 10px', borderRadius: '100px' }}>Live Demo</span>
                   </div>
 
                   {/* Live Chat messages area */}
@@ -4257,7 +4252,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                       <div
                         key={idx}
                         style={{
-                          background: m.sender === 'user' ? 'linear-gradient(135deg, #10b981, #059669)' : (isDark ? 'rgba(255,255,255,0.08)' : '#ffffff'),
+                          background: m.sender === 'user' ? 'linear-gradient(135deg, #10b981, #059669)' : (isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)` : '#ffffff'),
                           color: m.sender === 'user' ? '#ffffff' : t.text,
                           padding: '12px 16px',
                           borderRadius: m.sender === 'user' ? '18px 18px 0 18px' : '0 18px 18px 18px',
@@ -4294,7 +4289,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                             whiteSpace: 'nowrap',
                             padding: '5px 12px',
                             borderRadius: '100px',
-                            background: isDark ? 'rgba(255,255,255,0.08)' : '#f3f4f6',
+                            background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)` : '#f3f4f6',
                             border: `1px solid ${t.border}`,
                             color: t.text,
                             cursor: 'pointer',
@@ -4319,7 +4314,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                           padding: '10px 14px',
                           borderRadius: '12px',
                           border: `1px solid ${t.border}`,
-                          background: isDark ? 'rgba(255,255,255,0.05)' : '#f9fafb',
+                          background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.05)` : '#f9fafb',
                           color: t.text,
                           outline: 'none'
                         }}
@@ -4347,7 +4342,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               {insideTabs[activeInsideTab].mockupType === 'quick-capture' && (
                 <div style={{ width: '100%', maxWidth: '420px', background: t.cardBg, color: t.text, border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
                   {/* Accounts in wallet preview */}
-                  <div style={{ background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.05)', borderRadius: '16px', padding: '14px' }}>
+                  <div style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.03)` : 'rgba(0,0,0,0.02)', border: isDark ? `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)` : '1px solid rgba(0,0,0,0.05)', borderRadius: '16px', padding: '14px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                       <span style={{ fontSize: '13px', fontWeight: 800, color: t.text }}>📁 My Accounts in Wallet</span>
                       <span style={{ fontSize: '11px', color: '#10b981', fontWeight: 700 }}>See All (0) &gt;</span>
@@ -4358,7 +4353,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   </div>
 
                   {/* Quick capture preview */}
-                  <div style={{ background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '20px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.03)` : 'rgba(0,0,0,0.02)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '20px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontSize: '16px', fontWeight: 900 }}>Quick capture</span>
                       <span style={{ fontSize: '9px', fontWeight: 800, background: 'rgba(16,185,129,0.2)', color: '#10b981', padding: '2px 8px', borderRadius: '10px' }}>✨ AI AUTO-DETECT</span>
@@ -4369,10 +4364,10 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                       <div style={{ flex: 1, background: isDark ? '#1e293b' : '#ffffff', color: t.text, textAlign: 'center', padding: '6px', borderRadius: '10px', fontSize: '11px', fontWeight: 800 }}>Expense</div>
                       <div style={{ flex: 1, color: t.textMuted, textAlign: 'center', padding: '6px', fontSize: '11px', fontWeight: 700 }}>Income</div>
                       <div style={{ flex: 1, color: t.textMuted, textAlign: 'center', padding: '6px', fontSize: '11px', fontWeight: 700 }}>Transfer</div>
-                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>🎤</div>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>🎤</div>
                     </div>
 
-                    <div style={{ background: isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.02)', border: isDark ? '1px solid rgba(255,255,255,0.1)' : `1px solid ${t.border}`, borderRadius: '12px', padding: '12px 14px', fontSize: '12px', color: t.textMuted }}>
+                    <div style={{ background: isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.02)', border: isDark ? `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : `1px solid ${t.border}`, borderRadius: '12px', padding: '12px 14px', fontSize: '12px', color: t.textMuted }}>
                       Paid 220 for petrol in cash
                     </div>
                   </div>
@@ -4397,7 +4392,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   </div>
 
                   {/* Story Card Result */}
-                  <div style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)', border: isDark ? '1px solid rgba(255,255,255,0.1)' : `1px solid ${t.border}`, borderRadius: '18px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.05)` : 'rgba(0,0,0,0.02)', border: isDark ? `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : `1px solid ${t.border}`, borderRadius: '18px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: '11px', fontWeight: 800, color: '#10b981' }}>ZEN MONEY SCORE</span>
                       <span style={{ fontSize: '22px', fontWeight: 900, color: '#10b981' }}>94/100</span>
@@ -4418,11 +4413,11 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontSize: '11px', fontWeight: 800, color: '#fbbf24', background: 'rgba(251,191,36,0.1)', padding: '2px 8px', borderRadius: '8px', border: '1px solid rgba(251,191,36,0.2)' }}>⚡ 180 pts</span>
-                      <span style={{ fontSize: '11px', fontWeight: 700, background: isDark ? 'rgba(255,255,255,0.08)' : '#f1f5f9', color: t.text, padding: '4px 10px', borderRadius: '8px' }}>🛍️ Shop</span>
+                      <span style={{ fontSize: '11px', fontWeight: 700, background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)` : '#f1f5f9', color: t.text, padding: '4px 10px', borderRadius: '8px' }}>🛍️ Shop</span>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '14px', alignItems: 'center', background: isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc', border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0'}`, borderRadius: '18px', padding: '16px' }}>
+                  <div style={{ display: 'flex', gap: '14px', alignItems: 'center', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.03)` : '#f8fafc', border: `1px solid ${isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)` : '#e2e8f0'}`, borderRadius: '18px', padding: '16px' }}>
                     <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#fda4af', border: `2px solid ${isDark ? '#1e293b' : '#ffffff'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
                       🐷
                     </div>
@@ -4442,7 +4437,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                       <span style={{ color: '#10b981' }}>COMPANION HAPPINESS</span>
                       <span style={{ color: '#f59e0b' }}>15% (Getting Happy 😐)</span>
                     </div>
-                    <div style={{ width: '100%', height: '8px', borderRadius: '100px', background: 'rgba(255,255,255,0.1)' }}>
+                    <div style={{ width: '100%', height: '8px', borderRadius: '100px', background: 'rgba(0,0,0,0.1)' }}>
                       <div style={{ width: '15%', height: '100%', borderRadius: '100px', background: 'linear-gradient(90deg, #ef4444, #f59e0b)' }}></div>
                     </div>
                   </div>
@@ -4450,16 +4445,16 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               )}
 
               {insideTabs[activeInsideTab].mockupType === 'badges' && (
-                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#111827', color: '#f8fafc', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
+                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
                   <div style={{ fontSize: '14px', fontWeight: 800, color: '#94a3b8' }}>Achievement Badges & Rewards</div>
                   
                   {/* Badge 1: 10 Invites */}
-                  <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '18px', padding: '16px', display: 'flex', gap: '14px', alignItems: 'center' }}>
+                  <div style={{ background: 'rgba(0,0,0,0.04)', border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)`, borderRadius: '18px', padding: '16px', display: 'flex', gap: '14px', alignItems: 'center' }}>
                     <div style={{ fontSize: '32px' }}>🎁</div>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontSize: '15px', fontWeight: 800 }}>10 Invites</span>
-                        <span style={{ fontSize: '10px', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '100px', fontWeight: 700 }}>LOCKED 🔒</span>
+                        <span style={{ fontSize: '10px', background: 'rgba(0,0,0,0.1)', padding: '2px 8px', borderRadius: '100px', fontWeight: 700 }}>LOCKED 🔒</span>
                       </div>
                       <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '3px' }}>
                         Invite 10 friends to earn 1 Month Free Premium!
@@ -4471,12 +4466,12 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   </div>
 
                   {/* Badge 2: 90d Pro Saver */}
-                  <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '18px', padding: '16px', display: 'flex', gap: '14px', alignItems: 'center' }}>
+                  <div style={{ background: 'rgba(0,0,0,0.04)', border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)`, borderRadius: '18px', padding: '16px', display: 'flex', gap: '14px', alignItems: 'center' }}>
                     <div style={{ fontSize: '32px' }}>👑</div>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontSize: '15px', fontWeight: 800 }}>90d Pro Saver</span>
-                        <span style={{ fontSize: '10px', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '100px', fontWeight: 700 }}>LOCKED 🔒</span>
+                        <span style={{ fontSize: '10px', background: 'rgba(0,0,0,0.1)', padding: '2px 8px', borderRadius: '100px', fontWeight: 700 }}>LOCKED 🔒</span>
                       </div>
                       <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '3px' }}>
                         Maintain a 90-day streak to claim 1 Month Free Premium!
@@ -4490,11 +4485,11 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               )}
 
               {insideTabs[activeInsideTab].mockupType === 'monthly-letter' && (
-                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#111827', color: '#f8fafc', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)', textAlign: 'center' }}>
+                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)', textAlign: 'center' }}>
                   <div style={{ fontSize: '36px' }}>✉️</div>
                   <div style={{ fontSize: '18px', fontWeight: 900 }}>Monthly Report locked 🔒</div>
                   
-                  <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px', padding: '18px', fontSize: '13px', color: '#cbd5e1', lineHeight: 1.5, textAlign: 'left' }}>
+                  <div style={{ background: 'rgba(0,0,0,0.04)', border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)`, borderRadius: '18px', padding: '18px', fontSize: '13px', color: '#cbd5e1', lineHeight: 1.5, textAlign: 'left' }}>
                     Your first <strong>Monthly Letter from Zen</strong> will unlock after <strong>30 days</strong> of tracking.<br/><br/>
                     You have tracked for <strong>6 days</strong> so far. Keep logging daily to compile your personal money story!<br/><br/>
                     <span style={{ color: '#10b981', fontWeight: 800 }}>24 more days until unlock.</span>
@@ -4507,10 +4502,10 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               )}
 
               {insideTabs[activeInsideTab].mockupType === 'category-limits' && (
-                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#111827', color: '#f8fafc', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
+                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
                   <div style={{ fontSize: '16px', fontWeight: 900 }}>Category Budgets</div>
                   
-                  <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ background: 'rgba(0,0,0,0.04)', border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)`, borderRadius: '16px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                       <div style={{ fontSize: '10px', color: '#10b981', fontWeight: 800, letterSpacing: '0.05em' }}>🎯 TOTAL ALLOCATED BUDGET</div>
                       <div style={{ fontSize: '22px', fontWeight: 900 }}>₹0</div>
@@ -4526,7 +4521,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     { name: 'Entertainment', icon: '🎬', spent: '₹0' },
                     { name: 'Bills & Utilities', icon: '💳', spent: '₹0' }
                   ].map((cat, idx) => (
-                    <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div key={idx} style={{ background: 'rgba(0,0,0,0.03)', border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.06)`, borderRadius: '14px', padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span style={{ fontSize: '18px' }}>{cat.icon}</span>
                         <div>
@@ -4543,20 +4538,20 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               )}
 
               {insideTabs[activeInsideTab].mockupType === 'mood-tracker' && (
-                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#111827', color: '#f8fafc', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
+                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
                   <div style={{ fontSize: '12px', fontWeight: 800, color: '#10b981', letterSpacing: '0.08em' }}>EMOTIONAL SPENDING TRACKER</div>
                   <div style={{ fontSize: '12px', color: '#cbd5e1' }}>How did spending make you feel today? Select mood to log:</div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-around', background: 'rgba(255,255,255,0.04)', padding: '12px', borderRadius: '16px', fontSize: '22px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-around', background: 'rgba(0,0,0,0.04)', padding: '12px', borderRadius: '16px', fontSize: '22px' }}>
                     <span>😀</span> <span>😭</span> <span>😡</span> <span>😍</span> <span>😌</span> <span>😔</span>
                   </div>
 
-                  <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ background: 'rgba(0,0,0,0.03)', border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)`, borderRadius: '16px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 800 }}>
                       <span>Mood Trend</span>
                       <span style={{ fontSize: '11px', color: '#94a3b8' }}>Last 7 Days</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', fontSize: '10px', paddingTop: '10px', borderTop: '1px dashed rgba(255,255,255,0.1)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', fontSize: '10px', paddingTop: '10px', borderTop: `1px dashed rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` }}>
                       <span>Wed</span> <span>Thu</span> <span>Fri</span> <span>Sat</span> <span>Sun</span> <span>Mon</span> <span>Tue</span>
                     </div>
                   </div>
@@ -4564,14 +4559,14 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               )}
 
               {insideTabs[activeInsideTab].mockupType === 'family-sync' && (
-                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#111827', color: '#f8fafc', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
+                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
                   <div style={{ fontSize: '18px', fontWeight: 900 }}>Couple & Family Sync</div>
                   <div style={{ fontSize: '12px', color: '#94a3b8' }}>Partners, families & roommates real-time spending & transfer sync.</div>
 
-                  <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px', padding: '18px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ background: 'rgba(0,0,0,0.04)', border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)`, borderRadius: '18px', padding: '18px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     <div style={{ fontSize: '10px', fontWeight: 800, color: '#94a3b8', letterSpacing: '0.05em' }}>YOUR UNIQUE COUPLE / FAMILY SYNC CODE</div>
                     <div style={{ display: 'flex', gap: '10px' }}>
-                      <div style={{ flex: 1, background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.1)', padding: '10px 14px', borderRadius: '12px', fontFamily: 'monospace', fontWeight: 800, color: '#a855f7', fontSize: '15px', letterSpacing: '0.08em' }}>
+                      <div style={{ flex: 1, background: 'rgba(0,0,0,0.4)', border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)`, padding: '10px 14px', borderRadius: '12px', fontFamily: 'monospace', fontWeight: 800, color: '#a855f7', fontSize: '15px', letterSpacing: '0.08em' }}>
                         CP-S02G-2ARG
                       </div>
                       <div style={{ background: '#10b981', color: '#fff', padding: '10px 14px', borderRadius: '12px', fontWeight: 800, fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -4583,7 +4578,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               )}
 
               {insideTabs[activeInsideTab].mockupType === 'loans-tracker' && (
-                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#111827', color: '#f8fafc', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
+                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ fontSize: '18px', fontWeight: 900 }}>Loans & Borrowings</div>
                     <div style={{ background: '#10b981', color: '#fff', padding: '4px 10px', borderRadius: '8px', fontSize: '11px', fontWeight: 800 }}>+ Add Loan</div>
@@ -4601,27 +4596,27 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ background: 'rgba(0,0,0,0.04)', border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)`, borderRadius: '16px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontSize: '14px', fontWeight: 800 }}>{localStorage.getItem('zb_user_name') ? `Contact (${localStorage.getItem('zb_user_name')})` : 'Aditya Verma'}</span>
                         <span style={{ fontSize: '16px', fontWeight: 900, color: '#ef4444' }}>₹1,45,000</span>
                       </div>
                       <div style={{ fontSize: '11px', color: '#94a3b8' }}>Due Date: 2026-11-27 • (+3% /mo)</div>
                       <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
-                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.08)', color: '#fff', textAlign: 'center', padding: '8px', borderRadius: '10px', fontSize: '11px', fontWeight: 700 }}>Record Cash</div>
+                        <div style={{ flex: 1, background: 'rgba(0,0,0,0.08)', color: '#fff', textAlign: 'center', padding: '8px', borderRadius: '10px', fontSize: '11px', fontWeight: 700 }}>Record Cash</div>
                         <div style={{ flex: 1, background: '#10b981', color: '#fff', textAlign: 'center', padding: '8px', borderRadius: '10px', fontSize: '11px', fontWeight: 800 }}>⚡ Pay via PhonePe</div>
                       </div>
                     </div>
 
-                    <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ background: 'rgba(0,0,0,0.04)', border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)`, borderRadius: '16px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontSize: '14px', fontWeight: 800 }}>Rohan Sharma</span>
                         <span style={{ fontSize: '16px', fontWeight: 900, color: '#10b981' }}>₹55,000</span>
                       </div>
                       <div style={{ fontSize: '11px', color: '#94a3b8' }}>Due Date: 2026-12-15 • (0% interest)</div>
                       <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
-                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.08)', color: '#fff', textAlign: 'center', padding: '8px', borderRadius: '10px', fontSize: '11px', fontWeight: 700 }}>Remind via WA</div>
-                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.08)', color: '#fff', textAlign: 'center', padding: '8px', borderRadius: '10px', fontSize: '11px', fontWeight: 700 }}>Mark as Paid</div>
+                        <div style={{ flex: 1, background: 'rgba(0,0,0,0.08)', color: '#fff', textAlign: 'center', padding: '8px', borderRadius: '10px', fontSize: '11px', fontWeight: 700 }}>Remind via WA</div>
+                        <div style={{ flex: 1, background: 'rgba(0,0,0,0.08)', color: '#fff', textAlign: 'center', padding: '8px', borderRadius: '10px', fontSize: '11px', fontWeight: 700 }}>Mark as Paid</div>
                       </div>
                     </div>
                   </div>
@@ -4629,10 +4624,10 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               )}
 
               {insideTabs[activeInsideTab].mockupType === 'wealth-compound' && (
-                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#111827', color: '#f8fafc', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
+                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
                   <div style={{ fontSize: '16px', fontWeight: 900 }}>Wealth Compound Simulator</div>
                   
-                  <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px', padding: '18px', textAlign: 'center' }}>
+                  <div style={{ background: 'rgba(0,0,0,0.04)', border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)`, borderRadius: '18px', padding: '18px', textAlign: 'center' }}>
                     <div style={{ fontSize: '10px', color: '#10b981', fontWeight: 800, letterSpacing: '0.08em' }}>PROJECTED TOTAL WEALTH (10 YEARS)</div>
                     <div style={{ fontSize: '28px', fontWeight: 900, color: '#10b981', margin: '4px 0' }}>₹2,18,87,038</div>
                     <div style={{ display: 'flex', justifyContent: 'space-around', fontSize: '11px', color: '#94a3b8', marginTop: '8px' }}>
@@ -4652,7 +4647,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               )}
 
               {insideTabs[activeInsideTab].mockupType === 'analytics' && (
-                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#111827', color: '#f8fafc', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
+                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                       <div style={{ fontSize: '12px', fontWeight: 800, color: '#10b981', letterSpacing: '0.08em' }}>MONTHLY EXPENSE BREAKDOWN</div>
@@ -4689,13 +4684,13 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               )}
 
               {insideTabs[activeInsideTab].mockupType === 'goals' && (
-                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#111827', color: '#f8fafc', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
+                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ fontSize: '16px', fontWeight: 900 }}>🎯 Active Savings Goals</div>
                     <div style={{ background: '#10b981', color: '#fff', padding: '4px 10px', borderRadius: '8px', fontSize: '11px', fontWeight: 800 }}>+ New Goal</div>
                   </div>
 
-                  <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ background: 'rgba(0,0,0,0.04)', border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)`, borderRadius: '18px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span style={{ fontSize: '22px' }}>🛡️</span>
@@ -4706,7 +4701,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                       </div>
                       <span style={{ fontSize: '14px', fontWeight: 900, color: '#10b981' }}>72%</span>
                     </div>
-                    <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '100px', overflow: 'hidden' }}>
+                    <div style={{ width: '100%', height: '8px', background: 'rgba(0,0,0,0.1)', borderRadius: '100px', overflow: 'hidden' }}>
                       <div style={{ width: '72%', height: '100%', background: '#10b981', borderRadius: '100px' }}></div>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#94a3b8' }}>
@@ -4715,7 +4710,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     </div>
                   </div>
 
-                  <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ background: 'rgba(0,0,0,0.04)', border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)`, borderRadius: '18px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span style={{ fontSize: '22px' }}>✈️</span>
@@ -4726,7 +4721,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                       </div>
                       <span style={{ fontSize: '14px', fontWeight: 900, color: '#a855f7' }}>45%</span>
                     </div>
-                    <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '100px', overflow: 'hidden' }}>
+                    <div style={{ width: '100%', height: '8px', background: 'rgba(0,0,0,0.1)', borderRadius: '100px', overflow: 'hidden' }}>
                       <div style={{ width: '45%', height: '100%', background: '#a855f7', borderRadius: '100px' }}></div>
                     </div>
                   </div>
@@ -4734,7 +4729,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               )}
 
               {insideTabs[activeInsideTab].mockupType === 'vault' && (
-                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#111827', color: '#f8fafc', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)', textAlign: 'center' }}>
+                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 16px 36px rgba(0,0,0,0.4)', textAlign: 'center' }}>
                   <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(16,185,129,0.15)', border: '2px solid #10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', color: '#10b981' }}>
                     <Lock size={32} />
                   </div>
@@ -4744,7 +4739,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     <div style={{ fontSize: '12px', color: '#10b981', fontWeight: 700, marginTop: '2px' }}>🔒 Protected by Device FaceID & AES-256</div>
                   </div>
 
-                  <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left' }}>
+                  <div style={{ background: 'rgba(0,0,0,0.04)', border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)`, borderRadius: '18px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', fontWeight: 700 }}>
                       <Shield size={16} color="#10b981" />
                       <span>100% Client-Side Local Storage</span>
@@ -4843,7 +4838,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   {Math.round(((currentQuestionIndex + 1) / activeQuizQuestions.length) * 100)}% Completed
                 </span>
               </div>
-              <div style={{ width: '100%', height: '8px', background: isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb', borderRadius: '100px', overflow: 'hidden', marginBottom: '32px' }}>
+              <div style={{ width: '100%', height: '8px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : '#e5e7eb', borderRadius: '100px', overflow: 'hidden', marginBottom: '32px' }}>
                 <div style={{ width: `${((currentQuestionIndex + 1) / activeQuizQuestions.length) * 100}%`, height: '100%', background: '#10b981', borderRadius: '100px', transition: 'width 0.4s' }}></div>
               </div>
 
@@ -4857,12 +4852,12 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     key={i} 
                     onClick={() => handleSelectQuizOption(opt.points)}
                     style={{ 
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 24px', borderRadius: '18px', textAlign: 'left', border: `1px solid ${t.border}`, background: isDark ? 'rgba(255,255,255,0.04)' : '#f9fafb', color: t.text, cursor: 'pointer', transition: 'all 0.2s'
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 24px', borderRadius: '18px', textAlign: 'left', border: `1px solid ${t.border}`, background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.04)` : '#f9fafb', color: t.text, cursor: 'pointer', transition: 'all 0.2s'
                     }} 
                     className="hover-lift"
                   >
                     <span style={{ fontSize: '15px', fontWeight: 600, lineHeight: 1.4 }}>{opt.text}</span>
-                    <span style={{ fontSize: '11px', fontWeight: 800, padding: '4px 10px', borderRadius: '100px', background: isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb', color: t.textMuted, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 800, padding: '4px 10px', borderRadius: '100px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : '#e5e7eb', color: t.textMuted, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                       {opt.tag}
                     </span>
                   </button>
@@ -4929,7 +4924,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                       <span style={{ fontSize: '12px', fontWeight: 800 }}>{scoreInfo.budgetControl.pct}%</span>
                     </div>
                     <div style={{ fontSize: '16px', fontWeight: 800 }}>Budget Control</div>
-                    <div style={{ width: '100%', height: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb', borderRadius: '100px', overflow: 'hidden' }}>
+                    <div style={{ width: '100%', height: '6px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : '#e5e7eb', borderRadius: '100px', overflow: 'hidden' }}>
                       <div style={{ width: `${scoreInfo.budgetControl.pct}%`, height: '100%', background: scoreInfo.budgetControl.color, borderRadius: '100px' }}></div>
                     </div>
                     <div style={{ fontSize: '12px', color: t.textMuted, lineHeight: 1.4 }}>Zero-based allocation discipline & tracking consistency.</div>
@@ -4943,7 +4938,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                       <span style={{ fontSize: '12px', fontWeight: 800 }}>{scoreInfo.impulseControl.pct}%</span>
                     </div>
                     <div style={{ fontSize: '16px', fontWeight: 800 }}>Impulse Control</div>
-                    <div style={{ width: '100%', height: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb', borderRadius: '100px', overflow: 'hidden' }}>
+                    <div style={{ width: '100%', height: '6px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : '#e5e7eb', borderRadius: '100px', overflow: 'hidden' }}>
                       <div style={{ width: `${scoreInfo.impulseControl.pct}%`, height: '100%', background: scoreInfo.impulseControl.color, borderRadius: '100px' }}></div>
                     </div>
                     <div style={{ fontSize: '12px', color: t.textMuted, lineHeight: 1.4 }}>Ability to pause 24h before making unplanned purchases.</div>
@@ -4957,7 +4952,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                       <span style={{ fontSize: '12px', fontWeight: 800 }}>{scoreInfo.savingsRate.pct}%</span>
                     </div>
                     <div style={{ fontSize: '16px', fontWeight: 800 }}>Savings Buffer</div>
-                    <div style={{ width: '100%', height: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb', borderRadius: '100px', overflow: 'hidden' }}>
+                    <div style={{ width: '100%', height: '6px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : '#e5e7eb', borderRadius: '100px', overflow: 'hidden' }}>
                       <div style={{ width: `${scoreInfo.savingsRate.pct}%`, height: '100%', background: scoreInfo.savingsRate.color, borderRadius: '100px' }}></div>
                     </div>
                     <div style={{ fontSize: '12px', color: t.textMuted, lineHeight: 1.4 }}>Emergency fund buffer against sudden expenses.</div>
@@ -4971,7 +4966,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                       <span style={{ fontSize: '12px', fontWeight: 800 }}>{scoreInfo.debtRisk.pct}%</span>
                     </div>
                     <div style={{ fontSize: '16px', fontWeight: 800 }}>Debt Safety</div>
-                    <div style={{ width: '100%', height: '6px', background: isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb', borderRadius: '100px', overflow: 'hidden' }}>
+                    <div style={{ width: '100%', height: '6px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : '#e5e7eb', borderRadius: '100px', overflow: 'hidden' }}>
                       <div style={{ width: `${scoreInfo.debtRisk.pct}%`, height: '100%', background: scoreInfo.debtRisk.color, borderRadius: '100px' }}></div>
                     </div>
                     <div style={{ fontSize: '12px', color: t.textMuted, lineHeight: 1.4 }}>Protection against high-interest credit card traps.</div>
@@ -5000,7 +4995,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                       <button onClick={onOpenWebApp} style={{ background: isDark ? 'rgba(16,185,129,0.15)' : '#ecfdf5', border: '1px solid #10b981', color: '#10b981', padding: '10px 18px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
                         Launch AI Financial Coach
                       </button>
-                      <button onClick={onOpenWebApp} style={{ background: isDark ? 'rgba(255,255,255,0.06)' : '#f3f4f6', border: `1px solid ${t.border}`, color: t.text, padding: '10px 18px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+                      <button onClick={onOpenWebApp} style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.06)` : '#f3f4f6', border: `1px solid ${t.border}`, color: t.text, padding: '10px 18px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
                         Set Up Zero-Based Envelopes
                       </button>
                     </div>
@@ -5016,7 +5011,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                       <button onClick={onOpenWebApp} style={{ background: isDark ? 'rgba(59,130,246,0.15)' : '#eff6ff', border: '1px solid #3b82f6', color: '#3b82f6', padding: '10px 18px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
                         Build 1-Month Emergency Buffer
                       </button>
-                      <button onClick={onOpenWebApp} style={{ background: isDark ? 'rgba(255,255,255,0.06)' : '#f3f4f6', border: `1px solid ${t.border}`, color: t.text, padding: '10px 18px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+                      <button onClick={onOpenWebApp} style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.06)` : '#f3f4f6', border: `1px solid ${t.border}`, color: t.text, padding: '10px 18px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
                         Track 7-Day Spending Habits
                       </button>
                     </div>
@@ -5032,7 +5027,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                       <button onClick={onOpenWebApp} style={{ background: isDark ? 'rgba(139,92,246,0.15)' : '#f3e8ff', border: '1px solid #8b5cf6', color: '#8b5cf6', padding: '10px 18px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
                         Automate Monthly Savings Rules
                       </button>
-                      <button onClick={onOpenWebApp} style={{ background: isDark ? 'rgba(255,255,255,0.06)' : '#f3f4f6', border: `1px solid ${t.border}`, color: t.text, padding: '10px 18px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+                      <button onClick={onOpenWebApp} style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.06)` : '#f3f4f6', border: `1px solid ${t.border}`, color: t.text, padding: '10px 18px', borderRadius: '100px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
                         Zero-Debt Payoff Strategy
                       </button>
                     </div>
@@ -5045,7 +5040,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 <button onClick={onOpenWebApp} style={{ background: '#10b981', color: '#ffffff', padding: '16px 36px', borderRadius: '100px', fontSize: '16px', fontWeight: 800, border: 'none', cursor: 'pointer', boxShadow: '0 10px 24px rgba(16,185,129,0.3)' }} className="hover-lift">
                   Open Web App & Apply Roadmap <ArrowRight size={18} style={{ marginLeft: '8px' }} />
                 </button>
-                <button onClick={handleDownloadAction} style={{ background: isDark ? 'rgba(255,255,255,0.08)' : '#f3f4f6', color: t.text, padding: '16px 28px', borderRadius: '100px', fontSize: '15px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer' }}>
+                <button onClick={handleDownloadAction} style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)` : '#f3f4f6', color: t.text, padding: '16px 28px', borderRadius: '100px', fontSize: '15px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer' }}>
                   Download Android APK
                 </button>
               </div>
@@ -5193,9 +5188,9 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               <button 
                 onClick={onOpenWebApp} 
                 style={{ 
-                  background: 'rgba(255,255,255,0.12)', 
+                  background: 'rgba(0,0,0,0.12)', 
                   color: '#ffffff', 
-                  border: '1px solid rgba(255,255,255,0.3)', 
+                  border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.3)`, 
                   padding: '16px 28px', 
                   borderRadius: '100px', 
                   fontSize: '15px', 
@@ -5215,7 +5210,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             </div>
 
             {/* Trust Micro Indicators */}
-            <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.15)' }}>
+            <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginTop: '24px', paddingTop: '20px', borderTop: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.15)` }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'rgba(255,255,255,0.8)', fontWeight: 700 }}>
                 <Shield size={14} color="#34d399" /> 100% Encrypted
               </div>
@@ -5286,7 +5281,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           {/* Brand Left Column */}
           <div style={{ flex: '1 1 320px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-              <img src="/favicon.png" alt="ZenBudget" style={{ width: '38px', height: '38px', borderRadius: '12px' }} />
+              <img src="/logo.png" alt="ZenBudget" style={{ width: '38px', height: '38px', borderRadius: '12px' }} />
               <span style={{ fontSize: '22px', fontWeight: 900, color: t.text, letterSpacing: '-0.02em' }}>ZenBudget</span>
             </div>
             <p style={{ color: t.textSub, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '340px', marginBottom: '28px' }}>
@@ -5383,12 +5378,12 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               <span 
                 key={i} 
                 style={{ 
-                  fontSize: '11.5px', 
+                  fontSize: '9.5px', 
                   color: t.textMuted, 
                   fontWeight: 600, 
-                  background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)', 
+                  background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.04)` : 'rgba(0,0,0,0.03)', 
                   border: `1px solid ${t.border}`, 
-                  padding: '5px 12px', 
+                  padding: '3px 8px', 
                   borderRadius: '100px', 
                   cursor: 'pointer',
                   transition: 'all 0.2s' 
@@ -5426,14 +5421,14 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             <div style={{ background: isDark ? 'linear-gradient(135deg, #1b261d, #141c16)' : 'linear-gradient(135deg, #f0fdf4, #e8f5e9)', padding: '24px 24px 20px', position: 'relative', borderBottom: `1px solid ${t.border}` }}>
               
               {/* Close Button */}
-              <button onClick={() => setShowModal(false)} aria-label="Close" style={{ position: 'absolute', top: '16px', right: '16px', background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)', border: 'none', color: t.text, cursor: 'pointer', padding: '7px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
+              <button onClick={() => setShowModal(false)} aria-label="Close" style={{ position: 'absolute', top: '16px', right: '16px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : 'rgba(0,0,0,0.06)', border: 'none', color: t.text, cursor: 'pointer', padding: '7px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
                 <X size={16} strokeWidth={2.5} />
               </button>
               
               {/* Top Row: App Logo + Title + Ratings + FREE Badge */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', paddingRight: '32px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <img src="/favicon.png" alt="ZenBudget" style={{ width: '42px', height: '42px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(16,185,129,0.3)' }} />
+                  <img src="/logo.png" alt="ZenBudget" style={{ width: '42px', height: '42px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(16,185,129,0.3)' }} />
                   <div>
                     <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: t.text }}>ZenBudget</h3>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: t.textMuted, marginTop: '2px' }}>
@@ -5458,7 +5453,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             <div style={{ padding: '20px 24px 24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
               
               {/* Avatars + Daily Active Count Row */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: isDark ? 'rgba(255,255,255,0.04)' : '#f9fafb', padding: '10px 14px', borderRadius: '14px', border: `1px solid ${t.border}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.04)` : '#f9fafb', padding: '10px 14px', borderRadius: '14px', border: `1px solid ${t.border}` }}>
                 <div style={{ display: 'flex' }}>
                   {['S','M','A','R','J'].map((initial, i) => (
                     <div key={i} style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#84cc16', color: '#111827', fontSize: '10px', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: i > 0 ? '-6px' : 0, border: `2px solid ${isDark ? '#141b15' : '#ffffff'}` }}>
@@ -5554,7 +5549,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               overflow: 'hidden', 
               position: 'relative', 
               boxShadow: '0 30px 80px rgba(0,0,0,0.6)', 
-              border: '1px solid rgba(255,255,255,0.15)',
+              border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.15)`,
               background: isDark ? '#111812' : '#ffffff'
             }} 
             onClick={(e) => e.stopPropagation()}
@@ -5568,7 +5563,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   position: 'absolute', 
                   top: '18px', 
                   right: '18px', 
-                  background: 'rgba(255,255,255,0.15)', 
+                  background: 'rgba(0,0,0,0.15)', 
                   border: 'none', 
                   color: '#ffffff', 
                   cursor: 'pointer', 
@@ -5587,7 +5582,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               {/* App Brand Header */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
                 <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 20px rgba(16,185,129,0.4)', flexShrink: 0, overflow: 'hidden' }}>
-                  <img src="/favicon.png" alt="ZenBudget Logo" style={{ width: '34px', height: '34px', borderRadius: '8px', objectFit: 'cover' }} />
+                  <img src="/logo.png" alt="ZenBudget Logo" style={{ width: '34px', height: '34px', borderRadius: '8px', objectFit: 'cover' }} />
                 </div>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -5693,7 +5688,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 {deviceOS === 'android' ? (
                   <button 
                     onClick={() => { setShowWelcomeModal(false); onOpenWebApp(); }}
-                    style={{ width: '100%', padding: '13px 20px', borderRadius: '100px', background: isDark ? 'rgba(255,255,255,0.07)' : '#f3f4f6', color: t.text, fontSize: '13.5px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                    style={{ width: '100%', padding: '13px 20px', borderRadius: '100px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.07)` : '#f3f4f6', color: t.text, fontSize: '13.5px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                     className="hover-lift"
                   >
                     <Wallet size={16} color="#10b981" />
@@ -5702,7 +5697,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 ) : (
                   <button 
                     onClick={() => { setShowWelcomeModal(false); handleDownloadApk(); }}
-                    style={{ width: '100%', padding: '13px 20px', borderRadius: '100px', background: isDark ? 'rgba(255,255,255,0.07)' : '#f3f4f6', color: t.text, fontSize: '13.5px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                    style={{ width: '100%', padding: '13px 20px', borderRadius: '100px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.07)` : '#f3f4f6', color: t.text, fontSize: '13.5px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                     className="hover-lift"
                   >
                     <Download size={16} color="#10b981" />
@@ -5736,12 +5731,12 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px' }}>
-                  <img src="/favicon.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  <img src="/logo.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#fff' }}>ZenBudget App</h3>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
-                    <div style={{ background: 'rgba(255,255,255,0.2)', padding: '2px 6px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, color: '#fff' }}>FREE</div>
+                    <div style={{ background: 'rgba(0,0,0,0.2)', padding: '2px 6px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, color: '#fff' }}>FREE</div>
                     <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.9)', fontWeight: 600 }}>4.8 ★ Rating</span>
                   </div>
                 </div>
@@ -5795,7 +5790,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           <div className="hero-animate" style={{ width: '100%', maxWidth: '440px', background: isDark ? '#161d18' : '#ffffff', borderRadius: '28px', padding: '28px', boxShadow: '0 -20px 40px rgba(0,0,0,0.5)', border: `1px solid ${t.border}`, display: 'flex', flexDirection: 'column', gap: '20px' }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <img src="/favicon.png" alt="ZenBudget" style={{ width: '36px', height: '36px', borderRadius: '10px' }} />
+                <img src="/logo.png" alt="ZenBudget" style={{ width: '36px', height: '36px', borderRadius: '10px' }} />
                 <h3 style={{ fontSize: '17px', fontWeight: 800, margin: 0, color: t.text }}>Install on iPhone / iPad</h3>
               </div>
               <button onClick={() => setShowIosGuideModal(false)} style={{ background: 'transparent', border: 'none', color: t.text, cursor: 'pointer' }}>
@@ -5804,15 +5799,15 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', background: isDark ? 'rgba(255,255,255,0.04)' : '#f9fafb', padding: '12px 16px', borderRadius: '16px', border: `1px solid ${t.border}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.04)` : '#f9fafb', padding: '12px 16px', borderRadius: '16px', border: `1px solid ${t.border}` }}>
                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#10b981', color: '#fff', fontSize: '13px', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>1</div>
                 <span style={{ fontSize: '14px', fontWeight: 600, color: t.text }}>Tap Safari's <strong>Share button</strong> [↑] at the bottom toolbar.</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', background: isDark ? 'rgba(255,255,255,0.04)' : '#f9fafb', padding: '12px 16px', borderRadius: '16px', border: `1px solid ${t.border}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.04)` : '#f9fafb', padding: '12px 16px', borderRadius: '16px', border: `1px solid ${t.border}` }}>
                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#10b981', color: '#fff', fontSize: '13px', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>2</div>
                 <span style={{ fontSize: '14px', fontWeight: 600, color: t.text }}>Scroll down and select <strong>"Add to Home Screen"</strong>.</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', background: isDark ? 'rgba(255,255,255,0.04)' : '#f9fafb', padding: '12px 16px', borderRadius: '16px', border: `1px solid ${t.border}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.04)` : '#f9fafb', padding: '12px 16px', borderRadius: '16px', border: `1px solid ${t.border}` }}>
                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#10b981', color: '#fff', fontSize: '13px', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>3</div>
                 <span style={{ fontSize: '14px', fontWeight: 600, color: t.text }}>Tap <strong>"Add"</strong> in top-right to launch like a native App!</span>
               </div>
@@ -5829,7 +5824,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       {featureModalData && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', padding: '16px' }} onClick={() => setFeatureModalData(null)}>
           <div className="hero-animate" style={{ width: '100%', maxWidth: '520px', background: isDark ? '#161d18' : '#ffffff', borderRadius: '28px', overflow: 'hidden', position: 'relative', boxShadow: '0 30px 60px rgba(0,0,0,0.5)', border: `1px solid ${t.border}` }} onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setFeatureModalData(null)} style={{ position: 'absolute', top: '18px', right: '18px', background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', border: 'none', color: t.text, cursor: 'pointer', padding: '8px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
+            <button onClick={() => setFeatureModalData(null)} style={{ position: 'absolute', top: '18px', right: '18px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : 'rgba(0,0,0,0.05)', border: 'none', color: t.text, cursor: 'pointer', padding: '8px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
               <X size={18} />
             </button>
             <div style={{ padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -5845,7 +5840,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               <p style={{ fontSize: '14.5px', color: t.textSub, lineHeight: 1.6, margin: 0 }}>
                 {featureModalData.description}
               </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', background: isDark ? 'rgba(255,255,255,0.03)' : '#f9fafb', padding: '16px', borderRadius: '16px', border: `1px solid ${t.border}` }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.03)` : '#f9fafb', padding: '16px', borderRadius: '16px', border: `1px solid ${t.border}` }}>
                 {featureModalData.bullets.map((bullet, bIdx) => (
                   <div key={bIdx} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13.5px', fontWeight: 600, color: t.text }}>
                     <CheckCircle2 size={16} color="#10b981" />

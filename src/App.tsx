@@ -74,6 +74,12 @@ interface AppProps {
   onBackToLanding?: () => void;
 }
 
+const generateId = () => {
+  return typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : Date.now().toString(36) + Math.random().toString(36).substring(2);
+};
+
 const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   const [transactions, setTransactions] = useState<Transaction[]>(() => {
     const profileId = localStorage.getItem('zb_profile_id') || '';
@@ -579,7 +585,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
   const handleAddAccount = async (newAcc: Omit<Account, 'id'>) => {
     if (checkExpiredGuard('add bank accounts')) return;
-    const accId = crypto.randomUUID();
+    const accId = generateId();
     const created: any = { 
       ...newAcc, 
       id: accId, 
@@ -665,7 +671,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         const activeRate = rates[currency] || 1;
         const baseUSDAmount = amount / activeRate;
         await supabase.from('transactions').insert([{
-          id: crypto.randomUUID(),
+          id: generateId(),
           user_id: partnerTargetUserId,
           title: `Received from ${userName || 'Partner'}`,
           amount: baseUSDAmount,
@@ -686,7 +692,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
   const handleAddLoan = (loanData: Omit<LoanRecord, 'id' | 'paidAmount' | 'status'>) => {
     if (checkExpiredGuard('manage & add loans')) return;
-    const loanId = crypto.randomUUID();
+    const loanId = generateId();
     const newLoan: LoanRecord = {
       ...loanData,
       id: loanId,
@@ -1186,6 +1192,25 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           });
           triggerToast(`📣 ${b.title}`, b.type === 'coupon' ? 'success' : 'info');
           try { playNotificationSound('info'); } catch (_) {}
+
+          if (Capacitor.isNativePlatform()) {
+            import('@capacitor/local-notifications').then(({ LocalNotifications }) => {
+              LocalNotifications.schedule({
+                notifications: [
+                  {
+                    title: b.title || 'New Announcement',
+                    body: b.message || 'Check out the latest update in ZenBudget.',
+                    id: Math.floor(Math.random() * 1000000),
+                    schedule: { at: new Date(Date.now() + 1000) },
+                    sound: undefined,
+                    attachments: undefined,
+                    actionTypeId: '',
+                    extra: null
+                  }
+                ]
+              }).catch(e => console.warn('Local push failed', e));
+            }).catch(() => {});
+          }
         }
       })
       .subscribe();
@@ -1227,7 +1252,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   const addNotification = async (title: string, desc: string, type: ZenNotification['type']) => {
     if (!currentProfileId) return;
     const newNotif: ZenNotification = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       type,
       title,
       desc,
@@ -2786,7 +2811,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         }
       } else {
         // Create sync
-        const newTxId = crypto.randomUUID();
+        const newTxId = generateId();
         const newTx = {
           id: newTxId,
           user_id: currentProfileId,
@@ -4015,21 +4040,21 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             }}
             title="Scan & Pay"
             style={{
-              background: 'var(--bg-input)',
-              border: '1px solid var(--border-input)',
+              background: themeMode === 'light' ? '#FFFFFF' : 'var(--bg-input)',
+              border: themeMode === 'light' ? '1px solid rgba(0,0,0,0.1)' : '1px solid var(--border-input)',
               borderRadius: '12px',
               width: '36px',
               height: '36px',
-              color: 'var(--text-primary)',
+              color: themeMode === 'light' ? '#000000' : 'var(--text-primary)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+              boxShadow: themeMode === 'light' ? '0 2px 8px rgba(0,0,0,0.08)' : '0 2px 6px rgba(0,0,0,0.04)',
               transition: 'all 0.15s ease'
             }}
           >
-            <QrCode size={16} />
+            <QrCode size={18} strokeWidth={2.5} />
           </button>
 
           {/* Screenshot / Netbanking Receipt Scanner Button */}
@@ -4062,32 +4087,32 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             onClick={() => setIsNotificationsOpen(true)} 
             title="Notifications"
             style={{
-              background: 'var(--bg-input)',
-              border: '1px solid var(--border-input)',
+              background: themeMode === 'light' ? '#FFFFFF' : 'var(--bg-input)',
+              border: themeMode === 'light' ? '1px solid rgba(0,0,0,0.1)' : '1px solid var(--border-input)',
               borderRadius: '12px',
               width: '36px',
               height: '36px',
-              color: 'var(--text-primary)',
+              color: themeMode === 'light' ? '#000000' : 'var(--text-primary)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+              boxShadow: themeMode === 'light' ? '0 2px 8px rgba(0,0,0,0.08)' : '0 2px 6px rgba(0,0,0,0.04)',
               transition: 'all 0.15s ease',
               position: 'relative'
             }}
           >
-            <Bell size={16} />
+            <Bell size={18} strokeWidth={2.5} />
             {notifications.some(n => n.unread) && (
               <span style={{
                 position: 'absolute',
-                top: '6px',
-                right: '6px',
-                width: '7px',
-                height: '7px',
+                top: '4px',
+                right: '4px',
+                width: '8px',
+                height: '8px',
                 borderRadius: '50%',
-                backgroundColor: 'var(--primary)',
-                boxShadow: '0 0 6px var(--primary)'
+                backgroundColor: '#ef4444',
+                boxShadow: '0 0 6px #ef4444'
               }} />
             )}
           </button>

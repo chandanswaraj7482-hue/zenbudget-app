@@ -235,6 +235,9 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
             const data = await res.json();
             if (data && data.payment_session_id) {
               payment_session_id = data.payment_session_id;
+              if (data.environment) {
+                (window as any)._lastCfEnv = data.environment;
+              }
               break;
             }
           }
@@ -256,7 +259,8 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
             setIsProcessing(false);
             try { playErrorSound(); } catch (_) {}
             window.dispatchEvent(new CustomEvent('toast-alert', { detail: { message: 'Payment incomplete or cancelled. Please try again.', type: 'error' } }));
-          }
+          },
+          (window as any)._lastCfEnv
         );
       } else {
         // Direct PhonePe / UPI App intent fallback when server payment session is unavailable

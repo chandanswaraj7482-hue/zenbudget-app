@@ -207,17 +207,17 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
   const spawnItem = useCallback((canvasWidth: number): FallingItem => {
     const gs = gameStateRef.current;
     
-    // Challenging danger trap ratio (Much harder now!)
-    let trapChance = 0.55;
-    if (gs.score > 700) trapChance = 0.75;
-    else if (gs.score > 250) trapChance = 0.65;
+    // Challenging danger trap ratio (45% - 60% danger obstacles to dodge)
+    let trapChance = 0.45;
+    if (gs.score > 700) trapChance = 0.60;
+    else if (gs.score > 250) trapChance = 0.52;
     
     // Rare 3% chance of life recovery shield
     const heartChance = gs.lives < 3 ? 0.04 : 0.01;
     const roll = Math.random();
 
-    // Faster falling speed to make it challenging
-    const diffMultiplier = 1 + Math.min(1.20, (gs.difficulty - 1) * 0.15);
+    // Fast, hard falling speed
+    const diffMultiplier = 1.8 + Math.min(1.0, (gs.difficulty - 1) * 0.1);
 
     if (roll < heartChance) {
       // 💖 Extra Heart / Shield
@@ -228,7 +228,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         value: 50,
         emoji: '💖',
         label: 'Health Shield',
-        speed: (1.30 + Math.random() * 0.50) * diffMultiplier,
+        speed: (1.5 + Math.random() * 0.5) * diffMultiplier,
         size: 26
       };
     } else if (roll < heartChance + trapChance) {
@@ -242,7 +242,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         value: -1,
         emoji: exp.emoji,
         label: exp.label,
-        speed: (1.40 + Math.random() * 0.70) * diffMultiplier,
+        speed: (1.8 + Math.random() * 0.6) * diffMultiplier,
         size: exp.size
       };
     } else {
@@ -258,7 +258,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         value: coin.value,
         emoji: coin.emoji,
         label: coin.label,
-        speed: (0.85 + Math.random() * 0.35) * diffMultiplier,
+        speed: (1.6 + Math.random() * 0.5) * diffMultiplier,
         size: coin.size
       };
     }
@@ -343,12 +343,12 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         gs.invulnerableTimer--;
       }
 
-      // Fast difficulty scaling
-      gs.difficulty = 1 + Math.floor(gs.frameCount / 400) * 0.35;
+      // Smooth difficulty scaling
+      gs.difficulty = 1 + Math.floor(gs.frameCount / 700) * 0.2;
 
       // Spawning with clean spacing
       gs.spawnTimer++;
-      const spawnRate = Math.max(18, 40 - Math.floor(gs.difficulty * 4));
+      const spawnRate = Math.max(34, 52 - Math.floor(gs.difficulty * 2));
       if (gs.spawnTimer >= spawnRate) {
         gs.items.push(spawnItem(W));
         gs.spawnTimer = 0;

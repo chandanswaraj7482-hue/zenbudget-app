@@ -675,43 +675,43 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               </div>
               
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'space-between', fontSize: '11.5px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Check size={13} color="var(--success)" />
-                  <span style={{ color: 'var(--text-primary)' }}>Unlimited Budget Envelopes</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                  <Check size={13} color="var(--success)" style={{ flexShrink: 0 }} />
+                  <span style={{ color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Unlimited Budget Envelopes</span>
                 </div>
-                <span style={{ fontSize: '10px', color: 'var(--brand-primary)', fontWeight: 700 }}>5 in Trial ➔ Unlimited</span>
+                <span style={{ fontSize: '10px', color: 'var(--brand-primary)', fontWeight: 700, flexShrink: 0, width: '100px', textAlign: 'right' }}>5 in Trial ➔ Unlimited</span>
               </div>
 
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'space-between', fontSize: '11.5px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Check size={13} color="var(--success)" />
-                  <span style={{ color: 'var(--text-primary)' }}>AI Invoice & Receipt OCR Scanner</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                  <Check size={13} color="var(--success)" style={{ flexShrink: 0 }} />
+                  <span style={{ color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>AI Invoice & Receipt Scanner</span>
                 </div>
-                <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 700 }}>✓ Instant 0.2s</span>
+                <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 700, flexShrink: 0, width: '100px', textAlign: 'right' }}>✓ Instant 0.2s</span>
               </div>
 
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'space-between', fontSize: '11.5px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Check size={13} color="var(--success)" />
-                  <span style={{ color: 'var(--text-primary)' }}>Bank Statement PDF / CSV Smart Parser</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                  <Check size={13} color="var(--success)" style={{ flexShrink: 0 }} />
+                  <span style={{ color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Bank Statement Smart Parser</span>
                 </div>
-                <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 700 }}>✓ All Indian Banks</span>
+                <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 700, flexShrink: 0, width: '100px', textAlign: 'right' }}>✓ All Indian Banks</span>
               </div>
 
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'space-between', fontSize: '11.5px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Check size={13} color="var(--success)" />
-                  <span style={{ color: 'var(--text-primary)' }}>24/7 AI Coach "Can I Afford?" Guidance</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                  <Check size={13} color="var(--success)" style={{ flexShrink: 0 }} />
+                  <span style={{ color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>24/7 AI Coach Guidance</span>
                 </div>
-                <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 700 }}>✓ Unlimited</span>
+                <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 700, flexShrink: 0, width: '100px', textAlign: 'right' }}>✓ Unlimited</span>
               </div>
 
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'space-between', fontSize: '11.5px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Check size={13} color="var(--success)" />
-                  <span style={{ color: 'var(--text-primary)' }}>Couple Shared Sync & Household Transparency</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                  <Check size={13} color="var(--success)" style={{ flexShrink: 0 }} />
+                  <span style={{ color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Couple Shared Sync</span>
                 </div>
-                <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 700 }}>✓ Real-time Sync</span>
+                <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 700, flexShrink: 0, width: '100px', textAlign: 'right' }}>✓ Real-time Sync</span>
               </div>
             </div>
 
@@ -726,12 +726,13 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               <form onSubmit={handleApplyCoupon} style={{ display: 'flex', gap: '8px' }}>
                 <input 
                   type="text"
-                  placeholder="Enter promo coupon code"
+                  placeholder="Enter promo code"
                   value={inputCoupon}
                   onChange={(e) => setInputCoupon(e.target.value)}
                   style={{
                     flex: 1,
-                    padding: '8px 12px',
+                    minWidth: 0,
+                    padding: '8px 10px',
                     borderRadius: '8px',
                     border: '1px solid var(--border-input)',
                     background: 'var(--bg-card)',
@@ -744,7 +745,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                 <button
                   type="submit"
                   style={{
-                    padding: '8px 14px',
+                    padding: '8px 12px',
+                    flexShrink: 0,
                     borderRadius: '8px',
                     background: 'rgba(99, 102, 241, 0.2)',
                     border: '1px solid rgba(99, 102, 241, 0.4)',
@@ -833,6 +835,10 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                         }
                         if (data.payment_session_id) {
                           payment_session_id = data.payment_session_id;
+                          // If backend returned environment, save it
+                          if (data.environment) {
+                            (window as any)._lastCfEnv = data.environment;
+                          }
                         }
                       } catch (jsonErr: any) {
                         console.warn('JSON parsing error:', jsonErr);
@@ -884,7 +890,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                               try { window.location.href = rawUrl; } catch (e) {}
                             }
                           }
-                        }
+                        },
+                        (window as any)._lastCfEnv
                       );
                     }
                   } catch (sdkErr: any) {

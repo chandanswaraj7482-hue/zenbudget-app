@@ -571,13 +571,13 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               App Security
             </label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: 'var(--bg-input)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-input)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', background: 'var(--bg-input)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-input)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '13px', fontWeight: 600 }}>Enable App Lock</span>
                 <button
                   type="button"
                   onClick={() => setAppLockEnabled(!appLockEnabled)}
-                  style={{ width: '40px', height: '24px', borderRadius: '12px', background: appLockEnabled ? 'var(--primary)' : 'var(--bg-card)', border: '1px solid var(--border-input)', position: 'relative', cursor: 'pointer', transition: '0.3s' }}
+                  style={{ flexShrink: 0, width: '40px', height: '24px', borderRadius: '12px', background: appLockEnabled ? 'var(--primary)' : 'var(--bg-card)', border: '1px solid var(--border-input)', position: 'relative', cursor: 'pointer', transition: '0.3s' }}
                 >
                   <div style={{ position: 'absolute', top: '2px', left: appLockEnabled ? '18px' : '2px', width: '18px', height: '18px', borderRadius: '50%', background: '#fff', transition: '0.3s' }} />
                 </button>
@@ -588,41 +588,40 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setBiometricsEnabled(!biometricsEnabled)}
-                  style={{ width: '40px', height: '24px', borderRadius: '12px', background: biometricsEnabled ? 'var(--primary)' : 'var(--bg-card)', border: '1px solid var(--border-input)', position: 'relative', cursor: 'pointer', transition: '0.3s' }}
+                  style={{ flexShrink: 0, width: '40px', height: '24px', borderRadius: '12px', background: biometricsEnabled ? 'var(--primary)' : 'var(--bg-card)', border: '1px solid var(--border-input)', position: 'relative', cursor: 'pointer', transition: '0.3s' }}
                 >
                   <div style={{ position: 'absolute', top: '2px', left: biometricsEnabled ? '18px' : '2px', width: '18px', height: '18px', borderRadius: '50%', background: '#fff', transition: '0.3s' }} />
                 </button>
               </div>
-            </div>
-          </div>
 
-          {/* PIN Passcode */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              {t('passcode')}
-            </label>
-            <div style={{ position: 'relative' }}>
-              <KeyRound size={15} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-              <input
-                type={showPin ? 'text' : 'password'}
-                required
-                maxLength={4}
-                value={pin}
-                onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
-                placeholder="Enter 4-digit PIN"
-                className="glass-input"
-                style={{ fontSize: '13px', padding: '12px 40px 12px 40px' }}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPin(!showPin)}
-                style={{
-                  position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)',
-                  background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer'
-                }}
-              >
-                {showPin ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
+              <div style={{ height: '1px', background: 'var(--border-input)', margin: '4px 0' }} />
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{ fontSize: '13px', fontWeight: 600 }}>{t('passcode')}</span>
+                <div style={{ position: 'relative' }}>
+                  <KeyRound size={15} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+                  <input
+                    type={showPin ? 'text' : 'password'}
+                    required
+                    maxLength={4}
+                    value={pin}
+                    onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
+                    placeholder="Enter 4-digit PIN"
+                    className="glass-input"
+                    style={{ fontSize: '13px', padding: '12px 40px', width: '100%', boxSizing: 'border-box' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPin(!showPin)}
+                    style={{
+                      position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)',
+                      background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer'
+                    }}
+                  >
+                    {showPin ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 

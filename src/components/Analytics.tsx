@@ -310,7 +310,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
               </span>
             )}
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '6px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '4px', flexWrap: 'wrap' }}>
             {[
               { emoji: '😀', label: 'Happy' },
               { emoji: '😭', label: 'Sad' },
@@ -327,18 +327,19 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
                   onClick={() => handleSelectMood(item.emoji)}
                   title={item.label}
                   style={{
-                    flex: 1,
+                    flex: '1 1 14%',
+                    minWidth: '40px',
                     background: isSelected ? 'rgba(34,197,94,0.15)' : 'var(--bg-input)',
                     border: isSelected ? '2px solid var(--primary)' : '1px solid var(--border-input)',
                     borderRadius: '12px',
-                    padding: '10px 4px',
+                    padding: '8px 2px',
                     fontSize: '20px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     transition: 'all 0.2s ease',
-                    transform: isSelected ? 'scale(1.15)' : 'scale(1)'
+                    transform: isSelected ? 'scale(1.1)' : 'scale(1)'
                   }}
                 >
                   {item.emoji}

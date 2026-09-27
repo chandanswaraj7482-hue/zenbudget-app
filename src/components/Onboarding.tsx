@@ -18,7 +18,7 @@ const goalsList = [
 ];
 
 export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymbol }) => {
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(1);
   const [dob, setDob] = useState<string>('');
   const [monthlySalary, setMonthlySalary] = useState<string>('');
   
@@ -32,9 +32,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymb
   };
 
   const handleNext = () => {
-    if (step === 0) {
-      setStep(1);
-    } else if (step === 1 && selectedGoal) {
+    if (step === 1 && selectedGoal) {
       if (selectedGoal.id === 'other' && !customGoalName.trim()) {
         return;
       }
