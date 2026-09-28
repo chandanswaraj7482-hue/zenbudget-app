@@ -1,59 +1,62 @@
 import React, { useState, useEffect } from 'react';
 import App from './App';
 import LandingPage from './components/LandingPage';
+import { BlogView } from './components/BlogView';
+import { BlogPostView } from './components/BlogPostView';
 
 import { Capacitor } from '@capacitor/core';
 
 export default function Root() {
-  const [showLanding, setShowLanding] = useState(() => {
-    // Skip landing if URL hash is explicitly '#app'
-    if (window.location.hash === '#app') return false;
-    
-    // Skip landing if running as Native Android/iOS App
-    if (Capacitor.isNativePlatform()) return false;
-    
-    // Skip landing if running as Installed PWA (Standalone mode)
-    if (typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches) return false;
-    
-    // Skip landing if there's a PWA share receipt intent or other app-specific params
-    if (typeof window !== 'undefined' && (window.location.search.includes('shared_receipt=') || window.location.search.includes('pay_vpa='))) return false;
-
-    // Otherwise, show landing page for normal web visitors
-    return true;
-  });
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+  const [currentHash, setCurrentHash] = useState(window.location.hash);
 
   useEffect(() => {
-    const handleHashChange = () => {
-      if (window.location.hash === '#app') {
-        setShowLanding(false);
-      } else {
-        setShowLanding(true);
-      }
+    const handleNavigation = () => {
+      setCurrentPath(window.location.pathname);
+      setCurrentHash(window.location.hash);
     };
 
-    window.addEventListener('hashchange', handleHashChange);
-    window.addEventListener('popstate', handleHashChange);
-
+    window.addEventListener('popstate', handleNavigation);
+    window.addEventListener('hashchange', handleNavigation);
     return () => {
-      window.removeEventListener('hashchange', handleHashChange);
-      window.removeEventListener('popstate', handleHashChange);
+      window.removeEventListener('popstate', handleNavigation);
+      window.removeEventListener('hashchange', handleNavigation);
     };
   }, []);
 
   const handleOpenWebApp = () => {
     window.location.hash = 'app';
-    setShowLanding(false);
+    window.history.replaceState(null, '', '/#app');
+    setCurrentHash('#app');
+    setCurrentPath('/');
   };
 
   const handleBackToLanding = () => {
-    window.location.hash = '';
-    setShowLanding(true);
+    window.history.pushState(null, '', '/');
+    setCurrentHash('');
+    setCurrentPath('/');
   };
 
-  if (showLanding) {
-    return <LandingPage onOpenWebApp={handleOpenWebApp} />;
+  // Skip landing if running as Native Android/iOS App or PWA Standalone
+  const isAppMode = Capacitor.isNativePlatform() || 
+                    (typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches) ||
+                    currentHash === '#app' ||
+                    (typeof window !== 'undefined' && (window.location.search.includes('shared_receipt=') || window.location.search.includes('pay_vpa=')));
+
+  if (isAppMode) {
+    return <App onBackToLanding={handleBackToLanding} />;
   }
 
-  return <App onBackToLanding={handleBackToLanding} />;
+  // Handle SEO-friendly paths
+  if (currentPath.startsWith('/blog/')) {
+    const slug = currentPath.replace('/blog/', '');
+    return <BlogPostView slug={slug} onBackToLanding={handleBackToLanding} />;
+  }
+
+  if (currentPath === '/blog') {
+    return <BlogView onBackToLanding={handleBackToLanding} /> ;
+  }
+
+  return <LandingPage onOpenWebApp={handleOpenWebApp} />;
 }
 

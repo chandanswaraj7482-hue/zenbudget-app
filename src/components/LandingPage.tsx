@@ -2168,7 +2168,8 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               { label: 'Inside App', id: 'inside-app', key: 'inside app', hasDropdown: true },
               { label: 'Quiz', id: 'quiz', key: 'quiz', hasDropdown: false, badge: 'FREE' },
               { label: 'Pricing', id: 'pricing', key: 'pricing', hasDropdown: false },
-              { label: 'Stories', id: 'community', key: 'stories', hasDropdown: false }
+              { label: 'Stories', id: 'community', key: 'stories', hasDropdown: false },
+              { label: 'Blog', id: 'blog', key: 'blog', hasDropdown: false }
             ].map(link => (
               <li 
                 key={link.id} 
@@ -2181,6 +2182,10 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     else if (link.key === 'pricing') navigateToPage('pricing');
                     else if (link.key === 'stories') navigateToPage('community');
                     else if (link.key === 'about') navigateToPage('about');
+                    else if (link.key === 'blog') {
+                      window.history.pushState(null, '', '/blog');
+                      window.dispatchEvent(new Event('popstate'));
+                    }
                     else if (link.hasDropdown) {
                       if (activeDropdown === link.key) setActiveDropdown(null);
                       else handleDropdownMouseEnter(link.key);
@@ -2365,6 +2370,9 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               </button>
               <button onClick={() => { setMobileMenuOpen(false); navigateToPage('pricing'); }} style={{ textAlign: 'left', background: 'transparent', border: 'none', color: t.text, fontSize: '18px', fontWeight: 700, cursor: 'pointer' }}>
                 Pricing
+              </button>
+              <button onClick={() => { setMobileMenuOpen(false); window.history.pushState(null, '', '/blog'); window.dispatchEvent(new Event('popstate')); }} style={{ textAlign: 'left', background: 'transparent', border: 'none', color: t.text, fontSize: '18px', fontWeight: 700, cursor: 'pointer' }}>
+                Blog
               </button>
             </div>
 
@@ -5357,6 +5365,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             <a href="mailto:hello.zenbudget@zohomail.in" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Contact Support: hello.zenbudget@zohomail.in</a>
             <a onClick={onOpenWebApp} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Terms and Conditions</a>
             <a onClick={onOpenWebApp} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Privacy Policy</a>
+            <a onClick={() => { window.history.pushState(null, '', '/blog'); window.dispatchEvent(new Event('popstate')); }} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Blog</a>
             <a onClick={handleDownloadApk} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Download Android APK</a>
           </div>
 
