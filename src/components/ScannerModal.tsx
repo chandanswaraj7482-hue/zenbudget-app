@@ -704,7 +704,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
     // Compile shareable Web URL with prefilled parameters
     const origin = window.location.origin;
     const pathname = window.location.pathname;
-    const shareUrl = `${origin}${pathname}?pay_vpa=${encodeURIComponent(targetVpa)}&pay_amount=${encodeURIComponent(amtVal)}&pay_name=${encodeURIComponent(recName)}&pay_note=${encodeURIComponent(noteVal)}`;
+    const shareUrl = `${origin}${pathname}?pay_vpa=${encodeURIComponent(targetVpa)}&pay_amount=${encodeURIComponent(amtVal)}&pay_name=${encodeURIComponent(recName)}&pay_note=${encodeURIComponent(noteVal)}#app`;
     const shareText = `💳 Pay ₹${amtVal} to ${recName} (${targetVpa})\nTap the link to pay instantly with pre-filled details:\n${shareUrl}`;
 
     if (navigator.share) {

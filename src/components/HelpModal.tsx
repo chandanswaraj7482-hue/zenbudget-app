@@ -140,6 +140,10 @@ export const HelpModal: React.FC<HelpModalProps> = ({
       a: "Yes! ZenBudget stores all financial data in your phone's secure native sandbox. We do not run tracker cookies or upload your entries to cloud advertiser APIs."
     },
     {
+      q: "How to edit an expense detail?",
+      a: "Swipe right to delete and swipe left to edit transaction details on the Ledger screen."
+    },
+    {
       q: "Fingerprint unlock is not working?",
       a: "Ensure your phone has biometrics enabled in Android Settings and a fingerprint is registered. You can tap the Fingerprint button on the lockpad to retry."
     }

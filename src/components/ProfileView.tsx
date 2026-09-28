@@ -37,6 +37,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const [language, setLanguage] = useState(currentLanguage);
   const [themeMode, setThemeMode] = useState<'dark' | 'light'>(currentTheme);
   const [showPin, setShowPin] = useState(false);
+  const [showPhone, setShowPhone] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -469,19 +470,40 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               {/* Phone Number Input */}
               <div style={{ position: 'relative', flex: 1 }}>
                 <input
-                  type="tel"
+                  type={showPhone ? 'tel' : 'password'}
+                  inputMode="numeric"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                   placeholder="Enter your mobile number"
                   maxLength={15}
                   className="glass-input"
-                  style={{ fontSize: '13px', padding: '12px 14px', width: '100%', letterSpacing: '1px', fontWeight: 700 }}
+                  style={{ fontSize: '13px', padding: '12px 40px 12px 14px', width: '100%', letterSpacing: '1px', fontWeight: 700 }}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPhone(!showPhone)}
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '4px'
+                  }}
+                >
+                  {showPhone ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
             </div>
             {phone && (
               <p style={{ fontSize: '11px', color: '#34d399', margin: '4px 0 0 0', fontWeight: 600 }}>
-                📞 Saved Mobile Number: {phoneCode} {phone}
+                📞 Saved Mobile Number: {phoneCode} {showPhone ? phone : phone.replace(/./g, '*')}
               </p>
             )}
           </div>

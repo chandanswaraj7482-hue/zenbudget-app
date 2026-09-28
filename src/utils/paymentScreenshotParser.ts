@@ -127,10 +127,11 @@ export const parsePaymentScreenshot = async (
       const base64Data = base64DataUrl.split(',')[1] || base64DataUrl;
       const mimeType = base64DataUrl.includes('image/png') ? 'image/png' : 'image/jpeg';
 
-      const prompt = `You are a strict data extraction AI analyzing a mobile payment receipt/screenshot. 
+const prompt = `You are a strict data extraction AI analyzing a mobile payment receipt/screenshot. 
 CRITICAL RULE: DO NOT MAKE UP OR HALLUCINATE ANY DATA. If a value is not clearly visible in the image, return an empty string "" (or null for numbers).
 Extract the following information in strict valid JSON format:
 {
+  "isReceipt": boolean (Return true ONLY if the image is clearly a payment receipt, bank screenshot, or UPI transfer. Return false if it is a random photo, scenery, selfie, etc.),
   "amount": number (extract ONLY the exact amount paid/received. If not found, return null),
   "merchantName": string (extract ONLY the exact payee or sender name. If not found, return ""),
   "type": "expense" | "income" (CRITICAL: return "income" ONLY if the image explicitly shows money received, credited, cashback, or refund. Return "expense" if it shows money paid, debited, sent, or a payment to a merchant. If unsure, return "expense"),
@@ -163,6 +164,11 @@ Return ONLY pure JSON without markdown code blocks.`;
       const responseText = response.text?.replace(/```json|```/g, '').trim();
       if (responseText) {
         const parsed = JSON.parse(responseText);
+        
+        if (parsed.isReceipt === false) {
+          throw new Error("INVALID_RECEIPT");
+        }
+
         onProgress?.('ready', 100, 'Payment verified & categorized successfully!');
         
         const isIncome = parsed.type === 'income' || parsed.category === 'Salary' || parsed.category === 'Cashback';
@@ -179,8 +185,11 @@ Return ONLY pure JSON without markdown code blocks.`;
           rawImagePreview: base64DataUrl
         };
       }
-    } catch (err) {
+    } catch (err: any) {
       console.warn('ZenBudget Vision parse error:', err);
+      if (err.message === "INVALID_RECEIPT") {
+        throw err;
+      }
     }
   }
 

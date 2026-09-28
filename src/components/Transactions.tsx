@@ -38,6 +38,217 @@ const CATEGORIES: { id: CategoryType | 'all'; label: string; color: string }[] =
   { id: 'other', label: 'Others', color: '#64748b' },
 ];
 
+const SwipeableTransactionItem = ({ t, meta, isMenuOpen, currencySymbol, formatCurrency, getCategoryIcon, onEditTransaction, onDeleteTransaction, setActiveTxMenu, isPremiumUser }: any) => {
+  const [swipeOffset, setSwipeOffset] = React.useState(0);
+  const touchStartX = React.useRef(0);
+  const touchCurrentX = React.useRef(0);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchCurrentX.current = touchStartX.current;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchCurrentX.current = e.touches[0].clientX;
+    const diff = touchCurrentX.current - touchStartX.current;
+    if (Math.abs(diff) < 150) {
+      setSwipeOffset(diff);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    const diff = touchCurrentX.current - touchStartX.current;
+    if (diff > 80) {
+      onDeleteTransaction(t.id);
+    } else if (diff < -80) {
+      onEditTransaction(t);
+    }
+    setSwipeOffset(0);
+  };
+
+  return (
+    <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '16px' }}>
+      <div style={{ 
+        position: 'absolute', inset: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
+        padding: '0 20px', 
+        background: swipeOffset > 0 ? (isPremiumUser ? 'rgba(239, 68, 68, 0.2)' : 'rgba(236,72,153,0.2)') : swipeOffset < 0 ? 'rgba(16, 185, 129, 0.2)' : 'transparent',
+        zIndex: 0 
+      }}>
+        <div style={{ opacity: swipeOffset > 30 ? 1 : 0, color: isPremiumUser ? '#ef4444' : '#ec4899', fontWeight: 800, transition: 'opacity 0.2s', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Trash2 size={18} /> {isPremiumUser ? 'Delete' : '🔒 (PRO)'}
+        </div>
+        <div style={{ opacity: swipeOffset < -30 ? 1 : 0, color: '#10b981', fontWeight: 800, transition: 'opacity 0.2s', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          Edit <Edit3 size={18} />
+        </div>
+      </div>
+
+      <div 
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className="glass-panel"
+        style={{ 
+          transform: `translateX(${swipeOffset}px)`,
+          transition: swipeOffset === 0 ? 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' : 'none',
+          padding: '14px 16px', 
+          display: 'flex', 
+          flexDirection: 'column',
+          gap: isMenuOpen ? '12px' : '0',
+          position: 'relative',
+          zIndex: 1,
+          background: 'var(--bg-card)',
+          touchAction: 'pan-y'
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', width: '100%' }}>
+          <div 
+            style={{ display: 'flex', gap: '10px', alignItems: 'center', cursor: 'pointer', flex: '1 1 0%', minWidth: 0 }}
+            onClick={() => onEditTransaction(t)}
+          >
+            <div style={{ 
+              width: '38px', 
+              height: '38px', 
+              borderRadius: '12px', 
+              backgroundColor: t.type === 'income' ? 'var(--success-glow)' : meta.bg, 
+              color: t.type === 'income' ? 'var(--success)' : meta.color,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              {getCategoryIcon(t.category, t.type)}
+            </div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <h4 style={{ fontSize: '13.5px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', margin: 0, lineHeight: 1.3 }}>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>{t.title}</span>
+                {t.paidBy && (
+                  <span style={{ 
+                    fontSize: '9px', 
+                    fontWeight: 800, 
+                    padding: '2px 6px', 
+                    borderRadius: '8px', 
+                    background: t.paidBy === 'You' ? 'rgba(34,197,94,0.1)' : 'rgba(236,72,153,0.1)', 
+                    color: t.paidBy === 'You' ? 'var(--primary)' : '#ec4899',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    flexShrink: 0
+                  }}>
+                    {t.paidBy}
+                  </span>
+                )}
+                {t.partnerName && (
+                  <span style={{
+                    fontSize: '9px',
+                    fontWeight: 800,
+                    padding: '2px 6px',
+                    borderRadius: '8px',
+                    background: 'rgba(139,92,246,0.15)',
+                    color: '#a78bfa',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                    flexShrink: 0
+                  }}>
+                    👫 {t.partnerName}
+                  </span>
+                )}
+              </h4>
+              {t.notes && (
+                <p style={{ fontSize: '11px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0, marginTop: '2px' }}>
+                  {t.notes}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+            <span style={{ 
+              fontSize: '14px', 
+              fontWeight: 700, 
+              color: t.type === 'income' ? 'var(--success)' : 'var(--text-primary)',
+              whiteSpace: 'nowrap'
+            }}>
+              {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount, currencySymbol)}
+            </span>
+            
+            <button
+              onClick={() => setActiveTxMenu(isMenuOpen ? null : t.id)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-muted)',
+                cursor: 'pointer',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}
+            >
+              <MoreVertical size={16} />
+            </button>
+          </div>
+        </div>
+
+        {isMenuOpen && (
+          <div style={{ 
+            display: 'flex', 
+            gap: '8px', 
+            borderTop: '1px solid rgba(255,255,255,0.05)', 
+            paddingTop: '10px',
+            justifyContent: 'flex-end'
+          }}>
+            <button
+              onClick={() => {
+                onEditTransaction(t);
+                setActiveTxMenu(null);
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '6px 12px',
+                color: 'var(--text-primary)',
+                fontSize: '12px',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <Edit3 size={12} /> Edit
+            </button>
+            <button
+              onClick={() => {
+                onDeleteTransaction(t.id);
+                setActiveTxMenu(null);
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: isPremiumUser ? 'var(--danger-glow)' : 'rgba(236,72,153,0.1)',
+                border: isPremiumUser ? 'none' : '1px solid rgba(236,72,153,0.25)',
+                borderRadius: '8px',
+                padding: '6px 12px',
+                color: isPremiumUser ? 'var(--danger)' : '#ec4899',
+                fontSize: '12px',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              <Trash2 size={12} /> {isPremiumUser ? 'Delete' : '🔒 (PRO)'}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export const Transactions: React.FC<TransactionsProps> = ({
   transactions = [],
   currencySymbol,
@@ -407,163 +618,19 @@ export const Transactions: React.FC<TransactionsProps> = ({
                   const isMenuOpen = activeTxMenu === t.id;
 
                   return (
-                    <div 
-                      key={t.id} 
-                      className="glass-panel"
-                      style={{ 
-                        padding: '14px 16px', 
-                        display: 'flex', 
-                        flexDirection: 'column',
-                        gap: isMenuOpen ? '12px' : '0',
-                        position: 'relative'
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', width: '100%' }}>
-                        <div 
-                          style={{ display: 'flex', gap: '10px', alignItems: 'center', cursor: 'pointer', flex: '1 1 0%', minWidth: 0 }}
-                          onClick={() => onEditTransaction(t)}
-                        >
-                          <div style={{ 
-                            width: '38px', 
-                            height: '38px', 
-                            borderRadius: '12px', 
-                            backgroundColor: t.type === 'income' ? 'var(--success-glow)' : meta.bg, 
-                            color: t.type === 'income' ? 'var(--success)' : meta.color,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0
-                          }}>
-                            {getCategoryIcon(t.category, t.type)}
-                          </div>
-                          <div style={{ minWidth: 0, flex: 1 }}>
-                            <h4 style={{ fontSize: '13.5px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', margin: 0, lineHeight: 1.3 }}>
-                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>{t.title}</span>
-                              {t.paidBy && (
-                                <span style={{ 
-                                  fontSize: '9px', 
-                                  fontWeight: 800, 
-                                  padding: '2px 6px', 
-                                  borderRadius: '8px', 
-                                  background: t.paidBy === 'You' ? 'rgba(34,197,94,0.1)' : 'rgba(236,72,153,0.1)', 
-                                  color: t.paidBy === 'You' ? 'var(--primary)' : '#ec4899',
-                                  textTransform: 'uppercase',
-                                  letterSpacing: '0.05em',
-                                  flexShrink: 0
-                                }}>
-                                  {t.paidBy}
-                                </span>
-                              )}
-                              {t.partnerName && (
-                                <span style={{
-                                  fontSize: '9px',
-                                  fontWeight: 800,
-                                  padding: '2px 6px',
-                                  borderRadius: '8px',
-                                  background: 'rgba(139,92,246,0.15)',
-                                  color: '#a78bfa',
-                                  textTransform: 'uppercase',
-                                  letterSpacing: '0.05em',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '3px',
-                                  flexShrink: 0
-                                }}>
-                                  👫 {t.partnerName}
-                                </span>
-                              )}
-                            </h4>
-                            {t.notes && (
-                              <p style={{ fontSize: '11px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0, marginTop: '2px' }}>
-                                {t.notes}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-                          <span style={{ 
-                            fontSize: '14px', 
-                            fontWeight: 700, 
-                            color: t.type === 'income' ? 'var(--success)' : 'var(--text-primary)',
-                            whiteSpace: 'nowrap'
-                          }}>
-                            {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount, currencySymbol)}
-                          </span>
-                          
-                          <button
-                            onClick={() => setActiveTxMenu(isMenuOpen ? null : t.id)}
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              color: 'var(--text-muted)',
-                              cursor: 'pointer',
-                              padding: '4px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              flexShrink: 0
-                            }}
-                          >
-                            <MoreVertical size={16} />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Dropdown Options */}
-                      {isMenuOpen && (
-                        <div style={{ 
-                          display: 'flex', 
-                          gap: '8px', 
-                          borderTop: '1px solid rgba(255,255,255,0.05)', 
-                          paddingTop: '10px',
-                          justifyContent: 'flex-end'
-                        }}>
-                          <button
-                            onClick={() => {
-                              onEditTransaction(t);
-                              setActiveTxMenu(null);
-                            }}
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                              background: 'rgba(255, 255, 255, 0.05)',
-                              border: 'none',
-                              borderRadius: '8px',
-                              padding: '6px 12px',
-                              color: 'var(--text-primary)',
-                              fontSize: '12px',
-                              fontWeight: 600,
-                              cursor: 'pointer'
-                            }}
-                          >
-                            <Edit3 size={12} /> Edit
-                          </button>
-                          <button
-                            onClick={() => {
-                              onDeleteTransaction(t.id);
-                              setActiveTxMenu(null);
-                            }}
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                              background: isPremiumUser ? 'var(--danger-glow)' : 'rgba(236,72,153,0.1)',
-                              border: isPremiumUser ? 'none' : '1px solid rgba(236,72,153,0.25)',
-                              borderRadius: '8px',
-                              padding: '6px 12px',
-                              color: isPremiumUser ? 'var(--danger)' : '#ec4899',
-                              fontSize: '12px',
-                              fontWeight: 700,
-                              cursor: 'pointer'
-                            }}
-                          >
-                            <Trash2 size={12} /> {isPremiumUser ? 'Delete' : '🔒 Delete (PRO)'}
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                    <SwipeableTransactionItem
+                      key={t.id}
+                      t={t}
+                      meta={meta}
+                      isMenuOpen={isMenuOpen}
+                      currencySymbol={currencySymbol}
+                      formatCurrency={formatCurrency}
+                      getCategoryIcon={getCategoryIcon}
+                      onEditTransaction={onEditTransaction}
+                      onDeleteTransaction={onDeleteTransaction}
+                      setActiveTxMenu={setActiveTxMenu}
+                      isPremiumUser={isPremiumUser}
+                    />
                   );
                 })}
               </div>

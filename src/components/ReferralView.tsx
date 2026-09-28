@@ -43,7 +43,7 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
 
   const getViralInviteMessage = () => {
     const code = userReferralCode || 'ZENBUDGET';
-    const link = `https://zenbudget-tracker.vercel.app/?ref=${encodeURIComponent(code)}`;
+    const link = `https://zenbudget-tracker.vercel.app/?ref=${encodeURIComponent(code)}#app`;
     return `🚨 *Reality Check:* 83% of people lose ₹4,500+ every month to untracked small spends & hidden charges! 💸\n\n💡 I have been using *ZenBudget AI* to automatically track my daily kharcha, scan bank passbooks & block impulse buys — saving ₹5,000+ every month!\n\n🎁 Use my VIP Referral Code: *${code}* to unlock exclusive Premium savings tools:\n\n📲 *Download Android APK / Try Free App:* \n👉 ${link}\n\n⚡ _(Stop financial leaks today & take 100% control of your money!)_`;
   };
 

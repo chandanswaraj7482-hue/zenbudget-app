@@ -1805,7 +1805,12 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
   const handleDownloadApk = () => {
     setShowModal(false);
-    window.location.href = '/download.html';
+    const link = document.createElement('a');
+    link.href = '/zenbudget.apk';
+    link.download = 'zenbudget.apk';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // Quiz Handling
@@ -2141,7 +2146,11 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       <header style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', pointerEvents: mobileMenuOpen ? 'auto' : 'none' }}>
         <div style={{ 
           pointerEvents: 'auto', marginTop: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', padding: '0 32px', transition: 'all 0.3s', 
-          background: 'transparent',
+          background: isDark ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.35)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.05)',
+          borderRadius: '100px',
           width: 'min(1240px, 96%)', height: '64px' 
         }}>
           {/* Logo */}
@@ -4130,7 +4139,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             <div style={{ position: 'absolute', inset: 0, background: isDark ? 'linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.2), transparent)' : 'linear-gradient(to top, rgba(255,255,255,0.9), rgba(255,255,255,0.2), transparent)' }}></div>
             
             <div style={{ position: 'absolute', bottom: '32px', left: '32px', right: '32px', zIndex: 20 }}>
-              <div style={{ background: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.75)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)', border: `1px solid rgba(255,255,255,0.4)`, borderRadius: '20px', padding: '24px', color: isDark ? '#fff' : '#111827', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
+              <div style={{ background: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.25)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)', border: `1px solid rgba(255,255,255,0.4)`, borderRadius: '20px', padding: '24px', color: isDark ? '#fff' : '#111827', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
                 <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', color: isDark ? '#a7f3d0' : '#047857', marginBottom: '6px', display: 'block' }}>{toolkitItems[activeToolkit].badge}</span>
                 <h4 style={{ fontSize: '20px', fontWeight: 800, marginBottom: '8px' }}>{toolkitItems[activeToolkit].title}</h4>
                 <p style={{ fontSize: '13.5px', color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(17,24,39,0.8)', lineHeight: 1.5, margin: 0 }}>{toolkitItems[activeToolkit].desc}</p>
@@ -5345,7 +5354,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             <span style={{ fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: t.text, marginBottom: '6px' }}>Company</span>
             <a onClick={() => navigateToPage('about')} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>About ZenBudget</a>
             <a onClick={() => scrollTo('features')} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>FAQs & Help</a>
-            <a href="mailto:support@zenbudget.app" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Contact Support: support@zenbudget.app</a>
+            <a href="mailto:hello.zenbudget@zohomail.in" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Contact Support: hello.zenbudget@zohomail.in</a>
             <a onClick={onOpenWebApp} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Terms and Conditions</a>
             <a onClick={onOpenWebApp} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Privacy Policy</a>
             <a onClick={handleDownloadApk} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Download Android APK</a>

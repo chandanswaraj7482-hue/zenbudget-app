@@ -124,10 +124,14 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
             navigator.vibrate(50);
           }
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Shared payment processing error:', err);
         setStage('error');
-        setStatusMessage('Could not auto-read receipt. Please confirm details manually.');
+        if (err.message === "INVALID_RECEIPT") {
+          setStatusMessage('Invalid Image: This does not look like a payment receipt!');
+        } else {
+          setStatusMessage('Could not auto-read receipt. Please confirm details manually.');
+        }
         setAmount('0');
         setMerchantName('Payment Recipient');
       }

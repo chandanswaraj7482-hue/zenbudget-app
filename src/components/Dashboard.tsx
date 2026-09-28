@@ -2234,7 +2234,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   if (inviteCode && !inviteCode.toUpperCase().startsWith('ZB-')) {
                     inviteCode = 'ZB-' + inviteCode;
                   }
-                  const shareUrl = `https://zenbudget-tracker.vercel.app/?code=${inviteCode}`;
+                  const shareUrl = `https://zenbudget-tracker.vercel.app/?code=${inviteCode}#app`;
                   const shareText = `🌿 Join me on ZenBudget! Track your money habits with AI insights. Use my referral code ${inviteCode} and we both get 1 Month Premium FREE! Join here: ${shareUrl}`;
 
                   const copyFallback = (str: string) => {
