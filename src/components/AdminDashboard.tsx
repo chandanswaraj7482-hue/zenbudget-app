@@ -24,8 +24,10 @@ import {
   Layout,
   Upload,
   Eye,
-  CheckCircle
+  CheckCircle,
+  Globe
 } from 'lucide-react';
+import { AdminGeoMap } from './AdminGeoMap';
 import { 
   type LandingAssetsState, 
   INITIAL_LANDING_ASSETS, 
@@ -58,6 +60,15 @@ interface ProfileRecord {
   email?: string;
   couple_code?: string;
   partner_couple_code?: string;
+  country?: string;
+  country_code?: string;
+  city?: string;
+  region?: string;
+  last_ip?: string;
+  isp?: string;
+  last_login?: string;
+  last_logout?: string;
+  total_time_spent_seconds?: number;
 }
 
 interface BroadcastRecord {
@@ -391,7 +402,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   }
 ];
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing' | 'slots' | 'ai_coach' | 'landing_assets'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'geo_map' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing' | 'slots' | 'ai_coach' | 'landing_assets'>('overview');
   const [aiReviews, setAiReviews] = useState<any[]>([]);
   const [aiFeedback, setAiFeedback] = useState<any[]>([]);
   const [landingAssets, setLandingAssets] = useState<LandingAssetsState>(INITIAL_LANDING_ASSETS);
@@ -1151,6 +1162,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
             }}>
               {[
                 { id: 'overview', label: 'Analytics & Overview', icon: TrendingUp },
+                { id: 'geo_map', label: '🌍 Live World Map & IP Tracking', icon: Globe },
                 { id: 'landing_assets', label: '🖼️ Landing Page & Mockups CMS', icon: Layout },
                 { id: 'users', label: `User Management (${totalUsers})`, icon: Users },
                 { id: 'referrals', label: `Referrals & Revenue`, icon: Share2 },
@@ -1329,21 +1341,77 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                     </div>
                   </div>
 
-                  {/* System Quick Controls */}
+                  {/* System Quick Controls & Live Map Banner */}
                   <div style={{
-                    padding: '1.5rem',
-                    borderRadius: '16px',
-                    backgroundColor: 'rgba(30, 41, 59, 0.4)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)'
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                    gap: '1.25rem'
                   }}>
-                    <h4 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>
-                      🚀 Master System Controls
-                    </h4>
-                    <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1rem' }}>
-                      Use the tabs above to manage registered users, grant lifetime premium access, or send broadcast notifications to all ZenBudget users.
-                    </p>
+                    <div style={{
+                      padding: '1.5rem',
+                      borderRadius: '16px',
+                      backgroundColor: 'rgba(30, 41, 59, 0.4)',
+                      border: '1px solid rgba(255, 255, 255, 0.08)'
+                    }}>
+                      <h4 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        🚀 Master System Controls
+                      </h4>
+                      <p style={{ fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.5 }}>
+                        Use the tabs above to manage registered users, grant lifetime premium access, or send broadcast notifications to all ZenBudget users.
+                      </p>
+                    </div>
+
+                    <div style={{
+                      padding: '1.5rem',
+                      borderRadius: '16px',
+                      background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(99, 102, 241, 0.12) 100%)',
+                      border: '1px solid rgba(16, 185, 129, 0.3)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between'
+                    }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
+                          <span style={{ fontSize: '1.2rem' }}>🌍</span>
+                          <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#fff' }}>
+                            Live User Geo Map & Session Tracking
+                          </h4>
+                        </div>
+                        <p style={{ fontSize: '0.825rem', color: '#cbd5e1', lineHeight: 1.5, marginBottom: '1rem' }}>
+                          Real-time IP geolocation, dwell times, login/logout history & radar-style online user markers.
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setActiveTab('geo_map')}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '0.65rem 1.25rem',
+                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                          color: '#fff',
+                          fontWeight: 700,
+                          fontSize: '0.85rem',
+                          borderRadius: '10px',
+                          border: 'none',
+                          cursor: 'pointer',
+                          width: 'fit-content',
+                          boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
+                        }}
+                      >
+                        <Globe size={16} /> Open Interactive World Map →
+                      </button>
+                    </div>
                   </div>
                 </div>
+              )}
+
+              {/* TAB: LIVE GEO MAP & SESSION TRACKING */}
+              {activeTab === 'geo_map' && (
+                <AdminGeoMap 
+                  supabaseClient={supabaseClient} 
+                  onShowToast={onShowToast} 
+                />
               )}
 
               {/* TAB 2: USER MANAGEMENT */}
