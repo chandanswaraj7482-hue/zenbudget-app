@@ -14,11 +14,11 @@ export interface DailySlotConfig {
 }
 
 export const DYNAMIC_DAILY_SLOTS: DailySlotConfig[] = [
-  // ☀️ Slot 1: 09:00 AM (Morning Mindset & Safe Limit)
+  // ☀️ Slot 1: 06:30 AM (Morning Mindset & Safe Limit) - Changed from 09:00 AM
   {
     slotId: 1,
-    hour: 9,
-    minute: 0,
+    hour: 6,
+    minute: 30,
     name: 'Morning Safe Limit',
     variations: [
       {
@@ -52,9 +52,47 @@ export const DYNAMIC_DAILY_SLOTS: DailySlotConfig[] = [
     ],
   },
 
-  // ☕ Slot 2: 01:30 PM (Lunch, Chai & Snack Tracker)
+  // 📈 Slot 2: 10:30 AM (Mid-Morning Focus)
   {
     slotId: 2,
+    hour: 10,
+    minute: 30,
+    name: 'Mid-Morning Focus',
+    variations: [
+      {
+        title: '📈 Mid-Morning Money Check-In',
+        body: 'Are you staying disciplined today? Take a quick glance at your ZenBudget dashboard to stay on track. 💪',
+      },
+      {
+        title: '🚀 Keep the momentum going!',
+        body: 'A quick 10-second look at your safe allowance keeps impulse spending at bay. You’ve got this! ✨',
+      },
+      {
+        title: '💡 Small habits, massive results.',
+        body: 'Checking your budget mid-morning reinforces financial discipline. Open ZenBudget now! 🎯',
+      },
+      {
+        title: '💼 Work hustle + Money hustle',
+        body: 'Make sure your hard-earned money is being managed right. Check your limits before lunch! 🍱',
+      },
+      {
+        title: '🎯 Stay Focused on your Goals!',
+        body: 'Every rupee saved today brings you closer to your long-term wealth. Stay mindful! 🌿',
+      },
+      {
+        title: '💎 Mid-Day Financial Clarity',
+        body: 'Take a quick breather and review your daily targets. No surprises, just control! 🚀',
+      },
+      {
+        title: '🛡️ Mid-Morning Wallet Guard',
+        body: 'Don’t let the mid-morning cravings break the budget! Check your balance first. ☕',
+      },
+    ],
+  },
+
+  // ☕ Slot 3: 01:30 PM (Lunch, Chai & Snack Tracker)
+  {
+    slotId: 3,
     hour: 13,
     minute: 30,
     name: 'Midday Chai & Lunch Tracker',
@@ -84,15 +122,53 @@ export const DYNAMIC_DAILY_SLOTS: DailySlotConfig[] = [
         body: 'Logging even 1 transaction keeps your streak alive and builds unshakeable money discipline! 🚀',
       },
       {
-        title: '☕ Afternoon Coffee or Commute Check',
+        title: '☕ Afternoon Coffee Check',
         body: 'Check your remaining safe allowance for the afternoon. Stay disciplined and save extra today! 🌿',
       },
     ],
   },
 
-  // 🛍️ Slot 3: 06:30 PM (Evening Commute & Impulse Blocker)
+  // 🍪 Slot 4: 04:30 PM (Evening Snack / Tea Tracker)
   {
-    slotId: 3,
+    slotId: 4,
+    hour: 16,
+    minute: 30,
+    name: 'Evening Snack Tracker',
+    variations: [
+      {
+        title: '🍪 Evening Snacks or Tea time?',
+        body: 'Don’t forget to log those quick evening expenses! Every rupee matters. ☕',
+      },
+      {
+        title: '⚡ 4 PM Energy Slump? Watch the Wallet!',
+        body: 'Tempted to order expensive snacks? Check your food budget limit first! 🍟',
+      },
+      {
+        title: '🌅 Evening Expense Checkpoint',
+        body: 'Did you spend on chai, coffee, or snacks? Log it quickly before you forget! 📝',
+      },
+      {
+        title: '💸 Beware of the Evening Leaks',
+        body: 'Those ₹100 snacks add up to ₹3,000 a month! Log it in Quick Capture to stay aware. 🎯',
+      },
+      {
+        title: '🍔 Evening Food Delivery Craving?',
+        body: 'Check ZenBudget to see if it fits in your daily safe limit! Protect your goals. 🛡️',
+      },
+      {
+        title: '☕ Chai Time Hisab!',
+        body: 'Take 5 seconds to update your ledger while having your tea. Keeps the streak alive! 🚀',
+      },
+      {
+        title: '🏆 Evening Discipline Check',
+        body: 'You’ve done great so far today! Don’t let the evening spends ruin your streak. 💪',
+      },
+    ],
+  },
+
+  // 🛍️ Slot 5: 06:30 PM (Evening Commute & Impulse Blocker)
+  {
+    slotId: 5,
     hour: 18,
     minute: 30,
     name: 'Evening Impulse Guard',
@@ -128,9 +204,9 @@ export const DYNAMIC_DAILY_SLOTS: DailySlotConfig[] = [
     ],
   },
 
-  // 🌙 Slot 4: 09:30 PM (Night Hisab-Kitab & Daily Streak Keeper)
+  // 🌙 Slot 6: 09:30 PM (Night Hisab-Kitab & Daily Streak Keeper)
   {
-    slotId: 4,
+    slotId: 6,
     hour: 21,
     minute: 30,
     name: 'Night Hisab-Kitab Streak',

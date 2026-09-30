@@ -41,6 +41,8 @@ export default function Root() {
   const isAppMode = Capacitor.isNativePlatform() || 
                     (typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches) ||
                     currentHash === '#app' ||
+                    currentHash.includes('access_token=') ||
+                    currentHash.includes('error_description=') ||
                     (typeof window !== 'undefined' && (window.location.search.includes('shared_receipt=') || window.location.search.includes('pay_vpa=')));
 
   if (isAppMode) {

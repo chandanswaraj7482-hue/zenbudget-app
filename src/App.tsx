@@ -69,6 +69,7 @@ import { supabase } from './supabaseClient';
 import { playNotificationSound, playErrorSound, triggerFireworksCelebration, playClickSound } from './utils/audio';
 import confetti from 'canvas-confetti';
 import { parsePaymentScreenshot, parseSharedPaymentText } from './utils/paymentScreenshotParser';
+import { userTracker } from './utils/userTracker';
 
 interface AppProps {
   onBackToLanding?: () => void;
@@ -122,6 +123,15 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     document.addEventListener('click', handleGlobalClick);
     return () => document.removeEventListener('click', handleGlobalClick);
   }, []);
+
+  // Track page dwell time and active view analytics
+  useEffect(() => {
+    if (!isLocked && activeView) {
+      try {
+        userTracker.trackPageView(`App: ${activeView.toUpperCase()}`, `/#app/${activeView}`);
+      } catch (_) {}
+    }
+  }, [activeView, isLocked]);
 
   // Always reset scroll to the very top whenever the user switches views/pages
   useEffect(() => {
@@ -3513,6 +3523,9 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
   const handleLogout = async () => {
     try {
+      try {
+        userTracker.recordLogout();
+      } catch (_) {}
       await supabase.auth.signOut();
       const keysToWipe: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
@@ -3887,6 +3900,10 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         }
       }
 
+      try {
+        userTracker.recordLogin(validProfileId, validName, localStorage.getItem('zb_user_email') || '');
+      } catch (_) {}
+
       setIsLocked(false);
       setIsAppLoading(false);
       fetchDataFromSupabase().catch(() => {});
@@ -4040,17 +4057,17 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             }}
             title="Scan & Pay"
             style={{
-              background: themeMode === 'light' ? '#FFFFFF' : 'var(--bg-input)',
-              border: themeMode === 'light' ? '1px solid rgba(0,0,0,0.1)' : '1px solid var(--border-input)',
+              background: theme === 'light' ? '#FFFFFF' : 'var(--bg-input)',
+              border: theme === 'light' ? '1px solid rgba(0,0,0,0.1)' : '1px solid var(--border-input)',
               borderRadius: '12px',
               width: '36px',
               height: '36px',
-              color: themeMode === 'light' ? '#000000' : 'var(--text-primary)',
+              color: theme === 'light' ? '#000000' : 'var(--text-primary)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: themeMode === 'light' ? '0 2px 8px rgba(0,0,0,0.08)' : '0 2px 6px rgba(0,0,0,0.04)',
+              boxShadow: theme === 'light' ? '0 2px 8px rgba(0,0,0,0.08)' : '0 2px 6px rgba(0,0,0,0.04)',
               transition: 'all 0.15s ease'
             }}
           >
@@ -4087,17 +4104,17 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             onClick={() => setIsNotificationsOpen(true)} 
             title="Notifications"
             style={{
-              background: themeMode === 'light' ? '#FFFFFF' : 'var(--bg-input)',
-              border: themeMode === 'light' ? '1px solid rgba(0,0,0,0.1)' : '1px solid var(--border-input)',
+              background: theme === 'light' ? '#FFFFFF' : 'var(--bg-input)',
+              border: theme === 'light' ? '1px solid rgba(0,0,0,0.1)' : '1px solid var(--border-input)',
               borderRadius: '12px',
               width: '36px',
               height: '36px',
-              color: themeMode === 'light' ? '#000000' : 'var(--text-primary)',
+              color: theme === 'light' ? '#000000' : 'var(--text-primary)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: themeMode === 'light' ? '0 2px 8px rgba(0,0,0,0.08)' : '0 2px 6px rgba(0,0,0,0.04)',
+              boxShadow: theme === 'light' ? '0 2px 8px rgba(0,0,0,0.08)' : '0 2px 6px rgba(0,0,0,0.04)',
               transition: 'all 0.15s ease',
               position: 'relative'
             }}
@@ -5588,6 +5605,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
                   triggerToast(`Thank you for your rating & review! ⭐`, 'success');
                   try {
                     const textFeedback = reviewFeedback.trim() ? reviewFeedback.trim() : `${ratingStars} Star rating submitted`;
+                    userTracker.recordRating(ratingStars, textFeedback);
                     await supabase.from('app_ratings').insert([{
                       user_name: userName || 'ZenBudget User',
                       user_email: localStorage.getItem('zb_user_email') || 'user@zenbudget.app',
