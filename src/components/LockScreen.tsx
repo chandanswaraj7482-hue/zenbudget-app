@@ -4,6 +4,7 @@ import { supabase } from '../supabaseClient';
 import { playNotificationSound } from '../utils/audio';
 import { Capacitor } from '@capacitor/core';
 import { Device } from '@capacitor/device';
+import { getInitialsAvatar } from '../utils/avatar';
 
 interface LockScreenProps {
   onUnlock: (userId: string, username: string, tier: string, trialStart: string, pin: string, premiumExpiresAt: string | null, trialExpireDate?: string | null) => void;
@@ -341,7 +342,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           const meta = currentSess?.session?.user?.user_metadata || {};
           const gName = meta.full_name || meta.name || currentSess?.session?.user?.email?.split('@')[0] || username || 'User';
           const gEmail = (currentSess?.session?.user?.email || storedEmail || '').toLowerCase();
-          const gAvatar = meta.avatar_url || meta.picture || localStorage.getItem('zb_google_avatar') || `https://ui-avatars.com/api/?name=${encodeURIComponent(gName)}&background=22c55e&color=fff&rounded=true`;
+          const gAvatar = meta.avatar_url || meta.picture || localStorage.getItem('zb_google_avatar') || getInitialsAvatar(gName);
           const myReferralCode = 'ZB-' + Math.random().toString(36).substring(2, 10).toUpperCase();
 
           const newProf = {
@@ -427,7 +428,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             localStorage.setItem('zb_user_avatar', googleAvatar);
             supabase.from('profiles').update({ avatar_url: googleAvatar }).eq('id', uid).catch(() => {});
           } else if (!existingAvatar) {
-            const initAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(getInitialsName(userProf.name, userProf.email || storedEmail))}&background=22c55e&color=fff&rounded=true`;
+            const initAvatar = getInitialsAvatar(getInitialsName(userProf.name, userProf.email || storedEmail));
             localStorage.setItem('zb_user_avatar', initAvatar);
           }
         }

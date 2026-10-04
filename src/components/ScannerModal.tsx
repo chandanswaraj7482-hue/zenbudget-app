@@ -33,8 +33,6 @@ const FEELINGS = [
 const PAYMENT_TABS = ['Scan QR', 'Screenshot', 'Mobile', 'Bank A/c', 'UPI ID'];
 
 export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onSuccess, onPayViaCashfree, initialData, onRequireUnlockModal }) => {
-  if (!isOpen) return null;
-
   const [activePayTab, setActivePayTab] = useState<'Scan QR' | 'Screenshot' | 'Mobile' | 'Bank A/c' | 'UPI ID'>('Scan QR');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
@@ -757,6 +755,8 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
       });
     } catch (_) {}
   };
+
+  if (!isOpen) return null;
 
   return createPortal(
     <div style={{

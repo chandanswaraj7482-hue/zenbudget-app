@@ -108,6 +108,27 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
           >
             🔄 Open ZenBudget
           </button>
+          <button
+            onClick={() => {
+              try {
+                localStorage.clear();
+                sessionStorage.clear();
+              } catch (e) {}
+              window.location.reload();
+            }}
+            style={{
+              marginTop: '12px',
+              padding: '8px 16px',
+              borderRadius: '10px',
+              border: '1px solid rgba(255,255,255,0.15)',
+              background: 'transparent',
+              color: '#94a3b8',
+              fontSize: '12px',
+              cursor: 'pointer'
+            }}
+          >
+            Clear Data & Fresh Start
+          </button>
         </div>
       );
     }
@@ -127,12 +148,24 @@ if ('serviceWorker' in navigator) {
 }
 
 // Run bootstrapSession to restore auth token from SharedPreferences synchronously before mounting React App
-bootstrapSession().then(() => {
-  createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-      <ErrorBoundary>
-        <Root />
-      </ErrorBoundary>
-    </StrictMode>,
-  )
-});
+const mountApp = () => {
+  const container = document.getElementById('root');
+  if (container) {
+    createRoot(container).render(
+      <StrictMode>
+        <ErrorBoundary>
+          <Root />
+        </ErrorBoundary>
+      </StrictMode>,
+    );
+  }
+};
+
+bootstrapSession()
+  .catch((err) => {
+    console.warn('ZenBudget bootstrapSession warning:', err);
+  })
+  .finally(() => {
+    mountApp();
+  });
+

@@ -37,8 +37,6 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
   onSaveTransaction,
   onOpenFullEditor,
 }) => {
-  if (!isOpen || !payload) return null;
-
   const [stage, setStage] = useState<'receiving' | 'analyzing' | 'extracting' | 'ready' | 'error'>('receiving');
   const [progressPercent, setProgressPercent] = useState<number>(15);
   const [statusMessage, setStatusMessage] = useState<string>('Receiving payment intent...');
@@ -233,6 +231,8 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
         );
     }
   };
+
+  if (!isOpen || !payload) return null;
 
   return createPortal(
     <div style={{

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { User, KeyRound, Check, Eye, EyeOff, Globe, Banknote, ArrowLeft, Mail, Moon, Sun, Smartphone, Upload, Trash2, LogOut } from 'lucide-react';
 import { t } from '../utils/i18n';
 import { detectLocationFromIP } from '../utils/geoTracker';
+import { getInitialsAvatar, sanitizeAvatarUrl } from '../utils/avatar';
 
 interface ProfileViewProps {
   currentName: string;
@@ -92,7 +93,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const avatarFileRef = useRef<HTMLInputElement>(null);
 
   const [avatarUrl, setAvatarUrl] = useState<string>(() => {
-    return localStorage.getItem('zb_user_avatar') || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentName || 'User')}&background=22c55e&color=fff&rounded=true`;
+    return sanitizeAvatarUrl(localStorage.getItem('zb_user_avatar'), currentName || 'User');
   });
 
   const [rawUploadedImage, setRawUploadedImage] = useState<string | null>(null);
@@ -156,7 +157,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   };
 
   const googleAvatarSaved = localStorage.getItem('zb_google_avatar');
-  const initialsAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=22c55e&color=fff&rounded=true`;
+  const initialsAvatar = getInitialsAvatar(name || 'User');
 
   const PRESET_AVATARS = [
     ...(googleAvatarSaved ? [googleAvatarSaved] : []),

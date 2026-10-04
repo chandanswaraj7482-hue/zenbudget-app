@@ -242,21 +242,32 @@ class UserTrackerService {
     });
   }
 
-  public recordLogin(userId: string, userName: string, userEmail?: string) {
+  public async recordLogin(userId: string, userName: string, userEmail?: string) {
     this.currentUserId = userId || this.currentUserId;
     this.currentUserName = userName || this.currentUserName;
     this.currentUserEmail = userEmail || this.currentUserEmail;
 
+    // CRITICAL: Await real IP-based geo resolution BEFORE saving to Supabase
+    // This ensures we get the user's actual city/country from their IP, not the fallback
+    let geo: GeoLocation;
+    try {
+      // Clear any stale cached geo so we get a fresh lookup on each login
+      this.cachedGeo = null;
+      try { localStorage.removeItem('zb_cached_geo'); } catch (_) {}
+      geo = await this.resolveGeo();
+    } catch (_) {
+      geo = this.cachedGeo || {
+        country: 'India',
+        country_code: 'IN',
+        city: 'Unknown',
+        region: 'Unknown',
+        latitude: 20.5937,
+        longitude: 78.9629,
+        flag: '🇮🇳'
+      };
+    }
+
     const loginTimestamp = new Date().toISOString();
-    const geo = this.cachedGeo || {
-      country: 'India',
-      country_code: 'IN',
-      city: 'Delhi',
-      region: 'Delhi',
-      latitude: 28.6139,
-      longitude: 77.2090,
-      flag: '🇮🇳'
-    };
     const device = detectDevice();
 
     const sessionPayload: UserSessionData = {
@@ -476,6 +487,21 @@ class UserTrackerService {
       .catch(() => {});
   }
 
+  public recordRating(stars: number, feedback: string) {
+    try {
+      const stored = localStorage.getItem('zb_user_ratings');
+      const ratings = stored ? JSON.parse(stored) : [];
+      ratings.unshift({
+        stars,
+        feedback,
+        user_name: this.currentUserName,
+        user_email: this.currentUserEmail,
+        created_at: new Date().toISOString()
+      });
+      localStorage.setItem('zb_user_ratings', JSON.stringify(ratings.slice(0, 50)));
+    } catch (_) {}
+  }
+
   public getSessionId(): string {
     return this.currentSessionId;
   }
@@ -499,7 +525,7 @@ export function formatDuration(seconds?: number): string {
 }
 
 export function timeAgo(isoString?: string): string {
-  if (!isoString) return 'Just now';
+  if (!isoString) return 'Never / N/A';
   try {
     const diff = (Date.now() - new Date(isoString).getTime()) / 1000;
     if (diff < 15) return 'Just now';
@@ -515,172 +541,286 @@ export function timeAgo(isoString?: string): string {
   }
 }
 
-// Realistic seed data for when database is fresh / before tables have logged visits
-export const SAMPLE_GEO_SESSIONS: UserSessionData[] = [
-  {
-    id: 'seed_sess_in_1',
-    user_name: 'Aarav Sharma',
-    user_email: 'aarav.sharma@gmail.com',
-    country: 'India',
-    country_code: 'IN',
-    city: 'New Delhi',
-    region: 'Delhi NCR',
-    latitude: 28.6139,
-    longitude: 77.2090,
-    ip: '103.24.120.45',
-    isp: 'Airtel Broadband',
-    device: 'Android Mobile',
-    login_time: new Date(Date.now() - 4 * 60 * 1000).toISOString(),
-    last_active_at: new Date(Date.now() - 30 * 1000).toISOString(),
-    duration_seconds: 240,
-    is_active: true,
-    created_at: new Date(Date.now() - 4 * 60 * 1000).toISOString()
-  },
-  {
-    id: 'seed_sess_in_2',
-    user_name: 'Priya Patel',
-    user_email: 'priya.finance@yahoo.com',
-    country: 'India',
-    country_code: 'IN',
-    city: 'Mumbai',
-    region: 'Maharashtra',
-    latitude: 19.0760,
-    longitude: 72.8777,
-    ip: '49.36.192.11',
-    isp: 'Reliance Jio Fiber',
-    device: 'iOS Mobile',
-    login_time: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
-    last_active_at: new Date(Date.now() - 50 * 1000).toISOString(),
-    duration_seconds: 720,
-    is_active: true,
-    created_at: new Date(Date.now() - 12 * 60 * 1000).toISOString()
-  },
-  {
-    id: 'seed_sess_in_3',
-    user_name: 'Rohan Verma',
-    user_email: 'rohan.tech@outlook.com',
-    country: 'India',
-    country_code: 'IN',
-    city: 'Bengaluru',
-    region: 'Karnataka',
-    latitude: 12.9716,
-    longitude: 77.5946,
-    ip: '106.51.78.90',
-    isp: 'ACT Fibernet',
-    device: 'Mac Desktop',
-    login_time: new Date(Date.now() - 35 * 60 * 1000).toISOString(),
-    logout_time: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
-    last_active_at: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
-    duration_seconds: 1500,
-    is_active: false,
-    created_at: new Date(Date.now() - 35 * 60 * 1000).toISOString()
-  },
-  {
-    id: 'seed_sess_in_4',
-    user_name: 'Sneha Reddy',
-    user_email: 'sneha.reddy@gmail.com',
-    country: 'India',
-    country_code: 'IN',
-    city: 'Hyderabad',
-    region: 'Telangana',
-    latitude: 17.3850,
-    longitude: 78.4867,
-    ip: '183.82.100.12',
-    isp: 'Jio 5G Network',
-    device: 'Android Mobile',
-    login_time: new Date(Date.now() - 55 * 60 * 1000).toISOString(),
-    last_active_at: new Date(Date.now() - 80 * 1000).toISOString(),
-    duration_seconds: 3300,
-    is_active: true,
-    created_at: new Date(Date.now() - 55 * 60 * 1000).toISOString()
-  },
-  {
-    id: 'seed_sess_us_1',
-    user_name: 'Michael Davis',
-    user_email: 'michael.d@gmail.com',
-    country: 'United States',
-    country_code: 'US',
-    city: 'New York',
-    region: 'New York',
-    latitude: 40.7128,
-    longitude: -74.0060,
-    ip: '68.195.80.20',
-    isp: 'Verizon Fios',
-    device: 'Windows PC',
-    login_time: new Date(Date.now() - 85 * 60 * 1000).toISOString(),
-    logout_time: new Date(Date.now() - 40 * 60 * 1000).toISOString(),
-    last_active_at: new Date(Date.now() - 40 * 60 * 1000).toISOString(),
-    duration_seconds: 2700,
-    is_active: false,
-    created_at: new Date(Date.now() - 85 * 60 * 1000).toISOString()
-  },
-  {
-    id: 'seed_sess_ae_1',
-    user_name: 'Farhan Al-Maktoum',
-    user_email: 'farhan.ae@proton.me',
-    country: 'United Arab Emirates',
-    country_code: 'AE',
-    city: 'Dubai',
-    region: 'Dubai',
-    latitude: 25.2048,
-    longitude: 55.2708,
-    ip: '94.200.11.45',
-    isp: 'Etisalat UAE',
-    device: 'iOS Mobile',
-    login_time: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-    last_active_at: new Date(Date.now() - 60 * 1000).toISOString(),
-    duration_seconds: 900,
-    is_active: true,
-    created_at: new Date(Date.now() - 15 * 60 * 1000).toISOString()
-  },
-  {
-    id: 'seed_sess_uk_1',
-    user_name: 'Oliver Smith',
-    user_email: 'oliver.london@gmail.com',
-    country: 'United Kingdom',
-    country_code: 'GB',
-    city: 'London',
-    region: 'Greater London',
-    latitude: 51.5074,
-    longitude: -0.1278,
-    ip: '82.165.197.1',
-    isp: 'BT Broadband',
-    device: 'Mac Desktop',
-    login_time: new Date(Date.now() - 140 * 60 * 1000).toISOString(),
-    logout_time: new Date(Date.now() - 110 * 60 * 1000).toISOString(),
-    last_active_at: new Date(Date.now() - 110 * 60 * 1000).toISOString(),
-    duration_seconds: 1800,
-    is_active: false,
-    created_at: new Date(Date.now() - 140 * 60 * 1000).toISOString()
-  }
-];
-
-export async function fetchLiveUserSessions(supabaseClient: any = supabase): Promise<UserSessionData[]> {
+export function formatDateTime(isoString?: string | null): string {
+  if (!isoString) return 'Never / N/A';
   try {
-    const { data, error } = await supabaseClient
+    const d = new Date(isoString);
+    if (isNaN(d.getTime())) return 'N/A';
+    return d.toLocaleString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  } catch (_) {
+    return 'N/A';
+  }
+}
+
+export type InactivityCategory = 'online' | 'today' | '1-3days' | '4-7days' | 'dormant' | 'never';
+
+export interface InactivityInfo {
+  category: InactivityCategory;
+  text: string;
+  badgeLabel: string;
+  color: string;
+  bgColor: string;
+  borderColor: string;
+  days: number;
+  hours: number;
+  minutes: number;
+}
+
+export function getInactivityInfo(lastLoginIso?: string | null, isActiveSession?: boolean, logoutIso?: string | null): InactivityInfo {
+  if (isActiveSession && !logoutIso) {
+    return {
+      category: 'online',
+      text: 'Currently Online',
+      badgeLabel: 'ONLINE NOW',
+      color: '#10b981',
+      bgColor: 'rgba(16, 185, 129, 0.15)',
+      borderColor: 'rgba(16, 185, 129, 0.4)',
+      days: 0,
+      hours: 0,
+      minutes: 0
+    };
+  }
+
+  if (!lastLoginIso) {
+    return {
+      category: 'never',
+      text: 'Never logged in',
+      badgeLabel: 'NEVER ACTIVE',
+      color: '#94a3b8',
+      bgColor: 'rgba(148, 163, 184, 0.12)',
+      borderColor: 'rgba(148, 163, 184, 0.3)',
+      days: 999,
+      hours: 0,
+      minutes: 0
+    };
+  }
+
+  const loginTime = new Date(lastLoginIso).getTime();
+  const now = Date.now();
+  const diffMs = Math.max(0, now - loginTime);
+  const totalMins = Math.floor(diffMs / (1000 * 60));
+  const totalHours = Math.floor(totalMins / 60);
+  const days = Math.floor(totalHours / 24);
+  const remHours = totalHours % 24;
+  const remMins = totalMins % 60;
+
+  if (totalMins <= 5 && isActiveSession) {
+    return {
+      category: 'online',
+      text: 'Active just now',
+      badgeLabel: 'ONLINE NOW',
+      color: '#10b981',
+      bgColor: 'rgba(16, 185, 129, 0.15)',
+      borderColor: 'rgba(16, 185, 129, 0.4)',
+      days: 0,
+      hours: 0,
+      minutes: totalMins
+    };
+  }
+
+  if (days < 1) {
+    const text = totalHours > 0 ? `${totalHours}h ${remMins}m ago` : `${totalMins}m ago`;
+    return {
+      category: 'today',
+      text: `Active today (${text})`,
+      badgeLabel: 'ACTIVE TODAY',
+      color: '#38bdf8',
+      bgColor: 'rgba(56, 189, 248, 0.15)',
+      borderColor: 'rgba(56, 189, 248, 0.4)',
+      days: 0,
+      hours: totalHours,
+      minutes: remMins
+    };
+  }
+
+  if (days <= 3) {
+    return {
+      category: '1-3days',
+      text: `Inactive for ${days}d ${remHours}h`,
+      badgeLabel: `${days}d INACTIVE`,
+      color: '#f59e0b',
+      bgColor: 'rgba(245, 158, 11, 0.15)',
+      borderColor: 'rgba(245, 158, 11, 0.4)',
+      days,
+      hours: remHours,
+      minutes: remMins
+    };
+  }
+
+  if (days <= 7) {
+    return {
+      category: '4-7days',
+      text: `Inactive for ${days} days`,
+      badgeLabel: `${days}d INACTIVE`,
+      color: '#f97316',
+      bgColor: 'rgba(249, 115, 22, 0.15)',
+      borderColor: 'rgba(249, 115, 22, 0.4)',
+      days,
+      hours: remHours,
+      minutes: remMins
+    };
+  }
+
+  return {
+    category: 'dormant',
+    text: `Inactive for ${days} days (Dormant)`,
+    badgeLabel: `${days}d DORMANT`,
+    color: '#ef4444',
+    bgColor: 'rgba(239, 68, 68, 0.15)',
+    borderColor: 'rgba(239, 68, 68, 0.4)',
+    days,
+    hours: remHours,
+    minutes: remMins
+  };
+}
+
+export interface UnifiedUserRecord {
+  id: string;
+  user_id?: string;
+  user_name: string;
+  user_email: string;
+  subscription_tier?: string;
+  login_time: string;
+  logout_time?: string | null;
+  last_active_at: string;
+  duration_seconds: number;
+  country: string;
+  country_code: string;
+  city: string;
+  region?: string;
+  latitude: number;
+  longitude: number;
+  ip?: string;
+  isp?: string;
+  device: string;
+  is_active: boolean;
+  is_online: boolean;
+  inactivity: InactivityInfo;
+  source: 'session' | 'profile' | 'seed';
+}
+
+export async function fetchUnifiedUserActivity(supabaseClient: any = supabase): Promise<UnifiedUserRecord[]> {
+  const unifiedMap = new Map<string, UnifiedUserRecord>();
+
+  // 1. Fetch live user sessions from Supabase
+  let sessions: UserSessionData[] = [];
+  try {
+    const { data } = await supabaseClient
       .from('user_sessions')
       .select('*')
       .order('login_time', { ascending: false })
-      .limit(100);
-
-    // Merge with local cached sessions
-    let localSessions: UserSessionData[] = [];
-    try {
-      const raw = localStorage.getItem('zb_admin_sessions_cache');
-      if (raw) localSessions = JSON.parse(raw);
-    } catch (_) {}
-
-    if (error || !data || data.length === 0) {
-      if (localSessions.length > 0) {
-        return mergeSessions(localSessions, SAMPLE_GEO_SESSIONS);
-      }
-      return SAMPLE_GEO_SESSIONS;
+      .limit(200);
+    if (data && data.length > 0) {
+      sessions = data.filter((s: any) => s && s.id && !s.id.startsWith('seed_'));
     }
+  } catch (_) {}
 
-    return mergeSessions(data, localSessions);
-  } catch (_) {
-    return SAMPLE_GEO_SESSIONS;
-  }
+  // Merge any local sessions (filtering out seed dummies)
+  try {
+    const rawLocal = localStorage.getItem('zb_admin_sessions_cache');
+    if (rawLocal) {
+      const parsed: UserSessionData[] = JSON.parse(rawLocal);
+      if (Array.isArray(parsed)) {
+        const cleanLocal = parsed.filter(s => s && s.id && !s.id.startsWith('seed_'));
+        sessions = mergeSessions(sessions, cleanLocal);
+      }
+    }
+  } catch (_) {}
+
+  // 2. Fetch all registered profiles from Supabase
+  let profiles: any[] = [];
+  try {
+    const { data } = await supabaseClient
+      .from('profiles')
+      .select('*')
+      .limit(200);
+    if (data && data.length > 0) profiles = data;
+  } catch (_) {}
+
+  // 3. Process sessions first
+  sessions.forEach(s => {
+    const key = (s.user_email || s.user_id || s.user_name || s.id).toLowerCase();
+    const lastActive = s.last_active_at ? new Date(s.last_active_at).getTime() : new Date(s.login_time).getTime();
+    const isOnline = (s.is_active && !s.logout_time && (Date.now() - lastActive < 5 * 60 * 1000));
+    const inactivity = getInactivityInfo(s.login_time, isOnline, s.logout_time);
+
+    unifiedMap.set(key, {
+      id: s.id,
+      user_id: s.user_id,
+      user_name: s.user_name || 'Guest User',
+      user_email: s.user_email || '',
+      subscription_tier: 'trial',
+      login_time: s.login_time,
+      logout_time: s.logout_time,
+      last_active_at: s.last_active_at || s.login_time,
+      duration_seconds: s.duration_seconds || 0,
+      country: s.country || 'India',
+      country_code: s.country_code || 'IN',
+      city: s.city || 'Delhi',
+      region: s.region || '',
+      latitude: typeof s.latitude === 'number' ? s.latitude : 28.6139,
+      longitude: typeof s.longitude === 'number' ? s.longitude : 77.2090,
+      ip: s.ip || '103.xxx.xxx',
+      isp: s.isp || 'Broadband ISP',
+      device: s.device || 'Web Browser',
+      is_active: s.is_active,
+      is_online: isOnline,
+      inactivity,
+      source: 'session'
+    });
+  });
+
+  // 4. Enrich/Merge with profiles
+  profiles.forEach(p => {
+    const key = (p.email || p.id || p.name || '').toLowerCase();
+    const existing = unifiedMap.get(key);
+
+    const country = p.country || existing?.country || 'India';
+    const countryCode = p.country_code || existing?.country_code || 'IN';
+    const city = p.city || existing?.city || 'Delhi';
+    const lat = typeof p.latitude === 'number' ? p.latitude : (existing?.latitude || 28.6139);
+    const lng = typeof p.longitude === 'number' ? p.longitude : (existing?.longitude || 77.2090);
+    const loginTime = p.last_login || existing?.login_time || p.updated_at || new Date().toISOString();
+    const logoutTime = p.last_logout || existing?.logout_time;
+    const isOnline = existing ? existing.is_online : false;
+    const inactivity = getInactivityInfo(loginTime, isOnline, logoutTime);
+
+    unifiedMap.set(key, {
+      id: existing ? existing.id : p.id,
+      user_id: p.id,
+      user_name: p.name || existing?.user_name || 'Registered User',
+      user_email: p.email || existing?.user_email || '',
+      subscription_tier: p.subscription_tier || 'trial',
+      login_time: loginTime,
+      logout_time: logoutTime,
+      last_active_at: existing?.last_active_at || loginTime,
+      duration_seconds: p.total_time_spent_seconds || existing?.duration_seconds || 0,
+      country,
+      country_code: countryCode,
+      city,
+      region: p.region || existing?.region || '',
+      latitude: lat,
+      longitude: lng,
+      ip: p.last_ip || existing?.ip || '103.xxx.xxx',
+      isp: p.isp || existing?.isp || 'Broadband ISP',
+      device: existing?.device || 'Mobile App',
+      is_active: existing ? existing.is_active : false,
+      is_online: isOnline,
+      inactivity,
+      source: existing ? existing.source : 'profile'
+    });
+  });
+
+  const result = Array.from(unifiedMap.values());
+  // Sort primarily by login time desc
+  return result.sort((a, b) => new Date(b.login_time).getTime() - new Date(a.login_time).getTime());
 }
 
 function mergeSessions(primary: UserSessionData[], secondary: UserSessionData[]): UserSessionData[] {

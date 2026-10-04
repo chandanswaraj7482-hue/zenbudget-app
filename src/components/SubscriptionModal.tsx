@@ -789,9 +789,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                     let payment_session_id = '';
                     let responseText = '';
 
-                    // Try Vercel Serverless Function first (High reliability 24/7 CORS-enabled endpoint)
+                    // Try local /api/create-payment-session endpoint first
                     try {
-                      const response = await fetch(`https://admin-portal-zenbudget.vercel.app/api/create-payment-session`, {
+                      const response = await fetch(`/api/create-payment-session`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -804,7 +804,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                       });
                       responseText = await response.text();
                     } catch (fetchErr) {
-                      console.warn('Vercel API fetch failed, attempting fallback:', fetchErr);
+                      console.warn('Local API fetch failed, attempting fallback:', fetchErr);
                     }
 
                     // Fallback to main app serverless endpoint

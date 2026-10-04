@@ -177,6 +177,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   partnerId
 }) => {
   const [selectedDashboardView, setSelectedDashboardView] = useState<'combined' | 'personal' | string>('combined');
+  const [avatarError, setAvatarError] = useState(false);
 
   const [dateRangeFilter, setDateRangeFilter] = useState<'this_month' | 'last_month' | 'last_3_months' | 'custom'>('this_month');
   const [showPartnerBalanceModal, setShowPartnerBalanceModal] = useState(false);
@@ -751,11 +752,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginTop: '4px', marginBottom: '2px', flexWrap: 'nowrap', width: '100%' }}>
         <div onClick={onOpenProfile} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
           {/* Avatar with glow */}
-          {userAvatar ? (
-             <img src={userAvatar} alt="User" style={{ width: '46px', height: '46px', borderRadius: '50%', border: '2px solid #22c55e', boxShadow: '0 0 14px rgba(34,197,94,0.3)', objectFit: 'cover', flexShrink: 0 }} />
+          {userAvatar && !avatarError && !userAvatar.includes('ui-avatars.com') ? (
+             <img 
+               src={userAvatar} 
+               alt={userName || "User"} 
+               onError={() => setAvatarError(true)}
+               style={{ width: '46px', height: '46px', borderRadius: '50%', border: '2px solid #22c55e', boxShadow: '0 0 14px rgba(34,197,94,0.3)', objectFit: 'cover', flexShrink: 0 }} 
+             />
           ) : (
-             <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 'bold', fontSize: '20px', border: '2px solid rgba(255,255,255,0.2)', boxShadow: '0 0 14px rgba(34,197,94,0.3)', flexShrink: 0 }}>
-               {userName ? userName.charAt(0).toUpperCase() : 'U'}
+             <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: '18px', border: '2px solid #22c55e', boxShadow: '0 0 14px rgba(34,197,94,0.3)', flexShrink: 0, letterSpacing: '0.5px' }}>
+               {userName ? userName.trim().split(/\s+/).filter(Boolean).map(p => p[0]).slice(0, 2).join('').toUpperCase() || 'U' : 'U'}
              </div>
           )}
           

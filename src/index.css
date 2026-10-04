@@ -1447,3 +1447,56 @@ body:has(#root.landing-root) {
     linear-gradient(to bottom, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
   animation: hudGridMove 8s linear infinite;
 }
+
+/* ========================================================
+   GOOGLE PAY HIGHLIGHTED CENTER BOTTOM SCANNER (FINTECH UI)
+   ======================================================== */
+.gpay-bottom-scanner-btn {
+  animation: gpayPulseGlow 2.5s infinite;
+  outline: none;
+  border: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.gpay-bottom-scanner-btn:hover {
+  transform: translateY(-5px) scale(1.08);
+  box-shadow: 0 14px 32px rgba(16, 185, 129, 0.65), 0 0 0 6px rgba(16, 185, 129, 0.3) !important;
+}
+
+.gpay-bottom-scanner-btn:active {
+  transform: translateY(-1px) scale(0.95);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4), 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
+}
+
+.gpay-scanner-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(16, 185, 129, 0.55);
+  animation: gpayRadarWave 2.2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes gpayPulseGlow {
+  0%, 100% {
+    box-shadow: 0 8px 22px rgba(16, 185, 129, 0.45), 0 0 0 2.5px rgba(16, 185, 129, 0.25);
+  }
+  50% {
+    box-shadow: 0 12px 28px rgba(16, 185, 129, 0.7), 0 0 0 6.5px rgba(16, 185, 129, 0.35);
+  }
+}
+
+@keyframes gpayRadarWave {
+  0% {
+    transform: scale(0.88);
+    opacity: 0.9;
+  }
+  60% {
+    transform: scale(1.32);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}

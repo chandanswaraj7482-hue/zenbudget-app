@@ -20,8 +20,6 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
   initialSalary,
   userName = 'Friend'
 }) => {
-  if (!isOpen) return null;
-
   const [age, setAge] = useState<string>(() => {
     const profileId = localStorage.getItem('zb_profile_id') || 'local';
     const savedAge = localStorage.getItem(`zb_age_${profileId}`);
@@ -76,6 +74,8 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
       setIsSaving(false);
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div

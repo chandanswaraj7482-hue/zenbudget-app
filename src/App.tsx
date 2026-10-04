@@ -43,6 +43,7 @@ import { ScanPayUnlockModal } from './components/ScanPayUnlockModal';
 import { launchCashfreeCheckout } from './utils/cashfreeHelper';
 import { handleZenBudgetPaymentSystem, checkHasScanPayAccess } from './utils/paymentRouter';
 import { WidgetModal } from './components/WidgetModal';
+import { getInitialsAvatar, sanitizeAvatarUrl } from './utils/avatar';
 import { TransferModal } from './components/TransferModal';
 import { AddAccountModal } from './components/AddAccountModal';
 import { FinancialProfileCardModal } from './components/FinancialProfileCardModal';
@@ -82,6 +83,23 @@ const generateId = () => {
 };
 
 const App: React.FC<AppProps> = ({ onBackToLanding }) => {
+  // Auth & Profile states
+  const [currentProfileId, setCurrentProfileId] = useState<string>(() => localStorage.getItem('zb_profile_id') || '');
+  const [userName, setUserName] = useState<string>(() => localStorage.getItem('zb_user_name') || '');
+  const [isLocked, setIsLocked] = useState<boolean>(() => {
+    return localStorage.getItem('zb_profile_id') && localStorage.getItem('zb_app_lock_enabled') === 'false' ? false : true;
+  });
+  const [isAppLoading, setIsAppLoading] = useState<boolean>(false);
+  const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
+  const [showMorningBrief, setShowMorningBrief] = useState<boolean>(false);
+  const [showEveningReflection, setShowEveningReflection] = useState<boolean>(false);
+  const [showStoryReport, setShowStoryReport] = useState<boolean>(false);
+  const [storyReportType, setStoryReportType] = useState<'weekly' | 'monthly'>('weekly');
+  const [subscriptionTier, setSubscriptionTier] = useState<string>(() => {
+    return localStorage.getItem('zb_subscription_tier') || 'trial';
+  });
+  const isPremiumUser = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(subscriptionTier);
+
   const [transactions, setTransactions] = useState<Transaction[]>(() => {
     const profileId = localStorage.getItem('zb_profile_id') || '';
     if (profileId) {
@@ -112,6 +130,54 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
   const mainScrollRef = useRef<HTMLElement>(null);
 
+  // Accounts & Loans states
+  const [accounts, setAccounts] = useState<Account[]>(() => {
+    const profileId = localStorage.getItem('zb_profile_id') || '';
+    const stored = profileId ? localStorage.getItem(`zb_accounts_${profileId}`) : null;
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      } catch (e) {}
+    }
+    return [];
+  });
+
+  const [loans, setLoans] = useState<LoanRecord[]>(() => {
+    const profileId = localStorage.getItem('zb_profile_id') || '';
+    const stored = profileId ? localStorage.getItem(`zb_loans_${profileId}`) : null;
+    if (stored) {
+      try { return JSON.parse(stored); } catch (e) {}
+    }
+    return [];
+  });
+
+  const [userAvatar, setUserAvatar] = useState<string>(() => {
+    return sanitizeAvatarUrl(localStorage.getItem('zb_user_avatar'), localStorage.getItem('zb_user_name') || 'User');
+  });
+
+  const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
+  const [isTransferOpen, setIsTransferOpen] = useState(false);
+  const [isBankSyncOpen, setIsBankSyncOpen] = useState(false);
+  const [isWidgetModalOpen, setIsWidgetModalOpen] = useState(false);
+
+  const [hasScanPayAccess, setHasScanPayAccess] = useState<boolean>(() => {
+    // TEMPORARY FOR TESTING: Force false
+    return false;
+  });
+
+  const [trialStartDate, setTrialStartDate] = useState<string>(() => {
+    return localStorage.getItem('zb_trial_start_date') || new Date().toISOString();
+  });
+  const [isSubModalOpen, setIsSubModalOpen] = useState(false);
+  const [isScanPayUnlockOpen, setIsScanPayUnlockOpen] = useState(false);
+  const [isSubBlocker, setIsSubBlocker] = useState(false);
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+  const [showTrialUrgencyModal, setShowTrialUrgencyModal] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+
   // Global click SFX for buttons
   useEffect(() => {
     const handleGlobalClick = (e: MouseEvent) => {
@@ -140,109 +206,6 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     }
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, [activeView]);
-
-  // Accounts & Loans states
-  const [accounts, setAccounts] = useState<Account[]>(() => {
-    const profileId = localStorage.getItem('zb_profile_id') || '';
-    const stored = profileId ? localStorage.getItem(`zb_accounts_${profileId}`) : null;
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
-      } catch (e) {}
-    }
-    return [];
-  });
-
-  const handleDeleteBankAccount = (accId: string) => {
-    const tier = subscriptionTier || localStorage.getItem('zb_subscription_tier') || 'trial';
-    const isPro = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(tier) || localStorage.getItem('admin_overridden') === 'true';
-
-    if (!isPro) {
-      triggerToast('🔒 Deleting accounts is a Premium feature. Upgrade to Pro!', 'warning');
-      setIsSubBlocker(false);
-      setIsSubModalOpen(true);
-      return;
-    }
-
-    const acc = accounts.find(a => a.id === accId);
-    setConfirmDialog({
-      isOpen: true,
-      title: 'Delete Account',
-      message: `Are you sure you want to delete "${acc?.name || 'this account'}"?`,
-      confirmText: 'Delete Account',
-      cancelText: 'Cancel',
-      type: 'danger',
-      onConfirm: async () => {
-        setAccounts(prev => {
-          const nextAccs = prev.filter(a => a.id !== accId);
-          if (currentProfileId) {
-            localStorage.setItem(`zb_accounts_${currentProfileId}`, JSON.stringify(nextAccs));
-          }
-          return nextAccs;
-        });
-        // Delete from Supabase too for cross-device sync
-        if (currentProfileId) {
-          try { await supabase.from('accounts').delete().eq('id', accId).eq('user_id', currentProfileId); } catch (_) {}
-        }
-        setConfirmDialog(null);
-        triggerToast('Account deleted successfully.', 'info');
-      }
-    });
-  };
-
-  const [loans, setLoans] = useState<LoanRecord[]>(() => {
-    const profileId = localStorage.getItem('zb_profile_id') || '';
-    const stored = profileId ? localStorage.getItem(`zb_loans_${profileId}`) : null;
-    if (stored) {
-      try { return JSON.parse(stored); } catch (e) {}
-    }
-    return [];
-  });
-
-  const [userAvatar, setUserAvatar] = useState<string>(() => {
-    return localStorage.getItem('zb_user_avatar') || `https://ui-avatars.com/api/?name=${encodeURIComponent(localStorage.getItem('zb_user_name') || 'User')}&background=22c55e&color=fff&rounded=true`;
-  });
-
-  const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
-  const [isTransferOpen, setIsTransferOpen] = useState(false);
-  const [isBankSyncOpen, setIsBankSyncOpen] = useState(false);
-  const [isWidgetModalOpen, setIsWidgetModalOpen] = useState(false);
-  
-  // Auth & Profile states
-  const [isLocked, setIsLocked] = useState<boolean>(() => {
-    return localStorage.getItem('zb_profile_id') && localStorage.getItem('zb_app_lock_enabled') === 'false' ? false : true;
-  });
-  const [isAppLoading, setIsAppLoading] = useState<boolean>(false);
-  const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
-  const [showMorningBrief, setShowMorningBrief] = useState<boolean>(false);
-  const [showEveningReflection, setShowEveningReflection] = useState<boolean>(false);
-  const [showStoryReport, setShowStoryReport] = useState<boolean>(false);
-  const [storyReportType, setStoryReportType] = useState<'weekly' | 'monthly'>('weekly');
-  const [currentProfileId, setCurrentProfileId] = useState<string>(() => localStorage.getItem('zb_profile_id') || '');
-  const [userName, setUserName] = useState<string>(() => localStorage.getItem('zb_user_name') || '');
-  
-  const [subscriptionTier, setSubscriptionTier] = useState<string>(() => {
-    return localStorage.getItem('zb_subscription_tier') || 'trial';
-  });
-  const isPremiumUser = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(subscriptionTier);
-  
-  const [hasScanPayAccess, setHasScanPayAccess] = useState<boolean>(() => {
-    // TEMPORARY FOR TESTING: Force false
-    return false;
-  });
-
-  const [trialStartDate, setTrialStartDate] = useState<string>(() => {
-    return localStorage.getItem('zb_trial_start_date') || new Date().toISOString();
-  });
-  const [isSubModalOpen, setIsSubModalOpen] = useState(false);
-  const [isScanPayUnlockOpen, setIsScanPayUnlockOpen] = useState(false);
-  const [isSubBlocker, setIsSubBlocker] = useState(false);
-  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
-  const [showTrialUrgencyModal, setShowTrialUrgencyModal] = useState(false);
-  const [showRatingModal, setShowRatingModal] = useState(false);
   const [showFinancialProfileModal, setShowFinancialProfileModal] = useState(false);
   const [showNewMonthBudgetPromptModal, setShowNewMonthBudgetPromptModal] = useState(false);
 
@@ -621,6 +584,43 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       } catch (_) {}
     }
     triggerToast(`Account "${newAcc.name}" added successfully!`, 'success');
+  };
+
+  const handleDeleteBankAccount = (accId: string) => {
+    const tier = subscriptionTier || localStorage.getItem('zb_subscription_tier') || 'trial';
+    const isPro = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(tier) || localStorage.getItem('admin_overridden') === 'true';
+
+    if (!isPro) {
+      triggerToast('🔒 Deleting accounts is a Premium feature. Upgrade to Pro!', 'warning');
+      setIsSubBlocker(false);
+      setIsSubModalOpen(true);
+      return;
+    }
+
+    const acc = accounts.find(a => a.id === accId);
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Account',
+      message: `Are you sure you want to delete "${acc?.name || 'this account'}"?`,
+      confirmText: 'Delete Account',
+      cancelText: 'Cancel',
+      type: 'danger',
+      onConfirm: async () => {
+        setAccounts(prev => {
+          const nextAccs = prev.filter(a => a.id !== accId);
+          if (currentProfileId) {
+            localStorage.setItem(`zb_accounts_${currentProfileId}`, JSON.stringify(nextAccs));
+          }
+          return nextAccs;
+        });
+        // Delete from Supabase too for cross-device sync
+        if (currentProfileId) {
+          try { await supabase.from('accounts').delete().eq('id', accId).eq('user_id', currentProfileId); } catch (_) {}
+        }
+        setConfirmDialog(null);
+        triggerToast('Account deleted successfully.', 'info');
+      }
+    });
   };
 
   const handleTransfer = async (fromId: string, toId: string, amount: number, notes?: string) => {
@@ -1448,11 +1448,13 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       processSharedPayload(pendingIntent);
     }
 
-    // Background update checker from Supabase app_versions & broadcast notifications
+    // Background update checker from Supabase app_versions
     const checkForUpdates = async () => {
       // ONLY trigger update popup inside installed mobile APK devices.
       // Web browser auto-updates on deployment, so skip Web!
       if (!Capacitor.isNativePlatform()) return;
+
+      const CURRENT_VERSION_CODE = 1; // Bump this when releasing a new APK
 
       try {
         const { data } = await supabase
@@ -1462,33 +1464,26 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           .limit(1)
           .maybeSingle();
 
-        let latestVersion = data?.latest_version || '1.0.1';
-        let downloadUrl = data?.update_url || 'https://zenbudget-tracker.vercel.app/zenbudget.apk';
-        let isForceUpdate = !!data?.force_update;
-        let releaseNotes = data?.release_notes || 'Bug fixes, fast payment handles & new Zen Companion features!';
+        if (!data) return; // No data in table — don't show popup
 
-        // Check if there is an active broadcast notification for update
-        const { data: bcData } = await supabase
-          .from('broadcast_notifications')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(1);
+        const serverVersionCode: number = data?.version_code || 1;
+        const latestVersion: string = data?.latest_version || '1.0.0';
+        const downloadUrl: string = data?.update_url || 'https://zenbudget-tracker.vercel.app/zenbudget.apk';
+        const isForceUpdate: boolean = !!data?.force_update;
+        const releaseNotes: string = data?.release_notes || 'Bug fixes & new features!';
 
-        if (bcData && bcData[0] && (bcData[0].type === 'update' || bcData[0].title.toLowerCase().includes('update'))) {
-          latestVersion = '1.0.1';
-          releaseNotes = `${bcData[0].title}: ${bcData[0].message}`;
-        }
+        // Only show popup if server has a NEWER version than installed APK
+        if (serverVersionCode <= CURRENT_VERSION_CODE) return;
 
+        // Check if user already dismissed this exact version
         const lastDismissedVersion = localStorage.getItem('zb_last_update_dismissed_version');
-        const isDismissed = lastDismissedVersion === latestVersion || lastDismissedVersion === '1.0.1_dismissed';
+        if (!isForceUpdate && lastDismissedVersion === latestVersion) return;
 
-        if (!isDismissed || isForceUpdate) {
-          setUpdateVersion(latestVersion);
-          setUpdateUrl(downloadUrl);
-          setUpdateReleaseNotes(releaseNotes);
-          if (isForceUpdate) setForceUpdate(true);
-          setShowUpdatePopup(true);
-        }
+        setUpdateVersion(latestVersion);
+        setUpdateUrl(downloadUrl);
+        setUpdateReleaseNotes(releaseNotes);
+        if (isForceUpdate) setForceUpdate(true);
+        setShowUpdatePopup(true);
       } catch (err) {
         console.warn('ZenBudget: Version check failed:', err);
       }
@@ -1629,28 +1624,28 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       const parts = s.split(/[\/\-]/);
       if (parts.length === 3) {
         if (parts[0].length === 4) {
-          const y = parseInt(parts[0], 10);
-          const m = parseInt(parts[1], 10) - 1;
-          const d = parseInt(parts[2], 10);
-          const date = new Date(y, m, d);
-          const formatted = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-          return { due: date, dueStr: formatted, isValid: !isNaN(date.getTime()) };
+          const yr = parseInt(parts[0], 10);
+          const mo = parseInt(parts[1], 10) - 1;
+          const dt = parseInt(parts[2], 10);
+          const parsedDate = new Date(yr, mo, dt);
+          const formattedStr = `${yr}-${String(mo + 1).padStart(2, '0')}-${String(dt).padStart(2, '0')}`;
+          return { due: parsedDate, dueStr: formattedStr, isValid: !isNaN(parsedDate.getTime()) };
         } else if (parts[2].length === 4) {
-          const d = parseInt(parts[0], 10);
-          const m = parseInt(parts[1], 10) - 1;
-          const y = parseInt(parts[2], 10);
-          const date = new Date(y, m, d);
-          const formatted = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-          return { due: date, dueStr: formatted, isValid: !isNaN(date.getTime()) };
+          const dt = parseInt(parts[0], 10);
+          const mo = parseInt(parts[1], 10) - 1;
+          const yr = parseInt(parts[2], 10);
+          const parsedDate = new Date(yr, mo, dt);
+          const formattedStr = `${yr}-${String(mo + 1).padStart(2, '0')}-${String(dt).padStart(2, '0')}`;
+          return { due: parsedDate, dueStr: formattedStr, isValid: !isNaN(parsedDate.getTime()) };
         }
       }
-      const d = new Date(s);
-      if (isNaN(d.getTime())) return { due: new Date(), dueStr: '', isValid: false };
-      const y = d.getFullYear();
-      const m = d.getMonth() + 1;
-      const day = d.getDate();
-      const formatted = `${y}-${String(m).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      return { due: d, dueStr: formatted, isValid: true };
+      const parsedDate = new Date(s);
+      if (isNaN(parsedDate.getTime())) return { due: new Date(), dueStr: '', isValid: false };
+      const yr = parsedDate.getFullYear();
+      const mo = parsedDate.getMonth() + 1;
+      const day = parsedDate.getDate();
+      const formattedStr = `${yr}-${String(mo).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      return { due: parsedDate, dueStr: formattedStr, isValid: true };
     };
 
     const checkLoanReminders = () => {
@@ -3861,14 +3856,10 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         localStorage.setItem('zb_trial_expire_date', trialExpire);
       }
 
-      const activeAvatar = localStorage.getItem('zb_user_avatar') || (validName ? `https://ui-avatars.com/api/?name=${encodeURIComponent(validName)}&background=22c55e&color=fff&rounded=true` : '');
-      if (activeAvatar && (!activeAvatar.includes('name=User') || validName === 'User')) {
-        setUserAvatar(activeAvatar);
-      } else if (validName) {
-        const correctAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(validName)}&background=22c55e&color=fff&rounded=true`;
-        setUserAvatar(correctAvatar);
-        localStorage.setItem('zb_user_avatar', correctAvatar);
-      }
+      const storedAvatar = localStorage.getItem('zb_user_avatar');
+      const activeAvatar = sanitizeAvatarUrl(storedAvatar, validName);
+      setUserAvatar(activeAvatar);
+      localStorage.setItem('zb_user_avatar', activeAvatar);
 
       localStorage.setItem('zb_profile_id', validProfileId);
       localStorage.setItem('zb_user_name', validName);
@@ -4590,6 +4581,49 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         >
           <Receipt size={20} style={{ color: activeView === 'transactions' ? 'var(--primary)' : undefined }} />
           <span>{t('ledger', { defaultValue: 'Ledger' })}</span>
+        </button>
+
+        {/* Google Pay Highlighted Center Scanner Button */}
+        <button
+          onClick={() => {
+            playClickSound();
+            if (checkExpiredGuard('use Scan & Pay')) return;
+            setIsScannerOpen(true);
+          }}
+          title="Scan QR & Pay (Google Pay style)"
+          className="gpay-bottom-scanner-btn"
+          style={{
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 45%, #0284c7 100%)',
+            border: '3.5px solid var(--bg-dark)',
+            borderRadius: '50%',
+            width: '56px',
+            height: '56px',
+            marginTop: '-24px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#FFFFFF',
+            cursor: 'pointer',
+            boxShadow: '0 8px 24px rgba(16, 185, 129, 0.5), 0 0 0 3px rgba(16, 185, 129, 0.2)',
+            position: 'relative',
+            zIndex: 1000,
+            transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            flexShrink: 0
+          }}
+        >
+          <QrCode size={23} strokeWidth={2.6} style={{ color: '#FFFFFF' }} />
+          <span style={{ 
+            fontSize: '9px', 
+            fontWeight: 800, 
+            letterSpacing: '0.02em',
+            color: '#FFFFFF',
+            lineHeight: 1,
+            marginTop: '2px'
+          }}>
+            {t('scan', { defaultValue: 'Scan' })}
+          </span>
+          <span className="gpay-scanner-ring" />
         </button>
 
         <button

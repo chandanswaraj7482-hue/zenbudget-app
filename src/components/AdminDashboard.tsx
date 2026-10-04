@@ -1162,7 +1162,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
             }}>
               {[
                 { id: 'overview', label: 'Analytics & Overview', icon: TrendingUp },
-                { id: 'geo_map', label: '🌍 Live World Map & IP Tracking', icon: Globe },
+                { id: 'geo_map', label: '🌍 World Map & Inactivity Tracker', icon: Globe },
                 { id: 'landing_assets', label: '🖼️ Landing Page & Mockups CMS', icon: Layout },
                 { id: 'users', label: `User Management (${totalUsers})`, icon: Users },
                 { id: 'referrals', label: `Referrals & Revenue`, icon: Share2 },
@@ -1374,11 +1374,11 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
                           <span style={{ fontSize: '1.2rem' }}>🌍</span>
                           <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#fff' }}>
-                            Live User Geo Map & Session Tracking
+                            World Map & User Activity Tracker
                           </h4>
                         </div>
                         <p style={{ fontSize: '0.825rem', color: '#cbd5e1', lineHeight: 1.5, marginBottom: '1rem' }}>
-                          Real-time IP geolocation, dwell times, login/logout history & radar-style online user markers.
+                          Trace exact locations, login/logout timestamps, and monitor kitne time se users ne login nahi kiya hai with interactive world GPS radar.
                         </p>
                       </div>
                       <button

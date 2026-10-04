@@ -212,9 +212,8 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
 
       let payment_session_id = '';
       const endpoints = [
-        'https://admin-portal-zenbudget.vercel.app/api/create-payment-session',
-        'https://zenbudget-tracker.vercel.app/api/create-payment-session',
-        '/api/create-payment-session'
+        '/api/create-payment-session',
+        'https://zenbudget-tracker.vercel.app/api/create-payment-session'
       ];
 
       for (const url of endpoints) {

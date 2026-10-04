@@ -24,8 +24,10 @@ import {
   Layout,
   Upload,
   Eye,
-  CheckCircle
+  CheckCircle,
+  Globe
 } from 'lucide-react';
+import { AdminGeoMap } from './components/AdminGeoMap';
 import { 
   type LandingAssetsState, 
   INITIAL_LANDING_ASSETS, 
@@ -58,6 +60,15 @@ interface ProfileRecord {
   email?: string;
   couple_code?: string;
   partner_couple_code?: string;
+  country?: string;
+  country_code?: string;
+  city?: string;
+  region?: string;
+  last_ip?: string;
+  isp?: string;
+  last_login?: string;
+  last_logout?: string;
+  total_time_spent_seconds?: number;
 }
 
 interface BroadcastRecord {
@@ -391,7 +402,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   }
 ];
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing' | 'slots' | 'ai_coach' | 'landing_assets'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'geo_map' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing' | 'slots' | 'ai_coach' | 'landing_assets'>('overview');
   const [aiReviews, setAiReviews] = useState<any[]>([]);
   const [aiFeedback, setAiFeedback] = useState<any[]>([]);
   const [landingAssets, setLandingAssets] = useState<LandingAssetsState>(INITIAL_LANDING_ASSETS);
@@ -1151,6 +1162,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
             }}>
               {[
                 { id: 'overview', label: 'Analytics & Overview', icon: TrendingUp },
+                { id: 'geo_map', label: '🌍 World Map & Inactivity Tracker', icon: Globe },
                 { id: 'landing_assets', label: '🖼️ Landing Page & Mockups CMS', icon: Layout },
                 { id: 'users', label: `User Management (${totalUsers})`, icon: Users },
                 { id: 'referrals', label: `Referrals & Revenue`, icon: Share2 },
@@ -1329,21 +1341,77 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                     </div>
                   </div>
 
-                  {/* System Quick Controls */}
+                  {/* System Quick Controls & Live Map Banner */}
                   <div style={{
-                    padding: '1.5rem',
-                    borderRadius: '16px',
-                    backgroundColor: 'rgba(30, 41, 59, 0.4)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)'
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                    gap: '1.25rem'
                   }}>
-                    <h4 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>
-                      🚀 Master System Controls
-                    </h4>
-                    <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1rem' }}>
-                      Use the tabs above to manage registered users, grant lifetime premium access, or send broadcast notifications to all ZenBudget users.
-                    </p>
+                    <div style={{
+                      padding: '1.5rem',
+                      borderRadius: '16px',
+                      backgroundColor: 'rgba(30, 41, 59, 0.4)',
+                      border: '1px solid rgba(255, 255, 255, 0.08)'
+                    }}>
+                      <h4 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        🚀 Master System Controls
+                      </h4>
+                      <p style={{ fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.5 }}>
+                        Use the tabs above to manage registered users, grant lifetime premium access, or send broadcast notifications to all ZenBudget users.
+                      </p>
+                    </div>
+
+                    <div style={{
+                      padding: '1.5rem',
+                      borderRadius: '16px',
+                      background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(99, 102, 241, 0.12) 100%)',
+                      border: '1px solid rgba(16, 185, 129, 0.3)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between'
+                    }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
+                          <span style={{ fontSize: '1.2rem' }}>🌍</span>
+                          <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#fff' }}>
+                            World Map & User Activity Tracker
+                          </h4>
+                        </div>
+                        <p style={{ fontSize: '0.825rem', color: '#cbd5e1', lineHeight: 1.5, marginBottom: '1rem' }}>
+                          Trace exact locations, login/logout timestamps, and monitor kitne time se users ne login nahi kiya hai with interactive world GPS radar.
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setActiveTab('geo_map')}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '0.65rem 1.25rem',
+                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                          color: '#fff',
+                          fontWeight: 700,
+                          fontSize: '0.85rem',
+                          borderRadius: '10px',
+                          border: 'none',
+                          cursor: 'pointer',
+                          width: 'fit-content',
+                          boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
+                        }}
+                      >
+                        <Globe size={16} /> Open Interactive World Map →
+                      </button>
+                    </div>
                   </div>
                 </div>
+              )}
+
+              {/* TAB: LIVE GEO MAP & SESSION TRACKING */}
+              {activeTab === 'geo_map' && (
+                <AdminGeoMap 
+                  supabaseClient={supabaseClient} 
+                  onShowToast={onShowToast} 
+                />
               )}
 
               {/* TAB 2: USER MANAGEMENT */}
@@ -2168,6 +2236,34 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{new Date(f.created_at).toLocaleString()}</div>
                               </div>
                             </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* AI Coach Detailed Reviews Section */}
+                  <div style={{ padding: '1.5rem', backgroundColor: 'rgba(255, 255, 255, 0.02)', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                    <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#e2e8f0', marginBottom: '1rem' }}>Detailed App Reviews (AI Coach Section)</h3>
+                    {aiReviews.length === 0 ? (
+                      <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>No AI coach reviews submitted yet.</p>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {aiReviews.slice(0, 50).map(r => (
+                          <div key={r.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '1rem', backgroundColor: 'var(--bg-input)', borderRadius: '12px', border: '1px solid var(--border-input)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div style={{ fontWeight: 800, color: '#eab308' }}>★ {r.rating} / 5</div>
+                                <div style={{ fontSize: '0.875rem', color: 'var(--text-primary)', fontWeight: 600 }}>{r.user_name || 'Anonymous User'}</div>
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{new Date(r.created_at).toLocaleString()}</div>
+                            </div>
+                            {r.review_text && (
+                              <div style={{ fontSize: '0.875rem', color: '#cbd5e1', fontStyle: 'italic', backgroundColor: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px' }}>
+                                "{r.review_text}"
+                              </div>
+                            )}
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Profile ID: {r.profile_id}</div>
                           </div>
                         ))}
                       </div>
@@ -3083,8 +3179,33 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                     {Object.keys(landingAssets).map((key) => {
                       const assetKey = key as keyof LandingAssetsState;
                       const item = landingAssets[assetKey];
-                      const activePreviewUrl = resolveAssetPreviewUrl(item.useCustom && item.customUrl ? item.customUrl : item.defaultUrl);
                       const isPhoneMockup = assetKey === 'heroMockup1' || assetKey === 'heroMockup2';
+                      
+                      // For preview, show dark screenshot if available, else generic, else default
+                      const darkUrl = item.customUrlDark || item.customUrl || '';
+                      const lightUrl = item.customUrlLight || item.customUrl || '';
+                      const previewUrl = resolveAssetPreviewUrl(item.useCustom && darkUrl ? darkUrl : item.defaultUrl);
+
+                      // Helper to handle file upload for a specific field
+                      const handleFileUpload = (field: 'customUrl' | 'customUrlDark' | 'customUrlLight') => (e: React.ChangeEvent<HTMLInputElement>) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          if (typeof reader.result === 'string') {
+                            setLandingAssets(prev => ({
+                              ...prev,
+                              [assetKey]: {
+                                ...prev[assetKey],
+                                [field]: reader.result as string,
+                                useCustom: true
+                              }
+                            }));
+                            if (onShowToast) onShowToast(`Screenshot uploaded for ${item.label}! Click Save to publish.`, 'success');
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      };
 
                       return (
                         <div 
@@ -3097,7 +3218,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                             display: 'flex',
                             flexDirection: 'column',
                             justifyContent: 'space-between',
-                            gap: '16px',
+                            gap: '14px',
                             boxShadow: item.useCustom ? '0 10px 30px rgba(16,185,129,0.1)' : 'none'
                           }}
                         >
@@ -3105,7 +3226,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                             {/* Top Placement Badge & Switch Toggle */}
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '12px' }}>
                               <span style={{ 
-                                fontSize: '11px', 
+                                fontSize: '10px', 
                                 fontWeight: 800, 
                                 textTransform: 'uppercase', 
                                 letterSpacing: '0.06em', 
@@ -3121,7 +3242,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                               {/* Toggle Switch */}
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <span style={{ fontSize: '12px', color: item.useCustom ? '#34d399' : '#94a3b8', fontWeight: 700 }}>
-                                  {item.useCustom ? 'Custom Image' : 'Default Image'}
+                                  {item.useCustom ? '✓ Custom' : 'Default'}
                                 </span>
                                 <button
                                   type="button"
@@ -3161,61 +3282,44 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                               </div>
                             </div>
 
-                            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#fff', margin: '0 0 6px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#fff', margin: '0 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                               <span>{item.label}</span>
                               {isPhoneMockup && (
-                                <span style={{ fontSize: '10px', background: 'rgba(59,130,246,0.2)', border: '1px solid rgba(59,130,246,0.4)', color: '#60a5fa', padding: '2px 8px', borderRadius: '100px' }}>
-                                  📱 3D Phone Mockup
+                                <span style={{ fontSize: '10px', background: 'rgba(59,130,246,0.2)', border: '1px solid rgba(59,130,246,0.4)', color: '#60a5fa', padding: '2px 8px', borderRadius: '100px', whiteSpace: 'nowrap' }}>
+                                  📱 Auto-fits in 3D iPhone
                                 </span>
                               )}
                             </h3>
-                            <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '0 0 14px 0', lineHeight: 1.45 }}>
+                            <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: '0 0 12px 0', lineHeight: 1.4 }}>
                               {item.description}
                             </p>
 
-                            {/* Live Thumbnail Preview */}
+                            {/* Live Preview */}
                             <div style={{
                               width: '100%',
-                              height: '175px',
+                              height: '170px',
                               borderRadius: '14px',
                               overflow: 'hidden',
                               background: '#090e0b',
                               border: '1px solid rgba(255,255,255,0.1)',
                               position: 'relative',
-                              marginBottom: '14px',
                               display: 'flex',
                               alignItems: 'center',
-                              justifyContent: 'center'
+                              justifyContent: 'center',
+                              marginBottom: '12px'
                             }}>
-                              {activePreviewUrl ? (
+                              {previewUrl ? (
                                 <img 
-                                  src={activePreviewUrl} 
+                                  src={previewUrl} 
                                   alt={item.label} 
                                   style={{ width: '100%', height: '100%', objectFit: isPhoneMockup ? 'contain' : 'cover', background: '#090e0b' }}
+                                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                 />
                               ) : (
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#64748b', fontSize: '13px' }}>
-                                  Interactive Code UI Active
+                                  No image set
                                 </div>
                               )}
-                              
-                              {isPhoneMockup && (
-                                <div style={{
-                                  position: 'absolute',
-                                  top: '8px',
-                                  left: '8px',
-                                  background: 'rgba(16,185,129,0.85)',
-                                  backdropFilter: 'blur(8px)',
-                                  padding: '3px 8px',
-                                  borderRadius: '6px',
-                                  fontSize: '10px',
-                                  fontWeight: 800,
-                                  color: '#090e0b'
-                                }}>
-                                  ✓ Auto-fits in iPhone frame
-                                </div>
-                              )}
-
                               <div style={{
                                 position: 'absolute',
                                 bottom: '8px',
@@ -3232,79 +3336,109 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                               </div>
                             </div>
 
-                            {/* Custom Image URL / File Uploader */}
+                            {/* Upload Section — shown when custom is ON */}
                             {item.useCustom && (
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                  <input 
-                                    type="text"
-                                    placeholder="Paste Image URL (https://...)"
-                                    value={item.customUrl}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      setLandingAssets(prev => ({
-                                        ...prev,
-                                        [assetKey]: {
-                                          ...prev[assetKey],
-                                          customUrl: val
-                                        }
-                                      }));
-                                    }}
-                                    style={{
-                                      flex: 1,
-                                      padding: '8px 12px',
-                                      borderRadius: '8px',
-                                      background: 'rgba(0,0,0,0.4)',
-                                      border: '1px solid rgba(255,255,255,0.12)',
-                                      color: '#fff',
-                                      fontSize: '0.8rem',
-                                      outline: 'none'
-                                    }}
-                                  />
-                                  
-                                  {/* Local File Upload Button */}
-                                  <label style={{
-                                    padding: '8px 14px',
-                                    borderRadius: '8px',
-                                    background: 'rgba(16,185,129,0.2)',
-                                    border: '1px solid rgba(16,185,129,0.4)',
-                                    color: '#34d399',
-                                    fontSize: '0.8rem',
-                                    fontWeight: 700,
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '6px'
-                                  }}>
-                                    <Upload size={14} />
-                                    <span>Upload</span>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+
+                                {/* If phone mockup → show Dark & Light separate uploaders */}
+                                {isPhoneMockup ? (
+                                  <>
+                                    {/* Dark Mode Screenshot */}
+                                    <div style={{ padding: '10px 12px', borderRadius: '12px', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                        <span style={{ fontSize: '12px', fontWeight: 800, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                          🌙 Dark Mode Screenshot
+                                        </span>
+                                        {item.customUrlDark && <span style={{ fontSize: '10px', color: '#34d399', fontWeight: 700 }}>✓ Uploaded</span>}
+                                      </div>
+                                      <div style={{ display: 'flex', gap: '8px' }}>
+                                        <input 
+                                          type="text"
+                                          placeholder="Paste dark mode image URL..."
+                                          value={item.customUrlDark || ''}
+                                          onChange={(e) => {
+                                            setLandingAssets(prev => ({
+                                              ...prev,
+                                              [assetKey]: { ...prev[assetKey], customUrlDark: e.target.value }
+                                            }));
+                                          }}
+                                          style={{ flex: 1, padding: '7px 10px', borderRadius: '8px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.78rem', outline: 'none' }}
+                                        />
+                                        <label style={{
+                                          padding: '7px 12px', borderRadius: '8px',
+                                          background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.4)',
+                                          color: '#c4b5fd', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer',
+                                          display: 'flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap'
+                                        }}>
+                                          <Upload size={13} /> Upload
+                                          <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileUpload('customUrlDark')} />
+                                        </label>
+                                      </div>
+                                    </div>
+
+                                    {/* Light Mode Screenshot */}
+                                    <div style={{ padding: '10px 12px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                        <span style={{ fontSize: '12px', fontWeight: 800, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                          ☀️ Light Mode Screenshot
+                                        </span>
+                                        {item.customUrlLight && <span style={{ fontSize: '10px', color: '#34d399', fontWeight: 700 }}>✓ Uploaded</span>}
+                                      </div>
+                                      <div style={{ display: 'flex', gap: '8px' }}>
+                                        <input 
+                                          type="text"
+                                          placeholder="Paste light mode image URL..."
+                                          value={item.customUrlLight || ''}
+                                          onChange={(e) => {
+                                            setLandingAssets(prev => ({
+                                              ...prev,
+                                              [assetKey]: { ...prev[assetKey], customUrlLight: e.target.value }
+                                            }));
+                                          }}
+                                          style={{ flex: 1, padding: '7px 10px', borderRadius: '8px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.78rem', outline: 'none' }}
+                                        />
+                                        <label style={{
+                                          padding: '7px 12px', borderRadius: '8px',
+                                          background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.35)',
+                                          color: '#fbbf24', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer',
+                                          display: 'flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap'
+                                        }}>
+                                          <Upload size={13} /> Upload
+                                          <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileUpload('customUrlLight')} />
+                                        </label>
+                                      </div>
+                                    </div>
+
+                                    <p style={{ fontSize: '11px', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
+                                      💡 Upload separate screenshots for dark & light mode. Landing page auto-picks the right one based on visitor's theme. If you upload only one, it's used for both.
+                                    </p>
+                                  </>
+                                ) : (
+                                  /* Non-phone assets: single upload */
+                                  <div style={{ display: 'flex', gap: '8px' }}>
                                     <input 
-                                      type="file" 
-                                      accept="image/*" 
-                                      style={{ display: 'none' }}
+                                      type="text"
+                                      placeholder="Paste Image URL (https://...)"
+                                      value={item.customUrl}
                                       onChange={(e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) {
-                                          const reader = new FileReader();
-                                          reader.onloadend = () => {
-                                            if (typeof reader.result === 'string') {
-                                              setLandingAssets(prev => ({
-                                                ...prev,
-                                                [assetKey]: {
-                                                  ...prev[assetKey],
-                                                  customUrl: reader.result as string,
-                                                  useCustom: true
-                                                }
-                                              }));
-                                              if (onShowToast) onShowToast(`Selected image for ${item.label}! Click Save to publish.`, 'success');
-                                            }
-                                          };
-                                          reader.readAsDataURL(file);
-                                        }
+                                        setLandingAssets(prev => ({
+                                          ...prev,
+                                          [assetKey]: { ...prev[assetKey], customUrl: e.target.value }
+                                        }));
                                       }}
+                                      style={{ flex: 1, padding: '8px 12px', borderRadius: '8px', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: '0.8rem', outline: 'none' }}
                                     />
-                                  </label>
-                                </div>
+                                    <label style={{
+                                      padding: '8px 14px', borderRadius: '8px',
+                                      background: 'rgba(16,185,129,0.2)', border: '1px solid rgba(16,185,129,0.4)',
+                                      color: '#34d399', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer',
+                                      display: 'flex', alignItems: 'center', gap: '6px'
+                                    }}>
+                                      <Upload size={14} /> Upload
+                                      <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileUpload('customUrl')} />
+                                    </label>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
@@ -3319,7 +3453,9 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                                   [assetKey]: {
                                     ...prev[assetKey],
                                     useCustom: false,
-                                    customUrl: ''
+                                    customUrl: '',
+                                    customUrlDark: '',
+                                    customUrlLight: ''
                                   }
                                 }));
                               }}

@@ -41,8 +41,6 @@ export const HelpModal: React.FC<HelpModalProps> = ({
   isPremiumUser = true,
   onOpenSubscriptionModal
 }) => {
-  if (!isOpen) return null;
-
   const [activeTab, setActiveTab] = useState<'faq' | 'bot' | 'feedback'>(initialTab);
 
   useEffect(() => {
@@ -446,9 +444,8 @@ ${JSON.stringify(structCtx, null, 2)}`;
           const sysInstr = `You are Zen, an expert personal finance AI coach built into ZenBudget. You are witty, charming, emotionally intelligent, and fluent in Hindi/Hinglish and English. If the user chats casually, flirts, or jokes (e.g. asking to be a girlfriend, teasing, small talk), respond playfully with charm and humor in their language, then naturally tie it back to smart budgeting and saving money. Live user financial context: ${JSON.stringify(structCtx)}`;
           
           const endpoints = [
-            'https://zenbudget-tracker.vercel.app/api/groq-chat',
-            'https://admin-portal-zenbudget.vercel.app/api/groq-chat',
-            '/api/groq-chat'
+            '/api/groq-chat',
+            'https://zenbudget-tracker.vercel.app/api/groq-chat'
           ];
 
           for (const endpoint of endpoints) {
@@ -531,6 +528,8 @@ ${JSON.stringify(structCtx, null, 2)}`;
     "🎯 How to save ₹5,000 extra?",
     "💳 Highest expense category?"
   ];
+
+  if (!isOpen) return null;
 
   return (
     <div style={{

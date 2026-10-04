@@ -1795,11 +1795,10 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
   const handleDownloadAction = () => {
     setShowModal(false);
-    if (deviceOS === 'ios') {
+    if (deviceOS === 'ios' || deviceOS === 'mac') {
       setShowIosGuideModal(true);
     } else {
-      // Redirect to Web App to enforce Premium requirement for APK
-      onOpenWebApp();
+      handleDownloadApk();
     }
   };
 
@@ -2218,10 +2217,24 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               {isDark ? <Moon size={18} /> : <Sun size={18} />}
             </button>
 
-            <button onClick={() => setShowIosGuideModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#1c1917', color: '#fff', padding: '12px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 14px rgba(0,0,0,0.1)' }} className="desktop-only">
-              <Smartphone size={16} color="#fff" />
-              <span>Download App</span>
-              <ArrowRight size={16} color="#fff" />
+            <button 
+              onClick={handleDownloadAction} 
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#1c1917', color: '#fff', padding: '12px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 14px rgba(0,0,0,0.1)' }} 
+              className="desktop-only"
+            >
+              {deviceOS === 'ios' || deviceOS === 'mac' ? (
+                <>
+                  <Smartphone size={16} color="#10b981" />
+                  <span>Install on iOS</span>
+                  <ArrowRight size={16} color="#fff" />
+                </>
+              ) : (
+                <>
+                  <Download size={16} color="#10b981" />
+                  <span>Download APK</span>
+                  <ArrowRight size={16} color="#fff" />
+                </>
+              )}
             </button>
 
             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{ background: 'transparent', border: 'none', color: t.text, cursor: 'pointer', padding: '6px' }} className="mobile-show">
