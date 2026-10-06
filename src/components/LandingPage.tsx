@@ -5138,6 +5138,16 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             <a onClick={handleDownloadApk} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Download Direct APK</a>
           </div>
 
+          {/* Social & Connect Column */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: t.text, marginBottom: '6px' }}>Connect</span>
+            <a href="https://twitter.com/ZenBudgetApp" target="_blank" rel="noopener noreferrer" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>X (Twitter)</a>
+            <a href="https://instagram.com/zenbudgetapp" target="_blank" rel="noopener noreferrer" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>Instagram</a>
+            <a href="https://linkedin.com/company/zenbudget" target="_blank" rel="noopener noreferrer" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>LinkedIn</a>
+            <a href="https://facebook.com/zenbudgetapp" target="_blank" rel="noopener noreferrer" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>Facebook</a>
+            <a href="https://youtube.com/@zenbudgetapp" target="_blank" rel="noopener noreferrer" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>YouTube</a>
+          </div>
+
         </div>
 
         {/* Center Dot Divider */}
