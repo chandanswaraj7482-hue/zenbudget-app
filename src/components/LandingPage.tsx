@@ -5081,12 +5081,128 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             <p style={{ color: t.textSub, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '340px', marginBottom: '28px' }}>
               ZenBudget uses AI to analyze your spending routines and financial patterns, providing actionable insights. Recognize waste, reduce debt, and take control of your financial health.
             </p>
-            <button onClick={onOpenWebApp} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: isDark ? '#ffffff' : '#111827', color: isDark ? '#111827' : '#ffffff', padding: '14px 28px', borderRadius: '100px', fontSize: '15px', fontWeight: 800, border: 'none', cursor: 'pointer', boxShadow: '0 10px 25px rgba(0,0,0,0.12)' }} className="hover-lift">
+            <button onClick={onOpenWebApp} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: isDark ? '#ffffff' : '#111827', color: isDark ? '#111827' : '#ffffff', padding: '14px 28px', borderRadius: '100px', fontSize: '15px', fontWeight: 800, border: 'none', cursor: 'pointer', boxShadow: '0 10px 25px rgba(0,0,0,0.12)', marginBottom: '22px' }} className="hover-lift">
               <span>Try ZenBudget Free</span>
               <span style={{ background: '#10b981', color: '#fff', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ArrowRight size={13} />
               </span>
             </button>
+
+            {/* Official App Social Media Handles */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <a
+                href="https://www.instagram.com/zenbudget_tracker/"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Instagram (@zenbudget_tracker)"
+                style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '10px',
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
+                  border: `1px solid ${t.border}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textDecoration: 'none',
+                  fontSize: '18px',
+                  transition: 'transform 0.2s, background-color 0.2s'
+                }}
+                className="hover-lift"
+              >
+                📸
+              </a>
+              <a
+                href="https://www.facebook.com/people/ZenBudget/61592667931013/"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Facebook (ZenBudget)"
+                style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '10px',
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
+                  border: `1px solid ${t.border}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textDecoration: 'none',
+                  fontSize: '18px',
+                  transition: 'transform 0.2s, background-color 0.2s'
+                }}
+                className="hover-lift"
+              >
+                👥
+              </a>
+              <a
+                href="https://www.youtube.com/channel/UCa2ewl3C6Q3qGTXjbAMeAtA"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="YouTube Channel"
+                style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '10px',
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
+                  border: `1px solid ${t.border}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textDecoration: 'none',
+                  fontSize: '18px',
+                  transition: 'transform 0.2s, background-color 0.2s'
+                }}
+                className="hover-lift"
+              >
+                ▶️
+              </a>
+              <a
+                href="https://www.tiktok.com/@zenbudget_tracker?lang=en-GB"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="TikTok (@zenbudget_tracker)"
+                style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '10px',
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
+                  border: `1px solid ${t.border}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textDecoration: 'none',
+                  fontSize: '18px',
+                  transition: 'transform 0.2s, background-color 0.2s'
+                }}
+                className="hover-lift"
+              >
+                🎵
+              </a>
+              <a
+                href="https://twitter.com/ZenBudgetApp"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="X / Twitter (@ZenBudgetApp)"
+                style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '10px',
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
+                  border: `1px solid ${t.border}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: t.text,
+                  textDecoration: 'none',
+                  fontSize: '15px',
+                  fontWeight: 800,
+                  transition: 'transform 0.2s, background-color 0.2s'
+                }}
+                className="hover-lift"
+              >
+                𝕏
+              </a>
+            </div>
           </div>
 
           {/* Features Column */}
@@ -5150,14 +5266,98 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             <a onClick={handleDownloadApk} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Download Direct APK</a>
           </div>
 
-          {/* Social & Connect Column */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <span style={{ fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: t.text, marginBottom: '6px' }}>Connect</span>
-            <a href="https://twitter.com/ZenBudgetApp" target="_blank" rel="noopener noreferrer" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>X (Twitter)</a>
-            <a href="https://instagram.com/zenbudgetapp" target="_blank" rel="noopener noreferrer" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>Instagram</a>
-            <a href="https://linkedin.com/company/zenbudget" target="_blank" rel="noopener noreferrer" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>LinkedIn</a>
-            <a href="https://facebook.com/zenbudgetapp" target="_blank" rel="noopener noreferrer" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>Facebook</a>
-            <a href="https://youtube.com/@zenbudgetapp" target="_blank" rel="noopener noreferrer" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>YouTube</a>
+          {/* Social & Connect Column (Exact In-App Design from FollowUsView) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: '270px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: t.text, marginBottom: '4px' }}>Follow Us</span>
+            {[
+              {
+                platform: 'YouTube',
+                handle: '@channel/UCa2ewl3C6Q3qGTXjbAMeAtA',
+                icon: '▶️',
+                url: 'https://www.youtube.com/channel/UCa2ewl3C6Q3qGTXjbAMeAtA',
+                color: '#ff0000'
+              },
+              {
+                platform: 'TikTok',
+                handle: '@zenbudget_tracker',
+                icon: '🎵',
+                url: 'https://www.tiktok.com/@zenbudget_tracker?lang=en-GB',
+                color: '#00f2fe'
+              },
+              {
+                platform: 'Instagram',
+                handle: '@zenbudget_tracker',
+                icon: '📸',
+                url: 'https://www.instagram.com/zenbudget_tracker/',
+                color: '#e1306c'
+              },
+              {
+                platform: 'Facebook',
+                handle: '@ZenBudget',
+                icon: '👥',
+                url: 'https://www.facebook.com/people/ZenBudget/61592667931013/',
+                color: '#1877f2'
+              }
+            ].map((social) => (
+              <a
+                key={social.platform}
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '11px 13px',
+                  borderRadius: '16px',
+                  background: isDark ? 'rgba(15, 23, 42, 0.85)' : '#ffffff',
+                  border: `1px solid ${t.border}`,
+                  textDecoration: 'none',
+                  color: t.text,
+                  transition: 'all 0.2s ease',
+                  boxShadow: isDark ? '0 4px 14px rgba(0,0,0,0.25)' : '0 2px 8px rgba(0,0,0,0.04)'
+                }}
+                className="hover-lift"
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '11px' }}>
+                  <div style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '12px',
+                    background: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)',
+                    border: `1px solid ${t.border}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '18px'
+                  }}>
+                    {social.icon}
+                  </div>
+                  <div>
+                    <h4 style={{ fontSize: '13.5px', fontWeight: 800, margin: 0, color: t.text }}>{social.platform}</h4>
+                    <span style={{ fontSize: '11px', color: t.textMuted, display: 'block', maxWidth: '130px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {social.handle}
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '6px 12px',
+                  borderRadius: '10px',
+                  background: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
+                  color: social.color,
+                  fontWeight: 800,
+                  fontSize: '11.5px',
+                  border: `1px solid ${social.color}33`
+                }}>
+                  <span>Follow</span>
+                  <ArrowUpRight size={12} color={social.color} />
+                </div>
+              </a>
+            ))}
           </div>
 
         </div>
