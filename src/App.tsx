@@ -4583,49 +4583,6 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           <span>{t('ledger', { defaultValue: 'Ledger' })}</span>
         </button>
 
-        {/* Google Pay Highlighted Center Scanner Button */}
-        <button
-          onClick={() => {
-            playClickSound();
-            if (checkExpiredGuard('use Scan & Pay')) return;
-            setIsScannerOpen(true);
-          }}
-          title="Scan QR & Pay (Google Pay style)"
-          className="gpay-bottom-scanner-btn"
-          style={{
-            background: 'linear-gradient(135deg, #10b981 0%, #059669 45%, #0284c7 100%)',
-            border: '3.5px solid var(--bg-dark)',
-            borderRadius: '50%',
-            width: '56px',
-            height: '56px',
-            marginTop: '-24px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#FFFFFF',
-            cursor: 'pointer',
-            boxShadow: '0 8px 24px rgba(16, 185, 129, 0.5), 0 0 0 3px rgba(16, 185, 129, 0.2)',
-            position: 'relative',
-            zIndex: 1000,
-            transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
-            flexShrink: 0
-          }}
-        >
-          <QrCode size={23} strokeWidth={2.6} style={{ color: '#FFFFFF' }} />
-          <span style={{ 
-            fontSize: '9px', 
-            fontWeight: 800, 
-            letterSpacing: '0.02em',
-            color: '#FFFFFF',
-            lineHeight: 1,
-            marginTop: '2px'
-          }}>
-            {t('scan', { defaultValue: 'Scan' })}
-          </span>
-          <span className="gpay-scanner-ring" />
-        </button>
-
         <button
           onClick={() => handleNavClick('budgets')}
           style={{
