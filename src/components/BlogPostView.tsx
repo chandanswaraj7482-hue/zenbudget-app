@@ -28,7 +28,16 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
     } else {
       document.title = 'Post Not Found | ZenBudget Blog';
     }
+    document.documentElement.classList.add('landing-active');
+    document.body.classList.add('landing-active');
+    document.getElementById('root')?.classList.add('landing-root');
     window.scrollTo(0, 0);
+
+    return () => {
+      document.documentElement.classList.remove('landing-active');
+      document.body.classList.remove('landing-active');
+      document.getElementById('root')?.classList.remove('landing-root');
+    };
   }, [post]);
 
   const handleBackToBlog = () => {
@@ -66,8 +75,22 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
         justifyContent: 'center',
         padding: '24px',
         textAlign: 'center',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Manrope", sans-serif'
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Manrope", sans-serif',
+        width: '100%'
       }}>
+        <style>{`
+          html, body, #root {
+            overflow-y: auto !important;
+            height: auto !important;
+            min-height: 100vh !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            display: block !important;
+            border-left: none !important;
+            border-right: none !important;
+            background: #070a0f !important;
+          }
+        `}</style>
         <div style={{
           width: '72px',
           height: '72px',
@@ -112,8 +135,35 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
       fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Manrope", sans-serif',
       position: 'relative',
       overflowX: 'hidden',
-      paddingBottom: '100px'
+      paddingBottom: '100px',
+      width: '100%'
     }}>
+      <style>{`
+        html, body {
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+          height: auto !important;
+          min-height: 100vh !important;
+          display: block !important;
+          background: #070a0f !important;
+        }
+        #root {
+          overflow-x: hidden !important;
+          overflow-y: visible !important;
+          height: auto !important;
+          min-height: 100vh !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          display: block !important;
+          border-left: none !important;
+          border-right: none !important;
+          box-shadow: none !important;
+          background: transparent !important;
+        }
+        @media (max-width: 640px) {
+          .desktop-only { display: none !important; }
+        }
+      `}</style>
       {/* Background Ambient Glow */}
       <div style={{
         position: 'fixed',

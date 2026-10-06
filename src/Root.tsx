@@ -49,14 +49,16 @@ export default function Root() {
     return <App onBackToLanding={handleBackToLanding} />;
   }
 
-  // Handle SEO-friendly paths
-  if (currentPath.startsWith('/blog/')) {
-    const slug = currentPath.replace('/blog/', '');
-    return <BlogPostView slug={slug} onBackToLanding={handleBackToLanding} onOpenWebApp={handleOpenWebApp} />;
+  // Handle SEO-friendly paths (normalize trailing slashes)
+  const normalizedPath = currentPath.replace(/\/+$/, '') || '/';
+
+  if (normalizedPath === '/blog') {
+    return <BlogView onBackToLanding={handleBackToLanding} onOpenWebApp={handleOpenWebApp} />;
   }
 
-  if (currentPath === '/blog') {
-    return <BlogView onBackToLanding={handleBackToLanding} onOpenWebApp={handleOpenWebApp} />;
+  if (normalizedPath.startsWith('/blog/')) {
+    const slug = normalizedPath.replace('/blog/', '');
+    return <BlogPostView slug={slug} onBackToLanding={handleBackToLanding} onOpenWebApp={handleOpenWebApp} />;
   }
 
   return <LandingPage onOpenWebApp={handleOpenWebApp} />;

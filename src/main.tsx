@@ -43,7 +43,6 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       msg.includes('Failed to fetch') ||
       msg.includes('NetworkError') ||
       msg.includes('ResizeObserver') ||
-      msg.includes('Minified React error') ||
       msg.includes('words')
     ) {
       return { hasError: false, error: null };
