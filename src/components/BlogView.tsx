@@ -1,17 +1,24 @@
-import React, { useEffect } from 'react';
-import { ArrowLeft, Calendar, User, ArrowRight, Sparkles } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { ArrowLeft, Calendar, User, ArrowRight, Sparkles, Search, Clock, Tag, BookOpen, ShieldCheck } from 'lucide-react';
 import { blogPosts } from '../data/blogPosts';
+import type { BlogPost } from '../data/blogPosts';
+import { GooglePlayIcon } from './GooglePlayBadge';
+import { DISTRIBUTION_CONFIG } from '../config/buildConfig';
 
 interface BlogViewProps {
   onBackToLanding: () => void;
+  onOpenWebApp?: () => void;
 }
 
-export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding }) => {
+export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebApp }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+
   useEffect(() => {
-    document.title = 'ZenBudget Blog - Personal Finance & Budgeting Tips';
+    document.title = 'ZenBudget Blog - Personal Finance & Budgeting Insights';
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) {
-      metaDesc.setAttribute('content', 'Read the latest tips on personal finance, budget tracking, and wealth building from the ZenBudget team.');
+      metaDesc.setAttribute('content', 'Master your personal finances with actionable strategies on budgeting, UPI expense control, emergency funds, and mindful money management.');
     }
     window.scrollTo(0, 0);
   }, []);
@@ -21,137 +28,655 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding }) => {
     window.dispatchEvent(new Event('popstate'));
   };
 
-  return (
-    <div className="min-h-screen bg-[#050505] text-white selection:bg-emerald-500/30 relative overflow-hidden font-sans">
-      {/* Background Ambient Glows */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[120vw] max-w-[1200px] h-[600px] bg-gradient-to-b from-emerald-900/30 via-teal-900/10 to-transparent blur-[120px] opacity-70 pointer-events-none -z-10" />
-      <div className="fixed bottom-0 right-[-10%] w-[800px] h-[600px] bg-emerald-900/10 rounded-full blur-[150px] opacity-40 pointer-events-none -z-10" />
+  const categories = useMemo(() => {
+    const cats = ['All'];
+    blogPosts.forEach(post => {
+      if (post.category && !cats.includes(post.category)) {
+        cats.push(post.category);
+      }
+    });
+    return cats;
+  }, []);
 
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-500 bg-[#050505]/60 backdrop-blur-2xl border-b border-white/[0.03]">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <button 
+  const filteredPosts = useMemo(() => {
+    return blogPosts.filter(post => {
+      const matchesCategory = selectedCategory === 'All' || post.category === selectedCategory;
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch = !q || 
+        post.title.toLowerCase().includes(q) ||
+        post.excerpt.toLowerCase().includes(q) ||
+        post.author.toLowerCase().includes(q) ||
+        post.tags.some(t => t.toLowerCase().includes(q));
+      return matchesCategory && matchesSearch;
+    });
+  }, [searchQuery, selectedCategory]);
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: '#070a0f',
+      color: '#f8fafc',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Manrope", sans-serif',
+      position: 'relative',
+      overflowX: 'hidden',
+      paddingBottom: '80px'
+    }}>
+      {/* Background Ambient Glows */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: 'min(1200px, 100vw)',
+        height: '500px',
+        background: 'radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.05) 50%, transparent 80%)',
+        filter: 'blur(90px)',
+        pointerEvents: 'none',
+        zIndex: 0
+      }} />
+
+      {/* Top Sticky Header */}
+      <header style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '72px',
+        backgroundColor: 'rgba(7, 10, 15, 0.85)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        zIndex: 100,
+        display: 'flex',
+        alignItems: 'center'
+      }}>
+        <div style={{
+          maxWidth: '1240px',
+          width: '100%',
+          margin: '0 auto',
+          padding: '0 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '16px'
+        }}>
+          {/* Left: Back & Logo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button
               onClick={onBackToLanding}
-              className="group flex items-center justify-center w-11 h-11 rounded-full bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.08] hover:border-white/10 transition-all duration-300"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: '#e2e8f0',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              title="Back to ZenBudget Home"
+              aria-label="Back to home"
+              className="hover-lift"
             >
-              <ArrowLeft size={20} className="text-white/70 group-hover:text-white group-hover:-translate-x-0.5 transition-all" />
+              <ArrowLeft size={18} />
             </button>
-            <div className="flex items-center gap-3 cursor-pointer" onClick={onBackToLanding}>
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-600 flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.3)]">
-                <span className="text-xl font-bold text-white leading-none tracking-tighter">Z</span>
+
+            <div 
+              onClick={onBackToLanding} 
+              style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
+            >
+              <div style={{
+                width: '34px',
+                height: '34px',
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
+              }}>
+                <span style={{ fontSize: '18px', fontWeight: 900, color: '#ffffff' }}>Z</span>
               </div>
-              <span className="text-2xl font-extrabold tracking-tight text-white">ZenBudget</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>ZenBudget</span>
+                <span style={{ fontSize: '12px', fontWeight: 700, padding: '2px 8px', borderRadius: '100px', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                  Blog
+                </span>
+              </div>
             </div>
+          </div>
+
+          {/* Right Header CTAs */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <a
+              href={DISTRIBUTION_CONFIG.PLAY_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                borderRadius: '100px',
+                backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                color: '#ffffff',
+                textDecoration: 'none',
+                fontSize: '13px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              className="hover-lift"
+            >
+              <GooglePlayIcon size={16} />
+              <span className="desktop-only">Play Store</span>
+            </a>
+
+            <button
+              onClick={() => {
+                if (onOpenWebApp) onOpenWebApp();
+                else {
+                  window.history.pushState(null, '', '/#app');
+                  window.dispatchEvent(new Event('popstate'));
+                }
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '9px 18px',
+                borderRadius: '100px',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                border: 'none',
+                color: '#ffffff',
+                fontSize: '13px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                boxShadow: '0 4px 16px rgba(16, 185, 129, 0.35)',
+                transition: 'all 0.2s ease'
+              }}
+              className="hover-lift"
+            >
+              <span>Open Web App</span>
+              <ArrowRight size={14} />
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="pt-40 pb-32 px-6 relative z-10">
-        <div className="max-w-7xl mx-auto">
-          {/* Hero Section */}
-          <div className="text-center mb-28 relative">
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mb-8 backdrop-blur-md">
-              <Sparkles size={16} className="animate-pulse" />
-              <span className="text-sm font-bold uppercase tracking-widest">Insights & Strategies</span>
-            </div>
-            <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 leading-[1.1]">
-              <span className="text-white">Master Your </span>
-              <br className="md:hidden" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-br from-emerald-400 via-emerald-300 to-teal-500 drop-shadow-[0_0_40px_rgba(16,185,129,0.2)]">
-                Financial Future
-              </span>
-            </h1>
-            <p className="text-xl md:text-2xl text-white/50 max-w-3xl mx-auto font-medium leading-relaxed">
-              Elevate your money management with expert insights, proven wealth-building strategies, and the ZenBudget philosophy.
-            </p>
+      {/* Main Content Area */}
+      <main style={{ maxWidth: '1240px', margin: '0 auto', padding: '120px 24px 40px', position: 'relative', zIndex: 10 }}>
+        
+        {/* Hero Section */}
+        <div style={{ textAlign: 'center', maxWidth: '820px', margin: '0 auto 56px' }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '6px 16px',
+            borderRadius: '100px',
+            backgroundColor: 'rgba(16, 185, 129, 0.12)',
+            border: '1px solid rgba(16, 185, 129, 0.3)',
+            color: '#34d399',
+            fontSize: '12px',
+            fontWeight: 800,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            marginBottom: '20px'
+          }}>
+            <Sparkles size={14} color="#34d399" />
+            <span>FINANCIAL WISDOM & MODERN GUIDES</span>
           </div>
 
-          {/* Grid Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-            {blogPosts.map((post, index) => (
-              <div 
-                key={post.id} 
-                onClick={() => handlePostClick(post.slug)}
-                className="group cursor-pointer rounded-[2.5rem] bg-[#111111]/80 backdrop-blur-xl border border-white/[0.05] overflow-hidden hover:bg-[#151515] hover:border-emerald-500/30 transition-all duration-500 flex flex-col h-full hover:-translate-y-2 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.15)] relative"
-                style={{ animationDelay: `${index * 100}ms` }}
+          <h1 style={{
+            fontSize: 'clamp(32px, 5vw, 54px)',
+            fontWeight: 900,
+            lineHeight: 1.15,
+            letterSpacing: '-0.03em',
+            color: '#ffffff',
+            marginBottom: '18px'
+          }}>
+            Master Your Money.{' '}
+            <span style={{
+              background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>
+              Build Lasting Wealth.
+            </span>
+          </h1>
+
+          <p style={{
+            fontSize: 'clamp(15px, 2vw, 18px)',
+            color: '#94a3b8',
+            lineHeight: 1.6,
+            fontWeight: 500,
+            marginBottom: '36px'
+          }}>
+            Evidence-based budgeting strategies, behavioral spending psychology, and actionable guides to eliminate money stress in 2026.
+          </p>
+
+          {/* Search Bar */}
+          <div style={{
+            position: 'relative',
+            maxWidth: '540px',
+            margin: '0 auto',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.35)'
+          }}>
+            <Search size={18} color="#64748b" style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)' }} />
+            <input
+              type="text"
+              placeholder="Search guides, strategies, UPI tips, habits..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '14px 20px 14px 48px',
+                borderRadius: '100px',
+                backgroundColor: 'rgba(21, 32, 54, 0.7)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                backdropFilter: 'blur(12px)',
+                color: '#ffffff',
+                fontSize: '14.5px',
+                outline: 'none',
+                boxSizing: 'border-box',
+                transition: 'all 0.2s ease'
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#10b981';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.2)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.12)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                style={{
+                  position: 'absolute',
+                  right: '16px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  color: '#94a3b8',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: 700
+                }}
               >
-                {/* Image Container */}
-                <div className="h-64 overflow-hidden relative m-3 rounded-[2rem] border border-white/[0.02]">
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-transparent to-transparent z-10" />
-                  <img 
-                    src={post.imageUrl} 
-                    alt={post.title} 
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
+                Clear
+              </button>
+            )}
+          </div>
+
+          {/* Category Filter Pills */}
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            gap: '10px',
+            marginTop: '28px'
+          }}>
+            {categories.map((cat) => {
+              const isActive = selectedCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  style={{
+                    padding: '8px 18px',
+                    borderRadius: '100px',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    border: isActive ? '1px solid #10b981' : '1px solid rgba(255, 255, 255, 0.08)',
+                    backgroundColor: isActive ? 'rgba(16, 185, 129, 0.18)' : 'rgba(255, 255, 255, 0.03)',
+                    color: isActive ? '#34d399' : '#94a3b8'
+                  }}
+                  className="hover-lift"
+                >
+                  {cat}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Results Counter if searching */}
+        {(searchQuery || selectedCategory !== 'All') && (
+          <div style={{ marginBottom: '28px', color: '#94a3b8', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>Showing {filteredPosts.length} {filteredPosts.length === 1 ? 'article' : 'articles'}</span>
+            {selectedCategory !== 'All' && <span>in <strong style={{ color: '#ffffff' }}>{selectedCategory}</strong></span>}
+            {searchQuery && <span>matching "<em>{searchQuery}</em>"</span>}
+          </div>
+        )}
+
+        {/* Blog Posts Grid */}
+        {filteredPosts.length === 0 ? (
+          <div style={{
+            padding: '60px 24px',
+            textAlign: 'center',
+            backgroundColor: 'rgba(21, 32, 54, 0.4)',
+            border: '1px solid rgba(255, 255, 255, 0.06)',
+            borderRadius: '24px',
+            maxWidth: '500px',
+            margin: '40px auto'
+          }}>
+            <BookOpen size={42} color="#64748b" style={{ marginBottom: '16px' }} />
+            <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#ffffff', marginBottom: '8px' }}>No articles found</h3>
+            <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '20px' }}>
+              No articles matched your search query. Try searching for different keywords or clear your filters.
+            </p>
+            <button
+              onClick={() => { setSearchQuery(''); setSelectedCategory('All'); }}
+              style={{
+                padding: '10px 20px',
+                borderRadius: '100px',
+                background: '#10b981',
+                color: '#ffffff',
+                border: 'none',
+                fontWeight: 700,
+                fontSize: '13px',
+                cursor: 'pointer'
+              }}
+            >
+              Reset Filters
+            </button>
+          </div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 360px), 1fr))',
+            gap: '28px'
+          }}>
+            {filteredPosts.map((post) => (
+              <article
+                key={post.id}
+                onClick={() => handlePostClick(post.slug)}
+                style={{
+                  backgroundColor: 'rgba(17, 24, 39, 0.75)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: '28px',
+                  overflow: 'hidden',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)'
+                }}
+                className="hover-lift"
+              >
+                {/* Post Cover Image */}
+                <div style={{ position: 'relative', width: '100%', height: '220px', overflow: 'hidden' }}>
+                  <img
+                    src={post.imageUrl}
+                    alt={post.title}
+                    loading="lazy"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      transition: 'transform 0.5s ease'
+                    }}
                   />
-                  <div className="absolute top-4 right-4 z-20">
-                    <div className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-500">
-                      <ArrowRight size={18} className="text-white" />
-                    </div>
+                  <div style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(7,10,15,0.75) 100%)'
+                  }} />
+
+                  {/* Top Badges */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '14px',
+                    left: '14px',
+                    right: '14px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
+                    <span style={{
+                      backgroundColor: 'rgba(16, 185, 129, 0.9)',
+                      color: '#ffffff',
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      padding: '4px 10px',
+                      borderRadius: '100px',
+                      letterSpacing: '0.04em',
+                      textTransform: 'uppercase',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                    }}>
+                      {post.category}
+                    </span>
+
+                    <span style={{
+                      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                      backdropFilter: 'blur(8px)',
+                      color: '#e2e8f0',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      padding: '4px 10px',
+                      borderRadius: '100px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      border: '1px solid rgba(255,255,255,0.15)'
+                    }}>
+                      <Clock size={11} color="#34d399" />
+                      {post.readTime}
+                    </span>
                   </div>
-                  <div className="absolute bottom-4 left-4 z-20 flex gap-2 flex-wrap">
-                    {post.tags.map(tag => (
-                      <span key={tag} className="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 bg-black/60 backdrop-blur-md border border-white/10 text-white rounded-full">
-                        {tag}
+                </div>
+
+                {/* Post Content */}
+                <div style={{
+                  padding: '24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  flexGrow: 1
+                }}>
+                  <h2 style={{
+                    fontSize: '20px',
+                    fontWeight: 800,
+                    lineHeight: 1.3,
+                    color: '#ffffff',
+                    marginBottom: '12px',
+                    letterSpacing: '-0.02em',
+                    transition: 'color 0.2s ease'
+                  }}>
+                    {post.title}
+                  </h2>
+
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#94a3b8',
+                    lineHeight: 1.6,
+                    fontWeight: 400,
+                    marginBottom: '20px',
+                    flexGrow: 1,
+                    display: '-webkit-box',
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden'
+                  }}>
+                    {post.excerpt}
+                  </p>
+
+                  {/* Tags */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '20px' }}>
+                    {post.tags.slice(0, 3).map((tag) => (
+                      <span key={tag} style={{
+                        fontSize: '10.5px',
+                        fontWeight: 700,
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        color: '#cbd5e1',
+                        border: '1px solid rgba(255, 255, 255, 0.06)'
+                      }}>
+                        #{tag}
                       </span>
                     ))}
                   </div>
-                </div>
 
-                {/* Content */}
-                <div className="p-8 flex flex-col flex-grow relative z-10 pt-4">
-                  <h2 className="text-2xl font-bold mb-4 line-clamp-2 text-white group-hover:text-emerald-300 transition-colors duration-300 leading-tight">
-                    {post.title}
-                  </h2>
-                  <p className="text-white/50 mb-8 line-clamp-3 flex-grow leading-relaxed text-base font-medium">
-                    {post.excerpt}
-                  </p>
-                  
-                  <div className="flex items-center justify-between text-sm text-white/40 pt-6 border-t border-white/[0.05] mt-auto font-semibold">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                        <User size={12} className="text-emerald-400" />
+                  {/* Author & Read Link Footer */}
+                  <div style={{
+                    paddingTop: '16px',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '12px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '50%',
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        border: '1px solid rgba(16, 185, 129, 0.4)',
+                        color: '#34d399',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '11px',
+                        fontWeight: 800
+                      }}>
+                        {post.author.charAt(0)}
                       </div>
-                      <span className="group-hover:text-white/80 transition-colors">{post.author}</span>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#e2e8f0' }}>{post.author}</span>
+                        <span style={{ fontSize: '10.5px', color: '#64748b' }}>
+                          {new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 group-hover:text-white/80 transition-colors">
-                      <Calendar size={14} className="text-white/30 group-hover:text-emerald-400 transition-colors" /> 
-                      {new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '12.5px',
+                      fontWeight: 800,
+                      color: '#34d399'
+                    }}>
+                      <span>Read</span>
+                      <ArrowRight size={14} />
                     </div>
                   </div>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
-        </div>
-      </main>
+        )}
 
-      {/* Footer CTA */}
-      <section className="py-40 px-6 relative z-10 border-t border-white/[0.02] bg-gradient-to-b from-[#050505] to-emerald-900/10">
-        <div className="max-w-5xl mx-auto text-center relative">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/20 rounded-full blur-[120px] -z-10" />
-          <h2 className="text-5xl md:text-7xl font-black mb-8 tracking-tighter">
-            Ready to take <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">control?</span>
-          </h2>
-          <p className="text-xl md:text-2xl text-white/50 mb-12 max-w-2xl mx-auto font-medium leading-relaxed">
-            Join thousands of users who are already saving more, spending smarter, and building real wealth with ZenBudget.
-          </p>
-          <button 
-            onClick={() => {
-              window.history.pushState(null, '', '/#app');
-              window.dispatchEvent(new Event('popstate'));
-            }}
-            className="group inline-flex items-center justify-center gap-4 bg-white hover:bg-gray-100 text-black px-12 py-6 rounded-full font-bold text-xl transition-all hover:scale-105 shadow-[0_0_50px_rgba(255,255,255,0.15)] hover:shadow-[0_0_60px_rgba(255,255,255,0.25)]"
-          >
-            Start Tracking Free 
-            <span className="bg-black/5 text-black p-2.5 rounded-full group-hover:translate-x-1.5 transition-transform">
-              <ArrowRight size={22} />
-            </span>
-          </button>
-        </div>
-      </section>
+        {/* Bottom CTA Card */}
+        <section style={{
+          marginTop: '80px',
+          padding: '48px 36px',
+          borderRadius: '32px',
+          background: 'linear-gradient(135deg, #064e3b 0%, #022c22 45%, #065f46 100%)',
+          border: '1px solid rgba(52, 211, 153, 0.35)',
+          boxShadow: '0 24px 60px rgba(6, 78, 59, 0.5), inset 0 1px 0 rgba(255,255,255,0.2)',
+          textAlign: 'center',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div style={{ maxWidth: '640px', margin: '0 auto', position: 'relative', zIndex: 10 }}>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 14px',
+              borderRadius: '100px',
+              backgroundColor: 'rgba(52, 211, 153, 0.15)',
+              border: '1px solid rgba(52, 211, 153, 0.35)',
+              color: '#6ee7b7',
+              fontSize: '11px',
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              marginBottom: '16px'
+            }}>
+              <ShieldCheck size={14} />
+              <span>100% PRIVATE & ENCRYPTED APP</span>
+            </div>
+
+            <h2 style={{ fontSize: 'clamp(26px, 4vw, 38px)', fontWeight: 900, color: '#ffffff', lineHeight: 1.2, marginBottom: '14px', letterSpacing: '-0.02em' }}>
+              Put These Insights into Action Today
+            </h2>
+
+            <p style={{ fontSize: '15.5px', color: 'rgba(255, 255, 255, 0.85)', lineHeight: 1.6, marginBottom: '32px' }}>
+              Stop wondering where your money went. Track expenses in under 3 seconds, audit leaks automatically, and grow your financial cushion with ZenBudget.
+            </p>
+
+            <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap', alignItems: 'center' }}>
+              <button
+                onClick={() => {
+                  if (onOpenWebApp) onOpenWebApp();
+                  else {
+                    window.history.pushState(null, '', '/#app');
+                    window.dispatchEvent(new Event('popstate'));
+                  }
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)',
+                  color: '#064e3b',
+                  padding: '15px 32px',
+                  borderRadius: '100px',
+                  fontSize: '15.5px',
+                  fontWeight: 900,
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.3)'
+                }}
+                className="hover-lift"
+              >
+                <span>Launch ZenBudget Free</span>
+                <ArrowRight size={16} />
+              </button>
+
+              <a
+                href={DISTRIBUTION_CONFIG.PLAY_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  background: 'rgba(0, 0, 0, 0.4)',
+                  color: '#ffffff',
+                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                  padding: '14px 24px',
+                  borderRadius: '100px',
+                  fontSize: '14px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  textDecoration: 'none'
+                }}
+                className="hover-lift"
+              >
+                <GooglePlayIcon size={18} />
+                <span>Get on Google Play</span>
+              </a>
+            </div>
+          </div>
+        </section>
+
+      </main>
     </div>
   );
 };

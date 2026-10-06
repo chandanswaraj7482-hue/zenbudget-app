@@ -97,6 +97,52 @@
     <priority>0.9</priority>
   </url>
 
+  <!-- Blog Home -->
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/blog</loc>
+    <lastmod>2026-03-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Blog Articles -->
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/blog/how-to-manage-personal-finances</loc>
+    <lastmod>2026-03-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/blog/50-30-20-budget-rule-india</loc>
+    <lastmod>2026-03-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/blog/how-to-stop-impulse-spending</loc>
+    <lastmod>2026-03-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/blog/building-emergency-fund</loc>
+    <lastmod>2026-03-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/blog/hidden-subscriptions-audit</loc>
+    <lastmod>2026-02-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/blog/benefits-of-expense-tracking-apps</loc>
+    <lastmod>2026-02-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!-- Privacy Policy -->
   <url>
     <loc>https://zenbudget-tracker.vercel.app/privacy.html</loc>

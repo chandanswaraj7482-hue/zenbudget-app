@@ -5,6 +5,8 @@ import { playNotificationSound } from '../utils/audio';
 import { Capacitor } from '@capacitor/core';
 import { Device } from '@capacitor/device';
 import { getInitialsAvatar } from '../utils/avatar';
+import { GooglePlayIcon } from './GooglePlayBadge';
+import { DISTRIBUTION_CONFIG } from '../config/buildConfig';
 
 interface LockScreenProps {
   onUnlock: (userId: string, username: string, tier: string, trialStart: string, pin: string, premiumExpiresAt: string | null, trialExpireDate?: string | null) => void;
@@ -1388,32 +1390,62 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                     <span>Install iOS App</span>
                   </button>
                 ) : (
-                  <a
-                    href="https://raw.githubusercontent.com/chandanswaraj7482-hue/zenbudget-app/main/public/zenbudget.apk"
-                    download="ZenBudget-v2.5.0-latest.apk"
-                    style={{
-                      flex: '1 1 0%',
-                      height: '42px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '7px',
-                      padding: '11px 10px',
-                      borderRadius: '14px',
-                      border: '1px solid rgba(34, 197, 94, 0.25)',
-                      background: 'rgba(34, 197, 94, 0.06)',
-                      color: 'var(--primary)',
-                      fontSize: '12px',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      textDecoration: 'none',
-                      transition: 'all 0.2s ease',
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    <Download size={14} />
-                    <span>Android APK</span>
-                  </a>
+                  <>
+                    <a
+                      href={DISTRIBUTION_CONFIG.PLAY_STORE_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        flex: '1 1 0%',
+                        height: '42px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        padding: '11px 8px',
+                        borderRadius: '14px',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        background: 'rgba(0, 0, 0, 0.5)',
+                        color: '#ffffff',
+                        fontSize: '11.5px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        textDecoration: 'none',
+                        transition: 'all 0.2s ease',
+                        boxSizing: 'border-box'
+                      }}
+                    >
+                      <GooglePlayIcon size={14} />
+                      <span>Google Play</span>
+                    </a>
+
+                    <a
+                      href="https://raw.githubusercontent.com/chandanswaraj7482-hue/zenbudget-app/main/public/zenbudget.apk"
+                      download="ZenBudget-v2.5.0-latest.apk"
+                      style={{
+                        flex: '1 1 0%',
+                        height: '42px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        padding: '11px 8px',
+                        borderRadius: '14px',
+                        border: '1px solid rgba(34, 197, 94, 0.25)',
+                        background: 'rgba(34, 197, 94, 0.06)',
+                        color: 'var(--primary)',
+                        fontSize: '11.5px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        textDecoration: 'none',
+                        transition: 'all 0.2s ease',
+                        boxSizing: 'border-box'
+                      }}
+                    >
+                      <Download size={14} />
+                      <span>Direct APK</span>
+                    </a>
+                  </>
                 )}
 
                 <button

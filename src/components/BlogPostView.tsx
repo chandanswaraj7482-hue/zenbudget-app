@@ -1,14 +1,22 @@
-import React, { useEffect } from 'react';
-import { ArrowLeft, Calendar, User, ArrowRight, Share2, Sparkles } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ArrowLeft, Calendar, User, ArrowRight, Share2, Sparkles, Clock, Check, BookOpen, ShieldCheck } from 'lucide-react';
 import { blogPosts } from '../data/blogPosts';
+import type { BlogPost } from '../data/blogPosts';
+import { GooglePlayIcon } from './GooglePlayBadge';
+import { DISTRIBUTION_CONFIG } from '../config/buildConfig';
 
 interface BlogPostViewProps {
   slug: string;
   onBackToLanding: () => void;
+  onOpenWebApp?: () => void;
 }
 
-export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLanding }) => {
+export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLanding, onOpenWebApp }) => {
+  const [copied, setCopied] = useState(false);
   const post = blogPosts.find(p => p.slug === slug);
+
+  // Other related posts
+  const otherPosts = blogPosts.filter(p => p.slug !== slug).slice(0, 2);
 
   useEffect(() => {
     if (post) {
@@ -38,7 +46,8 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
         });
       } else {
         await navigator.clipboard.writeText(window.location.href);
-        alert('Link copied to clipboard!');
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
       }
     } catch (e) {
       console.error('Error sharing:', e);
@@ -47,135 +56,548 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-6 font-sans">
-        <h1 className="text-5xl font-black mb-6 tracking-tighter">Post Not Found</h1>
-        <p className="text-white/50 mb-10 text-xl">The article you are looking for does not exist.</p>
-        <button 
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: '#070a0f',
+        color: '#ffffff',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px',
+        textAlign: 'center',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Manrope", sans-serif'
+      }}>
+        <div style={{
+          width: '72px',
+          height: '72px',
+          borderRadius: '50%',
+          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: '24px'
+        }}>
+          <BookOpen size={36} color="#ef4444" />
+        </div>
+        <h1 style={{ fontSize: '36px', fontWeight: 900, marginBottom: '12px' }}>Article Not Found</h1>
+        <p style={{ color: '#94a3b8', fontSize: '16px', maxWidth: '420px', marginBottom: '28px' }}>
+          The article you are looking for may have been moved or updated.
+        </p>
+        <button
           onClick={handleBackToBlog}
-          className="bg-white/10 hover:bg-white/20 px-8 py-4 rounded-full font-bold transition-all hover:scale-105"
+          style={{
+            backgroundColor: '#10b981',
+            color: '#ffffff',
+            padding: '14px 28px',
+            borderRadius: '100px',
+            fontSize: '15px',
+            fontWeight: 800,
+            border: 'none',
+            cursor: 'pointer'
+          }}
+          className="hover-lift"
         >
-          Back to Blog
+          Browse All Articles
         </button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white selection:bg-emerald-500/30 relative overflow-hidden font-sans">
-      {/* Background Ambient Glows */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[120vw] max-w-[1200px] h-[600px] bg-gradient-to-b from-emerald-900/20 via-[#050505]/50 to-transparent blur-[120px] opacity-70 pointer-events-none -z-10" />
-      
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-500 bg-[#050505]/60 backdrop-blur-2xl border-b border-white/[0.03]">
-        <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-          <button 
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: '#070a0f',
+      color: '#f8fafc',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Manrope", sans-serif',
+      position: 'relative',
+      overflowX: 'hidden',
+      paddingBottom: '100px'
+    }}>
+      {/* Background Ambient Glow */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: 'min(1200px, 100vw)',
+        height: '400px',
+        background: 'radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%)',
+        filter: 'blur(80px)',
+        pointerEvents: 'none',
+        zIndex: 0
+      }} />
+
+      {/* Sticky Header */}
+      <header style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '70px',
+        backgroundColor: 'rgba(7, 10, 15, 0.85)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        zIndex: 100,
+        display: 'flex',
+        alignItems: 'center'
+      }}>
+        <div style={{
+          maxWidth: '1000px',
+          width: '100%',
+          margin: '0 auto',
+          padding: '0 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '16px'
+        }}>
+          {/* Back to Blog */}
+          <button
             onClick={handleBackToBlog}
-            className="flex items-center gap-4 text-white/60 hover:text-white transition-colors group"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '10px',
+              background: 'none',
+              border: 'none',
+              color: '#cbd5e1',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: 700,
+              padding: '8px 0',
+              transition: 'color 0.2s ease'
+            }}
+            className="hover-lift"
           >
-            <div className="w-11 h-11 rounded-full bg-white/[0.03] border border-white/[0.05] flex items-center justify-center group-hover:bg-white/[0.08] group-hover:border-white/10 transition-all duration-300">
-              <ArrowLeft size={20} className="group-hover:-translate-x-0.5 transition-transform" />
+            <div style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255, 255, 255, 0.06)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <ArrowLeft size={16} />
             </div>
-            <span className="font-bold hidden sm:inline tracking-wide text-sm uppercase">Back to Blog</span>
+            <span>All Articles</span>
           </button>
-          
-          <button 
-            onClick={handleShare}
-            className="group flex items-center gap-3 px-6 py-3 rounded-full bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.08] hover:border-emerald-500/30 transition-all duration-300"
-            title="Share Article"
-          >
-            <span className="font-bold text-sm hidden sm:inline text-white/70 group-hover:text-white uppercase tracking-wider">Share</span>
-            <Share2 size={16} className="text-white/70 group-hover:text-emerald-400 transition-colors" />
-          </button>
+
+          {/* Action CTAs */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button
+              onClick={handleShare}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                borderRadius: '100px',
+                backgroundColor: copied ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.06)',
+                border: copied ? '1px solid #10b981' : '1px solid rgba(255, 255, 255, 0.12)',
+                color: copied ? '#34d399' : '#e2e8f0',
+                fontSize: '13px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              title="Share this guide"
+              className="hover-lift"
+            >
+              {copied ? <Check size={15} color="#34d399" /> : <Share2 size={15} />}
+              <span>{copied ? 'Link Copied!' : 'Share'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                if (onOpenWebApp) onOpenWebApp();
+                else {
+                  window.history.pushState(null, '', '/#app');
+                  window.dispatchEvent(new Event('popstate'));
+                }
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '9px 18px',
+                borderRadius: '100px',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                border: 'none',
+                color: '#ffffff',
+                fontSize: '13px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
+              }}
+              className="hover-lift"
+            >
+              <span>Try App</span>
+              <ArrowRight size={14} />
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Article Content */}
-      <main className="pt-20 pb-32 relative z-10">
-        {/* Hero Image Section */}
-        <div className="w-full h-[65vh] md:h-[75vh] relative overflow-hidden flex items-end justify-center">
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent z-10" />
-          <img 
-            src={post.imageUrl} 
-            alt={post.title} 
-            referrerPolicy="no-referrer"
-            className="absolute inset-0 w-full h-full object-cover scale-[1.02] transform hover:scale-[1.05] transition-transform duration-[2s] ease-out"
+      {/* Main Article Container */}
+      <main style={{ maxWidth: '900px', margin: '0 auto', padding: '110px 24px 40px', position: 'relative', zIndex: 10 }}>
+        
+        {/* Article Meta Header */}
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          {/* Category & Read Time */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '18px' }}>
+            <span style={{
+              backgroundColor: 'rgba(16, 185, 129, 0.15)',
+              border: '1px solid rgba(16, 185, 129, 0.35)',
+              color: '#34d399',
+              fontSize: '11.5px',
+              fontWeight: 800,
+              padding: '4px 14px',
+              borderRadius: '100px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em'
+            }}>
+              {post.category}
+            </span>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              color: '#94a3b8',
+              fontSize: '12px',
+              fontWeight: 600
+            }}>
+              <Clock size={13} color="#10b981" />
+              {post.readTime}
+            </span>
+          </div>
+
+          {/* Article Title */}
+          <h1 style={{
+            fontSize: 'clamp(28px, 4.5vw, 44px)',
+            fontWeight: 900,
+            lineHeight: 1.2,
+            letterSpacing: '-0.025em',
+            color: '#ffffff',
+            marginBottom: '20px'
+          }}>
+            {post.title}
+          </h1>
+
+          {/* Excerpt Lead */}
+          <p style={{
+            fontSize: 'clamp(16px, 2vw, 19px)',
+            color: '#94a3b8',
+            lineHeight: 1.6,
+            fontWeight: 500,
+            maxWidth: '780px',
+            margin: '0 auto 28px'
+          }}>
+            {post.excerpt}
+          </p>
+
+          {/* Author & Date Pill */}
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '16px',
+            padding: '8px 18px',
+            borderRadius: '100px',
+            backgroundColor: 'rgba(255, 255, 255, 0.04)',
+            border: '1px solid rgba(255, 255, 255, 0.08)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                width: '30px',
+                height: '30px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '12px',
+                fontWeight: 800
+              }}>
+                {post.author.charAt(0)}
+              </div>
+              <div style={{ textAlign: 'left', lineHeight: 1.15 }}>
+                <div style={{ fontSize: '13px', fontWeight: 800, color: '#ffffff' }}>{post.author}</div>
+                {post.authorRole && (
+                  <div style={{ fontSize: '11px', color: '#64748b' }}>{post.authorRole}</div>
+                )}
+              </div>
+            </div>
+
+            <div style={{ width: '1px', height: '18px', backgroundColor: 'rgba(255, 255, 255, 0.12)' }} />
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#94a3b8', fontWeight: 600 }}>
+              <Calendar size={13} color="#10b981" />
+              <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Cover Image */}
+        <div style={{
+          width: '100%',
+          maxHeight: '460px',
+          borderRadius: '28px',
+          overflow: 'hidden',
+          marginBottom: '44px',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)',
+          border: '1px solid rgba(255, 255, 255, 0.08)'
+        }}>
+          <img
+            src={post.imageUrl}
+            alt={post.title}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           />
-          <div className="relative z-20 w-full max-w-5xl px-6 pb-24 md:pb-32 text-center">
-            <div className="flex gap-3 flex-wrap mb-8 justify-center">
-              {post.tags.map(tag => (
-                <span key={tag} className="text-xs font-bold uppercase tracking-widest px-5 py-2.5 bg-emerald-500 text-white rounded-full shadow-[0_0_30px_rgba(16,185,129,0.3)]">
-                  {tag}
+        </div>
+
+        {/* Article Body */}
+        <article style={{
+          backgroundColor: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '32px',
+          padding: 'clamp(28px, 5vw, 60px)',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.4)',
+          color: '#cbd5e1',
+          fontSize: '17px',
+          lineHeight: 1.8,
+          marginBottom: '56px'
+        }}>
+          <style>{`
+            .zen-blog-article h2 {
+              color: #ffffff;
+              font-size: 26px;
+              font-weight: 900;
+              letter-spacing: -0.02em;
+              margin-top: 40px;
+              margin-bottom: 16px;
+              line-height: 1.25;
+              padding-bottom: 8px;
+              border-bottom: 2px solid rgba(16, 185, 129, 0.2);
+            }
+            .zen-blog-article h3 {
+              color: #f1f5f9;
+              font-size: 20px;
+              font-weight: 800;
+              margin-top: 30px;
+              margin-bottom: 12px;
+            }
+            .zen-blog-article p {
+              margin-bottom: 22px;
+              color: #cbd5e1;
+            }
+            .zen-blog-article strong {
+              color: #ffffff;
+              font-weight: 700;
+            }
+            .zen-blog-article ul, .zen-blog-article ol {
+              margin-bottom: 26px;
+              padding-left: 24px;
+            }
+            .zen-blog-article li {
+              margin-bottom: 10px;
+              color: #cbd5e1;
+            }
+            .zen-blog-article blockquote {
+              border-left: 4px solid #10b981;
+              background-color: rgba(16, 185, 129, 0.08);
+              border-radius: 0 16px 16px 0;
+              padding: 20px 24px;
+              margin: 32px 0;
+              font-style: italic;
+              color: #f1f5f9;
+              font-size: 18px;
+              line-height: 1.6;
+            }
+            .zen-blog-article code {
+              background: rgba(255,255,255,0.08);
+              padding: 2px 8px;
+              border-radius: 6px;
+              font-size: 14px;
+              color: #34d399;
+            }
+          `}</style>
+
+          <div
+            className="zen-blog-article"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
+
+          {/* Tags Footer */}
+          <div style={{
+            marginTop: '44px',
+            paddingTop: '28px',
+            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '16px'
+          }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+              <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 700 }}>Tags:</span>
+              {post.tags.map((tag) => (
+                <span key={tag} style={{
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  padding: '4px 10px',
+                  borderRadius: '100px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  color: '#94a3b8',
+                  border: '1px solid rgba(255, 255, 255, 0.08)'
+                }}>
+                  #{tag}
                 </span>
               ))}
             </div>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-10 leading-[1.1] text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70">
-              {post.title}
-            </h1>
-            <div className="flex items-center justify-center gap-8 text-base text-white/60 font-semibold tracking-wide">
-              <div className="flex items-center gap-3 bg-white/[0.05] pr-5 pl-2 py-2 rounded-full border border-white/[0.05] backdrop-blur-md">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-bold shadow-lg shadow-emerald-500/20">
-                  {post.author.charAt(0)}
+
+            <button
+              onClick={handleShare}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 16px',
+                borderRadius: '100px',
+                backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                color: '#34d399',
+                fontSize: '12.5px',
+                fontWeight: 800,
+                cursor: 'pointer'
+              }}
+              className="hover-lift"
+            >
+              <Share2 size={13} />
+              <span>Share Guide</span>
+            </button>
+          </div>
+        </article>
+
+        {/* Read Next Section */}
+        {otherPosts.length > 0 && (
+          <div style={{ marginBottom: '60px' }}>
+            <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#ffffff', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Sparkles size={18} color="#10b981" />
+              <span>Read Next</span>
+            </h3>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: '20px'
+            }}>
+              {otherPosts.map((other) => (
+                <div
+                  key={other.id}
+                  onClick={() => {
+                    window.history.pushState(null, '', `/blog/${other.slug}`);
+                    window.dispatchEvent(new Event('popstate'));
+                  }}
+                  style={{
+                    backgroundColor: 'rgba(17, 24, 39, 0.7)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: '20px',
+                    padding: '20px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    transition: 'all 0.2s ease'
+                  }}
+                  className="hover-lift"
+                >
+                  <div>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      {other.category} · {other.readTime}
+                    </span>
+                    <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#ffffff', marginTop: '8px', lineHeight: 1.35 }}>
+                      {other.title}
+                    </h4>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#10b981', fontSize: '13px', fontWeight: 800, marginTop: '16px' }}>
+                    <span>Read Article</span>
+                    <ArrowRight size={14} />
+                  </div>
                 </div>
-                <span className="text-white/90">{post.author}</span>
-              </div>
-              <div className="flex items-center gap-2.5 bg-white/[0.05] px-5 py-3 rounded-full border border-white/[0.05] backdrop-blur-md">
-                <Calendar size={18} className="text-emerald-400" /> 
-                <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-              </div>
+              ))}
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Body Container */}
-        <div className="max-w-4xl mx-auto px-6 relative z-30 -mt-16 md:-mt-24">
-          <article className="w-full bg-[#0a0a0a]/90 backdrop-blur-3xl border border-white/[0.05] rounded-[3rem] p-8 md:p-20 shadow-[0_0_80px_rgba(0,0,0,0.8)] relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none -z-10" />
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-teal-500/5 rounded-full blur-[100px] pointer-events-none -z-10" />
-            
-            <div 
-              className="prose prose-invert prose-emerald max-w-none
-                         prose-headings:font-black prose-headings:tracking-tight prose-headings:text-white
-                         prose-h2:text-4xl md:prose-h2:text-5xl prose-h2:mt-20 prose-h2:mb-10 prose-h2:leading-[1.15]
-                         prose-h3:text-3xl md:prose-h3:text-4xl prose-h3:mt-16 prose-h3:mb-8
-                         prose-p:text-lg md:prose-p:text-2xl prose-p:text-white/70 prose-p:leading-[1.8] prose-p:mb-10 prose-p:font-medium
-                         prose-strong:text-white prose-strong:font-bold
-                         prose-ul:text-lg md:prose-ul:text-xl prose-ul:text-white/70 prose-ul:mb-10 prose-ul:leading-[1.8]
-                         prose-li:my-3
-                         prose-a:text-emerald-400 hover:prose-a:text-emerald-300 prose-a:transition-colors prose-a:no-underline hover:prose-a:underline prose-a:font-semibold
-                         prose-blockquote:border-l-emerald-500 prose-blockquote:bg-emerald-500/5 prose-blockquote:px-10 prose-blockquote:py-8 prose-blockquote:rounded-3xl prose-blockquote:font-medium prose-blockquote:text-white/90 prose-blockquote:italic prose-blockquote:text-2xl prose-blockquote:leading-relaxed prose-blockquote:my-12"
-              dangerouslySetInnerHTML={{ __html: post.content }} 
-            />
-          </article>
-        </div>
-      </main>
-
-      {/* Footer CTA */}
-      <section className="py-40 px-6 relative z-10 border-t border-white/[0.02] bg-gradient-to-b from-[#050505] to-emerald-900/10">
-        <div className="max-w-5xl mx-auto text-center relative">
-          <div className="inline-flex items-center justify-center w-24 h-24 rounded-[2rem] bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-600 mb-10 shadow-[0_0_50px_rgba(16,185,129,0.3)] relative group cursor-pointer hover:scale-105 transition-transform duration-500">
-             <div className="absolute inset-0 bg-white/20 rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity" />
-             <span className="text-5xl font-black text-white leading-none tracking-tighter">Z</span>
-          </div>
-          <h2 className="text-5xl md:text-7xl font-black mb-10 tracking-tighter">
-            Master your <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">money.</span>
+        {/* Bottom Banner */}
+        <section style={{
+          padding: '44px 32px',
+          borderRadius: '28px',
+          background: 'linear-gradient(135deg, #064e3b 0%, #022c22 45%, #065f46 100%)',
+          border: '1px solid rgba(52, 211, 153, 0.35)',
+          boxShadow: '0 20px 50px rgba(6, 78, 59, 0.45)',
+          textAlign: 'center'
+        }}>
+          <h2 style={{ fontSize: '26px', fontWeight: 900, color: '#ffffff', marginBottom: '12px' }}>
+            Take Control of Your Spending Today
           </h2>
-          <p className="text-xl md:text-2xl text-white/50 mb-14 max-w-2xl mx-auto font-medium leading-relaxed">
-            Stop guessing where your money goes. Start tracking it effortlessly today.
+          <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '15px', maxWidth: '540px', margin: '0 auto 28px', lineHeight: 1.6 }}>
+            Track expenses effortlessly with AI insights, automated categorization, and complete data privacy.
           </p>
-          <button 
-            onClick={() => {
-              window.history.pushState(null, '', '/#app');
-              window.dispatchEvent(new Event('popstate'));
-            }}
-            className="group inline-flex items-center justify-center gap-4 bg-white hover:bg-gray-100 text-black px-12 py-6 rounded-full font-bold text-xl transition-all hover:scale-105 shadow-[0_0_50px_rgba(255,255,255,0.15)]"
-          >
-            Get Started Free 
-            <span className="bg-black/5 text-black p-2.5 rounded-full group-hover:translate-x-1.5 transition-transform">
-              <ArrowRight size={22} />
-            </span>
-          </button>
-        </div>
-      </section>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => {
+                if (onOpenWebApp) onOpenWebApp();
+                else {
+                  window.history.pushState(null, '', '/#app');
+                  window.dispatchEvent(new Event('popstate'));
+                }
+              }}
+              style={{
+                backgroundColor: '#ffffff',
+                color: '#064e3b',
+                padding: '14px 28px',
+                borderRadius: '100px',
+                fontSize: '15px',
+                fontWeight: 900,
+                border: 'none',
+                cursor: 'pointer'
+              }}
+              className="hover-lift"
+            >
+              Open Web App
+            </button>
+            <a
+              href={DISTRIBUTION_CONFIG.PLAY_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                color: '#ffffff',
+                border: '1px solid rgba(255, 255, 255, 0.25)',
+                padding: '14px 22px',
+                borderRadius: '100px',
+                fontSize: '14px',
+                fontWeight: 800,
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+              className="hover-lift"
+            >
+              <GooglePlayIcon size={16} />
+              <span>Get on Google Play</span>
+            </a>
+          </div>
+        </section>
+
+      </main>
     </div>
   );
 };

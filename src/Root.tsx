@@ -52,11 +52,11 @@ export default function Root() {
   // Handle SEO-friendly paths
   if (currentPath.startsWith('/blog/')) {
     const slug = currentPath.replace('/blog/', '');
-    return <BlogPostView slug={slug} onBackToLanding={handleBackToLanding} />;
+    return <BlogPostView slug={slug} onBackToLanding={handleBackToLanding} onOpenWebApp={handleOpenWebApp} />;
   }
 
   if (currentPath === '/blog') {
-    return <BlogView onBackToLanding={handleBackToLanding} /> ;
+    return <BlogView onBackToLanding={handleBackToLanding} onOpenWebApp={handleOpenWebApp} />;
   }
 
   return <LandingPage onOpenWebApp={handleOpenWebApp} />;

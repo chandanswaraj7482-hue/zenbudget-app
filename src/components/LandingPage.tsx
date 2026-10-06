@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef, useLayoutEffect, useMemo } from 'react';
 import { Sparkles, ArrowRight, ArrowLeft, Search, Sun, Moon, Target, Shield, Users, Clock, Star, Smartphone, Brain, TrendingUp, TrendingDown, Heart, Activity, ChevronDown, MessageCircleHeart, ChartLine, BookHeart, Lock, ArrowUpRight, Wallet, PiggyBank, Receipt, BarChart3, Banknote, CircleCheck, Circle, Flame, Play, BookOpen, MessageCircle, X, Download, Menu, CheckCircle, CheckCircle2, ChevronRight, Zap, RefreshCw, HelpCircle, Award, Check, Monitor, Pause, ShieldCheck } from 'lucide-react';
+import { GooglePlayBadge, GooglePlayIcon } from './GooglePlayBadge';
+import { DISTRIBUTION_CONFIG } from '../config/buildConfig';
 
 interface LandingPageProps {
   onOpenWebApp: () => void;
@@ -2395,9 +2397,22 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   Download on iOS
                 </button>
               ) : (
-                <button onClick={() => { setMobileMenuOpen(false); handleDownloadApk(); }} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#27272a', color: '#fff', padding: '16px', borderRadius: '100px', fontSize: '16px', fontWeight: 700, border: 'none', cursor: 'pointer' }}>
-                  Download Android APK
-                </button>
+                <>
+                  <a
+                    href={DISTRIBUTION_CONFIG.PLAY_STORE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMobileMenuOpen(false)}
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#0a0a0a', color: '#fff', padding: '15px', borderRadius: '100px', fontSize: '15px', fontWeight: 700, border: '1px solid rgba(255,255,255,0.2)', textDecoration: 'none', cursor: 'pointer', boxSizing: 'border-box' }}
+                  >
+                    <GooglePlayIcon size={20} />
+                    <span>Get on Google Play</span>
+                  </a>
+                  <button onClick={() => { setMobileMenuOpen(false); handleDownloadApk(); }} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#27272a', color: '#fff', padding: '14px', borderRadius: '100px', fontSize: '14.5px', fontWeight: 700, border: 'none', cursor: 'pointer' }}>
+                    <Download size={16} color="#10b981" />
+                    <span>Download Direct APK</span>
+                  </button>
+                </>
               )}
               <button onClick={() => { setMobileMenuOpen(false); startFreshQuiz(); }} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#ecfccb', color: '#3f6212', padding: '16px', borderRadius: '100px', fontSize: '16px', fontWeight: 700, border: 'none', cursor: 'pointer' }}>
                 Take Free Assessment
@@ -2556,28 +2571,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   <ArrowRight size={16} />
                 </button>
 
-                <button 
-                  onClick={handleDownloadApk} 
-                  style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '10px', 
-                    background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)` : '#ffffff', 
-                    border: `1px solid ${t.border}`, 
-                    color: t.text, 
-                    padding: '16px 28px', 
-                    borderRadius: '100px', 
-                    fontSize: '15px', 
-                    fontWeight: 800, 
-                    cursor: 'pointer', 
-                    transition: 'all 0.2s',
-                    boxShadow: '0 4px 14px rgba(0,0,0,0.06)'
-                  }} 
-                  className="hover-lift about-hero-btn"
-                >
-                  <Download size={18} color="#84cc16" />
-                  <span>Download APK (Android)</span>
-                </button>
+                <GooglePlayBadge variant="badge" showProtect />
               </div>
 
               {/* 4 Brand Pillars Highlight Row */}
@@ -3910,17 +3904,11 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   )}
 
                   {deviceOS !== 'ios' && (
-                    <button onClick={handleDownloadApk} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', padding: '14px 28px', borderRadius: '100px', border: 'none', cursor: 'pointer', transition: 'all 0.25s ease', boxShadow: '0 12px 28px rgba(16,185,129,0.4)' }} className="hover-lift">
-                      <Download size={20} color="#ffffff" />
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
-                        <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', opacity: 0.85, letterSpacing: '0.08em' }}>Android Package (.apk)</span>
-                        <span style={{ fontSize: '16px', fontWeight: 800 }}>Download APK</span>
-                      </div>
-                    </button>
+                    <GooglePlayBadge variant="badge" showRating={true} showProtect={true} />
                   )}
 
                   {/* Primary Action: Open Web App */}
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
                     <button onClick={onOpenWebApp} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'linear-gradient(135deg, #10b981 0%, #047857 100%)', color: '#ffffff', padding: '14px 28px', borderRadius: '100px', border: 'none', cursor: 'pointer', transition: 'all 0.25s ease', boxShadow: '0 12px 30px rgba(16, 185, 129, 0.45), 0 2px 8px rgba(0,0,0,0.1)' }} className="glow-btn hover-lift">
                       <Lock size={20} color="#ffffff" />
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
@@ -3933,6 +3921,18 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     </button>
                   </div>
 
+                </div>
+
+                {/* Subtle Direct APK fallback link */}
+                <div style={{ marginTop: '-20px', marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: t.textMuted }}>
+                  <span>Prefer offline?</span>
+                  <button 
+                    onClick={handleDownloadApk} 
+                    style={{ background: 'none', border: 'none', color: '#10b981', fontWeight: 700, fontSize: '12px', cursor: 'pointer', padding: 0, textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    <Download size={12} />
+                    Download Direct APK (v2.5)
+                  </button>
                 </div>
 
                 {/* Bottom Highlights Bar (InnerHeal Style stats) */}
@@ -4965,6 +4965,8 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 <span>Take The Free Assessment</span>
               </button>
 
+              <GooglePlayBadge variant="outline" />
+
               <button 
                 onClick={onOpenWebApp} 
                 style={{ 
@@ -5129,7 +5131,11 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             <a onClick={onOpenWebApp} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Terms and Conditions</a>
             <a onClick={onOpenWebApp} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Privacy Policy</a>
             <a onClick={() => { window.history.pushState(null, '', '/blog'); window.dispatchEvent(new Event('popstate')); }} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Blog</a>
-            <a onClick={handleDownloadApk} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Download Android APK</a>
+            <a href={DISTRIBUTION_CONFIG.PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <GooglePlayIcon size={15} />
+              <span>Google Play Store</span>
+            </a>
+            <a onClick={handleDownloadApk} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Download Direct APK</a>
           </div>
 
         </div>
@@ -5266,30 +5272,38 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
               {/* Action Button & Not Now Sub-link */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px' }}>
-                <button 
-                  onClick={handleDownloadAction} 
-                  style={{ width: '100%', padding: '14px', borderRadius: '100px', background: '#ffffff', color: '#111827', fontSize: '15px', fontWeight: 800, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', boxShadow: '0 8px 20px rgba(0,0,0,0.2)' }}
-                  className="glow-btn"
-                >
-                  {deviceOS === 'ios' && (
-                    <>
-                      <Smartphone size={18} color="#10b981" />
-                      <span>Add to Home Screen (Safari)</span>
-                    </>
-                  )}
-                  {deviceOS === 'android' && (
-                    <>
-                      <Download size={18} color="#10b981" />
-                      <span>Download Android APK</span>
-                    </>
-                  )}
-                  {deviceOS !== 'ios' && deviceOS !== 'android' && (
-                    <>
-                      <Wallet size={18} color="#10b981" />
-                      <span>Open Web App Now</span>
-                    </>
-                  )}
-                </button>
+                {deviceOS === 'ios' ? (
+                  <button 
+                    onClick={handleDownloadAction} 
+                    style={{ width: '100%', padding: '14px', borderRadius: '100px', background: '#ffffff', color: '#111827', fontSize: '15px', fontWeight: 800, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', boxShadow: '0 8px 20px rgba(0,0,0,0.2)' }}
+                    className="glow-btn"
+                  >
+                    <Smartphone size={18} color="#10b981" />
+                    <span>Add to Home Screen (Safari)</span>
+                  </button>
+                ) : (
+                  <>
+                    <a
+                      href={DISTRIBUTION_CONFIG.PLAY_STORE_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setShowModal(false)}
+                      style={{ width: '100%', padding: '14px', borderRadius: '100px', background: '#0a0a0a', color: '#ffffff', fontSize: '15px', fontWeight: 800, border: '1px solid rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', cursor: 'pointer', textDecoration: 'none', boxShadow: '0 8px 20px rgba(0,0,0,0.35)', boxSizing: 'border-box' }}
+                      className="hover-lift"
+                    >
+                      <GooglePlayIcon size={20} />
+                      <span>Get on Google Play</span>
+                    </a>
+                    <button 
+                      onClick={handleDownloadApk}
+                      style={{ width: '100%', padding: '12px', borderRadius: '100px', background: isDark ? 'rgba(255,255,255,0.08)' : '#f3f4f6', color: t.text, fontSize: '13.5px', fontWeight: 700, border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}
+                      className="hover-lift"
+                    >
+                      <Download size={16} color="#10b981" />
+                      <span>Download Direct APK</span>
+                    </button>
+                  </>
+                )}
 
                 <button 
                   onClick={() => setShowModal(false)} 
@@ -5420,71 +5434,79 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
               {/* Action Buttons (Dynamically Traced to Device OS) */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
-                <button 
-                  onClick={() => {
-                    setShowWelcomeModal(false);
-                    if (deviceOS === 'android') handleDownloadApk();
-                    else if (deviceOS === 'ios') setShowIosGuideModal(true);
-                    else onOpenWebApp();
-                  }}
-                  style={{ width: '100%', padding: '15px 24px', borderRadius: '100px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', fontSize: '15px', fontWeight: 800, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 24px rgba(16,185,129,0.4)', transition: 'all 0.2s' }}
-                  className="glow-btn"
-                >
-                  {deviceOS === 'android' ? (
-                    <>
-                      <Download size={20} color="#ffffff" />
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
-                        <span style={{ fontSize: '9.5px', textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.06em' }}>TRACED DEVICE: ANDROID</span>
-                        <span style={{ fontSize: '15px', fontWeight: 900 }}>Download Android APK (Direct)</span>
-                      </div>
-                    </>
-                  ) : deviceOS === 'ios' ? (
-                    <>
-                      <Smartphone size={20} color="#ffffff" />
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
-                        <span style={{ fontSize: '9.5px', textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.06em' }}>TRACED DEVICE: IOS SAFARI</span>
-                        <span style={{ fontSize: '15px', fontWeight: 900 }}>Add to iPhone / iPad</span>
-                      </div>
-                    </>
-                  ) : deviceOS === 'mac' ? (
-                    <>
-                      <Monitor size={20} color="#ffffff" />
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
-                        <span style={{ fontSize: '9.5px', textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.06em' }}>TRACED DEVICE: MACOS</span>
-                        <span style={{ fontSize: '15px', fontWeight: 900 }}>Open Mac Web App</span>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <Wallet size={20} color="#ffffff" />
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
-                        <span style={{ fontSize: '9.5px', textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.06em' }}>TRACED DEVICE: WEB BROWSER</span>
-                        <span style={{ fontSize: '15px', fontWeight: 900 }}>Open Web App Now</span>
-                      </div>
-                    </>
-                  )}
-                </button>
-
-                {/* Secondary Button: Alternative Action */}
                 {deviceOS === 'android' ? (
-                  <button 
-                    onClick={() => { setShowWelcomeModal(false); onOpenWebApp(); }}
-                    style={{ width: '100%', padding: '13px 20px', borderRadius: '100px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.07)` : '#f3f4f6', color: t.text, fontSize: '13.5px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-                    className="hover-lift"
-                  >
-                    <Wallet size={16} color="#10b981" />
-                    <span>Open Web App (Browser Mode)</span>
-                  </button>
+                  <>
+                    <a
+                      href={DISTRIBUTION_CONFIG.PLAY_STORE_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setShowWelcomeModal(false)}
+                      style={{ width: '100%', padding: '14px 24px', borderRadius: '100px', background: '#0a0a0a', color: '#ffffff', fontSize: '15px', fontWeight: 800, border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.3)', textDecoration: 'none', boxSizing: 'border-box' }}
+                      className="hover-lift"
+                    >
+                      <GooglePlayIcon size={22} />
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
+                        <span style={{ fontSize: '9.5px', textTransform: 'uppercase', opacity: 0.8, letterSpacing: '0.06em' }}>OFFICIAL STORE</span>
+                        <span style={{ fontSize: '15px', fontWeight: 900 }}>Get on Google Play</span>
+                      </div>
+                    </a>
+
+                    <button 
+                      onClick={() => { setShowWelcomeModal(false); handleDownloadApk(); }}
+                      style={{ width: '100%', padding: '13px 20px', borderRadius: '100px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', fontSize: '14px', fontWeight: 800, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 6px 18px rgba(16,185,129,0.3)' }}
+                      className="glow-btn"
+                    >
+                      <Download size={16} color="#ffffff" />
+                      <span>Download Android APK (Direct)</span>
+                    </button>
+                  </>
                 ) : (
                   <button 
-                    onClick={() => { setShowWelcomeModal(false); handleDownloadApk(); }}
-                    style={{ width: '100%', padding: '13px 20px', borderRadius: '100px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.07)` : '#f3f4f6', color: t.text, fontSize: '13.5px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-                    className="hover-lift"
+                    onClick={() => {
+                      setShowWelcomeModal(false);
+                      if (deviceOS === 'ios') setShowIosGuideModal(true);
+                      else onOpenWebApp();
+                    }}
+                    style={{ width: '100%', padding: '15px 24px', borderRadius: '100px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', fontSize: '15px', fontWeight: 800, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 24px rgba(16,185,129,0.4)', transition: 'all 0.2s' }}
+                    className="glow-btn"
                   >
-                    <Download size={16} color="#10b981" />
-                    <span>Download Android APK (Direct)</span>
+                    {deviceOS === 'ios' ? (
+                      <>
+                        <Smartphone size={20} color="#ffffff" />
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
+                          <span style={{ fontSize: '9.5px', textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.06em' }}>TRACED DEVICE: IOS SAFARI</span>
+                          <span style={{ fontSize: '15px', fontWeight: 900 }}>Add to iPhone / iPad</span>
+                        </div>
+                      </>
+                    ) : deviceOS === 'mac' ? (
+                      <>
+                        <Monitor size={20} color="#ffffff" />
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
+                          <span style={{ fontSize: '9.5px', textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.06em' }}>TRACED DEVICE: MACOS</span>
+                          <span style={{ fontSize: '15px', fontWeight: 900 }}>Open Mac Web App</span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <Wallet size={20} color="#ffffff" />
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
+                          <span style={{ fontSize: '9.5px', textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.06em' }}>TRACED DEVICE: WEB BROWSER</span>
+                          <span style={{ fontSize: '15px', fontWeight: 900 }}>Open Web App Now</span>
+                        </div>
+                      </>
+                    )}
                   </button>
                 )}
+
+                {/* Secondary Button: Alternative Action */}
+                <button 
+                  onClick={() => { setShowWelcomeModal(false); onOpenWebApp(); }}
+                  style={{ width: '100%', padding: '12px 20px', borderRadius: '100px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.07)` : '#f3f4f6', color: t.text, fontSize: '13px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                  className="hover-lift"
+                >
+                  <Wallet size={15} color="#10b981" />
+                  <span>Open Web App (Browser Mode)</span>
+                </button>
 
                 <button 
                   onClick={() => setShowWelcomeModal(false)}
