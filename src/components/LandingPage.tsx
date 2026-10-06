@@ -3904,7 +3904,31 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   )}
 
                   {deviceOS !== 'ios' && (
-                    <GooglePlayBadge variant="badge" showRating={true} showProtect={true} />
+                    <a
+                      href={DISTRIBUTION_CONFIG.PLAY_STORE_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        color: '#ffffff',
+                        padding: '14px 28px',
+                        borderRadius: '100px',
+                        textDecoration: 'none',
+                        cursor: 'pointer',
+                        transition: 'all 0.25s ease',
+                        boxShadow: '0 12px 28px rgba(16,185,129,0.4)'
+                      }}
+                      className="hover-lift"
+                    >
+                      <GooglePlayIcon size={22} />
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.08em' }}>Google Play Store</span>
+                        <span style={{ fontSize: '16px', fontWeight: 800 }}>Get on Google Play</span>
+                      </div>
+                    </a>
                   )}
 
                   {/* Primary Action: Open Web App */}
@@ -3921,18 +3945,6 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     </button>
                   </div>
 
-                </div>
-
-                {/* Subtle Direct APK fallback link */}
-                <div style={{ marginTop: '-20px', marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: t.textMuted }}>
-                  <span>Prefer offline?</span>
-                  <button 
-                    onClick={handleDownloadApk} 
-                    style={{ background: 'none', border: 'none', color: '#10b981', fontWeight: 700, fontSize: '12px', cursor: 'pointer', padding: 0, textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                  >
-                    <Download size={12} />
-                    Download Direct APK (v2.5)
-                  </button>
                 </div>
 
                 {/* Bottom Highlights Bar (InnerHeal Style stats) */}
