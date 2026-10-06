@@ -19,12 +19,47 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
   const otherPosts = blogPosts.filter(p => p.slug !== slug).slice(0, 2);
 
   useEffect(() => {
+    let scriptTag: HTMLScriptElement | null = null;
     if (post) {
       document.title = `${post.title} | ZenBudget Blog`;
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) {
         metaDesc.setAttribute('content', post.excerpt);
       }
+      const ogImage = document.querySelector('meta[property="og:image"]');
+      if (ogImage) ogImage.setAttribute('content', post.imageUrl);
+      const twImage = document.querySelector('meta[name="twitter:image"]');
+      if (twImage) twImage.setAttribute('content', post.imageUrl);
+
+      // Inject Article Schema with ImageObject for Google Rich Snippets & Image SEO
+      scriptTag = document.createElement('script');
+      scriptTag.type = 'application/ld+json';
+      scriptTag.text = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        'headline': post.title,
+        'description': post.excerpt,
+        'image': [post.imageUrl],
+        'datePublished': post.date,
+        'author': {
+          '@type': 'Person',
+          'name': post.author,
+          'jobTitle': post.authorRole
+        },
+        'publisher': {
+          '@type': 'Organization',
+          'name': 'ZenBudget',
+          'logo': {
+            '@type': 'ImageObject',
+            'url': 'https://zenbudget-tracker.vercel.app/logo.png'
+          }
+        },
+        'mainEntityOfPage': {
+          '@type': 'WebPage',
+          '@id': window.location.href
+        }
+      });
+      document.head.appendChild(scriptTag);
     } else {
       document.title = 'Post Not Found | ZenBudget Blog';
     }
@@ -34,6 +69,13 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
     window.scrollTo(0, 0);
 
     return () => {
+      if (scriptTag && scriptTag.parentNode) {
+        scriptTag.parentNode.removeChild(scriptTag);
+      }
+      const ogImage = document.querySelector('meta[property="og:image"]');
+      if (ogImage) ogImage.setAttribute('content', 'https://zenbudget-tracker.vercel.app/zen_website.png');
+      const twImage = document.querySelector('meta[name="twitter:image"]');
+      if (twImage) twImage.setAttribute('content', 'https://zenbudget-tracker.vercel.app/zen_website.png');
       document.documentElement.classList.remove('landing-active');
       document.body.classList.remove('landing-active');
       document.getElementById('root')?.classList.remove('landing-root');
@@ -203,38 +245,56 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
           justifyContent: 'space-between',
           gap: '16px'
         }}>
-          {/* Back to Blog */}
-          <button
-            onClick={handleBackToBlog}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '10px',
-              background: 'none',
-              border: 'none',
-              color: '#cbd5e1',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: 700,
-              padding: '8px 0',
-              transition: 'color 0.2s ease'
-            }}
-            className="hover-lift"
-          >
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
-              backgroundColor: 'rgba(255, 255, 255, 0.06)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <ArrowLeft size={16} />
+          {/* Back to Blog & Logo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <button
+              onClick={handleBackToBlog}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'none',
+                border: 'none',
+                color: '#cbd5e1',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: 700,
+                padding: '8px 0',
+                transition: 'color 0.2s ease'
+              }}
+              className="hover-lift"
+              title="Back to All Articles"
+            >
+              <div style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <ArrowLeft size={16} />
+              </div>
+              <span className="desktop-only">All Articles</span>
+            </button>
+
+            <div
+              onClick={onBackToLanding}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+              title="ZenBudget Home"
+            >
+              <img
+                src="/logo.png"
+                alt="ZenBudget Logo"
+                style={{ width: '32px', height: '32px', borderRadius: '9px', objectFit: 'contain' }}
+              />
+              <span style={{ fontSize: '16px', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>
+                ZenBudget
+              </span>
             </div>
-            <span>All Articles</span>
-          </button>
+          </div>
 
           {/* Action CTAs */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -403,7 +463,8 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
         }}>
           <img
             src={post.imageUrl}
-            alt={post.title}
+            alt={`${post.title} — ZenBudget Personal Finance Guide`}
+            loading="eager"
             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           />
         </div>

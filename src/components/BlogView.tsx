@@ -164,18 +164,17 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
               onClick={onBackToLanding} 
               style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
             >
-              <div style={{
-                width: '34px',
-                height: '34px',
-                borderRadius: '10px',
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
-              }}>
-                <span style={{ fontSize: '18px', fontWeight: 900, color: '#ffffff' }}>Z</span>
-              </div>
+              <img
+                src="/logo.png"
+                alt="ZenBudget Logo"
+                style={{
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '10px',
+                  objectFit: 'contain',
+                  boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
+                }}
+              />
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>ZenBudget</span>
                 <span style={{ fontSize: '12px', fontWeight: 700, padding: '2px 8px', borderRadius: '100px', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
@@ -456,8 +455,9 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
                 <div style={{ position: 'relative', width: '100%', height: '220px', overflow: 'hidden' }}>
                   <img
                     src={post.imageUrl}
-                    alt={post.title}
+                    alt={`${post.title} — ZenBudget Finance Guide`}
                     loading="lazy"
+                    decoding="async"
                     style={{
                       width: '100%',
                       height: '100%',

@@ -14,6 +14,37 @@
     <image:image>
       <image:loc>https://zenbudget-tracker.vercel.app/zen_website.png</image:loc>
       <image:title>ZenBudget AI Expense Tracker Dashboard</image:title>
+      <image:caption>ZenBudget AI Expense Tracker &amp; Daily Budget Planner Full Web App Interface</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://zenbudget-tracker.vercel.app/hero-mockup.png</image:loc>
+      <image:title>ZenBudget Mobile App Interface &amp; Daily Limits</image:title>
+      <image:caption>Mobile app interface showing real-time daily safe-to-spend limits and impulse buy pause timer</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://zenbudget-tracker.vercel.app/images/toolkit_ocr.jpg</image:loc>
+      <image:title>ZenBudget AI Bank Statement OCR Passbook Scanner</image:title>
+      <image:caption>AI-powered bank passbook scanner and automatic UPI expense logger</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://zenbudget-tracker.vercel.app/images/toolkit_coach.jpg</image:loc>
+      <image:title>ZenBudget AI Financial Coach &amp; Money Mentor</image:title>
+      <image:caption>Personalized AI money mentor detecting spending leaks and building automated wealth plans</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://zenbudget-tracker.vercel.app/images/toolkit_couple.jpg</image:loc>
+      <image:title>ZenBudget Couples Shared Budget Ledger Sync</image:title>
+      <image:caption>Real-time shared household expense sync for couples and roommates</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://zenbudget-tracker.vercel.app/images/zen_sanctuary.jpg</image:loc>
+      <image:title>ZenBudget Financial Mindfulness Sanctuary</image:title>
+      <image:caption>Gamified pet garden and mindfulness rewards for staying under daily budget</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://zenbudget-tracker.vercel.app/logo.png</image:loc>
+      <image:title>ZenBudget Official Logo</image:title>
+      <image:caption>ZenBudget Official Application Logo</image:caption>
     </image:image>
   </url>
 
@@ -23,6 +54,11 @@
     <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
+    <image:image>
+      <image:loc>https://zenbudget-tracker.vercel.app/logo.png</image:loc>
+      <image:title>ZenBudget Financial Arcade Coin Catcher</image:title>
+      <image:caption>Financial coin catcher discipline mini-game</image:caption>
+    </image:image>
   </url>
 
   <!-- Web App Login/Dashboard -->
@@ -31,6 +67,11 @@
     <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
+    <image:image>
+      <image:loc>https://zenbudget-tracker.vercel.app/zen_website.png</image:loc>
+      <image:title>ZenBudget Web App Daily Money Manager</image:title>
+      <image:caption>Interactive web dashboard for daily money management</image:caption>
+    </image:image>
   </url>
 
   <!-- Financial Quiz Page -->
@@ -39,6 +80,11 @@
     <lastmod>2026-10-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://zenbudget-tracker.vercel.app/images/interactive_modules.jpg</image:loc>
+      <image:title>ZenBudget Financial Assessment Quiz</image:title>
+      <image:caption>Interactive 3-minute financial leak assessment quiz</image:caption>
+    </image:image>
   </url>
 
   <!-- Financial Toolkit -->
@@ -47,6 +93,16 @@
     <lastmod>2026-10-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://zenbudget-tracker.vercel.app/images/toolkit_ocr.jpg</image:loc>
+      <image:title>ZenBudget OCR Statement Toolkit</image:title>
+      <image:caption>Financial toolkit with bank statement scanning</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://zenbudget-tracker.vercel.app/images/toolkit_coach.jpg</image:loc>
+      <image:title>ZenBudget AI Money Coach Toolkit</image:title>
+      <image:caption>AI money advisor toolkit</image:caption>
+    </image:image>
   </url>
 
   <!-- Community Stories -->
@@ -55,6 +111,11 @@
     <lastmod>2026-10-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://zenbudget-tracker.vercel.app/images/community_toolkit.jpg</image:loc>
+      <image:title>ZenBudget Community Savings Challenge</image:title>
+      <image:caption>Community wealth building and budget challenges</image:caption>
+    </image:image>
   </url>
 
   <!-- AI Coach / Zen AI Features -->
@@ -63,6 +124,11 @@
     <lastmod>2026-10-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://zenbudget-tracker.vercel.app/images/toolkit_coach.jpg</image:loc>
+      <image:title>Zen AI Personal Finance Coach</image:title>
+      <image:caption>Smart financial recommendations and personalized wealth coach</image:caption>
+    </image:image>
   </url>
 
   <!-- Budget Planner -->
@@ -71,6 +137,11 @@
     <lastmod>2026-10-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://zenbudget-tracker.vercel.app/zen_website.png</image:loc>
+      <image:title>ZenBudget 50-30-20 Planner</image:title>
+      <image:caption>Interactive monthly budget planner tool</image:caption>
+    </image:image>
   </url>
 
   <!-- Savings Goals -->
@@ -79,6 +150,11 @@
     <lastmod>2026-10-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://zenbudget-tracker.vercel.app/hero-mockup.png</image:loc>
+      <image:title>ZenBudget Savings Goals Tracker</image:title>
+      <image:caption>Automated savings goal tracker and visual progress indicators</image:caption>
+    </image:image>
   </url>
 
   <!-- Android APK Download Page -->
@@ -87,6 +163,11 @@
     <lastmod>2026-10-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://zenbudget-tracker.vercel.app/hero-mockup.png</image:loc>
+      <image:title>ZenBudget Android APK Free Download</image:title>
+      <image:caption>Official ZenBudget Android App APK direct download</image:caption>
+    </image:image>
   </url>
 
   <!-- Android APK Direct File -->
@@ -103,44 +184,89 @@
     <lastmod>2026-10-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://zenbudget-tracker.vercel.app/og-banner.jpg</image:loc>
+      <image:title>ZenBudget Financial Wisdom &amp; Modern Guides Blog</image:title>
+      <image:caption>Evidence-based personal finance, budgeting strategies, and spending psychology</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://zenbudget-tracker.vercel.app/logo.png</image:loc>
+      <image:title>ZenBudget Official Logo</image:title>
+      <image:caption>ZenBudget Logo</image:caption>
+    </image:image>
   </url>
 
-  <!-- Blog Articles -->
+  <!-- Blog Articles with Dedicated Image Tags for Instant Google Image Indexing -->
   <url>
     <loc>https://zenbudget-tracker.vercel.app/blog/how-to-manage-personal-finances</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>How to Master Personal Finances in 2026: The Modern Guide</image:title>
+      <image:caption>Modern personal finance management strategies for digital banking and UPI</image:caption>
+    </image:image>
   </url>
+
   <url>
     <loc>https://zenbudget-tracker.vercel.app/blog/50-30-20-budget-rule-india</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>The 50/30/20 Rule in the Age of Instant UPI: Does It Still Work?</image:title>
+      <image:caption>Adapting the 50/30/20 budget framework for instant payment apps</image:caption>
+    </image:image>
   </url>
+
   <url>
     <loc>https://zenbudget-tracker.vercel.app/blog/how-to-stop-impulse-spending</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>The Psychology of Impulse Spending: 5 Neuroscience Tricks</image:title>
+      <image:caption>Neuroscience strategies to conquer dopamine-driven impulse purchases</image:caption>
+    </image:image>
   </url>
+
   <url>
     <loc>https://zenbudget-tracker.vercel.app/blog/building-emergency-fund</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>How to Build a 6-Month Emergency Fund from Scratch</image:title>
+      <image:caption>Step-by-step roadmap to calculate and automate your emergency cushion</image:caption>
+    </image:image>
   </url>
+
   <url>
     <loc>https://zenbudget-tracker.vercel.app/blog/hidden-subscriptions-audit</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>The Silent Wealth Drain: How to Audit &amp; Eliminate Micro-Subscriptions</image:title>
+      <image:caption>Comprehensive audit template to detect and cancel recurring fees</image:caption>
+    </image:image>
   </url>
+
   <url>
     <loc>https://zenbudget-tracker.vercel.app/blog/benefits-of-expense-tracking-apps</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>Why Traditional Spreadsheets Fail (And How AI Tracking Saves 10x More)</image:title>
+      <image:caption>Why Excel budget templates fail and why automated AI tracking succeeds</image:caption>
+    </image:image>
   </url>
 
   <!-- Privacy Policy -->
