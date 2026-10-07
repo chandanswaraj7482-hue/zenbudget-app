@@ -341,7 +341,7 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
               title="ZenBudget Home"
             >
               <img
-                src="/logo.png?v=2"
+                src="/icon.png"
                 alt="ZenBudget Logo"
                 style={{ width: '32px', height: '32px', borderRadius: '9px', objectFit: 'contain' }}
               />
@@ -738,7 +738,7 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
           textAlign: 'center'
         }}>
           <img
-            src="/logo.png?v=2"
+            src="/icon.png"
             alt="ZenBudget Logo"
             style={{
               width: '46px',

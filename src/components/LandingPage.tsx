@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useLayoutEffect, useMemo } from 're
 import { Sparkles, ArrowRight, ArrowLeft, Search, Sun, Moon, Target, Shield, Users, Clock, Star, Smartphone, Brain, TrendingUp, TrendingDown, Heart, Activity, ChevronDown, MessageCircleHeart, ChartLine, BookHeart, Lock, ArrowUpRight, Wallet, PiggyBank, Receipt, BarChart3, Banknote, CircleCheck, Circle, Flame, Play, BookOpen, MessageCircle, X, Download, Menu, CheckCircle, CheckCircle2, ChevronRight, Zap, RefreshCw, HelpCircle, Award, Check, Monitor, Pause, ShieldCheck } from 'lucide-react';
 import { GooglePlayBadge, GooglePlayIcon } from './GooglePlayBadge';
 import { DISTRIBUTION_CONFIG } from '../config/buildConfig';
+import { YouTubeIcon, TikTokIcon, InstagramIcon, FacebookIcon, LinkedInIcon, XIcon, renderSocialIcon } from './SocialIcons';
 
 interface LandingPageProps {
   onOpenWebApp: () => void;
@@ -1280,6 +1281,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileExpandedSection, setMobileExpandedSection] = useState<'features' | 'conditions' | null>(null);
   const [showThemeMenu, setShowThemeMenu] = useState(false);
   const [activeScene, setActiveScene] = useState('Morning');
   const [activeWeather, setActiveWeather] = useState('Clear');
@@ -1970,6 +1972,21 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
     .mobile-show { display: none; }
 
+    .landing-nav-pill {
+      margin-top: 20px;
+      padding: 0 28px;
+      width: min(1240px, calc(100% - 32px));
+      height: 64px;
+    }
+    .landing-hero-container {
+      padding-top: 112px;
+      padding-left: 20px;
+      padding-right: 20px;
+      padding-bottom: 28px;
+      margin: 0 auto;
+      width: min(1440px, 100%);
+    }
+
     @media (max-width: 1024px) {
       .desktop-only { display: none !important; }
       .mobile-show { display: flex !important; }
@@ -1984,6 +2001,18 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
     }
 
     @media (max-width: 768px) {
+      .landing-nav-pill {
+        margin-top: 12px !important;
+        padding: 0 16px !important;
+        width: calc(100% - 24px) !important;
+        height: 56px !important;
+      }
+      .landing-hero-container {
+        padding-top: 96px !important;
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+        padding-bottom: 20px !important;
+      }
       .quiz-container { padding: 20px 16px !important; }
       .scorecard-summary-grid { grid-template-columns: 1fr !important; }
       .scorecard-categories-grid { grid-template-columns: 1fr !important; }
@@ -2009,6 +2038,18 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
     }
 
     @media (max-width: 480px) {
+      .landing-nav-pill {
+        margin-top: 10px !important;
+        padding: 0 14px !important;
+        width: calc(100% - 20px) !important;
+        height: 54px !important;
+      }
+      .landing-hero-container {
+        padding-top: 90px !important;
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+        padding-bottom: 16px !important;
+      }
       .about-pillars-grid { grid-template-columns: 1fr !important; }
       .about-pill-item { padding: 12px 10px !important; }
     }
@@ -2145,18 +2186,25 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
       {/* ═══════════════ HEADER ═══════════════ */}
       <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', pointerEvents: mobileMenuOpen ? 'auto' : 'none' }}>
-        <div style={{ 
-          pointerEvents: 'auto', marginTop: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', padding: '0 32px', transition: 'all 0.3s', 
-          background: isDark ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.35)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.05)',
-          borderRadius: '100px',
-          width: 'min(1240px, 96%)', height: '64px' 
-        }}>
+        <div 
+          className="landing-nav-pill"
+          style={{ 
+            pointerEvents: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', transition: 'all 0.3s', 
+            background: isDark ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.45)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.06)',
+            borderRadius: '100px',
+            boxShadow: isDark ? '0 8px 30px rgba(0,0,0,0.35)' : '0 8px 24px rgba(0,0,0,0.06)'
+          }}
+        >
           {/* Logo */}
           <a onClick={e => { e.preventDefault(); navigateToPage('home'); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', textDecoration: 'none' }}>
-            <img src="/logo.png" alt="ZenBudget Logo" style={{ width: '34px', height: '34px', borderRadius: '12px' }} />
+            <img 
+              src="/icon.png" 
+              alt="ZenBudget Logo" 
+              style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'contain', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }} 
+            />
             <span style={{ fontSize: '18px', fontWeight: 800, color: t.text, letterSpacing: '-0.02em' }}>ZenBudget</span>
           </a>
 
@@ -2213,10 +2261,22 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               onClick={toggleTheme} 
               aria-label={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"} 
               title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-              style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', border: 'none', background: 'transparent', cursor: 'pointer', color: t.textMuted, transition: 'color 0.2s' }}
-              className="desktop-only"
+              style={{ 
+                width: '36px', 
+                height: '36px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                borderRadius: '50%', 
+                border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.08)', 
+                background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)', 
+                cursor: 'pointer', 
+                transition: 'all 0.2s',
+                flexShrink: 0
+              }}
+              className="hover-lift"
             >
-              {isDark ? <Moon size={18} /> : <Sun size={18} />}
+              {isDark ? <Sun size={17} color="#fbbf24" /> : <Moon size={17} color="#1e293b" />}
             </button>
 
             <button 
@@ -2358,63 +2418,259 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
         {/* Mobile Nav Menu Drawer (Full Screen Sheet) */}
         {mobileMenuOpen && (
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: t.bg, zIndex: 1000000, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: `1px solid ${t.border}` }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: '32px', height: '32px', background: '#10b981', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Sparkles size={16} color="white" />
-                </div>
-                <span style={{ fontSize: '18px', fontWeight: 900, color: t.text, letterSpacing: '-0.02em' }}>ZenBudget</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 24px', borderBottom: `1px solid ${t.border}` }}>
+              <div 
+                onClick={() => { setMobileMenuOpen(false); navigateToPage('home'); }} 
+                style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
+              >
+                <img src="/icon.png" alt="ZenBudget Logo" style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'contain', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)' }} />
+                <span style={{ fontSize: '19px', fontWeight: 900, color: t.text, letterSpacing: '-0.02em' }}>ZenBudget</span>
               </div>
-              <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'transparent', border: 'none', color: t.text, cursor: 'pointer', padding: '4px' }}>
+              <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'transparent', border: 'none', color: t.text, cursor: 'pointer', padding: '6px' }}>
                 <X size={24} />
               </button>
             </div>
             
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '24px', gap: '32px' }}>
-              <button onClick={() => { setMobileMenuOpen(false); scrollTo('features'); }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'transparent', border: 'none', color: t.text, fontSize: '18px', fontWeight: 700, cursor: 'pointer' }}>
-                Features <ChevronDown size={18} color={t.textSub} />
-              </button>
-              <button onClick={() => { setMobileMenuOpen(false); scrollTo('conditions'); }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'transparent', border: 'none', color: t.text, fontSize: '18px', fontWeight: 700, cursor: 'pointer' }}>
-                Conditions <ChevronDown size={18} color={t.textSub} />
-              </button>
-              <button onClick={() => { setMobileMenuOpen(false); navigateToPage('about'); }} style={{ textAlign: 'left', background: 'transparent', border: 'none', color: t.text, fontSize: '18px', fontWeight: 700, cursor: 'pointer' }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '24px', gap: '20px' }}>
+              {/* Features Accordion */}
+              <div>
+                <button 
+                  onClick={() => setMobileExpandedSection(mobileExpandedSection === 'features' ? null : 'features')} 
+                  style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'transparent', border: 'none', color: t.text, fontSize: '18px', fontWeight: 700, cursor: 'pointer', padding: '6px 0' }}
+                >
+                  <span>Features</span>
+                  <ChevronDown 
+                    size={20} 
+                    color={mobileExpandedSection === 'features' ? '#10b981' : t.textSub} 
+                    style={{ transform: mobileExpandedSection === 'features' ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} 
+                  />
+                </button>
+
+                {mobileExpandedSection === 'features' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '14px', paddingLeft: '4px' }}>
+                    {[
+                      { icon: <MessageCircleHeart size={18} color="#10b981" />, title: 'AI Coach Assistant', sub: '24/7 compassionate support', slug: 'ai-coach' },
+                      { icon: <Activity size={18} color="#3b82f6" />, title: 'Zero-Based Budget', sub: 'Purposeful money envelopes', slug: 'budget-planner' },
+                      { icon: <ChartLine size={18} color="#f59e0b" />, title: 'Expense Analytics', sub: 'Visual spending trends & leaks', slug: 'analytics' },
+                      { icon: <Flame size={18} color="#ec4899" />, title: 'Money Forest', sub: 'Gamified tree habit builder', slug: 'money-forest' },
+                      { icon: <Receipt size={18} color="#8b5cf6" />, title: 'AI Receipt Scanner', sub: 'Camera OCR invoice extraction', slug: 'receipt-scanner' },
+                      { icon: <Lock size={18} color="#64748b" />, title: '100% Private Vault', sub: 'Encrypted zero-knowledge storage', slug: 'private-vault' },
+                      { icon: <Target size={18} color="#10b981" />, title: 'Savings Goals', sub: 'Milestone & streak tracker', slug: 'savings-goals' },
+                      { icon: <Users size={18} color="#eab308" />, title: 'Together Community', sub: 'Peer debt challenges & tips', slug: 'community' }
+                    ].map((item, i) => (
+                      <div
+                        key={i}
+                        onClick={() => { setMobileMenuOpen(false); navigateToPage(item.slug); }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          padding: '11px 13px',
+                          borderRadius: '14px',
+                          background: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)',
+                          border: `1px solid ${t.border}`,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: isDark ? '#090d16' : '#ffffff', border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          {item.icon}
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '14px', fontWeight: 800, color: t.text }}>{item.title}</div>
+                          <div style={{ fontSize: '11px', color: t.textMuted }}>{item.sub}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Conditions Accordion */}
+              <div>
+                <button 
+                  onClick={() => setMobileExpandedSection(mobileExpandedSection === 'conditions' ? null : 'conditions')} 
+                  style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'transparent', border: 'none', color: t.text, fontSize: '18px', fontWeight: 700, cursor: 'pointer', padding: '6px 0' }}
+                >
+                  <span>Conditions</span>
+                  <ChevronDown 
+                    size={20} 
+                    color={mobileExpandedSection === 'conditions' ? '#10b981' : t.textSub} 
+                    style={{ transform: mobileExpandedSection === 'conditions' ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} 
+                  />
+                </button>
+
+                {mobileExpandedSection === 'conditions' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '14px', paddingLeft: '4px' }}>
+                    {[
+                      { icon: <Clock size={18} color="#ef4444" />, title: 'Paycheck to Paycheck', sub: 'Create a 15-day salary cushion', slug: 'paycheck-to-paycheck' },
+                      { icon: <Brain size={18} color="#f59e0b" />, title: 'Impulse Buying', sub: '24-hour wish-list cooling timer', slug: 'impulse-spending' },
+                      { icon: <Shield size={18} color="#8b5cf6" />, title: 'Credit Card Debt', sub: 'Snowball & avalanche payoff plans', slug: 'credit-debt' },
+                      { icon: <PiggyBank size={18} color="#10b981" />, title: 'No Emergency Savings', sub: '3 to 6-month safety net builder', slug: 'no-emergency-fund' },
+                      { icon: <RefreshCw size={18} color="#3b82f6" />, title: 'Irregular / Freelance', sub: 'Smooth volatile monthly income', slug: 'freelancer-money' },
+                      { icon: <Search size={18} color="#ec4899" />, title: 'Hidden Subscriptions', sub: 'Detect & cancel unused fees', slug: 'hidden-subscriptions' },
+                      { icon: <Users size={18} color="#14b8a6" />, title: 'Couple / Shared', sub: 'Transparent joint household budgets', slug: 'couple-finances' },
+                      { icon: <Sparkles size={18} color="#eab308" />, title: 'Students & Young Pros', sub: 'Early wealth building & SIP', slug: 'students-pros' }
+                    ].map((item, i) => (
+                      <div
+                        key={i}
+                        onClick={() => { setMobileMenuOpen(false); navigateToPage(item.slug); }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          padding: '11px 13px',
+                          borderRadius: '14px',
+                          background: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)',
+                          border: `1px solid ${t.border}`,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: isDark ? '#090d16' : '#ffffff', border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          {item.icon}
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '14px', fontWeight: 800, color: t.text }}>{item.title}</div>
+                          <div style={{ fontSize: '11px', color: t.textMuted }}>{item.sub}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <button onClick={() => { setMobileMenuOpen(false); navigateToPage('about'); }} style={{ textAlign: 'left', background: 'transparent', border: 'none', color: t.text, fontSize: '18px', fontWeight: 700, cursor: 'pointer', padding: '6px 0' }}>
                 About
               </button>
-              <button onClick={() => { setMobileMenuOpen(false); scrollTo('community'); }} style={{ textAlign: 'left', background: 'transparent', border: 'none', color: t.text, fontSize: '18px', fontWeight: 700, cursor: 'pointer' }}>
+              <button onClick={() => { setMobileMenuOpen(false); scrollTo('community'); }} style={{ textAlign: 'left', background: 'transparent', border: 'none', color: t.text, fontSize: '18px', fontWeight: 700, cursor: 'pointer', padding: '6px 0' }}>
                 Insights
               </button>
-              <button onClick={() => { setMobileMenuOpen(false); navigateToPage('pricing'); }} style={{ textAlign: 'left', background: 'transparent', border: 'none', color: t.text, fontSize: '18px', fontWeight: 700, cursor: 'pointer' }}>
+              <button onClick={() => { setMobileMenuOpen(false); navigateToPage('pricing'); }} style={{ textAlign: 'left', background: 'transparent', border: 'none', color: t.text, fontSize: '18px', fontWeight: 700, cursor: 'pointer', padding: '6px 0' }}>
                 Pricing
               </button>
-              <button onClick={() => { setMobileMenuOpen(false); window.history.pushState(null, '', '/blog'); window.dispatchEvent(new Event('popstate')); }} style={{ textAlign: 'left', background: 'transparent', border: 'none', color: t.text, fontSize: '18px', fontWeight: 700, cursor: 'pointer' }}>
+              <button onClick={() => { setMobileMenuOpen(false); window.history.pushState(null, '', '/blog'); window.dispatchEvent(new Event('popstate')); }} style={{ textAlign: 'left', background: 'transparent', border: 'none', color: t.text, fontSize: '18px', fontWeight: 700, cursor: 'pointer', padding: '6px 0' }}>
                 Blog
               </button>
+
+              {/* Theme Switcher in Mobile Drawer */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderRadius: '16px', background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', border: `1px solid ${t.border}`, marginTop: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  {isDark ? <Moon size={18} color="#10b981" /> : <Sun size={18} color="#f59e0b" />}
+                  <span style={{ fontSize: '15px', fontWeight: 800, color: t.text }}>Appearance</span>
+                </div>
+                <button 
+                  onClick={toggleTheme} 
+                  style={{ 
+                    background: isDark ? '#10b981' : '#1e293b', 
+                    color: '#ffffff', 
+                    border: 'none', 
+                    borderRadius: '100px', 
+                    padding: '7px 16px', 
+                    fontSize: '13px', 
+                    fontWeight: 800, 
+                    cursor: 'pointer'
+                  }}
+                >
+                  {isDark ? 'Dark Mode 🌙' : 'Light Mode ☀️'}
+                </button>
+              </div>
             </div>
 
-            <div style={{ padding: '24px', borderTop: `1px solid ${t.border}`, display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {deviceOS === 'ios' || deviceOS === 'mac' ? (
-                <button onClick={() => { setMobileMenuOpen(false); setShowIosGuideModal(true); }} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#27272a', color: '#fff', padding: '16px', borderRadius: '100px', fontSize: '16px', fontWeight: 700, border: 'none', cursor: 'pointer' }}>
-                  Download on iOS
+            <div style={{ padding: '20px 24px', borderTop: `1px solid ${t.border}`, display: 'flex', flexDirection: 'column', gap: '11px', background: isDark ? 'rgba(15, 23, 42, 0.4)' : 'rgba(255, 255, 255, 0.4)' }}>
+              {/* Google Play Store button - Always available */}
+              <a
+                href={DISTRIBUTION_CONFIG.PLAY_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '10px',
+                  background: '#090d16',
+                  color: '#ffffff',
+                  padding: '14px 20px',
+                  borderRadius: '100px',
+                  fontSize: '15px',
+                  fontWeight: 800,
+                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                  boxShadow: '0 4px 14px rgba(0, 0, 0, 0.3)',
+                  textDecoration: 'none',
+                  cursor: 'pointer',
+                  boxSizing: 'border-box'
+                }}
+              >
+                <GooglePlayIcon size={20} />
+                <span>Get on Google Play</span>
+              </a>
+
+              {/* Direct APK Download */}
+              <button 
+                onClick={() => { setMobileMenuOpen(false); handleDownloadApk(); }} 
+                style={{ 
+                  width: '100%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  gap: '8px', 
+                  background: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)', 
+                  color: t.text, 
+                  padding: '13px 20px', 
+                  borderRadius: '100px', 
+                  fontSize: '14px', 
+                  fontWeight: 700, 
+                  border: `1px solid ${t.border}`, 
+                  cursor: 'pointer' 
+                }}
+              >
+                <Download size={16} color="#10b981" />
+                <span>Download Direct APK</span>
+              </button>
+
+              {/* iOS option if on apple device */}
+              {(deviceOS === 'ios' || deviceOS === 'mac') && (
+                <button 
+                  onClick={() => { setMobileMenuOpen(false); setShowIosGuideModal(true); }} 
+                  style={{ 
+                    width: '100%', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    gap: '8px', 
+                    background: 'transparent', 
+                    color: t.textSub, 
+                    padding: '10px 16px', 
+                    borderRadius: '100px', 
+                    fontSize: '13px', 
+                    fontWeight: 600, 
+                    border: `1px dashed ${t.border}`, 
+                    cursor: 'pointer' 
+                  }}
+                >
+                  <Smartphone size={15} color="#10b981" />
+                  <span>Install on iOS (PWA Guide)</span>
                 </button>
-              ) : (
-                <>
-                  <a
-                    href={DISTRIBUTION_CONFIG.PLAY_STORE_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setMobileMenuOpen(false)}
-                    style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#0a0a0a', color: '#fff', padding: '15px', borderRadius: '100px', fontSize: '15px', fontWeight: 700, border: '1px solid rgba(255,255,255,0.2)', textDecoration: 'none', cursor: 'pointer', boxSizing: 'border-box' }}
-                  >
-                    <GooglePlayIcon size={20} />
-                    <span>Get on Google Play</span>
-                  </a>
-                  <button onClick={() => { setMobileMenuOpen(false); handleDownloadApk(); }} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#27272a', color: '#fff', padding: '14px', borderRadius: '100px', fontSize: '14.5px', fontWeight: 700, border: 'none', cursor: 'pointer' }}>
-                    <Download size={16} color="#10b981" />
-                    <span>Download Direct APK</span>
-                  </button>
-                </>
               )}
-              <button onClick={() => { setMobileMenuOpen(false); startFreshQuiz(); }} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#ecfccb', color: '#3f6212', padding: '16px', borderRadius: '100px', fontSize: '16px', fontWeight: 700, border: 'none', cursor: 'pointer' }}>
+
+              {/* Take Free Assessment */}
+              <button 
+                onClick={() => { setMobileMenuOpen(false); startFreshQuiz(); }} 
+                style={{ 
+                  width: '100%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  background: '#ecfccb', 
+                  color: '#3f6212', 
+                  padding: '14px 20px', 
+                  borderRadius: '100px', 
+                  fontSize: '15px', 
+                  fontWeight: 800, 
+                  border: 'none', 
+                  cursor: 'pointer' 
+                }}
+              >
                 Take Free Assessment
               </button>
             </div>
@@ -3815,8 +4071,8 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
 
       {/* ═══════════════ HERO SECTION (INNERHEAL STYLE ANIMATED BACKGROUND) ═══════════════ */}
-      <div style={{ paddingTop: '90px', margin: '0 auto', width: 'min(1440px, 100%)' }}>
-        <section style={{ borderRadius: '2.5rem', border: `1px solid ${t.border}`, position: 'relative', paddingTop: '56px', paddingBottom: '32px', background: isDark ? 'linear-gradient(180deg, #111812 0%, #162018 100%)' : 'linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%)', boxShadow: isDark ? '0 20px 50px rgba(0,0,0,0.5)' : '0 20px 50px rgba(16,185,129,0.08)' }}>
+      <div className="landing-hero-container">
+        <section style={{ borderRadius: '2.5rem', border: `1px solid ${t.border}`, position: 'relative', paddingTop: '42px', paddingBottom: '32px', background: isDark ? 'linear-gradient(180deg, #111812 0%, #162018 100%)' : 'linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%)', boxShadow: isDark ? '0 20px 50px rgba(0,0,0,0.5)' : '0 20px 50px rgba(16,185,129,0.08)' }}>
           
           {/* Glowing Animated Background Canvas (InnerHeal Mesh & Aura) */}
           <div style={{ position: 'absolute', inset: 0, zIndex: 0, overflow: 'hidden', borderRadius: '2.5rem', pointerEvents: 'none' }}>
@@ -3876,11 +4132,12 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   <div style={{ width: '22px', height: '22px', background: '#10b981', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Sparkles size={12} color="white" />
                   </div>
-                  <span style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', color: isDark ? '#a7f3d0' : '#166534' }}>AI FINANCIAL WELLNESS APP · WEB & ANDROID</span>
+                  <span style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', color: isDark ? '#a7f3d0' : '#166534' }}>ZENBUDGET TRACKER · #1 AI EXPENSE TRACKER &amp; DAILY BUDGET APP</span>
                 </div>
 
                 {/* Main Hero Title with Typing Animation */}
                 <h1 className="hero-animate hero-title" style={{ fontSize: 'clamp(2.4rem, 5vw, 3.8rem)', fontWeight: 900, lineHeight: 1.08, letterSpacing: '-0.03em', marginBottom: '20px', color: t.text }}>
+                  <span style={{ display: 'block', fontSize: 'clamp(14px, 2vw, 18px)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.14em', color: '#10b981', marginBottom: '10px' }}>ZenBudget Tracker</span>
                   Stop Wondering Where<br />Your Money{' '}
                   <span style={{ color: '#ef4444', display: 'inline-flex', alignItems: 'center', fontWeight: 900 }}>
                     <span>{typedText}</span>
@@ -5075,7 +5332,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           {/* Brand Left Column */}
           <div style={{ flex: '1 1 320px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-              <img src="/logo.png" alt="ZenBudget" style={{ width: '38px', height: '38px', borderRadius: '12px' }} />
+              <img src="/icon.png" alt="ZenBudget" style={{ width: '38px', height: '38px', borderRadius: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }} />
               <span style={{ fontSize: '22px', fontWeight: 900, color: t.text, letterSpacing: '-0.02em' }}>ZenBudget</span>
             </div>
             <p style={{ color: t.textSub, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '340px', marginBottom: '28px' }}>
@@ -5096,21 +5353,21 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 rel="noopener noreferrer"
                 title="Instagram (@zenbudget_tracker)"
                 style={{
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '10px',
-                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
-                  border: `1px solid ${t.border}`,
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '12px',
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#ffffff',
+                  border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid rgba(0, 0, 0, 0.08)',
+                  boxShadow: isDark ? '0 4px 14px rgba(0, 0, 0, 0.3)' : '0 2px 10px rgba(0, 0, 0, 0.05)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   textDecoration: 'none',
-                  fontSize: '18px',
-                  transition: 'transform 0.2s, background-color 0.2s'
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease'
                 }}
                 className="hover-lift"
               >
-                📸
+                <InstagramIcon size={21} />
               </a>
               <a
                 href="https://www.facebook.com/people/ZenBudget/61592667931013/"
@@ -5118,21 +5375,21 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 rel="noopener noreferrer"
                 title="Facebook (ZenBudget)"
                 style={{
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '10px',
-                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
-                  border: `1px solid ${t.border}`,
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '12px',
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#ffffff',
+                  border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid rgba(0, 0, 0, 0.08)',
+                  boxShadow: isDark ? '0 4px 14px rgba(0, 0, 0, 0.3)' : '0 2px 10px rgba(0, 0, 0, 0.05)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   textDecoration: 'none',
-                  fontSize: '18px',
-                  transition: 'transform 0.2s, background-color 0.2s'
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease'
                 }}
                 className="hover-lift"
               >
-                👥
+                <FacebookIcon size={21} color="#1877F2" />
               </a>
               <a
                 href="https://www.youtube.com/channel/UCa2ewl3C6Q3qGTXjbAMeAtA"
@@ -5140,21 +5397,21 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 rel="noopener noreferrer"
                 title="YouTube Channel"
                 style={{
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '10px',
-                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
-                  border: `1px solid ${t.border}`,
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '12px',
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#ffffff',
+                  border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid rgba(0, 0, 0, 0.08)',
+                  boxShadow: isDark ? '0 4px 14px rgba(0, 0, 0, 0.3)' : '0 2px 10px rgba(0, 0, 0, 0.05)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   textDecoration: 'none',
-                  fontSize: '18px',
-                  transition: 'transform 0.2s, background-color 0.2s'
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease'
                 }}
                 className="hover-lift"
               >
-                ▶️
+                <YouTubeIcon size={22} color="#FF0000" />
               </a>
               <a
                 href="https://www.tiktok.com/@zenbudget_tracker?lang=en-GB"
@@ -5162,21 +5419,21 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 rel="noopener noreferrer"
                 title="TikTok (@zenbudget_tracker)"
                 style={{
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '10px',
-                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
-                  border: `1px solid ${t.border}`,
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '12px',
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#ffffff',
+                  border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid rgba(0, 0, 0, 0.08)',
+                  boxShadow: isDark ? '0 4px 14px rgba(0, 0, 0, 0.3)' : '0 2px 10px rgba(0, 0, 0, 0.05)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   textDecoration: 'none',
-                  fontSize: '18px',
-                  transition: 'transform 0.2s, background-color 0.2s'
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease'
                 }}
                 className="hover-lift"
               >
-                🎵
+                <TikTokIcon size={20} color={isDark ? '#00f2fe' : '#111827'} />
               </a>
               <a
                 href="https://twitter.com/ZenBudgetApp"
@@ -5184,23 +5441,22 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 rel="noopener noreferrer"
                 title="X / Twitter (@ZenBudgetApp)"
                 style={{
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '10px',
-                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
-                  border: `1px solid ${t.border}`,
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '12px',
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#ffffff',
+                  border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid rgba(0, 0, 0, 0.08)',
+                  boxShadow: isDark ? '0 4px 14px rgba(0, 0, 0, 0.3)' : '0 2px 10px rgba(0, 0, 0, 0.05)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: t.text,
+                  color: isDark ? '#ffffff' : '#111827',
                   textDecoration: 'none',
-                  fontSize: '15px',
-                  fontWeight: 800,
-                  transition: 'transform 0.2s, background-color 0.2s'
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease'
                 }}
                 className="hover-lift"
               >
-                𝕏
+                <XIcon size={18} color={isDark ? '#ffffff' : '#111827'} />
               </a>
             </div>
           </div>
@@ -5273,28 +5529,24 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               {
                 platform: 'YouTube',
                 handle: '@channel/UCa2ewl3C6Q3qGTXjbAMeAtA',
-                icon: '▶️',
                 url: 'https://www.youtube.com/channel/UCa2ewl3C6Q3qGTXjbAMeAtA',
                 color: '#ff0000'
               },
               {
                 platform: 'TikTok',
                 handle: '@zenbudget_tracker',
-                icon: '🎵',
                 url: 'https://www.tiktok.com/@zenbudget_tracker?lang=en-GB',
                 color: '#00f2fe'
               },
               {
                 platform: 'Instagram',
                 handle: '@zenbudget_tracker',
-                icon: '📸',
                 url: 'https://www.instagram.com/zenbudget_tracker/',
                 color: '#e1306c'
               },
               {
                 platform: 'Facebook',
                 handle: '@ZenBudget',
-                icon: '👥',
                 url: 'https://www.facebook.com/people/ZenBudget/61592667931013/',
                 color: '#1877f2'
               }
@@ -5321,17 +5573,18 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '11px' }}>
                   <div style={{
-                    width: '38px',
-                    height: '38px',
-                    borderRadius: '12px',
-                    background: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)',
-                    border: `1px solid ${t.border}`,
+                    width: '42px',
+                    height: '42px',
+                    borderRadius: '13px',
+                    background: isDark ? `${social.color}22` : `${social.color}12`,
+                    border: `1px solid ${social.color}${isDark ? '44' : '28'}`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '18px'
+                    flexShrink: 0,
+                    transition: 'transform 0.2s ease'
                   }}>
-                    {social.icon}
+                    {renderSocialIcon(social.platform, 22, social.platform === 'TikTok' ? (isDark ? '#00f2fe' : '#111827') : undefined)}
                   </div>
                   <div>
                     <h4 style={{ fontSize: '13.5px', fontWeight: 800, margin: 0, color: t.text }}>{social.platform}</h4>
@@ -5347,7 +5600,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   gap: '4px',
                   padding: '6px 12px',
                   borderRadius: '10px',
-                  background: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
+                  background: isDark ? `${social.color}15` : `${social.color}0d`,
                   color: social.color,
                   fontWeight: 800,
                   fontSize: '11.5px',
@@ -5437,7 +5690,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               {/* Top Row: App Logo + Title + Ratings + FREE Badge */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', paddingRight: '32px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <img src="/logo.png" alt="ZenBudget" style={{ width: '42px', height: '42px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(16,185,129,0.3)' }} />
+                  <img src="/icon.png" alt="ZenBudget" style={{ width: '42px', height: '42px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(16,185,129,0.3)' }} />
                   <div>
                     <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: t.text }}>ZenBudget</h3>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: t.textMuted, marginTop: '2px' }}>
@@ -5598,8 +5851,8 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
               {/* App Brand Header */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
-                <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 20px rgba(16,185,129,0.4)', flexShrink: 0, overflow: 'hidden' }}>
-                  <img src="/logo.png" alt="ZenBudget Logo" style={{ width: '34px', height: '34px', borderRadius: '8px', objectFit: 'cover' }} />
+                <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: '#090d16', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 20px rgba(0,0,0,0.4)', flexShrink: 0, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.15)' }}>
+                  <img src="/icon.png" alt="ZenBudget Logo" style={{ width: '38px', height: '38px', borderRadius: '10px', objectFit: 'contain' }} />
                 </div>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -5755,8 +6008,8 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               </button>
               
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px' }}>
-                  <img src="/logo.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: '#090d16', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2px', border: '1px solid rgba(255,255,255,0.15)' }}>
+                  <img src="/icon.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '10px' }} />
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#fff' }}>ZenBudget App</h3>
@@ -5815,7 +6068,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           <div className="hero-animate" style={{ width: '100%', maxWidth: '440px', background: isDark ? '#161d18' : '#ffffff', borderRadius: '28px', padding: '28px', boxShadow: '0 -20px 40px rgba(0,0,0,0.5)', border: `1px solid ${t.border}`, display: 'flex', flexDirection: 'column', gap: '20px' }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <img src="/logo.png" alt="ZenBudget" style={{ width: '36px', height: '36px', borderRadius: '10px' }} />
+                <img src="/icon.png" alt="ZenBudget" style={{ width: '36px', height: '36px', borderRadius: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }} />
                 <h3 style={{ fontSize: '17px', fontWeight: 800, margin: 0, color: t.text }}>Install on iPhone / iPad</h3>
               </div>
               <button onClick={() => setShowIosGuideModal(false)} style={{ background: 'transparent', border: 'none', color: t.text, cursor: 'pointer' }}>

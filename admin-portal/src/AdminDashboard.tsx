@@ -35,6 +35,7 @@ import {
   saveRemoteLandingAssets,
   resolveAssetPreviewUrl
 } from './utils/landingAssetsHelper';
+import { renderSocialIcon } from './components/SocialIcons';
 
 interface RatingRecord {
   id: string;
@@ -3663,7 +3664,9 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                       >
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <span style={{ fontSize: '24px' }}>{link.icon}</span>
+                            <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#090d16', border: '1px solid rgba(255, 255, 255, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              {renderSocialIcon(link.platform, 20)}
+                            </div>
                             <div>
                               <h5 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#fff' }}>{link.platform}</h5>
                               <span style={{ fontSize: '0.75rem', color: '#a855f7', fontWeight: 700 }}>Something Labs</span>

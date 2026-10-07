@@ -131,7 +131,7 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
             const res = await parseAIBankStatement(base64, mime, (msg, pct) => {
               setStatusMessage(msg);
               setProgressPercent(pct);
-            });
+            }, filePassword);
             if (res.transactions.length === 0) {
               notify('No visible transactions could be extracted. Please upload a clearer photo of your passbook or statement.', 'warning');
             }

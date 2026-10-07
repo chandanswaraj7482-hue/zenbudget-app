@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ExternalLink, Sparkles, Building2 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import { renderSocialIcon } from './SocialIcons';
 
 interface SocialLinkItem {
   id?: string;
@@ -174,14 +175,15 @@ export const FollowUsView: React.FC<FollowUsViewProps> = ({ onBack }) => {
                     width: '46px',
                     height: '46px',
                     borderRadius: '14px',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    background: `${social.color || '#10b981'}15`,
+                    border: `1px solid ${social.color || '#10b981'}30`,
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '22px'
+                    flexShrink: 0
                   }}>
-                    {social.icon}
+                    {renderSocialIcon(social.platform, 24)}
                   </div>
                   <div style={{ textAlign: 'left' }}>
                     <h4 style={{ fontSize: '15px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>

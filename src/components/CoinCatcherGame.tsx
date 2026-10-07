@@ -1,6 +1,15 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Gamepad2, Trophy, RotateCcw, Play, Coins, Share2, Copy, Check, Sparkles } from 'lucide-react';
-import { playCoinSound, playDeleteSound, playAddTransactionSound, playDangerHitSound, playGameOverSound, playPowerupSound } from '../utils/audio';
+import { Gamepad2, Trophy, RotateCcw, Play, Coins, Share2, Copy, Check, Sparkles, Shield, AlertTriangle, Flame } from 'lucide-react';
+import {
+  playCoinSound,
+  playDeleteSound,
+  playAddTransactionSound,
+  playDangerHitSound,
+  playGameOverSound,
+  playPowerupSound,
+  playNotificationSound,
+  playCelebrationSound
+} from '../utils/audio';
 
 interface CoinCatcherGameProps {
   currencySymbol?: string;
@@ -10,15 +19,22 @@ interface CoinCatcherGameProps {
 }
 
 interface FallingItem {
+  id: number;
   x: number;
   y: number;
   vx?: number;
-  type: 'coin' | 'expense' | 'heart';
+  type: 'coin' | 'expense' | 'heart' | 'scam' | 'bomb' | 'shield' | 'magnet';
   value: number;
   emoji: string;
   label: string;
   speed: number;
   size: number;
+  startX?: number;
+  oscillation?: { amp: number; freq: number; phase: number };
+  fuseTimer?: number;
+  isDetonating?: boolean;
+  detonationRadius?: number;
+  detonationLife?: number;
 }
 
 interface Particle {
@@ -103,6 +119,10 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
     score: number;
     lives: number;
     invulnerableTimer: number;
+    hasShield: boolean;
+    magnetTimer: number;
+    crashTimer: number;
+    nextCrashScore: number;
     items: FallingItem[];
     particles: Particle[];
     floatingTexts: FloatingText[];
@@ -115,12 +135,17 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
     coinsCollected: number;
     trapsDodged: number;
     frameCount: number;
+    nextItemId: number;
   }>({
-    playerX: 160,
-    playerWidth: 52,
+    playerX: 175,
+    playerWidth: 44,
     score: 0,
     lives: 3,
     invulnerableTimer: 0,
+    hasShield: false,
+    magnetTimer: 0,
+    crashTimer: 0,
+    nextCrashScore: 250,
     items: [],
     particles: [],
     floatingTexts: [],
@@ -132,11 +157,13 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
     maxCombo: 0,
     coinsCollected: 0,
     trapsDodged: 0,
-    frameCount: 0
+    frameCount: 0,
+    nextItemId: 1
   });
 
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
+  const [hasShield, setHasShield] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [started, setStarted] = useState(false);
   const [highScore, setHighScore] = useState(() => {
@@ -205,80 +232,17 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
     window.open(waUrl, '_blank');
   };
 
-  const spawnItem = useCallback((canvasWidth: number): FallingItem => {
-    const gs = gameStateRef.current;
-    
-    // 🔥 Intense danger trap ratio (62% - 78% danger obstacles to dodge!)
-    let trapChance = 0.62;
-    if (gs.score > 800) trapChance = 0.78;
-    else if (gs.score > 300) trapChance = 0.70;
-    
-    // Rare 2.5% chance of life recovery shield
-    const heartChance = gs.lives < 3 ? 0.035 : 0.01;
-    const roll = Math.random();
-
-    // ⚡ Fast, intense hardcore falling speed (Starts at 3.2 - 5.2 px/frame)
-    const diffMultiplier = 2.4 + Math.min(2.5, (gs.difficulty - 1) * 0.25);
-
-    if (roll < heartChance) {
-      // 💖 Extra Heart / Shield
-      return {
-        x: 25 + Math.random() * (canvasWidth - 50),
-        y: -30,
-        vx: 0,
-        type: 'heart',
-        value: 50,
-        emoji: '💖',
-        label: 'Health Shield',
-        speed: (2.4 + Math.random() * 0.8) * diffMultiplier,
-        size: 26
-      };
-    } else if (roll < heartChance + trapChance) {
-      // ⚠️ Trap / Danger item (Impulse buys, card fees, F&O gamble, late fees)
-      const pool = FINANCIAL_ITEMS.expenses;
-      const exp = pool[Math.floor(Math.random() * pool.length)];
-      return {
-        x: 25 + Math.random() * (canvasWidth - 50),
-        y: -30,
-        vx: (Math.random() - 0.5) * 1.6, // Lateral drift for tricky reflexes
-        type: 'expense',
-        value: -1,
-        emoji: exp.emoji,
-        label: exp.label,
-        speed: (2.8 + Math.random() * 1.1) * diffMultiplier,
-        size: exp.size
-      };
-    } else {
-      // 🪙 Positive Coins / Wealth items
-      const pool = FINANCIAL_ITEMS.coins;
-      const coinRoll = Math.random();
-      const idx = coinRoll < 0.40 ? 0 : coinRoll < 0.65 ? 1 : coinRoll < 0.82 ? 2 : coinRoll < 0.92 ? 3 : coinRoll < 0.97 ? 4 : 5;
-      const coin = pool[idx];
-      return {
-        x: 25 + Math.random() * (canvasWidth - 50),
-        y: -30,
-        vx: (Math.random() - 0.5) * 0.8,
-        type: 'coin',
-        value: coin.value,
-        emoji: coin.emoji,
-        label: coin.label,
-        speed: (2.6 + Math.random() * 0.9) * diffMultiplier,
-        size: coin.size
-      };
-    }
-  }, []);
-
   const createParticles = useCallback((x: number, y: number, color: string, count: number) => {
     const gs = gameStateRef.current;
     for (let i = 0; i < count; i++) {
       gs.particles.push({
         x,
         y,
-        vx: (Math.random() - 0.5) * 7,
-        vy: -Math.random() * 5 - 1,
-        life: 22 + Math.random() * 16,
+        vx: (Math.random() - 0.5) * 6,
+        vy: -Math.random() * 4 - 1,
+        life: 20 + Math.random() * 15,
         color,
-        size: 2.5 + Math.random() * 3.5
+        size: 2.5 + Math.random() * 3
       });
     }
   }, []);
@@ -290,16 +254,255 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
       y,
       text,
       color,
-      life: 36
+      life: 38
     });
+  }, []);
+
+  // 🎯 TACTICAL FORMATIONS SPAWNER (NORMAL SPEED, HIGH SKILL & TACTICS)
+  const spawnFormation = useCallback((canvasWidth: number) => {
+    const gs = gameStateRef.current;
+    const isCrash = gs.crashTimer > 0;
+
+    // Normal, smooth, readable falling speed (2.0 - 2.5 px/frame max)
+    const baseSpeed = isCrash ? 2.3 : 2.05 + Math.min(0.35, (gs.difficulty - 1) * 0.05);
+
+    const roll = Math.random();
+
+    // 1. 🥪 THE SANDWICH TRAP (30% chance): High-value coin closely flanked by 2 traps!
+    // Player has to thread the needle to grab the coin!
+    if (roll < 0.30) {
+      const centerX = 65 + Math.random() * (canvasWidth - 130);
+      const coinPool = FINANCIAL_ITEMS.coins;
+      const coinItem = coinPool[Math.floor(2 + Math.random() * 4)]; // 60, 100, 150, or 250
+      
+      // Center Coin
+      gs.items.push({
+        id: gs.nextItemId++,
+        x: centerX,
+        y: -30,
+        type: 'coin',
+        value: coinItem.value,
+        emoji: coinItem.emoji,
+        label: coinItem.label,
+        speed: baseSpeed,
+        size: coinItem.size
+      });
+
+      // Left Flanking Trap (40px gap)
+      gs.items.push({
+        id: gs.nextItemId++,
+        x: centerX - 42,
+        y: -30,
+        type: 'expense',
+        value: -1,
+        emoji: '💳',
+        label: '36% Card Fee',
+        speed: baseSpeed,
+        size: 24
+      });
+
+      // Right Flanking Trap (40px gap)
+      gs.items.push({
+        id: gs.nextItemId++,
+        x: centerX + 42,
+        y: -30,
+        type: 'expense',
+        value: -1,
+        emoji: '💸',
+        label: 'Impulse Buy',
+        speed: baseSpeed,
+        size: 24
+      });
+      return;
+    }
+
+    // 2. 〰️ OSCILLATING SWEEPER (20% chance): Hazard swings back and forth across lanes
+    if (roll < 0.50) {
+      const startX = 60 + Math.random() * (canvasWidth - 120);
+      gs.items.push({
+        id: gs.nextItemId++,
+        x: startX,
+        y: -30,
+        type: 'expense',
+        value: -1,
+        emoji: '⚡',
+        label: 'Late Fee Fine',
+        speed: baseSpeed * 0.95,
+        size: 25,
+        startX,
+        oscillation: {
+          amp: 48 + Math.random() * 18,
+          freq: 0.048,
+          phase: Math.random() * Math.PI * 2
+        }
+      });
+
+      // Also spawn a regular coin on a different column
+      const safeCoinX = startX > canvasWidth / 2 ? 45 + Math.random() * 60 : canvasWidth - 105 + Math.random() * 60;
+      gs.items.push({
+        id: gs.nextItemId++,
+        x: safeCoinX,
+        y: -35,
+        type: 'coin',
+        value: 35,
+        emoji: '📈',
+        label: 'SIP Growth',
+        speed: baseSpeed,
+        size: 26
+      });
+      return;
+    }
+
+    // 3. 💣 DEBT BOMB BLAST (15% chance): Drops slowly, but explodes near the ground!
+    if (roll < 0.65) {
+      const bombX = 45 + Math.random() * (canvasWidth - 90);
+      gs.items.push({
+        id: gs.nextItemId++,
+        x: bombX,
+        y: -30,
+        type: 'bomb',
+        value: -1,
+        emoji: '💣',
+        label: 'Debt Bomb',
+        speed: baseSpeed * 0.9,
+        size: 27,
+        fuseTimer: 0
+      });
+
+      // Tempting coin nearby
+      const coinX = bombX > canvasWidth / 2 ? 40 + Math.random() * 70 : canvasWidth - 110 + Math.random() * 70;
+      gs.items.push({
+        id: gs.nextItemId++,
+        x: coinX,
+        y: -30,
+        type: 'coin',
+        value: 60,
+        emoji: '🛡️',
+        label: 'Emergency Fund',
+        speed: baseSpeed,
+        size: 27
+      });
+      return;
+    }
+
+    // 4. 🎣 SCAM / RUGPULL BAIT (12% chance): Deceptive coin that costs points & shatters streak!
+    if (roll < 0.77) {
+      const scamX = 40 + Math.random() * (canvasWidth - 80);
+      gs.items.push({
+        id: gs.nextItemId++,
+        x: scamX,
+        y: -30,
+        type: 'scam',
+        value: -75,
+        emoji: '🎣',
+        label: 'Fake Ponzi Scam',
+        speed: baseSpeed,
+        size: 25
+      });
+
+      // Genuine coin somewhere else
+      const realX = scamX > canvasWidth / 2 ? 45 + Math.random() * 70 : canvasWidth - 115 + Math.random() * 70;
+      gs.items.push({
+        id: gs.nextItemId++,
+        x: realX,
+        y: -32,
+        type: 'coin',
+        value: 40,
+        emoji: '🪙',
+        label: 'Daily Savings',
+        speed: baseSpeed,
+        size: 25
+      });
+      return;
+    }
+
+    // 5. 🧱 WALL WITH ONE ESCAPE SLIT (13% chance): 4 lanes, 3 blocked by hazards, 1 open corridor!
+    if (roll < 0.90) {
+      const gapIndex = Math.floor(Math.random() * 4); // 0, 1, 2, 3
+      const step = (canvasWidth - 50) / 4;
+      for (let i = 0; i < 4; i++) {
+        const laneX = 30 + i * step + step / 2;
+        if (i !== gapIndex) {
+          gs.items.push({
+            id: gs.nextItemId++,
+            x: laneX,
+            y: -30,
+            type: 'expense',
+            value: -1,
+            emoji: '⚠️',
+            label: 'Zombie Sub',
+            speed: baseSpeed * 0.95,
+            size: 24
+          });
+        } else {
+          // Put reward coin in the open gap!
+          gs.items.push({
+            id: gs.nextItemId++,
+            x: laneX,
+            y: -30,
+            type: 'coin',
+            value: 50,
+            emoji: '💎',
+            label: 'Safe Passage',
+            speed: baseSpeed * 0.95,
+            size: 28
+          });
+        }
+      }
+      return;
+    }
+
+    // 6. 🎁 POWER-UP OR EXTRA HEALTH (10% chance)
+    const powerRoll = Math.random();
+    if (gs.lives < 3 && powerRoll < 0.45) {
+      gs.items.push({
+        id: gs.nextItemId++,
+        x: 40 + Math.random() * (canvasWidth - 80),
+        y: -30,
+        type: 'heart',
+        value: 50,
+        emoji: '💖',
+        label: 'Health Shield',
+        speed: baseSpeed,
+        size: 26
+      });
+    } else if (powerRoll < 0.75 && !gs.hasShield) {
+      gs.items.push({
+        id: gs.nextItemId++,
+        x: 40 + Math.random() * (canvasWidth - 80),
+        y: -30,
+        type: 'shield',
+        value: 40,
+        emoji: '🛡️',
+        label: 'Emergency Buffer',
+        speed: baseSpeed,
+        size: 26
+      });
+    } else {
+      gs.items.push({
+        id: gs.nextItemId++,
+        x: 40 + Math.random() * (canvasWidth - 80),
+        y: -30,
+        type: 'magnet',
+        value: 30,
+        emoji: '🧲',
+        label: 'Compound Magnet',
+        speed: baseSpeed,
+        size: 26
+      });
+    }
   }, []);
 
   const resetGame = useCallback(() => {
     const gs = gameStateRef.current;
-    gs.playerX = 160;
+    gs.playerX = 175;
     gs.score = 0;
     gs.lives = 3;
     gs.invulnerableTimer = 0;
+    gs.hasShield = false;
+    gs.magnetTimer = 0;
+    gs.crashTimer = 0;
+    gs.nextCrashScore = 250;
     gs.items = [];
     gs.particles = [];
     gs.floatingTexts = [];
@@ -314,6 +517,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
     gs.frameCount = 0;
     setScore(0);
     setLives(3);
+    setHasShield(false);
     setGameOver(false);
     setStarted(true);
     setCombo(0);
@@ -323,10 +527,10 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
     const canvas = canvasRef.current;
     if (!canvas) return;
     const gs = gameStateRef.current;
-    gs.playerX = Math.max(30, Math.min(canvas.width - 30, gs.playerX + deltaX));
+    gs.playerX = Math.max(26, Math.min(canvas.width - 26, gs.playerX + deltaX));
   };
 
-  // Game loop
+  // 🕹️ GAME LOOP
   useEffect(() => {
     if (!isExpanded || !started || gameOver) return;
 
@@ -347,45 +551,148 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         gs.invulnerableTimer--;
       }
 
-      // Dynamic difficulty scaling (escalates fast every 300 frames)
-      gs.difficulty = 1 + Math.floor(gs.frameCount / 320) * 0.25;
+      // Magnet timer tick down
+      if (gs.magnetTimer > 0) {
+        gs.magnetTimer--;
+      }
 
-      // Spawning with rapid intense cadence (Hardcore mode)
+      // Market Crash Event logic
+      if (gs.crashTimer > 0) {
+        gs.crashTimer--;
+        if (gs.crashTimer === 0) {
+          // Crash survived! Big reward!
+          gs.score += 200;
+          gs.hasShield = true;
+          setScore(gs.score);
+          setHasShield(true);
+          playCelebrationSound();
+          createFloatingText(W / 2, H / 2 - 20, `🎉 CRASH SURVIVED! +${currencySymbol}200 & 🛡️ SHIELD!`, '#34d399');
+          createParticles(W / 2, H / 2, '#34d399', 24);
+        }
+      } else if (gs.score >= gs.nextCrashScore) {
+        // Trigger Market Crash
+        gs.crashTimer = 480; // 8 seconds at 60 FPS
+        gs.nextCrashScore += 350;
+        playNotificationSound('warning');
+        createFloatingText(W / 2, 60, `🚨 MARKET CRASH! SURVIVE 8 SECONDS!`, '#f43f5e');
+      }
+
+      // Gentle difficulty scaling
+      gs.difficulty = 1 + Math.floor(gs.score / 250) * 0.15;
+
+      // Spawning with steady cadence (Normal speed, high tactics)
       gs.spawnTimer++;
-      const spawnRate = Math.max(16, 26 - Math.floor(gs.difficulty * 2));
-      if (gs.spawnTimer >= spawnRate) {
-        gs.items.push(spawnItem(W));
+      const spawnCadence = gs.crashTimer > 0 ? 32 : Math.max(36, 48 - Math.floor(gs.difficulty * 2));
+      if (gs.spawnTimer >= spawnCadence) {
+        spawnFormation(W);
         gs.spawnTimer = 0;
       }
 
       // Update items
       gs.items = gs.items.filter(item => {
+        // Vertical descent at normal speed
         item.y += item.speed;
-        if (item.vx) {
+
+        // Oscillating trajectory (sine wave)
+        if (item.oscillation && item.startX !== undefined) {
+          const osc = item.oscillation;
+          item.x = item.startX + Math.sin(gs.frameCount * osc.freq + osc.phase) * osc.amp;
+        } else if (item.vx) {
           item.x += item.vx;
-          if (item.x < 20) { item.x = 20; item.vx = Math.abs(item.vx); }
-          else if (item.x > W - 20) { item.x = W - 20; item.vx = -Math.abs(item.vx); }
+          if (item.x < 24) { item.x = 24; item.vx = Math.abs(item.vx); }
+          else if (item.x > W - 24) { item.x = W - 24; item.vx = -Math.abs(item.vx); }
+        }
+
+        // Magnetism: if magnet is active, gently attract positive coins within 85px
+        if (gs.magnetTimer > 0 && (item.type === 'coin' || item.type === 'shield' || item.type === 'heart')) {
+          const dist = Math.abs(gs.playerX - item.x);
+          if (dist < 85 && item.y < H - 55) {
+            item.x += (gs.playerX - item.x) * 0.08;
+          }
         }
 
         const playerY = H - 55;
         const playerLeft = gs.playerX - gs.playerWidth / 2;
         const playerRight = gs.playerX + gs.playerWidth / 2;
 
-        const isVerticallyAligned = item.y + item.size / 2 > playerY && item.y - item.size / 2 < playerY + 38;
+        const isVerticallyAligned = item.y + item.size / 2 > playerY && item.y - item.size / 2 < playerY + 36;
 
-        // Collision Check
-        if (item.type === 'coin' || item.type === 'heart') {
-          // Generous catch box for positive items
-          if (isVerticallyAligned && item.x > playerLeft - 16 && item.x < playerRight + 16) {
+        // 💥 DEBT BOMB LOGIC
+        if (item.type === 'bomb') {
+          // As bomb nears ground, fuse burns
+          if (item.y >= H - 50) {
+            // Detonate!
+            const blastRadius = 46;
+            const distToPlayer = Math.abs(gs.playerX - item.x);
+            createParticles(item.x, H - 40, '#f97316', 22);
+
+            if (distToPlayer < blastRadius && isVerticallyAligned) {
+              if (gs.invulnerableTimer === 0) {
+                if (gs.hasShield) {
+                  gs.hasShield = false;
+                  setHasShield(false);
+                  gs.invulnerableTimer = 35;
+                  playDangerHitSound();
+                  createParticles(item.x, item.y, '#38bdf8', 16);
+                  createFloatingText(item.x, item.y - 12, '🛡️ Shield Absorbed Bomb!', '#38bdf8');
+                  return false;
+                }
+                gs.lives--;
+                gs.invulnerableTimer = 40;
+                gs.combo = 0;
+                setLives(gs.lives);
+                setCombo(0);
+                playDangerHitSound();
+                if (navigator.vibrate) try { navigator.vibrate([100, 50, 100]); } catch {}
+                createFloatingText(item.x, item.y - 12, '💣 Debt Bomb Blast! -1 Life', '#f43f5e');
+
+                if (gs.lives <= 0) {
+                  gs.gameOver = true;
+                  gs.started = false;
+                  setGameOver(true);
+                  setStarted(false);
+                  playGameOverSound();
+                  if (gs.score > highScore) {
+                    setHighScore(gs.score);
+                    localStorage.setItem('zb_coin_catcher_high', gs.score.toString());
+                  }
+                }
+              }
+            } else {
+              // Successfully dodged blast!
+              gs.trapsDodged++;
+              createFloatingText(item.x, H - 45, '💣 Blast Dodged!', '#38bdf8');
+            }
+            return false;
+          }
+        }
+
+        // 🪙 COINS & POSITIVE BUFFS
+        if (item.type === 'coin' || item.type === 'heart' || item.type === 'shield' || item.type === 'magnet') {
+          if (isVerticallyAligned && item.x > playerLeft - 14 && item.x < playerRight + 14) {
             if (item.type === 'heart') {
               gs.lives = Math.min(3, gs.lives + 1);
               setLives(gs.lives);
               gs.score += item.value;
               setScore(gs.score);
               playPowerupSound();
-              if (navigator.vibrate) try { navigator.vibrate([30, 30, 60]); } catch {}
               createParticles(item.x, item.y, '#ec4899', 18);
-              createFloatingText(item.x, item.y - 12, `💖 +1 Life Restored! (+${currencySymbol}50)`, '#f472b6');
+              createFloatingText(item.x, item.y - 12, `💖 Life Restored! (+${currencySymbol}50)`, '#f472b6');
+            } else if (item.type === 'shield') {
+              gs.hasShield = true;
+              setHasShield(true);
+              gs.score += item.value;
+              setScore(gs.score);
+              playPowerupSound();
+              createParticles(item.x, item.y, '#38bdf8', 18);
+              createFloatingText(item.x, item.y - 12, `🛡️ Emergency Buffer Shield!`, '#38bdf8');
+            } else if (item.type === 'magnet') {
+              gs.magnetTimer = 240; // 4 seconds
+              gs.score += item.value;
+              setScore(gs.score);
+              playPowerupSound();
+              createParticles(item.x, item.y, '#fbbf24', 18);
+              createFloatingText(item.x, item.y - 12, `🧲 Compound Magnet (4s)!`, '#fbbf24');
             } else {
               const comboBonus = Math.floor(gs.combo * 2.0);
               const totalEarned = item.value + comboBonus;
@@ -394,7 +701,6 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
               gs.coinsCollected++;
               if (gs.combo > gs.maxCombo) gs.maxCombo = gs.combo;
               
-              // SFX with dynamic combo pitch scaling, Haptic & visuals
               playCoinSound(gs.combo);
               if (navigator.vibrate) try { navigator.vibrate(20); } catch {}
               createParticles(item.x, item.y, '#34d399', 12);
@@ -404,25 +710,49 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
             }
             return false;
           }
-        } else if (item.type === 'expense') {
-          // Accurate danger hitbox: player must actively dodge left/right
+        }
+
+        // 🎣 SCAM / RUGPULL ITEM
+        if (item.type === 'scam') {
+          if (isVerticallyAligned && item.x > playerLeft - 8 && item.x < playerRight + 8) {
+            gs.score = Math.max(0, gs.score - 75);
+            gs.combo = 0;
+            setScore(gs.score);
+            setCombo(0);
+            playNotificationSound('warning');
+            if (navigator.vibrate) try { navigator.vibrate([60, 40, 60]); } catch {}
+            createParticles(item.x, item.y, '#f87171', 16);
+            createFloatingText(item.x, item.y - 12, `🚨 SCAM BUSTED! -${currencySymbol}75 & Streak Lost!`, '#f87171');
+            return false;
+          }
+        }
+
+        // ⚠️ HAZARD / TRAP ITEMS
+        if (item.type === 'expense') {
           if (isVerticallyAligned && item.x > playerLeft - 2 && item.x < playerRight + 2) {
             if (gs.invulnerableTimer > 0) {
-              // Shield absorbed trap!
-              createParticles(item.x, item.y, '#38bdf8', 10);
-              createFloatingText(item.x, item.y - 10, `🛡️ Shield Absorbed!`, '#38bdf8');
+              return false;
+            }
+
+            if (gs.hasShield) {
+              gs.hasShield = false;
+              setHasShield(false);
+              gs.invulnerableTimer = 35;
+              playDangerHitSound();
+              createParticles(item.x, item.y, '#38bdf8', 14);
+              createFloatingText(item.x, item.y - 10, `🛡️ Shield Absorbed Trap!`, '#38bdf8');
               return false;
             }
 
             gs.lives--;
-            gs.invulnerableTimer = 35; // ~0.55 seconds immunity
+            gs.invulnerableTimer = 38;
             gs.combo = 0;
+            setLives(gs.lives);
+            setCombo(0);
             playDangerHitSound();
             if (navigator.vibrate) try { navigator.vibrate([80, 50, 80]); } catch {}
             createParticles(item.x, item.y, '#f43f5e', 20);
             createFloatingText(item.x, item.y - 10, `💔 -1 Life (${item.label})`, '#fda4af');
-            setLives(gs.lives);
-            setCombo(0);
 
             if (gs.lives <= 0) {
               gs.gameOver = true;
@@ -440,16 +770,21 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
           }
         }
 
-        // Off-screen
+        // Off-screen check
         if (item.y > H + 25) {
           if (item.type === 'coin') {
-            gs.combo = 0;
-            setCombo(0);
-          } else {
+            // Strict Hardcore Mechanic: Missing a real coin resets streak!
+            if (gs.combo > 0) {
+              gs.combo = 0;
+              setCombo(0);
+              createFloatingText(item.x, H - 25, '⚠️ Missed SIP! Streak reset', '#fbbf24');
+            }
+          } else if (item.type === 'expense' || item.type === 'bomb') {
             gs.trapsDodged++;
           }
           return false;
         }
+
         return true;
       });
 
@@ -469,8 +804,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         return ft.life > 0;
       });
 
-      // --- RENDER SCREEN ---
-      // Cyber Dark Gradient Background
+      // --- 🎨 RENDER CANVAS ---
       const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
       bgGrad.addColorStop(0, '#060a14');
       bgGrad.addColorStop(1, '#0c1427');
@@ -493,6 +827,23 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         ctx.stroke();
       }
 
+      // Market Crash Red Edge Alert Pulsing
+      if (gs.crashTimer > 0) {
+        const pulseAlpha = 0.15 + Math.sin(gs.frameCount * 0.12) * 0.1;
+        ctx.fillStyle = `rgba(244, 63, 94, ${pulseAlpha})`;
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.strokeStyle = '#f43f5e';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(1, 1, W - 2, H - 2);
+
+        // Crash banner
+        ctx.font = 'bold 11px sans-serif';
+        ctx.fillStyle = '#fca5a5';
+        ctx.textAlign = 'center';
+        ctx.fillText(`🚨 MARKET CRASH! SURVIVE: ${Math.ceil(gs.crashTimer / 60)}s`, W / 2, 44);
+      }
+
       // Ground Line
       const groundGrad = ctx.createLinearGradient(0, H - 14, 0, H);
       groundGrad.addColorStop(0, 'rgba(52, 211, 153, 0.35)');
@@ -508,6 +859,20 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
 
       // Falling items
       gs.items.forEach(item => {
+        // Bomb Danger Blast Radius Indicator
+        if (item.type === 'bomb' && item.y > H - 85) {
+          const pulse = Math.sin(gs.frameCount * 0.25) * 0.15 + 0.25;
+          ctx.fillStyle = `rgba(244, 63, 94, ${pulse})`;
+          ctx.beginPath();
+          ctx.arc(item.x, H - 40, 46, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#f43f5e';
+          ctx.setLineDash([4, 4]);
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+
         ctx.font = `${item.size}px serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -518,17 +883,47 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         } else if (item.type === 'heart') {
           ctx.shadowColor = '#ec4899';
           ctx.shadowBlur = 14;
+        } else if (item.type === 'shield') {
+          ctx.shadowColor = '#38bdf8';
+          ctx.shadowBlur = 14;
+        } else if (item.type === 'magnet') {
+          ctx.shadowColor = '#fbbf24';
+          ctx.shadowBlur = 14;
+        } else if (item.type === 'scam') {
+          ctx.shadowColor = '#f87171';
+          ctx.shadowBlur = 10;
         } else {
           ctx.shadowColor = '#f43f5e';
           ctx.shadowBlur = 10;
         }
+
         ctx.fillText(item.emoji, item.x, item.y);
         ctx.shadowBlur = 0;
 
         // Label below item
         ctx.font = 'bold 8px sans-serif';
-        ctx.fillStyle = item.type === 'coin' ? '#a7f3d0' : item.type === 'heart' ? '#fbcfe8' : '#fca5a5';
-        ctx.fillText(item.type === 'coin' ? `+${item.value}` : item.type === 'heart' ? '+LIFE' : 'DODGE', item.x, item.y + item.size / 2 + 8);
+        if (item.type === 'coin') {
+          ctx.fillStyle = '#a7f3d0';
+          ctx.fillText(`+${item.value}`, item.x, item.y + item.size / 2 + 8);
+        } else if (item.type === 'heart') {
+          ctx.fillStyle = '#fbcfe8';
+          ctx.fillText('+LIFE', item.x, item.y + item.size / 2 + 8);
+        } else if (item.type === 'shield') {
+          ctx.fillStyle = '#bae6fd';
+          ctx.fillText('SHIELD', item.x, item.y + item.size / 2 + 8);
+        } else if (item.type === 'magnet') {
+          ctx.fillStyle = '#fef08a';
+          ctx.fillText('MAGNET', item.x, item.y + item.size / 2 + 8);
+        } else if (item.type === 'scam') {
+          ctx.fillStyle = '#f87171';
+          ctx.fillText('SCAM!', item.x, item.y + item.size / 2 + 8);
+        } else if (item.type === 'bomb') {
+          ctx.fillStyle = '#fb923c';
+          ctx.fillText('BOMB', item.x, item.y + item.size / 2 + 8);
+        } else {
+          ctx.fillStyle = '#fca5a5';
+          ctx.fillText('DODGE', item.x, item.y + item.size / 2 + 8);
+        }
       });
 
       // Piggy Character
@@ -538,27 +933,46 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
       // Platform Glow
       ctx.fillStyle = 'rgba(52, 211, 153, 0.28)';
       ctx.beginPath();
-      ctx.ellipse(pX, pY + 38, 26, 6, 0, 0, Math.PI * 2);
+      ctx.ellipse(pX, pY + 38, 24, 6, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Invulnerability protective shield aura & flash
-      const isInvulnerable = gs.invulnerableTimer > 0;
-      const isFlashed = isInvulnerable && Math.floor(gs.frameCount / 5) % 2 === 0;
-
-      if (isInvulnerable) {
-        ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = 2;
-        ctx.shadowColor = '#38bdf8';
-        ctx.shadowBlur = 14;
+      // Magnet Pulsing Ring
+      if (gs.magnetTimer > 0) {
+        const ringRadius = 28 + (gs.frameCount % 20) * 1.5;
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.arc(pX, pY + 16, 24, 0, Math.PI * 2);
+        ctx.arc(pX, pY + 16, ringRadius, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Shield Aura
+      if (gs.hasShield) {
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = '#38bdf8';
+        ctx.shadowBlur = 16;
+        ctx.beginPath();
+        ctx.arc(pX, pY + 16, 26, 0, Math.PI * 2);
         ctx.stroke();
         ctx.shadowBlur = 0;
       }
 
+      // Invulnerability protective flash
+      const isInvulnerable = gs.invulnerableTimer > 0;
+      const isFlashed = isInvulnerable && Math.floor(gs.frameCount / 5) % 2 === 0;
+
+      if (isInvulnerable && !gs.hasShield) {
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(pX, pY + 16, 22, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
       // Piggy
       ctx.globalAlpha = isFlashed ? 0.45 : 1;
-      ctx.shadowColor = isInvulnerable ? '#38bdf8' : '#10b981';
+      ctx.shadowColor = gs.hasShield ? '#38bdf8' : '#10b981';
       ctx.shadowBlur = 16;
       ctx.font = '38px serif';
       ctx.textAlign = 'center';
@@ -589,12 +1003,12 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
 
       // Combo Text
       if (gs.combo >= 3) {
-        ctx.font = 'bold 15px sans-serif';
+        ctx.font = 'bold 14px sans-serif';
         ctx.fillStyle = '#fbbf24';
         ctx.textAlign = 'center';
         ctx.shadowColor = '#fbbf24';
         ctx.shadowBlur = 10;
-        ctx.fillText(`🔥 ${gs.combo}x SIP STREAK!`, W / 2, 28);
+        ctx.fillText(`🔥 ${gs.combo}x SIP STREAK!`, W / 2, 24);
         ctx.shadowBlur = 0;
       }
 
@@ -604,10 +1018,11 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
       ctx.fillStyle = '#f8fafc';
       ctx.fillText(`${currencySymbol}${gs.score}`, 12, 22);
 
-      // HUD: Lives
+      // HUD: Lives & Shield
       ctx.textAlign = 'right';
-      ctx.font = '14px serif';
-      ctx.fillText('❤️'.repeat(Math.max(0, gs.lives)), W - 12, 22);
+      ctx.font = '13px sans-serif';
+      const shieldIcon = gs.hasShield ? ' 🛡️' : '';
+      ctx.fillText(`${'❤️'.repeat(Math.max(0, gs.lives))}${shieldIcon}`, W - 12, 22);
 
       animFrameRef.current = requestAnimationFrame(loop);
     };
@@ -617,15 +1032,15 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
     return () => {
       cancelAnimationFrame(animFrameRef.current);
     };
-  }, [isExpanded, started, gameOver, spawnItem, createParticles, createFloatingText, currencySymbol, highScore]);
+  }, [isExpanded, started, gameOver, spawnFormation, createParticles, createFloatingText, currencySymbol, highScore]);
 
   // Controls (Keyboard)
   useEffect(() => {
     if (!isExpanded || !started || gameOver) return;
     const handleKey = (e: KeyboardEvent) => {
-      const speed = 20;
-      if (e.key === 'ArrowLeft' || e.key === 'a') movePlayerBy(-speed);
-      if (e.key === 'ArrowRight' || e.key === 'd') movePlayerBy(speed);
+      const step = 16;
+      if (e.key === 'ArrowLeft' || e.key === 'a') movePlayerBy(-step);
+      if (e.key === 'ArrowRight' || e.key === 'd') movePlayerBy(step);
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
@@ -642,7 +1057,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
       const scaleX = canvas.width / rect.width;
       const targetX = (touch.clientX - rect.left) * scaleX;
       const gs = gameStateRef.current;
-      gs.playerX = Math.max(28, Math.min(canvas.width - 28, targetX));
+      gs.playerX = Math.max(26, Math.min(canvas.width - 26, targetX));
       touchXRef.current = targetX;
     };
 
@@ -664,7 +1079,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
       const gs = gameStateRef.current;
-      gs.playerX = Math.max(28, Math.min(canvas.width - 28, (e.clientX - rect.left) * scaleX));
+      gs.playerX = Math.max(26, Math.min(canvas.width - 26, (e.clientX - rect.left) * scaleX));
     };
 
     canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
@@ -812,7 +1227,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         </div>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '9px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>Financial Health</div>
-          <div style={{ fontSize: '15px' }}>{'❤️'.repeat(Math.max(0, lives))}</div>
+          <div style={{ fontSize: '15px' }}>{'❤️'.repeat(Math.max(0, lives))}{hasShield ? ' 🛡️' : ''}</div>
         </div>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '9px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>SIP Streak</div>
@@ -876,26 +1291,42 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
             justifyContent: 'center',
             background: 'rgba(6, 10, 20, 0.94)',
             backdropFilter: 'blur(8px)',
-            gap: '14px',
-            padding: '20px'
+            gap: '12px',
+            padding: '16px'
           }}>
-            <div style={{ fontSize: '48px', animation: 'bounce 1s infinite' }}>🐷</div>
-            <h3 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: '#f8fafc' }}>
+            <div style={{ fontSize: '42px', animation: 'bounce 1s infinite' }}>🐷</div>
+            <h3 style={{ fontSize: '19px', fontWeight: 800, margin: 0, color: '#f8fafc' }}>
               Zen Coin Catcher
             </h3>
-            <p style={{ fontSize: '12px', color: '#94a3b8', textAlign: 'center', margin: '0', lineHeight: 1.5, maxWidth: '280px' }}>
-              Slide or swipe your finger across the screen to move 🐷<br/>
-              <span style={{ color: '#34d399', fontWeight: 700 }}>Gesture Controls • Catch SIP & Dodge Traps!</span>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '3px 10px',
+              borderRadius: '999px',
+              background: 'rgba(16, 185, 129, 0.15)',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+              fontSize: '11px',
+              fontWeight: 700,
+              color: '#34d399'
+            }}>
+              <span>⚡ Normal Speed • Tactical Hard Mode</span>
+            </div>
+            <p style={{ fontSize: '11.5px', color: '#94a3b8', textAlign: 'center', margin: '0', lineHeight: 1.5, maxWidth: '290px' }}>
+              Slide or swipe your finger across screen to steer 🐷<br/>
+              • Weave between <span style={{ color: '#fbbf24', fontWeight: 700 }}>Sandwich Traps</span> & sweeping hazards<br/>
+              • Dodge <span style={{ color: '#f87171', fontWeight: 700 }}>Debt Bombs 💣 & Fake Scams 🎣</span><br/>
+              • Don't miss coins or your <span style={{ color: '#38bdf8', fontWeight: 700 }}>SIP streak resets!</span>
             </p>
             <button
               onClick={resetGame}
               style={{
-                padding: '13px 34px',
+                padding: '12px 32px',
                 borderRadius: '16px',
                 background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                 border: 'none',
                 color: '#ffffff',
-                fontSize: '15px',
+                fontSize: '14px',
                 fontWeight: 800,
                 cursor: 'pointer',
                 display: 'flex',

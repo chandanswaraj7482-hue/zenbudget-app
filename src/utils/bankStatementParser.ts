@@ -161,21 +161,75 @@ export const parseCSVStatement = (csvText: string): BankStatementAnalysisResult 
 export const parseAIBankStatement = async (
   base64Data: string,
   mimeType: string = 'image/jpeg',
-  onProgress?: (stage: string, percent: number) => void
+  onProgress?: (stage: string, percent: number) => void,
+  password: string = ''
 ): Promise<BankStatementAnalysisResult> => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
 
-  onProgress?.('Decrypting & Preprocessing Statement...', 25);
+  onProgress?.('Reading statement file headers & layout...', 25);
 
+  // 1. Try serverless backend parser /api/parse-statement (Works on Vercel production with GEMINI_API_KEY)
+  try {
+    onProgress?.('AI Neural Passbook OCR Analyzing...', 55);
+    const resp = await fetch('/api/parse-statement', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ base64Data, mimeType, password })
+    });
+
+    if (resp.ok) {
+      const parsed = await resp.json();
+      if (parsed && Array.isArray(parsed.transactions) && parsed.transactions.length > 0) {
+        onProgress?.('Normalizing categories and balance audit...', 85);
+        let totalIncome = 0;
+        let totalExpenses = 0;
+
+        const txs: ParsedBankTransaction[] = parsed.transactions
+          .filter((t: any) => t && (Number(t.amount) > 0 || parseFloat(t.amount) > 0))
+          .map((t: any, idx: number) => {
+            const amt = Math.round(Math.abs(parseFloat(t.amount) || 0));
+            const isIncome = t.type === 'income';
+            if (isIncome) totalIncome += amt;
+            else totalExpenses += amt;
+
+            return {
+              id: `ai-stmt-${Date.now()}-${idx}`,
+              date: t.date || new Date().toISOString().split('T')[0],
+              title: t.title || 'Bank Transaction',
+              amount: amt,
+              type: isIncome ? 'income' : 'expense',
+              category: isIncome ? 'income' : (t.category || 'General'),
+              rawNarration: t.rawNarration || t.title || '',
+              selected: true
+            };
+          });
+
+        onProgress?.('Real Statement Verified!', 100);
+        return {
+          bankName: parsed.bankName || 'Bank Statement',
+          accountNumber: parsed.accountNumber || '',
+          statementPeriod: parsed.statementPeriod || 'Statement Period',
+          totalIncome,
+          totalExpenses,
+          transactions: txs
+        };
+      }
+    }
+  } catch (apiErr) {
+    console.warn('Serverless parse-statement endpoint fallback:', apiErr);
+  }
+
+  // 2. Direct client-side SDK fallback if client API key is configured
   if (apiKey) {
     try {
-      onProgress?.('AI Neural Passbook OCR Analyzing...', 60);
+      onProgress?.('Running Client AI Vision Engine...', 65);
       const ai = new GoogleGenAI({ apiKey });
       const cleanBase64 = base64Data.split(',')[1] || base64Data;
 
-      const prompt = `You are a bank passbook and account statement OCR extraction engine.
+      const prompt = `You are a strict bank passbook and account statement OCR extraction engine.
 Analyze this bank account statement or passbook page.
-CRITICAL RULE: Extract ONLY REAL, VISIBLE transactions from this exact image. DO NOT invent, hallucinate, or generate sample transactions. If a line is illegible or not a transaction, omit it.
+${password ? `Note: User provided statement password '${password}'.` : ''}
+CRITICAL RULE: Extract ONLY REAL, VISIBLE transactions from this exact image/document. DO NOT invent, hallucinate, or generate sample transactions. If a line is illegible or not a transaction, omit it.
 
 Extract transactions in strict JSON format:
 {
@@ -193,7 +247,7 @@ Extract transactions in strict JSON format:
     }
   ]
 }
-Return ONLY pure JSON without markdown. Extract up to 40 clearest visible transactions.`;
+Return ONLY pure JSON without markdown. Extract up to 50 clearest visible transactions.`;
 
       const response = await ai.models.generateContent({
         model: 'gemini-1.5-flash',
