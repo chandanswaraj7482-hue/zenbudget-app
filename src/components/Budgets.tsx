@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { t } from '../utils/i18n';
 import { 
   Utensils, 
@@ -9,18 +9,28 @@ import {
   HeartPulse, 
   MoreHorizontal, 
   Check, 
-  AlertTriangle,
-  Info
+  Lock,
+  Crown,
+  Play,
+  X,
+  Sparkles,
+  CheckCircle2,
+  Tv
 } from 'lucide-react';
 import type { CategoryBudget, CategoryType, Transaction } from '../types';
 import { formatCurrency } from '../utils/formatCurrency';
+import { playCelebrationSound, playNotificationSound } from '../utils/audio';
 
 interface BudgetsProps {
   budgets: CategoryBudget[];
   transactions: Transaction[];
   currencySymbol: string;
   onSaveBudget: (category: CategoryType, limit: number) => void;
+  isPremiumUser?: boolean;
+  onOpenSubscriptionModal?: () => void;
 }
+
+const FREE_BASE_LIMIT = 2; // Free accounts get 2 category limits
 
 const CATEGORIES: { id: CategoryType; label: string; icon: React.ReactNode; color: string; bg: string }[] = [
   { id: 'food', label: 'Food & Dining', icon: <Utensils size={18} />, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
@@ -36,7 +46,9 @@ export const Budgets: React.FC<BudgetsProps> = ({
   budgets = [],
   transactions = [],
   currencySymbol,
-  onSaveBudget
+  onSaveBudget,
+  isPremiumUser = false,
+  onOpenSubscriptionModal
 }) => {
   const [editingCategory, setEditingCategory] = useState<CategoryType | null>(null);
   const [limitInput, setLimitInput] = useState<string>('');
@@ -45,8 +57,26 @@ export const Budgets: React.FC<BudgetsProps> = ({
   });
   const [isManageOpen, setIsManageOpen] = useState(false);
 
+  // Bonus limit slots unlocked by watching rewarded ads
+  const [bonusSlots, setBonusSlots] = useState<number>(() => {
+    const saved = localStorage.getItem('zb_bonus_budget_slots');
+    return saved ? parseInt(saved, 10) : 0;
+  });
+
+  // Rewarded Ad Modal State
+  const [adModalOpen, setAdModalOpen] = useState(false);
+  const [pendingCategory, setPendingCategory] = useState<CategoryType | null>(null);
+  const [adPlaying, setAdPlaying] = useState(false);
+  const [adCountdown, setAdCountdown] = useState(10);
+  const [adRewarded, setAdRewarded] = useState(false);
+
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
+
+  // Active limits currently set
+  const activeLimitCount = budgets.filter(b => b.limit > 0).length;
+  const maxAllowedSlots = isPremiumUser ? 999 : (FREE_BASE_LIMIT + bonusSlots);
+  const isLimitCapped = !isPremiumUser && activeLimitCount >= maxAllowedSlots;
 
   const getSpentAmount = (cat: CategoryType) => {
     return transactions
@@ -66,8 +96,23 @@ export const Budgets: React.FC<BudgetsProps> = ({
   };
 
   const handleEditClick = (cat: CategoryType, currentLimit: number) => {
+    // If category already has a limit, allow editing freely
+    if (currentLimit > 0) {
+      setEditingCategory(cat);
+      setLimitInput(currentLimit.toString());
+      return;
+    }
+
+    // If setting a NEW limit and cap is reached for free user, prompt ad / pro
+    if (isLimitCapped) {
+      playNotificationSound();
+      setPendingCategory(cat);
+      setAdModalOpen(true);
+      return;
+    }
+
     setEditingCategory(cat);
-    setLimitInput(currentLimit > 0 ? currentLimit.toString() : '');
+    setLimitInput('');
   };
 
   const handleSave = (cat: CategoryType) => {
@@ -77,6 +122,45 @@ export const Budgets: React.FC<BudgetsProps> = ({
     }
     onSaveBudget(cat, val);
     setEditingCategory(null);
+  };
+
+  // Rewarded Ad Simulation Timer
+  useEffect(() => {
+    let timer: any = null;
+    if (adPlaying && adCountdown > 0) {
+      timer = setInterval(() => {
+        setAdCountdown(prev => prev - 1);
+      }, 1000);
+    } else if (adPlaying && adCountdown === 0) {
+      setAdPlaying(false);
+      setAdRewarded(true);
+      playCelebrationSound();
+      const newBonus = bonusSlots + 1;
+      setBonusSlots(newBonus);
+      localStorage.setItem('zb_bonus_budget_slots', String(newBonus));
+
+      // Auto-unlock pending category
+      if (pendingCategory) {
+        setEditingCategory(pendingCategory);
+        setLimitInput('');
+      }
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [adPlaying, adCountdown, pendingCategory, bonusSlots]);
+
+  const startWatchingAd = () => {
+    setAdPlaying(true);
+    setAdCountdown(10);
+    setAdRewarded(false);
+  };
+
+  const closeAdModal = () => {
+    setAdModalOpen(false);
+    setAdPlaying(false);
+    setAdRewarded(false);
+    setPendingCategory(null);
   };
 
   // Total stats
@@ -118,6 +202,93 @@ export const Budgets: React.FC<BudgetsProps> = ({
         >
           {isManageOpen ? 'Done' : 'Manage Categories'}
         </button>
+      </div>
+
+      {/* Free Tier Limits vs Pro Status Banner */}
+      <div style={{
+        padding: '12px 16px',
+        borderRadius: '16px',
+        background: isPremiumUser 
+          ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%)'
+          : 'linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(239, 68, 68, 0.08) 100%)',
+        border: isPremiumUser 
+          ? '1px solid rgba(16, 185, 129, 0.3)'
+          : '1px solid rgba(245, 158, 11, 0.25)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '10px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {isPremiumUser ? (
+            <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#10b981', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Crown size={16} />
+            </div>
+          ) : (
+            <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#f59e0b', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Lock size={16} />
+            </div>
+          )}
+          <div>
+            <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)' }}>
+              {isPremiumUser ? '⭐ ZenBudget Pro Active' : `Free Tier: ${activeLimitCount}/${maxAllowedSlots} Limits Used`}
+            </div>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+              {isPremiumUser 
+                ? 'Unlimited category limits & 100% Ad-Free experience' 
+                : (isLimitCapped ? 'Limit cap reached! Watch ad for +1 slot or go Pro' : `Free tier allows 2 limits. ${maxAllowedSlots - activeLimitCount} left.`)}
+            </div>
+          </div>
+        </div>
+
+        {!isPremiumUser && (
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => { setPendingCategory(null); setAdModalOpen(true); }}
+              className="hover-lift"
+              style={{
+                background: 'rgba(245, 158, 11, 0.15)',
+                color: '#f59e0b',
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                fontSize: '11px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <Tv size={12} />
+              <span>+1 Slot (Watch Ad)</span>
+            </button>
+            {onOpenSubscriptionModal && (
+              <button
+                onClick={onOpenSubscriptionModal}
+                className="hover-lift"
+                style={{
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
+                }}
+              >
+                <Crown size={12} />
+                <span>Go Pro</span>
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {isManageOpen && (
@@ -194,7 +365,6 @@ export const Budgets: React.FC<BudgetsProps> = ({
           const spent = getSpentAmount(cat.id);
           const isEditing = editingCategory === cat.id;
           const isOver = limit > 0 && spent > limit;
-          const percent = limit > 0 ? Math.min(100, Math.round((spent / limit) * 100)) : 0;
 
           return (
             <div 
@@ -299,40 +469,246 @@ export const Budgets: React.FC<BudgetsProps> = ({
                   </button>
                 )}
               </div>
-
-              {/* Progress Indicator */}
-              {limit > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '4px' }}>
-                  <div style={{ width: '100%', height: '8px', borderRadius: '99px', backgroundColor: 'rgba(0, 0, 0, 0.08)', overflow: 'hidden' }}>
-                    <div style={{ 
-                      width: `${percent}%`, 
-                      height: '100%', 
-                      background: isOver ? 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)' : percent > 80 ? 'linear-gradient(90deg, #f59e0b 0%, #d97706 100%)' : 'linear-gradient(90deg, #10b981 0%, #059669 100%)',
-                      borderRadius: '99px',
-                      transition: 'width 0.5s ease-out'
-                    }} />
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                    <span style={{ color: 'var(--text-secondary)', fontWeight: 700 }}>
-                      {percent}{t('of_limit_spent')}
-                    </span>
-                    {isOver ? (
-                      <span style={{ color: '#dc2626', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 800, background: 'rgba(239, 68, 68, 0.1)', padding: '2px 8px', borderRadius: '6px' }}>
-                        <AlertTriangle size={13} /> {t('over_limit')} {formatCurrency(spent - limit, currencySymbol)}
-                      </span>
-                    ) : (
-                      <span style={{ color: 'var(--text-secondary)', fontWeight: 700 }}>
-                        {t('remaining')}: <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(limit - spent, currencySymbol)}</strong>
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           );
         })}
       </div>
+
+      {/* =================================================================== */}
+      {/* REWARDED AD / PRO UPGRADE MODAL                                    */}
+      {/* =================================================================== */}
+      {adModalOpen && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.82)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'var(--bg-card, #0f172a)',
+            border: '1.5px solid rgba(16, 185, 129, 0.35)',
+            borderRadius: '26px',
+            maxWidth: '380px',
+            width: '100%',
+            overflow: 'hidden',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+            animation: 'fadeIn 0.25s ease-out'
+          }}>
+            
+            {/* Modal Header */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '16px 20px',
+              borderBottom: '1px solid var(--border-input, rgba(255,255,255,0.08))'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Tv size={18} color="#f59e0b" />
+                <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>
+                  Category Limits Unlock
+                </span>
+              </div>
+              {!adPlaying && (
+                <button
+                  onClick={closeAdModal}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    padding: '4px'
+                  }}
+                >
+                  <X size={18} />
+                </button>
+              )}
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ padding: '24px 20px', textAlign: 'center' }}>
+              
+              {!adPlaying && !adRewarded && (
+                <div>
+                  <div style={{
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '20px',
+                    background: 'rgba(245, 158, 11, 0.15)',
+                    color: '#f59e0b',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 16px',
+                    fontSize: '26px'
+                  }}>
+                    🔒
+                  </div>
+
+                  <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 8px 0' }}>
+                    Free Limit Cap Reached (2/2 Used)
+                  </h3>
+
+                  <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: '0 0 20px 0' }}>
+                    Free users can set monthly caps on up to <strong>2 categories</strong>. Watch a quick 10-second sponsor ad to unlock <strong>+1 extra category limit</strong>, or upgrade to <strong>ZenBudget Pro</strong> for unlimited caps!
+                  </p>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {/* Watch Ad Button */}
+                    <button
+                      onClick={startWatchingAd}
+                      className="hover-lift"
+                      style={{
+                        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                        color: '#ffffff',
+                        border: 'none',
+                        padding: '13px 20px',
+                        borderRadius: '14px',
+                        fontSize: '13.5px',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        boxShadow: '0 6px 18px rgba(245, 158, 11, 0.35)'
+                      }}
+                    >
+                      <Play size={16} fill="#ffffff" />
+                      <span>Watch 10s Sponsor Ad (+1 Slot)</span>
+                    </button>
+
+                    {/* Go Pro Button */}
+                    {onOpenSubscriptionModal && (
+                      <button
+                        onClick={() => { closeAdModal(); onOpenSubscriptionModal(); }}
+                        className="hover-lift"
+                        style={{
+                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                          color: '#ffffff',
+                          border: 'none',
+                          padding: '13px 20px',
+                          borderRadius: '14px',
+                          fontSize: '13.5px',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          boxShadow: '0 6px 18px rgba(16, 185, 129, 0.35)'
+                        }}
+                      >
+                        <Crown size={16} />
+                        <span>Go Pro (Unlimited &amp; Ad-Free)</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Ad Playing Simulation */}
+              {adPlaying && (
+                <div>
+                  <div style={{
+                    padding: '24px 16px',
+                    borderRadius: '18px',
+                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%)',
+                    border: '1.5px dashed rgba(16, 185, 129, 0.4)',
+                    marginBottom: '16px'
+                  }}>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                      Sponsored Partner Ad
+                    </span>
+                    <h4 style={{ fontSize: '16px', fontWeight: 900, color: 'var(--text-primary)', margin: '8px 0 4px 0' }}>
+                      🌱 ZenBudget Pro • Save ₹5,000/mo
+                    </h4>
+                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>
+                      Automatic passbook scans, couples shared sync &amp; safe daily spending limits.
+                    </p>
+                  </div>
+
+                  {/* Countdown Timer */}
+                  <div style={{ marginBottom: '12px' }}>
+                    <div style={{ fontSize: '24px', fontWeight: 900, color: '#f59e0b' }}>
+                      ⏱️ {adCountdown}s
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                      Do not close • Reward will unlock automatically
+                    </div>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div style={{ width: '100%', height: '8px', background: 'var(--bg-input, rgba(255,255,255,0.08))', borderRadius: '999px', overflow: 'hidden' }}>
+                    <div style={{
+                      width: `${((10 - adCountdown) / 10) * 100}%`,
+                      height: '100%',
+                      background: 'linear-gradient(90deg, #f59e0b 0%, #10b981 100%)',
+                      transition: 'width 1s linear'
+                    }} />
+                  </div>
+                </div>
+              )}
+
+              {/* Ad Finished / Reward Unlocked */}
+              {adRewarded && (
+                <div>
+                  <div style={{
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '20px',
+                    background: 'rgba(16, 185, 129, 0.2)',
+                    color: '#10b981',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 16px',
+                    fontSize: '28px'
+                  }}>
+                    🎉
+                  </div>
+
+                  <h3 style={{ fontSize: '20px', fontWeight: 900, color: '#10b981', margin: '0 0 6px 0' }}>
+                    +1 Category Limit Unlocked!
+                  </h3>
+
+                  <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', margin: '0 0 20px 0' }}>
+                    Thank you for supporting ZenBudget! You can now set your spending limit for this category.
+                  </p>
+
+                  <button
+                    onClick={closeAdModal}
+                    className="hover-lift"
+                    style={{
+                      background: '#10b981',
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '12px 28px',
+                      borderRadius: '999px',
+                      fontSize: '13px',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <CheckCircle2 size={16} />
+                    <span>Set My Limit Now</span>
+                  </button>
+                </div>
+              )}
+
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

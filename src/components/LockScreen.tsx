@@ -438,6 +438,32 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
         console.log("LockScreen: Profile ready, unlocking...");
         setIsLoading(false);
+        // If user authenticated via Google/Apple OAuth, directly unlock into the app!
+        const isFromOAuth = (typeof window !== 'undefined' && (
+          window.location.href.includes('access_token=') || 
+          window.location.href.includes('code=')
+        )) || 
+        localStorage.getItem('zb_oauth_just_completed') === 'true' ||
+        localStorage.getItem('zb_oauth_in_progress') === 'true';
+
+        if (isFromOAuth) {
+          localStorage.removeItem('zb_oauth_just_completed');
+          localStorage.removeItem('zb_oauth_in_progress');
+          console.log("LockScreen: Direct unlock after successful OAuth!");
+          playNotificationSound('success');
+          const effectiveUserId = userProf.id || uid;
+          onUnlock(
+            effectiveUserId,
+            userProf.name || 'User',
+            userProf.subscription_tier || 'free',
+            userProf.trial_start_date || new Date().toISOString(),
+            userProf.pin || '0000',
+            userProf.premium_expires_at,
+            userProf.trial_expire_date
+          );
+          return;
+        }
+
         // Check localStorage first — if user has already created a PIN before, go to unlock directly
         const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem(`zb_pin_${uid}`);
         const pinAlreadyCreated = localStorage.getItem('zb_pin_created') === 'true';
@@ -514,8 +540,54 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
     try {
       console.log("LockScreen: Running checkCurrentSession()");
-      const sessionRes = await withTimeout(supabase.auth.getSession(), 1800);
-      const session = sessionRes?.data?.session;
+      
+      let session: any = null;
+      const href = typeof window !== 'undefined' ? window.location.href : '';
+      const isOAuthRedirect = href.includes('access_token=') || href.includes('code=');
+
+      // 1. Direct URL token extraction (fixes #app#access_token and web OAuth returns)
+      if (href.includes('access_token=') && href.includes('refresh_token=')) {
+        try {
+          console.log('LockScreen: Extracting OAuth tokens from URL...');
+          const accessMatch = href.match(/access_token=([^&]+)/);
+          const refreshMatch = href.match(/refresh_token=([^&]+)/);
+          if (accessMatch && refreshMatch) {
+            const accessToken = decodeURIComponent(accessMatch[1]);
+            const refreshToken = decodeURIComponent(refreshMatch[1]);
+            const { data, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken
+            });
+            if (!error && data?.session) {
+              session = data.session;
+              localStorage.setItem('zb_oauth_just_completed', 'true');
+              window.history.replaceState(null, '', window.location.pathname + '#app');
+            }
+          }
+        } catch (tokErr) {
+          console.warn('LockScreen: URL token extraction error:', tokErr);
+        }
+      } else if (href.includes('code=')) {
+        try {
+          const codeMatch = href.match(/[?&#]code=([^&]+)/);
+          if (codeMatch) {
+            const code = decodeURIComponent(codeMatch[1]);
+            const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+            if (!error && data?.session) {
+              session = data.session;
+              localStorage.setItem('zb_oauth_just_completed', 'true');
+              window.history.replaceState(null, '', window.location.pathname + '#app');
+            }
+          }
+        } catch (codeErr) {
+          console.warn('LockScreen: Code exchange error:', codeErr);
+        }
+      }
+
+      if (!session) {
+        const sessionRes = await withTimeout(supabase.auth.getSession(), 1800);
+        session = sessionRes?.data?.session;
+      }
 
       console.log("LockScreen: getSession() result", session?.user?.email);
       if (session?.user) {
@@ -823,10 +895,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         }
       } else {
         // Web OAuth flow
+        localStorage.setItem('zb_oauth_in_progress', 'true');
         const { error } = await supabase.auth.signInWithOAuth({ 
           provider,
           options: {
-            redirectTo: window.location.origin + '/#app'
+            redirectTo: window.location.origin + '/'
           }
         });
         if (error) throw error;
