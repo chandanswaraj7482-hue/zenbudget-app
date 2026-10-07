@@ -334,7 +334,7 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
           </button>
         </div>
 
-        {/* 3-in-1 Activities & Habits Hub: Coin Game, Money IQ Quiz & Daily Habit Challenge */}
+        {/* 2-in-1 Zen Arcade & Brain Hub: Coin Game & Money IQ Quiz */}
         <ZenActivitiesHub currencySymbol={currencySymbol} userReferralCode={_userReferralCode} />
       </div>
 

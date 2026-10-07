@@ -2,15 +2,12 @@ import React, { useState } from 'react';
 import { 
   Gamepad2, 
   Brain, 
-  Flame, 
   Sparkles, 
-  CheckCircle2, 
   ArrowRight, 
   RotateCcw, 
   Award, 
   Zap,
-  ChevronRight,
-  Check
+  ChevronRight
 } from 'lucide-react';
 import { CoinCatcherGame } from './CoinCatcherGame';
 import { playCelebrationSound, playNotificationSound } from '../utils/audio';
@@ -18,7 +15,7 @@ import { playCelebrationSound, playNotificationSound } from '../utils/audio';
 interface ZenActivitiesHubProps {
   currencySymbol?: string;
   userReferralCode?: string;
-  defaultTab?: 'game' | 'quiz' | 'challenge';
+  defaultTab?: 'game' | 'quiz';
 }
 
 // 8 Curated Rapid Money IQ Quiz Questions
@@ -105,80 +102,13 @@ const QUIZ_QUESTIONS = [
   }
 ];
 
-// 7 Daily Rotating Habit Challenges
-const DAILY_CHALLENGES = [
-  {
-    day: 1,
-    title: "Zero Food Delivery Day 🥗",
-    sub: "Cook meals at home today. Zero orders on Swiggy or Zomato.",
-    savingsEst: "₹450",
-    difficulty: "Medium",
-    category: "Dining",
-    tip: "Meal prep a simple dinner. Drink water instead of ordering sugar drinks."
-  },
-  {
-    day: 2,
-    title: "Subscription Audit & Cancel ✂️",
-    sub: "Open your play store or card auto-debits and cancel 1 unused app.",
-    savingsEst: "₹299/mo",
-    difficulty: "Easy",
-    category: "Subscriptions",
-    tip: "Check gym memberships, OTT apps, or cloud storage you rarely touch."
-  },
-  {
-    day: 3,
-    title: "₹100 Micro-Gullak Transfer 🪙",
-    sub: "Send ₹100 right now to your savings pot, gold, or liquid fund.",
-    savingsEst: "₹100",
-    difficulty: "Easy",
-    category: "Savings",
-    tip: "Even ₹100 compounding at 12% over 15 years becomes ₹50,000+!"
-  },
-  {
-    day: 4,
-    title: "24-Hour Impulse Freeze 🧊",
-    sub: "Add that Amazon/Myntra item to your wishlist and wait full 24h.",
-    savingsEst: "₹1,500",
-    difficulty: "Hard",
-    category: "Shopping",
-    tip: "72% of impulse urges disappear completely after sleeping on them."
-  },
-  {
-    day: 5,
-    title: "Coffee / Chai Cash Only ☕",
-    sub: "Limit daily chai/snack spend to ₹30 maximum in exact change.",
-    savingsEst: "₹120",
-    difficulty: "Easy",
-    category: "Daily Habits",
-    tip: "Small everyday micro-leaks quietly drain ₹3,000+ every month."
-  },
-  {
-    day: 6,
-    title: "Log All Expenses Before Bed 📝",
-    sub: "Use Zen AI Quick Capture to log every rupee spent today.",
-    savingsEst: "Financial Clarity",
-    difficulty: "Easy",
-    category: "Discipline",
-    tip: "Awareness alone reduces careless spending by 21% without feeling deprived."
-  },
-  {
-    day: 7,
-    title: "Weekly Review & Victory Lap 🏆",
-    sub: "Check your 7-day spending chart and reward your discipline.",
-    savingsEst: "Habit Formed",
-    difficulty: "Rewarding",
-    category: "Mindset",
-    tip: "Give yourself a high five! You're in the top 5% of money-conscious people."
-  }
-];
-
 export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
   currencySymbol = '₹',
   userReferralCode = '',
   defaultTab = 'game'
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState<'game' | 'quiz' | 'challenge'>(defaultTab);
+  const [activeTab, setActiveTab] = useState<'game' | 'quiz'>(defaultTab);
 
   // Quiz State
   const [quizIndex, setQuizIndex] = useState(0);
@@ -186,20 +116,6 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
   const [quizStarted, setQuizStarted] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
-
-  // Daily Challenge State (Synced to localStorage)
-  const todayKey = new Date().toISOString().slice(0, 10);
-  const dayOfWeek = (new Date().getDay() + 6) % 7; // 0 = Mon, 6 = Sun
-  const currentChallenge = DAILY_CHALLENGES[dayOfWeek] || DAILY_CHALLENGES[0];
-
-  const [challengeCompleted, setChallengeCompleted] = useState(() => {
-    return localStorage.getItem(`zen_challenge_${todayKey}`) === 'completed';
-  });
-
-  const [streakCount, setStreakCount] = useState(() => {
-    const saved = localStorage.getItem('zen_activity_streak');
-    return saved ? parseInt(saved, 10) : 4; // Default pleasant streak
-  });
 
   const handleAnswerQuiz = (points: number) => {
     playNotificationSound();
@@ -222,16 +138,6 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
     setSelectedAnswers([]);
     setQuizCompleted(false);
     setQuizStarted(true);
-  };
-
-  const handleCompleteChallenge = () => {
-    if (challengeCompleted) return;
-    playCelebrationSound();
-    setChallengeCompleted(true);
-    const newStreak = streakCount + 1;
-    setStreakCount(newStreak);
-    localStorage.setItem(`zen_challenge_${todayKey}`, 'completed');
-    localStorage.setItem('zen_activity_streak', String(newStreak));
   };
 
   // Helper for Quiz Result Profile
@@ -299,7 +205,7 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
               boxShadow: '0 6px 16px rgba(16, 185, 129, 0.35)',
               flexShrink: 0
             }}>
-              ✨
+              🎮
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -314,11 +220,11 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
                   background: '#10b981',
                   color: '#ffffff'
                 }}>
-                  3-in-1
+                  2-in-1
                 </span>
               </div>
               <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', margin: '3px 0 0 0' }}>
-                🎮 Coin Catcher • 🧠 Money IQ Quiz • 🔥 Daily Habit Streak ({streakCount}d)
+                🎮 Coin Catcher Arcade • 🧠 60-Second Money IQ Quiz
               </p>
             </div>
           </div>
@@ -336,7 +242,7 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
             boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)',
             flexShrink: 0
           }}>
-            <span>Open Hub</span>
+            <span>Play &amp; Learn</span>
             <ChevronRight size={15} />
           </div>
         </button>
@@ -344,7 +250,7 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
     );
   }
 
-  // Expanded Hub View with 3 Activities
+  // Expanded Hub View with 2 Activities (Game & Quiz)
   return (
     <div style={{
       marginTop: '16px',
@@ -367,7 +273,7 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Sparkles size={18} color="#10b981" />
           <span style={{ fontSize: '15px', fontWeight: 900, color: 'var(--text-primary)' }}>
-            Zen Zone: Activities &amp; Habits
+            Zen Arcade &amp; Brain Hub
           </span>
         </div>
         <button
@@ -387,12 +293,12 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
         </button>
       </div>
 
-      {/* 3 Activity Tabs Selector */}
+      {/* 2 Activity Tabs Selector (50% / 50%) */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
+        gridTemplateColumns: 'repeat(2, 1fr)',
         padding: '8px',
-        gap: '6px',
+        gap: '8px',
         background: 'rgba(0,0,0,0.03)',
         borderBottom: '1px solid var(--border-input, rgba(255,255,255,0.06))'
       }}>
@@ -401,23 +307,23 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
           onClick={() => setActiveTab('game')}
           style={{
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
-            gap: '4px',
-            padding: '10px 6px',
+            justifyContent: 'center',
+            gap: '8px',
+            padding: '12px 10px',
             borderRadius: '16px',
             border: 'none',
             background: activeTab === 'game' ? '#10b981' : 'transparent',
             color: activeTab === 'game' ? '#ffffff' : 'var(--text-secondary)',
             fontWeight: 800,
-            fontSize: '11.5px',
+            fontSize: '13px',
             cursor: 'pointer',
             transition: 'all 0.2s',
             boxShadow: activeTab === 'game' ? '0 4px 14px rgba(16, 185, 129, 0.35)' : 'none'
           }}
         >
-          <Gamepad2 size={16} />
-          <span>1. Coin Game</span>
+          <Gamepad2 size={18} />
+          <span>🎮 1. Coin Catcher Game</span>
         </button>
 
         {/* Tab 2: Money IQ Quiz */}
@@ -425,47 +331,23 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
           onClick={() => setActiveTab('quiz')}
           style={{
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
-            gap: '4px',
-            padding: '10px 6px',
+            justifyContent: 'center',
+            gap: '8px',
+            padding: '12px 10px',
             borderRadius: '16px',
             border: 'none',
             background: activeTab === 'quiz' ? '#10b981' : 'transparent',
             color: activeTab === 'quiz' ? '#ffffff' : 'var(--text-secondary)',
             fontWeight: 800,
-            fontSize: '11.5px',
+            fontSize: '13px',
             cursor: 'pointer',
             transition: 'all 0.2s',
             boxShadow: activeTab === 'quiz' ? '0 4px 14px rgba(16, 185, 129, 0.35)' : 'none'
           }}
         >
-          <Brain size={16} />
-          <span>2. Money Quiz</span>
-        </button>
-
-        {/* Tab 3: Habit Streak */}
-        <button
-          onClick={() => setActiveTab('challenge')}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '4px',
-            padding: '10px 6px',
-            borderRadius: '16px',
-            border: 'none',
-            background: activeTab === 'challenge' ? '#10b981' : 'transparent',
-            color: activeTab === 'challenge' ? '#ffffff' : 'var(--text-secondary)',
-            fontWeight: 800,
-            fontSize: '11.5px',
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-            boxShadow: activeTab === 'challenge' ? '0 4px 14px rgba(16, 185, 129, 0.35)' : 'none'
-          }}
-        >
-          <Flame size={16} color={activeTab === 'challenge' ? '#ffffff' : '#f59e0b'} />
-          <span>3. Habit Streak</span>
+          <Brain size={18} />
+          <span>🧠 2. Money IQ Quiz</span>
         </button>
       </div>
 
@@ -717,185 +599,6 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
               })()}
             </div>
           )}
-        </div>
-      )}
-
-      {/* =================================================================== */}
-      {/* ACTIVITY 3: 24-HOUR NO-SPEND DAILY HABIT CHALLENGE                  */}
-      {/* =================================================================== */}
-      {activeTab === 'challenge' && (
-        <div style={{ padding: '20px 18px' }}>
-          {/* Streak Flame Banner */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '14px 18px',
-            borderRadius: '20px',
-            background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, rgba(239, 68, 68, 0.12) 100%)',
-            border: '1px solid rgba(245, 158, 11, 0.3)',
-            marginBottom: '18px'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{
-                fontSize: '28px',
-                animation: 'bounce 1.5s infinite'
-              }}>
-                🔥
-              </div>
-              <div>
-                <div style={{ fontSize: '18px', fontWeight: 900, color: '#f59e0b' }}>
-                  {streakCount} Day Streak!
-                </div>
-                <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                  Complete today's challenge to keep flame alive
-                </div>
-              </div>
-            </div>
-
-            <div style={{
-              background: '#f59e0b',
-              color: '#ffffff',
-              padding: '6px 12px',
-              borderRadius: '999px',
-              fontSize: '11px',
-              fontWeight: 800
-            }}>
-              Day {currentChallenge.day} / 7
-            </div>
-          </div>
-
-          {/* Today's Active Challenge Card */}
-          <div style={{
-            background: challengeCompleted 
-              ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 182, 212, 0.08) 100%)'
-              : 'rgba(255,255,255,0.02)',
-            border: challengeCompleted 
-              ? '1.5px solid rgba(16, 185, 129, 0.4)' 
-              : '1.5px solid var(--border-input, rgba(255,255,255,0.08))',
-            borderRadius: '24px',
-            padding: '20px',
-            marginBottom: '18px'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <span style={{
-                fontSize: '11px',
-                fontWeight: 800,
-                color: '#10b981',
-                background: 'rgba(16, 185, 129, 0.12)',
-                padding: '4px 10px',
-                borderRadius: '999px'
-              }}>
-                🎯 Today's Mission
-              </span>
-              <span style={{
-                fontSize: '11px',
-                color: 'var(--text-secondary)',
-                fontWeight: 700
-              }}>
-                Est. Savings: <strong style={{ color: '#10b981' }}>{currentChallenge.savingsEst}</strong>
-              </span>
-            </div>
-
-            <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 6px 0' }}>
-              {currentChallenge.title}
-            </h3>
-            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 0 14px 0', lineHeight: 1.5 }}>
-              {currentChallenge.sub}
-            </p>
-
-            <div style={{
-              padding: '10px 14px',
-              borderRadius: '14px',
-              background: 'rgba(0,0,0,0.04)',
-              border: '1px solid var(--border-input, rgba(255,255,255,0.06))',
-              fontSize: '11.5px',
-              color: 'var(--text-secondary)',
-              marginBottom: '18px'
-            }}>
-              💡 <strong>Pro Tip:</strong> {currentChallenge.tip}
-            </div>
-
-            {challengeCompleted ? (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                padding: '14px',
-                borderRadius: '16px',
-                background: '#10b981',
-                color: '#ffffff',
-                fontWeight: 800,
-                fontSize: '14px',
-                boxShadow: '0 6px 20px rgba(16, 185, 129, 0.35)'
-              }}>
-                <CheckCircle2 size={18} />
-                <span>Mission Completed for Today! 🎉</span>
-              </div>
-            ) : (
-              <button
-                onClick={handleCompleteChallenge}
-                className="hover-lift"
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  padding: '14px',
-                  borderRadius: '16px',
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                  color: '#ffffff',
-                  fontWeight: 800,
-                  fontSize: '14px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: '0 6px 20px rgba(16, 185, 129, 0.35)'
-                }}
-              >
-                <Check size={18} />
-                <span>Mark as Done &amp; Boost Streak</span>
-              </button>
-            )}
-          </div>
-
-          {/* 7-Day Habit Track Grid */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: '6px'
-          }}>
-            {DAILY_CHALLENGES.map((ch, idx) => {
-              const isPast = idx < dayOfWeek;
-              const isCurrent = idx === dayOfWeek;
-              return (
-                <div
-                  key={idx}
-                  style={{
-                    flex: 1,
-                    textAlign: 'center',
-                    padding: '8px 4px',
-                    borderRadius: '12px',
-                    background: isCurrent 
-                      ? (challengeCompleted ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)')
-                      : (isPast ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.02)'),
-                    border: isCurrent 
-                      ? '1px solid #10b981' 
-                      : '1px solid transparent'
-                  }}
-                >
-                  <div style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 700 }}>
-                    Day {ch.day}
-                  </div>
-                  <div style={{ fontSize: '14px', marginTop: '2px' }}>
-                    {isPast || (isCurrent && challengeCompleted) ? '✅' : (isCurrent ? '⏳' : '🔒')}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
         </div>
       )}
     </div>
