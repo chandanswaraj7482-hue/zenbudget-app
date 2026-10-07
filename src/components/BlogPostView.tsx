@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Calendar, User, ArrowRight, Share2, Sparkles, Clock, Check, BookOpen, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Calendar, User, ArrowRight, Share2, Sparkles, Clock, Check, BookOpen, ShieldCheck, Sun, Moon } from 'lucide-react';
 import { blogPosts } from '../data/blogPosts';
 import type { BlogPost } from '../data/blogPosts';
 import { GooglePlayIcon } from './GooglePlayBadge';
@@ -13,10 +13,58 @@ interface BlogPostViewProps {
 
 export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLanding, onOpenWebApp }) => {
   const [copied, setCopied] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    try {
+      const saved = localStorage.getItem('zb_landing_theme') || localStorage.getItem('zb_theme');
+      if (saved === 'light' || saved === 'dark') return saved;
+      if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        return 'light';
+      }
+    } catch (e) {}
+    return 'dark';
+  });
+
+  const isDark = theme === 'dark';
+
+  const toggleTheme = () => {
+    setTheme(prev => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      try {
+        localStorage.setItem('zb_landing_theme', next);
+        localStorage.setItem('zb_theme', next);
+      } catch (e) {}
+      return next;
+    });
+  };
+
   const post = blogPosts.find(p => p.slug === slug);
 
   // Other related posts
   const otherPosts = blogPosts.filter(p => p.slug !== slug).slice(0, 2);
+
+  const t = {
+    bg: isDark ? '#070a0f' : '#f8fafc',
+    text: isDark ? '#f8fafc' : '#0f172a',
+    textMuted: isDark ? '#94a3b8' : '#64748b',
+    textSecondary: isDark ? '#cbd5e1' : '#334155',
+    headerBg: isDark ? 'rgba(7, 10, 15, 0.85)' : 'rgba(255, 255, 255, 0.88)',
+    headerBorder: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(226, 232, 240, 0.85)',
+    articleBg: isDark ? 'rgba(15, 23, 42, 0.65)' : '#ffffff',
+    articleBorder: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(226, 232, 240, 0.9)',
+    articleShadow: isDark ? '0 20px 60px rgba(0, 0, 0, 0.4)' : '0 20px 50px -10px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.02)',
+    cardBg: isDark ? 'rgba(17, 24, 39, 0.7)' : '#ffffff',
+    cardBorder: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(226, 232, 240, 0.85)',
+    cardShadow: isDark ? 'none' : '0 10px 25px -5px rgba(0, 0, 0, 0.05)',
+    metaPillBg: isDark ? 'rgba(255, 255, 255, 0.04)' : '#ffffff',
+    metaPillBorder: isDark ? 'rgba(255, 255, 255, 0.08)' : '#e2e8f0',
+    tagBg: isDark ? 'rgba(255, 255, 255, 0.05)' : '#f1f5f9',
+    tagBorder: isDark ? 'rgba(255, 255, 255, 0.08)' : '#e2e8f0',
+    tagText: isDark ? '#cbd5e1' : '#475569',
+    divider: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(226, 232, 240, 0.9)',
+    iconBtnBg: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
+    iconBtnBorder: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
+    iconBtnColor: isDark ? '#e2e8f0' : '#1e293b',
+  };
 
   useEffect(() => {
     let scriptTag: HTMLScriptElement | null = null;
@@ -172,13 +220,14 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#070a0f',
-      color: '#f8fafc',
+      backgroundColor: t.bg,
+      color: t.text,
       fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Manrope", sans-serif',
       position: 'relative',
       overflowX: 'hidden',
       paddingBottom: '100px',
-      width: '100%'
+      width: '100%',
+      transition: 'background-color 0.25s ease, color 0.25s ease'
     }}>
       <style>{`
         html, body {
@@ -187,7 +236,9 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
           height: auto !important;
           min-height: 100vh !important;
           display: block !important;
-          background: #070a0f !important;
+          background: ${t.bg} !important;
+          color: ${t.text} !important;
+          transition: background-color 0.25s ease, color 0.25s ease;
         }
         #root {
           overflow-x: hidden !important;
@@ -214,7 +265,9 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
         transform: 'translateX(-50%)',
         width: 'min(1200px, 100vw)',
         height: '400px',
-        background: 'radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%)',
+        background: isDark 
+          ? 'radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%)'
+          : 'radial-gradient(circle, rgba(16, 185, 129, 0.10) 0%, transparent 70%)',
         filter: 'blur(80px)',
         pointerEvents: 'none',
         zIndex: 0
@@ -227,13 +280,14 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
         left: 0,
         right: 0,
         height: '70px',
-        backgroundColor: 'rgba(7, 10, 15, 0.85)',
+        backgroundColor: t.headerBg,
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        borderBottom: `1px solid ${t.headerBorder}`,
         zIndex: 100,
         display: 'flex',
-        alignItems: 'center'
+        alignItems: 'center',
+        transition: 'background-color 0.25s ease, border-color 0.25s ease'
       }}>
         <div style={{
           maxWidth: '1000px',
@@ -255,7 +309,7 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
                 gap: '8px',
                 background: 'none',
                 border: 'none',
-                color: '#cbd5e1',
+                color: t.textSecondary,
                 cursor: 'pointer',
                 fontSize: '14px',
                 fontWeight: 700,
@@ -269,11 +323,12 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
                 width: '36px',
                 height: '36px',
                 borderRadius: '50%',
-                backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
+                backgroundColor: t.iconBtnBg,
+                border: `1px solid ${t.iconBtnBorder}`,
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                color: t.iconBtnColor
               }}>
                 <ArrowLeft size={16} />
               </div>
@@ -290,7 +345,7 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
                 alt="ZenBudget Logo"
                 style={{ width: '32px', height: '32px', borderRadius: '9px', objectFit: 'contain' }}
               />
-              <span style={{ fontSize: '16px', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>
+              <span style={{ fontSize: '16px', fontWeight: 800, color: t.text, letterSpacing: '-0.02em' }}>
                 ZenBudget
               </span>
             </div>
@@ -298,6 +353,29 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
 
           {/* Action CTAs */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              aria-label={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '38px',
+                height: '38px',
+                borderRadius: '50%',
+                backgroundColor: t.iconBtnBg,
+                border: `1px solid ${t.iconBtnBorder}`,
+                color: t.iconBtnColor,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              className="hover-lift"
+            >
+              {isDark ? <Sun size={17} color="#f59e0b" /> : <Moon size={17} color="#6366f1" />}
+            </button>
+
             <button
               onClick={handleShare}
               style={{
@@ -306,9 +384,11 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
                 gap: '8px',
                 padding: '8px 16px',
                 borderRadius: '100px',
-                backgroundColor: copied ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.06)',
-                border: copied ? '1px solid #10b981' : '1px solid rgba(255, 255, 255, 0.12)',
-                color: copied ? '#34d399' : '#e2e8f0',
+                backgroundColor: copied 
+                  ? (isDark ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.15)') 
+                  : t.iconBtnBg,
+                border: copied ? '1px solid #10b981' : `1px solid ${t.iconBtnBorder}`,
+                color: copied ? (isDark ? '#34d399' : '#059669') : t.text,
                 fontSize: '13px',
                 fontWeight: 700,
                 cursor: 'pointer',
@@ -317,7 +397,7 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
               title="Share this guide"
               className="hover-lift"
             >
-              {copied ? <Check size={15} color="#34d399" /> : <Share2 size={15} />}
+              {copied ? <Check size={15} color={isDark ? "#34d399" : "#059669"} /> : <Share2 size={15} />}
               <span>{copied ? 'Link Copied!' : 'Share'}</span>
             </button>
 
@@ -360,9 +440,9 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
           {/* Category & Read Time */}
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '18px' }}>
             <span style={{
-              backgroundColor: 'rgba(16, 185, 129, 0.15)',
+              backgroundColor: isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(16, 185, 129, 0.12)',
               border: '1px solid rgba(16, 185, 129, 0.35)',
-              color: '#34d399',
+              color: isDark ? '#34d399' : '#059669',
               fontSize: '11.5px',
               fontWeight: 800,
               padding: '4px 14px',
@@ -376,7 +456,7 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
               display: 'inline-flex',
               alignItems: 'center',
               gap: '4px',
-              color: '#94a3b8',
+              color: t.textMuted,
               fontSize: '12px',
               fontWeight: 600
             }}>
@@ -391,7 +471,7 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
             fontWeight: 900,
             lineHeight: 1.2,
             letterSpacing: '-0.025em',
-            color: '#ffffff',
+            color: t.text,
             marginBottom: '20px'
           }}>
             {post.title}
@@ -400,7 +480,7 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
           {/* Excerpt Lead */}
           <p style={{
             fontSize: 'clamp(16px, 2vw, 19px)',
-            color: '#94a3b8',
+            color: t.textMuted,
             lineHeight: 1.6,
             fontWeight: 500,
             maxWidth: '780px',
@@ -416,8 +496,9 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
             gap: '16px',
             padding: '8px 18px',
             borderRadius: '100px',
-            backgroundColor: 'rgba(255, 255, 255, 0.04)',
-            border: '1px solid rgba(255, 255, 255, 0.08)'
+            backgroundColor: t.metaPillBg,
+            border: `1px solid ${t.metaPillBorder}`,
+            boxShadow: !isDark ? '0 1px 4px rgba(0,0,0,0.04)' : 'none'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{
@@ -435,16 +516,16 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
                 {post.author.charAt(0)}
               </div>
               <div style={{ textAlign: 'left', lineHeight: 1.15 }}>
-                <div style={{ fontSize: '13px', fontWeight: 800, color: '#ffffff' }}>{post.author}</div>
+                <div style={{ fontSize: '13px', fontWeight: 800, color: t.text }}>{post.author}</div>
                 {post.authorRole && (
-                  <div style={{ fontSize: '11px', color: '#64748b' }}>{post.authorRole}</div>
+                  <div style={{ fontSize: '11px', color: t.textMuted }}>{post.authorRole}</div>
                 )}
               </div>
             </div>
 
-            <div style={{ width: '1px', height: '18px', backgroundColor: 'rgba(255, 255, 255, 0.12)' }} />
+            <div style={{ width: '1px', height: '18px', backgroundColor: t.divider }} />
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#94a3b8', fontWeight: 600 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: t.textMuted, fontWeight: 600 }}>
               <Calendar size={13} color="#10b981" />
               <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
             </div>
@@ -458,8 +539,8 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
           borderRadius: '28px',
           overflow: 'hidden',
           marginBottom: '44px',
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)',
-          border: '1px solid rgba(255, 255, 255, 0.08)'
+          boxShadow: isDark ? '0 20px 50px rgba(0, 0, 0, 0.5)' : '0 15px 40px rgba(0,0,0,0.08)',
+          border: `1px solid ${t.articleBorder}`
         }}>
           <img
             src={post.imageUrl}
@@ -471,21 +552,21 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
 
         {/* Article Body */}
         <article style={{
-          backgroundColor: 'rgba(15, 23, 42, 0.65)',
+          backgroundColor: t.articleBg,
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
+          border: `1px solid ${t.articleBorder}`,
           borderRadius: '32px',
           padding: 'clamp(28px, 5vw, 60px)',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.4)',
-          color: '#cbd5e1',
+          boxShadow: t.articleShadow,
+          color: t.textSecondary,
           fontSize: '17px',
           lineHeight: 1.8,
           marginBottom: '56px'
         }}>
           <style>{`
             .zen-blog-article h2 {
-              color: #ffffff;
+              color: ${t.text};
               font-size: 26px;
               font-weight: 900;
               letter-spacing: -0.02em;
@@ -493,10 +574,10 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
               margin-bottom: 16px;
               line-height: 1.25;
               padding-bottom: 8px;
-              border-bottom: 2px solid rgba(16, 185, 129, 0.2);
+              border-bottom: 2px solid ${isDark ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.25)'};
             }
             .zen-blog-article h3 {
-              color: #f1f5f9;
+              color: ${isDark ? '#f1f5f9' : '#1e293b'};
               font-size: 20px;
               font-weight: 800;
               margin-top: 30px;
@@ -504,10 +585,10 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
             }
             .zen-blog-article p {
               margin-bottom: 22px;
-              color: #cbd5e1;
+              color: ${t.textSecondary};
             }
             .zen-blog-article strong {
-              color: #ffffff;
+              color: ${t.text};
               font-weight: 700;
             }
             .zen-blog-article ul, .zen-blog-article ol {
@@ -516,25 +597,26 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
             }
             .zen-blog-article li {
               margin-bottom: 10px;
-              color: #cbd5e1;
+              color: ${t.textSecondary};
             }
             .zen-blog-article blockquote {
               border-left: 4px solid #10b981;
-              background-color: rgba(16, 185, 129, 0.08);
+              background-color: ${isDark ? 'rgba(16, 185, 129, 0.08)' : 'rgba(16, 185, 129, 0.06)'};
               border-radius: 0 16px 16px 0;
               padding: 20px 24px;
               margin: 32px 0;
               font-style: italic;
-              color: #f1f5f9;
+              color: ${t.text};
               font-size: 18px;
               line-height: 1.6;
             }
             .zen-blog-article code {
-              background: rgba(255,255,255,0.08);
+              background: ${isDark ? 'rgba(255,255,255,0.08)' : '#f1f5f9'};
               padding: 2px 8px;
               border-radius: 6px;
               font-size: 14px;
-              color: #34d399;
+              color: ${isDark ? '#34d399' : '#059669'};
+              border: 1px solid ${t.cardBorder};
             }
           `}</style>
 
@@ -547,7 +629,7 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
           <div style={{
             marginTop: '44px',
             paddingTop: '28px',
-            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            borderTop: `1px solid ${t.divider}`,
             display: 'flex',
             flexWrap: 'wrap',
             alignItems: 'center',
@@ -555,16 +637,16 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
             gap: '16px'
           }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
-              <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 700 }}>Tags:</span>
+              <span style={{ fontSize: '13px', color: t.textMuted, fontWeight: 700 }}>Tags:</span>
               {post.tags.map((tag) => (
                 <span key={tag} style={{
                   fontSize: '12px',
                   fontWeight: 700,
                   padding: '4px 10px',
                   borderRadius: '100px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  color: '#94a3b8',
-                  border: '1px solid rgba(255, 255, 255, 0.08)'
+                  backgroundColor: t.tagBg,
+                  color: t.tagText,
+                  border: `1px solid ${t.tagBorder}`
                 }}>
                   #{tag}
                 </span>
@@ -579,9 +661,9 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
                 gap: '6px',
                 padding: '8px 16px',
                 borderRadius: '100px',
-                backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                backgroundColor: isDark ? 'rgba(16, 185, 129, 0.12)' : 'rgba(16, 185, 129, 0.1)',
                 border: '1px solid rgba(16, 185, 129, 0.3)',
-                color: '#34d399',
+                color: isDark ? '#34d399' : '#059669',
                 fontSize: '12.5px',
                 fontWeight: 800,
                 cursor: 'pointer'
@@ -597,7 +679,7 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
         {/* Read Next Section */}
         {otherPosts.length > 0 && (
           <div style={{ marginBottom: '60px' }}>
-            <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#ffffff', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h3 style={{ fontSize: '20px', fontWeight: 800, color: t.text, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Sparkles size={18} color="#10b981" />
               <span>Read Next</span>
             </h3>
@@ -615,27 +697,28 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
                     window.dispatchEvent(new Event('popstate'));
                   }}
                   style={{
-                    backgroundColor: 'rgba(17, 24, 39, 0.7)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    backgroundColor: t.cardBg,
+                    border: `1px solid ${t.cardBorder}`,
                     borderRadius: '20px',
                     padding: '20px',
                     cursor: 'pointer',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
-                    transition: 'all 0.2s ease'
+                    transition: 'all 0.2s ease',
+                    boxShadow: t.cardShadow
                   }}
                   className="hover-lift"
                 >
                   <div>
-                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: isDark ? '#34d399' : '#059669', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                       {other.category} · {other.readTime}
                     </span>
-                    <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#ffffff', marginTop: '8px', lineHeight: 1.35 }}>
+                    <h4 style={{ fontSize: '16px', fontWeight: 800, color: t.text, marginTop: '8px', lineHeight: 1.35 }}>
                       {other.title}
                     </h4>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#10b981', fontSize: '13px', fontWeight: 800, marginTop: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: isDark ? '#10b981' : '#059669', fontSize: '13px', fontWeight: 800, marginTop: '16px' }}>
                     <span>Read Article</span>
                     <ArrowRight size={14} />
                   </div>

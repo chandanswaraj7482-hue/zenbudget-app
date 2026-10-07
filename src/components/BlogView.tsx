@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ArrowLeft, Calendar, User, ArrowRight, Sparkles, Search, Clock, Tag, BookOpen, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Calendar, User, ArrowRight, Sparkles, Search, Clock, Tag, BookOpen, ShieldCheck, Sun, Moon } from 'lucide-react';
 import { blogPosts } from '../data/blogPosts';
 import type { BlogPost } from '../data/blogPosts';
 import { GooglePlayIcon } from './GooglePlayBadge';
@@ -13,6 +13,29 @@ interface BlogViewProps {
 export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebApp }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    try {
+      const saved = localStorage.getItem('zb_landing_theme') || localStorage.getItem('zb_theme');
+      if (saved === 'light' || saved === 'dark') return saved;
+      if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        return 'light';
+      }
+    } catch (e) {}
+    return 'dark';
+  });
+
+  const isDark = theme === 'dark';
+
+  const toggleTheme = () => {
+    setTheme(prev => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      try {
+        localStorage.setItem('zb_landing_theme', next);
+        localStorage.setItem('zb_theme', next);
+      } catch (e) {}
+      return next;
+    });
+  };
 
   useEffect(() => {
     document.title = 'ZenBudget Blog - Personal Finance & Budgeting Insights';
@@ -60,16 +83,42 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
     });
   }, [searchQuery, selectedCategory]);
 
+  const t = {
+    bg: isDark ? '#070a0f' : '#f8fafc',
+    text: isDark ? '#f8fafc' : '#0f172a',
+    textMuted: isDark ? '#94a3b8' : '#64748b',
+    textSecondary: isDark ? '#cbd5e1' : '#334155',
+    headerBg: isDark ? 'rgba(7, 10, 15, 0.85)' : 'rgba(255, 255, 255, 0.88)',
+    headerBorder: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(226, 232, 240, 0.85)',
+    cardBg: isDark ? 'rgba(17, 24, 39, 0.75)' : '#ffffff',
+    cardBorder: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(226, 232, 240, 0.85)',
+    cardShadow: isDark ? '0 8px 24px rgba(0, 0, 0, 0.35)' : '0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 2px 6px rgba(0, 0, 0, 0.02)',
+    inputBg: isDark ? 'rgba(21, 32, 54, 0.7)' : '#ffffff',
+    inputBorder: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(203, 213, 225, 0.9)',
+    inputShadow: isDark ? '0 8px 30px rgba(0,0,0,0.35)' : '0 4px 20px rgba(0,0,0,0.06)',
+    pillInactiveBg: isDark ? 'rgba(255, 255, 255, 0.03)' : '#ffffff',
+    pillInactiveBorder: isDark ? 'rgba(255, 255, 255, 0.08)' : '#e2e8f0',
+    pillInactiveText: isDark ? '#94a3b8' : '#64748b',
+    tagBg: isDark ? 'rgba(255, 255, 255, 0.05)' : '#f1f5f9',
+    tagBorder: isDark ? 'rgba(255, 255, 255, 0.06)' : '#e2e8f0',
+    tagText: isDark ? '#cbd5e1' : '#475569',
+    divider: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(226, 232, 240, 0.9)',
+    iconBtnBg: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
+    iconBtnBorder: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
+    iconBtnColor: isDark ? '#e2e8f0' : '#1e293b',
+  };
+
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#070a0f',
-      color: '#f8fafc',
+      backgroundColor: t.bg,
+      color: t.text,
       fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Manrope", sans-serif',
       position: 'relative',
       overflowX: 'hidden',
       paddingBottom: '80px',
-      width: '100%'
+      width: '100%',
+      transition: 'background-color 0.25s ease, color 0.25s ease'
     }}>
       <style>{`
         html, body {
@@ -78,7 +127,9 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
           height: auto !important;
           min-height: 100vh !important;
           display: block !important;
-          background: #070a0f !important;
+          background: ${t.bg} !important;
+          color: ${t.text} !important;
+          transition: background-color 0.25s ease, color 0.25s ease;
         }
         #root {
           overflow-x: hidden !important;
@@ -105,7 +156,9 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
         transform: 'translateX(-50%)',
         width: 'min(1200px, 100vw)',
         height: '500px',
-        background: 'radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.05) 50%, transparent 80%)',
+        background: isDark 
+          ? 'radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.05) 50%, transparent 80%)'
+          : 'radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.03) 50%, transparent 80%)',
         filter: 'blur(90px)',
         pointerEvents: 'none',
         zIndex: 0
@@ -118,13 +171,14 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
         left: 0,
         right: 0,
         height: '72px',
-        backgroundColor: 'rgba(7, 10, 15, 0.85)',
+        backgroundColor: t.headerBg,
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        borderBottom: `1px solid ${t.headerBorder}`,
         zIndex: 100,
         display: 'flex',
-        alignItems: 'center'
+        alignItems: 'center',
+        transition: 'background-color 0.25s ease, border-color 0.25s ease'
       }}>
         <div style={{
           maxWidth: '1240px',
@@ -147,9 +201,9 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
                 width: '40px',
                 height: '40px',
                 borderRadius: '50%',
-                backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: '#e2e8f0',
+                backgroundColor: t.iconBtnBg,
+                border: `1px solid ${t.iconBtnBorder}`,
+                color: t.iconBtnColor,
                 cursor: 'pointer',
                 transition: 'all 0.2s ease'
               }}
@@ -176,8 +230,8 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
                 }}
               />
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>ZenBudget</span>
-                <span style={{ fontSize: '12px', fontWeight: 700, padding: '2px 8px', borderRadius: '100px', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                <span style={{ fontSize: '18px', fontWeight: 800, color: t.text, letterSpacing: '-0.02em' }}>ZenBudget</span>
+                <span style={{ fontSize: '12px', fontWeight: 700, padding: '2px 8px', borderRadius: '100px', backgroundColor: isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(16, 185, 129, 0.12)', color: isDark ? '#34d399' : '#059669', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
                   Blog
                 </span>
               </div>
@@ -186,6 +240,29 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
 
           {/* Right Header CTAs */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              aria-label={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                backgroundColor: t.iconBtnBg,
+                border: `1px solid ${t.iconBtnBorder}`,
+                color: t.iconBtnColor,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              className="hover-lift"
+            >
+              {isDark ? <Sun size={18} color="#f59e0b" /> : <Moon size={18} color="#6366f1" />}
+            </button>
+
             <a
               href={DISTRIBUTION_CONFIG.PLAY_STORE_URL}
               target="_blank"
@@ -196,9 +273,9 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
                 gap: '8px',
                 padding: '8px 16px',
                 borderRadius: '100px',
-                backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                color: '#ffffff',
+                backgroundColor: t.iconBtnBg,
+                border: `1px solid ${t.iconBtnBorder}`,
+                color: t.text,
                 textDecoration: 'none',
                 fontSize: '13px',
                 fontWeight: 700,
@@ -272,7 +349,7 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
             fontWeight: 900,
             lineHeight: 1.15,
             letterSpacing: '-0.03em',
-            color: '#ffffff',
+            color: t.text,
             marginBottom: '18px'
           }}>
             Master Your Money.{' '}
@@ -287,7 +364,7 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
 
           <p style={{
             fontSize: 'clamp(15px, 2vw, 18px)',
-            color: '#94a3b8',
+            color: t.textMuted,
             lineHeight: 1.6,
             fontWeight: 500,
             marginBottom: '36px'
@@ -300,9 +377,10 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
             position: 'relative',
             maxWidth: '540px',
             margin: '0 auto',
-            boxShadow: '0 8px 30px rgba(0,0,0,0.35)'
+            boxShadow: t.inputShadow,
+            borderRadius: '100px'
           }}>
-            <Search size={18} color="#64748b" style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)' }} />
+            <Search size={18} color={isDark ? "#64748b" : "#94a3b8"} style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)' }} />
             <input
               type="text"
               placeholder="Search guides, strategies, UPI tips, habits..."
@@ -312,10 +390,10 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
                 width: '100%',
                 padding: '14px 20px 14px 48px',
                 borderRadius: '100px',
-                backgroundColor: 'rgba(21, 32, 54, 0.7)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
+                backgroundColor: t.inputBg,
+                border: `1px solid ${t.inputBorder}`,
                 backdropFilter: 'blur(12px)',
-                color: '#ffffff',
+                color: t.text,
                 fontSize: '14.5px',
                 outline: 'none',
                 boxSizing: 'border-box',
@@ -326,7 +404,7 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
                 e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.2)';
               }}
               onBlur={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.12)';
+                e.currentTarget.style.borderColor = t.inputBorder;
                 e.currentTarget.style.boxShadow = 'none';
               }}
             />
@@ -340,7 +418,7 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
                   transform: 'translateY(-50%)',
                   background: 'none',
                   border: 'none',
-                  color: '#94a3b8',
+                  color: t.textMuted,
                   cursor: 'pointer',
                   fontSize: '12px',
                   fontWeight: 700
@@ -372,9 +450,12 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
                     fontWeight: 700,
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
-                    border: isActive ? '1px solid #10b981' : '1px solid rgba(255, 255, 255, 0.08)',
-                    backgroundColor: isActive ? 'rgba(16, 185, 129, 0.18)' : 'rgba(255, 255, 255, 0.03)',
-                    color: isActive ? '#34d399' : '#94a3b8'
+                    border: isActive ? '1px solid #10b981' : `1px solid ${t.pillInactiveBorder}`,
+                    backgroundColor: isActive 
+                      ? (isDark ? 'rgba(16, 185, 129, 0.18)' : 'rgba(16, 185, 129, 0.12)') 
+                      : t.pillInactiveBg,
+                    color: isActive ? (isDark ? '#34d399' : '#059669') : t.pillInactiveText,
+                    boxShadow: !isActive && !isDark ? '0 1px 3px rgba(0,0,0,0.04)' : 'none'
                   }}
                   className="hover-lift"
                 >
@@ -387,9 +468,9 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
 
         {/* Results Counter if searching */}
         {(searchQuery || selectedCategory !== 'All') && (
-          <div style={{ marginBottom: '28px', color: '#94a3b8', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ marginBottom: '28px', color: t.textMuted, fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span>Showing {filteredPosts.length} {filteredPosts.length === 1 ? 'article' : 'articles'}</span>
-            {selectedCategory !== 'All' && <span>in <strong style={{ color: '#ffffff' }}>{selectedCategory}</strong></span>}
+            {selectedCategory !== 'All' && <span>in <strong style={{ color: t.text }}>{selectedCategory}</strong></span>}
             {searchQuery && <span>matching "<em>{searchQuery}</em>"</span>}
           </div>
         )}
@@ -399,15 +480,16 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
           <div style={{
             padding: '60px 24px',
             textAlign: 'center',
-            backgroundColor: 'rgba(21, 32, 54, 0.4)',
-            border: '1px solid rgba(255, 255, 255, 0.06)',
+            backgroundColor: isDark ? 'rgba(21, 32, 54, 0.4)' : '#ffffff',
+            border: `1px solid ${t.cardBorder}`,
             borderRadius: '24px',
             maxWidth: '500px',
-            margin: '40px auto'
+            margin: '40px auto',
+            boxShadow: t.cardShadow
           }}>
             <BookOpen size={42} color="#64748b" style={{ marginBottom: '16px' }} />
-            <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#ffffff', marginBottom: '8px' }}>No articles found</h3>
-            <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '20px' }}>
+            <h3 style={{ fontSize: '20px', fontWeight: 800, color: t.text, marginBottom: '8px' }}>No articles found</h3>
+            <p style={{ color: t.textMuted, fontSize: '14px', marginBottom: '20px' }}>
               No articles matched your search query. Try searching for different keywords or clear your filters.
             </p>
             <button
@@ -437,17 +519,17 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
                 key={post.id}
                 onClick={() => handlePostClick(post.slug)}
                 style={{
-                  backgroundColor: 'rgba(17, 24, 39, 0.75)',
+                  backgroundColor: t.cardBg,
                   backdropFilter: 'blur(16px)',
                   WebkitBackdropFilter: 'blur(16px)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  border: `1px solid ${t.cardBorder}`,
                   borderRadius: '28px',
                   overflow: 'hidden',
                   cursor: 'pointer',
                   display: 'flex',
                   flexDirection: 'column',
                   transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)'
+                  boxShadow: t.cardShadow
                 }}
                 className="hover-lift"
               >
@@ -468,7 +550,9 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
                   <div style={{
                     position: 'absolute',
                     inset: 0,
-                    background: 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(7,10,15,0.75) 100%)'
+                    background: isDark 
+                      ? 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(7,10,15,0.75) 100%)'
+                      : 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.45) 100%)'
                   }} />
 
                   {/* Top Badges */}
@@ -490,7 +574,7 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
                       borderRadius: '100px',
                       letterSpacing: '0.04em',
                       textTransform: 'uppercase',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.25)'
                     }}>
                       {post.category}
                     </span>
@@ -525,7 +609,7 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
                     fontSize: '20px',
                     fontWeight: 800,
                     lineHeight: 1.3,
-                    color: '#ffffff',
+                    color: t.text,
                     marginBottom: '12px',
                     letterSpacing: '-0.02em',
                     transition: 'color 0.2s ease'
@@ -535,7 +619,7 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
 
                   <p style={{
                     fontSize: '14px',
-                    color: '#94a3b8',
+                    color: t.textMuted,
                     lineHeight: 1.6,
                     fontWeight: 400,
                     marginBottom: '20px',
@@ -556,9 +640,9 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
                         fontWeight: 700,
                         padding: '3px 8px',
                         borderRadius: '6px',
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        color: '#cbd5e1',
-                        border: '1px solid rgba(255, 255, 255, 0.06)'
+                        backgroundColor: t.tagBg,
+                        color: t.tagText,
+                        border: `1px solid ${t.tagBorder}`
                       }}>
                         #{tag}
                       </span>
@@ -568,7 +652,7 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
                   {/* Author & Read Link Footer */}
                   <div style={{
                     paddingTop: '16px',
-                    borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                    borderTop: `1px solid ${t.divider}`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
@@ -579,9 +663,9 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
                         width: '28px',
                         height: '28px',
                         borderRadius: '50%',
-                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        backgroundColor: isDark ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.15)',
                         border: '1px solid rgba(16, 185, 129, 0.4)',
-                        color: '#34d399',
+                        color: isDark ? '#34d399' : '#059669',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -591,8 +675,8 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
                         {post.author.charAt(0)}
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#e2e8f0' }}>{post.author}</span>
-                        <span style={{ fontSize: '10.5px', color: '#64748b' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: t.text }}>{post.author}</span>
+                        <span style={{ fontSize: '10.5px', color: t.textMuted }}>
                           {new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </span>
                       </div>
@@ -604,7 +688,7 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
                       gap: '4px',
                       fontSize: '12.5px',
                       fontWeight: 800,
-                      color: '#34d399'
+                      color: isDark ? '#34d399' : '#059669'
                     }}>
                       <span>Read</span>
                       <ArrowRight size={14} />
