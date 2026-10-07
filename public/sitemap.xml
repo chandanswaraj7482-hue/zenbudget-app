@@ -293,6 +293,78 @@
     </image:image>
   </url>
 
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/blog/smart-money-habits-students-young-professionals</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>Smart Money Habits for College Students &amp; First-Job Earners</image:title>
+      <image:caption>Guide for young professionals to budget entry-level salaries and build wealth early</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/blog/how-to-escape-credit-card-debt-snowball-vs-avalanche</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>How to Escape Credit Card Debt: Debt Snowball vs Avalanche</image:title>
+      <image:caption>Proven debt payoff strategies to clear high-interest card balances</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/blog/grocery-shopping-hacks-to-cut-food-bill-in-half</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>10 Grocery Shopping Hacks to Cut Your Food Bill by 40%</image:title>
+      <image:caption>Supermarket psychology and bulk-buying hacks to lower food bills</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/blog/lifestyle-inflation-trap-and-how-to-prevent-it</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>The Lifestyle Inflation Trap: Why Earning More Doesn't Make You Rich</image:title>
+      <image:caption>How lifestyle creep happens and the 50% raise rule to protect your wealth</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/blog/freelancer-gig-worker-budgeting-irregular-income</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>Budgeting on an Irregular Income: Freelancer &amp; Creator Blueprint</image:title>
+      <image:caption>Financial strategies for freelancers and self-employed creators with fluctuating revenue</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/blog/how-to-save-first-1-lakh-rupees-roadmap</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>How to Save Your First ₹1,00,000: 6-Month Fast Track Roadmap</image:title>
+      <image:caption>Math-backed 6-month roadmap to accumulate your first 1 Lakh rupees</image:caption>
+    </image:image>
+  </url>
+
   <!-- Privacy Policy -->
   <url>
     <loc>https://zenbudget-tracker.vercel.app/privacy.html</loc>

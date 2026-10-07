@@ -654,6 +654,19 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
           boxShadow: '0 20px 50px rgba(6, 78, 59, 0.45)',
           textAlign: 'center'
         }}>
+          <img
+            src="/logo.png?v=2"
+            alt="ZenBudget Logo"
+            style={{
+              width: '46px',
+              height: '46px',
+              borderRadius: '13px',
+              objectFit: 'contain',
+              margin: '0 auto 16px',
+              display: 'block',
+              boxShadow: '0 8px 24px rgba(16, 185, 129, 0.4)'
+            }}
+          />
           <h2 style={{ fontSize: '26px', fontWeight: 900, color: '#ffffff', marginBottom: '12px' }}>
             Take Control of Your Spending Today
           </h2>

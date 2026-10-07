@@ -629,6 +629,20 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
           overflow: 'hidden'
         }}>
           <div style={{ maxWidth: '640px', margin: '0 auto', position: 'relative', zIndex: 10 }}>
+            <img
+              src="/logo.png?v=2"
+              alt="ZenBudget Logo"
+              style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '14px',
+                objectFit: 'contain',
+                margin: '0 auto 16px',
+                display: 'block',
+                boxShadow: '0 8px 24px rgba(16, 185, 129, 0.4)'
+              }}
+            />
+
             <div style={{
               display: 'inline-flex',
               alignItems: 'center',

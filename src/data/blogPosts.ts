@@ -313,6 +313,228 @@ export const blogPosts: BlogPost[] = [
       <h2>How ZenBudget Couples & Family Sync Solves This</h2>
       <p>ZenBudget includes dedicated <strong>Couple & Family Sync</strong>: partners link with a simple 6-character code. You can choose which modules to sync (like Shared Rent & Groceries) while keeping your personal accounts private. Both partners receive real-time balance transparency without intrusive interrogation.</p>
     `
+  },
+  {
+    id: '9',
+    slug: 'smart-money-habits-students-young-professionals',
+    title: 'Smart Money Habits for College Students & First-Job Earners (2026 Guide)',
+    excerpt: 'Navigate entry-level salaries, avoid peer pressure spending, build credit score safely, and start compounding wealth from your very first paycheck.',
+    readTime: '7 min read',
+    category: 'Budgeting',
+    tags: ['Student Finance', 'First Job Salary', 'Young Professional Money', 'Early Investing'],
+    author: 'Chandan Swaraj',
+    authorRole: 'Founder, ZenBudget',
+    date: '2026-04-03',
+    imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80',
+    content: `
+      <h2>The Thrill and Peril of Your First Salary</h2>
+      <p>Receiving your very first paycheck is an electrifying milestone. For the first time in life, you have real financial autonomy. But without clear money boundaries, that hard-earned entry-level salary vanishes shockingly fast on weekend party tabs, food delivery apps, and upgrading electronics to match office peers.</p>
+
+      <h2>1. The "First 3 Months Rule"</h2>
+      <p>When you start your first job, resist the urge to immediately upgrade your lifestyle. Keep living like a student for just 90 days. During these initial three months, accumulate a <strong>₹30,000 to ₹50,000 security buffer</strong> in a separate bank account. This provides the safety cushion you need if company onboarding, relocation, or reimbursements get delayed.</p>
+
+      <h2>2. Guard Against Peer Pressure & FOMO Spending</h2>
+      <p>Colleagues inviting you to ₹1,500 dinners every Friday can derail your finances. You do not need to be antisocial — learn the art of the <em>positive redirect</em>: "I already have plans for dinner, but I'd love to join you guys for coffee after!" You preserve professional camaraderie without sacrificing a week's grocery allowance.</p>
+
+      <h2>3. Demystify Credit Cards Early</h2>
+      <p>A credit card is a powerful wealth-building tool if used correctly, or financial quicksand if treated as free money:</p>
+      <ul>
+        <li><strong>Rule #1:</strong> Never charge anything to a credit card that you do not already have sitting in your bank account today.</li>
+        <li><strong>Rule #2:</strong> Always pay the <em>Total Amount Due</em> before the due date, never the "Minimum Due" (which incurs 42% annualized interest).</li>
+        <li><strong>Rule #3:</strong> Keep your credit utilization below 30% of your limit to build a stellar 750+ CIBIL score.</li>
+      </ul>
+
+      <h2>4. The Magic of Starting Early: Compound Interest</h2>
+      <p>A 22-year-old who invests ₹2,500 every month at 12% annual returns will accumulate over ₹88 Lakhs by age 52. Waiting until age 32 to start requires investing over triple that amount monthly to reach the same net worth. Time in the market is your ultimate unfair advantage.</p>
+
+      <h2>5. Track Without Guilt Using ZenBudget</h2>
+      <p>Use ZenBudget to create a simple 3-tier budget: Needs, Fun Buffer, and Wealth Vault. Set your daily limit so you can enjoy weekend hangouts guilt-free knowing your essentials and future savings are 100% safeguarded.</p>
+    `
+  },
+  {
+    id: '10',
+    slug: 'how-to-escape-credit-card-debt-snowball-vs-avalanche',
+    title: 'How to Escape Credit Card Debt: The Debt Snowball vs Avalanche Blueprint',
+    excerpt: 'Tackle 36%–42% APR credit card balances with battle-tested repayment strategies that save maximum interest and build psychological momentum.',
+    readTime: '8 min read',
+    category: 'Savings',
+    tags: ['Debt Payoff', 'Debt Snowball', 'Credit Card Debt', 'Debt Avalanche'],
+    author: 'Ananya Sharma',
+    authorRole: 'Behavioral Finance Analyst',
+    date: '2026-04-04',
+    imageUrl: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=1200&q=80',
+    content: `
+      <h2>The High-Interest Debt Trap Explained</h2>
+      <p>Credit card debt is the single biggest destroyer of personal wealth. With annual interest rates hovering between 36% and 44%, paying only the "Minimum Amount Due" means a ₹50,000 balance can take over 14 years to clear, costing more than ₹1,20,000 in pure interest charges.</p>
+      
+      <p>To break free permanently, you need a disciplined mathematical and behavioral roadmap. Here are the two proven strategies used by millions worldwide.</p>
+
+      <h2>Method 1: The Debt Avalanche (Mathematically Optimal)</h2>
+      <p>In the Debt Avalanche method, you order all your outstanding debts strictly by <strong>highest interest rate to lowest interest rate</strong>:</p>
+      <ol>
+        <li>Pay minimum payments on all cards to protect your credit score.</li>
+        <li>Channel every extra rupee into the card with the highest APR (e.g. Card A at 42% interest).</li>
+        <li>Once Card A is paid off, roll that entire monthly payment into the next highest interest balance (Card B at 36%).</li>
+      </ol>
+      <p><em>Advantage:</em> Minimizes total interest paid and clears debt the fastest mathematically.</p>
+
+      <h2>Method 2: The Debt Snowball (Psychologically Powerful)</h2>
+      <p>Popularized by behavioral economists, the Debt Snowball method orders debts from <strong>smallest balance to largest balance</strong>, ignoring interest rates initially:</p>
+      <ol>
+        <li>Pay minimums on all cards.</li>
+        <li>Attack the smallest debt (e.g. ₹8,000 medical bill or retail card) with ferocious intensity until it hits ZERO.</li>
+        <li>Experience the immense dopamine rush of completely eliminating an account.</li>
+        <li>Roll that freed-up payment into the next smallest balance.</li>
+      </ol>
+      <p><em>Advantage:</em> Provides rapid psychological victories that keep you motivated during a multi-month payoff journey.</p>
+
+      <h2>Which One Should You Choose?</h2>
+      <p>If you are analytical and disciplined, choose the <strong>Avalanche</strong> to save maximum cash. If you feel emotionally overwhelmed and need quick wins to maintain momentum, choose the <strong>Snowball</strong>. The best method is the one you will actually stick to.</p>
+
+      <h2>Critical Action: Stop Digging the Hole</h2>
+      <p>While paying off debt, remove all saved cards from Amazon, Swiggy, and Zomato. Use debit or UPI backed strictly by your checking account balance until your credit card statements show a clean ₹0 balance.</p>
+    `
+  },
+  {
+    id: '11',
+    slug: 'grocery-shopping-hacks-to-cut-food-bill-in-half',
+    title: '10 Grocery Shopping Hacks to Cut Your Monthly Food Bill by 40%',
+    excerpt: 'From supermarket shelf psychology to bulk-buying staples and meal prepping, discover proven hacks to dramatically lower food costs without eating boring meals.',
+    readTime: '6 min read',
+    category: 'Budgeting',
+    tags: ['Grocery Savings', 'Cut Food Costs', 'Frugal Living', 'Meal Planning'],
+    author: 'Dr. Rohan Mehra',
+    authorRole: 'Behavioral Economics Contributor',
+    date: '2026-04-05',
+    imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80',
+    content: `
+      <h2>The Hidden Leaks in Your Weekly Grocery Run</h2>
+      <p>Groceries and food represent the most flexible category in any household budget. While rent and EMIs are fixed, your grocery bill can fluctuate wildly between ₹6,000 and ₹18,000 per month depending on how you shop. Here are 10 psychological and practical hacks to slash your grocery bill without sacrificing nutrition or taste.</p>
+
+      <h2>1. Never Shop on an Empty Stomach</h2>
+      <p>Behavioral research proves that shopping while hungry increases total cart spend by 23% — and nearly 80% of the extra items purchased are calorie-dense snacks and instant foods with high markups.</p>
+
+      <h2>2. Look at the Bottom and Top Shelves</h2>
+      <p>Supermarkets place their highest-margin brand names directly at eye level (the "golden shelf"). Everyday staples of identical or superior quality from regional millers are almost always stocked on the bottom two shelves at 30% to 50% lower prices.</p>
+
+      <h2>3. Buy Whole Staples in Bulk, Fresh Produce Weekly</h2>
+      <p>Rice, lentils (daal), whole grains, cooking oil, and flour have multi-month shelf lives. Buying these in 5kg–10kg bulk bags yields significant unit cost discounts. Conversely, buy fresh greens, dairy, and fruits strictly in 3-day quantities to eliminate food spoilage waste.</p>
+
+      <h2>4. Beware of 10-Minute Delivery Surcharges</h2>
+      <p>Quick-commerce delivery platforms add delivery fees, packaging fees, surge surcharges, and small-cart handling fees. What seems like a ₹120 snack order routinely totals ₹190 after platform markups. Reserve quick delivery for genuine emergencies and do one consolidated weekly pantry run.</p>
+
+      <h2>5. The "Inventory-First" Rule Before Stepping Out</h2>
+      <p>Before writing a grocery list, take 2 minutes to inspect your freezer and pantry. Plan at least 3 meals around ingredients you already own. Most households throw away 15% to 20% of edible food every month.</p>
+
+      <h2>Track Your Grocery Category on ZenBudget</h2>
+      <p>Set a dedicated "Groceries & Supermarket" sub-budget in ZenBudget. When you notice you have spent 75% of your allocation by the 18th of the month, challenge yourself to a "Pantry Cleanout Week" to stay under target!</p>
+    `
+  },
+  {
+    id: '12',
+    slug: 'lifestyle-inflation-trap-and-how-to-prevent-it',
+    title: 'The Lifestyle Inflation Trap: Why Earning More Doesn’t Make You Rich',
+    excerpt: 'Got a promotion or appraisal but still living paycheck to paycheck? Here is why lifestyle creep happens and how the 50% Raise Rule protects your wealth.',
+    readTime: '6 min read',
+    category: 'Psychology',
+    tags: ['Lifestyle Creep', 'Wealth Psychology', 'Mindful Wealth', 'Salary Appraisal'],
+    author: 'Dr. Rohan Mehra',
+    authorRole: 'Behavioral Economics Contributor',
+    date: '2026-04-05',
+    imageUrl: 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&w=1200&q=80',
+    content: `
+      <h2>The Paradox of the Bigger Paycheck</h2>
+      <p>When you earned ₹30,000/month, you managed to get by. You promised yourself: <em>"When I finally earn ₹75,000/month, I will save so much money!"</em> A couple of years later, you are earning ₹1,20,000/month — yet at the end of the month, your bank balance is still mysteriously near zero.</p>
+      
+      <p>This universal phenomenon is known as <strong>Lifestyle Inflation</strong> (or Lifestyle Creep). As your income climbs, former luxuries quietly morph into perceived necessities: cab rides replace the metro, upscale cafes replace local tea stalls, and high-end brand garments replace functional wear.</p>
+
+      <h2>The Hedonic Treadmill Explained</h2>
+      <p>Psychologists call this the <em>Hedonic Treadmill</em>: human beings quickly adapt to higher levels of comfort. The thrill of upgrading from a ₹20,000 phone to a ₹90,000 phone lasts roughly two weeks. After that, the phone simply becomes normal, while your monthly EMI bill stays high for 12 months.</p>
+
+      <h2>The Solution: The 50% Raise Rule</h2>
+      <p>You do not need to deprive yourself of celebrating your hard work. Use the golden <strong>50% Raise Rule</strong> whenever you receive a bonus, salary appraisal, or promotion:</p>
+      <blockquote>
+        Allocate 50% of your net pay increase directly to upgrading your lifestyle (better apartment, dining, personal travel). Divert the remaining 50% straight into automated investments before it ever touches your everyday checking account.
+      </blockquote>
+      <p>If your monthly salary increases by ₹20,000, enjoy spending ₹10,000 more every month, while automating the other ₹10,000 into index funds or debt payoff. You enjoy your success today while dramatically accelerating your retirement freedom.</p>
+
+      <h2>Define What Truly Brings You Joy</h2>
+      <p>Spend extravagantly on the 2 or 3 things you genuinely love, and cut costs ruthlessly on things you don't care about. True financial wisdom is ignoring what society tells you to buy, and prioritizing authentic peace of mind.</p>
+    `
+  },
+  {
+    id: '13',
+    slug: 'freelancer-gig-worker-budgeting-irregular-income',
+    title: 'Budgeting on an Irregular Income: The Freelancer & Creator Survival Blueprint',
+    excerpt: 'How freelancers, consultants, and gig economy creators can tame fluctuating revenue, automate quarterly taxes, and maintain steady monthly paychecks.',
+    readTime: '7 min read',
+    category: 'Budgeting',
+    tags: ['Freelancer Finance', 'Irregular Income', 'Gig Economy', 'Self-Employed Budget'],
+    author: 'Chandan Swaraj',
+    authorRole: 'Founder, ZenBudget',
+    date: '2026-04-06',
+    imageUrl: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=80',
+    content: `
+      <h2>The Feast or Famine Cycle</h2>
+      <p>Freelancing, consulting, and creator business models offer incredible freedom. But they come with one brutal challenge: one month you invoice ₹1,80,000, and the next month clients delay payments and you make only ₹35,000. Trying to budget irregular income using standard salaried frameworks inevitably leads to anxiety and cash crunches.</p>
+
+      <h2>1. The "Business Buffer Account" Strategy</h2>
+      <p>Never deposit client invoice checks directly into your personal checking account. Instead, establish a dedicated Business Holding Account:</p>
+      <ul>
+        <li>All client payments, royalties, and project milestones land in the Business Holding Account.</li>
+        <li>Set up a recurring monthly transfer to pay yourself a <strong>Fixed Baseline Salary</strong> on the 1st of every month (e.g. ₹60,000).</li>
+        <li>During high-earning months (Feast), the surplus builds up in the holding account.</li>
+        <li>During dry months (Famine), the surplus pays your salary without disruption.</li>
+      </ul>
+
+      <h2>2. Automate Tax Reserves Immediately</h2>
+      <p>When a salaried employee receives money, tax has already been deducted at source (TDS). As a freelancer, every invoice received is gross pre-tax income. Immediately transfer 20% to 25% of every invoice into a high-yield Tax Escrow account. When quarterly advance tax deadlines arrive, you can pay without stress.</p>
+
+      <h2>3. Know Your Bare-Bones Survival Number</h2>
+      <p>Calculate your absolute minimum monthly survival cost: rent, basic groceries, electricity, and health insurance. If your survival cost is ₹32,000, you know with absolute clarity what the floor of your business needs to generate each month.</p>
+
+      <h2>4. Build an Extended 9-Month Runway</h2>
+      <p>While salaried workers need 3 to 6 months of emergency funds, self-employed creators should aim for 9 months of expenses. Having a 9-month buffer allows you to decline low-paying, stressful clients and focus on high-value project pitches.</p>
+    `
+  },
+  {
+    id: '14',
+    slug: 'how-to-save-first-1-lakh-rupees-roadmap',
+    title: 'How to Save Your First ₹1,00,000 ($1,200): The 6-Month Fast Track Roadmap',
+    excerpt: 'The first financial milestone is always the hardest. Here is a realistic, math-backed gameplan to hit a six-figure savings milestone in six months.',
+    readTime: '7 min read',
+    category: 'Savings',
+    tags: ['First 1 Lakh Savings', 'Savings Challenge', 'Financial Milestones', 'Money Goals'],
+    author: 'Chandan Swaraj',
+    authorRole: 'Founder, ZenBudget',
+    date: '2026-04-06',
+    imageUrl: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1200&q=80',
+    content: `
+      <h2>Why the First ₹1,00,000 Changes Everything</h2>
+      <p>Renowned investor Charlie Munger famously said: <em>"The first $100,000 is a bitch, but you gotta do it."</em> In the Indian context, reaching your first ₹1,00,000 in liquid savings is that pivotal psychological inflection point. Before this milestone, savings feel fragile. After you cross ₹1,00,000, your money mindset transforms from scarcity to builder mode.</p>
+
+      <h2>The Math: ₹16,666 Per Month for 6 Months</h2>
+      <p>To reach ₹1,00,000 in 180 days, you need to save approximately <strong>₹16,666 each month (or roughly ₹550 per day)</strong>. Here is the exact 4-step framework to find that ₹550 daily without feeling miserable.</p>
+
+      <h2>Step 1: The Quick-Kill Audit (Target: ₹5,000/month saved)</h2>
+      <ul>
+        <li>Audit all OTT, music, and software subscriptions — cancel 3 you rarely use (Save ₹800/mo).</li>
+        <li>Switch from ordering dinner 3 times a week to 1 time a week (Save ₹3,200/mo).</li>
+        <li>Review phone and broadband plans for cheaper family tiers (Save ₹1,000/mo).</li>
+      </ul>
+
+      <h2>Step 2: The 52-Day Shopping Fast (Target: ₹6,000/month saved)</h2>
+      <p>Commit to a 2-month moratorium on non-essential retail: no new clothes, tech accessories, shoes, or impulse Amazon purchases. Put every item you desire into ZenBudget's Wishlist Blocker. You will be stunned by how much cash stays in your account.</p>
+
+      <h2>Step 3: Monetize Skills or Unused Possessions (Target: ₹6,000/month extra)</h2>
+      <p>Sell old smartphones, unused instruments, or textbooks on secondhand marketplaces. Take on 2 freelance gigs or weekend consulting sessions. Earning an extra ₹1,500 per weekend easily supplies the remaining gap.</p>
+
+      <h2>Step 4: Keep It in a Separate "Untouchable" Vault</h2>
+      <p>Never keep your ₹1,00,000 target in your primary UPI spending account. The moment you see a healthy balance, your brain feels rich and tempts you to splurge. Park it in a dedicated high-yield savings account or liquid fund named <strong>"First Lakh Milestone - Do Not Touch"</strong>.</p>
+
+      <h2>Celebrate the Milestone!</h2>
+      <p>Once you hit ₹1,00,000, take ₹2,000 and treat yourself to a nice celebratory meal with family or friends. Acknowledge your discipline, then set your sights on your next milestone: ₹5,00,000!</p>
+    `
   }
 ];
 
