@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { t } from '../utils/i18n';
 import { supabase } from '../supabaseClient';
-import { CoinCatcherGame } from './CoinCatcherGame';
+import { ZenActivitiesHub } from './ZenActivitiesHub';
 
 interface MoreToolsViewProps {
   onNavigateToImpulseBlocker: () => void;
@@ -334,8 +334,8 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
           </button>
         </div>
 
-        {/* Arcade Mini-Game: Coin Catcher */}
-        <CoinCatcherGame currencySymbol={currencySymbol} userReferralCode={_userReferralCode} />
+        {/* 3-in-1 Activities & Habits Hub: Coin Game, Money IQ Quiz & Daily Habit Challenge */}
+        <ZenActivitiesHub currencySymbol={currencySymbol} userReferralCode={_userReferralCode} />
       </div>
 
       {/* SECTION 3: SHARE & REWARDS */}
