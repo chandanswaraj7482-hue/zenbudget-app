@@ -127,7 +127,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
   const faqList = [
     {
       q: "How do I upgrade to Premium?",
-      a: "Open ZenBudget Premium, choose Monthly, Yearly, or an available Lifetime Founding Member plan, then complete your payment securely through the Cashfree checkout."
+      a: "Open ZenBudget Premium, choose Monthly, Yearly, or an available Lifetime Founding Member plan, then complete your payment securely through our 256-bit encrypted checkout."
     },
     {
       q: "What is a 50/30/20 budgeting rule?",

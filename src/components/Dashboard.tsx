@@ -35,6 +35,7 @@ import { PremiumHub } from './PremiumHub';
 import { QuickCaptureCard } from './QuickCaptureCard';
 import { formatCurrency } from '../utils/formatCurrency';
 import confetti from 'canvas-confetti';
+import { playBadgeClaimFanfare } from '../utils/audio';
 
 interface DashboardProps {
   currentProfileId: string;
@@ -205,6 +206,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
     return [];
   });
 
+  // Infinite Renewable Badges Cycle Tracker (Cycle 1, Cycle 2, Cycle 3...)
+  const [badgeCycles, setBadgeCycles] = useState<Record<string, number>>(() => {
+    const stored = currentProfileId ? localStorage.getItem(`zb_badge_cycles_${currentProfileId}`) : null;
+    if (stored) {
+      try { return JSON.parse(stored); } catch (e) {}
+    }
+    return {};
+  });
+
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isZenCoachExpanded, setIsZenCoachExpanded] = useState(false);
   const [challenges, setChallenges] = useState<{id: string; title: string; subtitle: string; percent: number}[]>(() => {
@@ -223,6 +233,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     const handleResetEvent = () => {
       setChallenges([]);
       setClaimedBadges([]);
+      setBadgeCycles({});
     };
     window.addEventListener('zenbudget_reset_all_data', handleResetEvent);
     return () => {
@@ -277,6 +288,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     id: string;
     icon: string;
     title: string;
+    cycle: number;
     isUnlocked: boolean;
     isClaimed: boolean;
     canClaim: boolean;
@@ -287,24 +299,48 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const handleClaimBadge = (badgeId: string) => {
     try {
       confetti({
-        particleCount: 100,
-        spread: 70,
+        particleCount: 120,
+        spread: 80,
         origin: { y: 0.6 }
       });
+      playBadgeClaimFanfare();
     } catch (e) {}
 
-    const nextClaimed = [...claimedBadges, badgeId];
+    // Advance cycle count by +1 so user can repeat and renew indefinitely
+    const currentCycle = badgeCycles[badgeId] || 0;
+    const nextCycles = {
+      ...badgeCycles,
+      [badgeId]: currentCycle + 1
+    };
+    setBadgeCycles(nextCycles);
+    if (currentProfileId) {
+      localStorage.setItem(`zb_badge_cycles_${currentProfileId}`, JSON.stringify(nextCycles));
+    }
+
+    const nextClaimed = Array.from(new Set([...claimedBadges, badgeId]));
     setClaimedBadges(nextClaimed);
     if (currentProfileId) {
       localStorage.setItem(`zb_claimed_badges_${currentProfileId}`, JSON.stringify(nextClaimed));
     }
 
+    // Stack benefits: Add +30 days (1 month) to premium subscription every cycle!
     if (badgeId === 'invites_10' || badgeId === 'streak_90d') {
-      const futureExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      const existingExpiryStr = localStorage.getItem('zb_premium_expires_at');
+      const nowMs = Date.now();
+      let baseMs = nowMs;
+      if (existingExpiryStr) {
+        const parsedMs = new Date(existingExpiryStr).getTime();
+        if (!isNaN(parsedMs) && parsedMs > nowMs) {
+          baseMs = parsedMs;
+        }
+      }
+      const futureExpiry = new Date(baseMs + 30 * 24 * 60 * 60 * 1000).toISOString();
       localStorage.setItem('zb_subscription_tier', 'premium_monthly');
       localStorage.setItem('zb_premium_expires_at', futureExpiry);
       window.dispatchEvent(new Event('storage'));
-      window.dispatchEvent(new CustomEvent('zenbudget_subscription_updated', { detail: { tier: 'premium_monthly', expiresAt: futureExpiry } }));
+      window.dispatchEvent(new CustomEvent('zenbudget_subscription_updated', { 
+        detail: { tier: 'premium_monthly', expiresAt: futureExpiry } 
+      }));
     }
 
     setChallenges(prev => {
@@ -1585,119 +1621,175 @@ export const Dashboard: React.FC<DashboardProps> = ({
         }
 
         // Fix logic so badges are NOT unlocked by default for new users (require actual activity!)
-        const hasFirstSpend = transactions.length >= 1;
-        const hasStreakBadge = currentStreakCount >= 7;
-        const hasSave10k = totalSaved >= 10000;
-        const hasNoSwiggy = transactions.length >= 5 && !transactions.some(t => (t.title || '').toLowerCase().includes('swiggy') || (t.title || '').toLowerCase().includes('zomato'));
-        const hasCoffeeCtrl = transactions.length >= 5 && !transactions.some(t => (t.title || '').toLowerCase().includes('coffee') && t.amount > 500);
-        const has10Invites = referralCount >= 10;
+        // Renewable Multi-Cycle Targets (Levels up & renews indefinitely!)
+        const cycleInvites = badgeCycles['invites_10'] || 0;
+        const targetInvites = (cycleInvites + 1) * 10;
+        const has10Invites = referralCount >= targetInvites;
 
-        // Level 2 Dynamic Progression Badges (Unlock as user advances!)
-        const hasSave50k = totalSaved >= 50000;
-        const has30dStreak = currentStreakCount >= 30;
-        const has50Logs = transactions.length >= 50;
+        const cycle90d = badgeCycles['streak_90d'] || 0;
+        const target90d = (cycle90d + 1) * 90;
+        const hasStreak90d = currentStreakCount >= target90d;
+
+        const cycle7d = badgeCycles['streak_7d'] || 0;
+        const target7d = (cycle7d + 1) * 7;
+        const hasStreak7d = currentStreakCount >= target7d;
+
+        const cycle10k = badgeCycles['save_10k'] || 0;
+        const target10k = (cycle10k + 1) * 10000;
+        const hasSave10k = totalSaved >= target10k;
+
+        const cycle50k = badgeCycles['save_50k'] || 0;
+        const target50k = (cycle50k + 1) * 50000;
+        const hasSave50k = totalSaved >= target50k;
+
+        const cycleLogs = badgeCycles['logs_50'] || 0;
+        const targetLogs = (cycleLogs + 1) * 50;
+        const has50Logs = transactions.length >= targetLogs;
+
+        const cycle30d = badgeCycles['streak_30d'] || 0;
+        const target30d = (cycle30d + 1) * 30;
+        const has30dStreak = currentStreakCount >= target30d;
+
+        const cycleSwiggy = badgeCycles['no_swiggy'] || 0;
+        const targetSwiggy = (cycleSwiggy + 1) * 5;
+        const hasNoSwiggy = transactions.length >= targetSwiggy && !transactions.some(t => (t.title || '').toLowerCase().includes('swiggy') || (t.title || '').toLowerCase().includes('zomato'));
+
+        const cycleCoffee = badgeCycles['coffee_ctrl'] || 0;
+        const targetCoffee = (cycleCoffee + 1) * 5;
+        const hasCoffeeCtrl = transactions.length >= targetCoffee && !transactions.some(t => (t.title || '').toLowerCase().includes('coffee') && t.amount > 500);
+
+        const cycleFirst = badgeCycles['first_spend'] || 0;
+        const hasFirstSpend = transactions.length >= 1;
+        const canClaimFirst = hasFirstSpend && cycleFirst === 0;
 
         const allBadgesList = [
-          {
-            id: 'first_spend',
-            icon: '🥉',
-            title: 'First Spend',
-            isUnlocked: hasFirstSpend,
-            requirement: 'Log your first transaction (expense or income) in ZenBudget to unlock this achievement.',
-            progress: `${Math.min(1, transactions.length)}/1 Transaction Logged`
-          },
           {
             id: 'invites_10',
             icon: '🎁',
             title: '10 Invites',
+            cycle: cycleInvites,
             isUnlocked: has10Invites,
-            requirement: 'Invite 10 friends (who sign up & upgrade to Premium) using your referral link to earn 1 Month Free Premium!',
-            progress: `${referralCount}/10 Subscribed Friends Invited`
+            canClaim: has10Invites,
+            isRenewable: true,
+            requirement: 'Invite 10 friends (who sign up & upgrade to Premium) to earn +1 Month Free Premium! (Renews infinitely for each 10 members)',
+            progress: has10Invites 
+              ? `Level ${cycleInvites + 1} Ready! 🎁 (${referralCount}/${targetInvites} Invited)` 
+              : `${referralCount}/${targetInvites} Subscribed Friends Invited (Cycle ${cycleInvites + 1})`
           },
           {
             id: 'streak_90d',
             icon: '👑',
             title: '90d Pro Saver',
-            isUnlocked: currentStreakCount >= 90,
-            requirement: 'Maintain a 90-day (3 Months) daily transaction streak to claim 1 Month FREE Premium Subscription!',
-            progress: currentStreakCount >= 90 ? 'REWARD UNLOCKED 🔓 (1 Month Free Premium)' : `${currentStreakCount}/90 Days Daily Streak`
+            cycle: cycle90d,
+            isUnlocked: hasStreak90d,
+            canClaim: hasStreak90d,
+            isRenewable: true,
+            requirement: 'Maintain a 90-day unbroken daily transaction streak to claim +1 Month FREE Premium! (Renews every 90 days)',
+            progress: hasStreak90d 
+              ? `Level ${cycle90d + 1} Ready! 🎁 (+1 Month Free Premium)` 
+              : `${currentStreakCount}/${target90d} Days Daily Streak (Cycle ${cycle90d + 1})`
+          },
+          {
+            id: 'first_spend',
+            icon: '🥉',
+            title: 'First Spend',
+            cycle: cycleFirst,
+            isUnlocked: hasFirstSpend,
+            canClaim: canClaimFirst,
+            isRenewable: false,
+            requirement: 'Log your first transaction (expense or income) in ZenBudget to unlock this achievement.',
+            progress: `${Math.min(1, transactions.length)}/1 Transaction Logged`
           },
           {
             id: 'streak_7d',
             icon: '🥈',
             title: '7d Streak',
-            isUnlocked: hasStreakBadge,
-            requirement: 'Track your daily expenses for 7 consecutive days without breaking your daily streak!',
-            progress: `${currentStreakCount}/7 Days Streak`
+            cycle: cycle7d,
+            isUnlocked: hasStreak7d,
+            canClaim: hasStreak7d,
+            isRenewable: true,
+            requirement: `Track your daily expenses for ${target7d} consecutive days without breaking your daily streak!`,
+            progress: `${currentStreakCount}/${target7d} Days Streak (Cycle ${cycle7d + 1})`
           },
           {
             id: 'save_10k',
             icon: '🥇',
             title: 'Save 10k',
+            cycle: cycle10k,
             isUnlocked: hasSave10k,
-            requirement: 'Accumulate at least ₹10,000 in savings across your savings goals and monthly balance.',
-            progress: `${currencySymbol}${totalSaved.toLocaleString()} / ${currencySymbol}10,000 Saved`
+            canClaim: hasSave10k,
+            isRenewable: true,
+            requirement: `Accumulate savings in increments of ₹10,000 across your savings goals and balance. (Renews infinitely!)`,
+            progress: `${currencySymbol}${totalSaved.toLocaleString()} / ${currencySymbol}${target10k.toLocaleString()} Saved (Cycle ${cycle10k + 1})`
           },
           {
             id: 'no_swiggy',
             icon: '🔥',
             title: 'No Swiggy',
+            cycle: cycleSwiggy,
             isUnlocked: hasNoSwiggy,
-            requirement: 'Log at least 5 transactions without any Swiggy or Zomato food delivery entries.',
-            progress: hasNoSwiggy ? 'Clean Streak Active 🔓' : `${transactions.length}/5 Logs logged (Zero Food Delivery)`
+            canClaim: hasNoSwiggy,
+            isRenewable: true,
+            requirement: `Log at least ${targetSwiggy} transactions without any Swiggy or Zomato food delivery entries.`,
+            progress: `${transactions.length}/${targetSwiggy} Clean Logs (Zero Food Delivery)`
           },
           {
             id: 'coffee_ctrl',
             icon: '☕',
             title: 'Coffee Ctrl',
+            cycle: cycleCoffee,
             isUnlocked: hasCoffeeCtrl,
-            requirement: 'Keep single coffee/cafe transactions below ₹500 across at least 5 logged transactions.',
-            progress: hasCoffeeCtrl ? 'Controlled 🔓' : `${transactions.length}/5 Logs (Under ₹500 Coffee)`
+            canClaim: hasCoffeeCtrl,
+            isRenewable: true,
+            requirement: `Keep single coffee/cafe transactions below ₹500 across at least ${targetCoffee} logged transactions.`,
+            progress: `${transactions.length}/${targetCoffee} Logs (Under ₹500 Coffee)`
           },
-          // Dynamic Level 2 Badges (Unlocked or visible once user progresses)
+          // Dynamic Level 2 Badges
           ...(hasFirstSpend ? [{
             id: 'logs_50',
             icon: '📊',
             title: '50 Logged',
+            cycle: cycleLogs,
             isUnlocked: has50Logs,
-            requirement: 'Log 50 transactions to master complete financial awareness.',
-            progress: `${transactions.length}/50 Transactions`
+            canClaim: has50Logs,
+            isRenewable: true,
+            requirement: `Log ${targetLogs} transactions to master complete financial awareness. (Renews every 50 logs)`,
+            progress: `${transactions.length}/${targetLogs} Transactions Logged (Cycle ${cycleLogs + 1})`
           }] : []),
           ...(hasSave10k || totalSaved > 5000 ? [{
             id: 'save_50k',
             icon: '💎',
             title: 'Save 50k',
+            cycle: cycle50k,
             isUnlocked: hasSave50k,
-            requirement: 'Reach ₹50,000 in total savings to unlock Zen Wealth Status!',
-            progress: `${currencySymbol}${totalSaved.toLocaleString()} / ${currencySymbol}50,000 Saved`
+            canClaim: hasSave50k,
+            isRenewable: true,
+            requirement: `Reach ₹${target50k.toLocaleString()} in total savings to unlock Zen Wealth Status!`,
+            progress: `${currencySymbol}${totalSaved.toLocaleString()} / ${currencySymbol}${target50k.toLocaleString()} Saved (Cycle ${cycle50k + 1})`
           }] : []),
-          ...(hasStreakBadge || currentStreakCount >= 4 ? [{
+          ...(hasStreak7d || currentStreakCount >= 4 ? [{
             id: 'streak_30d',
             icon: '🏆',
             title: '30d Master',
+            cycle: cycle30d,
             isUnlocked: has30dStreak,
-            requirement: 'Maintain an unbroken 30-day streak of daily tracking.',
-            progress: `${currentStreakCount}/30 Days Streak`
+            canClaim: has30dStreak,
+            isRenewable: true,
+            requirement: `Maintain an unbroken ${target30d}-day streak of daily tracking.`,
+            progress: `${currentStreakCount}/${target30d} Days Streak (Cycle ${cycle30d + 1})`
           }] : [])
         ];
 
-        // Separate badges: unclaimed (active/upcoming) vs claimed (completed)
-        const unclaimedBadges = allBadgesList.filter(b => !claimedBadges.includes(b.id));
-        const claimedBadgesList = allBadgesList.filter(b => claimedBadges.includes(b.id));
-
-        // Sort unclaimed badges so that ready to claim (canClaim) come first
-        const sortedUnclaimed = [...unclaimedBadges].sort((a, b) => {
-          const aCanClaim = a.isUnlocked && !claimedBadges.includes(a.id);
-          const bCanClaim = b.isUnlocked && !claimedBadges.includes(b.id);
-          if (aCanClaim && !bCanClaim) return -1;
-          if (!aCanClaim && bCanClaim) return 1;
+        // Sort badges so ready to claim (canClaim) come first
+        const sortedBadges = [...allBadgesList].sort((a, b) => {
+          if (a.canClaim && !b.canClaim) return -1;
+          if (!a.canClaim && b.canClaim) return 1;
           return 0;
         });
 
-        // Front view shows active/upcoming badges (hiding completed ones unless all are completed)
-        const frontBadgesList = [...sortedUnclaimed, ...claimedBadgesList].slice(0, 3);
-        const visibleBadgesList = showAllBadges ? [...sortedUnclaimed, ...claimedBadgesList] : frontBadgesList;
-        const unlockedCount = allBadgesList.filter(b => b.isUnlocked).length;
+        const frontBadgesList = sortedBadges.slice(0, 3);
+        const visibleBadgesList = showAllBadges ? sortedBadges : frontBadgesList;
+        const unlockedCount = allBadgesList.filter(b => b.isUnlocked || (badgeCycles[b.id] || 0) > 0).length;
 
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' }}>
@@ -1724,15 +1816,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   {showAllBadges ? 'Show Less' : `See All (${allBadgesList.length})`}
                 </button>
                 <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--primary)', background: 'rgba(34,197,94,0.12)', padding: '3px 10px', borderRadius: '8px', border: '1px solid rgba(34,197,94,0.2)', whiteSpace: 'nowrap' }}>
-                  {unlockedCount}/{allBadgesList.length} Unlocked
+                  {unlockedCount}/{allBadgesList.length} Active
                 </span>
               </div>
             </div>
             
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', textAlign: 'center' }}>
               {visibleBadgesList.map(b => {
-                const isClaimed = claimedBadges.includes(b.id);
-                const canClaim = b.isUnlocked && !isClaimed;
+                const canClaim = b.canClaim;
+                const cycle = b.cycle;
 
                 return (
                   <div
@@ -1741,8 +1833,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       id: b.id,
                       icon: b.icon,
                       title: b.title,
+                      cycle,
                       isUnlocked: b.isUnlocked,
-                      isClaimed,
+                      isClaimed: cycle > 0 && !canClaim,
                       canClaim,
                       requirement: b.requirement,
                       progress: b.progress
@@ -1751,29 +1844,46 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     style={{
                       padding: '12px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
                       background: canClaim 
-                        ? 'rgba(234, 179, 8, 0.15)' 
-                        : b.isUnlocked 
+                        ? 'rgba(234, 179, 8, 0.18)' 
+                        : cycle > 0 
                           ? 'rgba(34, 197, 94, 0.08)' 
                           : 'var(--bg-input)',
                       border: canClaim 
-                        ? '1px solid rgba(234, 179, 8, 0.8)' 
-                        : b.isUnlocked 
+                        ? '1px solid rgba(234, 179, 8, 0.85)' 
+                        : cycle > 0 
                           ? '1px solid rgba(34, 197, 94, 0.4)' 
                           : '1px solid var(--border-input)',
-                      opacity: b.isUnlocked ? 1 : 0.6,
+                      opacity: (canClaim || cycle > 0) ? 1 : 0.65,
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
-                      boxShadow: canClaim ? '0 0 12px rgba(234, 179, 8, 0.4)' : 'none'
+                      position: 'relative',
+                      boxShadow: canClaim ? '0 0 16px rgba(234, 179, 8, 0.45)' : 'none'
                     }}
                   >
-                    <span style={{ fontSize: '24px', filter: b.isUnlocked ? 'none' : 'grayscale(70%)' }}>{b.icon}</span>
+                    {/* Level / Cycle Indicator Tag */}
+                    <div style={{
+                      position: 'absolute',
+                      top: '4px',
+                      right: '4px',
+                      fontSize: '8px',
+                      fontWeight: 800,
+                      padding: '1px 5px',
+                      borderRadius: '4px',
+                      background: cycle > 0 ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255, 255, 255, 0.06)',
+                      color: cycle > 0 ? '#4ade80' : '#94a3b8',
+                      border: cycle > 0 ? '1px solid rgba(34, 197, 94, 0.3)' : '1px solid rgba(255, 255, 255, 0.08)'
+                    }}>
+                      Lvl {cycle + 1}
+                    </div>
+
+                    <span style={{ fontSize: '24px', filter: (canClaim || cycle > 0) ? 'none' : 'grayscale(60%)', marginTop: '4px' }}>{b.icon}</span>
                     <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text-primary)' }}>{b.title}</span>
                     <span style={{
                       fontSize: '9px',
-                      color: canClaim ? '#eab308' : b.isUnlocked ? 'var(--primary)' : 'var(--text-secondary)',
+                      color: canClaim ? '#eab308' : cycle > 0 ? 'var(--primary)' : 'var(--text-secondary)',
                       fontWeight: 800
                     }}>
-                      {canClaim ? 'CLAIM 🎁' : isClaimed ? 'CLAIMED 🏆' : 'LOCKED 🔒'}
+                      {canClaim ? 'CLAIM 🎁' : cycle > 0 ? `LVL ${cycle + 1} ⏳` : 'LOCKED 🔒'}
                     </span>
                   </div>
                 );
@@ -2987,19 +3097,26 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* Badge Information & How to Unlock / Claim Modal */}
       {activeBadgeModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }} onClick={() => setActiveBadgeModal(null)}>
-          <div style={{ background: 'var(--bg-card)', border: activeBadgeModal.canClaim ? '1px solid rgba(234,179,8,0.8)' : activeBadgeModal.isUnlocked ? '1px solid rgba(34,197,94,0.4)' : '1px solid var(--border-card)', borderRadius: '24px', padding: '24px', maxWidth: '340px', width: '100%', textAlign: 'center', boxShadow: '0 20px 40px rgba(0,0,0,0.6)' }} onClick={e => e.stopPropagation()}>
+          <div style={{ background: 'var(--bg-card)', border: activeBadgeModal.canClaim ? '1px solid rgba(234,179,8,0.8)' : activeBadgeModal.cycle > 0 ? '1px solid rgba(34,197,94,0.4)' : '1px solid var(--border-card)', borderRadius: '24px', padding: '24px', maxWidth: '340px', width: '100%', textAlign: 'center', boxShadow: '0 20px 40px rgba(0,0,0,0.6)' }} onClick={e => e.stopPropagation()}>
             <div style={{ fontSize: '54px', marginBottom: '10px' }}>{activeBadgeModal.icon}</div>
+            <div style={{ display: 'inline-block', fontSize: '10px', fontWeight: 800, padding: '2px 8px', borderRadius: '6px', background: 'rgba(34,197,94,0.15)', color: '#4ade80', marginBottom: '6px', border: '1px solid rgba(34,197,94,0.3)' }}>
+              ⭐ LEVEL {activeBadgeModal.cycle + 1} · CYCLE {activeBadgeModal.cycle + 1}
+            </div>
             <h3 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '6px' }}>{activeBadgeModal.title}</h3>
             
-            <div style={{ display: 'inline-flex', padding: '4px 12px', borderRadius: '99px', fontSize: '11px', fontWeight: 700, background: activeBadgeModal.canClaim ? 'rgba(234,179,8,0.15)' : activeBadgeModal.isUnlocked ? 'rgba(34,197,94,0.15)' : 'var(--bg-input)', color: activeBadgeModal.canClaim ? '#eab308' : activeBadgeModal.isUnlocked ? 'var(--primary)' : 'var(--text-secondary)', marginBottom: '16px', border: activeBadgeModal.canClaim ? '1px solid rgba(234,179,8,0.4)' : activeBadgeModal.isUnlocked ? '1px solid rgba(34,197,94,0.3)' : '1px solid var(--border-input)' }}>
-              {activeBadgeModal.canClaim ? 'READY TO CLAIM 🎁' : activeBadgeModal.isClaimed ? 'CLAIMED 🏆' : 'LOCKED 🔒'}
+            <div style={{ display: 'inline-flex', padding: '4px 12px', borderRadius: '99px', fontSize: '11px', fontWeight: 700, background: activeBadgeModal.canClaim ? 'rgba(234,179,8,0.15)' : activeBadgeModal.cycle > 0 ? 'rgba(34,197,94,0.15)' : 'var(--bg-input)', color: activeBadgeModal.canClaim ? '#eab308' : activeBadgeModal.cycle > 0 ? 'var(--primary)' : 'var(--text-secondary)', marginBottom: '14px', border: activeBadgeModal.canClaim ? '1px solid rgba(234,179,8,0.4)' : activeBadgeModal.cycle > 0 ? '1px solid rgba(34,197,94,0.3)' : '1px solid var(--border-input)' }}>
+              {activeBadgeModal.canClaim ? 'READY TO CLAIM 🎁' : activeBadgeModal.cycle > 0 ? `CYCLE ${activeBadgeModal.cycle + 1} ACTIVE ⏳` : 'LOCKED 🔒'}
             </div>
 
-            <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', borderRadius: '14px', padding: '14px', textAlign: 'left', marginBottom: '20px' }}>
-              <p style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>How to Unlock:</p>
+            <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', borderRadius: '14px', padding: '14px', textAlign: 'left', marginBottom: '16px' }}>
+              <p style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Requirement (Level {activeBadgeModal.cycle + 1}):</p>
               <p style={{ fontSize: '12px', color: 'var(--text-primary)', lineHeight: 1.5, marginBottom: '10px' }}>{activeBadgeModal.requirement}</p>
               <p style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Current Progress:</p>
               <p style={{ fontSize: '12px', color: activeBadgeModal.canClaim ? '#eab308' : 'var(--primary)', fontWeight: 700 }}>{activeBadgeModal.progress}</p>
+            </div>
+
+            <div style={{ background: 'rgba(34, 197, 94, 0.08)', border: '1px dashed rgba(34, 197, 94, 0.3)', borderRadius: '12px', padding: '10px', fontSize: '11px', color: '#86efac', textAlign: 'left', marginBottom: '16px', lineHeight: 1.4 }}>
+              🔁 <strong>Infinite Renewal:</strong> Every time you finish this requirement, your reward (+1 Month Free Premium, XP) stacks and the badge renews for the next level!
             </div>
 
             {activeBadgeModal.canClaim ? (
@@ -3007,14 +3124,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 onClick={() => handleClaimBadge(activeBadgeModal.id)}
                 style={{ width: '100%', padding: '14px', borderRadius: '14px', border: 'none', background: 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)', color: '#ffffff', fontSize: '14px', fontWeight: 800, cursor: 'pointer', boxShadow: '0 4px 15px rgba(234, 179, 8, 0.4)' }}
               >
-                🎁 Claim Badge Reward!
+                🎁 Claim Level {activeBadgeModal.cycle + 1} Reward!
               </button>
             ) : (
               <button
                 onClick={() => setActiveBadgeModal(null)}
                 style={{ width: '100%', padding: '12px', borderRadius: '14px', border: 'none', background: 'var(--primary)', color: '#ffffff', fontSize: '13px', fontWeight: 800, cursor: 'pointer' }}
               >
-                {activeBadgeModal.isClaimed ? 'Badge Collected! ✨' : 'Got it! 👍'}
+                {activeBadgeModal.cycle > 0 ? 'Tracking Level ' + (activeBadgeModal.cycle + 1) + ' 🚀' : 'Got it! 👍'}
               </button>
             )}
           </div>

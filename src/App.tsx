@@ -779,7 +779,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
     if (!isUnlocked) {
       setIsScanPayUnlockOpen(true);
-      triggerToast('🔒 Unlock 1-Click PhonePe & UPI Access (₹79 via Cashfree) to proceed!', 'info');
+      triggerToast('🔒 Unlock 1-Click PhonePe & UPI Access (₹79) to proceed!', 'info');
       return;
     }
 

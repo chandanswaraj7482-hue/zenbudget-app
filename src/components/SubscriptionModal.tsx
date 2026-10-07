@@ -921,7 +921,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '11px', color: '#94a3b8' }}>
                 <ShieldCheck size={14} color="#10b981" />
-                <span>Secure payment powered by Cashfree</span>
+                <span>256-Bit Bank-Grade Encrypted Secure Payment</span>
               </div>
               <div style={{ textAlign: 'center', fontSize: '9px', color: 'var(--text-muted)', marginTop: '4px', fontStyle: 'italic' }}>
                 * Auto-pay is automatically enabled via secure e-mandate. You can cancel anytime.

@@ -3361,7 +3361,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 },
                 { 
                   q: "Is my payment and transaction data secure?", 
-                  a: "100% Yes. All payments are processed securely through certified gateway standards (Google Play, Apple App Store, and Cashfree 256-Bit SSL Encryption). Furthermore, ZenBudget uses private encrypted local device storage — we never sell, share, or broker your personal financial records." 
+                  a: "100% Yes. All payments are processed securely through certified gateway standards (Google Play, Apple App Store, and 256-Bit SSL Encrypted Banking Gateways). Furthermore, ZenBudget uses private encrypted local device storage — we never sell, share, or broker your personal financial records." 
                 },
                 { 
                   q: "What happens if I reach the 10 daily transactions limit during the trial?", 

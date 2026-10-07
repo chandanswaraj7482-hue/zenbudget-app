@@ -269,6 +269,30 @@
     </image:image>
   </url>
 
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/blog/best-expense-tracker-apps-india-2026</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1554224154-26032ffc0d07?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>Top 7 Best Expense Tracker &amp; Budgeting Apps in India (2026 Review)</image:title>
+      <image:caption>Comparing India’s top personal finance apps for UPI scanning, passbook tracking and savings</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://zenbudget-tracker.vercel.app/blog/couples-budgeting-shared-expenses-guide</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</image:loc>
+      <image:title>The Couples Budgeting Playbook: How to Split Bills &amp; Build Wealth</image:title>
+      <image:caption>Step-by-step framework for couples and roommates to synchronize household rent and groceries</image:caption>
+    </image:image>
+  </url>
+
   <!-- Privacy Policy -->
   <url>
     <loc>https://zenbudget-tracker.vercel.app/privacy.html</loc>

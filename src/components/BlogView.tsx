@@ -165,7 +165,7 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
               style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
             >
               <img
-                src="/logo.png"
+                src="/logo.png?v=2"
                 alt="ZenBudget Logo"
                 style={{
                   width: '34px',

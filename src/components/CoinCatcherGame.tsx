@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Gamepad2, Trophy, RotateCcw, Play, Coins, Share2, Copy, Check, Sparkles } from 'lucide-react';
-import { playCoinSound, playDeleteSound, playAddTransactionSound } from '../utils/audio';
+import { playCoinSound, playDeleteSound, playAddTransactionSound, playDangerHitSound, playGameOverSound, playPowerupSound } from '../utils/audio';
 
 interface CoinCatcherGameProps {
   currencySymbol?: string;
@@ -12,6 +12,7 @@ interface CoinCatcherGameProps {
 interface FallingItem {
   x: number;
   y: number;
+  vx?: number;
   type: 'coin' | 'expense' | 'heart';
   value: number;
   emoji: string;
@@ -207,28 +208,29 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
   const spawnItem = useCallback((canvasWidth: number): FallingItem => {
     const gs = gameStateRef.current;
     
-    // Challenging danger trap ratio (45% - 60% danger obstacles to dodge)
-    let trapChance = 0.45;
-    if (gs.score > 700) trapChance = 0.60;
-    else if (gs.score > 250) trapChance = 0.52;
+    // 🔥 Intense danger trap ratio (62% - 78% danger obstacles to dodge!)
+    let trapChance = 0.62;
+    if (gs.score > 800) trapChance = 0.78;
+    else if (gs.score > 300) trapChance = 0.70;
     
-    // Rare 3% chance of life recovery shield
-    const heartChance = gs.lives < 3 ? 0.04 : 0.01;
+    // Rare 2.5% chance of life recovery shield
+    const heartChance = gs.lives < 3 ? 0.035 : 0.01;
     const roll = Math.random();
 
-    // Fast, hard falling speed
-    const diffMultiplier = 1.8 + Math.min(1.0, (gs.difficulty - 1) * 0.1);
+    // ⚡ Fast, intense hardcore falling speed (Starts at 3.2 - 5.2 px/frame)
+    const diffMultiplier = 2.4 + Math.min(2.5, (gs.difficulty - 1) * 0.25);
 
     if (roll < heartChance) {
       // 💖 Extra Heart / Shield
       return {
         x: 25 + Math.random() * (canvasWidth - 50),
         y: -30,
+        vx: 0,
         type: 'heart',
         value: 50,
         emoji: '💖',
         label: 'Health Shield',
-        speed: (1.5 + Math.random() * 0.5) * diffMultiplier,
+        speed: (2.4 + Math.random() * 0.8) * diffMultiplier,
         size: 26
       };
     } else if (roll < heartChance + trapChance) {
@@ -238,11 +240,12 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
       return {
         x: 25 + Math.random() * (canvasWidth - 50),
         y: -30,
+        vx: (Math.random() - 0.5) * 1.6, // Lateral drift for tricky reflexes
         type: 'expense',
         value: -1,
         emoji: exp.emoji,
         label: exp.label,
-        speed: (1.8 + Math.random() * 0.6) * diffMultiplier,
+        speed: (2.8 + Math.random() * 1.1) * diffMultiplier,
         size: exp.size
       };
     } else {
@@ -254,11 +257,12 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
       return {
         x: 25 + Math.random() * (canvasWidth - 50),
         y: -30,
+        vx: (Math.random() - 0.5) * 0.8,
         type: 'coin',
         value: coin.value,
         emoji: coin.emoji,
         label: coin.label,
-        speed: (1.6 + Math.random() * 0.5) * diffMultiplier,
+        speed: (2.6 + Math.random() * 0.9) * diffMultiplier,
         size: coin.size
       };
     }
@@ -343,12 +347,12 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         gs.invulnerableTimer--;
       }
 
-      // Smooth difficulty scaling
-      gs.difficulty = 1 + Math.floor(gs.frameCount / 700) * 0.2;
+      // Dynamic difficulty scaling (escalates fast every 300 frames)
+      gs.difficulty = 1 + Math.floor(gs.frameCount / 320) * 0.25;
 
-      // Spawning with clean spacing
+      // Spawning with rapid intense cadence (Hardcore mode)
       gs.spawnTimer++;
-      const spawnRate = Math.max(34, 52 - Math.floor(gs.difficulty * 2));
+      const spawnRate = Math.max(16, 26 - Math.floor(gs.difficulty * 2));
       if (gs.spawnTimer >= spawnRate) {
         gs.items.push(spawnItem(W));
         gs.spawnTimer = 0;
@@ -357,6 +361,11 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
       // Update items
       gs.items = gs.items.filter(item => {
         item.y += item.speed;
+        if (item.vx) {
+          item.x += item.vx;
+          if (item.x < 20) { item.x = 20; item.vx = Math.abs(item.vx); }
+          else if (item.x > W - 20) { item.x = W - 20; item.vx = -Math.abs(item.vx); }
+        }
 
         const playerY = H - 55;
         const playerLeft = gs.playerX - gs.playerWidth / 2;
@@ -373,22 +382,22 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
               setLives(gs.lives);
               gs.score += item.value;
               setScore(gs.score);
-              playAddTransactionSound();
+              playPowerupSound();
               if (navigator.vibrate) try { navigator.vibrate([30, 30, 60]); } catch {}
-              createParticles(item.x, item.y, '#ec4899', 14);
+              createParticles(item.x, item.y, '#ec4899', 18);
               createFloatingText(item.x, item.y - 12, `💖 +1 Life Restored! (+${currencySymbol}50)`, '#f472b6');
             } else {
-              const comboBonus = Math.floor(gs.combo * 1.5);
+              const comboBonus = Math.floor(gs.combo * 2.0);
               const totalEarned = item.value + comboBonus;
               gs.score += totalEarned;
               gs.combo++;
               gs.coinsCollected++;
               if (gs.combo > gs.maxCombo) gs.maxCombo = gs.combo;
               
-              // SFX, Haptic & visuals
-              playCoinSound();
+              // SFX with dynamic combo pitch scaling, Haptic & visuals
+              playCoinSound(gs.combo);
               if (navigator.vibrate) try { navigator.vibrate(20); } catch {}
-              createParticles(item.x, item.y, '#34d399', 10);
+              createParticles(item.x, item.y, '#34d399', 12);
               createFloatingText(item.x, item.y - 10, `+${currencySymbol}${totalEarned} ${item.label}`, '#86efac');
               setScore(gs.score);
               setCombo(gs.combo);
@@ -400,17 +409,17 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
           if (isVerticallyAligned && item.x > playerLeft - 2 && item.x < playerRight + 2) {
             if (gs.invulnerableTimer > 0) {
               // Shield absorbed trap!
-              createParticles(item.x, item.y, '#38bdf8', 8);
+              createParticles(item.x, item.y, '#38bdf8', 10);
               createFloatingText(item.x, item.y - 10, `🛡️ Shield Absorbed!`, '#38bdf8');
               return false;
             }
 
             gs.lives--;
-            gs.invulnerableTimer = 45; // ~0.75 seconds immunity
+            gs.invulnerableTimer = 35; // ~0.55 seconds immunity
             gs.combo = 0;
-            playDeleteSound();
-            if (navigator.vibrate) try { navigator.vibrate([60, 40, 60]); } catch {}
-            createParticles(item.x, item.y, '#f43f5e', 16);
+            playDangerHitSound();
+            if (navigator.vibrate) try { navigator.vibrate([80, 50, 80]); } catch {}
+            createParticles(item.x, item.y, '#f43f5e', 20);
             createFloatingText(item.x, item.y - 10, `💔 -1 Life (${item.label})`, '#fda4af');
             setLives(gs.lives);
             setCombo(0);
@@ -420,7 +429,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
               gs.started = false;
               setGameOver(true);
               setStarted(false);
-              playDeleteSound();
+              playGameOverSound();
               if (gs.score > highScore) {
                 setHighScore(gs.score);
                 localStorage.setItem('zb_coin_catcher_high', gs.score.toString());

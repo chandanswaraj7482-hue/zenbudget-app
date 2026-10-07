@@ -122,21 +122,26 @@ export const playAddTransactionSound = () => {
 };
 
 /**
- * 🔊 4. Coin Pickup SFX (for Game)
+ * 🔊 4. Coin Pickup SFX (with Combo Pitch Scaling)
  */
-export const playCoinSound = () => {
+export const playCoinSound = (combo = 0) => {
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
+
+    // Pitch scales with combo streak (higher combos sound more euphoric!)
+    const pitchFactor = 1 + Math.min(1.0, combo * 0.07);
+    const baseFreq = 987.77 * pitchFactor; // B5 * factor
+    const secondFreq = 1318.51 * pitchFactor; // E6 * factor
 
     const osc = ctx.createOscillator();
     const gainNode = ctx.createGain();
     
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(987.77, ctx.currentTime); // B5
-    osc.frequency.setValueAtTime(1318.51, ctx.currentTime + 0.05); // E6
+    osc.frequency.setValueAtTime(baseFreq, ctx.currentTime);
+    osc.frequency.setValueAtTime(secondFreq, ctx.currentTime + 0.04);
     
-    gainNode.gain.setValueAtTime(0.07, ctx.currentTime);
+    gainNode.gain.setValueAtTime(0.09, ctx.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
     
     osc.connect(gainNode);
@@ -144,11 +149,176 @@ export const playCoinSound = () => {
     
     osc.start();
     osc.stop(ctx.currentTime + 0.18);
+
+    // If high combo (5+), add a magical harmonic chime
+    if (combo >= 5) {
+      const harm = ctx.createOscillator();
+      const harmGain = ctx.createGain();
+      harm.type = 'triangle';
+      harm.frequency.setValueAtTime(secondFreq * 1.5, ctx.currentTime + 0.05);
+      harmGain.gain.setValueAtTime(0.05, ctx.currentTime + 0.05);
+      harmGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+      harm.connect(harmGain);
+      harmGain.connect(ctx.destination);
+      harm.start(ctx.currentTime + 0.05);
+      harm.stop(ctx.currentTime + 0.25);
+    }
   } catch (err) {}
 };
 
 /**
- * 🔊 5. Delete / Cancel / Close Sound (Soft low swoosh)
+ * 💥 5. Danger / Trap Obstacle Impact SFX (Harsh crunchy collision)
+ */
+export const playDangerHitSound = () => {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    // Low crunchy buzz
+    const osc = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(260, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(55, ctx.currentTime + 0.22);
+    
+    gainNode.gain.setValueAtTime(0.18, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+    
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    
+    osc.start();
+    osc.stop(ctx.currentTime + 0.22);
+
+    // Distortion thud
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = 'square';
+    osc2.frequency.setValueAtTime(140, ctx.currentTime);
+    osc2.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.15);
+    gain2.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start();
+    osc2.stop(ctx.currentTime + 0.15);
+  } catch (err) {}
+};
+
+/**
+ * ☠️ 6. Game Over Tragic Arc SFX (Descending dramatic 8-bit defeat)
+ */
+export const playGameOverSound = () => {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const notes = [440, 392, 349.23, 293.66, 220]; // A4, G4, F4, D4, A3
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const time = ctx.currentTime + idx * 0.12;
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, time);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.85, time + 0.15);
+
+      gain.gain.setValueAtTime(0.12, time);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.18);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(time);
+      osc.stop(time + 0.18);
+    });
+  } catch (err) {}
+};
+
+/**
+ * 💖 7. Power-up / Shield Restored SFX (Ascending magical sparkle)
+ */
+export const playPowerupSound = () => {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const arpeggio = [523.25, 659.25, 783.99, 1046.50, 1318.51]; // C5, E5, G5, C6, E6
+    arpeggio.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const time = ctx.currentTime + idx * 0.05;
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, time);
+
+      gain.gain.setValueAtTime(0.09, time);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.15);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(time);
+      osc.stop(time + 0.15);
+    });
+  } catch (err) {}
+};
+
+/**
+ * 🏆 8. Badge Claim / Reward Fanfare SFX (Triumphant brass chime)
+ */
+export const playBadgeClaimFanfare = () => {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    // Major Chord 1: C Major (C5 + G5)
+    [523.25, 783.99].forEach(f => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'triangle';
+      o.frequency.setValueAtTime(f, ctx.currentTime);
+      g.gain.setValueAtTime(0.12, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.start(ctx.currentTime);
+      o.stop(ctx.currentTime + 0.22);
+    });
+
+    // Chord 2: E Major / G Major (E5 + B5)
+    [659.25, 987.77].forEach(f => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'triangle';
+      o.frequency.setValueAtTime(f, ctx.currentTime + 0.16);
+      g.gain.setValueAtTime(0.14, ctx.currentTime + 0.16);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.42);
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.start(ctx.currentTime + 0.16);
+      o.stop(ctx.currentTime + 0.42);
+    });
+
+    // Chord 3: High C Peak Fanfare (G5 + C6 + E6)
+    [783.99, 1046.50, 1318.51].forEach(f => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(f, ctx.currentTime + 0.32);
+      g.gain.setValueAtTime(0.18, ctx.currentTime + 0.32);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.95);
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.start(ctx.currentTime + 0.32);
+      o.stop(ctx.currentTime + 0.95);
+    });
+  } catch (err) {}
+};
+
+/**
+ * 🔊 9. Delete / Cancel / Close Sound (Soft low swoosh)
  */
 export const playDeleteSound = () => {
   try {

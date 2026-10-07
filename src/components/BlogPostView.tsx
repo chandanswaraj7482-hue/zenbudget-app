@@ -286,7 +286,7 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
               title="ZenBudget Home"
             >
               <img
-                src="/logo.png"
+                src="/logo.png?v=2"
                 alt="ZenBudget Logo"
                 style={{ width: '32px', height: '32px', borderRadius: '9px', objectFit: 'contain' }}
               />

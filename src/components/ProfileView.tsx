@@ -426,7 +426,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           {/* Phone Number with Country Code */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Mobile Phone Number (Cashfree Sync)
+              Mobile Phone Number (UPI Sync)
             </label>
             <div style={{ display: 'flex', gap: '8px' }}>
               {/* Country Code Selector */}

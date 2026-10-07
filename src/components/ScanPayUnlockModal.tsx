@@ -582,7 +582,7 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
               </button>
 
               <p style={{ textAlign: 'center', fontSize: '10.5px', color: '#334155', marginTop: '12px', margin: '12px 0 0 0' }}>
-                Secured by Cashfree · 100% refund if payment fails
+                256-Bit SSL Encrypted Checkout · 100% refund guarantee
               </p>
             </>
           )}
