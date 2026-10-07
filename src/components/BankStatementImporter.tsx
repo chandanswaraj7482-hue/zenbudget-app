@@ -389,7 +389,7 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
                     }}
                   >
                     <Sparkles size={14} />
-                    <span>Unlock Pro (From ₹149/mo)</span>
+                    <span>Unlock Pro (From ₹99/mo)</span>
                   </button>
                 </div>
               </div>

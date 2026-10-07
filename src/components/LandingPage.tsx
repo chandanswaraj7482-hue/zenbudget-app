@@ -3388,23 +3388,23 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           {/* 4 Pricing Cards Grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', maxWidth: '1240px', margin: '0 auto 64px' }}>
             
-            {/* Tier 1: 7-Day Free Trial */}
+            {/* Tier 1: Free Forever (Ad-Supported) */}
             <div style={{ background: t.cardBg, border: `1px solid ${t.border}`, borderRadius: '24px', padding: '36px 28px', boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.3)' : '0 10px 30px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-              <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: t.textMuted, letterSpacing: '0.1em', marginBottom: '8px' }}>STARTER</span>
-              <h3 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '8px', color: t.text }}>7-Day Free Detox</h3>
-              <p style={{ color: t.textSub, fontSize: '14px', marginBottom: '24px', minHeight: '42px', lineHeight: 1.5 }}>Perfect for test-driving AI features, finding leaks, and seeing immediate savings.</p>
+              <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: t.textMuted, letterSpacing: '0.1em', marginBottom: '8px' }}>STARTER · AD-SUPPORTED</span>
+              <h3 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '8px', color: t.text }}>Free Forever</h3>
+              <p style={{ color: t.textSub, fontSize: '14px', marginBottom: '24px', minHeight: '42px', lineHeight: 1.5 }}>Essential daily budgeting with standard ads. Perfect for mindful daily tracking.</p>
               
               <div style={{ fontSize: '42px', fontWeight: 900, marginBottom: '6px', color: t.text, display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                ₹0 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/7 days</span>
+                ₹0 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/forever</span>
               </div>
-              <p style={{ fontSize: '13px', color: '#10b981', marginBottom: '32px', fontWeight: 700 }}>No credit card required to start</p>
+              <p style={{ fontSize: '13px', color: '#10b981', marginBottom: '32px', fontWeight: 700 }}>100% Free · No credit card required</p>
               
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
                 {[
-                  { text: '10 Transactions / Day', desc: 'Sufficient for most daily expenses' },
-                  { text: 'Basic Budget Tracking', desc: 'Track your spending in 5 core categories' },
-                  { text: 'Standard Analytics', desc: 'Basic charts and monthly summaries' },
-                  { text: '1 Connected Account', desc: 'Manual entry and UPI logs supported' },
+                  { text: 'Unlimited Daily Transactions', desc: 'Track every single rupee with zero caps' },
+                  { text: 'Standard Experience with Ads', desc: 'Clean banner & non-intrusive partner ads' },
+                  { text: 'Up to 2 Category Budget Limits', desc: 'Watch a quick 10s ad to unlock extra slots' },
+                  { text: 'Zen Arcade & Habits Hub', desc: 'Coin Catcher game, Money Quiz & 24h Streak' },
                   { text: '100% Encrypted Local Storage', desc: 'Zero data leaves your mobile device' }
                 ].map((feat, i) => (
                   <li key={i} style={{ display: 'flex', gap: '12px' }}>
@@ -3422,7 +3422,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 style={{ width: '100%', padding: '14px', borderRadius: '100px', border: `2px solid ${t.border}`, background: 'transparent', color: t.text, fontSize: '14.5px', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s' }} 
                 className="hover-lift"
               >
-                Start 7-Day Free Trial
+                Start Free Forever
               </button>
             </div>
 
@@ -3435,16 +3435,16 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               <p style={{ color: t.textSub, fontSize: '14px', marginBottom: '24px', minHeight: '42px', lineHeight: 1.5 }}>Full AI automation to crush impulse buying. Cancel anytime if you slip up.</p>
               
               <div style={{ fontSize: '42px', fontWeight: 900, marginBottom: '6px', color: t.text, display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                ₹149 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/month</span>
+                ₹99 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/month</span>
               </div>
-              <p style={{ fontSize: '13px', color: t.textMuted, marginBottom: '32px', fontWeight: 600 }}>Costs less than a premium coffee</p>
+              <p style={{ fontSize: '13px', color: '#0284c7', marginBottom: '32px', fontWeight: 700 }}>Costs less than 2 chais a month</p>
               
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
                 {[
-                  { text: 'Unlimited Transactions', desc: 'Track every single rupee with zero caps' },
+                  { text: '100% Ad-Free Clean UI', desc: 'Zero interruptions across the entire app' },
+                  { text: 'Unlimited Category Limits', desc: 'Set monthly caps across all categories' },
                   { text: 'AI Camera Receipt Scanner', desc: 'Instant OCR extraction from photos' },
                   { text: 'Smart Auto-Categorization', desc: 'Automatic food, bill, and fuel sorting' },
-                  { text: 'Unlimited Custom Envelopes', desc: 'Create tags, projects, and goals' },
                   { text: 'Monthly PDF & Excel Export', desc: 'Download clean financial statements' }
                 ].map((feat, i) => (
                   <li key={i} style={{ display: 'flex', gap: '12px' }}>
@@ -3462,31 +3462,31 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 style={{ width: '100%', padding: '14px', borderRadius: '100px', border: 'none', background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)', color: '#ffffff', fontSize: '14.5px', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 8px 20px rgba(2,132,199,0.3)' }} 
                 className="hover-lift"
               >
-                Get Pro Monthly (₹149)
+                Get Pro Monthly (₹99)
               </button>
             </div>
             
             {/* Tier 3: Pro Annual (Featured) */}
             <div style={{ background: isDark ? '#132219' : '#ffffff', border: '2.5px solid #10b981', borderRadius: '24px', padding: '36px 28px', color: t.text, boxShadow: '0 25px 50px rgba(16,185,129,0.25)', position: 'relative', display: 'flex', flexDirection: 'column', transform: 'scale(1.02)', zIndex: 2 }}>
               <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', fontSize: '11px', fontWeight: 900, padding: '6px 18px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.08em', boxShadow: '0 6px 16px rgba(16,185,129,0.4)', whiteSpace: 'nowrap' }}>
-                🔥 NO-BRAINER · SAVE OVER 16%
+                🔥 NO-BRAINER · SAVE OVER 33%
               </div>
               
               <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: '#10b981', letterSpacing: '0.1em', marginBottom: '8px' }}>THE WEALTH BUILDER</span>
               <h3 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '8px', color: t.text }}>Pro Annual</h3>
-              <p style={{ color: t.textSub, fontSize: '14px', marginBottom: '24px', minHeight: '42px', lineHeight: 1.5 }}>Commit to changing your financial life. Get 2 months completely free.</p>
+              <p style={{ color: t.textSub, fontSize: '14px', marginBottom: '24px', minHeight: '42px', lineHeight: 1.5 }}>Commit to changing your financial life. Get all premium features unlimited.</p>
               
               <div style={{ fontSize: '42px', fontWeight: 900, marginBottom: '6px', color: '#10b981', display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                ₹1,499 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/year</span>
+                ₹799 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/year</span>
               </div>
-              <p style={{ fontSize: '13px', color: '#10b981', marginBottom: '32px', fontWeight: 700 }}>Only ~₹124/month. Literally a rounding error.</p>
+              <p style={{ fontSize: '13px', color: '#10b981', marginBottom: '32px', fontWeight: 700 }}>Only ~₹66/month. Less than a streaming subscription!</p>
               
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
                 {[
-                  { text: 'Everything in Pro Monthly', desc: 'All unlimited features and OCR scanners' },
-                  { text: 'Unlimited AI Financial Coach', desc: '24/7 "Can I afford this?" real-time checks' },
-                  { text: 'Bank Statement Importer', desc: 'Auto-import CSV & PDF bank statements' },
+                  { text: 'Everything in Pro Monthly', desc: '100% Ad-Free with all core tools' },
+                  { text: 'AI Bank Statement & Passbook OCR', desc: 'Auto-import PDF statements & passbooks' },
                   { text: 'Couple & Household Sync', desc: 'Real-time joint household transparency' },
+                  { text: 'Unlimited AI Financial Coach', desc: '24/7 "Can I afford this?" real-time checks' },
                   { text: 'Biometric App Lock & Stealth', desc: 'Fingerprint/FaceID & balance hide mode' },
                   { text: 'Priority VIP Support', desc: 'Fast-track engineering assistance' }
                 ].map((feat, i) => (
@@ -3505,7 +3505,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 style={{ width: '100%', padding: '15px', borderRadius: '100px', border: 'none', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', fontSize: '15px', fontWeight: 900, cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 10px 25px rgba(16,185,129,0.35)' }} 
                 className="hover-lift"
               >
-                Get Pro Annual (₹1,499)
+                Get Pro Annual (₹799)
               </button>
             </div>
 
@@ -3562,25 +3562,26 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               <thead>
                 <tr style={{ borderBottom: `2px solid ${t.border}` }}>
                   <th style={{ padding: '16px 12px', color: t.textMuted, fontSize: '13px', fontWeight: 800, textTransform: 'uppercase' }}>Feature</th>
-                  <th style={{ padding: '16px 12px', color: t.text, fontSize: '14px', fontWeight: 800, textAlign: 'center' }}>7-Day Trial (₹0)</th>
-                  <th style={{ padding: '16px 12px', color: '#0284c7', fontSize: '14px', fontWeight: 800, textAlign: 'center' }}>Monthly (₹149)</th>
-                  <th style={{ padding: '16px 12px', color: '#10b981', fontSize: '14px', fontWeight: 900, textAlign: 'center' }}>Annual (₹1,499)</th>
+                  <th style={{ padding: '16px 12px', color: t.text, fontSize: '14px', fontWeight: 800, textAlign: 'center' }}>Free Forever (₹0)</th>
+                  <th style={{ padding: '16px 12px', color: '#0284c7', fontSize: '14px', fontWeight: 800, textAlign: 'center' }}>Monthly (₹99)</th>
+                  <th style={{ padding: '16px 12px', color: '#10b981', fontSize: '14px', fontWeight: 900, textAlign: 'center' }}>Annual (₹799)</th>
                   <th style={{ padding: '16px 12px', color: '#d97706', fontSize: '14px', fontWeight: 800, textAlign: 'center' }}>Lifetime (₹2,499)</th>
                 </tr>
               </thead>
               <tbody style={{ fontSize: '14px' }}>
                 {[
-                  { feature: 'Trial Validity / Duration', free: '7 Days Full Access', monthly: 'Ongoing (Monthly)', annual: 'Ongoing (Annual)', lifetime: 'Lifetime Forever' },
-                  { feature: 'Daily Transactions Cap', free: '10 per day', monthly: 'Unlimited', annual: 'Unlimited', lifetime: 'Unlimited' },
-                  { feature: 'Device Encrypted Local Storage', free: '✓ Included', monthly: '✓ Included', annual: '✓ Included', lifetime: '✓ Included' },
-                  { feature: 'Budget Envelopes', free: '5 Core Categories', monthly: 'Unlimited', annual: 'Unlimited', lifetime: 'Unlimited' },
-                  { feature: 'AI Camera Invoice & Receipt Scanner', free: '✕', monthly: '✓ Unlimited', annual: '✓ Unlimited', lifetime: '✓ Unlimited' },
-                  { feature: 'Bank Statement CSV/PDF Smart Parser', free: '✕', monthly: '✓ Included', annual: '✓ Included', lifetime: '✓ Included' },
-                  { feature: '24/7 AI Coach Advice & "Can I Afford?"', free: 'Basic Nudges', monthly: '✓ Unlimited', annual: '✓ Unlimited', lifetime: '✓ Unlimited' },
-                  { feature: 'Couple & Household Sync', free: '✕', monthly: '✓ Real-time', annual: '✓ Real-time', lifetime: '✓ Real-time' },
-                  { feature: 'App Lock (Biometrics & Privacy Shield)', free: '✕', monthly: '✓ Included', annual: '✓ Included', lifetime: '✓ Included' },
-                  { feature: 'Excel / PDF Comprehensive Statements', free: '✕', monthly: '✓ Included', annual: '✓ Included', lifetime: '✓ Included' },
-                  { feature: 'Future AI Updates & Models', free: '✕', monthly: 'Active sub only', annual: 'Active sub only', lifetime: '✓ Forever Free' },
+                  { feature: 'Plan Duration', free: 'Free Forever', monthly: 'Monthly Access', annual: 'Yearly Access', lifetime: 'Lifetime Forever' },
+                  { feature: 'Ads Experience', free: 'Standard Ads', monthly: '100% Ad-Free', annual: '100% Ad-Free', lifetime: '100% Ad-Free' },
+                  { feature: 'Daily Transactions Cap', free: 'Unlimited', monthly: 'Unlimited', annual: 'Unlimited', lifetime: 'Unlimited' },
+                  { feature: 'Category Budget Limits', free: '2 Limits (+1 via Ad)', monthly: 'Unlimited Caps', annual: 'Unlimited Caps', lifetime: 'Unlimited Caps' },
+                  { feature: 'Zen Arcade & Habits Hub', free: '✓ Included', monthly: '✓ Included', annual: '✓ Included', lifetime: '✓ Included' },
+                  { feature: 'AI Camera Receipt Scanner', free: '✕ Locked', monthly: '✓ Unlimited', annual: '✓ Unlimited', lifetime: '✓ Unlimited' },
+                  { feature: 'Bank Statement CSV/PDF Smart Parser', free: '✕ Locked', monthly: '✓ Included', annual: '✓ Included', lifetime: '✓ Included' },
+                  { feature: '24/7 AI Coach Advice & Insights', free: 'Basic Nudges', monthly: '✓ Unlimited', annual: '✓ Unlimited', lifetime: '✓ Unlimited' },
+                  { feature: 'Couple & Household Sync', free: '✕ Locked', monthly: '✓ Real-time', annual: '✓ Real-time', lifetime: '✓ Real-time' },
+                  { feature: 'App Lock (Biometrics & Privacy Shield)', free: '✕ Locked', monthly: '✓ Included', annual: '✓ Included', lifetime: '✓ Included' },
+                  { feature: 'Excel / PDF Statements Export', free: '✕ Locked', monthly: '✓ Included', annual: '✓ Included', lifetime: '✓ Included' },
+                  { feature: 'Future AI Updates & Models', free: '✕ Locked', monthly: 'Active sub only', annual: 'Active sub only', lifetime: '✓ Forever Free' },
                 ].map((row, idx) => (
                   <tr key={idx} style={{ borderBottom: `1px solid ${t.border}` }}>
                     <td style={{ padding: '16px 12px', fontWeight: 700, color: t.text }}>{row.feature}</td>
@@ -3604,12 +3605,12 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {[
                 { 
-                  q: "How does the 7-Day Free Trial work?", 
-                  a: "Every new user gets a full 7-Day Free Trial with up to 10 daily transactions, no credit card required. You get to experience the core zero-based budgeting, smart envelopes, and encrypted privacy. After 7 days or when you need unlimited daily entries, you can easily upgrade to Pro Monthly (₹149), Pro Annual (₹1,499), or Lifetime VIP (₹2,499)." 
+                  q: "How does the Free Plan work?", 
+                  a: "ZenBudget Tracker is 100% free to use for daily expense and income tracking with zero transaction limits. Free users see occasional non-intrusive partner ads and can set up to 2 category budget caps (with the option to watch a 10-second sponsor ad for extra limits). To remove ads, unlock Bank Statement OCR scanning, and enable Couples Sync, you can upgrade to Pro Monthly (₹99) or Pro Annual (₹799) anytime." 
                 },
                 { 
-                  q: "What is the difference between Pro Monthly (₹149) and Pro Annual (₹1,499)?", 
-                  a: "The Monthly plan costs ₹149/mo and is billed month-to-month with total cancellation freedom. The Annual plan costs ₹1,499/year (saving you over 16% — equivalent to 2 months free) and includes advanced extras such as unlimited 24/7 AI Coach queries, bank statement CSV/PDF parsers, and couple sync." 
+                  q: "What is the difference between Pro Monthly (₹99) and Pro Annual (₹799)?", 
+                  a: "The Monthly plan costs just ₹99/mo and gives you a 100% ad-free experience, unlimited category limits, and smart receipt scanning. The Annual plan costs ₹799/year (saving you over 33% — only ~₹66/month) and includes advanced extras such as AI bank statement & passbook parsers, couples shared sync, and 24/7 AI financial coaching." 
                 },
                 { 
                   q: "What does the Lifetime VIP Pass (₹2,499) include?", 

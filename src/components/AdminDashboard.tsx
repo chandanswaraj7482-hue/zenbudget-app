@@ -141,8 +141,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   // INR Subscription Pricing
-  const [monthlyPrice, setMonthlyPrice] = useState<number>(() => getInitialPrice('monthly', 149));
-  const [yearlyPrice, setYearlyPrice] = useState<number>(() => getInitialPrice('yearly', 1499));
+  const [monthlyPrice, setMonthlyPrice] = useState<number>(() => getInitialPrice('monthly', 99));
+  const [yearlyPrice, setYearlyPrice] = useState<number>(() => getInitialPrice('yearly', 799));
   const [lifetimePrice, setLifetimePrice] = useState<number>(() => getInitialPrice('lifetime', 2499));
 
   // USD Subscription Pricing

@@ -743,30 +743,32 @@ export function resolveUserFinancialQuery(
   const pricingKeywords = ['price', 'pricing', 'cost', 'kitna lagta', 'kitne ka', 'premium buy', 'subscription', 'pro plan', 'buy premium', 'pay', 'charge', 'kitna hai', 'plan', 'charge kitna'];
   if (pricingKeywords.some(k => qLower.includes(k)) || (qLower.includes('premium') && (qLower.includes('cost') || qLower.includes('price') || qLower.includes('buy') || qLower.includes('plan') || qLower.includes('kitna') || qLower.includes('charge')))) {
     const responseText = isFormalEnglish
-      ? `💎 **ZenBudget Premium Plans & Pricing** 👑\n\n` +
-        `• 🌟 **7-Day Free Trial**: 10 transactions daily & budget basics (100% Free for 7 Days, No Credit Card!).\n` +
-        `• 💳 **Pro Monthly Plan**: **₹149 / month** (Flexible monthly access, cancel anytime)\n` +
-        `• 🏆 **Pro Annual Plan**: **₹1,499 / year** *(Save >16%! ~₹124/mo, 2 Months Free)*\n` +
-        `• 👑 **Lifetime VIP Pass**: **₹2,499** one-time payment for lifetime access!\n` +
+      ? `💎 **ZenBudget Plans & Pricing** 👑\n\n` +
+        `• 🌟 **Free Forever Plan**: 100% Free with partner ads, unlimited expense tracking, 2 category limits & Zen Arcade!\n` +
+        `• 💳 **Pro Monthly Plan**: **₹99 / month** (100% Ad-Free, cancel anytime)\n` +
+        `• 🏆 **Pro Annual Plan**: **₹799 / year** *(Save >33%! Only ~₹66/mo, Most Popular!)*\n` +
+        `• 👑 **Lifetime VIP Pass**: **₹2,499** one-time payment for permanent VIP access!\n` +
         `• 🎁 **Referral Reward**: Invite 10 friends to get **1 Month Premium 100% FREE**!\n\n` +
         `✨ **What Premium Unlocks**:\n` +
-        `✅ Unlimited Daily Transactions & Custom Categories\n` +
-        `✅ 24/7 Unlimited Zen AI Money Coach Guidance & Deep Analytics\n` +
-        `✅ Bank Statement Importer (CSV/PDF auto-parser)\n` +
+        `✅ 100% Ad-Free Clean UI\n` +
+        `✅ Unlimited Category Budget Limits\n` +
+        `✅ AI Bank Statement & Passbook Scanner (OCR)\n` +
         `✅ Couple & Family Real-Time Multi-Device Sync\n` +
+        `✅ 24/7 Unlimited Zen AI Money Coach Guidance & Deep Analytics\n` +
         `✅ PDF / Excel Ledger Data Export & Biometric Privacy Lock\n\n` +
-        `👉 Tap the **"👑 Upgrade to Premium"** button to upgrade instantly via UPI (GPay, PhonePe, Paytm), Cards, or NetBanking!`
-      : `💎 **ZenBudget Premium Pricing & Plans Details** 👑\n\n` +
-        `• 🌟 **7-Day Free Trial**: 10 transactions daily & basic budgeting (Bilkul Free 7 Days Trial!).\n` +
-        `• 💳 **Pro Monthly Plan**: **₹149 / mahina** (Cancel anytime)\n` +
-        `• 🏆 **Pro Annual Plan**: **₹1,499 / saal** *(16%+ savings, ~₹124/mahina, Subse Popular!)*\n` +
+        `👉 Tap the **"👑 Upgrade to Premium"** button to upgrade instantly via Google Play or UPI!`
+      : `💎 **ZenBudget Pricing & Plans Details** 👑\n\n` +
+        `• 🌟 **Free Forever Plan**: 100% Free forever (Ad-supported, unlimited daily transactions, 2 category limits & Arcade)!\n` +
+        `• 💳 **Pro Monthly Plan**: **₹99 / mahina** (100% Ad-Free, cancel anytime)\n` +
+        `• 🏆 **Pro Annual Plan**: **₹799 / saal** *(33%+ savings, sirf ~₹66/mahina! Subse Popular)*\n` +
         `• 👑 **Pro Lifetime Access**: **₹2,499** (Ek baar payment, lifetime ke liye VIP access!)\n` +
         `• 🎁 **Free Referral Bonus**: 10 dosto ko invite karein aur **1 Month Premium FREE** paayein!\n\n` +
         `✨ **Premium Buy Karne Ke Benefits**:\n` +
-        `✅ Unlimited Daily Transactions & Unlimited Categories\n` +
-        `✅ 24/7 Unlimited Zen AI Money Coach Advice & Deep Insights\n` +
-        `✅ Bank Statement Importer (CSV / PDF Smart Parser)\n` +
-        `✅ Couple & Family Sync (Real-time partner sync)\n` +
+        `✅ 100% Ad-Free Experience\n` +
+        `✅ Unlimited Category Spending Caps\n` +
+        `✅ Bank Statement & Passbook OCR Scanner\n` +
+        `✅ Couple & Family Real-time Sync\n` +
+        `✅ 24/7 Unlimited Zen AI Money Coach Advice\n` +
         `✅ PDF & Excel Monthly Report Export\n` +
         `✅ Biometric App Lock & VIP Badges\n\n` +
         `👉 Header me **"👑 Upgrade to Premium"** par click karke UPI (GPay, PhonePe, Paytm) ya Card se instant buy kar sakte hain! 🚀`;
