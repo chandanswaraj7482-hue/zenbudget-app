@@ -1013,7 +1013,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     };
   }, []);
 
-  // Bank-Grade 5-Minute Inactivity Auto-Lock Security
+  // Bank-Grade Security: 5-Minute Inactivity & Background Resume Auto-Lock
   useEffect(() => {
     if (isLocked || !currentProfileId) return;
 
@@ -1030,12 +1030,43 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     window.addEventListener('click', updateActivity, { passive: true });
     window.addEventListener('scroll', updateActivity, { passive: true });
 
+    // 5-Minute Inactivity Auto-Lock
     intervalId = setInterval(() => {
       if (Date.now() - lastActivityTime >= 5 * 60 * 1000) {
         setIsLocked(true);
         triggerToast('🔒 ZenBudget Auto-Locked after 5 mins of inactivity for Bank-Grade Security.', 'info');
       }
     }, 10000); // Check every 10 seconds
+
+    // Capacitor Native app background / resume auto-lock
+    let appStateHandle: any = null;
+    if (Capacitor.isNativePlatform()) {
+      CapApp.addListener('appStateChange', (state) => {
+        const lockEnabled = localStorage.getItem('zb_app_lock_enabled') !== 'false';
+        if (!state.isActive) {
+          sessionStorage.setItem('zb_was_backgrounded', 'true');
+        } else if (sessionStorage.getItem('zb_was_backgrounded') === 'true' && lockEnabled) {
+          sessionStorage.removeItem('zb_was_backgrounded');
+          setIsLocked(true);
+        }
+      }).then((handle) => {
+        appStateHandle = handle;
+      }).catch((err) => {
+        console.warn('CapApp appStateChange error:', err);
+      });
+    }
+
+    // Web / PWA visibility change auto-lock
+    const handleVisibilityChange = () => {
+      const lockEnabled = localStorage.getItem('zb_app_lock_enabled') !== 'false';
+      if (document.visibilityState === 'hidden') {
+        sessionStorage.setItem('zb_was_backgrounded', 'true');
+      } else if (document.visibilityState === 'visible' && sessionStorage.getItem('zb_was_backgrounded') === 'true' && lockEnabled) {
+        sessionStorage.removeItem('zb_was_backgrounded');
+        setIsLocked(true);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       if (intervalId) clearInterval(intervalId);
@@ -1044,6 +1075,10 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       window.removeEventListener('touchstart', updateActivity);
       window.removeEventListener('click', updateActivity);
       window.removeEventListener('scroll', updateActivity);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (appStateHandle && typeof appStateHandle.remove === 'function') {
+        appStateHandle.remove();
+      }
     };
   }, [isLocked, currentProfileId]);
 

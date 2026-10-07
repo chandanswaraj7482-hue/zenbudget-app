@@ -110,18 +110,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         });
     } else {
       // Web/PWA: Check WebAuthn (fingerprint/face on mobile browsers)
-      if (window.PublicKeyCredential) {
+      if (typeof window !== 'undefined' && window.PublicKeyCredential) {
         PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
           .then((available) => {
             if (available) {
-              // Only mark biometrics as available if user has previously registered a credential
-              const hasCredential = !!localStorage.getItem('zb_webauthn_cred_id');
-              if (hasCredential) {
-                setBiometricsAvailable(true);
-                console.log('LockScreen: Web biometric (WebAuthn) available and credential registered');
-              } else {
-                console.log('LockScreen: Web biometric hardware available but no credential registered yet');
-              }
+              setBiometricsAvailable(true);
             }
           })
           .catch((err) => {
@@ -582,7 +575,16 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
   async function triggerBiometricUnlock(overrideProfile?: typeof dbProfile) {
     try {
-      const activeProfile = overrideProfile || dbProfile;
+      const fallbackProfile = {
+        name: username || localStorage.getItem('zb_user_name') || 'User',
+        subscription_tier: localStorage.getItem('zb_subscription_tier') || 'trial',
+        trial_start_date: localStorage.getItem('zb_trial_start_date') || new Date().toISOString(),
+        pin: localStorage.getItem('zb_user_pin') || '0000',
+        premium_expires_at: localStorage.getItem('zb_premium_expires_at') || null,
+        trial_expire_date: localStorage.getItem('zb_trial_expire_date') || null,
+        referral_code: localStorage.getItem('zb_invite_code') || ''
+      };
+      const activeProfile = overrideProfile || dbProfile || fallbackProfile;
       if (!activeProfile) return;
 
       if (Capacitor.isNativePlatform()) {
@@ -621,7 +623,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               challenge: typeof crypto !== 'undefined' ? crypto.getRandomValues(new Uint8Array(32)) : new Uint8Array(32),
               rp: { name: 'ZenBudget', id: window.location.hostname },
               user: {
-                id: new TextEncoder().encode(userId || 'zenbudget-user'),
+                id: new TextEncoder().encode(userId || localStorage.getItem('zb_profile_id') || 'zenbudget-user'),
                 name: activeProfile.name || 'ZenBudget User',
                 displayName: activeProfile.name || 'ZenBudget User'
               },
@@ -651,8 +653,9 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         localStorage.setItem('zb_invite_code', activeProfile.referral_code);
       }
       playNotificationSound('success');
+      const effectiveUserId = userId || localStorage.getItem('zb_profile_id') || 'local';
       onUnlock(
-        userId,
+        effectiveUserId,
         activeProfile.name,
         activeProfile.subscription_tier,
         activeProfile.trial_start_date,
@@ -668,9 +671,16 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
   const biometricTriggered = useRef(false);
 
   useEffect(() => {
-    if (step === 'unlock' && biometricsAvailable && dbProfile && !biometricTriggered.current && localStorage.getItem('zb_biometrics_enabled') !== 'false') {
+    biometricTriggered.current = false;
+  }, [step]);
+
+  useEffect(() => {
+    if (step === 'unlock' && !biometricTriggered.current && localStorage.getItem('zb_biometrics_enabled') !== 'false') {
       biometricTriggered.current = true;
-      triggerBiometricUnlock();
+      const timer = setTimeout(() => {
+        triggerBiometricUnlock();
+      }, 300);
+      return () => clearTimeout(timer);
     }
   }, [step, biometricsAvailable, dbProfile]);
 
@@ -1883,9 +1893,10 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               </button>
             ))}
 
-            {/* Left Keypad Column: Biometrics button — only shown when biometrics are available */}
-            {biometricsAvailable && localStorage.getItem('zb_biometrics_enabled') !== 'false' ? (
+            {/* Left Keypad Column: Biometrics button */}
+            {localStorage.getItem('zb_biometrics_enabled') !== 'false' ? (
               <button
+                type="button"
                 onClick={() => triggerBiometricUnlock()}
                 style={{
                   height: '60px',

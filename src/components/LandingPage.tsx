@@ -5268,7 +5268,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
           {/* Social & Connect Column (Exact In-App Design from FollowUsView) */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: '270px' }}>
-            <span style={{ fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: t.text, marginBottom: '4px' }}>Follow Us</span>
+            <span style={{ fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: t.text, marginBottom: '4px' }}>Follow Something Labs</span>
             {[
               {
                 platform: 'YouTube',
