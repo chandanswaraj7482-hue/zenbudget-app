@@ -402,12 +402,22 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   }
 ];
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'geo_map' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing' | 'slots' | 'ai_coach' | 'landing_assets'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'geo_map' | 'users' | 'broadcasts' | 'coupons' | 'ratings' | 'referrals' | 'family' | 'pricing' | 'slots' | 'ai_coach' | 'landing_assets' | 'social'>('overview');
   const [aiReviews, setAiReviews] = useState<any[]>([]);
   const [aiFeedback, setAiFeedback] = useState<any[]>([]);
   const [landingAssets, setLandingAssets] = useState<LandingAssetsState>(INITIAL_LANDING_ASSETS);
   const [isSavingAssets, setIsSavingAssets] = useState(false);
   const [assetsSavedNotice, setAssetsSavedNotice] = useState(false);
+  const [socialLinks, setSocialLinks] = useState<{ platform: string; url: string; icon: string; is_active: boolean }[]>([
+    { platform: 'YouTube', icon: '▶️', url: 'https://www.youtube.com/channel/UCa2ewl3C6Q3qGTXjbAMeAtA', is_active: true },
+    { platform: 'TikTok', icon: '🎵', url: 'https://www.tiktok.com/@zenbudget_tracker?lang=en-GB', is_active: true },
+    { platform: 'Instagram', icon: '📸', url: 'https://www.instagram.com/zenbudget_tracker/', is_active: true },
+    { platform: 'Facebook', icon: '👥', url: 'https://www.facebook.com/people/ZenBudget/61592667931013/', is_active: true },
+    { platform: 'LinkedIn', icon: '💼', url: '', is_active: true },
+    { platform: 'X', icon: '𝕏', url: 'https://twitter.com/ZenBudgetApp', is_active: true }
+  ]);
+  const [isSavingSocial, setIsSavingSocial] = useState(false);
+  const [socialSavedNotice, setSocialSavedNotice] = useState(false);
 
   useEffect(() => {
     fetchRemoteLandingAssets().then(data => setLandingAssets(data));
@@ -569,10 +579,64 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
         console.warn('Could not fetch AI Reviews, SQL migration maybe pending:', err);
       }
 
+      // Fetch Social Links from app_config / social_links
+      try {
+        const { data: cfgLinks } = await supabaseClient
+          .from('app_config')
+          .select('data')
+          .eq('id', 'social_links')
+          .maybeSingle();
+        if (cfgLinks?.data && Array.isArray(cfgLinks.data) && cfgLinks.data.length > 0) {
+          setSocialLinks(cfgLinks.data);
+        } else {
+          const { data: dbLinks } = await supabaseClient
+            .from('social_links')
+            .select('*');
+          if (dbLinks && dbLinks.length > 0) {
+            setSocialLinks(dbLinks);
+          }
+        }
+      } catch (err) {
+        console.warn('Could not fetch social links:', err);
+      }
+
     } catch (err) {
       console.error('Admin fetch error:', err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSaveSocialLinks = async () => {
+    setIsSavingSocial(true);
+    try {
+      // 1. Save to app_config
+      const { error: cfgErr } = await supabaseClient.from('app_config').upsert([{
+        id: 'social_links',
+        data: socialLinks,
+        updated_at: new Date().toISOString()
+      }]);
+      if (cfgErr) throw cfgErr;
+
+      // 2. Also try upsert to social_links table
+      try {
+        for (const link of socialLinks) {
+          await supabaseClient.from('social_links').upsert([{
+            platform: link.platform,
+            url: link.url,
+            icon: link.icon,
+            is_active: link.is_active
+          }], { onConflict: 'platform' });
+        }
+      } catch (_) {}
+
+      setSocialSavedNotice(true);
+      if (onShowToast) onShowToast('✅ Social Links updated in real-time across Web & APK!', 'success');
+      setTimeout(() => setSocialSavedNotice(false), 3000);
+    } catch (err: any) {
+      if (onShowToast) onShowToast('Failed to save social links: ' + (err.message || 'Error'), 'warning');
+    } finally {
+      setIsSavingSocial(false);
     }
   };
 
@@ -1171,7 +1235,8 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                 { id: 'coupons', label: 'Discount Coupons', icon: Gift },
                 { id: 'pricing', label: 'Pricing Control', icon: DollarSign },
                 { id: 'ratings', label: `App Ratings (${ratings.length})`, icon: Star },
-                { id: 'ai_coach', label: 'AI Coach & Reviews', icon: Bot }
+                { id: 'ai_coach', label: 'AI Coach & Reviews', icon: Bot },
+                { id: 'social', label: '🔗 Something Labs Social Links', icon: Share2 }
               ].map(tab => {
                 const IconComponent = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -3536,6 +3601,117 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                         )}
                       </tbody>
                     </table>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'social' && (
+                <div style={{ animation: 'fadeIn 0.25s ease' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+                    <div>
+                      <h4 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff' }}>
+                        <Share2 size={20} color="#a855f7" /> Something Labs — Official Social Links CMS
+                      </h4>
+                      <p style={{ fontSize: '0.825rem', color: '#94a3b8', margin: '4px 0 0 0' }}>
+                        Live cloud sync for Web, iOS & Android APK. Updates reflect instantly across all apps without rebuilding!
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={handleSaveSocialLinks}
+                      disabled={isSavingSocial}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '10px 22px',
+                        borderRadius: '12px',
+                        background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
+                        border: 'none',
+                        color: '#fff',
+                        fontWeight: 800,
+                        fontSize: '0.85rem',
+                        cursor: isSavingSocial ? 'not-allowed' : 'pointer',
+                        boxShadow: '0 4px 16px rgba(168, 85, 247, 0.4)',
+                        opacity: isSavingSocial ? 0.7 : 1
+                      }}
+                    >
+                      {isSavingSocial ? <RefreshCw size={16} className="animate-spin" /> : <Check size={16} />}
+                      {isSavingSocial ? 'Saving to Cloud...' : 'Save Live Changes'}
+                    </button>
+                  </div>
+
+                  {socialSavedNotice && (
+                    <div style={{ padding: '12px 18px', borderRadius: '12px', background: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.3)', color: '#4ade80', fontWeight: 700, fontSize: '0.85rem', marginBottom: '1.25rem' }}>
+                      🚀 Social Links saved successfully! Supabase Realtime broadcast sent to all active Web & APK devices.
+                    </div>
+                  )}
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
+                    {socialLinks.map((link, idx) => (
+                      <div
+                        key={link.platform}
+                        style={{
+                          padding: '1.25rem',
+                          backgroundColor: 'rgba(30, 41, 59, 0.65)',
+                          border: '1px solid rgba(255, 255, 255, 0.08)',
+                          borderRadius: '16px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '12px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ fontSize: '24px' }}>{link.icon}</span>
+                            <div>
+                              <h5 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#fff' }}>{link.platform}</h5>
+                              <span style={{ fontSize: '0.75rem', color: '#a855f7', fontWeight: 700 }}>Something Labs</span>
+                            </div>
+                          </div>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#94a3b8', cursor: 'pointer' }}>
+                            <input
+                              type="checkbox"
+                              checked={link.is_active !== false}
+                              onChange={(e) => {
+                                const updated = [...socialLinks];
+                                updated[idx].is_active = e.target.checked;
+                                setSocialLinks(updated);
+                              }}
+                              style={{ cursor: 'pointer' }}
+                            />
+                            Active
+                          </label>
+                        </div>
+
+                        <div>
+                          <label style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '6px' }}>
+                            Channel / Profile URL:
+                          </label>
+                          <input
+                            type="text"
+                            value={link.url || ''}
+                            placeholder={link.platform === 'LinkedIn' ? 'e.g. https://linkedin.com/company/somethinglabs' : `https://${link.platform.toLowerCase()}.com/...`}
+                            onChange={(e) => {
+                              const updated = [...socialLinks];
+                              updated[idx].url = e.target.value;
+                              setSocialLinks(updated);
+                            }}
+                            style={{
+                              width: '100%',
+                              padding: '10px 14px',
+                              borderRadius: '10px',
+                              background: 'rgba(15, 23, 42, 0.7)',
+                              border: '1px solid rgba(255, 255, 255, 0.12)',
+                              color: '#fff',
+                              fontSize: '0.85rem',
+                              outline: 'none',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}

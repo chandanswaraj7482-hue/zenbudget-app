@@ -2215,6 +2215,13 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         .eq('id', currentProfileId)
         .maybeSingle();
       
+      if (profData?.is_suspended) {
+        triggerToast('⚠️ Your account has been suspended by the administrator.', 'error');
+        setIsLocked(true);
+        await performCompleteLogoutAndDataWipe();
+        return;
+      }
+
       if (!profData && !profErr && currentProfileId && currentProfileId !== 'local') {
         const { data: authSession } = await supabase.auth.getSession();
         if (authSession?.session) {

@@ -378,6 +378,13 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
       console.log("LockScreen: fetchUserProfile database query result:", userProf);
       if (userProf) {
+        if (userProf.is_suspended) {
+          setErrorMsg('⚠️ Your account has been suspended by the administrator. Please contact support.');
+          setIsLoading(false);
+          setStep('auth');
+          return;
+        }
+
         // Auto-register device session for multi-device sync
         const currentDeviceId = await getOrCreateDeviceId();
         const isMobile = currentDeviceId.startsWith('mobile_');

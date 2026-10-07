@@ -30,27 +30,64 @@ export const FollowUsView: React.FC<FollowUsViewProps> = ({ onBack }) => {
   ];
 
   useEffect(() => {
-    supabase
-      .from('social_links')
-      .select('*')
-      .eq('is_active', true)
-      .then(({ data }) => {
-        if (data && data.length > 0) {
-          // Merge Supabase entries with official Something Labs list
+    const fetchLinks = async () => {
+      try {
+        const { data: dbLinks } = await supabase
+          .from('social_links')
+          .select('*')
+          .eq('is_active', true);
+
+        if (dbLinks && dbLinks.length > 0) {
           const merged = defaultLinks.map(def => {
-            const remote = data.find((d: any) => d.platform?.toLowerCase() === def.platform.toLowerCase());
+            const remote = dbLinks.find((d: any) => d.platform?.toLowerCase() === def.platform.toLowerCase());
+            return remote ? { ...def, ...remote, handleName: 'Something Labs' } : def;
+          });
+          setSocialLinks(merged);
+          setLoading(false);
+          return;
+        }
+
+        // Fallback: Check app_config table for 'social_links'
+        const { data: cfgData } = await supabase
+          .from('app_config')
+          .select('data')
+          .eq('id', 'social_links')
+          .maybeSingle();
+
+        if (cfgData?.data && Array.isArray(cfgData.data) && cfgData.data.length > 0) {
+          const merged = defaultLinks.map(def => {
+            const remote = cfgData.data.find((d: any) => d.platform?.toLowerCase() === def.platform.toLowerCase());
             return remote ? { ...def, ...remote, handleName: 'Something Labs' } : def;
           });
           setSocialLinks(merged);
         } else {
           setSocialLinks(defaultLinks);
         }
-        setLoading(false);
-      })
-      .catch(() => {
+      } catch (_) {
         setSocialLinks(defaultLinks);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchLinks();
+
+    // Realtime channel for live updates from Admin Panel
+    const channel = supabase
+      .channel('public:social_links_sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'social_links' }, () => {
+        fetchLinks();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'app_config' }, (payload: any) => {
+        if (payload?.new && (payload.new as any).id === 'social_links') {
+          fetchLinks();
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return (
