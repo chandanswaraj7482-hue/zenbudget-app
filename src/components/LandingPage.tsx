@@ -3596,7 +3596,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           </div>
 
           {/* Pricing FAQ */}
-          <div style={{ maxWidth: '840px', margin: '0 auto' }}>
+          <div id="faq" style={{ maxWidth: '840px', margin: '0 auto', scrollMarginTop: '100px' }}>
             <div style={{ textAlign: 'center', marginBottom: '40px' }}>
               <span style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', color: '#10b981', letterSpacing: '0.12em' }}>Common Inquiries</span>
               <h2 style={{ fontSize: '32px', fontWeight: 900, color: t.text, marginTop: '8px' }}>Frequently Asked Questions</h2>
@@ -5510,17 +5510,18 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           {/* Company Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <span style={{ fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: t.text, marginBottom: '6px' }}>Company</span>
-            <a onClick={() => navigateToPage('about')} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>About ZenBudget</a>
-            <a onClick={() => scrollTo('features')} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>FAQs & Help</a>
-            <a href="mailto:hello.zenbudget@zohomail.in" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Contact Support: hello.zenbudget@zohomail.in</a>
-            <a onClick={onOpenWebApp} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Terms and Conditions</a>
-            <a onClick={onOpenWebApp} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Privacy Policy</a>
-            <a onClick={() => { window.history.pushState(null, '', '/blog'); window.dispatchEvent(new Event('popstate')); }} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Blog</a>
-            <a href={DISTRIBUTION_CONFIG.PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <a onClick={() => navigateToPage('about')} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>About ZenBudget</a>
+            <a onClick={() => scrollTo('faq')} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>FAQs &amp; Help</a>
+            <a href="mailto:hello.zenbudget@zohomail.in" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>Contact: hello.zenbudget@zohomail.in</a>
+            <a href="/terms.html" target="_blank" rel="noopener noreferrer" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>Terms and Conditions</a>
+            <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>Privacy Policy</a>
+            <a href="/security.html" target="_blank" rel="noopener noreferrer" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>Security Overview</a>
+            <a onClick={() => { window.history.pushState(null, '', '/blog'); window.dispatchEvent(new Event('popstate')); }} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>Blog</a>
+            <a href={DISTRIBUTION_CONFIG.PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>
               <GooglePlayIcon size={15} />
               <span>Google Play Store</span>
             </a>
-            <a onClick={handleDownloadApk} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Download Direct APK</a>
+            <a onClick={handleDownloadApk} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>Download Direct APK</a>
           </div>
 
           {/* Social & Connect Column (Exact In-App Design from FollowUsView) */}
@@ -5666,8 +5667,17 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           </div>
         </div>
 
-        {/* Financial Disclaimer */}
+        {/* Financial Disclaimer & Legal Links */}
         <div style={{ textAlign: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap', marginBottom: '16px', alignItems: 'center' }}>
+            <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style={{ fontSize: '12.5px', color: t.textSub, textDecoration: 'none', fontWeight: 600, transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>Privacy Policy</a>
+            <span style={{ color: t.border }}>•</span>
+            <a href="/terms.html" target="_blank" rel="noopener noreferrer" style={{ fontSize: '12.5px', color: t.textSub, textDecoration: 'none', fontWeight: 600, transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>Terms of Service</a>
+            <span style={{ color: t.border }}>•</span>
+            <a href="/security.html" target="_blank" rel="noopener noreferrer" style={{ fontSize: '12.5px', color: t.textSub, textDecoration: 'none', fontWeight: 600, transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>Security Overview</a>
+            <span style={{ color: t.border }}>•</span>
+            <a href="/contact.html" target="_blank" rel="noopener noreferrer" style={{ fontSize: '12.5px', color: t.textSub, textDecoration: 'none', fontWeight: 600, transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>Contact Us</a>
+          </div>
           <p style={{ fontSize: '11.5px', color: t.textMuted, lineHeight: 1.6, maxWidth: '840px', margin: '0 auto 16px' }}>
             <strong>Financial Disclaimer:</strong> ZenBudget is designed for personal financial wellness and self-tracking. It is <strong>not</strong> a substitute for professional investment advice, tax consulting, or registered banking services.
           </p>
