@@ -7,7 +7,13 @@ import {
   RotateCcw, 
   Award, 
   Zap,
-  ChevronRight
+  ChevronRight,
+  TrendingUp,
+  Clock,
+  ShieldCheck,
+  Flame,
+  CheckCircle2,
+  BookmarkCheck
 } from 'lucide-react';
 import { CoinCatcherGame } from './CoinCatcherGame';
 import { playCelebrationSound, playNotificationSound } from '../utils/audio';
@@ -15,7 +21,7 @@ import { playCelebrationSound, playNotificationSound } from '../utils/audio';
 interface ZenActivitiesHubProps {
   currencySymbol?: string;
   userReferralCode?: string;
-  defaultTab?: 'game' | 'quiz';
+  defaultTab?: 'game' | 'quiz' | 'afford';
 }
 
 // 8 Curated Rapid Money IQ Quiz Questions
@@ -108,7 +114,7 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
   defaultTab = 'game'
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState<'game' | 'quiz'>(defaultTab);
+  const [activeTab, setActiveTab] = useState<'game' | 'quiz' | 'afford'>(defaultTab);
 
   // Quiz State
   const [quizIndex, setQuizIndex] = useState(0);
@@ -116,6 +122,12 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
   const [quizStarted, setQuizStarted] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
+
+  // Activity 3: "Can I Afford It?" State
+  const [affordItemName, setAffordItemName] = useState('New Sneakers');
+  const [affordAmount, setAffordAmount] = useState<number>(3500);
+  const [monthlyIncome, setMonthlyIncome] = useState<number>(45000);
+  const [isFrozenInWishlist, setIsFrozenInWishlist] = useState(false);
 
   const handleAnswerQuiz = (points: number) => {
     playNotificationSound();
@@ -171,6 +183,61 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
     }
   };
 
+  // Activity 3 Math Helpers
+  // Hourly wage based on 22 working days * 8 hours = 176 hours/month
+  const hourlyRate = Math.max(1, Math.round(monthlyIncome / 176));
+  const workHoursCost = (affordAmount / hourlyRate).toFixed(1);
+
+  // SIP Compounding at 12% Annual CAGR: A = P * (1 + r)^t
+  const sip5Years = Math.round(affordAmount * Math.pow(1 + 0.12, 5));
+  const sip10Years = Math.round(affordAmount * Math.pow(1 + 0.12, 10));
+  const sip20Years = Math.round(affordAmount * Math.pow(1 + 0.12, 20));
+
+  // Affordability Verdict: % of Monthly Income
+  const costPercentage = ((affordAmount / Math.max(1, monthlyIncome)) * 100);
+  const getAffordVerdict = () => {
+    if (costPercentage <= 5) {
+      return {
+        color: '#10b981',
+        title: '🟢 Safe & Guilt-Free Buy',
+        badge: 'Low Impact (< 5% income)',
+        desc: 'This purchase fits cleanly within your discretionary budget. You can purchase this guilt-free without touching your savings.'
+      };
+    } else if (costPercentage <= 20) {
+      return {
+        color: '#f59e0b',
+        title: '🟡 Pause 24-Hour Buffer',
+        badge: 'Moderate Impact (5-20% income)',
+        desc: 'Significant spending chunk. We strongly recommend sleeping on it for 24-48 hours before pulling the trigger to eliminate dopamine impulse.'
+      };
+    } else {
+      return {
+        color: '#ef4444',
+        title: '🔴 Debt / High-Risk Warning',
+        badge: 'High Impact (> 20% income)',
+        desc: 'High financial strain! If you need Credit Card EMI or Pay Later to buy this, avoid it. It will trigger spending regret.'
+      };
+    }
+  };
+
+  const affordVerdict = getAffordVerdict();
+
+  const handleFreezeWishlist = () => {
+    playNotificationSound();
+    setIsFrozenInWishlist(true);
+    try {
+      const existing = JSON.parse(localStorage.getItem('zb_wishlist_items') || '[]');
+      existing.unshift({
+        name: affordItemName,
+        amount: affordAmount,
+        addedAt: new Date().toISOString(),
+        unlocksAt: new Date(Date.now() + 48 * 3600 * 1000).toISOString()
+      });
+      localStorage.setItem('zb_wishlist_items', JSON.stringify(existing.slice(0, 10)));
+    } catch (_) {}
+    setTimeout(() => setIsFrozenInWishlist(false), 3000);
+  };
+
   // Collapsed Card Preview
   if (!isExpanded) {
     return (
@@ -220,11 +287,11 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
                   background: '#10b981',
                   color: '#ffffff'
                 }}>
-                  2-in-1
+                  3-in-1
                 </span>
               </div>
               <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', margin: '3px 0 0 0' }}>
-                🎮 Coin Catcher Arcade • 🧠 60-Second Money IQ Quiz
+                🎮 Coin Game • 🧠 Money IQ Quiz • ⚡ Can I Afford It?
               </p>
             </div>
           </div>
@@ -250,7 +317,7 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
     );
   }
 
-  // Expanded Hub View with 2 Activities (Game & Quiz)
+  // Expanded Hub View with 3 Activities
   return (
     <div style={{
       marginTop: '16px',
@@ -275,6 +342,16 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
           <span style={{ fontSize: '15px', fontWeight: 900, color: 'var(--text-primary)' }}>
             Zen Arcade &amp; Brain Hub
           </span>
+          <span style={{
+            fontSize: '10px',
+            fontWeight: 800,
+            padding: '2px 8px',
+            borderRadius: '999px',
+            background: 'rgba(16, 185, 129, 0.15)',
+            color: '#10b981'
+          }}>
+            3-in-1
+          </span>
         </div>
         <button
           onClick={() => setIsExpanded(false)}
@@ -293,12 +370,12 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
         </button>
       </div>
 
-      {/* 2 Activity Tabs Selector (50% / 50%) */}
+      {/* 3 Activity Tabs Selector */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
+        gridTemplateColumns: 'repeat(3, 1fr)',
         padding: '8px',
-        gap: '8px',
+        gap: '6px',
         background: 'rgba(0,0,0,0.03)',
         borderBottom: '1px solid var(--border-input, rgba(255,255,255,0.06))'
       }}>
@@ -309,21 +386,21 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '8px',
-            padding: '12px 10px',
-            borderRadius: '16px',
+            gap: '6px',
+            padding: '10px 6px',
+            borderRadius: '14px',
             border: 'none',
             background: activeTab === 'game' ? '#10b981' : 'transparent',
             color: activeTab === 'game' ? '#ffffff' : 'var(--text-secondary)',
             fontWeight: 800,
-            fontSize: '13px',
+            fontSize: '12px',
             cursor: 'pointer',
             transition: 'all 0.2s',
             boxShadow: activeTab === 'game' ? '0 4px 14px rgba(16, 185, 129, 0.35)' : 'none'
           }}
         >
-          <Gamepad2 size={18} />
-          <span>🎮 1. Coin Catcher Game</span>
+          <Gamepad2 size={16} />
+          <span>1. Arcade</span>
         </button>
 
         {/* Tab 2: Money IQ Quiz */}
@@ -333,21 +410,45 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '8px',
-            padding: '12px 10px',
-            borderRadius: '16px',
+            gap: '6px',
+            padding: '10px 6px',
+            borderRadius: '14px',
             border: 'none',
             background: activeTab === 'quiz' ? '#10b981' : 'transparent',
             color: activeTab === 'quiz' ? '#ffffff' : 'var(--text-secondary)',
             fontWeight: 800,
-            fontSize: '13px',
+            fontSize: '12px',
             cursor: 'pointer',
             transition: 'all 0.2s',
             boxShadow: activeTab === 'quiz' ? '0 4px 14px rgba(16, 185, 129, 0.35)' : 'none'
           }}
         >
-          <Brain size={18} />
-          <span>🧠 2. Money IQ Quiz</span>
+          <Brain size={16} />
+          <span>2. IQ Quiz</span>
+        </button>
+
+        {/* Tab 3: "Can I Afford It?" Impulse Checker */}
+        <button
+          onClick={() => setActiveTab('afford')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            padding: '10px 6px',
+            borderRadius: '14px',
+            border: 'none',
+            background: activeTab === 'afford' ? '#10b981' : 'transparent',
+            color: activeTab === 'afford' ? '#ffffff' : 'var(--text-secondary)',
+            fontWeight: 800,
+            fontSize: '12px',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            boxShadow: activeTab === 'afford' ? '0 4px 14px rgba(16, 185, 129, 0.35)' : 'none'
+          }}
+        >
+          <Zap size={16} />
+          <span>3. Afford It?</span>
         </button>
       </div>
 
@@ -599,6 +700,244 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
               })()}
             </div>
           )}
+        </div>
+      )}
+
+      {/* =================================================================== */}
+      {/* ACTIVITY 3: "CAN I AFFORD IT?" & SIP MULTIPLIER                     */}
+      {/* =================================================================== */}
+      {activeTab === 'afford' && (
+        <div style={{ padding: '20px 18px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '18px' }}>
+            <span style={{
+              fontSize: '11px',
+              fontWeight: 800,
+              color: '#10b981',
+              background: 'rgba(16, 185, 129, 0.12)',
+              padding: '4px 12px',
+              borderRadius: '999px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <Zap size={13} />
+              Instant Impulse Purchase Audit
+            </span>
+            <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--text-primary)', margin: '8px 0 4px 0' }}>
+              Can I Really Afford This? 🤔
+            </h3>
+            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>
+              Audit unplanned purchases in 10 seconds before swiping your card.
+            </p>
+          </div>
+
+          {/* Quick Item Input Card */}
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.02)',
+            border: '1.5px solid var(--border-input, rgba(255, 255, 255, 0.08))',
+            borderRadius: '20px',
+            padding: '16px',
+            marginBottom: '16px'
+          }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '10px', marginBottom: '12px' }}>
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                  What do you want to buy?
+                </label>
+                <input
+                  type="text"
+                  value={affordItemName}
+                  onChange={(e) => setAffordItemName(e.target.value)}
+                  placeholder="e.g. Headphones, Shoes"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '12px',
+                    border: '1px solid var(--border-input)',
+                    background: 'var(--bg-input)',
+                    color: 'var(--text-primary)',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    outline: 'none'
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                  Item Price ({currencySymbol})
+                </label>
+                <input
+                  type="number"
+                  value={affordAmount || ''}
+                  onChange={(e) => setAffordAmount(Math.max(0, Number(e.target.value)))}
+                  placeholder="3500"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '12px',
+                    border: '1px solid var(--border-input)',
+                    background: 'var(--bg-input)',
+                    color: '#10b981',
+                    fontSize: '14px',
+                    fontWeight: 800,
+                    outline: 'none'
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Quick Price Pick Chips */}
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {[
+                { label: '☕ ₹150 Chai', amt: 150 },
+                { label: '🍕 ₹600 Food', amt: 600 },
+                { label: '👟 ₹3,500 Shoes', amt: 3500 },
+                { label: '📱 ₹25,000 Gadget', amt: 25000 }
+              ].map((chip, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setAffordAmount(chip.amt)}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '999px',
+                    background: affordAmount === chip.amt ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.04)',
+                    border: affordAmount === chip.amt ? '1px solid #10b981' : '1px solid var(--border-input)',
+                    color: affordAmount === chip.amt ? '#10b981' : 'var(--text-secondary)',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {chip.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Verdict Alert Card */}
+          <div style={{
+            background: `${affordVerdict.color}15`,
+            border: `1.5px solid ${affordVerdict.color}40`,
+            borderRadius: '20px',
+            padding: '16px',
+            marginBottom: '16px'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <span style={{ fontSize: '15px', fontWeight: 900, color: affordVerdict.color }}>
+                {affordVerdict.title}
+              </span>
+              <span style={{
+                fontSize: '10.5px',
+                fontWeight: 800,
+                color: affordVerdict.color,
+                background: `${affordVerdict.color}20`,
+                padding: '2px 8px',
+                borderRadius: '999px'
+              }}>
+                {affordVerdict.badge}
+              </span>
+            </div>
+            <p style={{ fontSize: '12.5px', color: 'var(--text-primary)', margin: 0, lineHeight: 1.45 }}>
+              {affordVerdict.desc}
+            </p>
+          </div>
+
+          {/* Key Mindful Reality Metrics (Hours of Life & SIP Multiplier) */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginBottom: '16px' }}>
+            {/* Metric 1: Life Work Hours */}
+            <div style={{
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid var(--border-input, rgba(255,255,255,0.08))',
+              borderRadius: '16px',
+              padding: '14px',
+              textAlign: 'center'
+            }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
+                <Clock size={16} />
+              </div>
+              <div style={{ fontSize: '20px', fontWeight: 900, color: '#f59e0b' }}>
+                {workHoursCost} hrs
+              </div>
+              <div style={{ fontSize: '10.5px', color: 'var(--text-secondary)', fontWeight: 700, marginTop: '2px' }}>
+                Of Your Life Worked
+              </div>
+            </div>
+
+            {/* Metric 2: 10-Yr SIP Growth */}
+            <div style={{
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid var(--border-input, rgba(255,255,255,0.08))',
+              borderRadius: '16px',
+              padding: '14px',
+              textAlign: 'center'
+            }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
+                <TrendingUp size={16} />
+              </div>
+              <div style={{ fontSize: '20px', fontWeight: 900, color: '#10b981' }}>
+                {currencySymbol}{sip10Years.toLocaleString()}
+              </div>
+              <div style={{ fontSize: '10.5px', color: 'var(--text-secondary)', fontWeight: 700, marginTop: '2px' }}>
+                Wealth If Invested (10 Yrs)
+              </div>
+            </div>
+          </div>
+
+          {/* SIP Wealth Time Machine Breakdown */}
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(6, 182, 212, 0.04) 100%)',
+            border: '1px solid rgba(16, 185, 129, 0.25)',
+            borderRadius: '18px',
+            padding: '14px 16px',
+            marginBottom: '16px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 800, color: '#10b981', marginBottom: '8px' }}>
+              <TrendingUp size={14} />
+              <span>SIP Wealth Multiplier (12% CAGR):</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', color: 'var(--text-secondary)' }}>
+              <div>In 5 Years: <strong style={{ color: 'var(--text-primary)' }}>{currencySymbol}{sip5Years.toLocaleString()}</strong></div>
+              <div>In 10 Years: <strong style={{ color: '#10b981' }}>{currencySymbol}{sip10Years.toLocaleString()}</strong></div>
+              <div>In 20 Years: <strong style={{ color: '#06b6d4' }}>{currencySymbol}{sip20Years.toLocaleString()}</strong></div>
+            </div>
+          </div>
+
+          {/* 1-Tap Action: Cool-Off in Wishlist */}
+          <button
+            onClick={handleFreezeWishlist}
+            className="hover-lift"
+            style={{
+              width: '100%',
+              padding: '14px',
+              borderRadius: '16px',
+              border: 'none',
+              background: isFrozenInWishlist 
+                ? '#10b981' 
+                : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              color: '#ffffff',
+              fontSize: '13.5px',
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              boxShadow: '0 6px 20px rgba(16, 185, 129, 0.35)'
+            }}
+          >
+            {isFrozenInWishlist ? (
+              <>
+                <CheckCircle2 size={16} />
+                <span>Frozen in 48-Hour Wishlist! ❄️</span>
+              </>
+            ) : (
+              <>
+                <BookmarkCheck size={16} />
+                <span>Freeze &amp; Cool Off for 48 Hours 🧊</span>
+              </>
+            )}
+          </button>
         </div>
       )}
     </div>

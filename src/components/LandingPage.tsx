@@ -2767,7 +2767,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   ))}
                 </div>
                 <span style={{ fontSize: '13px', fontWeight: 800, color: t.text }}>
-                  Trusted by <span style={{ color: '#84cc16' }}>4,000+ conscious savers</span> across India & beyond
+                  Trusted by <span style={{ color: '#84cc16' }}>4,200+ conscious savers</span> across India & beyond
                 </span>
               </div>
 
@@ -3435,9 +3435,9 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               <p style={{ color: t.textSub, fontSize: '14px', marginBottom: '24px', minHeight: '42px', lineHeight: 1.5 }}>Full AI automation to crush impulse buying. Cancel anytime if you slip up.</p>
               
               <div style={{ fontSize: '42px', fontWeight: 900, marginBottom: '6px', color: t.text, display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                ₹99 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/month</span>
+                ₹149 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/month</span>
               </div>
-              <p style={{ fontSize: '13px', color: '#0284c7', marginBottom: '32px', fontWeight: 700 }}>Costs less than 2 chais a month</p>
+              <p style={{ fontSize: '13px', color: '#0284c7', marginBottom: '32px', fontWeight: 700 }}>Costs less than 1 cup of coffee a week</p>
               
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
                 {[
@@ -3462,14 +3462,14 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 style={{ width: '100%', padding: '14px', borderRadius: '100px', border: 'none', background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)', color: '#ffffff', fontSize: '14.5px', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 8px 20px rgba(2,132,199,0.3)' }} 
                 className="hover-lift"
               >
-                Get Pro Monthly (₹99)
+                Get Pro Monthly (₹149)
               </button>
             </div>
             
             {/* Tier 3: Pro Annual (Featured) */}
             <div style={{ background: isDark ? '#132219' : '#ffffff', border: '2.5px solid #10b981', borderRadius: '24px', padding: '36px 28px', color: t.text, boxShadow: '0 25px 50px rgba(16,185,129,0.25)', position: 'relative', display: 'flex', flexDirection: 'column', transform: 'scale(1.02)', zIndex: 2 }}>
               <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', fontSize: '11px', fontWeight: 900, padding: '6px 18px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.08em', boxShadow: '0 6px 16px rgba(16,185,129,0.4)', whiteSpace: 'nowrap' }}>
-                🔥 NO-BRAINER · SAVE OVER 33%
+                🔥 BEST VALUE · SAVE 16%
               </div>
               
               <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: '#10b981', letterSpacing: '0.1em', marginBottom: '8px' }}>THE WEALTH BUILDER</span>
@@ -3477,9 +3477,9 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               <p style={{ color: t.textSub, fontSize: '14px', marginBottom: '24px', minHeight: '42px', lineHeight: 1.5 }}>Commit to changing your financial life. Get all premium features unlimited.</p>
               
               <div style={{ fontSize: '42px', fontWeight: 900, marginBottom: '6px', color: '#10b981', display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                ₹799 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/year</span>
+                ₹1,499 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/year</span>
               </div>
-              <p style={{ fontSize: '13px', color: '#10b981', marginBottom: '32px', fontWeight: 700 }}>Only ~₹66/month. Less than a streaming subscription!</p>
+              <p style={{ fontSize: '13px', color: '#10b981', marginBottom: '32px', fontWeight: 700 }}>Only ~₹125/month. Complete financial peace of mind!</p>
               
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
                 {[
@@ -3505,7 +3505,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 style={{ width: '100%', padding: '15px', borderRadius: '100px', border: 'none', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', fontSize: '15px', fontWeight: 900, cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 10px 25px rgba(16,185,129,0.35)' }} 
                 className="hover-lift"
               >
-                Get Pro Annual (₹799)
+                Get Pro Annual (₹1,499)
               </button>
             </div>
 
@@ -3563,8 +3563,8 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 <tr style={{ borderBottom: `2px solid ${t.border}` }}>
                   <th style={{ padding: '16px 12px', color: t.textMuted, fontSize: '13px', fontWeight: 800, textTransform: 'uppercase' }}>Feature</th>
                   <th style={{ padding: '16px 12px', color: t.text, fontSize: '14px', fontWeight: 800, textAlign: 'center' }}>Free Forever (₹0)</th>
-                  <th style={{ padding: '16px 12px', color: '#0284c7', fontSize: '14px', fontWeight: 800, textAlign: 'center' }}>Monthly (₹99)</th>
-                  <th style={{ padding: '16px 12px', color: '#10b981', fontSize: '14px', fontWeight: 900, textAlign: 'center' }}>Annual (₹799)</th>
+                  <th style={{ padding: '16px 12px', color: '#0284c7', fontSize: '14px', fontWeight: 800, textAlign: 'center' }}>Monthly (₹149)</th>
+                  <th style={{ padding: '16px 12px', color: '#10b981', fontSize: '14px', fontWeight: 900, textAlign: 'center' }}>Annual (₹1,499)</th>
                   <th style={{ padding: '16px 12px', color: '#d97706', fontSize: '14px', fontWeight: 800, textAlign: 'center' }}>Lifetime (₹2,499)</th>
                 </tr>
               </thead>
@@ -3606,11 +3606,11 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               {[
                 { 
                   q: "How does the Free Plan work?", 
-                  a: "ZenBudget Tracker is 100% free to use for daily expense and income tracking with zero transaction limits. Free users see occasional non-intrusive partner ads and can set up to 2 category budget caps (with the option to watch a 10-second sponsor ad for extra limits). To remove ads, unlock Bank Statement OCR scanning, and enable Couples Sync, you can upgrade to Pro Monthly (₹99) or Pro Annual (₹799) anytime." 
+                  a: "ZenBudget Tracker is 100% free to use for daily expense and income tracking with zero transaction limits. Free users see occasional non-intrusive partner ads and can set up to 2 category budget caps (with the option to watch a 10-second sponsor ad for extra limits). To remove ads, unlock Bank Statement OCR scanning, and enable Couples Sync, you can upgrade to Pro Monthly (₹149) or Pro Annual (₹1,499) anytime." 
                 },
                 { 
-                  q: "What is the difference between Pro Monthly (₹99) and Pro Annual (₹799)?", 
-                  a: "The Monthly plan costs just ₹99/mo and gives you a 100% ad-free experience, unlimited category limits, and smart receipt scanning. The Annual plan costs ₹799/year (saving you over 33% — only ~₹66/month) and includes advanced extras such as AI bank statement & passbook parsers, couples shared sync, and 24/7 AI financial coaching." 
+                  q: "What is the difference between Pro Monthly (₹149) and Pro Annual (₹1,499)?", 
+                  a: "The Monthly plan costs just ₹149/mo and gives you a 100% ad-free experience, unlimited category limits, and smart receipt scanning. The Annual plan costs ₹1,499/year (saving you over 16% — only ~₹125/month) and includes advanced extras such as AI bank statement & passbook parsers, couples shared sync, and 24/7 AI financial coaching." 
                 },
                 { 
                   q: "What does the Lifetime VIP Pass (₹2,499) include?", 
@@ -4124,7 +4124,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Star size={14} fill="#84cc16" color="#84cc16" />
-                    <span style={{ fontSize: '13px', fontWeight: 800, color: t.text }}>Trusted by <span style={{ color: '#84cc16' }}>4,000+</span> active users</span>
+                    <span style={{ fontSize: '13px', fontWeight: 800, color: t.text }}>Trusted by <span style={{ color: '#84cc16' }}>4,200+</span> active users</span>
                   </div>
                 </div>
 
@@ -4214,7 +4214,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     <Shield size={16} color="#10b981" /> 100% Private
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13.5px', fontWeight: 700, color: t.textSub }}>
-                    <Users size={16} color="#3b82f6" /> <AnimatedCounter end={4000} duration={2000} />+ Users
+                    <Users size={16} color="#3b82f6" /> <AnimatedCounter end={4200} duration={2000} />+ Users
                   </div>
                 </div>
 

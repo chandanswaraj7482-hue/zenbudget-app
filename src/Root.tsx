@@ -37,12 +37,21 @@ export default function Root() {
     setCurrentPath('/');
   };
 
-  // Skip landing if running as Native Android/iOS App or PWA Standalone
+  // Skip landing if running as Native Android/iOS App or PWA Standalone or completing OAuth login
+  const isOAuthCallback = typeof window !== 'undefined' && (
+    window.location.href.includes('access_token=') ||
+    window.location.href.includes('refresh_token=') ||
+    window.location.href.includes('code=') ||
+    window.location.href.includes('error_description=') ||
+    window.location.search.includes('code=') ||
+    window.location.hash.includes('access_token=') ||
+    localStorage.getItem('zb_oauth_in_progress') === 'true'
+  );
+
   const isAppMode = Capacitor.isNativePlatform() || 
                     (typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches) ||
                     currentHash === '#app' ||
-                    currentHash.includes('access_token=') ||
-                    currentHash.includes('error_description=') ||
+                    isOAuthCallback ||
                     (typeof window !== 'undefined' && (window.location.search.includes('shared_receipt=') || window.location.search.includes('pay_vpa=')));
 
   if (isAppMode) {

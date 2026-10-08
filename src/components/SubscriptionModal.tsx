@@ -22,7 +22,7 @@ interface SubscriptionModalProps {
 export type PlanCycle = 'monthly' | 'yearly' | 'lifetime';
 
 export const LOCALIZED_PRICES_MONTHLY: Record<string, { amount: number; symbol: string; label: string }> = {
-  INR: { amount: 99, symbol: '₹', label: '₹99/mo' },
+  INR: { amount: 149, symbol: '₹', label: '₹149/mo' },
   USD: { amount: 6.99, symbol: '$', label: '$6.99/mo' },
   EUR: { amount: 6.99, symbol: '€', label: '€6.99/mo' },
   GBP: { amount: 5.99, symbol: '£', label: '£5.99/mo' },
@@ -36,7 +36,7 @@ export const LOCALIZED_PRICES_MONTHLY: Record<string, { amount: number; symbol: 
 };
 
 export const LOCALIZED_PRICES_YEARLY: Record<string, { amount: number; symbol: string; label: string }> = {
-  INR: { amount: 799, symbol: '₹', label: '₹799/yr' },
+  INR: { amount: 1499, symbol: '₹', label: '₹1,499/yr' },
   USD: { amount: 19.99, symbol: '$', label: '$19.99/yr' },
   EUR: { amount: 19.99, symbol: '€', label: '€19.99/yr' },
   GBP: { amount: 17.99, symbol: '£', label: '£17.99/yr' },

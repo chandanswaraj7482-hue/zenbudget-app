@@ -212,6 +212,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       }
       
       if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user) {
+        localStorage.setItem('zb_oauth_just_completed', 'true');
         setUserId(session.user.id);
         if (session.user.email) {
           localStorage.setItem('zb_user_email', session.user.email);
@@ -1235,9 +1236,70 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         gap: '20px'
       }}>
       {isLoading && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', margin: '20px 0' }}>
-          <Loader2 size={36} className="animate-spin" style={{ color: 'var(--primary)' }} />
-          <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Securing access...</span>
+        <div
+          className="glass-panel"
+          style={{
+            width: '100%',
+            maxWidth: '360px',
+            padding: '40px 24px',
+            borderRadius: '28px',
+            border: '1.5px solid rgba(16, 185, 129, 0.35)',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.6), 0 0 40px rgba(16, 185, 129, 0.15)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center',
+            gap: '16px'
+          }}
+        >
+          {/* Glowing Animated App Icon */}
+          <div style={{
+            width: '74px',
+            height: '74px',
+            borderRadius: '24px',
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(6, 182, 212, 0.15) 100%)',
+            border: '1.5px solid rgba(16, 185, 129, 0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 0 28px rgba(16, 185, 129, 0.35)',
+            animation: 'pulse 2s infinite ease-in-out'
+          }}>
+            <img src="/favicon.png?v=10" alt="ZenBudget" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
+          </div>
+
+          <div>
+            <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 6px 0', letterSpacing: '-0.02em' }}>
+              Authenticating Session
+            </h3>
+            <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', margin: 0 }}>
+              Verifying your encrypted financial vault...
+            </p>
+          </div>
+
+          {/* Smooth Shimmering Progress Bar */}
+          <div style={{
+            width: '100%',
+            height: '4px',
+            background: 'rgba(255, 255, 255, 0.08)',
+            borderRadius: '999px',
+            overflow: 'hidden',
+            marginTop: '8px'
+          }}>
+            <div style={{
+              width: '60%',
+              height: '100%',
+              background: 'linear-gradient(90deg, #10b981, #06b6d4, #10b981)',
+              borderRadius: '999px',
+              animation: 'shimmer 1.5s infinite linear',
+              backgroundSize: '200% 100%'
+            }} />
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#10b981', fontWeight: 700, marginTop: '4px' }}>
+            <Loader2 size={13} className="animate-spin" />
+            <span>Connecting securely via 256-bit SSL</span>
+          </div>
         </div>
       )}
 

@@ -49,6 +49,11 @@
             android:grantUriPermissions="true">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" />
         </provider>
+
+        <!-- Google AdMob Mobile Ads SDK Application ID -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-4092533420634757~2332723631" />
     </application>
 
     <!-- Queries for Inter-app UPI Deep Link Communication -->

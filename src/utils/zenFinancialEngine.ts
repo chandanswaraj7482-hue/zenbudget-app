@@ -745,8 +745,8 @@ export function resolveUserFinancialQuery(
     const responseText = isFormalEnglish
       ? `💎 **ZenBudget Plans & Pricing** 👑\n\n` +
         `• 🌟 **Free Forever Plan**: 100% Free with partner ads, unlimited expense tracking, 2 category limits & Zen Arcade!\n` +
-        `• 💳 **Pro Monthly Plan**: **₹99 / month** (100% Ad-Free, cancel anytime)\n` +
-        `• 🏆 **Pro Annual Plan**: **₹799 / year** *(Save >33%! Only ~₹66/mo, Most Popular!)*\n` +
+        `• 💳 **Pro Monthly Plan**: **₹149 / month** (100% Ad-Free, cancel anytime)\n` +
+        `• 🏆 **Pro Annual Plan**: **₹1,499 / year** *(Save 16%! Only ~₹125/mo, Most Popular!)*\n` +
         `• 👑 **Lifetime VIP Pass**: **₹2,499** one-time payment for permanent VIP access!\n` +
         `• 🎁 **Referral Reward**: Invite 10 friends to get **1 Month Premium 100% FREE**!\n\n` +
         `✨ **What Premium Unlocks**:\n` +
@@ -759,8 +759,8 @@ export function resolveUserFinancialQuery(
         `👉 Tap the **"👑 Upgrade to Premium"** button to upgrade instantly via Google Play or UPI!`
       : `💎 **ZenBudget Pricing & Plans Details** 👑\n\n` +
         `• 🌟 **Free Forever Plan**: 100% Free forever (Ad-supported, unlimited daily transactions, 2 category limits & Arcade)!\n` +
-        `• 💳 **Pro Monthly Plan**: **₹99 / mahina** (100% Ad-Free, cancel anytime)\n` +
-        `• 🏆 **Pro Annual Plan**: **₹799 / saal** *(33%+ savings, sirf ~₹66/mahina! Subse Popular)*\n` +
+        `• 💳 **Pro Monthly Plan**: **₹149 / mahina** (100% Ad-Free, cancel anytime)\n` +
+        `• 🏆 **Pro Annual Plan**: **₹1,499 / saal** *(16%+ savings, sirf ~₹125/mahina! Subse Popular)*\n` +
         `• 👑 **Pro Lifetime Access**: **₹2,499** (Ek baar payment, lifetime ke liye VIP access!)\n` +
         `• 🎁 **Free Referral Bonus**: 10 dosto ko invite karein aur **1 Month Premium FREE** paayein!\n\n` +
         `✨ **Premium Buy Karne Ke Benefits**:\n` +
