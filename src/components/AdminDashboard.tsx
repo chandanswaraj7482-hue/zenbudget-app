@@ -412,8 +412,8 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   const [socialLinks, setSocialLinks] = useState<{ platform: string; url: string; icon: string; is_active: boolean }[]>([
     { platform: 'YouTube', icon: '▶️', url: 'https://www.youtube.com/channel/UCa2ewl3C6Q3qGTXjbAMeAtA', is_active: true },
     { platform: 'TikTok', icon: '🎵', url: 'https://www.tiktok.com/@zenbudget_tracker?lang=en-GB', is_active: true },
-    { platform: 'Instagram', icon: '📸', url: 'https://www.instagram.com/zenbudget_tracker/', is_active: true },
-    { platform: 'Facebook', icon: '👥', url: 'https://www.facebook.com/people/ZenBudget/61592667931013/', is_active: true },
+    { platform: 'Instagram', icon: '📸', url: 'https://www.instagram.com/somethinglabs.in/', is_active: true },
+    { platform: 'Facebook', icon: '👥', url: 'https://www.facebook.com/somethinglabs.in', is_active: true },
     { platform: 'LinkedIn', icon: '💼', url: '', is_active: true },
     { platform: 'X', icon: '𝕏', url: 'https://twitter.com/ZenBudgetApp', is_active: true }
   ]);

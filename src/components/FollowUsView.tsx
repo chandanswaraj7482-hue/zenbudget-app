@@ -24,8 +24,8 @@ export const FollowUsView: React.FC<FollowUsViewProps> = ({ onBack }) => {
   const defaultLinks: SocialLinkItem[] = [
     { platform: 'YouTube', handleName: 'Something Labs', icon: '▶️', url: 'https://www.youtube.com/channel/UCa2ewl3C6Q3qGTXjbAMeAtA', color: '#ff0000', is_active: true },
     { platform: 'TikTok', handleName: 'Something Labs', icon: '🎵', url: 'https://www.tiktok.com/@zenbudget_tracker?lang=en-GB', color: '#00f2fe', is_active: true },
-    { platform: 'Instagram', handleName: 'Something Labs', icon: '📸', url: 'https://www.instagram.com/zenbudget_tracker/', color: '#e1306c', is_active: true },
-    { platform: 'Facebook', handleName: 'Something Labs', icon: '👥', url: 'https://www.facebook.com/people/ZenBudget/61592667931013/', color: '#1877f2', is_active: true },
+    { platform: 'Instagram', handleName: 'Something Labs', icon: '📸', url: 'https://www.instagram.com/somethinglabs.in/', color: '#e1306c', is_active: true },
+    { platform: 'Facebook', handleName: 'Something Labs', icon: '👥', url: 'https://www.facebook.com/somethinglabs.in', color: '#1877f2', is_active: true },
     { platform: 'LinkedIn', handleName: 'Something Labs', icon: '💼', url: '', color: '#0a66c2', is_active: true },
     { platform: 'X', handleName: 'Something Labs', icon: '𝕏', url: 'https://twitter.com/ZenBudgetApp', color: '#ffffff', is_active: true }
   ];

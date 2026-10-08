@@ -79,15 +79,15 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
       } else {
         // Fallback to default links
         setSocialLinks([
-          { platform: 'Instagram', icon: '📸', url: 'https://www.instagram.com/zenbudget_tracker/', color: '#e1306c', is_active: true },
-          { platform: 'Facebook', icon: '👥', url: 'https://www.facebook.com/people/ZenBudget/61592667931013/', color: '#1877f2', is_active: true },
+          { platform: 'Instagram', icon: '📸', url: 'https://www.instagram.com/somethinglabs.in/', color: '#e1306c', is_active: true },
+          { platform: 'Facebook', icon: '👥', url: 'https://www.facebook.com/somethinglabs.in', color: '#1877f2', is_active: true },
           { platform: 'YouTube', icon: '▶️', url: 'https://www.youtube.com/channel/UCa2ewl3C6Q3qGTXjbAMeAtA', color: '#ff0000', is_active: true },
         ]);
       }
     }).catch(() => {
       setSocialLinks([
-        { platform: 'Instagram', icon: '📸', url: 'https://www.instagram.com/zenbudget_tracker/', color: '#e1306c', is_active: true },
-        { platform: 'Facebook', icon: '👥', url: 'https://www.facebook.com/people/ZenBudget/61592667931013/', color: '#1877f2', is_active: true },
+        { platform: 'Instagram', icon: '📸', url: 'https://www.instagram.com/somethinglabs.in/', color: '#e1306c', is_active: true },
+        { platform: 'Facebook', icon: '👥', url: 'https://www.facebook.com/somethinglabs.in', color: '#1877f2', is_active: true },
         { platform: 'YouTube', icon: '▶️', url: 'https://www.youtube.com/channel/UCa2ewl3C6Q3qGTXjbAMeAtA', color: '#ff0000', is_active: true },
       ]);
     });

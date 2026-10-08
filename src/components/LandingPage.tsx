@@ -5349,10 +5349,10 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             {/* Official App Social Media Handles */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
               <a
-                href="https://www.instagram.com/zenbudget_tracker/"
+                href="https://www.instagram.com/somethinglabs.in/"
                 target="_blank"
                 rel="noopener noreferrer"
-                title="Instagram (@zenbudget_tracker)"
+                title="Instagram (@somethinglabs.in)"
                 style={{
                   width: '42px',
                   height: '42px',
@@ -5371,10 +5371,10 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 <InstagramIcon size={21} />
               </a>
               <a
-                href="https://www.facebook.com/people/ZenBudget/61592667931013/"
+                href="https://www.facebook.com/somethinglabs.in"
                 target="_blank"
                 rel="noopener noreferrer"
-                title="Facebook (ZenBudget)"
+                title="Facebook (Something Labs)"
                 style={{
                   width: '42px',
                   height: '42px',
@@ -5541,14 +5541,14 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               },
               {
                 platform: 'Instagram',
-                handle: '@zenbudget_tracker',
-                url: 'https://www.instagram.com/zenbudget_tracker/',
+                handle: '@somethinglabs.in',
+                url: 'https://www.instagram.com/somethinglabs.in/',
                 color: '#e1306c'
               },
               {
                 platform: 'Facebook',
-                handle: '@ZenBudget',
-                url: 'https://www.facebook.com/people/ZenBudget/61592667931013/',
+                handle: '@somethinglabs.in',
+                url: 'https://www.facebook.com/somethinglabs.in',
                 color: '#1877f2'
               }
             ].map((social) => (
