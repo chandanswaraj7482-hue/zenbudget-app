@@ -1832,31 +1832,6 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             gap: '0px'
           }}
         >
-          {onBackToLanding && (
-            <button
-              type="button"
-              onClick={onBackToLanding}
-              style={{
-                alignSelf: 'flex-start',
-                marginBottom: '16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                background: 'rgba(255, 255, 255, 0.06)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                color: 'var(--text-secondary)',
-                padding: '6px 14px',
-                borderRadius: '100px',
-                fontSize: '12px',
-                fontWeight: 700,
-                cursor: 'pointer'
-              }}
-            >
-              <Globe size={14} />
-              <span>Website Home</span>
-            </button>
-          )}
-
           {/* ── Logo & Branding ── */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '8px' }}>
             <div style={{

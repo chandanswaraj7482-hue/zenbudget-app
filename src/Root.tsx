@@ -55,7 +55,7 @@ export default function Root() {
                     (typeof window !== 'undefined' && (window.location.search.includes('shared_receipt=') || window.location.search.includes('pay_vpa=')));
 
   if (isAppMode) {
-    return <App onBackToLanding={handleBackToLanding} />;
+    return <App onBackToLanding={Capacitor.isNativePlatform() ? undefined : handleBackToLanding} />;
   }
 
   // Handle SEO-friendly paths (normalize trailing slashes)
