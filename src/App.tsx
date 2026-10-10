@@ -473,80 +473,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     };
   }, []);
 
-  // ─── Version Check & Update Popup (Remote Supabase & local version.json) ───
-  useEffect(() => {
-    // Only check and show APK update popup on installed Native Mobile APK (skip Web browsers)
-    if (!Capacitor.isNativePlatform()) return;
 
-    const APP_VERSION_CODE = 1; // Current APK version (v1.0.0) — bump version.json or app_updates table in Supabase
-    const checkForUpdates = async () => {
-      try {
-        let remoteData: any = null;
-        try {
-          const { data: dbUpdate } = await supabase
-            .from('app_updates')
-            .select('*')
-            .order('version_code', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-          if (dbUpdate) remoteData = dbUpdate;
-        } catch (e) {}
-
-        if (!remoteData) {
-          const res = await fetch('/version.json?t=' + Date.now());
-          if (res.ok) remoteData = await res.json();
-        }
-
-        if (!remoteData) return;
-
-        const serverVersionCode: number = remoteData.version_code || remoteData.versionCode || 1;
-        const serverVersion: string = remoteData.version || '1.0.0';
-        const apkUrl: string = remoteData.apk_url || remoteData.apkUrl || 'https://zenbudget-tracker.vercel.app/zenbudget.apk';
-        const releaseNotes: string = remoteData.release_notes || remoteData.releaseNotes || '';
-        const isForce: boolean = remoteData.is_force_update || remoteData.forceUpdate || false;
-
-        // Check if user already dismissed this version
-        const dismissedVersion = localStorage.getItem('zb_last_update_dismissed_version');
-        if (!isForce && dismissedVersion === serverVersion) return;
-
-        if (serverVersionCode > APP_VERSION_CODE) {
-          setUpdateVersion(serverVersion);
-          setUpdateUrl(apkUrl);
-          setUpdateReleaseNotes(releaseNotes);
-          setForceUpdate(isForce);
-          setShowUpdatePopup(true);
-
-          // Send local notification on native APK
-          if (Capacitor.isNativePlatform()) {
-            try {
-              const { LocalNotifications } = await import('@capacitor/local-notifications');
-              await LocalNotifications.schedule({
-                notifications: [{
-                  id: 101,
-                  title: '🚀 ZenBudget Update Available!',
-                  body: `v${serverVersion} is ready — ${releaseNotes.split('\n')[0]}`,
-                  schedule: { at: new Date(Date.now() + 1000) },
-                  smallIcon: 'ic_stat_icon',
-                  iconColor: '#10b981',
-                  sound: undefined,
-                  attachments: undefined,
-                  actionTypeId: '',
-                  extra: null
-                }]
-              });
-            } catch (e) {
-              console.warn('ZenBudget: Could not send update notification:', e);
-            }
-          }
-        }
-      } catch (e) {
-        console.warn('ZenBudget: Update check failed:', e);
-      }
-    };
-    // Check on startup after 3 seconds
-    const timer = setTimeout(checkForUpdates, 3000);
-    return () => clearTimeout(timer);
-  }, []);
 
 
 
@@ -1496,47 +1423,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       processSharedPayload(pendingIntent);
     }
 
-    // Background update checker from Supabase app_versions
-    const checkForUpdates = async () => {
-      // ONLY trigger update popup inside installed mobile APK devices.
-      // Web browser auto-updates on deployment, so skip Web!
-      if (!Capacitor.isNativePlatform()) return;
 
-      const CURRENT_VERSION_CODE = 1; // Bump this when releasing a new APK
-
-      try {
-        const { data } = await supabase
-          .from('app_versions')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (!data) return; // No data in table — don't show popup
-
-        const serverVersionCode: number = data?.version_code || 1;
-        const latestVersion: string = data?.latest_version || '1.0.0';
-        const downloadUrl: string = data?.update_url || 'https://zenbudget-tracker.vercel.app/zenbudget.apk';
-        const isForceUpdate: boolean = !!data?.force_update;
-        const releaseNotes: string = data?.release_notes || 'Bug fixes & new features!';
-
-        // Only show popup if server has a NEWER version than installed APK
-        if (serverVersionCode <= CURRENT_VERSION_CODE) return;
-
-        // Check if user already dismissed this exact version
-        const lastDismissedVersion = localStorage.getItem('zb_last_update_dismissed_version');
-        if (!isForceUpdate && lastDismissedVersion === latestVersion) return;
-
-        setUpdateVersion(latestVersion);
-        setUpdateUrl(downloadUrl);
-        setUpdateReleaseNotes(releaseNotes);
-        if (isForceUpdate) setForceUpdate(true);
-        setShowUpdatePopup(true);
-      } catch (err) {
-        console.warn('ZenBudget: Version check failed:', err);
-      }
-    };
-    checkForUpdates();
 
     const handleToastAlert = (e: any) => {
       const msg = e.detail?.message || 'Notification';
@@ -5295,80 +5182,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         />
       )}
 
-      {/* APK Update Popup */}
-      {showUpdatePopup && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
-          <div style={{ background: 'linear-gradient(180deg, rgba(20,20,35,0.98) 0%, #09090f 100%)', border: forceUpdate ? '1px solid rgba(239,68,68,0.4)' : '1px solid rgba(34,197,94,0.3)', borderRadius: '28px', padding: '28px', maxWidth: '340px', width: '100%', textAlign: 'center', boxShadow: forceUpdate ? '0 0 60px rgba(239,68,68,0.2)' : '0 0 60px rgba(34,197,94,0.15)' }}>
-            <div style={{ fontSize: '48px', marginBottom: '12px' }}>{forceUpdate ? '⚠️' : '🚀'}</div>
-            <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#fff', marginBottom: '6px' }}>
-              {forceUpdate ? 'Critical Update Required!' : 'Update Available!'}
-            </h3>
-            <p style={{ fontSize: '13px', color: 'var(--primary)', fontWeight: 700, marginBottom: '8px' }}>ZenBudget v{updateVersion}</p>
-            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '20px' }}>
-              {forceUpdate 
-                ? 'A critical update is required to continue using ZenBudget. Please download the latest version.'
-                : 'A new version is ready with bug fixes and new features. Update now for the best experience.'}
-            </p>
-            {updateReleaseNotes && (
-              <div style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: '14px',
-                padding: '12px 14px',
-                fontSize: '12px',
-                color: 'var(--text-secondary)',
-                textAlign: 'left',
-                marginBottom: '20px',
-                maxHeight: '120px',
-                overflowY: 'auto',
-                lineHeight: 1.5
-              }}>
-                <div style={{ fontWeight: 800, color: '#fff', marginBottom: '4px' }}>What's New:</div>
-                <div style={{ whiteSpace: 'pre-line' }}>{updateReleaseNotes}</div>
-              </div>
-            )}
-            <div style={{ display: 'flex', gap: '12px' }}>
-              {!forceUpdate && (
-                <button
-                  onClick={() => {
-                    localStorage.setItem('zb_last_update_dismissed_version', updateVersion);
-                    setShowUpdatePopup(false);
-                  }}
-                  style={{ flex: 1, padding: '12px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
-                >
-                  Later
-                </button>
-              )}
-              <button
-                onClick={async () => {
-                  let fullUrl = updateUrl || 'https://zenbudget-tracker.vercel.app/zenbudget.apk';
-                  if (!fullUrl.startsWith('http')) {
-                    fullUrl = `https://zenbudget-tracker.vercel.app${fullUrl.startsWith('/') ? '' : '/'}${fullUrl}`;
-                  }
 
-                  try {
-                    if (Capacitor.isNativePlatform()) {
-                      await Browser.open({ url: fullUrl });
-                    } else {
-                      window.open(fullUrl, '_blank');
-                    }
-                  } catch (err) {
-                    console.warn('Browser open fallback:', err);
-                    window.location.href = fullUrl;
-                  }
-
-                  if (!forceUpdate) {
-                    setShowUpdatePopup(false);
-                  }
-                }}
-                style={{ flex: 2, padding: '12px', borderRadius: '14px', border: 'none', background: 'linear-gradient(to right, var(--primary), var(--secondary))', color: '#000', fontSize: '13px', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-              >
-                Update Now ⬇️
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Admin Dashboard */}
       {isAdminModalOpen && (

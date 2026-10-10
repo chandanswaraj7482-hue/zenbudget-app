@@ -764,15 +764,15 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
     }
   }, [step, biometricsAvailable, dbProfile]);
 
-  const [agreedTerms, setAgreedTerms] = useState(false);
+  const [agreedTerms, setAgreedTerms] = useState(true);
 
   const getPasswordStrength = (pass: string) => {
     if (!pass) return { score: 0, label: '', color: '' };
-    if (pass.length < 6) return { score: 1, label: 'Weak 🔴 (min 6 chars)', color: '#ef4444' };
+    if (pass.length < 6) return { score: 1, label: 'Min 6 chars 🔴', color: '#ef4444' };
     const hasNum = /\d/.test(pass);
     const hasSpecial = /[^A-Za-z0-9]/.test(pass);
     if (pass.length >= 8 && (hasNum || hasSpecial)) {
-      return { score: 3, label: 'Strong 💪', color: '#16a34a' };
+      return { score: 3, label: 'Strong 💪', color: '#10b981' };
     }
     return { score: 2, label: 'Good 🟡', color: '#f59e0b' };
   };
@@ -784,16 +784,12 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       return;
     }
     if (!agreedTerms) {
-      setErrorMsg('Please accept the Terms & Conditions & Privacy Policy to proceed.');
+      setErrorMsg('Please accept the Terms & Privacy Policy to proceed.');
       return;
     }
     if (authMode === 'signup') {
       if (password.length < 6) {
         setErrorMsg('Password must be at least 6 characters long.');
-        return;
-      }
-      if (!/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/\d/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
-        setErrorMsg('Password must contain at least one lowercase letter, one uppercase letter, one digit, and one symbol.');
         return;
       }
     }
@@ -1303,118 +1299,156 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           className="glass-panel"
           style={{
             width: '100%',
-            maxWidth: '360px',
+            maxWidth: '380px',
             padding: '32px 24px 24px',
-            borderRadius: '28px',
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+            borderRadius: '26px',
+            background: 'var(--bg-card, rgba(17, 24, 39, 0.92))',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            boxShadow: '0 24px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.04)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0px'
+            boxSizing: 'border-box'
           }}
         >
-          {/* ── Logo & Branding ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '28px' }}>
+          {/* ── Logo & Header ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '22px' }}>
             <div style={{
-              width: '72px', height: '72px', borderRadius: '22px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: '14px', overflow: 'hidden'
+              width: '58px',
+              height: '58px',
+              borderRadius: '18px',
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(6, 182, 212, 0.15) 100%)',
+              border: '1px solid rgba(16, 185, 129, 0.35)',
+              boxShadow: '0 8px 24px rgba(16, 185, 129, 0.25)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '12px',
+              overflow: 'hidden'
             }}>
-              <img src="/favicon.png?v=10" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src="/favicon.png?v=10" alt="ZenBudget" style={{ width: '38px', height: '38px', objectFit: 'contain' }} />
             </div>
-            <h1 style={{ fontSize: '30px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
-              <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
+
+            <h1 style={{
+              fontSize: '22px',
+              fontWeight: 800,
+              letterSpacing: '-0.02em',
+              margin: '0 0 5px 0',
+              color: 'var(--text-primary, #ffffff)',
+              fontFamily: "'Manrope', sans-serif"
+            }}>
+              {authMode === 'login' ? 'Welcome Back' : 'Create Free Account'}
             </h1>
-            <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', margin: 0, fontWeight: 700 }}>
-              Calm Your Money
+            <p style={{
+              fontSize: '12.5px',
+              color: 'var(--text-secondary, #94a3b8)',
+              margin: 0,
+              lineHeight: 1.4
+            }}>
+              {authMode === 'login' ? 'Sign in to access your financial vault' : 'Start tracking expenses with calm & clarity'}
             </p>
           </div>
 
-          {/* ── Login / Sign Up Tab ── */}
-          <div style={{
-            display: 'flex', background: 'var(--bg-input)', padding: '4px',
-            borderRadius: '14px', border: '1px solid var(--border-input)', marginBottom: '24px'
-          }}>
-            <button type="button" onClick={() => { setAuthMode('login'); setErrorMsg(''); }} style={{
-              flex: 1, padding: '10px', borderRadius: '10px', border: 'none', cursor: 'pointer',
-              fontSize: '13px', fontWeight: 800,
-              background: authMode === 'login' ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'transparent',
-              color: authMode === 'login' ? '#ffffff' : 'var(--text-secondary)',
-              boxShadow: authMode === 'login' ? '0 4px 12px rgba(34,197,94,0.35)' : 'none',
-              transition: 'all 0.2s ease'
-            }}>Login</button>
-            <button type="button" onClick={() => { setAuthMode('signup'); setErrorMsg(''); }} style={{
-              flex: 1, padding: '10px', borderRadius: '10px', border: 'none', cursor: 'pointer',
-              fontSize: '13px', fontWeight: 800,
-              background: authMode === 'signup' ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'transparent',
-              color: authMode === 'signup' ? '#ffffff' : 'var(--text-secondary)',
-              boxShadow: authMode === 'signup' ? '0 4px 12px rgba(34,197,94,0.35)' : 'none',
-              transition: 'all 0.2s ease'
-            }}>Sign Up</button>
-          </div>
-
-          {/* ── Social Login Buttons ── */}
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-            <button type="button" onClick={() => handleSocialLogin('google')} style={{
-              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
-              padding: '11px 8px', borderRadius: '12px', border: '1px solid var(--border-input)',
-              background: 'var(--bg-input)', color: 'var(--text-primary)',
-              fontSize: '12px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s ease'
-            }}>
-              <svg viewBox="0 0 24 24" width="15" height="15"><path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.62 14.98 1 12 1 7.35 1 3.37 3.65 1.42 7.54l3.86 3C6.26 7.56 8.9 5.04 12 5.04z"/><path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.44h6.44c-.28 1.48-1.12 2.74-2.38 3.58l3.69 2.87c2.16-1.99 3.74-4.92 3.74-8.55z"/><path fill="#FBBC05" d="M5.28 14.54c-.24-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29L1.42 6.96C.52 8.76 0 10.78 0 12.92s.52 4.16 1.42 5.96l3.86-3.34z"/><path fill="#34A853" d="M12 22.88c3.24 0 5.97-1.07 7.96-2.91l-3.69-2.87c-1.02.68-2.33 1.09-4.27 1.09-3.1 0-5.74-2.52-6.68-5.5l-3.86 3C3.37 20.23 7.35 22.88 12 22.88z"/></svg>
-              Google
-            </button>
-            <button type="button" onClick={() => handleSocialLogin('apple')} style={{
-              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
-              padding: '11px 8px', borderRadius: '12px', border: '1px solid var(--border-input)',
-              background: 'var(--bg-input)', color: 'var(--text-primary)',
-              fontSize: '12px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s ease'
-            }}>
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.21.67-2.93 1.49-.62.69-1.16 1.84-1.01 2.96 1.12.09 2.27-.58 2.95-1.39"/></svg>
-              Apple
-            </button>
-          </div>
+          {/* ── 1-Tap Google Sign-In (High-Conversion, Clean) ── */}
+          <button
+            type="button"
+            onClick={() => handleSocialLogin('google')}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              padding: '12px 16px',
+              borderRadius: '14px',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              background: 'rgba(255, 255, 255, 0.06)',
+              color: 'var(--text-primary, #ffffff)',
+              fontSize: '13px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxSizing: 'border-box'
+            }}
+          >
+            <svg viewBox="0 0 24 24" width="18" height="18">
+              <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.62 14.98 1 12 1 7.35 1 3.37 3.65 1.42 7.54l3.86 3C6.26 7.56 8.9 5.04 12 5.04z"/>
+              <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.44h6.44c-.28 1.48-1.12 2.74-2.38 3.58l3.69 2.87c2.16-1.99 3.74-4.92 3.74-8.55z"/>
+              <path fill="#FBBC05" d="M5.28 14.54c-.24-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29L1.42 6.96C.52 8.76 0 10.78 0 12.92s.52 4.16 1.42 5.96l3.86-3.34z"/>
+              <path fill="#34A853" d="M12 22.88c3.24 0 5.97-1.07 7.96-2.91l-3.69-2.87c-1.02.68-2.33 1.09-4.27 1.09-3.1 0-5.74-2.52-6.68-5.5l-3.86 3C3.37 20.23 7.35 22.88 12 22.88z"/>
+            </svg>
+            <span>Continue with Google</span>
+          </button>
 
           {/* ── Divider ── */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-            <div style={{ flex: 1, height: '1px', background: 'var(--border-input)' }} />
-            <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>OR WITH EMAIL</span>
-            <div style={{ flex: 1, height: '1px', background: 'var(--border-input)' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '18px 0' }}>
+            <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.08)' }} />
+            <span style={{ fontSize: '10.5px', color: 'var(--text-secondary, #64748b)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              or with email
+            </span>
+            <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.08)' }} />
           </div>
 
           {/* ── Form ── */}
-          <form onSubmit={handleAuthSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <form onSubmit={handleAuthSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
             {authMode === 'signup' && (
               <>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Full Name</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '10.5px', fontWeight: 800, color: 'var(--text-secondary, #94a3b8)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Full Name</label>
                   <div style={{ position: 'relative' }}>
-                    <User size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-                    <input type="text" required value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Your full name" className="glass-input" style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px' }} />
+                    <User size={15} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary, #94a3b8)' }} />
+                    <input
+                      type="text"
+                      required
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="e.g. Rahul Sharma"
+                      className="glass-input"
+                      style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px', width: '100%', boxSizing: 'border-box' }}
+                    />
                   </div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Referral Code <span style={{ color: 'var(--text-muted)', textTransform: 'none', fontWeight: 600 }}>(optional)</span></label>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '10.5px', fontWeight: 800, color: 'var(--text-secondary, #94a3b8)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Referral Code <span style={{ color: 'var(--text-secondary, #64748b)', textTransform: 'none', fontWeight: 500 }}>(optional)</span>
+                  </label>
                   <div style={{ position: 'relative' }}>
-                    <Gift size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-                    <input type="text" value={referralCodeInput} onChange={(e) => setReferralCodeInput(e.target.value.toUpperCase())} placeholder="ZB-XXXX-XXXX" className="glass-input" style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px', textTransform: 'uppercase' }} />
+                    <Gift size={15} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary, #94a3b8)' }} />
+                    <input
+                      type="text"
+                      value={referralCodeInput}
+                      onChange={(e) => setReferralCodeInput(e.target.value.toUpperCase())}
+                      placeholder="ZB-XXXX-XXXX"
+                      className="glass-input"
+                      style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px', textTransform: 'uppercase', width: '100%', boxSizing: 'border-box' }}
+                    />
                   </div>
                 </div>
               </>
             )}
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Email Address</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <label style={{ fontSize: '10.5px', fontWeight: 800, color: 'var(--text-secondary, #94a3b8)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Email Address</label>
               <div style={{ position: 'relative' }}>
-                <Mail size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@email.com" className="glass-input" style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px' }} />
+                <Mail size={15} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary, #94a3b8)' }} />
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@email.com"
+                  className="glass-input"
+                  style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px', width: '100%', boxSizing: 'border-box' }}
+                />
               </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Password</label>
+                <label style={{ fontSize: '10.5px', fontWeight: 800, color: 'var(--text-secondary, #94a3b8)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Password</label>
                 {authMode === 'signup' && password.length > 0 && (
                   <span style={{ fontSize: '10px', fontWeight: 800, color: getPasswordStrength(password).color }}>
                     {getPasswordStrength(password).label}
@@ -1422,205 +1456,144 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                 )}
               </div>
               <div style={{ position: 'relative' }}>
-                <KeyRound size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-                <input type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="glass-input" style={{ paddingLeft: '38px', paddingRight: '40px', fontSize: '13px', padding: '11px 40px 11px 38px', width: '100%', boxSizing: 'border-box' }} />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', padding: 0 }}>
+                <KeyRound size={15} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary, #94a3b8)' }} />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="glass-input"
+                  style={{ paddingLeft: '38px', paddingRight: '40px', fontSize: '13px', padding: '11px 40px 11px 38px', width: '100%', boxSizing: 'border-box' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-secondary, #94a3b8)', cursor: 'pointer', display: 'flex', padding: 0 }}
+                >
                   {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
             </div>
 
-            {/* Remember Me & Forgot Password */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>
-                <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '13px', height: '13px', margin: 0 }} />
-                Remember Me
-              </label>
-              <button type="button" onClick={async () => {
-                if (!email.trim()) { setErrorMsg('Please enter your email first.'); return; }
-                setIsLoading(true);
-                try {
-                  const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: window.location.origin });
-                  if (error) throw error;
-                  setSuccessMsg(`Reset link sent to ${email.trim()}!`);
-                  setErrorMsg('');
-                } catch (err: any) {
-                  setErrorMsg(err.message || 'Failed to send reset link.');
-                } finally { setIsLoading(false); }
-              }} style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: '11px' }}>
-                Forgot Password?
-              </button>
-            </div>
-
-            {/* Mandatory Terms & Conditions Checkbox */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 10px',
-              borderRadius: '10px',
-              background: 'var(--bg-input)',
-              border: '1px solid var(--border-input)',
-              marginTop: '4px'
-            }}>
-              <input
-                type="checkbox"
-                id="termsCheck"
-                checked={agreedTerms}
-                onChange={(e) => setAgreedTerms(e.target.checked)}
-                style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '15px', height: '15px', flexShrink: 0 }}
-              />
-              <label htmlFor="termsCheck" style={{ fontSize: '11px', color: 'var(--text-secondary)', cursor: 'pointer', lineHeight: 1.3, fontWeight: 600 }}>
-                I agree to the <a href="/terms.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', fontWeight: 800, textDecoration: 'none' }}>Terms of Service</a> & <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', fontWeight: 800, textDecoration: 'none' }}>Privacy Policy</a>
-              </label>
-            </div>
+            {/* Remember Me & Forgot Password (Only in Login mode) */}
+            {authMode === 'login' && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11.5px', marginTop: '2px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary, #94a3b8)', cursor: 'pointer', fontWeight: 600 }}>
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    style={{ accentColor: '#10b981', cursor: 'pointer', width: '13px', height: '13px', margin: 0 }}
+                  />
+                  Remember me
+                </label>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!email.trim()) { setErrorMsg('Please enter your email first to receive reset link.'); return; }
+                    setIsLoading(true);
+                    try {
+                      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: window.location.origin });
+                      if (error) throw error;
+                      setSuccessMsg(`Reset link sent to ${email.trim()}!`);
+                      setErrorMsg('');
+                    } catch (err: any) {
+                      setErrorMsg(err.message || 'Failed to send reset link.');
+                    } finally { setIsLoading(false); }
+                  }}
+                  style={{ background: 'none', border: 'none', color: '#10b981', fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: '11.5px' }}
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
 
             {successMsg && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#16a34a', fontSize: '12px', fontWeight: 700, background: 'rgba(34,197,94,0.12)', padding: '10px 14px', borderRadius: '12px', border: '1px solid rgba(34,197,94,0.3)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#10b981', fontSize: '12px', fontWeight: 700, background: 'rgba(16, 185, 129, 0.1)', padding: '10px 12px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
                 <CheckCircle size={15} style={{ flexShrink: 0 }} /> <span>{successMsg}</span>
               </div>
             )}
+
             {errorMsg && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--danger)', fontSize: '11px', background: 'var(--danger-glow)', padding: '9px 12px', borderRadius: '10px', border: '1px solid rgba(244,63,94,0.2)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '7px', color: '#f87171', fontSize: '11.5px', background: 'rgba(239, 68, 68, 0.1)', padding: '10px 12px', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.25)' }}>
                 <AlertCircle size={14} style={{ flexShrink: 0 }} /> <span>{errorMsg}</span>
               </div>
             )}
 
             {/* Submit Button */}
-            <button type="submit" style={{
-              padding: '13px', borderRadius: '14px', fontSize: '14px', fontWeight: 800, marginTop: '4px',
-              background: 'linear-gradient(135deg, #22c55e 0%, #06b6d4 100%)',
-              color: '#ffffff', border: 'none',
-              boxShadow: '0 6px 20px rgba(34, 197, 94, 0.35)',
-              cursor: 'pointer', transition: 'all 0.2s ease', letterSpacing: '0.01em',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
-            }}>
-              {authMode === 'login' ? '🔓 Login to ZenBudget' : '🚀 Create Account'}
+            <button
+              type="submit"
+              style={{
+                width: '100%',
+                padding: '13px 16px',
+                borderRadius: '14px',
+                fontSize: '14px',
+                fontWeight: 800,
+                marginTop: '6px',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: '#ffffff',
+                border: 'none',
+                boxShadow: '0 8px 24px rgba(16, 185, 129, 0.35)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxSizing: 'border-box'
+              }}
+            >
+              <span>{authMode === 'login' ? 'Sign In to ZenBudget' : 'Create Free Account'}</span>
+              <span style={{ fontSize: '15px' }}>→</span>
             </button>
           </form>
 
-          {/* ── Footer: Device-Aware App Download & Security ── */}
-          <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-input)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
-            <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '0.03em' }}>
-              🔒 256-bit Encrypted • Privacy First
-            </span>
-
-            {!Capacitor.isNativePlatform() && (
-              <div style={{ display: 'flex', gap: '10px', width: '100%', boxSizing: 'border-box' }}>
-                {detectedPlatform === 'apple' ? (
-                  <button
-                    type="button"
-                    onClick={() => setShowIOSInstructions(true)}
-                    style={{
-                      flex: '1 1 0%',
-                      height: '42px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '7px',
-                      padding: '11px 10px',
-                      borderRadius: '14px',
-                      border: '1px solid rgba(34, 197, 94, 0.25)',
-                      background: 'rgba(34, 197, 94, 0.06)',
-                      color: 'var(--primary)',
-                      fontSize: '12px',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    <Download size={14} />
-                    <span>Install iOS App</span>
-                  </button>
-                ) : (
-                  <>
-                    <a
-                      href={DISTRIBUTION_CONFIG.PLAY_STORE_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        flex: '1 1 0%',
-                        height: '42px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px',
-                        padding: '11px 8px',
-                        borderRadius: '14px',
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        background: 'rgba(0, 0, 0, 0.5)',
-                        color: '#ffffff',
-                        fontSize: '11.5px',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        textDecoration: 'none',
-                        transition: 'all 0.2s ease',
-                        boxSizing: 'border-box'
-                      }}
-                    >
-                      <GooglePlayIcon size={14} />
-                      <span>Google Play</span>
-                    </a>
-
-                    <a
-                      href="https://raw.githubusercontent.com/chandanswaraj7482-hue/zenbudget-app/main/public/zenbudget.apk"
-                      download="ZenBudget-v2.5.0-latest.apk"
-                      style={{
-                        flex: '1 1 0%',
-                        height: '42px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px',
-                        padding: '11px 8px',
-                        borderRadius: '14px',
-                        border: '1px solid rgba(34, 197, 94, 0.25)',
-                        background: 'rgba(34, 197, 94, 0.06)',
-                        color: 'var(--primary)',
-                        fontSize: '11.5px',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        textDecoration: 'none',
-                        transition: 'all 0.2s ease',
-                        boxSizing: 'border-box'
-                      }}
-                    >
-                      <Download size={14} />
-                      <span>Direct APK</span>
-                    </a>
-                  </>
-                )}
-
+          {/* ── Switcher: Login <-> Sign Up ── */}
+          <div style={{
+            marginTop: '18px',
+            paddingTop: '16px',
+            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            textAlign: 'center',
+            fontSize: '12.5px',
+            color: 'var(--text-secondary, #94a3b8)'
+          }}>
+            {authMode === 'login' ? (
+              <span>
+                Don't have an account?{' '}
                 <button
                   type="button"
-                  onClick={() => {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  style={{
-                    flex: '1 1 0%',
-                    height: '42px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '7px',
-                    padding: '11px 10px',
-                    borderRadius: '14px',
-                    border: '1px solid rgba(99, 102, 241, 0.25)',
-                    background: 'rgba(99, 102, 241, 0.06)',
-                    color: 'rgb(129, 140, 248)',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    boxSizing: 'border-box'
-                  }}
+                  onClick={() => { setAuthMode('signup'); setErrorMsg(''); setSuccessMsg(''); }}
+                  style={{ background: 'none', border: 'none', color: '#10b981', fontWeight: 800, cursor: 'pointer', padding: 0, fontSize: '12.5px' }}
                 >
-                  <span style={{ fontSize: '14px' }}>🌐</span>
-                  <span>Open Web App</span>
+                  Create one now
                 </button>
-              </div>
+              </span>
+            ) : (
+              <span>
+                Already have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => { setAuthMode('login'); setErrorMsg(''); setSuccessMsg(''); }}
+                  style={{ background: 'none', border: 'none', color: '#10b981', fontWeight: 800, cursor: 'pointer', padding: 0, fontSize: '12.5px' }}
+                >
+                  Sign in here
+                </button>
+              </span>
             )}
+          </div>
+
+          {/* ── Discrete Legal & Security Notice ── */}
+          <div style={{ marginTop: '14px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <span style={{ fontSize: '10px', color: 'var(--text-secondary, #64748b)', lineHeight: 1.4 }}>
+              By continuing, you agree to our{' '}
+              <a href="/terms.html" target="_blank" rel="noopener noreferrer" style={{ color: '#10b981', textDecoration: 'none', fontWeight: 600 }}>Terms</a>
+              {' '}&{' '}
+              <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style={{ color: '#10b981', textDecoration: 'none', fontWeight: 600 }}>Privacy Policy</a>
+            </span>
+            <span style={{ fontSize: '10px', color: 'var(--text-secondary, #64748b)', fontWeight: 600, letterSpacing: '0.02em' }}>
+              🔒 256-Bit Encrypted Vault • Zero Ads Tracker
+            </span>
           </div>
         </div>
       )}
