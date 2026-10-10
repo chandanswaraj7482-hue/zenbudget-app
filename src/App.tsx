@@ -1512,15 +1512,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       return false;
     }
 
-    // Any free/trial/other tier: strictly check trial duration
-    if (getRemainingDays() <= 0) return true;
-    if (!trialStartDate) return true;
-    const start = new Date(trialStartDate).getTime();
-    if (!isNaN(start)) {
-      const diffDays = (Date.now() - start) / (1000 * 60 * 60 * 24);
-      return diffDays >= 7;
-    }
-    return true;
+    // Free tier never expires - users have free tier features & 10 daily tx
+    return false;
   };
 
   const isTrialExpired = () => isSubscriptionExpired();
@@ -4161,10 +4154,10 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             )}
           </button>
 
-          {/* Premium / Trial Status Badge */}
+          {/* Premium / Upgrade Status Badge */}
           {isPremiumUser ? (
             <div style={{
-              height: '36px',
+              height: '34px',
               padding: '0 12px',
               borderRadius: '12px',
               background: 'linear-gradient(135deg, rgba(236,72,153,0.15) 0%, rgba(99,102,241,0.15) 100%)',
@@ -4177,32 +4170,32 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
               gap: '4px',
               boxShadow: '0 2px 6px rgba(236,72,153,0.08)'
             }}>
-              <Sparkles size={12} /> PREMIUM
+              <Sparkles size={12} /> PRO
             </div>
           ) : (
             <button
               onClick={() => {
-                setIsSubBlocker(isSubscriptionExpired());
+                setIsSubBlocker(false);
                 setIsSubModalOpen(true);
               }}
               style={{
-                height: '36px',
+                height: '34px',
                 padding: '0 12px',
                 borderRadius: '12px',
-                background: isTrialExpired() ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.1)',
-                border: isTrialExpired() ? '1px solid rgba(239,68,68,0.25)' : '1px solid rgba(34,197,94,0.25)',
-                color: isTrialExpired() ? '#ef4444' : 'var(--primary)',
+                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%)',
+                border: '1px solid rgba(245, 158, 11, 0.35)',
+                color: '#f59e0b',
                 fontSize: '11px',
                 fontWeight: 800,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '5px',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 6px rgba(245,158,11,0.1)',
                 transition: 'all 0.15s ease'
               }}
             >
-              <span>{isTrialExpired() ? '⚠️ Expired' : `⏳ ${getRemainingDays()}d left`}</span>
+              <span>👑 Upgrade</span>
             </button>
           )}
         </div>
