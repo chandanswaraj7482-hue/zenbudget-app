@@ -408,21 +408,6 @@ export const HelpModal: React.FC<HelpModalProps> = ({
   const handleSend = async (e?: React.FormEvent, customPrompt?: string) => {
     if (e) e.preventDefault();
 
-    if (!isPremiumUser && aiQueriesUsed >= 1) {
-      setShowAiAdModal(true);
-      return;
-    }
-
-    if (!isPremiumUser && aiQueriesUsed === 0 && !aiTrialUnlocked) {
-      setShowAiAdModal(true);
-      return;
-    }
-
-    if (!isPremiumUser && aiQueriesUsed === 0) {
-      setAiQueriesUsed(1);
-      localStorage.setItem('zb_ai_queries_used', '1');
-    }
-
     const rawText = (customPrompt || inputVal).trim();
     if (!rawText) return;
 
@@ -453,6 +438,15 @@ export const HelpModal: React.FC<HelpModalProps> = ({
         const ai = new GoogleGenAI({ apiKey });
 
         const systemInstruction = `You are Zen, an expert personal finance AI coach built into ZenBudget.
+USER SUBSCRIPTION STATUS: ${isPremiumUser ? '👑 ZENBUDGET PRO (VIP MEMBER)' : '🌿 FREE TIER USER (BASIC MODE)'}
+
+${!isPremiumUser ? `CRITICAL FREE TIER BEHAVIOR:
+- The user is on the FREE TIER. Provide a concise, clear, helpful BASIC financial reply (strictly 2 to 4 crisp sentences or short bullets).
+- Keep answers basic, direct, and easy to understand. Do NOT provide complex multi-year forensic projections or deep wealth modeling.
+- Conclude with a helpful short tip:
+"💡 *Tip: Upgrade to ZenBudget Pro for deep multi-year wealth projections, custom debt-free schedules, and priority 24/7 AI coaching!*"` : `PRO MEMBER PRIVILEGE:
+- Provide deep, comprehensive, elite personalized financial analysis, multi-step debt payoff models, category forecasting, and actionable wealth-building guidance.`}
+
 You MUST ALWAYS answer from verified, structured live user financial data provided below.
 
 CRITICAL FINANCIAL RULES:
@@ -609,7 +603,40 @@ ${JSON.stringify(structCtx, null, 2)}`;
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <HelpCircle size={18} style={{ color: 'var(--primary)' }} />
-            <h3 style={{ fontSize: '16px', fontWeight: 800 }}>Support & AI Assistant</h3>
+            <div>
+              <h3 style={{ fontSize: '15px', fontWeight: 800, margin: 0 }}>
+                {isPremiumUser ? '👑 Zen Pro AI Coach' : '🌿 Zen AI Coach'}
+              </h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                <span style={{
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  color: isPremiumUser ? '#34d399' : '#94a3b8',
+                  background: isPremiumUser ? 'rgba(52, 211, 153, 0.15)' : 'rgba(255, 255, 255, 0.08)',
+                  padding: '1px 6px',
+                  borderRadius: '4px'
+                }}>
+                  {isPremiumUser ? 'DEEP ANALYSIS' : 'BASIC MODE (FREE)'}
+                </span>
+                {!isPremiumUser && onOpenSubscriptionModal && (
+                  <button
+                    onClick={onOpenSubscriptionModal}
+                    style={{
+                      fontSize: '10px',
+                      fontWeight: 800,
+                      color: '#fbbf24',
+                      background: 'rgba(251, 191, 36, 0.15)',
+                      border: '1px solid rgba(251, 191, 36, 0.3)',
+                      padding: '1px 6px',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Unlock Pro ⚡
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
           <button 
             onClick={onClose}

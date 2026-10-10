@@ -99,7 +99,42 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   const [subscriptionTier, setSubscriptionTier] = useState<string>(() => {
     return localStorage.getItem('zb_subscription_tier') || 'trial';
   });
-  const isPremiumUser = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(subscriptionTier);
+  const [premiumExpiresAt, setPremiumExpiresAt] = useState<string | null>(() => {
+    return localStorage.getItem('zb_premium_expires_at') || null;
+  });
+
+  const isPremiumUser = (() => {
+    if (subscriptionTier === 'premium_lifetime') return true;
+    if (['premium', 'premium_monthly', 'premium_yearly'].includes(subscriptionTier)) {
+      if (premiumExpiresAt) {
+        const exp = new Date(premiumExpiresAt).getTime();
+        if (!isNaN(exp) && Date.now() > exp) return false;
+      }
+      return true;
+    }
+    return false;
+  })();
+
+  // Auto-demote expired Monthly/Yearly subscriptions back to Free tier
+  useEffect(() => {
+    if (['premium', 'premium_monthly', 'premium_yearly'].includes(subscriptionTier)) {
+      if (premiumExpiresAt) {
+        const exp = new Date(premiumExpiresAt).getTime();
+        if (!isNaN(exp) && Date.now() > exp) {
+          console.log('[Subscription] Monthly/Yearly plan has expired! Auto-shifting to Free tier.');
+          setSubscriptionTier('free');
+          localStorage.setItem('zb_subscription_tier', 'free');
+          const profId = localStorage.getItem('zb_profile_id');
+          if (profId) {
+            supabase.from('profiles').update({ subscription_tier: 'free' }).eq('id', profId).catch(() => {});
+          }
+        }
+      }
+    }
+  }, [subscriptionTier, premiumExpiresAt]);
+
+  const [showDailyLimitModal, setShowDailyLimitModal] = useState<boolean>(false);
+  const [isDailyAdLoading, setIsDailyAdLoading] = useState<boolean>(false);
 
   // Google AdMob: Show adaptive bottom banner for free users, hide for Pro / Lifetime users
   useEffect(() => {
@@ -237,9 +272,6 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   // Profile settings editor states
   const [userPin, setUserPin] = useState<string>(() => {
     return localStorage.getItem('zb_user_pin') || '0000';
-  });
-  const [premiumExpiresAt, setPremiumExpiresAt] = useState<string | null>(() => {
-    return localStorage.getItem('zb_premium_expires_at') || null;
   });
   const [referredBy, setReferredBy] = useState<string | null>(() => {
     return localStorage.getItem('zb_referred_by') || null;
@@ -2893,12 +2925,54 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     setEditingTransaction(null);
   };
 
+  const handleWatchDailyLimitAd = () => {
+    setIsDailyAdLoading(true);
+    const todayStr = new Date().toISOString().split('T')[0];
+    const bonusSlots = Number(localStorage.getItem(`zb_daily_tx_bonus_${todayStr}`) || 0);
+
+    if (Capacitor.isNativePlatform()) {
+      admobService.showRewardedAd(() => {
+        setIsDailyAdLoading(false);
+        const nextBonus = bonusSlots + 5;
+        localStorage.setItem(`zb_daily_tx_bonus_${todayStr}`, String(nextBonus));
+        triggerToast(`🎉 +5 Daily Transactions Unlocked! (Total: ${10 + nextBonus} today)`, 'success');
+        setShowDailyLimitModal(false);
+        setIsModalOpen(true);
+      }).catch(() => {
+        setIsDailyAdLoading(false);
+        triggerToast('Video ad could not load. Try again or upgrade to Pro.', 'warning');
+      });
+    } else {
+      setTimeout(() => {
+        setIsDailyAdLoading(false);
+        const nextBonus = bonusSlots + 5;
+        localStorage.setItem(`zb_daily_tx_bonus_${todayStr}`, String(nextBonus));
+        triggerToast(`🎉 +5 Daily Transactions Unlocked! (Total: ${10 + nextBonus} today)`, 'success');
+        setShowDailyLimitModal(false);
+        setIsModalOpen(true);
+      }, 1500);
+    }
+  };
+
   const handleSaveTransaction = async (txData: Omit<Transaction, 'id'> & { id?: string }): Promise<boolean> => {
     if (isSubscriptionExpired()) {
       setIsSubBlocker(true);
       setIsSubModalOpen(true);
       triggerToast('Free trial expired! Upgrade to Premium to log transactions.', 'warning');
       return false;
+    }
+
+    // 10 Daily Transactions Limit for Free Users (Watch Rewarded Ad to unlock +5)
+    if (!isPremiumUser && !txData.id) {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const todayTxCount = transactions.filter(t => t.date === todayStr).length;
+      const bonusSlots = Number(localStorage.getItem(`zb_daily_tx_bonus_${todayStr}`) || 0);
+      const maxAllowedToday = 10 + bonusSlots;
+      if (todayTxCount >= maxAllowedToday) {
+        setShowDailyLimitModal(true);
+        triggerToast(`🎯 Daily free limit reached (${todayTxCount}/${maxAllowedToday}). Watch ad for +5!`, 'warning');
+        return false;
+      }
     }
 
     // Always ensure amount is a whole number (no decimals stored)
@@ -4189,6 +4263,15 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             currencySymbol={currencySymbol}
             onAddTransactionClick={() => {
               if (checkExpiredGuard('log new transactions')) return;
+              if (!isPremiumUser) {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const todayTxCount = transactions.filter(t => t.date === todayStr).length;
+                const bonusSlots = Number(localStorage.getItem(`zb_daily_tx_bonus_${todayStr}`) || 0);
+                if (todayTxCount >= 10 + bonusSlots) {
+                  setShowDailyLimitModal(true);
+                  return;
+                }
+              }
               setEditingTransaction(null);
               setIsModalOpen(true);
             }}
@@ -5005,6 +5088,126 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           currency={currency}
           rates={rates}
         />
+      )}
+
+      {/* Daily Free Transactions Limit Modal */}
+      {showDailyLimitModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.85)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1200,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'var(--bg-card, #1e293b)',
+            border: '1px solid rgba(245, 158, 11, 0.4)',
+            borderRadius: '24px',
+            padding: '24px',
+            width: '100%',
+            maxWidth: '420px',
+            textAlign: 'center',
+            boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setShowDailyLimitModal(false)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#94a3b8',
+                cursor: 'pointer'
+              }}
+            >
+              ✕
+            </button>
+
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '20px',
+              background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.2))',
+              border: '1px solid rgba(245, 158, 11, 0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px',
+              fontSize: '28px'
+            }}>
+              🎯
+            </div>
+
+            <h3 style={{ fontSize: '19px', fontWeight: 800, margin: '0 0 8px', color: 'var(--text-primary)' }}>
+              Daily Free Limit Reached!
+            </h3>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: '0 0 20px' }}>
+              Free accounts can log up to <strong>10 transactions per day</strong>. Watch 1 quick video ad to unlock <strong style={{ color: '#10b981' }}>+5 extra transactions</strong> for today, or upgrade to Pro for 100% UNLIMITED daily logging!
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button
+                onClick={handleWatchDailyLimitAd}
+                disabled={isDailyAdLoading}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  borderRadius: '14px',
+                  background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                  border: 'none',
+                  color: '#ffffff',
+                  fontSize: '14px',
+                  fontWeight: 800,
+                  cursor: isDailyAdLoading ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 15px rgba(245, 158, 11, 0.35)',
+                  opacity: isDailyAdLoading ? 0.7 : 1
+                }}
+              >
+                🎬 {isDailyAdLoading ? 'Loading Video Ad...' : 'Watch Video Ad (+5 Transactions Today)'}
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowDailyLimitModal(false);
+                  setIsSubBlocker(false);
+                  setIsSubModalOpen(true);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '13px',
+                  borderRadius: '14px',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  border: 'none',
+                  color: '#ffffff',
+                  fontSize: '13px',
+                  fontWeight: 800,
+                  cursor: 'pointer'
+                }}
+              >
+                👑 Upgrade to Pro (Unlimited & 0 Ads)
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Scan & Pay Feature Unlock Modal Paywall */}

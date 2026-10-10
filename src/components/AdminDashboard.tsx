@@ -1873,6 +1873,71 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                                           </div>
                                         </div>
 
+                                        {/* Subscription Validity & Month-wise History in Admin Panel */}
+                                        {(() => {
+                                          const exp = selectedDetailUser.premium_expires_at ? new Date(selectedDetailUser.premium_expires_at) : null;
+                                          const isLifetime = selectedDetailUser.subscription_tier === 'premium_lifetime';
+                                          const isExpired = exp && Date.now() > exp.getTime();
+                                          const daysLeft = exp ? Math.ceil((exp.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
+                                          const userPayments = payments.filter(pay => pay.user_id === selectedDetailUser.id);
+
+                                          return (
+                                            <>
+                                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
+                                                <div style={{ padding: '12px', borderRadius: '12px', background: 'rgba(30,41,59,0.6)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                  <div style={{ color: '#94a3b8', fontSize: '0.75rem' }}>PLAN STATUS &amp; VALIDITY</div>
+                                                  <div style={{ fontWeight: 800, fontSize: '0.82rem', marginTop: '2px', color: isLifetime ? '#fbbf24' : isExpired ? '#f87171' : daysLeft !== null && daysLeft > 0 ? '#34d399' : '#94a3b8' }}>
+                                                    {isLifetime 
+                                                      ? '⚡ Lifetime (Never Expires)' 
+                                                      : isExpired 
+                                                        ? `❌ Expired (${exp?.toLocaleDateString()}) - Shifted to Free` 
+                                                        : daysLeft !== null && daysLeft > 0 
+                                                          ? `🟢 Active (${daysLeft}d left - until ${exp?.toLocaleDateString()})` 
+                                                          : '⚪ Free Tier'}
+                                                  </div>
+                                                </div>
+                                                <div style={{ padding: '12px', borderRadius: '12px', background: 'rgba(30,41,59,0.6)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                  <div style={{ color: '#94a3b8', fontSize: '0.75rem' }}>TOTAL PAID REVENUE</div>
+                                                  <div style={{ fontWeight: 800, color: '#10b981', fontSize: '0.95rem', marginTop: '2px' }}>
+                                                    ₹{userPayments.reduce((s, p) => s + (p.amount || 0), 0).toLocaleString()} INR ({userPayments.length} purchases)
+                                                  </div>
+                                                </div>
+                                              </div>
+
+                                              {/* User's Month-wise Subscription & Payment History */}
+                                              <div style={{ marginTop: '10px', padding: '12px', borderRadius: '12px', background: 'rgba(15, 23, 42, 0.7)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                                                <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#a5b4fc', marginBottom: '8px' }}>
+                                                  📜 Subscription History &amp; Monthly Activity ({userPayments.length})
+                                                </div>
+                                                {userPayments.length === 0 ? (
+                                                  <div style={{ fontSize: '0.75rem', color: '#64748b', fontStyle: 'italic' }}>
+                                                    No payments yet (User has used Free trial / Ad rewards).
+                                                  </div>
+                                                ) : (
+                                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '160px', overflowY: 'auto' }}>
+                                                    {userPayments.map((pay, i) => (
+                                                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', fontSize: '0.75rem' }}>
+                                                        <div>
+                                                          <div style={{ fontWeight: 700, color: '#fff' }}>
+                                                            {pay.plan_name || pay.tier || 'Monthly Plan'}
+                                                          </div>
+                                                          <div style={{ color: '#94a3b8', fontSize: '0.7rem' }}>
+                                                            {new Date(pay.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                          </div>
+                                                        </div>
+                                                        <div style={{ textAlign: 'right' }}>
+                                                          <div style={{ fontWeight: 800, color: '#34d399' }}>₹{pay.amount}</div>
+                                                          <div style={{ color: '#10b981', fontSize: '0.68rem', fontWeight: 700 }}>SUCCESS ✅</div>
+                                                        </div>
+                                                      </div>
+                                                    ))}
+                                                  </div>
+                                                )}
+                                              </div>
+                                            </>
+                                          );
+                                        })()}
+
                                         {/* Quick Action Buttons */}
                                         <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                           <div style={{ fontWeight: 700, color: '#e2e8f0', fontSize: '0.85rem' }}>Manage Subscription & Account Status</div>
