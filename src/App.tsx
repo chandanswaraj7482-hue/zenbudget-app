@@ -3406,12 +3406,34 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   };
 
   const handleExportCSV = async () => {
-    // Premium Feature Lock
-    if (!isPremiumUser) {
-      setIsSubBlocker(false);
-      setIsSubModalOpen(true);
-      triggerToast('Upgrade to Premium to export CSV report spreadsheets!', 'warning');
+    const exportsUsed = Number(localStorage.getItem('zb_csv_exports_used') || 0);
+    const exportBonus = Number(localStorage.getItem('zb_csv_export_bonus') || 0);
+
+    const hasAccess = isPremiumUser || exportsUsed === 0 || exportBonus > 0;
+
+    if (!hasAccess) {
+      if (Capacitor.isNativePlatform()) {
+        triggerToast('🎬 Watch a quick video ad to export your report for FREE!', 'info');
+        admobService.showRewardedAd(() => {
+          localStorage.setItem('zb_csv_export_bonus', '1');
+          triggerToast('🎉 1 Free CSV Export Unlocked!', 'success');
+          handleExportCSV();
+        });
+      } else {
+        setIsSubBlocker(false);
+        setIsSubModalOpen(true);
+        triggerToast('👑 1-Time Free Export Used! Upgrade to Pro for unlimited exports.', 'warning');
+      }
       return;
+    }
+
+    if (!isPremiumUser) {
+      if (exportsUsed === 0) {
+        localStorage.setItem('zb_csv_exports_used', '1');
+        triggerToast('🎉 1st Free CSV Export downloaded!', 'success');
+      } else if (exportBonus > 0) {
+        localStorage.setItem('zb_csv_export_bonus', String(exportBonus - 1));
+      }
     }
 
     const currentRate = rates[currency] || 1;

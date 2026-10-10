@@ -17,12 +17,15 @@ import {
   Lock,
   Clock,
   Briefcase,
-  Home
+  Home,
+  Play,
+  Sparkles
 } from 'lucide-react';
 import type { Transaction, CategoryType, Account } from '../types';
 import { EXPENSE_MOODS, INCOME_MOODS, normalizeMood } from '../types';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
+import { admobService } from '../services/admobService';
 import { checkImpulseLock, type ImpulseLockCheckResult } from './WishlistBlocker';
 
 interface TransactionModalProps {
@@ -212,9 +215,63 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     }
     setType('expense');
     setScanMessage({ text: `✅ Receipt scanned: ${parsed.title || 'Unknown'} — ${currencySymbol}${parsed.amount || ''}`, type: 'success' });
+
+    // Deduct free trial or bonus credit
+    const isPro = localStorage.getItem('zb_subscription_tier')?.startsWith('premium');
+    if (!isPro) {
+      if (receiptScansUsed === 0) {
+        setReceiptScansUsed(1);
+        localStorage.setItem('zb_receipt_scans_used', '1');
+      } else if (receiptBonusCredits > 0) {
+        const next = receiptBonusCredits - 1;
+        setReceiptBonusCredits(next);
+        localStorage.setItem('zb_receipt_bonus_credits', String(next));
+      }
+    }
+  };
+
+  const [receiptScansUsed, setReceiptScansUsed] = useState<number>(() => {
+    return Number(localStorage.getItem('zb_receipt_scans_used') || 0);
+  });
+  const [receiptBonusCredits, setReceiptBonusCredits] = useState<number>(() => {
+    return Number(localStorage.getItem('zb_receipt_bonus_credits') || 0);
+  });
+  const [showReceiptAdModal, setShowReceiptAdModal] = useState<boolean>(false);
+  const [isReceiptAdLoading, setIsReceiptAdLoading] = useState<boolean>(false);
+
+  const isProUser = localStorage.getItem('zb_subscription_tier')?.startsWith('premium');
+  const hasReceiptAccess = isProUser || receiptScansUsed === 0 || receiptBonusCredits > 0;
+
+  const handleWatchReceiptAd = () => {
+    setIsReceiptAdLoading(true);
+    if (Capacitor.isNativePlatform()) {
+      admobService.showRewardedAd(() => {
+        setIsReceiptAdLoading(false);
+        const newCredits = receiptBonusCredits + 1;
+        setReceiptBonusCredits(newCredits);
+        localStorage.setItem('zb_receipt_bonus_credits', String(newCredits));
+        setShowReceiptAdModal(false);
+        setTimeout(() => handleCameraScan(), 300);
+      }).catch(() => {
+        setIsReceiptAdLoading(false);
+      });
+    } else {
+      setTimeout(() => {
+        setIsReceiptAdLoading(false);
+        const newCredits = receiptBonusCredits + 1;
+        setReceiptBonusCredits(newCredits);
+        localStorage.setItem('zb_receipt_bonus_credits', String(newCredits));
+        setShowReceiptAdModal(false);
+        setTimeout(() => handleCameraScan(), 300);
+      }, 2000);
+    }
   };
 
   const handleReceiptFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!hasReceiptAccess) {
+      setShowReceiptAdModal(true);
+      return;
+    }
     const file = e.target.files?.[0];
     if (!file) return;
     setIsScanning(true);
@@ -243,6 +300,10 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   };
 
   const handleCameraScan = async () => {
+    if (!hasReceiptAccess) {
+      setShowReceiptAdModal(true);
+      return;
+    }
     setIsScanning(true);
     setScanMessage(null);
     try {
@@ -1934,10 +1995,126 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     document.body
   ) : null;
 
+  const receiptAdPortal = showReceiptAdModal ? createPortal(
+    <div 
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(5, 10, 20, 0.88)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 999999,
+        padding: '20px',
+        animation: 'fadeIn 0.2s ease-out'
+      }}
+      onClick={() => setShowReceiptAdModal(false)}
+    >
+      <div 
+        style={{
+          width: '100%',
+          maxWidth: '380px',
+          background: 'var(--bg-card)',
+          border: '1px solid rgba(245, 158, 11, 0.4)',
+          borderRadius: '24px',
+          padding: '24px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+          textAlign: 'center',
+          boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+          position: 'relative'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          onClick={() => setShowReceiptAdModal(false)}
+          style={{
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: 'none',
+            borderRadius: '50%',
+            width: '32px',
+            height: '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#94a3b8',
+            cursor: 'pointer'
+          }}
+        >
+          <X size={16} />
+        </button>
+
+        <div style={{
+          width: '60px',
+          height: '60px',
+          borderRadius: '20px',
+          background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.2))',
+          border: '1px solid rgba(245, 158, 11, 0.3)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 auto',
+          color: '#f59e0b',
+          fontSize: '26px'
+        }}>
+          🧾
+        </div>
+
+        <div>
+          <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 6px' }}>
+            1 Free Receipt Scan Used!
+          </h3>
+          <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>
+            You have experienced your 1-Time Free AI Bill Scan. Watch a sponsor video ad to unlock another AI Bill Scan for <strong style={{ color: '#10b981' }}>FREE</strong>, or upgrade to Pro for unlimited instant scans.
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px' }}>
+          <button
+            type="button"
+            onClick={handleWatchReceiptAd}
+            disabled={isReceiptAdLoading}
+            style={{
+              padding: '14px',
+              borderRadius: '14px',
+              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+              border: 'none',
+              color: '#ffffff',
+              fontSize: '14px',
+              fontWeight: 800,
+              cursor: isReceiptAdLoading ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              boxShadow: '0 4px 15px rgba(245, 158, 11, 0.35)',
+              opacity: isReceiptAdLoading ? 0.7 : 1
+            }}
+          >
+            <Play size={16} fill="#ffffff" />
+            <span>{isReceiptAdLoading ? 'Loading Video Ad...' : '🎬 Watch Video Ad (+1 Free Scan)'}</span>
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  ) : null;
+
   return (
     <>
       {mainPortal}
       {insufficientBalancePortal}
+      {receiptAdPortal}
     </>
   );
 };

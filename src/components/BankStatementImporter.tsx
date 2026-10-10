@@ -3,8 +3,10 @@ import { CoinCatcherGame } from './CoinCatcherGame';
 import { 
   ChevronLeft, UploadCloud, FileText, CheckCircle2, AlertCircle, 
   Sparkles, ShieldCheck, ArrowRight, Landmark, Lock, 
-  CheckSquare, Square, Wallet, Tag, TrendingUp, TrendingDown, Zap
+  CheckSquare, Square, Wallet, Tag, TrendingUp, TrendingDown, Zap, Play, X
 } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
+import { admobService } from '../services/admobService';
 import { supabase } from '../supabaseClient';
 import { 
   parseCSVStatement, 
@@ -64,17 +66,56 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [scansUsed, setScansUsed] = useState<number>(() => {
+    return Number(localStorage.getItem('zb_statement_scans_used') || 0);
+  });
+  const [bonusCredits, setBonusCredits] = useState<number>(() => {
+    return Number(localStorage.getItem('zb_statement_bonus_credits') || 0);
+  });
+  const [showAdModal, setShowAdModal] = useState<boolean>(false);
+  const [isAdLoading, setIsAdLoading] = useState<boolean>(false);
+
+  const hasAccess = isPremiumUser || scansUsed === 0 || bonusCredits > 0;
+
+  const handleWatchRewardedAd = () => {
+    setIsAdLoading(true);
+    if (Capacitor.isNativePlatform()) {
+      admobService.showRewardedAd(() => {
+        setIsAdLoading(false);
+        const newCredits = bonusCredits + 1;
+        setBonusCredits(newCredits);
+        localStorage.setItem('zb_statement_bonus_credits', String(newCredits));
+        setShowAdModal(false);
+        notify('🎉 1 Free Bank Statement Scan Unlocked!', 'success');
+        setTimeout(() => fileInputRef.current?.click(), 300);
+      }).catch(() => {
+        setIsAdLoading(false);
+        notify('Ad could not load. Try again or upgrade to Pro.', 'warning');
+      });
+    } else {
+      setTimeout(() => {
+        setIsAdLoading(false);
+        const newCredits = bonusCredits + 1;
+        setBonusCredits(newCredits);
+        localStorage.setItem('zb_statement_bonus_credits', String(newCredits));
+        setShowAdModal(false);
+        notify('🎉 1 Free Bank Statement Scan Unlocked!', 'success');
+        setTimeout(() => fileInputRef.current?.click(), 300);
+      }, 2500);
+    }
+  };
+
   const handleUploadAreaClick = () => {
-    if (!isPremiumUser) {
-      onOpenSubscriptionModal();
+    if (!hasAccess) {
+      setShowAdModal(true);
       return;
     }
     fileInputRef.current?.click();
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!isPremiumUser) {
-      onOpenSubscriptionModal();
+    if (!hasAccess) {
+      setShowAdModal(true);
       return;
     }
     const selected = e.target.files?.[0];
@@ -94,13 +135,25 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
   };
 
   const startAnalysis = async () => {
-    if (!isPremiumUser) {
-      onOpenSubscriptionModal();
+    if (!hasAccess) {
+      setShowAdModal(true);
       return;
     }
     if (!file) {
       notify('Please select a bank statement file first.', 'warning');
       return;
+    }
+
+    // Deduct free trial or bonus credit
+    if (!isPremiumUser) {
+      if (scansUsed === 0) {
+        setScansUsed(1);
+        localStorage.setItem('zb_statement_scans_used', '1');
+      } else if (bonusCredits > 0) {
+        const next = bonusCredits - 1;
+        setBonusCredits(next);
+        localStorage.setItem('zb_statement_bonus_credits', String(next));
+      }
     }
 
     setIsProcessing(true);
@@ -1216,6 +1269,141 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
 
         {/* Financial Mini Game - Chrome Dino Style */}
         <CoinCatcherGame currencySymbol={currencySymbol} userReferralCode={userReferralCode} />
+
+        {/* Rewarded Ad Unlock Modal for Bank Statements */}
+        {showAdModal && (
+          <div 
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(5, 10, 20, 0.88)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 99999,
+              padding: '20px',
+              animation: 'fadeIn 0.2s ease-out'
+            }}
+            onClick={() => setShowAdModal(false)}
+          >
+            <div 
+              style={{
+                width: '100%',
+                maxWidth: '380px',
+                background: 'var(--bg-card)',
+                border: '1px solid rgba(245, 158, 11, 0.4)',
+                borderRadius: '24px',
+                padding: '24px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+                textAlign: 'center',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+                position: 'relative'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => setShowAdModal(false)}
+                style={{
+                  position: 'absolute',
+                  top: '16px',
+                  right: '16px',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#94a3b8',
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={16} />
+              </button>
+
+              <div style={{
+                width: '60px',
+                height: '60px',
+                borderRadius: '20px',
+                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.2))',
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto',
+                color: '#f59e0b',
+                fontSize: '26px'
+              }}>
+                🏦
+              </div>
+
+              <div>
+                <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 6px' }}>
+                  1 Free Parse Used!
+                </h3>
+                <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>
+                  You have experienced your 1-Time Free Statement Parse. Watch a sponsor video ad to unlock another parse for <strong style={{ color: '#10b981' }}>FREE</strong>, or upgrade to Pro for unlimited statements.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px' }}>
+                <button
+                  type="button"
+                  onClick={handleWatchRewardedAd}
+                  disabled={isAdLoading}
+                  style={{
+                    padding: '14px',
+                    borderRadius: '14px',
+                    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                    border: 'none',
+                    color: '#ffffff',
+                    fontSize: '14px',
+                    fontWeight: 800,
+                    cursor: isAdLoading ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 15px rgba(245, 158, 11, 0.35)',
+                    opacity: isAdLoading ? 0.7 : 1
+                  }}
+                >
+                  <Play size={16} fill="#ffffff" />
+                  <span>{isAdLoading ? 'Loading Video Ad...' : '🎬 Watch Video Ad (+1 Free Parse)'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAdModal(false);
+                    onOpenSubscriptionModal();
+                  }}
+                  style={{
+                    padding: '12px',
+                    borderRadius: '14px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    color: '#cbd5e1',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  👑 Upgrade to Pro (₹149/mo)
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

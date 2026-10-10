@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { HelpCircle, X, Bot, Star, Mail, Send, MessageSquare, Sparkles, ThumbsUp, CheckCircle, CheckCircle2 } from 'lucide-react';
+import { HelpCircle, X, Bot, Star, Mail, Send, MessageSquare, Sparkles, ThumbsUp, CheckCircle, CheckCircle2, Play, Lock } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
+import { admobService } from '../services/admobService';
 import { GoogleGenAI } from '@google/genai';
 import { ZenFinancialIntelligenceEngine, resolveUserFinancialQuery } from '../utils/zenFinancialEngine';
 import type { ConversationMemoryState } from '../utils/zenFinancialEngine';
@@ -375,12 +377,57 @@ export const HelpModal: React.FC<HelpModalProps> = ({
     lastMerchants: null
   });
 
+  const [aiQueriesUsed, setAiQueriesUsed] = useState<number>(() => {
+    return Number(localStorage.getItem('zb_ai_queries_used') || 0);
+  });
+  const [aiBonusCredits, setAiBonusCredits] = useState<number>(() => {
+    return Number(localStorage.getItem('zb_ai_bonus_credits') || 0);
+  });
+  const [showAiAdModal, setShowAiAdModal] = useState<boolean>(false);
+  const [isAiAdLoading, setIsAiAdLoading] = useState<boolean>(false);
+
+  const hasAiAccess = isPremiumUser || aiQueriesUsed === 0 || aiBonusCredits > 0;
+
+  const handleWatchAiAd = () => {
+    setIsAiAdLoading(true);
+    if (Capacitor.isNativePlatform()) {
+      admobService.showRewardedAd(() => {
+        setIsAiAdLoading(false);
+        const newCredits = aiBonusCredits + 1;
+        setAiBonusCredits(newCredits);
+        localStorage.setItem('zb_ai_bonus_credits', String(newCredits));
+        setShowAiAdModal(false);
+      }).catch(() => {
+        setIsAiAdLoading(false);
+      });
+    } else {
+      setTimeout(() => {
+        setIsAiAdLoading(false);
+        const newCredits = aiBonusCredits + 1;
+        setAiBonusCredits(newCredits);
+        localStorage.setItem('zb_ai_bonus_credits', String(newCredits));
+        setShowAiAdModal(false);
+      }, 2000);
+    }
+  };
+
   const handleSend = async (e?: React.FormEvent, customPrompt?: string) => {
     if (e) e.preventDefault();
 
-    if (isPremiumUser === false) {
-      onOpenSubscriptionModal?.();
+    if (!hasAiAccess) {
+      setShowAiAdModal(true);
       return;
+    }
+
+    if (!isPremiumUser) {
+      if (aiQueriesUsed === 0) {
+        setAiQueriesUsed(1);
+        localStorage.setItem('zb_ai_queries_used', '1');
+      } else if (aiBonusCredits > 0) {
+        const next = aiBonusCredits - 1;
+        setAiBonusCredits(next);
+        localStorage.setItem('zb_ai_bonus_credits', String(next));
+      }
     }
 
     const rawText = (customPrompt || inputVal).trim();
@@ -1071,6 +1118,142 @@ ${JSON.stringify(structCtx, null, 2)}`;
             </div>
           )}
         </div>
+
+        {/* Rewarded Ad Unlock Modal for AI Financial Coach */}
+        {showAiAdModal && (
+          <div 
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(5, 10, 20, 0.88)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 999999,
+              padding: '20px',
+              animation: 'fadeIn 0.2s ease-out'
+            }}
+            onClick={() => setShowAiAdModal(false)}
+          >
+            <div 
+              style={{
+                width: '100%',
+                maxWidth: '380px',
+                background: 'var(--bg-card)',
+                border: '1px solid rgba(99, 102, 241, 0.4)',
+                borderRadius: '24px',
+                padding: '24px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+                textAlign: 'center',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+                position: 'relative'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => setShowAiAdModal(false)}
+                style={{
+                  position: 'absolute',
+                  top: '16px',
+                  right: '16px',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#94a3b8',
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={16} />
+              </button>
+
+              <div style={{
+                width: '60px',
+                height: '60px',
+                borderRadius: '20px',
+                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2))',
+                border: '1px solid rgba(99, 102, 241, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto',
+                color: '#818cf8',
+                fontSize: '26px'
+              }}>
+                🤖
+              </div>
+
+              <div>
+                <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 6px' }}>
+                  1 Free AI Question Used!
+                </h3>
+                <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>
+                  You have used your 1-Time Free AI Consultation. Watch a sponsor video ad to ask Zen another question for <strong style={{ color: '#10b981' }}>FREE</strong>, or upgrade to Pro for unlimited 24/7 AI coaching.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px' }}>
+                <button
+                  type="button"
+                  onClick={handleWatchAiAd}
+                  disabled={isAiAdLoading}
+                  style={{
+                    padding: '14px',
+                    borderRadius: '14px',
+                    background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+                    border: 'none',
+                    color: '#ffffff',
+                    fontSize: '14px',
+                    fontWeight: 800,
+                    cursor: isAiAdLoading ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 15px rgba(99, 102, 241, 0.35)',
+                    opacity: isAiAdLoading ? 0.7 : 1
+                  }}
+                >
+                  <Play size={16} fill="#ffffff" />
+                  <span>{isAiAdLoading ? 'Loading Video Ad...' : '🎬 Watch Video Ad (+1 Free Query)'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAiAdModal(false);
+                    onOpenSubscriptionModal?.();
+                  }}
+                  style={{
+                    padding: '12px',
+                    borderRadius: '14px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    color: '#cbd5e1',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  👑 Upgrade to Pro (₹149/mo)
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );
