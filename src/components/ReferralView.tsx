@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Gift, Copy, Check, Share2 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import { admobService } from '../services/admobService';
 
 interface ReferralViewProps {
   onBack: () => void;
@@ -55,6 +56,7 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
   };
 
   const handleShareInvite = async () => {
+    admobService.showInterstitial(false, 30000).catch(() => {});
     const msg = getViralInviteMessage();
     if (navigator.share) {
       try {

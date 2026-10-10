@@ -20,6 +20,8 @@ import {
 import type { CategoryBudget, CategoryType, Transaction } from '../types';
 import { formatCurrency } from '../utils/formatCurrency';
 import { playCelebrationSound, playNotificationSound } from '../utils/audio';
+import { Capacitor } from '@capacitor/core';
+import { admobService } from '../services/admobService';
 
 interface BudgetsProps {
   budgets: CategoryBudget[];
@@ -107,7 +109,18 @@ export const Budgets: React.FC<BudgetsProps> = ({
     if (isLimitCapped) {
       playNotificationSound();
       setPendingCategory(cat);
-      setAdModalOpen(true);
+      if (Capacitor.isNativePlatform()) {
+        admobService.showRewardedAd(() => {
+          playCelebrationSound();
+          const newBonus = bonusSlots + 1;
+          setBonusSlots(newBonus);
+          localStorage.setItem('zb_bonus_budget_slots', String(newBonus));
+          setEditingCategory(cat);
+          setLimitInput('');
+        });
+      } else {
+        setAdModalOpen(true);
+      }
       return;
     }
 
@@ -151,6 +164,21 @@ export const Budgets: React.FC<BudgetsProps> = ({
   }, [adPlaying, adCountdown, pendingCategory, bonusSlots]);
 
   const startWatchingAd = () => {
+    if (Capacitor.isNativePlatform()) {
+      admobService.showRewardedAd(() => {
+        setAdPlaying(false);
+        setAdRewarded(true);
+        playCelebrationSound();
+        const newBonus = bonusSlots + 1;
+        setBonusSlots(newBonus);
+        localStorage.setItem('zb_bonus_budget_slots', String(newBonus));
+        if (pendingCategory) {
+          setEditingCategory(pendingCategory);
+          setLimitInput('');
+        }
+      });
+      return;
+    }
     setAdPlaying(true);
     setAdCountdown(10);
     setAdRewarded(false);

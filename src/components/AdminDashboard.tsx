@@ -141,14 +141,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   // INR Subscription Pricing
-  const [monthlyPrice, setMonthlyPrice] = useState<number>(() => getInitialPrice('monthly', 149));
-  const [yearlyPrice, setYearlyPrice] = useState<number>(() => getInitialPrice('yearly', 1499));
-  const [lifetimePrice, setLifetimePrice] = useState<number>(() => getInitialPrice('lifetime', 2499));
+  const [monthlyPrice, setMonthlyPrice] = useState<number>(() => getInitialPrice('monthly', 99));
+  const [yearlyPrice, setYearlyPrice] = useState<number>(() => getInitialPrice('yearly', 499));
+  const [lifetimePrice, setLifetimePrice] = useState<number>(() => getInitialPrice('lifetime', 999));
 
   // USD Subscription Pricing
-  const [usdMonthlyPrice, setUsdMonthlyPrice] = useState<number>(() => getInitialPrice('usd_monthly', 6.99));
-  const [usdYearlyPrice, setUsdYearlyPrice] = useState<number>(() => getInitialPrice('usd_yearly', 19.99));
-  const [usdLifetimePrice, setUsdLifetimePrice] = useState<number>(() => getInitialPrice('usd_lifetime', 29.99));
+  const [usdMonthlyPrice, setUsdMonthlyPrice] = useState<number>(() => getInitialPrice('usd_monthly', 1.99));
+  const [usdYearlyPrice, setUsdYearlyPrice] = useState<number>(() => getInitialPrice('usd_yearly', 9.99));
+  const [usdLifetimePrice, setUsdLifetimePrice] = useState<number>(() => getInitialPrice('usd_lifetime', 19.99));
 
   // EUR Subscription Pricing
   const [eurMonthlyPrice, setEurMonthlyPrice] = useState<number>(() => getInitialPrice('eur_monthly', 6.99));
@@ -1054,7 +1054,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   const premiumLifetimeCount = profiles.filter(p => p.subscription_tier === 'premium_lifetime').length;
   const totalPremiumUsers = premiumMonthlyCount + premiumYearlyCount + premiumLifetimeCount;
   const trialCount = Math.max(0, totalUsers - totalPremiumUsers);
-  const estimatedRevenue = (premiumMonthlyCount * (monthlyPrice || 149)) + (premiumYearlyCount * (yearlyPrice || 1499)) + (premiumLifetimeCount * (lifetimePrice || 2499));
+  const estimatedRevenue = (premiumMonthlyCount * (monthlyPrice || 99)) + (premiumYearlyCount * (yearlyPrice || 499)) + (premiumLifetimeCount * (lifetimePrice || 999));
 
   const handleDeleteRating = async (ratingId: string) => {
     setRatings(prev => prev.filter(r => r.id !== ratingId));
@@ -3039,7 +3039,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                             else if (selectedPricingCurrency === 'AED') setAedYearlyPrice(val);
                             else if (selectedPricingCurrency === 'SGD') setSgdYearlyPrice(val);
                           }}
-                          placeholder={selectedPricingCurrency === 'INR' ? '1499' : '29.99'}
+                          placeholder={selectedPricingCurrency === 'INR' ? '499' : '9.99'}
                           style={{ width: '100%', padding: '11px 14px', borderRadius: '10px', background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.15)', color: '#fbbf24', fontWeight: 800, fontSize: '1rem', outline: 'none' }}
                         />
                       </div>

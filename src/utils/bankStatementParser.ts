@@ -250,7 +250,7 @@ Extract transactions in strict JSON format:
 Return ONLY pure JSON without markdown. Extract up to 50 clearest visible transactions.`;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-3.8-flash',
         contents: [
           {
             role: 'user',

@@ -430,7 +430,7 @@ LIVE STRUCTURED FINANCIAL CONTEXT (JSON):
 ${JSON.stringify(structCtx, null, 2)}`;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-1.5-flash',
+          model: 'gemini-3.8-flash',
           contents: rawText,
           config: {
             systemInstruction: systemInstruction,
