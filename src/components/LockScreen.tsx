@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Delete, AlertCircle, CheckCircle, Mail, KeyRound, Loader2, LogOut, ArrowLeft, User, Download, Fingerprint, X, Gift, Eye, EyeOff, Globe } from 'lucide-react';
+import { Delete, AlertCircle, CheckCircle, Mail, KeyRound, Loader2, LogOut, ArrowLeft, User, Download, Fingerprint, X, Gift, Eye, EyeOff, Globe, Zap } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { playNotificationSound } from '../utils/audio';
 import { Capacitor } from '@capacitor/core';
@@ -806,25 +806,6 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         localStorage.setItem('zb_user_email', cleanEmail);
       }
       if (authMode === 'signup') {
-        // ─── WHITELISTED HOSTS bypass all device restrictions ───────────────
-        const WHITELISTED_HOSTS = ['10.121.201.39', 'localhost', '127.0.0.1'];
-        const isWhitelistedSignup = WHITELISTED_HOSTS.some(h => window.location.hostname === h || window.location.hostname.startsWith(h));
-
-        if (!isWhitelistedSignup) {
-          // Anti-abuse: check device isn't already registered to another user
-          const currentDeviceId = await getOrCreateDeviceId();
-          const { data: deviceCheck } = await supabase
-            .from('device_sessions')
-            .select('user_id')
-            .eq('device_id', currentDeviceId)
-            .limit(1);
-          if (deviceCheck && deviceCheck.length > 0) {
-            setErrorMsg('This device is already registered to another ZenBudget account.');
-            setIsLoading(false);
-            return;
-          }
-        }
-
         // Prevent duplicate profiles for 1 email
         const { data: existingProfile } = await supabase
           .from('profiles')
@@ -855,7 +836,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         }
       }
     } catch (err: any) {
-      setErrorMsg(err.message || 'Authentication failed. Please check credentials.');
+      setErrorMsg(err.message || 'Authentication failed. Please check credentials or continue as Guest.');
       playNotificationSound('warning');
     } finally {
       setIsLoading(false);
@@ -872,31 +853,41 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
     setIsLoading(true);
     setErrorMsg('');
 
-    // Safety timeout: auto-reset loading state after 6 seconds if OAuth popup or redirect is delayed
+    // Safety timeout: auto-reset loading state after 8 seconds if OAuth popup or redirect is delayed
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 6000);
+    }, 8000);
 
     try {
+      localStorage.setItem('zb_oauth_in_progress', 'true');
+
       if (Capacitor.isNativePlatform()) {
-        // Native OAuth flow using Capacitor Browser
+        // Native OAuth flow using Capacitor Browser with direct session listener
         const { data, error } = await supabase.auth.signInWithOAuth({ 
           provider,
           options: {
-            redirectTo: 'com.zenbudget.app://login',
+            redirectTo: 'https://zenbudget-tracker.vercel.app/',
             skipBrowserRedirect: true
           }
         });
         if (error) throw error;
         if (data?.url) {
           const { Browser } = await import('@capacitor/browser');
+          
+          const onBrowserFinished = async () => {
+            console.log('LockScreen: Browser dismissed, checking active session...');
+            const { data: sessData } = await supabase.auth.getSession();
+            if (sessData?.session?.user) {
+              await fetchUserProfile(sessData.session.user.id);
+            }
+          };
+          Browser.addListener('browserFinished', onBrowserFinished);
           await Browser.open({ url: data.url, windowName: '_self' });
         } else {
           throw new Error('OAuth authentication URL was not generated.');
         }
       } else {
         // Web OAuth flow
-        localStorage.setItem('zb_oauth_in_progress', 'true');
         const { error } = await supabase.auth.signInWithOAuth({ 
           provider,
           options: {
@@ -907,7 +898,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       }
     } catch (err: any) {
       clearTimeout(timer);
-      setErrorMsg(err.message || `Failed to authenticate with ${provider}.`);
+      console.error('LockScreen: Social login error:', err);
+      setErrorMsg(err.message || `Failed to authenticate with ${provider}. Please try with Email or check your network connection.`);
       playNotificationSound('warning');
       setIsLoading(false);
     }

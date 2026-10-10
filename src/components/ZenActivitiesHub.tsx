@@ -13,10 +13,12 @@ import {
   ShieldCheck,
   Flame,
   CheckCircle2,
-  BookmarkCheck
+  BookmarkCheck,
+  Video
 } from 'lucide-react';
 import { CoinCatcherGame } from './CoinCatcherGame';
 import { playCelebrationSound, playNotificationSound } from '../utils/audio';
+import { admobService } from '../services/admobService';
 
 interface ZenActivitiesHubProps {
   currencySymbol?: string;
@@ -122,6 +124,8 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
   const [quizStarted, setQuizStarted] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
+  const [unlockedDeepPlan, setUnlockedDeepPlan] = useState(false);
+  const [adLoading, setAdLoading] = useState(false);
 
   // Activity 3: "Can I Afford It?" State
   const [affordItemName, setAffordItemName] = useState('New Sneakers');
@@ -150,6 +154,19 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
     setSelectedAnswers([]);
     setQuizCompleted(false);
     setQuizStarted(true);
+    setUnlockedDeepPlan(false);
+  };
+
+  const handleUnlockDeepPlanWithAd = async () => {
+    setAdLoading(true);
+    try {
+      await admobService.showRewardedAd(() => {
+        setUnlockedDeepPlan(true);
+        playCelebrationSound();
+      });
+    } finally {
+      setAdLoading(false);
+    }
   };
 
   // Helper for Quiz Result Profile
@@ -675,6 +692,55 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
                         <span>Zen Recommendation: {result.advice}</span>
                       </div>
                     </div>
+
+                    {/* Rewarded Video Ad: Unlock AI Wealth Roadmap */}
+                    {!unlockedDeepPlan ? (
+                      <button
+                        onClick={handleUnlockDeepPlanWithAd}
+                        disabled={adLoading}
+                        style={{
+                          width: '100%',
+                          padding: '12px 16px',
+                          borderRadius: '14px',
+                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                          border: 'none',
+                          color: '#ffffff',
+                          fontSize: '12.5px',
+                          fontWeight: 800,
+                          cursor: adLoading ? 'not-allowed' : 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+                          marginBottom: '12px',
+                          opacity: adLoading ? 0.7 : 1
+                        }}
+                      >
+                        <Video size={16} />
+                        {adLoading ? 'Loading Sponsor Video...' : '🎬 Watch Video Ad to Unlock AI Wealth Roadmap'}
+                      </button>
+                    ) : (
+                      <div style={{
+                        background: 'rgba(16, 185, 129, 0.08)',
+                        border: '1px solid rgba(16, 185, 129, 0.25)',
+                        borderRadius: '16px',
+                        padding: '16px',
+                        marginBottom: '14px',
+                        textAlign: 'left'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#10b981', fontWeight: 800, fontSize: '13px' }}>
+                          <Sparkles size={16} />
+                          <span>Unlocked AI 5-Step Wealth Roadmap:</span>
+                        </div>
+                        <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '12px', color: 'var(--text-primary)', lineHeight: 1.6 }}>
+                          <li><strong>50/30/20 Rule:</strong> Limit non-essential wants to max 30% of take-home pay.</li>
+                          <li><strong>Automated SIP Target:</strong> Invest min {currencySymbol}3,000/mo at 12% CAGR to build a {currencySymbol}10 Lakh nest egg.</li>
+                          <li><strong>48-Hr Impulse Buffer:</strong> Always park impulsive buys in Zen Wishlist before swiping.</li>
+                          <li><strong>Liquid Emergency Fund:</strong> Keep 3 months of basic living expenses safely parked in high-yield savings.</li>
+                        </ul>
+                      </div>
+                    )}
 
                     <button
                       onClick={handleRestartQuiz}

@@ -349,7 +349,15 @@
   </head>
   <body>
     <div id="root">
-      <!-- Semantic Static Pre-Rendered Content for Search Engine Crawlers & Audit Spiders (Googlebot, Bingbot, Seobility) -->
+      <div id="zen-init-loader" style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0d110e; color: #ffffff; font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif; text-align: center; padding: 24px;">
+        <div style="width: 56px; height: 56px; border-radius: 18px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 16px; box-shadow: 0 0 30px rgba(16, 185, 129, 0.25);">🌱</div>
+        <div style="font-size: 19px; font-weight: 800; color: #f8fafc; letter-spacing: -0.01em;">ZenBudget Tracker</div>
+        <div style="font-size: 13px; color: #64748b; margin-top: 6px; font-weight: 500;">Loading smart expense manager...</div>
+      </div>
+    </div>
+
+    <!-- Semantic Static Pre-Rendered Content for Search Engine Crawlers & Non-JS Audit Spiders -->
+    <noscript>
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; background: #ffffff; max-width: 1040px; margin: 0 auto; padding: 32px 20px; line-height: 1.65;">
         
         <!-- Header & Primary Navigation -->
@@ -575,17 +583,17 @@
           
           <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-top: 12px;">
             <span style="font-weight: 600; color: #0f172a;">Follow Something Labs / ZenBudget:</span>
-            <a href="https://www.youtube.com/channel/UCa2ewl3C6Q3qGTXjbAMeAtA" target="_blank" rel="noopener noreferrer" style="color: #dc2626; text-decoration: none; font-weight: 600;">YouTube</a>
+            <a href="https://www.youtube.com/channel/UCa2ewl3C6Q3qGTXjbAMeAtA" target="_blank" rel="noopener noreferrer" style="color: #dc2626; text-decoration: none; font-weight: 600;">YouTube (@SomethingLabsai)</a>
             <a href="https://www.tiktok.com/@zenbudget_tracker" target="_blank" rel="noopener noreferrer" style="color: #0f172a; text-decoration: none; font-weight: 600;">TikTok</a>
-            <a href="https://www.instagram.com/zenbudget_tracker/" target="_blank" rel="noopener noreferrer" style="color: #e11d48; text-decoration: none; font-weight: 600;">Instagram</a>
-            <a href="https://www.facebook.com/people/ZenBudget/61592667931013/" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: none; font-weight: 600;">Facebook</a>
+            <a href="https://www.instagram.com/somethinglabs.in/" target="_blank" rel="noopener noreferrer" style="color: #e11d48; text-decoration: none; font-weight: 600;">Instagram (@somethinglabs.in)</a>
+            <a href="https://www.facebook.com/somethinglabs.in" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: none; font-weight: 600;">Facebook (@somethinglabs.in)</a>
             <a href="https://twitter.com/ZenBudgetApp" target="_blank" rel="noopener noreferrer" style="color: #0284c7; text-decoration: none; font-weight: 600;">X (Twitter)</a>
             <a href="https://linkedin.com/company/zenbudget" target="_blank" rel="noopener noreferrer" style="color: #0284c7; text-decoration: none; font-weight: 600;">LinkedIn</a>
             <a href="https://play.google.com/store/apps" target="_blank" rel="noopener noreferrer" style="color: #059669; text-decoration: none; font-weight: 600;">Google Play Store</a>
           </div>
         </footer>
       </div>
-    </div>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

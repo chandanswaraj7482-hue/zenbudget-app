@@ -1727,7 +1727,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       const timer = setTimeout(() => {
         setShowWelcomeModal(true);
         sessionStorage.setItem('zb_welcome_shown', 'true');
-      }, 800);
+      }, 1800);
       return () => clearTimeout(timer);
     }
 
@@ -2052,6 +2052,66 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       }
       .about-pillars-grid { grid-template-columns: 1fr !important; }
       .about-pill-item { padding: 12px 10px !important; }
+    }
+
+    /* ══════ PHONE-OPTIMIZED LUXURY WELCOME BOTTOM SHEET & MODAL ══════ */
+    .zb-welcome-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 9999999;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 0;
+      animation: zbFadeIn 0.3s ease-out both;
+    }
+
+    .zb-welcome-sheet {
+      width: 100%;
+      max-width: 440px;
+      border-radius: 28px 28px 0 0;
+      overflow: hidden;
+      position: relative;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      animation: zbSheetUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+      box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.65);
+      border-top: 1px solid rgba(16, 185, 129, 0.35);
+      border-left: 1px solid rgba(255, 255, 255, 0.08);
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    @media (min-width: 641px) {
+      .zb-welcome-backdrop {
+        align-items: center !important;
+        padding: 24px !important;
+      }
+      .zb-welcome-sheet {
+        border-radius: 28px !important;
+        max-height: 86vh !important;
+        animation: zbCardIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7) !important;
+        border: 1px solid rgba(16, 185, 129, 0.25) !important;
+      }
+    }
+
+    @keyframes zbFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes zbSheetUp {
+      from { transform: translateY(100%); opacity: 0.6; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes zbCardIn {
+      from { transform: scale(0.92) translateY(24px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
     }
   `;
 
@@ -5530,7 +5590,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             {[
               {
                 platform: 'YouTube',
-                handle: '@channel/UCa2ewl3C6Q3qGTXjbAMeAtA',
+                handle: '@SomethingLabsai',
                 url: 'https://www.youtube.com/channel/UCa2ewl3C6Q3qGTXjbAMeAtA',
                 color: '#ff0000'
               },
@@ -5805,48 +5865,38 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
         </div>
       )}
 
-      {/* ═══════════════ INNERHEAL-STYLE AUTOMATIC ENTRY WELCOME CARD POPUP ═══════════════ */}
+      {/* ═══════════════ LUXURY PHONE-OPTIMIZED WELCOME POPUP / BOTTOM SHEET ═══════════════ */}
       {showWelcomeModal && (
         <div 
-          style={{ 
-            position: 'fixed', 
-            inset: 0, 
-            zIndex: 9999999, 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            background: 'rgba(0, 0, 0, 0.78)', 
-            backdropFilter: 'blur(12px)', 
-            padding: '16px' 
-          }} 
+          className="zb-welcome-backdrop"
           onClick={() => setShowWelcomeModal(false)}
         >
           <div 
-            className="hero-animate" 
+            className="zb-welcome-sheet"
             style={{ 
-              width: '100%', 
-              maxWidth: '460px', 
-              borderRadius: '28px', 
-              overflow: 'hidden', 
-              position: 'relative', 
-              boxShadow: '0 30px 80px rgba(0,0,0,0.6)', 
-              border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.15)`,
-              background: isDark ? '#111812' : '#ffffff'
-            }} 
+              background: isDark ? 'linear-gradient(180deg, #131c15 0%, #0d140e 100%)' : '#ffffff',
+              color: t.text
+            }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header Section with Dark Green Forest Gradient Canvas */}
-            <div style={{ background: 'linear-gradient(135deg, #0d2818 0%, #163824 100%)', padding: '28px 24px 24px', color: '#ffffff', position: 'relative' }}>
+            {/* Mobile Top Drag Handle */}
+            <div style={{ padding: '10px 0 2px', display: 'flex', justifyContent: 'center' }}>
+              <div style={{ width: '40px', height: '4px', borderRadius: '100px', background: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)' }} />
+            </div>
+
+            {/* Modal Header */}
+            <div style={{ padding: '12px 20px 12px', position: 'relative' }}>
               {/* Close Button */}
               <button 
                 onClick={() => setShowWelcomeModal(false)} 
+                aria-label="Close"
                 style={{ 
                   position: 'absolute', 
-                  top: '18px', 
-                  right: '18px', 
-                  background: 'rgba(0,0,0,0.15)', 
+                  top: '10px', 
+                  right: '16px', 
+                  background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', 
                   border: 'none', 
-                  color: '#ffffff', 
+                  color: t.text, 
                   cursor: 'pointer', 
                   width: '32px', 
                   height: '32px', 
@@ -5854,221 +5904,254 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   display: 'flex', 
                   alignItems: 'center', 
                   justifyContent: 'center',
-                  transition: 'all 0.2s' 
+                  transition: 'background 0.2s',
+                  zIndex: 2
                 }}
               >
-                <X size={18} />
+                <X size={16} />
               </button>
 
-              {/* App Brand Header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
-                <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: '#090d16', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 20px rgba(0,0,0,0.4)', flexShrink: 0, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.15)' }}>
-                  <img src="/icon.png" alt="ZenBudget Logo" style={{ width: '38px', height: '38px', borderRadius: '10px', objectFit: 'contain' }} />
+              {/* Top Row: App Icon + Name + Star Rating & Free Pill */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingRight: '36px' }}>
+                <div style={{ position: 'relative' }}>
+                  <img 
+                    src="/icon.png" 
+                    alt="ZenBudget" 
+                    style={{ 
+                      width: '44px', 
+                      height: '44px', 
+                      borderRadius: '12px', 
+                      boxShadow: '0 6px 18px rgba(16,185,129,0.3)',
+                      border: '1.5px solid rgba(16,185,129,0.35)',
+                      display: 'block',
+                      objectFit: 'contain'
+                    }} 
+                  />
+                  <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', width: '10px', height: '10px', borderRadius: '50%', background: '#10b981', border: `2px solid ${isDark ? '#131c15' : '#ffffff'}` }} />
                 </div>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <h3 style={{ fontSize: '19px', fontWeight: 900, color: '#ffffff', margin: 0, letterSpacing: '-0.02em' }}>ZenBudget</h3>
-                    <span style={{ fontSize: '10px', fontWeight: 900, background: 'rgba(163, 230, 53, 0.2)', border: '1px solid #a3e635', color: '#a3e635', padding: '2px 8px', borderRadius: '100px', textTransform: 'uppercase' }}>FREE</span>
+                    <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: t.text, letterSpacing: '-0.02em' }}>ZenBudget</h3>
+                    <span style={{ fontSize: '9px', fontWeight: 800, background: 'rgba(16,185,129,0.18)', border: '1px solid rgba(16,185,129,0.4)', color: '#10b981', padding: '1px 6px', borderRadius: '100px', letterSpacing: '0.04em' }}>FREE</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px' }}>
-                    <div style={{ display: 'flex', gap: '2px' }}>
-                      {[...Array(5)].map((_, i) => <Star key={i} size={12} fill="#facc15" color="#facc15" />)}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: t.textMuted, marginTop: '2px' }}>
+                    <div style={{ display: 'flex', color: '#facc15' }}>
+                      {[1,2,3,4,5].map(s => <Star key={s} size={10} fill="currentColor" />)}
                     </div>
-                    <span style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>4.9 ★ • Smart & Private</span>
+                    <span style={{ fontWeight: 600 }}>4.9 ★ • 10K+ Smart Savers</span>
                   </div>
                 </div>
               </div>
 
               {/* Title & Tagline */}
-              <h2 style={{ fontSize: '22px', fontWeight: 900, margin: '0 0 8px 0', lineHeight: 1.25, letterSpacing: '-0.02em', color: '#ffffff' }}>
-                Your money deserves <span style={{ color: '#a3e635' }}>better care.</span>
-              </h2>
-              <p style={{ fontSize: '13.5px', color: 'rgba(255,255,255,0.85)', lineHeight: 1.5, margin: 0 }}>
-                AI expense tracking, private budget vaults, and instant financial peace — free in your pocket.
-              </p>
-            </div>
-
-            {/* Social Proof Strip */}
-            <div style={{ background: isDark ? 'rgba(163, 230, 53, 0.12)' : '#fef3c7', borderTop: `1px solid ${isDark ? 'rgba(163, 230, 53, 0.2)' : '#fde68a'}`, borderBottom: `1px solid ${isDark ? 'rgba(163, 230, 53, 0.2)' : '#fde68a'}`, padding: '10px 24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{ display: 'flex' }}>
-                {['S', 'M', 'A', 'R', 'J'].map((char, i) => (
-                  <div key={i} style={{ width: '22px', height: '22px', borderRadius: '50%', background: ['#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b'][i], color: '#fff', fontSize: '10px', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: i > 0 ? '-6px' : 0, border: '2px solid #ffffff' }}>
-                    {char}
-                  </div>
-                ))}
+              <div style={{ marginTop: '12px' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 5px 0', lineHeight: 1.25, color: t.text, letterSpacing: '-0.02em' }}>
+                  Your money deserves <span style={{ color: '#10b981' }}>better care.</span>
+                </h2>
+                <p style={{ fontSize: '12px', color: t.textSub, margin: 0, lineHeight: 1.45, fontWeight: 500 }}>
+                  AI expense tracking, private budget vaults & zero-based goals — free in your pocket.
+                </p>
               </div>
-              <span style={{ fontSize: '12.5px', fontWeight: 800, color: isDark ? '#a3e635' : '#92400e' }}>
-                Join smart budgeters building financial discipline daily
-              </span>
             </div>
 
-            {/* Feature Bullets */}
-            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {/* 3 Compact Feature Pills */}
+            <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: '7px' }}>
               {[
-                { icon: <Brain size={16} color="#10b981" />, text: 'AI expense tracking — insights in 60 seconds' },
-                { icon: <Shield size={16} color="#10b981" />, text: 'End-to-end encrypted — your data stays yours' },
-                { icon: <TrendingUp size={16} color="#10b981" />, text: 'Evidence-based wealth compound & budget tools' },
-                { icon: <CheckCircle2 size={16} color="#10b981" />, text: '7-day free trial — no credit card required' }
+                { icon: <Zap size={14} color="#10b981" />, title: 'AI Smart Tracking', desc: 'Scan bills & auto-log in 30 seconds' },
+                { icon: <Shield size={14} color="#10b981" />, title: '100% Private & Encrypted', desc: 'Your financial data stays on your device' },
+                { icon: <TrendingUp size={14} color="#10b981" />, title: 'Zero-Based Budgets', desc: 'Built-in wealth compound & debt payoff' },
               ].map((item, idx) => (
-                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13.5px', fontWeight: 700, color: t.text }}>
-                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: isDark ? 'rgba(16,185,129,0.15)' : '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div 
+                  key={idx}
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '10px', 
+                    padding: '8px 12px',
+                    borderRadius: '12px',
+                    background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.025)',
+                    border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}`
+                  }}
+                >
+                  <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: isDark ? 'rgba(16,185,129,0.15)' : '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     {item.icon}
                   </div>
-                  <span>{item.text}</span>
-                </div>
-              ))}
-
-              {/* Action Buttons (Dynamically Traced to Device OS) */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
-                {deviceOS === 'android' ? (
-                  <>
-                    <a
-                      href={DISTRIBUTION_CONFIG.PLAY_STORE_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => setShowWelcomeModal(false)}
-                      style={{ width: '100%', padding: '14px 24px', borderRadius: '100px', background: '#0a0a0a', color: '#ffffff', fontSize: '15px', fontWeight: 800, border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.3)', textDecoration: 'none', boxSizing: 'border-box' }}
-                      className="hover-lift"
-                    >
-                      <GooglePlayIcon size={22} />
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
-                        <span style={{ fontSize: '9.5px', textTransform: 'uppercase', opacity: 0.8, letterSpacing: '0.06em' }}>OFFICIAL STORE</span>
-                        <span style={{ fontSize: '15px', fontWeight: 900 }}>Get on Google Play</span>
-                      </div>
-                    </a>
-
-                    <button 
-                      onClick={() => { setShowWelcomeModal(false); handleDownloadApk(); }}
-                      style={{ width: '100%', padding: '13px 20px', borderRadius: '100px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', fontSize: '14px', fontWeight: 800, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 6px 18px rgba(16,185,129,0.3)' }}
-                      className="glow-btn"
-                    >
-                      <Download size={16} color="#ffffff" />
-                      <span>Download Android APK (Direct)</span>
-                    </button>
-                  </>
-                ) : (
-                  <button 
-                    onClick={() => {
-                      setShowWelcomeModal(false);
-                      if (deviceOS === 'ios') setShowIosGuideModal(true);
-                      else onOpenWebApp();
-                    }}
-                    style={{ width: '100%', padding: '15px 24px', borderRadius: '100px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', fontSize: '15px', fontWeight: 800, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 8px 24px rgba(16,185,129,0.4)', transition: 'all 0.2s' }}
-                    className="glow-btn"
-                  >
-                    {deviceOS === 'ios' ? (
-                      <>
-                        <Smartphone size={20} color="#ffffff" />
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
-                          <span style={{ fontSize: '9.5px', textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.06em' }}>TRACED DEVICE: IOS SAFARI</span>
-                          <span style={{ fontSize: '15px', fontWeight: 900 }}>Add to iPhone / iPad</span>
-                        </div>
-                      </>
-                    ) : deviceOS === 'mac' ? (
-                      <>
-                        <Monitor size={20} color="#ffffff" />
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
-                          <span style={{ fontSize: '9.5px', textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.06em' }}>TRACED DEVICE: MACOS</span>
-                          <span style={{ fontSize: '15px', fontWeight: 900 }}>Open Mac Web App</span>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <Wallet size={20} color="#ffffff" />
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
-                          <span style={{ fontSize: '9.5px', textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.06em' }}>TRACED DEVICE: WEB BROWSER</span>
-                          <span style={{ fontSize: '15px', fontWeight: 900 }}>Open Web App Now</span>
-                        </div>
-                      </>
-                    )}
-                  </button>
-                )}
-
-                {/* Secondary Button: Alternative Action */}
-                <button 
-                  onClick={() => { setShowWelcomeModal(false); onOpenWebApp(); }}
-                  style={{ width: '100%', padding: '12px 20px', borderRadius: '100px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.07)` : '#f3f4f6', color: t.text, fontSize: '13px', fontWeight: 700, border: `1px solid ${t.border}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-                  className="hover-lift"
-                >
-                  <Wallet size={15} color="#10b981" />
-                  <span>Open Web App (Browser Mode)</span>
-                </button>
-
-                <button 
-                  onClick={() => setShowWelcomeModal(false)}
-                  style={{ background: 'transparent', border: 'none', color: t.textMuted, fontSize: '13px', fontWeight: 700, cursor: 'pointer', padding: '6px' }}
-                >
-                  Not now, explore website
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      )}
-
-      {/* ═══════════════ WELCOME DOWNLOAD MODAL ═══════════════ */}
-      {showWelcomeModal && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(10px)', padding: '16px' }}>
-          <div className="hero-animate" style={{ width: '100%', maxWidth: '440px', background: isDark ? '#161d18' : '#ffffff', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.6)', border: `1px solid ${t.border}`, display: 'flex', flexDirection: 'column' }}>
-            
-            {/* Modal Header/Banner */}
-            <div style={{ background: 'linear-gradient(135deg, #10b981 0%, #047857 100%)', padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative' }}>
-              <button onClick={() => setShowWelcomeModal(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(0,0,0,0.2)', border: 'none', color: '#fff', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(4px)' }}>
-                <X size={16} />
-              </button>
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: '#090d16', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2px', border: '1px solid rgba(255,255,255,0.15)' }}>
-                  <img src="/icon.png" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '10px' }} />
-                </div>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#fff' }}>ZenBudget App</h3>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
-                    <div style={{ background: 'rgba(0,0,0,0.2)', padding: '2px 6px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, color: '#fff' }}>FREE</div>
-                    <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.9)', fontWeight: 600 }}>4.8 ★ Rating</span>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: t.text, lineHeight: 1.2 }}>{item.title}</span>
+                    <span style={{ fontSize: '10.5px', color: t.textMuted, lineHeight: 1.2 }}>{item.desc}</span>
                   </div>
                 </div>
-              </div>
-              
-              <h2 style={{ margin: '8px 0 0', fontSize: '24px', fontWeight: 800, color: '#fff', lineHeight: 1.2 }}>Your money deserves better care.</h2>
-              <p style={{ margin: 0, fontSize: '14px', color: 'rgba(255,255,255,0.9)', lineHeight: 1.4, fontWeight: 500 }}>AI expense tracking, zero-based budgeting, and a private wealth companion — free in your pocket.</p>
+              ))}
             </div>
-            
-            {/* Modal Body */}
-            <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                  <div style={{ color: '#10b981', marginTop: '2px' }}><CheckCircle2 size={18} /></div>
-                  <span style={{ fontSize: '14px', fontWeight: 600, color: t.text, lineHeight: 1.4 }}>AI financial coach — insights in seconds</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                  <div style={{ color: '#10b981', marginTop: '2px' }}><CheckCircle2 size={18} /></div>
-                  <span style={{ fontSize: '14px', fontWeight: 600, color: t.text, lineHeight: 1.4 }}>End-to-end encrypted — your data stays yours</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                  <div style={{ color: '#10b981', marginTop: '2px' }}><CheckCircle2 size={18} /></div>
-                  <span style={{ fontSize: '14px', fontWeight: 600, color: t.text, lineHeight: 1.4 }}>7-day free trial — no credit card required</span>
-                </div>
-              </div>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px' }}>
-                {(deviceOS === 'ios' || deviceOS === 'mac') ? (
-                  <button onClick={() => { setShowWelcomeModal(false); setShowIosGuideModal(true); }} style={{ width: '100%', padding: '16px', borderRadius: '14px', background: t.text, color: t.bg, fontSize: '16px', fontWeight: 800, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                    Install iOS Web App
+
+            {/* Action Buttons */}
+            <div style={{ padding: '14px 20px calc(20px + env(safe-area-inset-bottom, 0px))', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {deviceOS === 'android' ? (
+                <>
+                  <button 
+                    onClick={() => { setShowWelcomeModal(false); handleDownloadApk(); }}
+                    style={{ 
+                      width: '100%', 
+                      padding: '13px 20px', 
+                      borderRadius: '100px', 
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
+                      color: '#ffffff', 
+                      fontSize: '14.5px', 
+                      fontWeight: 800, 
+                      border: 'none', 
+                      cursor: 'pointer', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      gap: '9px', 
+                      boxShadow: '0 8px 24px rgba(16,185,129,0.35)',
+                      transition: 'transform 0.2s'
+                    }}
+                    className="glow-btn"
+                  >
+                    <Download size={17} strokeWidth={2.5} />
+                    <span>Download Android App (APK • Free)</span>
                   </button>
-                ) : (
-                  <button onClick={() => { setShowWelcomeModal(false); handleDownloadApk(); }} style={{ width: '100%', padding: '16px', borderRadius: '14px', background: t.text, color: t.bg, fontSize: '16px', fontWeight: 800, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                    Download Android APK
+
+                  <button 
+                    onClick={() => { setShowWelcomeModal(false); onOpenWebApp(); }}
+                    style={{ 
+                      width: '100%', 
+                      padding: '11px 16px', 
+                      borderRadius: '100px', 
+                      background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', 
+                      color: t.text, 
+                      fontSize: '13px', 
+                      fontWeight: 700, 
+                      border: `1px solid ${t.border}`, 
+                      cursor: 'pointer', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      gap: '7px' 
+                    }}
+                    className="hover-lift"
+                  >
+                    <Wallet size={15} color="#10b981" />
+                    <span>Continue in Browser (Web App)</span>
                   </button>
-                )}
-                
-                <button onClick={() => setShowWelcomeModal(false)} style={{ width: '100%', padding: '12px', background: 'transparent', color: t.textMuted, fontSize: '14px', fontWeight: 600, border: 'none', cursor: 'pointer' }}>
-                  Not now
-                </button>
-              </div>
+                </>
+              ) : deviceOS === 'ios' ? (
+                <>
+                  <button 
+                    onClick={() => { setShowWelcomeModal(false); setShowIosGuideModal(true); }}
+                    style={{ 
+                      width: '100%', 
+                      padding: '13px 20px', 
+                      borderRadius: '100px', 
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
+                      color: '#ffffff', 
+                      fontSize: '14.5px', 
+                      fontWeight: 800, 
+                      border: 'none', 
+                      cursor: 'pointer', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      gap: '9px', 
+                      boxShadow: '0 8px 24px rgba(16,185,129,0.35)' 
+                    }}
+                    className="glow-btn"
+                  >
+                    <Smartphone size={17} strokeWidth={2.5} />
+                    <span>Add to iPhone (Safari PWA)</span>
+                  </button>
+
+                  <button 
+                    onClick={() => { setShowWelcomeModal(false); onOpenWebApp(); }}
+                    style={{ 
+                      width: '100%', 
+                      padding: '11px 16px', 
+                      borderRadius: '100px', 
+                      background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', 
+                      color: t.text, 
+                      fontSize: '13px', 
+                      fontWeight: 700, 
+                      border: `1px solid ${t.border}`, 
+                      cursor: 'pointer', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      gap: '7px' 
+                    }}
+                    className="hover-lift"
+                  >
+                    <Wallet size={15} color="#10b981" />
+                    <span>Continue in Browser (Web App)</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button 
+                    onClick={() => { setShowWelcomeModal(false); onOpenWebApp(); }}
+                    style={{ 
+                      width: '100%', 
+                      padding: '13px 20px', 
+                      borderRadius: '100px', 
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
+                      color: '#ffffff', 
+                      fontSize: '14.5px', 
+                      fontWeight: 800, 
+                      border: 'none', 
+                      cursor: 'pointer', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      gap: '9px', 
+                      boxShadow: '0 8px 24px rgba(16,185,129,0.35)' 
+                    }}
+                    className="glow-btn"
+                  >
+                    <Wallet size={17} strokeWidth={2.5} />
+                    <span>Launch Web App Now</span>
+                  </button>
+
+                  <button 
+                    onClick={() => { setShowWelcomeModal(false); handleDownloadApk(); }}
+                    style={{ 
+                      width: '100%', 
+                      padding: '11px 16px', 
+                      borderRadius: '100px', 
+                      background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', 
+                      color: t.text, 
+                      fontSize: '13px', 
+                      fontWeight: 700, 
+                      border: `1px solid ${t.border}`, 
+                      cursor: 'pointer', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      gap: '7px' 
+                    }}
+                    className="hover-lift"
+                  >
+                    <Download size={15} color="#10b981" />
+                    <span>Download Android APK (Free)</span>
+                  </button>
+                </>
+              )}
+
+              <button 
+                onClick={() => setShowWelcomeModal(false)}
+                style={{ 
+                  background: 'transparent', 
+                  border: 'none', 
+                  color: t.textMuted, 
+                  fontSize: '12px', 
+                  fontWeight: 600, 
+                  cursor: 'pointer', 
+                  padding: '3px',
+                  textAlign: 'center'
+                }}
+              >
+                Not now, explore website
+              </button>
             </div>
-            
           </div>
         </div>
       )}

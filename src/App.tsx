@@ -56,6 +56,7 @@ import { PushNotifications } from '@capacitor/push-notifications';
 import { autoSyncCurrencyFromIP } from './utils/geoTracker';
 import { formatCurrency } from './utils/formatCurrency';
 import { scheduleDailyReminderNotifications, checkAndTriggerWebDailyNotification } from './utils/notificationScheduler';
+import { admobService } from './services/admobService';
 import type { Transaction, SavingsGoal, CategoryBudget, CategoryType, Account, LoanRecord } from './types';
 import { Dashboard } from './components/Dashboard';
 import { Transactions } from './components/Transactions';
@@ -99,6 +100,18 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     return localStorage.getItem('zb_subscription_tier') || 'trial';
   });
   const isPremiumUser = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(subscriptionTier);
+
+  // Google AdMob: Show adaptive bottom banner for free users, hide for Pro / Lifetime users
+  useEffect(() => {
+    if (!isPremiumUser) {
+      admobService.showBanner(false);
+    } else {
+      admobService.hideBanner();
+    }
+    return () => {
+      admobService.hideBanner();
+    };
+  }, [isPremiumUser]);
 
   const [transactions, setTransactions] = useState<Transaction[]>(() => {
     const profileId = localStorage.getItem('zb_profile_id') || '';
@@ -3062,6 +3075,9 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       }
     }
     await doSaveTransaction(txData);
+    if (!isPremiumUser) {
+      admobService.recordActionAndMaybeShowAd(false);
+    }
     return true;
   };
 

@@ -146,6 +146,8 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+import { Capacitor } from '@capacitor/core';
+
 // Run bootstrapSession to restore auth token from SharedPreferences synchronously before mounting React App
 const mountApp = () => {
   const container = document.getElementById('root');
@@ -160,11 +162,16 @@ const mountApp = () => {
   }
 };
 
-bootstrapSession()
-  .catch((err) => {
-    console.warn('ZenBudget bootstrapSession warning:', err);
-  })
-  .finally(() => {
-    mountApp();
-  });
+if (Capacitor.isNativePlatform()) {
+  bootstrapSession()
+    .catch((err) => {
+      console.warn('ZenBudget bootstrapSession warning:', err);
+    })
+    .finally(() => {
+      mountApp();
+    });
+} else {
+  // On Web / PWA, mount immediately for 0ms render
+  mountApp();
+}
 

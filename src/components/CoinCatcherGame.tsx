@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Gamepad2, Trophy, RotateCcw, Play, Coins, Share2, Copy, Check, Sparkles, Shield, AlertTriangle, Flame } from 'lucide-react';
+import { Gamepad2, Trophy, RotateCcw, Play, Coins, Share2, Copy, Check, Sparkles, Shield, AlertTriangle, Flame, Video } from 'lucide-react';
+import { admobService } from '../services/admobService';
 import {
   playCoinSound,
   playDeleteSound,
@@ -172,6 +173,8 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
   const [combo, setCombo] = useState(0);
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [hasRevivedWithAd, setHasRevivedWithAd] = useState(false);
+  const [adLoading, setAdLoading] = useState(false);
   const [currentTipIndex] = useState(() => Math.floor(Math.random() * FINANCIAL_TIPS.length));
   const [activityIndex, setActivityIndex] = useState(0);
 
@@ -521,7 +524,28 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
     setGameOver(false);
     setStarted(true);
     setCombo(0);
+    setHasRevivedWithAd(false);
+    admobService.recordActionAndMaybeShowAd();
   }, []);
+
+  const handleReviveWithAd = async () => {
+    setAdLoading(true);
+    try {
+      await admobService.showRewardedAd(() => {
+        const gs = gameStateRef.current;
+        gs.lives = 2;
+        gs.invulnerableTimer = 120;
+        gs.gameOver = false;
+        gs.started = true;
+        setLives(2);
+        setGameOver(false);
+        setHasRevivedWithAd(true);
+        playCelebrationSound();
+      });
+    } finally {
+      setAdLoading(false);
+    }
+  };
 
   const movePlayerBy = (deltaX: number) => {
     const canvas = canvasRef.current;
@@ -1450,6 +1474,35 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
                 {copiedLink ? 'Copied!' : 'Copy Link'}
               </button>
             </div>
+
+            {!hasRevivedWithAd && (
+              <button
+                onClick={handleReviveWithAd}
+                disabled={adLoading}
+                style={{
+                  width: '100%',
+                  maxWidth: '280px',
+                  padding: '11px',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                  border: 'none',
+                  color: '#ffffff',
+                  fontSize: '12.5px',
+                  fontWeight: 800,
+                  cursor: adLoading ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 14px rgba(245, 158, 11, 0.4)',
+                  marginTop: '8px',
+                  opacity: adLoading ? 0.7 : 1
+                }}
+              >
+                <Video size={15} />
+                {adLoading ? 'Loading Sponsor Video...' : '🎬 Watch Video Ad to Revive (+2 Lives)'}
+              </button>
+            )}
 
             <button
               onClick={resetGame}

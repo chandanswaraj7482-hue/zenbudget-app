@@ -3,11 +3,9 @@ android
 .gradle
 admin-portal.zip
 .git
-*.apk
 *.aab
 playstore_release
-public/*.apk
-dist/*.apk
 zenbudget_decoded
 *.jar
 *.idsig
+
