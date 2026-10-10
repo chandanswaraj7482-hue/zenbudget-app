@@ -135,6 +135,12 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
   const [showDailyLimitModal, setShowDailyLimitModal] = useState<boolean>(false);
   const [isDailyAdLoading, setIsDailyAdLoading] = useState<boolean>(false);
+  const [showGalleryLimitModal, setShowGalleryLimitModal] = useState<boolean>(false);
+  const [isGalleryAdLoading, setIsGalleryAdLoading] = useState<boolean>(false);
+  const isPremiumUserRef = useRef(isPremiumUser);
+  useEffect(() => {
+    isPremiumUserRef.current = isPremiumUser;
+  }, [isPremiumUser]);
 
   // Google AdMob: Show adaptive bottom banner for free users, hide for Pro / Lifetime users
   useEffect(() => {
@@ -687,6 +693,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       localStorage.setItem(`zb_loans_${currentProfileId}`, JSON.stringify(updated));
     }
     triggerToast(`Loan entry for ${loanData.personName} saved!`, 'success');
+    admobService.recordActionAndMaybeShowAd(isPremiumUser);
   };
 
   const handleRepayLoan = (loanId: string, repayAmount: number, accountId: string) => {
@@ -737,6 +744,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       type: isBorrowed ? 'expense' : 'income',
       notes: `Loan Repayment record (${targetLoan.personName})`
     });
+    admobService.recordActionAndMaybeShowAd(isPremiumUser);
   };
 
   const [upiPayeeModal, setUpiPayeeModal] = useState<{ isOpen: boolean, loan: LoanRecord | null, amount: number, accountId: string }>({ isOpen: false, loan: null, amount: 0, accountId: '' });
@@ -1372,6 +1380,19 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     // Handle incoming shared intent from Android (GPay, PhonePe, Paytm, Bank SMS, Gallery)
     const processSharedPayload = (payload: { type: 'image' | 'text'; data: string }) => {
       if (!payload || !payload.data) return;
+      if (payload.type === 'image' && !isPremiumUserRef.current) {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const usedScans = Number(localStorage.getItem(`zb_gallery_scans_${todayStr}`) || 0);
+        const bonusScans = Number(localStorage.getItem(`zb_gallery_bonus_${todayStr}`) || 0);
+        const maxAllowed = 2 + bonusScans;
+        if (usedScans >= maxAllowed) {
+          setShowGalleryLimitModal(true);
+          triggerToast(`📸 Daily free AI scan limit reached (${usedScans}/${maxAllowed}). Watch ad for +1!`, 'warning');
+          return;
+        }
+        localStorage.setItem(`zb_gallery_scans_${todayStr}`, String(usedScans + 1));
+        triggerToast(`📸 AI Receipt Scan: ${usedScans + 1}/${maxAllowed} used today`, 'info');
+      }
       setSharedPaymentPayload(payload);
       setIsSharedProcessingOpen(true);
     };
@@ -2947,6 +2968,59 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     }
   };
 
+  const getGalleryDailyLimitState = () => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const usedScans = Number(localStorage.getItem(`zb_gallery_scans_${todayStr}`) || 0);
+    const bonusScans = Number(localStorage.getItem(`zb_gallery_bonus_${todayStr}`) || 0);
+    const maxAllowed = 2 + bonusScans;
+    const isLimitReached = !isPremiumUser && usedScans >= maxAllowed;
+    return { todayStr, usedScans, bonusScans, maxAllowed, isLimitReached };
+  };
+
+  const handleOpenGalleryReceiptPicker = () => {
+    if (checkExpiredGuard('scan receipt screenshot')) return;
+    const { isLimitReached, usedScans, maxAllowed } = getGalleryDailyLimitState();
+    if (isLimitReached) {
+      setShowGalleryLimitModal(true);
+      triggerToast(`📸 Daily free AI scan limit reached (${usedScans}/${maxAllowed}). Watch ad for +1!`, 'warning');
+      return;
+    }
+    (window as any).openReceiptPicker?.();
+  };
+
+  const handleWatchGalleryLimitAd = () => {
+    setIsGalleryAdLoading(true);
+    const todayStr = new Date().toISOString().split('T')[0];
+    const bonusScans = Number(localStorage.getItem(`zb_gallery_bonus_${todayStr}`) || 0);
+
+    if (Capacitor.isNativePlatform()) {
+      admobService.showRewardedAd(() => {
+        setIsGalleryAdLoading(false);
+        const nextBonus = bonusScans + 1;
+        localStorage.setItem(`zb_gallery_bonus_${todayStr}`, String(nextBonus));
+        triggerToast(`🎉 +1 Free AI Gallery Scan Unlocked! (${2 + nextBonus} total today)`, 'success');
+        setShowGalleryLimitModal(false);
+        setTimeout(() => {
+          (window as any).openReceiptPicker?.();
+        }, 350);
+      }).catch(() => {
+        setIsGalleryAdLoading(false);
+        triggerToast('Video ad could not load. Try again or upgrade to Pro.', 'warning');
+      });
+    } else {
+      setTimeout(() => {
+        setIsGalleryAdLoading(false);
+        const nextBonus = bonusScans + 1;
+        localStorage.setItem(`zb_gallery_bonus_${todayStr}`, String(nextBonus));
+        triggerToast(`🎉 +1 Free AI Gallery Scan Unlocked! (${2 + nextBonus} total today)`, 'success');
+        setShowGalleryLimitModal(false);
+        setTimeout(() => {
+          (window as any).openReceiptPicker?.();
+        }, 350);
+      }, 1500);
+    }
+  };
+
   const handleSaveTransaction = async (txData: Omit<Transaction, 'id'> & { id?: string }): Promise<boolean> => {
     if (isSubscriptionExpired()) {
       setIsSubBlocker(true);
@@ -4096,11 +4170,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
           {/* Screenshot / Netbanking Receipt Scanner Button */}
           <button
-            onClick={() => {
-              if (checkExpiredGuard('scan receipt screenshot')) return;
-              (window as any).openReceiptPicker?.();
-            }}
-            title="Scan Screenshot from Gallery / Netbanking"
+            onClick={handleOpenGalleryReceiptPicker}
+            title={isPremiumUser ? "Scan Screenshot from Gallery (Unlimited Pro)" : "Scan Screenshot from Gallery (2 Free Daily Scans)"}
             style={{
               background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.12) 100%)',
               border: '1px solid rgba(16, 185, 129, 0.3)',
@@ -4314,6 +4385,9 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
               setIsHelpOpen(true);
             }}
             onOpenLoans={() => {
+              if (!isPremiumUser) {
+                admobService.showInterstitial(isPremiumUser, 20000);
+              }
               setActiveView('loans');
             }}
             onOpenProfile={() => setActiveView('profile')}
@@ -4402,6 +4476,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             onBack={() => setActiveView('more')}
             currentProfileId={currentProfileId}
             currencySymbol={currencySymbol}
+            isPremiumUser={isPremiumUser}
+            onShowToast={triggerToast}
             onAddTransaction={(title, amount, category) => {
               handleSaveTransaction({
                 title,
@@ -4427,6 +4503,9 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             key={langKey}
             onNavigateToImpulseBlocker={() => {
               if (checkExpiredGuard('use Impulse Blocker')) return;
+              if (!isPremiumUser) {
+                admobService.showInterstitial(isPremiumUser, 20000);
+              }
               setActiveView('wishlist');
             }}
             onNavigateToSimulator={() => {
@@ -4446,11 +4525,19 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             }}
             onNavigateToSharedBudget={() => {
               if (checkExpiredGuard('use Couple Budget Sync')) return;
+              if (!isPremiumUser) {
+                toast.info('👑 Couple & Family Sync is an exclusive PRO feature! Upgrade to connect.');
+                setIsSubModalOpen(true);
+                return;
+              }
               setActiveView('shared_budget');
             }}
             onNavigateToReferral={() => setActiveView('referral')}
             onNavigateToLoans={() => {
               if (checkExpiredGuard('manage Loans & Khata')) return;
+              if (!isPremiumUser) {
+                admobService.showInterstitial(isPremiumUser, 20000);
+              }
               setActiveView('loans');
             }}
             onOpenBankSync={() => {
@@ -5203,6 +5290,126 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         </div>
       )}
 
+      {/* Daily Free Gallery Screenshot AI Scans Limit Modal (2/day Free) */}
+      {showGalleryLimitModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.85)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1200,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'var(--bg-card, #1e293b)',
+            border: '1px solid rgba(16, 185, 129, 0.4)',
+            borderRadius: '24px',
+            padding: '24px',
+            width: '100%',
+            maxWidth: '420px',
+            textAlign: 'center',
+            boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setShowGalleryLimitModal(false)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#94a3b8',
+                cursor: 'pointer'
+              }}
+            >
+              ✕
+            </button>
+
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '20px',
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2))',
+              border: '1px solid rgba(16, 185, 129, 0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px',
+              fontSize: '28px'
+            }}>
+              📸
+            </div>
+
+            <h3 style={{ fontSize: '19px', fontWeight: 800, margin: '0 0 8px', color: 'var(--text-primary)' }}>
+              Daily Gallery Limit Reached!
+            </h3>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: '0 0 20px' }}>
+              Free plan allows <strong>2 receipt screenshot scans per day</strong>. Watch 1 quick video ad to unlock <strong style={{ color: '#10b981' }}>+1 Extra AI Scan</strong> for today, or upgrade to Pro for 100% UNLIMITED daily scans!
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button
+                onClick={handleWatchGalleryLimitAd}
+                disabled={isGalleryAdLoading}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  borderRadius: '14px',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  border: 'none',
+                  color: '#ffffff',
+                  fontSize: '14px',
+                  fontWeight: 800,
+                  cursor: isGalleryAdLoading ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 15px rgba(16, 185, 129, 0.35)',
+                  opacity: isGalleryAdLoading ? 0.7 : 1
+                }}
+              >
+                🎬 {isGalleryAdLoading ? 'Loading Video Ad...' : 'Watch Video Ad (+1 Scan Today)'}
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowGalleryLimitModal(false);
+                  setIsSubBlocker(false);
+                  setIsSubModalOpen(true);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '13px',
+                  borderRadius: '14px',
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  color: 'var(--text-primary)',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                👑 Upgrade to Pro (Unlimited Scans & 0 Ads)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Scan & Pay Feature Unlock Modal Paywall */}
       <ScanPayUnlockModal
         isOpen={isScanPayUnlockOpen}
@@ -5299,6 +5506,11 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           payload={sharedPaymentPayload}
           accounts={accounts}
           currencySymbol={currencySymbol}
+          isPremiumUser={isPremiumUser}
+          dailyUsageInfo={(() => {
+            const info = getGalleryDailyLimitState();
+            return { used: info.usedScans, max: info.maxAllowed };
+          })()}
           onClose={() => {
             setIsSharedProcessingOpen(false);
             setSharedPaymentPayload(null);

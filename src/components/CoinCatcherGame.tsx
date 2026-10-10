@@ -139,9 +139,9 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
     nextItemId: number;
   }>({
     playerX: 175,
-    playerWidth: 44,
+    playerWidth: 50,
     score: 0,
-    lives: 3,
+    lives: 5,
     invulnerableTimer: 0,
     hasShield: false,
     magnetTimer: 0,
@@ -163,7 +163,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
   });
 
   const [score, setScore] = useState(0);
-  const [lives, setLives] = useState(3);
+  const [lives, setLives] = useState(5);
   const [hasShield, setHasShield] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [started, setStarted] = useState(false);
@@ -266,15 +266,14 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
     const gs = gameStateRef.current;
     const isCrash = gs.crashTimer > 0;
 
-    // Normal, smooth, readable falling speed (2.0 - 2.5 px/frame max)
-    const baseSpeed = isCrash ? 2.3 : 2.05 + Math.min(0.35, (gs.difficulty - 1) * 0.05);
+    // Relaxed, super smooth falling speed (1.4 - 1.7 px/frame)
+    const baseSpeed = isCrash ? 1.7 : 1.45 + Math.min(0.2, (gs.difficulty - 1) * 0.02);
 
     const roll = Math.random();
 
-    // 1. 🥪 THE SANDWICH TRAP (30% chance): High-value coin closely flanked by 2 traps!
-    // Player has to thread the needle to grab the coin!
-    if (roll < 0.30) {
-      const centerX = 65 + Math.random() * (canvasWidth - 130);
+    // 1. 🥪 THE SANDWICH TRAP (25% chance): High-value coin flanked with wide clearance!
+    if (roll < 0.25) {
+      const centerX = 80 + Math.random() * (canvasWidth - 160);
       const coinPool = FINANCIAL_ITEMS.coins;
       const coinItem = coinPool[Math.floor(2 + Math.random() * 4)]; // 60, 100, 150, or 250
       
@@ -291,30 +290,30 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         size: coinItem.size
       });
 
-      // Left Flanking Trap (40px gap)
+      // Left Flanking Trap (70px generous gap)
       gs.items.push({
         id: gs.nextItemId++,
-        x: centerX - 42,
+        x: centerX - 70,
         y: -30,
         type: 'expense',
         value: -1,
         emoji: '💳',
-        label: '36% Card Fee',
+        label: 'Card Fee',
         speed: baseSpeed,
-        size: 24
+        size: 20
       });
 
-      // Right Flanking Trap (40px gap)
+      // Right Flanking Trap (70px generous gap)
       gs.items.push({
         id: gs.nextItemId++,
-        x: centerX + 42,
+        x: centerX + 70,
         y: -30,
         type: 'expense',
         value: -1,
         emoji: '💸',
         label: 'Impulse Buy',
         speed: baseSpeed,
-        size: 24
+        size: 20
       });
       return;
     }
@@ -419,45 +418,31 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
       return;
     }
 
-    // 5. 🧱 WALL WITH ONE ESCAPE SLIT (13% chance): 4 lanes, 3 blocked by hazards, 1 open corridor!
+    // 5. 💰 QUAD COIN SHOWER (15% chance): Rich shower of positive coins across lanes!
     if (roll < 0.90) {
-      const gapIndex = Math.floor(Math.random() * 4); // 0, 1, 2, 3
       const step = (canvasWidth - 50) / 4;
+      const emojis = ['🪙', '📈', '💎', '💰'];
+      const values = [40, 50, 75, 100];
       for (let i = 0; i < 4; i++) {
-        const laneX = 30 + i * step + step / 2;
-        if (i !== gapIndex) {
-          gs.items.push({
-            id: gs.nextItemId++,
-            x: laneX,
-            y: -30,
-            type: 'expense',
-            value: -1,
-            emoji: '⚠️',
-            label: 'Zombie Sub',
-            speed: baseSpeed * 0.95,
-            size: 24
-          });
-        } else {
-          // Put reward coin in the open gap!
-          gs.items.push({
-            id: gs.nextItemId++,
-            x: laneX,
-            y: -30,
-            type: 'coin',
-            value: 50,
-            emoji: '💎',
-            label: 'Safe Passage',
-            speed: baseSpeed * 0.95,
-            size: 28
-          });
-        }
+        const laneX = 25 + i * step + step / 2;
+        gs.items.push({
+          id: gs.nextItemId++,
+          x: laneX,
+          y: -30 - (i % 2) * 18,
+          type: 'coin',
+          value: values[i],
+          emoji: emojis[i],
+          label: 'Wealth Bonus',
+          speed: baseSpeed * 0.92,
+          size: 26
+        });
       }
       return;
     }
 
     // 6. 🎁 POWER-UP OR EXTRA HEALTH (10% chance)
     const powerRoll = Math.random();
-    if (gs.lives < 3 && powerRoll < 0.45) {
+    if (gs.lives < 5 && powerRoll < 0.65) {
       gs.items.push({
         id: gs.nextItemId++,
         x: 40 + Math.random() * (canvasWidth - 80),
@@ -466,7 +451,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         value: 50,
         emoji: '💖',
         label: 'Health Shield',
-        speed: baseSpeed,
+        speed: baseSpeed * 0.85,
         size: 26
       });
     } else if (powerRoll < 0.75 && !gs.hasShield) {
@@ -500,12 +485,12 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
     const gs = gameStateRef.current;
     gs.playerX = 175;
     gs.score = 0;
-    gs.lives = 3;
+    gs.lives = 5;
     gs.invulnerableTimer = 0;
     gs.hasShield = false;
     gs.magnetTimer = 0;
     gs.crashTimer = 0;
-    gs.nextCrashScore = 250;
+    gs.nextCrashScore = 650;
     gs.items = [];
     gs.particles = [];
     gs.floatingTexts = [];
@@ -519,7 +504,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
     gs.trapsDodged = 0;
     gs.frameCount = 0;
     setScore(0);
-    setLives(3);
+    setLives(5);
     setHasShield(false);
     setGameOver(false);
     setStarted(true);
@@ -533,11 +518,11 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
     try {
       await admobService.showRewardedAd(() => {
         const gs = gameStateRef.current;
-        gs.lives = 2;
-        gs.invulnerableTimer = 120;
+        gs.lives = 3;
+        gs.invulnerableTimer = 150;
         gs.gameOver = false;
         gs.started = true;
-        setLives(2);
+        setLives(3);
         setGameOver(false);
         setHasRevivedWithAd(true);
         playCelebrationSound();
@@ -646,7 +631,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
           // As bomb nears ground, fuse burns
           if (item.y >= H - 50) {
             // Detonate!
-            const blastRadius = 46;
+            const blastRadius = 32;
             const distToPlayer = Math.abs(gs.playerX - item.x);
             createParticles(item.x, H - 40, '#f97316', 22);
 
@@ -655,14 +640,14 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
                 if (gs.hasShield) {
                   gs.hasShield = false;
                   setHasShield(false);
-                  gs.invulnerableTimer = 35;
+                  gs.invulnerableTimer = 65;
                   playDangerHitSound();
                   createParticles(item.x, item.y, '#38bdf8', 16);
                   createFloatingText(item.x, item.y - 12, '🛡️ Shield Absorbed Bomb!', '#38bdf8');
                   return false;
                 }
                 gs.lives--;
-                gs.invulnerableTimer = 40;
+                gs.invulnerableTimer = 70;
                 gs.combo = 0;
                 setLives(gs.lives);
                 setCombo(0);
@@ -693,9 +678,9 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
 
         // 🪙 COINS & POSITIVE BUFFS
         if (item.type === 'coin' || item.type === 'heart' || item.type === 'shield' || item.type === 'magnet') {
-          if (isVerticallyAligned && item.x > playerLeft - 14 && item.x < playerRight + 14) {
+          if (isVerticallyAligned && item.x > playerLeft - 18 && item.x < playerRight + 18) {
             if (item.type === 'heart') {
-              gs.lives = Math.min(3, gs.lives + 1);
+              gs.lives = Math.min(5, gs.lives + 1);
               setLives(gs.lives);
               gs.score += item.value;
               setScore(gs.score);
@@ -711,12 +696,12 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
               createParticles(item.x, item.y, '#38bdf8', 18);
               createFloatingText(item.x, item.y - 12, `🛡️ Emergency Buffer Shield!`, '#38bdf8');
             } else if (item.type === 'magnet') {
-              gs.magnetTimer = 240; // 4 seconds
+              gs.magnetTimer = 300; // 5 seconds
               gs.score += item.value;
               setScore(gs.score);
               playPowerupSound();
               createParticles(item.x, item.y, '#fbbf24', 18);
-              createFloatingText(item.x, item.y - 12, `🧲 Compound Magnet (4s)!`, '#fbbf24');
+              createFloatingText(item.x, item.y - 12, `🧲 Compound Magnet (5s)!`, '#fbbf24');
             } else {
               const comboBonus = Math.floor(gs.combo * 2.0);
               const totalEarned = item.value + comboBonus;
@@ -738,22 +723,22 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
 
         // 🎣 SCAM / RUGPULL ITEM
         if (item.type === 'scam') {
-          if (isVerticallyAligned && item.x > playerLeft - 8 && item.x < playerRight + 8) {
-            gs.score = Math.max(0, gs.score - 75);
+          if (isVerticallyAligned && item.x > playerLeft - 4 && item.x < playerRight + 4) {
+            gs.score = Math.max(0, gs.score - 30);
             gs.combo = 0;
             setScore(gs.score);
             setCombo(0);
             playNotificationSound('warning');
             if (navigator.vibrate) try { navigator.vibrate([60, 40, 60]); } catch {}
             createParticles(item.x, item.y, '#f87171', 16);
-            createFloatingText(item.x, item.y - 12, `🚨 SCAM BUSTED! -${currencySymbol}75 & Streak Lost!`, '#f87171');
+            createFloatingText(item.x, item.y - 12, `🚨 SCAM BUSTED! -${currencySymbol}30 & Streak Lost!`, '#f87171');
             return false;
           }
         }
 
         // ⚠️ HAZARD / TRAP ITEMS
         if (item.type === 'expense') {
-          if (isVerticallyAligned && item.x > playerLeft - 2 && item.x < playerRight + 2) {
+          if (isVerticallyAligned && item.x > playerLeft + 6 && item.x < playerRight - 6) {
             if (gs.invulnerableTimer > 0) {
               return false;
             }
@@ -761,7 +746,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
             if (gs.hasShield) {
               gs.hasShield = false;
               setHasShield(false);
-              gs.invulnerableTimer = 35;
+              gs.invulnerableTimer = 65;
               playDangerHitSound();
               createParticles(item.x, item.y, '#38bdf8', 14);
               createFloatingText(item.x, item.y - 10, `🛡️ Shield Absorbed Trap!`, '#38bdf8');
@@ -769,7 +754,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
             }
 
             gs.lives--;
-            gs.invulnerableTimer = 38;
+            gs.invulnerableTimer = 65;
             gs.combo = 0;
             setLives(gs.lives);
             setCombo(0);
@@ -788,7 +773,6 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
                 setHighScore(gs.score);
                 localStorage.setItem('zb_coin_catcher_high', gs.score.toString());
               }
-              return false;
             }
             return false;
           }
@@ -796,14 +780,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
 
         // Off-screen check
         if (item.y > H + 25) {
-          if (item.type === 'coin') {
-            // Strict Hardcore Mechanic: Missing a real coin resets streak!
-            if (gs.combo > 0) {
-              gs.combo = 0;
-              setCombo(0);
-              createFloatingText(item.x, H - 25, '⚠️ Missed SIP! Streak reset', '#fbbf24');
-            }
-          } else if (item.type === 'expense' || item.type === 'bomb') {
+          if (item.type === 'expense' || item.type === 'bomb') {
             gs.trapsDodged++;
           }
           return false;
@@ -1500,7 +1477,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
                 }}
               >
                 <Video size={15} />
-                {adLoading ? 'Loading Sponsor Video...' : '🎬 Watch Video Ad to Revive (+2 Lives)'}
+                {adLoading ? 'Loading Sponsor Video...' : '🎬 Watch Video Ad to Revive (+3 Lives)'}
               </button>
             )}
 

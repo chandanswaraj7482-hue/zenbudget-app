@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
 import { Clock, Trash2, CheckCircle2, Plus, ArrowLeft, Pencil } from 'lucide-react';
+import { admobService } from '../services/admobService';
 
 export interface WishlistItem {
   id: string;
@@ -58,6 +58,7 @@ interface WishlistBlockerProps {
   currencySymbol: string;
   onAddTransaction: (title: string, amount: number, category: string) => void;
   onShowToast?: (msg: string, type?: 'success' | 'info' | 'warning') => void;
+  isPremiumUser?: boolean;
 }
 
 export const WishlistBlocker: React.FC<WishlistBlockerProps> = ({
@@ -65,7 +66,8 @@ export const WishlistBlocker: React.FC<WishlistBlockerProps> = ({
   currentProfileId,
   currencySymbol,
   onAddTransaction,
-  onShowToast
+  onShowToast,
+  isPremiumUser = false
 }) => {
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [newItemName, setNewItemName] = useState('');
@@ -127,6 +129,8 @@ export const WishlistBlocker: React.FC<WishlistBlockerProps> = ({
     setNewItemAmount('');
     setNewItemCategory('shopping');
     setNewItemReason('');
+    if (onShowToast) onShowToast(`Item "${newItem.name}" added to Impulse Blocker lock!`, 'success');
+    admobService.recordActionAndMaybeShowAd(isPremiumUser);
   };
 
   const handleDeleteItem = (id: string) => {

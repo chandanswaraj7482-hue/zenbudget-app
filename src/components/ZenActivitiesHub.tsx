@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Gamepad2, 
   Brain, 
   Sparkles, 
   ArrowRight, 
+  ArrowLeft,
+  X,
   RotateCcw, 
   Award, 
   Zap,
@@ -133,6 +135,15 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
   const [monthlyIncome, setMonthlyIncome] = useState<number>(45000);
   const [isFrozenInWishlist, setIsFrozenInWishlist] = useState(false);
 
+  useEffect(() => {
+    if (!isExpanded) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsExpanded(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isExpanded]);
+
   const handleAnswerQuiz = (points: number) => {
     playNotificationSound();
     const newAnswers = [...selectedAnswers, points];
@@ -256,8 +267,9 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
   };
 
   // Collapsed Card Preview
-  if (!isExpanded) {
-    return (
+  return (
+    <>
+      {/* 1. Hub Entry Card (Always clean in More tools menu) */}
       <div style={{ marginTop: '16px', marginBottom: '16px' }}>
         <button
           onClick={() => setIsExpanded(true)}
@@ -331,71 +343,121 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
           </div>
         </button>
       </div>
-    );
-  }
 
-  // Expanded Hub View with 3 Activities
-  return (
-    <div style={{
-      marginTop: '16px',
-      marginBottom: '20px',
-      borderRadius: '28px',
-      border: '1.5px solid rgba(16, 185, 129, 0.35)',
-      background: 'var(--bg-card)',
-      overflow: 'hidden',
-      boxShadow: '0 16px 40px rgba(0,0,0,0.18)'
-    }}>
-      {/* Top Header */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '16px 20px',
-        borderBottom: '1px solid var(--border-input, rgba(255,255,255,0.08))',
-        background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(6, 182, 212, 0.04) 100%)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Sparkles size={18} color="#10b981" />
-          <span style={{ fontSize: '15px', fontWeight: 900, color: 'var(--text-primary)' }}>
-            Zen Arcade &amp; Brain Hub
-          </span>
-          <span style={{
-            fontSize: '10px',
-            fontWeight: 800,
-            padding: '2px 8px',
-            borderRadius: '999px',
-            background: 'rgba(16, 185, 129, 0.15)',
-            color: '#10b981'
+      {/* 2. DEDICATED FULL-SCREEN SEPARATE GAMING & BRAIN HUB PAGE */}
+      {isExpanded && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 99999,
+          background: 'var(--bg-primary, #090d16)',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          animation: 'fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}>
+          {/* Dedicated Full-Screen Header with Back & Close */}
+          <div style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 30,
+            background: 'rgba(15, 23, 42, 0.95)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+            padding: '12px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexShrink: 0
           }}>
-            3-in-1
-          </span>
-        </div>
-        <button
-          onClick={() => setIsExpanded(false)}
-          style={{
-            background: 'var(--bg-input)',
-            border: '1px solid var(--border-input)',
-            borderRadius: '10px',
-            padding: '5px 12px',
-            color: 'var(--text-secondary)',
-            fontSize: '11px',
-            fontWeight: 700,
-            cursor: 'pointer'
-          }}
-        >
-          Close Hub
-        </button>
-      </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <button
+                onClick={() => setIsExpanded(false)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  borderRadius: '12px',
+                  width: '38px',
+                  height: '38px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--text-primary, #fff)',
+                  cursor: 'pointer',
+                  flexShrink: 0
+                }}
+                title="Back to More"
+              >
+                <ArrowLeft size={18} />
+              </button>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '15px', fontWeight: 900, color: 'var(--text-primary, #fff)' }}>
+                    Zen Arcade &amp; Brain Hub
+                  </span>
+                  <span style={{
+                    fontSize: '9.5px',
+                    fontWeight: 800,
+                    padding: '2px 8px',
+                    borderRadius: '999px',
+                    background: '#10b981',
+                    color: '#ffffff'
+                  }}>
+                    3-in-1
+                  </span>
+                </div>
+                <p style={{ fontSize: '11px', color: 'var(--text-secondary, #94a3b8)', margin: '1px 0 0 0' }}>
+                  🎮 Arcade • 🧠 IQ Quiz • ⚡ Can I Afford It?
+                </p>
+              </div>
+            </div>
 
-      {/* 3 Activity Tabs Selector */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        padding: '8px',
-        gap: '6px',
-        background: 'rgba(0,0,0,0.03)',
-        borderBottom: '1px solid var(--border-input, rgba(255,255,255,0.06))'
-      }}>
+            <button
+              onClick={() => setIsExpanded(false)}
+              style={{
+                background: 'rgba(239, 68, 68, 0.12)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                borderRadius: '10px',
+                padding: '6px 14px',
+                color: '#f87171',
+                fontSize: '12px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <X size={14} />
+              <span>Close</span>
+            </button>
+          </div>
+
+          {/* Full Screen Scrollable Body */}
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: '14px 14px 50px 14px',
+            maxWidth: '560px',
+            width: '100%',
+            margin: '0 auto',
+            boxSizing: 'border-box'
+          }}>
+            {/* 3 Activity Tabs Selector */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              padding: '6px',
+              gap: '6px',
+              background: 'var(--bg-card, rgba(30, 41, 59, 0.6))',
+              borderRadius: '16px',
+              border: '1px solid var(--border-input, rgba(255,255,255,0.08))',
+              marginBottom: '16px'
+            }}>
         {/* Tab 1: Arcade Game */}
         <button
           onClick={() => setActiveTab('game')}
@@ -1006,6 +1068,9 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
           </button>
         </div>
       )}
-    </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };

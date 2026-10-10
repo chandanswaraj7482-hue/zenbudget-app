@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { Mic, ArrowRight, Sparkles, Check, RefreshCw } from 'lucide-react';
+import { Mic, MicOff, ArrowRight, Sparkles, Check, RefreshCw, AlertCircle, Wallet, Plus, X } from 'lucide-react';
 import type { Transaction, Account } from '../types';
 import confetti from 'canvas-confetti';
-import { Wallet, Plus, X } from 'lucide-react';
 import { t } from '../utils/i18n';
 
 interface QuickCaptureCardProps {
@@ -24,15 +23,24 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
   const [isListening, setIsListening] = useState(false);
   const [lastSavedSummary, setLastSavedSummary] = useState<string | null>(null);
   const [showNoAccountModal, setShowNoAccountModal] = useState(false);
+  const recognitionRef = useRef<any>(null);
 
   const [selectedAccountId, setSelectedAccountId] = useState<string>(() => accounts[0]?.id || '1');
-  const [selectedTransferToAccountId, setSelectedTransferToAccountId] = useState<string>(() => accounts[1]?.id || accounts[0]?.id || '2');
+  const [selectedTransferToAccountId, setSelectedTransferToAccountId] = useState<string>(() => accounts[1]?.id || accounts[0]?.id || '1');
 
-  React.useEffect(() => {
-    if (accounts && accounts.length > 0 && (!selectedAccountId || !accounts.some(a => a.id === selectedAccountId))) {
-      setSelectedAccountId(accounts[0].id);
+  useEffect(() => {
+    if (accounts && accounts.length > 0) {
+      if (!selectedAccountId || !accounts.some(a => a.id === selectedAccountId)) {
+        setSelectedAccountId(accounts[0].id);
+      }
+      if (accounts.length > 1) {
+        if (!selectedTransferToAccountId || selectedTransferToAccountId === selectedAccountId) {
+          const other = accounts.find(a => a.id !== selectedAccountId);
+          if (other) setSelectedTransferToAccountId(other.id);
+        }
+      }
     }
-  }, [accounts]);
+  }, [accounts, selectedAccountId, selectedTransferToAccountId]);
 
   const [parseError, setParseError] = useState<string | null>(null);
 
@@ -67,6 +75,26 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
         const numMatch = cleanText.match(/(?:(?:₹|\$|€|£|rs\.?|inr|rupees|ruppess|rupee)?\s*)(\d+(?:\.\d+)?)/i) || cleanText.match(/(\d+(?:\.\d+)?)\s*(?:rs|inr|rupees|ruppess|rupee)?/i);
         if (numMatch) {
           amount = Math.round(parseFloat(numMatch[1]));
+        }
+      }
+    }
+
+    // Number word fallback if no digits were matched (handles spoken number words like "bees", "pachas", "hundred")
+    if (!amount || amount <= 0) {
+      const numberWordsMap: Record<string, number> = {
+        'ek': 1, 'do': 2, 'teen': 3, 'char': 4, 'chaar': 4, 'paanch': 5, 'panch': 5, 'chhe': 6, 'che': 6, 'saat': 7, 'aath': 8, 'nau': 9, 'das': 10, 'dus': 10,
+        'gyarah': 11, 'barah': 12, 'terah': 13, 'chaudah': 14, 'pandrah': 15, 'solah': 16, 'satrah': 17, 'atharah': 18, 'unnis': 19,
+        'bees': 20, 'beess': 20, 'tees': 30, 'chaalis': 40, 'chalis': 40, 'pachaas': 50, 'pachas': 50, 'saath': 60, 'sath': 60,
+        'sattar': 70, 'assi': 80, 'nabbe': 90, 'sau': 100, 'so': 100, 'hazaar': 1000, 'hazar': 1000, 'lakh': 100000,
+        'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
+        'twenty': 20, 'thirty': 30, 'forty': 40, 'fifty': 50, 'sixty': 60, 'seventy': 70, 'eighty': 80, 'ninety': 90,
+        'hundred': 100, 'thousand': 1000
+      };
+      const words = cleanText.split(/[\s,]+/);
+      for (const w of words) {
+        if (numberWordsMap[w]) {
+          amount = numberWordsMap[w];
+          break;
         }
       }
     }
@@ -198,7 +226,7 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
         entertainment: 'Entertainment',
         health: 'Health & Medical',
         salary: 'Salary / Income',
-        other: 'General Expense'
+        other: defaultType === 'expense' ? 'Quick Expense' : (defaultType === 'income' ? 'Quick Income' : 'Wallet Transfer')
       };
       extractedTitle = catLabels[category] || `${type.toUpperCase()} Transaction`;
     }
@@ -213,31 +241,82 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
     };
   };
 
-  const handleVoiceInput = () => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setParseError('Speech recognition is not supported in this browser. Please type text directly.');
+  const handleVoiceInput = async () => {
+    // If already listening, stop recording
+    if (isListening) {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (_) {}
+      }
+      setIsListening(false);
       return;
     }
 
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setParseError('Voice speech-to-text is not supported in this browser. Please type directly or use Chrome.');
+      window.dispatchEvent(new CustomEvent('toast-alert', { 
+        detail: { message: 'Speech recognition not supported in this browser', type: 'info' } 
+      }));
+      return;
+    }
+
+    // Explicitly prompt for mic permission if getUserMedia is supported
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(t => t.stop());
+      } catch (micErr) {
+        console.warn('Microphone permission error:', micErr);
+      }
+    }
+
     try {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.abort(); } catch (_) {}
+      }
+
       const recognition = new SpeechRecognition();
-      recognition.lang = 'en-IN'; // Supports English + Indian accents & mixed phrases
+      recognitionRef.current = recognition;
+      recognition.lang = 'en-IN';
       recognition.continuous = false;
-      recognition.interimResults = false;
+      recognition.interimResults = true; // Live typing as user speaks!
 
       setIsListening(true);
+      setParseError(null);
 
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        if (transcript) {
-          setInputQuery(transcript);
+      recognition.onstart = () => {
+        setIsListening(true);
+        if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
+          navigator.vibrate(35);
         }
-        setIsListening(false);
       };
 
-      recognition.onerror = () => {
+      recognition.onresult = (event: any) => {
+        let currentTranscript = '';
+        for (let i = 0; i < event.results.length; i++) {
+          currentTranscript += event.results[i][0].transcript;
+        }
+        if (currentTranscript) {
+          setInputQuery(currentTranscript);
+          if (parseError) setParseError(null);
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        console.warn('Speech recognition error:', event.error);
         setIsListening(false);
+        if (event.error === 'not-allowed') {
+          setParseError('Microphone permission was denied. Please allow microphone in browser/device settings.');
+          window.dispatchEvent(new CustomEvent('toast-alert', { 
+            detail: { message: 'Microphone permission denied', type: 'warning' } 
+          }));
+        } else if (event.error === 'no-speech') {
+          setParseError('No speech detected. Please tap the mic and speak clearly.');
+        } else if (event.error !== 'aborted') {
+          setParseError(`Voice input issue: ${event.error}. Please type directly.`);
+        }
       };
 
       recognition.onend = () => {
@@ -245,8 +324,10 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
       };
 
       recognition.start();
-    } catch (e) {
+    } catch (e: any) {
+      console.warn('Speech recognition start failed:', e);
       setIsListening(false);
+      setParseError('Could not start microphone. Please type your transaction directly.');
     }
   };
 
@@ -372,86 +453,197 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
         </div>
       </div>
 
-      {/* Type Selector Tabs & Mic */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', gap: '10px' }}>
-        <div style={{
-          display: 'flex',
-          flex: 1,
-          background: 'var(--bg-input)',
-          padding: '4px',
-          borderRadius: '16px',
-          border: '1px solid var(--border-input)',
-          gap: '4px'
-        }}>
-          {(['expense', 'income', 'transfer'] as const).map(tab => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setActiveTab(tab)}
-              style={{
-                flex: 1,
-                padding: '7px 4px',
-                borderRadius: '12px',
-                border: 'none',
-                fontSize: '11px',
-                fontWeight: 800,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                background: activeTab === tab ? 'var(--bg-card-hover)' : 'transparent',
-                color: activeTab === tab ? 'var(--text-primary)' : 'var(--text-secondary)',
-                boxShadow: activeTab === tab ? '0 2px 8px rgba(0,0,0,0.15)' : 'none'
-              }}
-            >
-              {tab === 'expense' ? t('expenses') : tab === 'income' ? t('income') : t('transfer')}
-            </button>
-          ))}
-        </div>
-
-        {/* Speech Mic Button */}
-        <button
-          type="button"
-          onClick={handleVoiceInput}
-          title="Voice Speech to Text"
-          style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            border: isListening ? '2px solid var(--primary)' : '1px solid var(--border-card)',
-            background: isListening ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-dark)',
-            color: isListening ? 'var(--primary)' : 'var(--text-secondary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            animation: isListening ? 'pulse 1.5s infinite' : 'none',
-            flexShrink: 0
-          }}
-        >
-          <Mic size={18} />
-        </button>
+      {/* Type Selector Tabs */}
+      <div style={{
+        display: 'flex',
+        background: 'var(--bg-input)',
+        padding: '4px',
+        borderRadius: '16px',
+        border: '1px solid var(--border-input)',
+        gap: '4px',
+        marginBottom: '14px'
+      }}>
+        {(['expense', 'income', 'transfer'] as const).map(tab => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => {
+              setActiveTab(tab);
+              if (parseError) setParseError(null);
+            }}
+            style={{
+              flex: 1,
+              padding: '9px 6px',
+              borderRadius: '12px',
+              border: 'none',
+              fontSize: '12px',
+              fontWeight: 800,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              background: activeTab === tab ? 'var(--bg-card-hover)' : 'transparent',
+              color: activeTab === tab ? 'var(--text-primary)' : 'var(--text-secondary)',
+              boxShadow: activeTab === tab ? '0 2px 8px rgba(0,0,0,0.15)' : 'none'
+            }}
+          >
+            {tab === 'expense' ? t('expenses') : tab === 'income' ? t('income') : t('transfer')}
+          </button>
+        ))}
       </div>
 
-      {/* Input Box & Submit Button */}
+      {/* Transfer Accounts Selector (When Transfer tab is active) */}
+      {activeTab === 'transfer' && (
+        accounts.length < 2 ? (
+          <div style={{
+            marginBottom: '12px',
+            padding: '10px 14px',
+            borderRadius: '14px',
+            background: 'rgba(234, 179, 8, 0.12)',
+            border: '1px solid rgba(234, 179, 8, 0.25)',
+            color: '#fde047',
+            fontSize: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '8px'
+          }}>
+            <span>⚠️ Wallet transfer ke liye kam se kam 2 accounts hone chahiye.</span>
+            {onAddAccountClick && (
+              <button
+                type="button"
+                onClick={onAddAccountClick}
+                style={{
+                  background: '#eab308',
+                  color: '#000',
+                  border: 'none',
+                  padding: '5px 10px',
+                  borderRadius: '8px',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                + Add Account
+              </button>
+            )}
+          </div>
+        ) : (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '12px',
+            padding: '8px 12px',
+            borderRadius: '14px',
+            background: 'rgba(0,0,0,0.25)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            fontSize: '12px'
+          }}>
+            <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>From:</span>
+            <select
+              value={selectedAccountId}
+              onChange={e => setSelectedAccountId(e.target.value)}
+              style={{
+                flex: 1,
+                background: 'transparent',
+                border: 'none',
+                color: '#fff',
+                fontWeight: 700,
+                outline: 'none',
+                cursor: 'pointer',
+                fontSize: '12px'
+              }}
+            >
+              {accounts.map(a => (
+                <option key={a.id} value={a.id} style={{ background: '#0f172a', color: '#fff' }}>
+                  {a.name} ({currencySymbol}{a.balance ?? 0})
+                </option>
+              ))}
+            </select>
+            <span style={{ color: 'var(--primary)', fontWeight: 800 }}>➔</span>
+            <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>To:</span>
+            <select
+              value={selectedTransferToAccountId}
+              onChange={e => setSelectedTransferToAccountId(e.target.value)}
+              style={{
+                flex: 1,
+                background: 'transparent',
+                border: 'none',
+                color: '#fff',
+                fontWeight: 700,
+                outline: 'none',
+                cursor: 'pointer',
+                fontSize: '12px'
+              }}
+            >
+              {accounts.map(a => (
+                <option key={a.id} value={a.id} style={{ background: '#0f172a', color: '#fff' }}>
+                  {a.name} ({currencySymbol}{a.balance ?? 0})
+                </option>
+              ))}
+            </select>
+          </div>
+        )
+      )}
+
+      {/* Input Box with Integrated Speech Mic & Submit Button */}
       <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '8px' }}>
-        <div style={{ position: 'relative', flex: 1 }}>
+        <div style={{
+          position: 'relative',
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          background: 'var(--bg-input)',
+          borderRadius: '18px',
+          border: isListening ? '1.5px solid var(--primary)' : '1px solid var(--border-input)',
+          boxShadow: isListening ? '0 0 16px rgba(16, 185, 129, 0.25)' : 'none',
+          transition: 'all 0.2s ease',
+          padding: '0 8px 0 16px'
+        }}>
           <input
             type="text"
             value={inputQuery}
-            onChange={e => setInputQuery(e.target.value)}
-            placeholder={getPlaceholder()}
+            onChange={e => {
+              setInputQuery(e.target.value);
+              if (parseError) setParseError(null);
+            }}
+            placeholder={isListening ? '🎙️ Listening... Speak your amount & item now...' : getPlaceholder()}
             style={{
-              width: '100%',
-              padding: '14px 18px',
-              borderRadius: '18px',
-              border: '1px solid var(--border-input)',
-              background: 'var(--bg-input)',
+              flex: 1,
+              padding: '14px 0',
+              border: 'none',
+              background: 'transparent',
               color: 'var(--text-primary)',
               fontSize: '13.5px',
               outline: 'none',
-              transition: 'all 0.2s ease'
+              fontFamily: 'inherit'
             }}
           />
+
+          {/* Integrated Speech Mic Button */}
+          <button
+            type="button"
+            onClick={handleVoiceInput}
+            title={isListening ? 'Stop listening' : 'Voice Speech to Text'}
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              border: isListening ? '1.5px solid #ef4444' : '1px solid rgba(255,255,255,0.1)',
+              background: isListening ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255,255,255,0.06)',
+              color: isListening ? '#f87171' : 'var(--primary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              animation: isListening ? 'pulse 1.2s infinite' : 'none',
+              flexShrink: 0,
+              marginLeft: '6px'
+            }}
+          >
+            {isListening ? <MicOff size={17} /> : <Mic size={17} />}
+          </button>
         </div>
 
         <button
@@ -476,6 +668,34 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
           <ArrowRight size={20} />
         </button>
       </form>
+
+      {/* Parse Error Display */}
+      {parseError && (
+        <div style={{
+          marginTop: '10px',
+          padding: '8px 12px',
+          borderRadius: '12px',
+          background: 'rgba(239, 68, 68, 0.12)',
+          border: '1px solid rgba(239, 68, 68, 0.3)',
+          color: '#f87171',
+          fontSize: '12px',
+          fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          animation: 'fadeIn 0.2s ease-out'
+        }}>
+          <AlertCircle size={15} style={{ flexShrink: 0 }} />
+          <span style={{ flex: 1 }}>{parseError}</span>
+          <button
+            type="button"
+            onClick={() => setParseError(null)}
+            style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: 0 }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Success Feedback Summary */}
       {lastSavedSummary && (

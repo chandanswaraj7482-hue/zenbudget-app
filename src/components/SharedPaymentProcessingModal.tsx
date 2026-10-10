@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { 
   CheckCircle2, Sparkles, AlertCircle, ArrowRight, ShieldCheck, 
@@ -17,6 +17,8 @@ interface SharedPaymentProcessingModalProps {
   currencySymbol: string;
   onSaveTransaction: (tx: any) => Promise<boolean>;
   onOpenFullEditor: (tx: any) => void;
+  isPremiumUser?: boolean;
+  dailyUsageInfo?: { used: number; max: number };
 }
 
 const EXPENSE_CATEGORIES = [
@@ -36,6 +38,8 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
   currencySymbol,
   onSaveTransaction,
   onOpenFullEditor,
+  isPremiumUser = false,
+  dailyUsageInfo,
 }) => {
   const [stage, setStage] = useState<'receiving' | 'analyzing' | 'extracting' | 'ready' | 'error'>('receiving');
   const [progressPercent, setProgressPercent] = useState<number>(15);
@@ -53,92 +57,15 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [autoSaveCountdown, setAutoSaveCountdown] = useState<number | null>(null);
 
   const hasProcessedRef = useRef(false);
 
-  useEffect(() => {
-    if (!isOpen || !payload) {
-      hasProcessedRef.current = false;
-      return;
-    }
+  const cancelAutoSave = useCallback(() => {
+    setAutoSaveCountdown(null);
+  }, []);
 
-    if (hasProcessedRef.current) return;
-    hasProcessedRef.current = true;
-
-    // Set initial default account
-    const upiAcc = accounts.find(a => /upi|gpay|phonepe|paytm/i.test(a.name) || a.type === 'upi');
-    const defaultAccId = upiAcc ? upiAcc.id : (accounts[0]?.id || '');
-    setSelectedAccountId(defaultAccId);
-
-    const executeAnalysis = async () => {
-      try {
-        setStage('receiving');
-        setProgressPercent(20);
-        setStatusMessage('Establishing link with payment source...');
-
-        // Subtle haptic if supported
-        if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
-          navigator.vibrate(30);
-        }
-
-        await new Promise(r => setTimeout(r, 600));
-
-        if (payload.type === 'image') {
-          setStage('analyzing');
-          setProgressPercent(45);
-          setStatusMessage('AI Vision OCR scanning receipt details...');
-
-          const result = await parsePaymentScreenshot(
-            payload.data,
-            (currentStage, percent, msg) => {
-              setStage(currentStage);
-              setProgressPercent(percent);
-              setStatusMessage(msg);
-            }
-          );
-
-          setProgressPercent(100);
-          setStage('ready');
-          setStatusMessage('Payment verified successfully!');
-          populateFields(result, defaultAccId);
-
-          if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
-            navigator.vibrate([40, 60, 40]);
-          }
-        } else {
-          // Text Payload
-          setStage('analyzing');
-          setProgressPercent(60);
-          setStatusMessage('Parsing UPI transaction message...');
-          await new Promise(r => setTimeout(r, 700));
-
-          const result = parseSharedPaymentText(payload.data);
-          setProgressPercent(100);
-          setStage('ready');
-          setStatusMessage('UPI Payment identified!');
-          populateFields(result, defaultAccId);
-
-          if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
-            navigator.vibrate(50);
-          }
-        }
-      } catch (err: any) {
-        console.error('Shared payment processing error:', err);
-        setStage('error');
-        if (err.message === "INVALID_RECEIPT") {
-          setStatusMessage('Invalid Image: This does not look like a payment receipt!');
-        } else {
-          setStatusMessage('Could not auto-read receipt. Please confirm details manually.');
-        }
-        setAmount('0');
-        setMerchantName('Payment Recipient');
-      }
-    };
-
-    executeAnalysis();
-  }, [isOpen, payload]);
-
-  const populateFields = (result: ParsedPaymentResult, fallbackAccountId: string) => {
+  const populateFields = useCallback((result: ParsedPaymentResult, fallbackAccountId: string) => {
     setParsedData(result);
     setAmount(result.amount ? String(Math.round(parseFloat(result.amount))) : '');
     const isInc = result.type === 'income';
@@ -150,9 +77,124 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
     if (!selectedAccountId) {
       setSelectedAccountId(fallbackAccountId);
     }
-  };
+  }, [selectedAccountId]);
 
-  const handleQuickSave = async () => {
+  const executeAnalysis = useCallback(async (currentPayload = payload) => {
+    if (!currentPayload || !currentPayload.data) return;
+    try {
+      setStage('receiving');
+      setProgressPercent(20);
+      setStatusMessage('Establishing link with payment source...');
+      setAutoSaveCountdown(null);
+
+      // Subtle haptic if supported
+      if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
+        navigator.vibrate(30);
+      }
+
+      await new Promise(r => setTimeout(r, 600));
+
+      const upiAcc = accounts.find(a => /upi|gpay|phonepe|paytm/i.test(a.name) || a.type === 'upi');
+      const defaultAccId = upiAcc ? upiAcc.id : (accounts[0]?.id || '');
+
+      if (currentPayload.type === 'image') {
+        setStage('analyzing');
+        setProgressPercent(45);
+        setStatusMessage('AI Vision OCR scanning receipt details...');
+
+        const result = await parsePaymentScreenshot(
+          currentPayload.data,
+          (currentStage, percent, msg) => {
+            setStage(currentStage);
+            setProgressPercent(percent);
+            setStatusMessage(msg);
+          }
+        );
+
+        const parsedAmt = parseFloat(result.amount);
+        if (!result.amount || isNaN(parsedAmt) || parsedAmt <= 0) {
+          setStage('error');
+          setStatusMessage('Invalid Payment Screenshot: No valid transaction amount detected!');
+          setAmount('');
+          setMerchantName('');
+          if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
+            navigator.vibrate([100, 50, 100]);
+          }
+          return;
+        }
+
+        setProgressPercent(100);
+        setStage('ready');
+        setStatusMessage('Payment verified successfully!');
+        populateFields(result, selectedAccountId || defaultAccId);
+        setAutoSaveCountdown(3);
+
+        if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
+          navigator.vibrate([40, 60, 40]);
+        }
+      } else {
+        // Text Payload
+        setStage('analyzing');
+        setProgressPercent(60);
+        setStatusMessage('Parsing UPI transaction message...');
+        await new Promise(r => setTimeout(r, 700));
+
+        const result = parseSharedPaymentText(currentPayload.data);
+        const parsedAmt = parseFloat(result.amount);
+        if (!result.amount || isNaN(parsedAmt) || parsedAmt <= 0) {
+          setStage('error');
+          setStatusMessage('No valid payment amount found in shared message!');
+          setAmount('');
+          setMerchantName('');
+          return;
+        }
+
+        setProgressPercent(100);
+        setStage('ready');
+        setStatusMessage('UPI Payment identified!');
+        populateFields(result, selectedAccountId || defaultAccId);
+        setAutoSaveCountdown(3);
+
+        if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
+          navigator.vibrate(50);
+        }
+      }
+    } catch (err: any) {
+      console.error('Shared payment processing error:', err);
+      setStage('error');
+      setAutoSaveCountdown(null);
+      if (err.message === "INVALID_RECEIPT") {
+        setStatusMessage('Invalid Image: This does not look like a payment receipt or no amount was found!');
+      } else {
+        setStatusMessage('Could not detect payment amount. Please upload a clear receipt.');
+      }
+      setAmount('');
+      setMerchantName('');
+    }
+  }, [payload, accounts, selectedAccountId, populateFields]);
+
+  useEffect(() => {
+    if (!isOpen || !payload) {
+      hasProcessedRef.current = false;
+      setAutoSaveCountdown(null);
+      return;
+    }
+
+    if (hasProcessedRef.current) return;
+    hasProcessedRef.current = true;
+
+    // Set initial default account
+    const upiAcc = accounts.find(a => /upi|gpay|phonepe|paytm/i.test(a.name) || a.type === 'upi');
+    const defaultAccId = upiAcc ? upiAcc.id : (accounts[0]?.id || '');
+    if (!selectedAccountId) {
+      setSelectedAccountId(defaultAccId);
+    }
+
+    executeAnalysis(payload);
+  }, [isOpen, payload, executeAnalysis, accounts, selectedAccountId]);
+
+  const handleQuickSave = useCallback(async () => {
+    setAutoSaveCountdown(null);
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount) || numAmount <= 0) {
       setInputError('Please enter a valid amount');
@@ -182,7 +224,21 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [amount, merchantName, transactionType, category, date, notes, selectedAccountId, accounts, onSaveTransaction, onClose]);
+
+  // Auto-Save Countdown Effect
+  useEffect(() => {
+    if (autoSaveCountdown === null) return;
+    if (autoSaveCountdown > 0) {
+      const timer = setTimeout(() => {
+        setAutoSaveCountdown(prev => (prev !== null && prev > 0 ? prev - 1 : 0));
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (autoSaveCountdown === 0) {
+      setAutoSaveCountdown(null);
+      handleQuickSave();
+    }
+  }, [autoSaveCountdown, handleQuickSave]);
 
   const handleEditMore = () => {
     const numAmount = parseFloat(amount) || 0;
@@ -515,10 +571,189 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
         )}
 
         {/* ================================================================= */}
+        {/* STAGE ERROR: INVALID PAYMENT SCREENSHOT / NO AMOUNT FOUND        */}
+        {/* ================================================================= */}
+        {stage === 'error' && (
+          <div style={{ textAlign: 'center', padding: '10px 4px 16px' }}>
+            <div style={{
+              width: '68px',
+              height: '68px',
+              borderRadius: '22px',
+              background: 'rgba(239, 68, 68, 0.15)',
+              border: '1.5px solid rgba(239, 68, 68, 0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px auto',
+              color: '#ef4444',
+              boxShadow: '0 8px 25px rgba(239, 68, 68, 0.25)'
+            }}>
+              <AlertCircle size={34} />
+            </div>
+
+            <h3 style={{ fontSize: '18px', fontWeight: 900, color: '#f87171', margin: '0 0 8px 0' }}>
+              Invalid Payment Screenshot
+            </h3>
+            <p style={{ fontSize: '12.5px', color: '#94a3b8', margin: '0 0 18px 0', lineHeight: 1.5, padding: '0 8px' }}>
+              {statusMessage || 'ZenBudget AI ko is image me koi valid payment amount ya transaction nahi mila. Kripya ek clear UPI receipt (GPay, PhonePe, Paytm, Bank SMS) upload karein.'}
+            </p>
+
+            {payload?.type === 'image' && payload.data && (
+              <div style={{
+                width: '100%',
+                maxHeight: '130px',
+                borderRadius: '16px',
+                overflow: 'hidden',
+                border: '1.5px dashed rgba(239, 68, 68, 0.35)',
+                background: 'rgba(0, 0, 0, 0.4)',
+                marginBottom: '18px',
+                position: 'relative'
+              }}>
+                <img
+                  src={payload.data}
+                  alt="Rejected Image"
+                  style={{ width: '100%', height: '130px', objectFit: 'contain', opacity: 0.6 }}
+                />
+                <div style={{
+                  position: 'absolute',
+                  bottom: '8px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: 'rgba(239, 68, 68, 0.95)',
+                  color: '#fff',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  padding: '3px 12px',
+                  borderRadius: '999px',
+                  whiteSpace: 'nowrap'
+                }}>
+                  ❌ No Valid Amount Detected
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <label style={{
+                width: '100%',
+                padding: '14px',
+                borderRadius: '16px',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: '#ffffff',
+                fontSize: '14px',
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                boxShadow: '0 6px 20px rgba(16, 185, 129, 0.35)',
+                boxSizing: 'border-box'
+              }}>
+                <span>📸 Upload Clear UPI Screenshot</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        if (reader.result) {
+                          hasProcessedRef.current = false;
+                          payload.data = reader.result as string;
+                          payload.type = 'image';
+                          setStage('receiving');
+                          executeAnalysis();
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </label>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={handleEditMore}
+                  style={{
+                    padding: '12px',
+                    borderRadius: '14px',
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    color: '#cbd5e1',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  ✏️ Enter Manually
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onClose}
+                  style={{
+                    padding: '12px',
+                    borderRadius: '14px',
+                    background: 'transparent',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    color: '#f87171',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  ✕ Discard
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ================================================================= */}
         {/* STAGE 2: READY STATE (DETECTION CARD & 1-TAP SAVE)                 */}
         {/* ================================================================= */}
-        {(stage === 'ready' || stage === 'error') && (
+        {stage === 'ready' && (
           <div>
+            {/* Auto-Save Countdown Banner */}
+            {autoSaveCountdown !== null && (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(6, 182, 212, 0.12) 100%)',
+                border: '1px solid rgba(16, 185, 129, 0.4)',
+                borderRadius: '16px',
+                padding: '10px 14px',
+                marginBottom: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Zap size={16} color="#34d399" />
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#34d399' }}>
+                    Auto-logging to ZenBudget in {autoSaveCountdown}s...
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={cancelAutoSave}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.12)',
+                    border: 'none',
+                    color: '#e2e8f0',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    padding: '5px 12px',
+                    borderRadius: '8px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Pause / Edit
+                </button>
+              </div>
+            )}
+
             {/* Top Success Badge */}
             <div style={{
               display: 'flex',
@@ -542,19 +777,34 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
                 </div>
               </div>
 
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '4px 10px',
-                borderRadius: '999px',
-                backgroundColor: transactionType === 'income' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(244, 63, 94, 0.2)',
-                color: transactionType === 'income' ? '#34d399' : '#fb7185',
-                fontSize: '11px',
-                fontWeight: 700
-              }}>
-                <ShieldCheck size={13} />
-                <span>{transactionType === 'income' ? '💰 Income Detected' : '💸 Expense Detected'}</span>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '4px 10px',
+                  borderRadius: '999px',
+                  backgroundColor: transactionType === 'income' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(244, 63, 94, 0.2)',
+                  color: transactionType === 'income' ? '#34d399' : '#fb7185',
+                  fontSize: '11px',
+                  fontWeight: 700
+                }}>
+                  <ShieldCheck size={13} />
+                  <span>{transactionType === 'income' ? '💰 Income Detected' : '💸 Expense Detected'}</span>
+                </div>
+                {!isPremiumUser && dailyUsageInfo && (
+                  <div style={{
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    color: '#10b981',
+                    background: 'rgba(16, 185, 129, 0.12)',
+                    border: '1px solid rgba(16, 185, 129, 0.25)',
+                    borderRadius: '8px',
+                    padding: '2px 7px'
+                  }}>
+                    📸 Daily Free: {dailyUsageInfo.used}/{dailyUsageInfo.max}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -571,6 +821,7 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
               <button
                 type="button"
                 onClick={() => {
+                  cancelAutoSave();
                   setTransactionType('expense');
                   if (INCOME_CATEGORIES.includes(category)) setCategory('General');
                 }}
@@ -598,6 +849,7 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
               <button
                 type="button"
                 onClick={() => {
+                  cancelAutoSave();
                   setTransactionType('income');
                   if (EXPENSE_CATEGORIES.includes(category)) setCategory('Income');
                 }}
@@ -649,6 +901,7 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
                   type="number"
                   value={amount}
                   onChange={(e) => {
+                    cancelAutoSave();
                     setAmount(e.target.value);
                     if (inputError) setInputError(null);
                   }}
@@ -703,7 +956,10 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
                   <input
                     type="text"
                     value={merchantName}
-                    onChange={(e) => setMerchantName(e.target.value)}
+                    onChange={(e) => {
+                      cancelAutoSave();
+                      setMerchantName(e.target.value);
+                    }}
                     placeholder="Payee Name"
                     style={{
                       flex: 1,
@@ -738,7 +994,10 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
                     <Tag size={14} color="#34d399" />
                     <select
                       value={category}
-                      onChange={(e) => setCategory(e.target.value)}
+                      onChange={(e) => {
+                        cancelAutoSave();
+                        setCategory(e.target.value);
+                      }}
                       style={{
                         flex: 1,
                         background: 'transparent',
@@ -777,7 +1036,10 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
                     <Wallet size={14} color="#06b6d4" />
                     <select
                       value={selectedAccountId}
-                      onChange={(e) => setSelectedAccountId(e.target.value)}
+                      onChange={(e) => {
+                        cancelAutoSave();
+                        setSelectedAccountId(e.target.value);
+                      }}
                       style={{
                         flex: 1,
                         background: 'transparent',
@@ -805,6 +1067,7 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
                   </div>
                 </div>
               </div>
+
 
               {/* UPI UTR Reference (If present) */}
               {parsedData?.upiRef && (
@@ -866,7 +1129,13 @@ export const SharedPaymentProcessingModal: React.FC<SharedPaymentProcessingModal
                 }}
               >
                 <Zap size={18} fill="#ffffff" />
-                <span>{isSaving ? 'Saving to Budget...' : '⚡ Quick Log to ZenBudget'}</span>
+                <span>
+                  {isSaving 
+                    ? 'Saving to Budget...' 
+                    : autoSaveCountdown !== null 
+                      ? `⚡ Instant Log Now (${autoSaveCountdown}s)` 
+                      : '⚡ Quick Log to ZenBudget'}
+                </span>
               </button>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>

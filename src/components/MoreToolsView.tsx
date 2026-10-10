@@ -218,7 +218,20 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
                 <Users size={20} />
               </div>
               <div>
-                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>{t('shared_budget')}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>{t('shared_budget')}</p>
+                  <span style={{
+                    background: 'linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)',
+                    color: '#fff',
+                    fontSize: '9.5px',
+                    fontWeight: 800,
+                    padding: '2px 7px',
+                    borderRadius: '999px',
+                    letterSpacing: '0.04em'
+                  }}>
+                    👑 PRO
+                  </span>
+                </div>
                 <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('shared_budget_sub')}</span>
               </div>
             </div>

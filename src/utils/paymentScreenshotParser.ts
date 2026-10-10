@@ -143,29 +143,52 @@ Return ONLY pure JSON without markdown code blocks.`;
 
       onProgress?.('extracting', 80, 'Auto-detecting Income vs Expense, Merchant & Category...');
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-flash-latest',
-        contents: [
-          {
-            role: 'user',
-            parts: [
-              { text: prompt },
-              {
-                inlineData: {
-                  mimeType,
-                  data: base64Data
+      let response;
+      try {
+        response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                { text: prompt },
+                {
+                  inlineData: {
+                    mimeType,
+                    data: base64Data
+                  }
                 }
-              }
-            ]
-          }
-        ]
-      });
+              ]
+            }
+          ]
+        });
+      } catch (modelErr) {
+        console.warn('Gemini 2.5 flash retry with 1.5 flash:', modelErr);
+        response = await ai.models.generateContent({
+          model: 'gemini-1.5-flash',
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                { text: prompt },
+                {
+                  inlineData: {
+                    mimeType,
+                    data: base64Data
+                  }
+                }
+              ]
+            }
+          ]
+        });
+      }
 
       const responseText = response.text?.replace(/```json|```/g, '').trim();
       if (responseText) {
         const parsed = JSON.parse(responseText);
         
-        if (parsed.isReceipt === false) {
+        const parsedAmt = parsed.amount ? parseFloat(parsed.amount) : 0;
+        if (parsed.isReceipt === false || !parsed.amount || isNaN(parsedAmt) || parsedAmt <= 0) {
           throw new Error("INVALID_RECEIPT");
         }
 
@@ -174,7 +197,7 @@ Return ONLY pure JSON without markdown code blocks.`;
         const isIncome = parsed.type === 'income' || parsed.category === 'Salary' || parsed.category === 'Cashback';
 
         return {
-          amount: parsed.amount ? String(Math.abs(parseFloat(parsed.amount) || 0)) : '',
+          amount: String(Math.abs(parsedAmt)),
           merchantName: parsed.merchantName ? parsed.merchantName.trim() : (isIncome ? 'Payment Inflow' : 'Payment Outflow'),
           category: parsed.category || (isIncome ? 'Income' : 'General'),
           type: isIncome ? 'income' : 'expense',
@@ -187,22 +210,10 @@ Return ONLY pure JSON without markdown code blocks.`;
       }
     } catch (err: any) {
       console.warn('ZenBudget Vision parse error:', err);
-      if (err.message === "INVALID_RECEIPT") {
-        throw err;
-      }
+      throw new Error("INVALID_RECEIPT");
     }
   }
 
-  // Fallback when unreadable (never invent fake transaction amounts)
-  onProgress?.('ready', 100, 'Screenshot ready for confirmation');
-  return {
-    amount: '',
-    merchantName: '',
-    category: 'General',
-    type: 'expense',
-    note: 'Payment Screenshot',
-    date: today,
-    appSource: 'screenshot',
-    rawImagePreview: base64DataUrl
-  };
+  // If no API key or image unreadable, throw INVALID_RECEIPT error so UI shows error state
+  throw new Error("INVALID_RECEIPT");
 };

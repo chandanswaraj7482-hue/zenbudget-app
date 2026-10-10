@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, QrCode, Phone, Hash, FileText, Tag, Send } from 'lucide-react';
+import { X, QrCode, Phone, Hash, FileText, Tag, Send, Flashlight, Zap } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { Capacitor } from '@capacitor/core';
 import { checkHasScanPayAccess, handleZenBudgetPaymentSystem } from '../utils/paymentRouter';
@@ -30,10 +30,10 @@ const FEELINGS = [
   { label: 'Neutral', emoji: '😐' },
 ];
 
-const PAYMENT_TABS = ['Scan QR', 'Screenshot', 'Mobile', 'Bank A/c', 'UPI ID'];
+const PAYMENT_TABS = ['Scan QR', 'Mobile', 'Bank A/c', 'UPI ID'];
 
 export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onSuccess, onPayViaCashfree, initialData, onRequireUnlockModal }) => {
-  const [activePayTab, setActivePayTab] = useState<'Scan QR' | 'Screenshot' | 'Mobile' | 'Bank A/c' | 'UPI ID'>('Scan QR');
+  const [activePayTab, setActivePayTab] = useState<'Scan QR' | 'Mobile' | 'Bank A/c' | 'UPI ID'>('Scan QR');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('General');
@@ -73,6 +73,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
   }, [initialData]);
 
   const [isScanning, setIsScanning] = useState(false);
+  const [isTorchOn, setIsTorchOn] = useState(false);
   const [scanResult, setScanResult] = useState('');
   const [isPaying, setIsPaying] = useState(false);
   const [step, setStep] = useState<'details' | 'payment' | 'collect_waiting'>('details');
@@ -228,6 +229,13 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
   };
 
   const stopCamera = () => {
+    if (isTorchOn && streamRef.current) {
+      try {
+        const track = streamRef.current.getVideoTracks()[0];
+        track?.applyConstraints?.({ advanced: [{ torch: false }] } as any).catch(() => {});
+      } catch (_) {}
+    }
+    setIsTorchOn(false);
     if (requestRef.current) {
       cancelAnimationFrame(requestRef.current);
       requestRef.current = null;
@@ -237,6 +245,32 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
       streamRef.current = null;
     }
     setIsScanning(false);
+  };
+
+  const toggleTorch = async () => {
+    if (!streamRef.current || !isScanning) {
+      window.dispatchEvent(new CustomEvent('toast-alert', { 
+        detail: { message: 'Start camera first to turn on flashlight', type: 'info' } 
+      }));
+      return;
+    }
+    const track = streamRef.current.getVideoTracks()[0];
+    if (!track) return;
+    try {
+      const nextState = !isTorchOn;
+      await (track as any).applyConstraints({
+        advanced: [{ torch: nextState }]
+      });
+      setIsTorchOn(nextState);
+      if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
+        navigator.vibrate(30);
+      }
+    } catch (err) {
+      console.warn('Torch toggle failed:', err);
+      window.dispatchEvent(new CustomEvent('toast-alert', { 
+        detail: { message: 'Flashlight is not available on this device camera', type: 'warning' } 
+      }));
+    }
   };
 
   const scanFrame = () => {
@@ -396,7 +430,38 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
     if (/^\d*$/.test(val)) setPayMobile(val);
   };
 
+  const getTargetVpa = (preferredApp?: 'phonepe' | 'gpay' | 'paytm') => {
+    if (activePayTab === 'Mobile') {
+      const cleanPhone = payMobile.replace(/\D/g, '');
+      let suffix = (mobileUpiSuffix || 'upi').replace(/^@/, '');
+      if (preferredApp === 'phonepe' && (!mobileUpiSuffix || mobileUpiSuffix === 'upi')) suffix = 'ybl';
+      if (preferredApp === 'gpay' && (!mobileUpiSuffix || mobileUpiSuffix === 'upi')) suffix = 'okaxis';
+      if (preferredApp === 'paytm' && (!mobileUpiSuffix || mobileUpiSuffix === 'upi')) suffix = 'paytm';
+      return `${cleanPhone}@${suffix}`;
+    }
+    if (activePayTab === 'Bank A/c') {
+      const cleanAcc = payAccNum.replace(/\D/g, '');
+      const cleanIfsc = payIfsc.trim().toUpperCase();
+      return cleanIfsc ? `${cleanAcc}@${cleanIfsc}.ifsc.npci` : `${cleanAcc}@upi`;
+    }
+    if (activePayTab === 'UPI ID') {
+      return payUpiIdDirect.trim();
+    }
+    return recipientId || payUpiIdDirect || 'chandanswaraj7482@okicici';
+  };
+
   const buildUPIUrl = (paOverride?: string, schemePrefix?: string) => {
+    let scheme = 'upi://pay?';
+    if (schemePrefix === 'phonepe' || schemePrefix?.startsWith('phonepe')) {
+      scheme = 'phonepe://pay?';
+    } else if (schemePrefix === 'gpay' || schemePrefix?.startsWith('tez') || schemePrefix?.startsWith('gpay')) {
+      scheme = 'tez://upi/pay?';
+    } else if (schemePrefix === 'paytm' || schemePrefix?.startsWith('paytm')) {
+      scheme = 'paytmmp://pay?';
+    } else if (schemePrefix && schemePrefix.includes('://')) {
+      scheme = schemePrefix.endsWith('?') ? schemePrefix : `${schemePrefix}?`;
+    }
+
     // 1. If scanned from QR Code and we have raw QR URL, preserve original QR parameters
     if (activePayTab === 'Scan QR' && _rawQrUrl && _rawQrUrl.startsWith('upi://pay?')) {
       let urlObj: URL;
@@ -417,52 +482,20 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
       }
 
       let finalQuery = searchParams.toString();
-      const prefix = (schemePrefix && schemePrefix !== 'upi://pay?') ? schemePrefix : 'upi://pay?';
-      return `${prefix}${finalQuery}`;
+      return `${scheme}${finalQuery}`;
     }
 
     // 2. Manual P2P Payments (Mobile / Bank A/c / UPI ID / Direct VPA)
-    let pa = '';
-    let pn = '';
+    let pa = paOverride ? paOverride.trim() : getTargetVpa(schemePrefix as any);
+    let pn = merchantName || 'ZenBudget Payee';
 
-    if (paOverride) {
-      pa = paOverride.trim();
-      pn = merchantName || recipientId || 'Payee';
-    } else if (activePayTab === 'Scan QR') {
-      pa = recipientId.trim();
-      pn = merchantName.trim() || 'Merchant';
-    } else if (activePayTab === 'Mobile') {
-      const cleanPhone = payMobile.replace(/\D/g, '');
-
-      // User-selected handle extension (e.g., @oksbi, @ybl, @paytm)
-      const userHandle = (mobileUpiSuffix || '').replace(/^@/, '').trim();
-      // @upi is NPCI universal handle - resolves to any UPI app the recipient uses
-      let handle = userHandle || 'upi';
-
-      // Only auto-pair handle if user has NOT manually selected one
-      if (!userHandle) {
-        if (schemePrefix?.includes('tez') || schemePrefix?.includes('google')) {
-          handle = 'okaxis';
-        } else if (schemePrefix?.includes('phonepe')) {
-          handle = 'ybl';
-        } else if (schemePrefix?.includes('paytm')) {
-          handle = 'paytm';
-        }
-      }
-
-      pa = `${cleanPhone}@${handle}`;
-      // Use a clean generic name - phone number in pn causes GPay "Cannot pay" error
-      pn = payHolderName.trim() || 'User';
+    if (activePayTab === 'Mobile') {
+      pn = payHolderName.trim() || 'Contact';
     } else if (activePayTab === 'Bank A/c') {
-      const cleanAcc = payAccNum.replace(/\D/g, '');
-      const cleanIfsc = payIfsc.trim().toUpperCase();
-      pa = cleanIfsc ? `${cleanAcc}@${cleanIfsc}.ifsc.npci` : `${cleanAcc}@upi`;
       pn = payHolderName.trim() || 'Bank Transfer';
     } else if (activePayTab === 'UPI ID') {
-      pa = payUpiIdDirect.trim();
-      pn = 'Recipient';
-    } else {
-      pa = recipientId.trim() || 'merchant@upi';
+      pn = merchantName.trim() || 'Payee';
+    } else if (activePayTab === 'Scan QR') {
       pn = merchantName.trim() || 'Merchant';
     }
 
@@ -470,7 +503,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
     const cleanPa = (pa || 'chandanswaraj7482@okaxis').toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9@._-]/g, '');
     
     // Payee name (alphanumeric only, no %20 encoding to prevent GPay Intent parse error)
-    const sanitizedPn = (pn || 'ZenBudget').replace(/[^a-zA-Z0-9]/g, '').trim().slice(0, 30) || 'ZenBudget';
+    const sanitizedPn = (pn || 'ZenBudget').replace(/[^a-zA-Z0-9 ]/g, '').trim().slice(0, 30) || 'ZenBudget';
 
     // Format amount cleanly: clean integer for whole numbers (e.g. '1'), 2 decimals for fractions (e.g. '1.50')
     let amountStr = '';
@@ -482,37 +515,17 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
     // 100% Official NPCI Full Specification URL (tr = Ref ID, tid = Txn ID, mode=00 for P2P)
     const tr = `ZB${Date.now().toString().slice(-10)}`;
     const tid = `T${Date.now().toString().slice(-10)}`;
-    let params = `pa=${cleanPa}&pn=${sanitizedPn}&tr=${tr}&tid=${tid}&mode=00&cu=INR`;
+    let params = `pa=${cleanPa}&pn=${encodeURIComponent(sanitizedPn)}&tr=${tr}&tid=${tid}&mode=00&cu=INR`;
     if (amountStr) params += `&am=${amountStr}`;
 
-    const sanitizedDesc = (description.trim() || 'Payment').replace(/[^a-zA-Z0-9]/g, '').slice(0, 30);
-    if (sanitizedDesc) params += `&tn=${sanitizedDesc}`;
+    const sanitizedDesc = (description.trim() || 'Payment').replace(/[^a-zA-Z0-9 ]/g, '').slice(0, 30);
+    if (sanitizedDesc) params += `&tn=${encodeURIComponent(sanitizedDesc)}`;
 
-    const scheme = (schemePrefix && schemePrefix !== 'upi://pay?') ? schemePrefix : 'upi://pay?';
     return `${scheme}${params}`;
   };
 
   const redirectToUPI = (upiUrl: string) => {
     console.log('🚀 Launching UPI URL synchronously:', upiUrl);
-
-    // Universal Mobile Number Quick Router (Bypassing UPI Extension UI)
-    if (activePayTab === 'Mobile') {
-      const cleanPhone = payMobile.replace(/\D/g, '');
-      const amtVal = parseFloat(amount) || 0;
-      const phonePeDirectUrl = `phonepe://pay?phone=${cleanPhone}&am=${amtVal}&cu=INR`;
-      const defaultUpiUrl = buildUPIUrl(`${cleanPhone}@ybl`);
-
-      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-      if (isMobile) {
-        window.location.href = phonePeDirectUrl;
-        setTimeout(() => {
-          window.location.href = defaultUpiUrl;
-        }, 500);
-      } else {
-        window.location.href = defaultUpiUrl;
-      }
-      return;
-    }
 
     let finalUrl = upiUrl;
     const isGPay = upiUrl.includes('tez') || upiUrl.includes('google') || upiUrl.includes('package=com.google.android.apps.nbu.paisa.user');
@@ -544,15 +557,24 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
       androidIntent = `intent://pay?${cleanParams}#Intent;scheme=upi;package=com.dreamplug.android.cred;end;`;
     }
 
-    // Direct Intent launch for Android
-    try {
-      window.location.href = isGPay || isPhonePe || isPaytm || isBhim || isCred ? androidIntent : finalUrl;
-    } catch (e) {}
+    const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
+
+    if (isAndroid) {
+      try {
+        window.location.href = isGPay || isPhonePe || isPaytm || isBhim || isCred ? androidIntent : finalUrl;
+      } catch (e) {
+        window.location.href = finalUrl;
+      }
+    } else {
+      try {
+        window.location.href = finalUrl;
+      } catch (e) {}
+    }
 
     // Fallback anchor click dispatch
     try {
       const a1 = document.createElement('a');
-      a1.href = finalUrl;
+      a1.href = isAndroid && (isGPay || isPhonePe || isPaytm || isBhim || isCred) ? androidIntent : finalUrl;
       a1.setAttribute('target', '_system');
       a1.setAttribute('rel', 'noopener');
       document.body.appendChild(a1);
@@ -614,19 +636,25 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
       if (payUpiIdDirect.trim()) {
         parseUPIQR(payUpiIdDirect.trim());
       } else {
-        setRecipientId('chandanswaraj7482@okicici');
-        setMerchantName('ZenBudget Payee');
+        showErr('Please scan a valid UPI QR code first or tap Upload QR from gallery.');
+        return;
       }
     }
     if (activePayTab === 'Mobile' && payMobile.replace(/\D/g, '').length !== 10) {
       showErr('Please enter a valid 10-digit mobile number.');
       return;
     }
-    if (activePayTab === 'Bank A/c' && (!payAccNum.trim() || !payIfsc.trim())) {
-      showErr('Please enter Bank Account Number and IFSC Code.');
-      return;
+    if (activePayTab === 'Bank A/c') {
+      if (!payAccNum.trim() || payAccNum.trim().length < 6) {
+        showErr('Please enter a valid Bank Account Number.');
+        return;
+      }
+      if (!payIfsc.trim() || payIfsc.trim().length < 4) {
+        showErr('Please enter Bank IFSC Code (e.g. SBIN0004561).');
+        return;
+      }
     }
-    if (activePayTab === 'UPI ID' && !payUpiIdDirect.includes('@')) {
+    if (activePayTab === 'UPI ID' && (!payUpiIdDirect.includes('@') || payUpiIdDirect.trim().length < 5)) {
       showErr('Please enter a valid UPI ID (e.g. user@okaxis).');
       return;
     }
@@ -643,7 +671,8 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
     if (isPaying) return;
     setIsPaying(true);
 
-    const upiUrl = buildUPIUrl(paOverride, schemePrefix);
+    const targetVpa = paOverride || getTargetVpa(schemePrefix as any);
+    const upiUrl = buildUPIUrl(targetVpa, schemePrefix);
     console.log('Built UPI URL:', upiUrl);
 
     // CRITICAL: Launch UPI app IMMEDIATELY synchronously inside user click handler
@@ -657,7 +686,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
         let finalTitle = description.trim();
         if (!finalTitle) {
           if (activePayTab === 'Mobile') {
-            finalTitle = `UPI Pay to ${payMobile}@${mobileUpiSuffix}`;
+            finalTitle = `UPI Pay to ${targetVpa}`;
           } else if (activePayTab === 'Bank A/c') {
             finalTitle = `Bank Transfer to ${payHolderName || payAccNum}`;
           } else if (activePayTab === 'UPI ID') {
@@ -694,8 +723,8 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
   };
 
   const handleSharePaymentLink = async () => {
-    const targetVpa = recipientId || (activePayTab === 'Mobile' ? `${payMobile}@${mobileUpiSuffix}` : payUpiIdDirect) || 'chandanswaraj7482@okicici';
-    const recName = merchantName || (activePayTab === 'Mobile' ? `+91 ${payMobile}` : (activePayTab === 'Bank A/c' ? payHolderName || payAccNum : payUpiIdDirect)) || 'ZenBudget Merchant';
+    const targetVpa = getTargetVpa();
+    const recName = merchantName || (activePayTab === 'Mobile' ? `+91 ${payMobile}` : (activePayTab === 'Bank A/c' ? payHolderName || `A/C ${payAccNum}` : payUpiIdDirect)) || 'ZenBudget Merchant';
     const amtVal = parseFloat(amount) || 0;
     const noteVal = description.trim() || 'ZenBudget Payment';
 
@@ -727,8 +756,8 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
     }
   };
 
-  const handleSendUpiCollect = (targetVpa?: string) => {
-    const vpa = targetVpa || recipientId || (activePayTab === 'Mobile' ? `${payMobile}@${mobileUpiSuffix}` : payUpiIdDirect) || '';
+  const handleSendUpiCollect = (paOverride?: string) => {
+    const vpa = paOverride || getTargetVpa();
     if (!vpa || !vpa.includes('@')) {
       showErr('Please enter a valid UPI ID (e.g. 9199927258@ybl or user@okhdfcbank)');
       return;
@@ -845,55 +874,172 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
             {activePayTab === 'Scan QR' && (
               <div style={{ marginBottom: '16px' }}>
                 <div style={{
-                  height: '210px', borderRadius: '18px', overflow: 'hidden', position: 'relative',
-                  background: '#09090b', border: '2px solid rgba(34,197,94,0.4)', boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
+                  height: '260px', borderRadius: '20px', overflow: 'hidden', position: 'relative',
+                  background: '#09090b', border: '2px solid rgba(34,197,94,0.35)', boxShadow: '0 8px 32px rgba(0,0,0,0.35)'
                 }}>
                   <video ref={videoRef} style={{ width: '100%', height: '100%', objectFit: 'cover' }} playsInline muted />
+
+                  {/* Floating Flashlight Button on Viewfinder */}
+                  {isScanning && (
+                    <button
+                      type="button"
+                      onClick={toggleTorch}
+                      style={{
+                        position: 'absolute',
+                        top: 12,
+                        right: 12,
+                        zIndex: 15,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '7px 13px',
+                        borderRadius: '999px',
+                        border: isTorchOn ? '1.5px solid #facc15' : '1px solid rgba(255, 255, 255, 0.25)',
+                        background: isTorchOn ? 'linear-gradient(135deg, rgba(234, 179, 8, 0.4), rgba(202, 138, 4, 0.5))' : 'rgba(15, 23, 42, 0.75)',
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)',
+                        color: isTorchOn ? '#fef08a' : '#ffffff',
+                        fontSize: '11px',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        boxShadow: isTorchOn ? '0 0 16px rgba(234, 179, 8, 0.6)' : '0 4px 12px rgba(0, 0, 0, 0.4)',
+                        transition: 'all 0.2s ease'
+                      }}
+                      title={isTorchOn ? 'Turn Flashlight OFF' : 'Turn Flashlight ON'}
+                    >
+                      {isTorchOn ? <Zap size={14} fill="#fef08a" color="#fef08a" /> : <Flashlight size={14} color="#ffffff" />}
+                      <span>{isTorchOn ? 'Torch ON' : 'Torch'}</span>
+                    </button>
+                  )}
+
                   {!isScanning && (
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '16px', textAlign: 'center' }}>
-                      <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(34,197,94,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <QrCode size={30} color="var(--primary)" />
+                    <div style={{
+                      position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+                      alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '16px',
+                      textAlign: 'center', zIndex: 4, background: 'rgba(9, 9, 11, 0.88)'
+                    }}>
+                      <div style={{
+                        width: '60px', height: '60px', borderRadius: '18px',
+                        background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%)',
+                        border: '1px solid rgba(34, 197, 94, 0.35)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: '0 8px 20px rgba(34, 197, 94, 0.2)'
+                      }}>
+                        <QrCode size={32} color="var(--primary)" />
                       </div>
-                      <span style={{ color: '#ffffff', fontSize: '13px', fontWeight: 800 }}>
-                        Point Camera to QR or Upload Image
+                      <span style={{ color: '#ffffff', fontSize: '14px', fontWeight: 800 }}>
+                        Camera Ready to Scan
                       </span>
                       <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '11px', maxWidth: '280px', lineHeight: 1.4 }}>
-                        Tap "Start Camera" or "Upload QR Image" to auto-detect merchant & amount!
+                        Point camera to any UPI QR code or tap Upload QR from gallery
                       </span>
                     </div>
                   )}
-                  {/* Corner brackets for scan effect */}
-                  {isScanning && (
-                    <>
-                      <div style={{ position: 'absolute', top: 16, left: 16, width: '32px', height: '32px', borderTop: '3px solid #22c55e', borderLeft: '3px solid #22c55e', borderRadius: '4px' }} />
-                      <div style={{ position: 'absolute', top: 16, right: 16, width: '32px', height: '32px', borderTop: '3px solid #22c55e', borderRight: '3px solid #22c55e', borderRadius: '4px' }} />
-                      <div style={{ position: 'absolute', bottom: 16, left: 16, width: '32px', height: '32px', borderBottom: '3px solid #22c55e', borderLeft: '3px solid #22c55e', borderRadius: '4px' }} />
-                      <div style={{ position: 'absolute', bottom: 16, right: 16, width: '32px', height: '32px', borderBottom: '3px solid #22c55e', borderRight: '3px solid #22c55e', borderRadius: '4px' }} />
-                      
-                      {/* High-contrast instruction badge */}
-                      <div style={{ position: 'absolute', bottom: 10, left: 10, right: 10, textAlign: 'center' }}>
-                        <span style={{
-                          background: 'rgba(0, 0, 0, 0.75)',
-                          backdropFilter: 'blur(8px)',
-                          WebkitBackdropFilter: 'blur(8px)',
-                          color: '#ffffff',
-                          fontSize: '11px',
-                          fontWeight: 700,
-                          padding: '5px 14px',
-                          borderRadius: '20px',
-                          display: 'inline-block',
-                          border: '1px solid rgba(255,255,255,0.2)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-                        }}>
-                          📷 Point camera at QR code • Auto-detects details
-                        </span>
-                      </div>
-                    </>
-                  )}
+
+                  {/* Centered QR Viewfinder Shape Box (Mask cutout) */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '180px',
+                    height: '180px',
+                    borderRadius: '18px',
+                    boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.55)',
+                    pointerEvents: 'none',
+                    overflow: 'hidden',
+                    zIndex: 5
+                  }}>
+                    {/* Subtle QR Center Watermark */}
+                    <div style={{
+                      position: 'absolute',
+                      inset: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      opacity: isScanning ? 0.12 : 0.2,
+                      pointerEvents: 'none'
+                    }}>
+                      <QrCode size={105} color="#22c55e" />
+                    </div>
+
+                    {/* Animated Neon Laser Scanline */}
+                    {isScanning && (
+                      <div style={{
+                        position: 'absolute',
+                        left: 0,
+                        right: 0,
+                        height: '3px',
+                        background: 'linear-gradient(90deg, transparent, #22c55e, #86efac, #22c55e, transparent)',
+                        boxShadow: '0 0 12px #22c55e, 0 0 24px rgba(34, 197, 94, 0.7)',
+                        animation: 'scanLine 2s infinite ease-in-out'
+                      }} />
+                    )}
+                  </div>
+
+                  {/* QR Viewfinder Corner Brackets */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '186px',
+                    height: '186px',
+                    pointerEvents: 'none',
+                    zIndex: 6
+                  }}>
+                    {/* Top-Left */}
+                    <div style={{
+                      position: 'absolute', top: 0, left: 0, width: '28px', height: '28px',
+                      borderTop: '3.5px solid #22c55e', borderLeft: '3.5px solid #22c55e',
+                      borderTopLeftRadius: '14px',
+                      filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.9))'
+                    }} />
+                    {/* Top-Right */}
+                    <div style={{
+                      position: 'absolute', top: 0, right: 0, width: '28px', height: '28px',
+                      borderTop: '3.5px solid #22c55e', borderRight: '3.5px solid #22c55e',
+                      borderTopRightRadius: '14px',
+                      filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.9))'
+                    }} />
+                    {/* Bottom-Left */}
+                    <div style={{
+                      position: 'absolute', bottom: 0, left: 0, width: '28px', height: '28px',
+                      borderBottom: '3.5px solid #22c55e', borderLeft: '3.5px solid #22c55e',
+                      borderBottomLeftRadius: '14px',
+                      filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.9))'
+                    }} />
+                    {/* Bottom-Right */}
+                    <div style={{
+                      position: 'absolute', bottom: 0, right: 0, width: '28px', height: '28px',
+                      borderBottom: '3.5px solid #22c55e', borderRight: '3.5px solid #22c55e',
+                      borderBottomRightRadius: '14px',
+                      filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.9))'
+                    }} />
+                  </div>
+
+                  {/* High-contrast instruction badge */}
+                  <div style={{ position: 'absolute', bottom: 10, left: 10, right: 10, textAlign: 'center', zIndex: 7 }}>
+                    <span style={{
+                      background: 'rgba(0, 0, 0, 0.8)',
+                      backdropFilter: 'blur(8px)',
+                      WebkitBackdropFilter: 'blur(8px)',
+                      color: '#ffffff',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      padding: '5px 14px',
+                      borderRadius: '20px',
+                      display: 'inline-block',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.4)'
+                    }}>
+                      {isScanning ? '🔍 Align UPI QR code inside the square frame' : '📷 Tap Start Camera to scan'}
+                    </span>
+                  </div>
                 </div>
 
-                {/* Upload Image / Real QR Code Scan / Camera Controls */}
-                <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                {/* Upload Image / Real QR Code Scan / Camera & Flashlight Controls */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '8px', marginTop: '10px' }}>
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -903,14 +1049,19 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                   />
                   <button
                     type="button"
-                    onClick={startCamera}
+                    onClick={() => {
+                      if (isScanning) {
+                        stopCamera();
+                      } else {
+                        startCamera();
+                      }
+                    }}
                     style={{
-                      flex: 1,
                       padding: '11px 12px',
                       borderRadius: '12px',
-                      background: 'rgba(34, 197, 94, 0.12)',
-                      border: '1px solid rgba(34, 197, 94, 0.3)',
-                      color: 'var(--primary)',
+                      background: isScanning ? 'rgba(239, 68, 68, 0.12)' : 'rgba(34, 197, 94, 0.12)',
+                      border: isScanning ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(34, 197, 94, 0.3)',
+                      color: isScanning ? '#ef4444' : 'var(--primary)',
                       fontSize: '12px',
                       fontWeight: 800,
                       cursor: 'pointer',
@@ -920,15 +1071,41 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                       gap: '6px'
                     }}
                   >
-                    📷 Start Camera
+                    {isScanning ? '⏹️ Stop Camera' : '📷 Start Camera'}
                   </button>
+
+                  {/* Flashlight / Torch Button */}
+                  <button
+                    type="button"
+                    onClick={toggleTorch}
+                    style={{
+                      padding: '11px 14px',
+                      borderRadius: '12px',
+                      background: isTorchOn ? 'linear-gradient(135deg, rgba(234, 179, 8, 0.3) 0%, rgba(202, 138, 4, 0.4) 100%)' : 'rgba(255, 255, 255, 0.06)',
+                      border: isTorchOn ? '1px solid #facc15' : '1px solid rgba(255, 255, 255, 0.12)',
+                      color: isTorchOn ? '#fef08a' : '#cbd5e1',
+                      fontSize: '12px',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      boxShadow: isTorchOn ? '0 0 14px rgba(234, 179, 8, 0.4)' : 'none',
+                      transition: 'all 0.2s ease'
+                    }}
+                    title={isTorchOn ? 'Turn Flashlight OFF' : 'Turn Flashlight ON'}
+                  >
+                    {isTorchOn ? <Zap size={15} fill="#fef08a" color="#fef08a" /> : <Flashlight size={15} color="#cbd5e1" />}
+                    <span>{isTorchOn ? 'Torch ON' : 'Torch'}</span>
+                  </button>
+
                   <button
                     type="button"
                     onClick={() => {
                       fileInputRef.current?.click();
                     }}
                     style={{
-                      flex: 1,
                       padding: '11px 12px',
                       borderRadius: '12px',
                       background: 'rgba(34, 197, 94, 0.12)',
@@ -944,15 +1121,10 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                       transition: 'all 0.2s'
                     }}
                   >
-                    📸 Upload QR Image
+                    📸 Upload QR
                   </button>
                 </div>
 
-                {scanResult && (
-                  <div style={{ marginTop: '10px', padding: '10px 14px', background: 'rgba(34,197,94,0.12)', borderRadius: '12px', fontSize: '12px', color: 'var(--primary)', fontWeight: 700, border: '1px solid rgba(34,197,94,0.3)' }}>
-                    {scanResult}
-                  </div>
-                )}
                 {scanResult && (
                   <div style={{ marginTop: '10px', padding: '10px 14px', background: 'rgba(34,197,94,0.12)', borderRadius: '12px', fontSize: '12px', color: 'var(--primary)', fontWeight: 700, border: '1px solid rgba(34,197,94,0.3)' }}>
                     {scanResult}
@@ -974,83 +1146,6 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
               </div>
             )}
 
-            {/* Mobile Number Tab */}
-            {activePayTab === 'Screenshot' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', animation: 'fadeIn 0.3s ease-out', minHeight: '300px', justifyContent: 'center', alignItems: 'center' }}>
-                <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-                  <h3 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>
-                    <span style={{ color: 'var(--primary)' }}>No Typing.</span><br />
-                    <span style={{ color: 'var(--secondary)' }}>No Bank Logins.</span>
-                  </h3>
-                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Just share your payment screenshot. We auto-log the rest instantly.</p>
-                </div>
-                
-                {isScanning ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-                    <div className="animate-spin" style={{ width: '40px', height: '40px', borderRadius: '50%', border: '3px solid rgba(34,197,94,0.2)', borderTopColor: 'var(--primary)' }} />
-                    <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--primary)' }}>Analyzing screenshot...</span>
-                  </div>
-                ) : (
-                  <label style={{
-                    width: '100%',
-                    maxWidth: '300px',
-                    height: '140px',
-                    border: '2px dashed var(--primary)',
-                    borderRadius: '24px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '12px',
-                    background: 'rgba(34, 197, 94, 0.05)',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}>
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      style={{ display: 'none' }}
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          setIsScanning(true);
-                          try {
-                            const reader = new FileReader();
-                            reader.onload = async (event) => {
-                              try {
-                                const base64 = event.target?.result as string;
-                                if ((window as any).handleIncomingSharedContent) {
-                                  setIsScanning(false);
-                                  onClose();
-                                  (window as any).handleIncomingSharedContent({ type: 'image', data: base64 });
-                                  return;
-                                }
-                                const parsed = await parsePaymentScreenshot(base64);
-                                setIsScanning(false);
-                                if (parsed.amount) setAmount(parsed.amount);
-                                if (parsed.merchantName) setMerchantName(parsed.merchantName);
-                                if (parsed.note) setDescription(parsed.note);
-                                if (parsed.category) setCategory(parsed.category);
-                                setStep('payment');
-                              } catch (err) {
-                                setIsScanning(false);
-                              }
-                            };
-                            reader.readAsDataURL(file);
-                          } catch (err) {
-                            setIsScanning(false);
-                          }
-                        }
-                      }}
-                    />
-                    <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: 'var(--primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <FileText size={24} />
-                    </div>
-                    <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>Upload Screenshot</span>
-                  </label>
-                )}
-              </div>
-            )}
 
             {activePayTab === 'Mobile' && (
               <div style={{ marginBottom: '16px' }}>
@@ -1072,6 +1167,49 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                     <span style={{ fontSize: '16px' }}>✅</span>
                   )}
                 </div>
+
+                {/* Popular UPI Handles Quick Chips */}
+                <div style={{ marginTop: '10px' }}>
+                  <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    Select UPI Handle / App:
+                  </span>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
+                    {[
+                      { id: 'upi', label: '@upi (Universal NPCI)' },
+                      { id: 'ybl', label: '@ybl (PhonePe)' },
+                      { id: 'okaxis', label: '@okaxis (Google Pay)' },
+                      { id: 'paytm', label: '@paytm (Paytm)' },
+                      { id: 'okhdfcbank', label: '@okhdfc (HDFC)' },
+                    ].map(h => (
+                      <button
+                        key={h.id}
+                        type="button"
+                        onClick={() => setMobileUpiSuffix(h.id)}
+                        style={{
+                          padding: '6px 10px',
+                          borderRadius: '8px',
+                          border: mobileUpiSuffix === h.id ? '1px solid var(--primary)' : '1px solid var(--border-input)',
+                          background: mobileUpiSuffix === h.id ? 'rgba(34, 197, 94, 0.15)' : 'var(--bg-input)',
+                          color: mobileUpiSuffix === h.id ? 'var(--primary)' : 'var(--text-secondary)',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        {h.label}
+                      </button>
+                    ))}
+                  </div>
+                  {payMobile.length === 10 && (
+                    <div style={{ marginTop: '8px', fontSize: '11px', color: '#10b981', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>Resolved UPI VPA:</span>
+                      <code style={{ background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.25)', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', color: '#10b981' }}>
+                        {payMobile}@{mobileUpiSuffix || 'upi'}
+                      </code>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -1082,7 +1220,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                   <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>Account Number</label>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-input)', borderRadius: '14px', padding: '12px 16px', border: '1px solid var(--border-input)' }}>
                     <Hash size={16} color="var(--text-secondary)" style={{ flexShrink: 0 }} />
-                    <input type="text" className="unadorned-input" inputMode="numeric" placeholder="Enter account number" value={payAccNum} onChange={e => setPayAccNum(e.target.value)} style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '14px', fontWeight: 700, outline: 'none', padding: '4px 6px' }} />
+                    <input type="text" className="unadorned-input" inputMode="numeric" placeholder="Enter bank account number" value={payAccNum} onChange={e => setPayAccNum(e.target.value)} style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '14px', fontWeight: 700, outline: 'none', padding: '4px 6px' }} />
                   </div>
                 </div>
                 <div>
@@ -1094,18 +1232,56 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                 <div>
                   <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>Account Holder Name</label>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-input)', borderRadius: '14px', padding: '12px 16px', border: '1px solid var(--border-input)' }}>
-                    <input type="text" className="unadorned-input" placeholder="Merchant / Person name" value={payHolderName} onChange={e => setPayHolderName(e.target.value)} style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '14px', fontWeight: 700, outline: 'none', padding: '4px 6px' }} />
+                    <input type="text" className="unadorned-input" placeholder="Beneficiary / Account holder name" value={payHolderName} onChange={e => setPayHolderName(e.target.value)} style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '14px', fontWeight: 700, outline: 'none', padding: '4px 6px' }} />
                   </div>
                 </div>
+
+                {payAccNum && payIfsc && (
+                  <div style={{ padding: '8px 12px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.25)', fontSize: '11px', color: '#60a5fa' }}>
+                    <span style={{ fontWeight: 700 }}>🏦 NPCI Bank Transfer URI:</span>{' '}
+                    <code style={{ fontSize: '11px', background: 'rgba(59, 130, 246, 0.15)', padding: '2px 6px', borderRadius: '4px' }}>
+                      {payAccNum.replace(/\D/g, '')}@{payIfsc.trim().toUpperCase()}.ifsc.npci
+                    </code>
+                  </div>
+                )}
               </div>
             )}
 
             {/* UPI ID Tab */}
             {activePayTab === 'UPI ID' && (
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>UPI ID</label>
+                <label style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>UPI ID (VPA)</label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-input)', borderRadius: '14px', padding: '12px 16px', border: '1px solid var(--border-input)' }}>
-                  <input type="text" className="unadorned-input" placeholder="name@upi" value={payUpiIdDirect} onChange={e => setPayUpiIdDirect(e.target.value)} style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '14px', fontWeight: 700, outline: 'none', padding: '4px 6px' }} />
+                  <input type="text" className="unadorned-input" placeholder="e.g. merchant@okaxis or user@ybl" value={payUpiIdDirect} onChange={e => setPayUpiIdDirect(e.target.value.toLowerCase())} style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '14px', fontWeight: 700, outline: 'none', padding: '4px 6px' }} />
+                  {payUpiIdDirect.includes('@') && payUpiIdDirect.split('@')[1]?.length >= 2 && (
+                    <span style={{ fontSize: '14px' }}>✅</span>
+                  )}
+                </div>
+
+                {/* Popular Handles Quick Buttons */}
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '8px' }}>
+                  {['@okaxis', '@okhdfcbank', '@ybl', '@paytm', '@upi', '@icici'].map(suffix => (
+                    <button
+                      key={suffix}
+                      type="button"
+                      onClick={() => {
+                        const prefix = payUpiIdDirect.includes('@') ? payUpiIdDirect.split('@')[0] : payUpiIdDirect;
+                        setPayUpiIdDirect(`${prefix || ''}${suffix}`);
+                      }}
+                      style={{
+                        padding: '4px 8px',
+                        borderRadius: '6px',
+                        border: '1px solid var(--border-input)',
+                        background: 'var(--bg-input)',
+                        color: 'var(--text-secondary)',
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {suffix}
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
@@ -1195,8 +1371,8 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                     }
                     actionType = 'MOBILE_NUMBER';
                     payloadData.phone = payMobile;
-                    payloadData.upiSuffix = mobileUpiSuffix;
-                    payloadData.targetUpiId = `${payMobile}@${mobileUpiSuffix}`;
+                    payloadData.upiSuffix = mobileUpiSuffix || 'upi';
+                    payloadData.targetUpiId = getTargetVpa();
                   } else if (activePayTab === 'Bank A/c') {
                     if (!payAccNum || !payIfsc) {
                       showErr('Please enter Bank Account Number and IFSC Code.');
@@ -1204,8 +1380,17 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
                     }
                     actionType = 'BANK_TRANSFER';
                     payloadData.accountNumber = payAccNum;
-                    payloadData.ifsc = payIfsc;
-                    payloadData.recipientName = payHolderName;
+                    payloadData.ifsc = payIfsc.trim().toUpperCase();
+                    payloadData.recipientName = payHolderName || 'Bank Beneficiary';
+                    payloadData.targetUpiId = getTargetVpa();
+                  } else if (activePayTab === 'UPI ID') {
+                    if (!payUpiIdDirect || !payUpiIdDirect.includes('@')) {
+                      showErr('Please enter a valid UPI ID (e.g. user@okaxis).');
+                      return;
+                    }
+                    actionType = 'SCAN_OR_UPI';
+                    payloadData.targetUpiId = payUpiIdDirect.trim();
+                    payloadData.recipientName = merchantName || 'UPI Payee';
                   } else {
                     const finalVpa = recipientId || payUpiIdDirect || 'chandanswaraj7482@okicici';
                     actionType = 'SCAN_OR_UPI';
@@ -1283,10 +1468,12 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
             <div style={{ padding: '20px', background: 'var(--bg-input)', borderRadius: '20px', border: '1px solid var(--border-input)' }}>
               <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 700 }}>PAYING TO</span>
               <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: '4px 0 2px' }}>
-                {merchantName || recipientId || (activePayTab === 'Mobile' ? `+91 ${payMobile}` : (activePayTab === 'Bank A/c' ? payHolderName || payAccNum : payUpiIdDirect)) || 'Merchant'}
+                {merchantName || (activePayTab === 'Mobile' ? `+91 ${payMobile}` : (activePayTab === 'Bank A/c' ? payHolderName || `A/C ${payAccNum}` : payUpiIdDirect)) || recipientId || 'Payee'}
               </h3>
               <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '0 0 12px' }}>
-                {recipientId || (activePayTab === 'Mobile' ? `${payMobile}@${mobileUpiSuffix}` : (activePayTab === 'Bank A/c' ? `A/C: ${payAccNum} (${payIfsc})` : payUpiIdDirect))}
+                <code style={{ background: 'var(--bg-card)', padding: '3px 8px', borderRadius: '6px', fontSize: '12px', color: '#10b981', fontWeight: 700 }}>
+                  {getTargetVpa()}
+                </code>
               </p>
               <div style={{ fontSize: '32px', fontWeight: 900, color: 'var(--primary)' }}>
                 ₹{amount || '0'}
@@ -1297,12 +1484,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
             <button
               type="button"
               onClick={() => {
-                const numAmt = parseFloat(amount) || 0;
-                let targetVpa = recipientId || payUpiIdDirect;
-                if (activePayTab === 'Mobile') targetVpa = `${payMobile}@${mobileUpiSuffix}`;
-                if (activePayTab === 'Bank A/c') targetVpa = `${payAccNum}@${payIfsc.toUpperCase()}.ifsc.npci`;
-                
-                handlePay(targetVpa);
+                handlePay(getTargetVpa());
                 stopCamera();
                 onClose();
               }}
@@ -1331,9 +1513,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
               <button
                 type="button"
                 onClick={() => {
-                  let targetVpa = recipientId || payUpiIdDirect;
-                  if (activePayTab === 'Mobile') targetVpa = `${payMobile}@${mobileUpiSuffix}`;
-                  handlePay(targetVpa, 'phonepe');
+                  handlePay(getTargetVpa('phonepe'), 'phonepe');
                   stopCamera();
                   onClose();
                 }}
@@ -1361,9 +1541,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
               <button
                 type="button"
                 onClick={() => {
-                  let targetVpa = recipientId || payUpiIdDirect;
-                  if (activePayTab === 'Mobile') targetVpa = `${payMobile}@${mobileUpiSuffix}`;
-                  handlePay(targetVpa, 'gpay');
+                  handlePay(getTargetVpa('gpay'), 'gpay');
                   stopCamera();
                   onClose();
                 }}
@@ -1391,9 +1569,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
               <button
                 type="button"
                 onClick={() => {
-                  let targetVpa = recipientId || payUpiIdDirect;
-                  if (activePayTab === 'Mobile') targetVpa = `${payMobile}@${mobileUpiSuffix}`;
-                  handlePay(targetVpa, 'paytm');
+                  handlePay(getTargetVpa('paytm'), 'paytm');
                   stopCamera();
                   onClose();
                 }}
@@ -1423,8 +1599,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
             <button
               type="button"
               onClick={() => {
-                const targetVpa = recipientId || (activePayTab === 'Mobile' ? `${payMobile}@${mobileUpiSuffix}` : payUpiIdDirect);
-                handleSendUpiCollect(targetVpa);
+                handleSendUpiCollect(getTargetVpa());
               }}
               style={{
                 width: '100%',
