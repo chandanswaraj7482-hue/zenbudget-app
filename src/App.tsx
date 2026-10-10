@@ -3405,34 +3405,29 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     setShowGranularResetModal(false);
   };
 
-  const handleExportCSV = async () => {
+  const handleExportCSV = async (skipAuthCheck = false) => {
     const exportsUsed = Number(localStorage.getItem('zb_csv_exports_used') || 0);
-    const exportBonus = Number(localStorage.getItem('zb_csv_export_bonus') || 0);
 
-    const hasAccess = isPremiumUser || exportsUsed === 0 || exportBonus > 0;
-
-    if (!hasAccess) {
-      if (Capacitor.isNativePlatform()) {
-        triggerToast('🎬 Watch a quick video ad to export your report for FREE!', 'info');
-        admobService.showRewardedAd(() => {
-          localStorage.setItem('zb_csv_export_bonus', '1');
-          triggerToast('🎉 1 Free CSV Export Unlocked!', 'success');
-          handleExportCSV();
-        });
-      } else {
+    if (!skipAuthCheck) {
+      if (!isPremiumUser && exportsUsed >= 1) {
         setIsSubBlocker(false);
         setIsSubModalOpen(true);
-        triggerToast('👑 1-Time Free Export Used! Upgrade to Pro for unlimited exports.', 'warning');
+        triggerToast('👑 1-Time Free CSV Export already used! Upgrade to Pro for unlimited exports.', 'warning');
+        return;
       }
-      return;
-    }
 
-    if (!isPremiumUser) {
-      if (exportsUsed === 0) {
-        localStorage.setItem('zb_csv_exports_used', '1');
-        triggerToast('🎉 1st Free CSV Export downloaded!', 'success');
-      } else if (exportBonus > 0) {
-        localStorage.setItem('zb_csv_export_bonus', String(exportBonus - 1));
+      if (!isPremiumUser && exportsUsed === 0) {
+        if (Capacitor.isNativePlatform()) {
+          triggerToast('🎬 Watch 1 quick video ad to unlock your 1-Time Free CSV Report Export!', 'info');
+          admobService.showRewardedAd(() => {
+            localStorage.setItem('zb_csv_exports_used', '1');
+            triggerToast('🎉 1-Time Free CSV Export Unlocked!', 'success');
+            handleExportCSV(true);
+          });
+          return;
+        } else {
+          localStorage.setItem('zb_csv_exports_used', '1');
+        }
       }
     }
 

@@ -380,22 +380,18 @@ export const HelpModal: React.FC<HelpModalProps> = ({
   const [aiQueriesUsed, setAiQueriesUsed] = useState<number>(() => {
     return Number(localStorage.getItem('zb_ai_queries_used') || 0);
   });
-  const [aiBonusCredits, setAiBonusCredits] = useState<number>(() => {
-    return Number(localStorage.getItem('zb_ai_bonus_credits') || 0);
-  });
+  const [aiTrialUnlocked, setAiTrialUnlocked] = useState<boolean>(false);
   const [showAiAdModal, setShowAiAdModal] = useState<boolean>(false);
   const [isAiAdLoading, setIsAiAdLoading] = useState<boolean>(false);
 
-  const hasAiAccess = isPremiumUser || aiQueriesUsed === 0 || aiBonusCredits > 0;
+  const hasAiAccess = isPremiumUser || (aiQueriesUsed === 0 && aiTrialUnlocked);
 
   const handleWatchAiAd = () => {
     setIsAiAdLoading(true);
     if (Capacitor.isNativePlatform()) {
       admobService.showRewardedAd(() => {
         setIsAiAdLoading(false);
-        const newCredits = aiBonusCredits + 1;
-        setAiBonusCredits(newCredits);
-        localStorage.setItem('zb_ai_bonus_credits', String(newCredits));
+        setAiTrialUnlocked(true);
         setShowAiAdModal(false);
       }).catch(() => {
         setIsAiAdLoading(false);
@@ -403,9 +399,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
     } else {
       setTimeout(() => {
         setIsAiAdLoading(false);
-        const newCredits = aiBonusCredits + 1;
-        setAiBonusCredits(newCredits);
-        localStorage.setItem('zb_ai_bonus_credits', String(newCredits));
+        setAiTrialUnlocked(true);
         setShowAiAdModal(false);
       }, 2000);
     }
@@ -414,20 +408,19 @@ export const HelpModal: React.FC<HelpModalProps> = ({
   const handleSend = async (e?: React.FormEvent, customPrompt?: string) => {
     if (e) e.preventDefault();
 
-    if (!hasAiAccess) {
+    if (!isPremiumUser && aiQueriesUsed >= 1) {
       setShowAiAdModal(true);
       return;
     }
 
-    if (!isPremiumUser) {
-      if (aiQueriesUsed === 0) {
-        setAiQueriesUsed(1);
-        localStorage.setItem('zb_ai_queries_used', '1');
-      } else if (aiBonusCredits > 0) {
-        const next = aiBonusCredits - 1;
-        setAiBonusCredits(next);
-        localStorage.setItem('zb_ai_bonus_credits', String(next));
-      }
+    if (!isPremiumUser && aiQueriesUsed === 0 && !aiTrialUnlocked) {
+      setShowAiAdModal(true);
+      return;
+    }
+
+    if (!isPremiumUser && aiQueriesUsed === 0) {
+      setAiQueriesUsed(1);
+      localStorage.setItem('zb_ai_queries_used', '1');
     }
 
     const rawText = (customPrompt || inputVal).trim();
@@ -1197,38 +1190,42 @@ ${JSON.stringify(structCtx, null, 2)}`;
 
               <div>
                 <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 6px' }}>
-                  1 Free AI Question Used!
+                  {aiQueriesUsed >= 1 ? '👑 1-Time Free AI Question Used!' : '🎬 Unlock 1-Time Free AI Question'}
                 </h3>
                 <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>
-                  You have used your 1-Time Free AI Consultation. Watch a sponsor video ad to ask Zen another question for <strong style={{ color: '#10b981' }}>FREE</strong>, or upgrade to Pro for unlimited 24/7 AI coaching.
+                  {aiQueriesUsed >= 1
+                    ? 'You have already used your 1-Time Free AI Consultation. Upgrade to ZenBudget Pro for unlimited 24/7 AI financial coaching.'
+                    : 'Watch 1 short sponsor video ad to ask Zen your 1-Time Free Financial Question! Subsequent questions require ZenBudget Pro.'}
                 </p>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px' }}>
-                <button
-                  type="button"
-                  onClick={handleWatchAiAd}
-                  disabled={isAiAdLoading}
-                  style={{
-                    padding: '14px',
-                    borderRadius: '14px',
-                    background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
-                    border: 'none',
-                    color: '#ffffff',
-                    fontSize: '14px',
-                    fontWeight: 800,
-                    cursor: isAiAdLoading ? 'not-allowed' : 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    boxShadow: '0 4px 15px rgba(99, 102, 241, 0.35)',
-                    opacity: isAiAdLoading ? 0.7 : 1
-                  }}
-                >
-                  <Play size={16} fill="#ffffff" />
-                  <span>{isAiAdLoading ? 'Loading Video Ad...' : '🎬 Watch Video Ad (+1 Free Query)'}</span>
-                </button>
+                {aiQueriesUsed === 0 ? (
+                  <button
+                    type="button"
+                    onClick={handleWatchAiAd}
+                    disabled={isAiAdLoading}
+                    style={{
+                      padding: '14px',
+                      borderRadius: '14px',
+                      background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+                      border: 'none',
+                      color: '#ffffff',
+                      fontSize: '14px',
+                      fontWeight: 800,
+                      cursor: isAiAdLoading ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 15px rgba(99, 102, 241, 0.35)',
+                      opacity: isAiAdLoading ? 0.7 : 1
+                    }}
+                  >
+                    <Play size={16} fill="#ffffff" />
+                    <span>{isAiAdLoading ? 'Loading Video Ad...' : '🎬 Watch Video Ad (Unlock 1 Free Query)'}</span>
+                  </button>
+                ) : null}
 
                 <button
                   type="button"
@@ -1237,13 +1234,13 @@ ${JSON.stringify(structCtx, null, 2)}`;
                     onOpenSubscriptionModal?.();
                   }}
                   style={{
-                    padding: '12px',
+                    padding: '13px',
                     borderRadius: '14px',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
-                    color: '#cbd5e1',
+                    background: aiQueriesUsed >= 1 ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'rgba(255, 255, 255, 0.05)',
+                    border: aiQueriesUsed >= 1 ? 'none' : '1px solid rgba(255, 255, 255, 0.15)',
+                    color: '#ffffff',
                     fontSize: '13px',
-                    fontWeight: 700,
+                    fontWeight: 800,
                     cursor: 'pointer'
                   }}
                 >

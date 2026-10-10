@@ -69,24 +69,22 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
   const [scansUsed, setScansUsed] = useState<number>(() => {
     return Number(localStorage.getItem('zb_statement_scans_used') || 0);
   });
-  const [bonusCredits, setBonusCredits] = useState<number>(() => {
-    return Number(localStorage.getItem('zb_statement_bonus_credits') || 0);
-  });
+  const [trialUnlocked, setTrialUnlocked] = useState<boolean>(false);
   const [showAdModal, setShowAdModal] = useState<boolean>(false);
   const [isAdLoading, setIsAdLoading] = useState<boolean>(false);
 
-  const hasAccess = isPremiumUser || scansUsed === 0 || bonusCredits > 0;
+  const isLocked = !isPremiumUser && scansUsed >= 1;
+  const needsAdUnlock = !isPremiumUser && scansUsed === 0 && !trialUnlocked;
+  const hasAccess = isPremiumUser || (scansUsed === 0 && trialUnlocked);
 
   const handleWatchRewardedAd = () => {
     setIsAdLoading(true);
     if (Capacitor.isNativePlatform()) {
       admobService.showRewardedAd(() => {
         setIsAdLoading(false);
-        const newCredits = bonusCredits + 1;
-        setBonusCredits(newCredits);
-        localStorage.setItem('zb_statement_bonus_credits', String(newCredits));
+        setTrialUnlocked(true);
         setShowAdModal(false);
-        notify('🎉 1 Free Bank Statement Scan Unlocked!', 'success');
+        notify('🎉 1-Time Free Statement Scan Unlocked!', 'success');
         setTimeout(() => fileInputRef.current?.click(), 300);
       }).catch(() => {
         setIsAdLoading(false);
@@ -95,18 +93,24 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
     } else {
       setTimeout(() => {
         setIsAdLoading(false);
-        const newCredits = bonusCredits + 1;
-        setBonusCredits(newCredits);
-        localStorage.setItem('zb_statement_bonus_credits', String(newCredits));
+        setTrialUnlocked(true);
         setShowAdModal(false);
-        notify('🎉 1 Free Bank Statement Scan Unlocked!', 'success');
+        notify('🎉 1-Time Free Statement Scan Unlocked!', 'success');
         setTimeout(() => fileInputRef.current?.click(), 300);
-      }, 2500);
+      }, 2000);
     }
   };
 
   const handleUploadAreaClick = () => {
-    if (!hasAccess) {
+    if (isPremiumUser) {
+      fileInputRef.current?.click();
+      return;
+    }
+    if (scansUsed >= 1) {
+      onOpenSubscriptionModal();
+      return;
+    }
+    if (!trialUnlocked) {
       setShowAdModal(true);
       return;
     }
@@ -114,7 +118,11 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!hasAccess) {
+    if (!isPremiumUser && scansUsed >= 1) {
+      onOpenSubscriptionModal();
+      return;
+    }
+    if (!isPremiumUser && scansUsed === 0 && !trialUnlocked) {
       setShowAdModal(true);
       return;
     }
@@ -135,7 +143,11 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
   };
 
   const startAnalysis = async () => {
-    if (!hasAccess) {
+    if (!isPremiumUser && scansUsed >= 1) {
+      onOpenSubscriptionModal();
+      return;
+    }
+    if (!isPremiumUser && scansUsed === 0 && !trialUnlocked) {
       setShowAdModal(true);
       return;
     }
@@ -144,16 +156,10 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
       return;
     }
 
-    // Deduct free trial or bonus credit
-    if (!isPremiumUser) {
-      if (scansUsed === 0) {
-        setScansUsed(1);
-        localStorage.setItem('zb_statement_scans_used', '1');
-      } else if (bonusCredits > 0) {
-        const next = bonusCredits - 1;
-        setBonusCredits(next);
-        localStorage.setItem('zb_statement_bonus_credits', String(next));
-      }
+    // Mark 1-time free trial as used
+    if (!isPremiumUser && scansUsed === 0) {
+      setScansUsed(1);
+      localStorage.setItem('zb_statement_scans_used', '1');
     }
 
     setIsProcessing(true);
@@ -225,10 +231,6 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
   };
 
   const handleBatchImport = async () => {
-    if (!isPremiumUser) {
-      onOpenSubscriptionModal();
-      return;
-    }
     if (!analysisResult) return;
     const toImport = analysisResult.transactions.filter(t => t.selected);
     if (toImport.length === 0) {
@@ -389,11 +391,13 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
       {/* Main Content */}
       <div style={{ padding: '20px', flex: 1, maxWidth: '640px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
         
-        {/* PRO Exclusive Banner (if user is not pro) */}
+        {/* PRO / 1-Time Free Trial Banner */}
         {!isPremiumUser && (
           <div style={{
-            background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%)',
-            border: '1px solid rgba(245, 158, 11, 0.3)',
+            background: scansUsed >= 1 
+              ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%)'
+              : 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(99, 102, 241, 0.1) 100%)',
+            border: scansUsed >= 1 ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(16, 185, 129, 0.35)',
             borderRadius: '24px',
             padding: '20px',
             marginBottom: '20px',
@@ -405,33 +409,56 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
                 width: '42px',
                 height: '42px',
                 borderRadius: '14px',
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                background: scansUsed >= 1 ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 'linear-gradient(135deg, #10b981, #059669)',
                 color: '#fff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0
               }}>
-                <Lock size={20} />
+                {scansUsed >= 1 ? <Lock size={20} /> : <Sparkles size={20} />}
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: '#f59e0b' }}>
-                    ZenBudget Pro Exclusive Feature
+                  <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: scansUsed >= 1 ? '#ef4444' : '#10b981' }}>
+                    {scansUsed >= 1 ? '👑 1-Time Free Statement Used!' : '🎬 1st Statement: 100% Free Trial'}
                   </h3>
                 </div>
                 <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '6px 0 14px', lineHeight: '1.5' }}>
-                  Unlock automated PDF/CSV statement imports, AI category normalization, and recurring bill tracking with zero manual data entry.
+                  {scansUsed >= 1
+                    ? 'You have already used your 1-Time Free Bank Statement import. Upgrade to ZenBudget Pro for unlimited automated statement imports.'
+                    : 'Watch 1 short sponsor video ad to scan your 1st bank statement 100% FREE! Subsequent statements require ZenBudget Pro.'}
                 </p>
 
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  {scansUsed === 0 && !trialUnlocked && (
+                    <button
+                      onClick={() => setShowAdModal(true)}
+                      style={{
+                        padding: '10px 18px',
+                        borderRadius: '12px',
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        border: 'none',
+                        color: '#ffffff',
+                        fontSize: '13px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <Play size={14} fill="#ffffff" />
+                      <span>Watch Ad (Scan 1st Statement Free)</span>
+                    </button>
+                  )}
                   <button
                     onClick={onOpenSubscriptionModal}
                     style={{
                       padding: '10px 18px',
                       borderRadius: '12px',
-                      background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                      border: 'none',
+                      background: scansUsed >= 1 ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 'rgba(255, 255, 255, 0.08)',
+                      border: scansUsed >= 1 ? 'none' : '1px solid rgba(255, 255, 255, 0.15)',
                       color: '#ffffff',
                       fontSize: '13px',
                       fontWeight: 700,
@@ -442,7 +469,7 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
                     }}
                   >
                     <Sparkles size={14} />
-                    <span>Unlock Pro (From ₹149/mo)</span>
+                    <span>{scansUsed >= 1 ? 'Unlock Pro (From ₹149/mo)' : 'Get Pro for Unlimited'}</span>
                   </button>
                 </div>
               </div>
@@ -522,32 +549,40 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
                 accept=".pdf,.csv,image/*"
                 style={{ display: 'none' }}
                 onChange={handleFileSelect}
-                disabled={!isPremiumUser}
+                disabled={!hasAccess}
               />
 
               <div style={{
                 width: '64px',
                 height: '64px',
                 borderRadius: '20px',
-                background: !isPremiumUser ? 'rgba(245, 158, 11, 0.15)' : 'rgba(16, 185, 129, 0.12)',
-                color: !isPremiumUser ? '#f59e0b' : '#10b981',
+                background: isLocked
+                  ? 'rgba(239, 68, 68, 0.15)'
+                  : needsAdUnlock
+                    ? 'rgba(16, 185, 129, 0.15)'
+                    : 'rgba(16, 185, 129, 0.12)',
+                color: isLocked ? '#ef4444' : '#10b981',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 margin: '0 auto 16px'
               }}>
-                {!isPremiumUser ? <Lock size={32} /> : <UploadCloud size={32} />}
+                {isLocked ? <Lock size={32} /> : needsAdUnlock ? <Sparkles size={32} /> : <UploadCloud size={32} />}
               </div>
 
               <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 6px' }}>
-                {!isPremiumUser 
-                  ? 'Unlock Pro to Scan Statements' 
-                  : (file ? file.name : 'Select Bank Statement')}
+                {isLocked
+                  ? '1-Time Free Statement Used'
+                  : needsAdUnlock
+                    ? '🎬 1st Statement: 100% FREE (Watch Ad)'
+                    : (file ? file.name : 'Select Bank Statement')}
               </h3>
               <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 0 16px' }}>
-                {!isPremiumUser
-                  ? 'Statement Intelligence & auto-import is a Pro exclusive feature'
-                  : 'Supports HDFC, SBI, ICICI, Axis PDF, CSV & Passbook Photos'}
+                {isLocked
+                  ? 'Upgrade to ZenBudget Pro for unlimited statement imports'
+                  : needsAdUnlock
+                    ? 'Tap to watch 1 sponsor video ad & scan your 1st statement 100% free!'
+                    : 'Supports HDFC, SBI, ICICI, Axis PDF, CSV & Passbook Photos'}
               </p>
 
               <div style={{
@@ -558,12 +593,17 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
                 borderRadius: '999px',
                 background: 'var(--bg-input)',
                 fontSize: '11px',
-                color: !isPremiumUser ? '#f59e0b' : 'var(--text-secondary)'
+                color: isLocked ? '#ef4444' : needsAdUnlock ? '#10b981' : 'var(--text-secondary)'
               }}>
-                {!isPremiumUser ? (
+                {isLocked ? (
                   <>
-                    <Lock size={14} color="#f59e0b" />
+                    <Lock size={14} color="#ef4444" />
                     <span style={{ fontWeight: 700 }}>Pro Subscription Required</span>
+                  </>
+                ) : needsAdUnlock ? (
+                  <>
+                    <Play size={14} color="#10b981" fill="#10b981" />
+                    <span style={{ fontWeight: 700, color: '#10b981' }}>Tap to Watch Ad & Unlock 1st Scan</span>
                   </>
                 ) : (
                   <>
@@ -583,7 +623,8 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
               marginBottom: '20px',
               display: 'flex',
               alignItems: 'center',
-              gap: '12px'
+              gap: '12px',
+              opacity: isLocked ? 0.6 : 1
             }}>
               <Lock size={18} color="#94a3b8" />
               <div style={{ flex: 1 }}>
@@ -592,7 +633,7 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
                   value={filePassword}
                   onChange={(e) => setFilePassword(e.target.value)}
                   placeholder="PDF Password (Optional - if your bank statement is locked)"
-                  disabled={!isPremiumUser}
+                  disabled={isLocked}
                   style={{
                     width: '100%',
                     background: 'transparent',
@@ -610,39 +651,50 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <button
                 onClick={() => {
-                  if (!isPremiumUser) {
+                  if (isLocked) {
                     onOpenSubscriptionModal();
+                    return;
+                  }
+                  if (needsAdUnlock) {
+                    setShowAdModal(true);
                     return;
                   }
                   startAnalysis();
                 }}
-                disabled={isPremiumUser && !file}
+                disabled={hasAccess && !file}
                 style={{
                   width: '100%',
                   padding: '16px',
                   borderRadius: '16px',
-                  background: !isPremiumUser
+                  background: isLocked
                     ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
-                    : file 
-                      ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
-                      : 'var(--bg-input)',
+                    : needsAdUnlock
+                      ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                      : file 
+                        ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
+                        : 'var(--bg-input)',
                   border: 'none',
-                  color: (!isPremiumUser || file) ? '#ffffff' : 'var(--text-muted)',
+                  color: (isLocked || needsAdUnlock || file) ? '#ffffff' : 'var(--text-muted)',
                   fontSize: '15px',
                   fontWeight: 800,
-                  cursor: (!isPremiumUser || file) ? 'pointer' : 'not-allowed',
+                  cursor: (isLocked || needsAdUnlock || file) ? 'pointer' : 'not-allowed',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  boxShadow: (!isPremiumUser || file) ? '0 10px 25px rgba(16, 185, 129, 0.3)' : 'none',
+                  boxShadow: (isLocked || needsAdUnlock || file) ? '0 10px 25px rgba(16, 185, 129, 0.3)' : 'none',
                   transition: 'all 0.2s'
                 }}
               >
-                {!isPremiumUser ? (
+                {isLocked ? (
                   <>
                     <Lock size={18} />
-                    <span>Unlock Pro to Scan Statement</span>
+                    <span>👑 1-Time Free Scan Used (Upgrade to Pro)</span>
+                  </>
+                ) : needsAdUnlock ? (
+                  <>
+                    <Play size={18} fill="#ffffff" />
+                    <span>🎬 Watch Ad to Scan 1st Statement (100% FREE)</span>
                   </>
                 ) : (
                   <>
@@ -1348,10 +1400,10 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
 
               <div>
                 <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 6px' }}>
-                  1 Free Parse Used!
+                  🎬 Unlock 1-Time Free Statement Parse
                 </h3>
                 <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>
-                  You have experienced your 1-Time Free Statement Parse. Watch a sponsor video ad to unlock another parse for <strong style={{ color: '#10b981' }}>FREE</strong>, or upgrade to Pro for unlimited statements.
+                  Watch 1 short sponsor video ad to unlock your 1-Time Free Bank Statement Parse! Subsequent statements require ZenBudget Pro.
                 </p>
               </div>
 
@@ -1378,7 +1430,7 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
                   }}
                 >
                   <Play size={16} fill="#ffffff" />
-                  <span>{isAdLoading ? 'Loading Video Ad...' : '🎬 Watch Video Ad (+1 Free Parse)'}</span>
+                  <span>{isAdLoading ? 'Loading Video Ad...' : '🎬 Watch Video Ad (Unlock 1 Free Parse)'}</span>
                 </button>
 
                 <button

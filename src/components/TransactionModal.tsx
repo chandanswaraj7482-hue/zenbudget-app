@@ -216,16 +216,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     setType('expense');
     setScanMessage({ text: `✅ Receipt scanned: ${parsed.title || 'Unknown'} — ${currencySymbol}${parsed.amount || ''}`, type: 'success' });
 
-    // Deduct free trial or bonus credit
+    // Deduct free trial
     const isPro = localStorage.getItem('zb_subscription_tier')?.startsWith('premium');
     if (!isPro) {
       if (receiptScansUsed === 0) {
         setReceiptScansUsed(1);
         localStorage.setItem('zb_receipt_scans_used', '1');
-      } else if (receiptBonusCredits > 0) {
-        const next = receiptBonusCredits - 1;
-        setReceiptBonusCredits(next);
-        localStorage.setItem('zb_receipt_bonus_credits', String(next));
       }
     }
   };
@@ -233,36 +229,30 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   const [receiptScansUsed, setReceiptScansUsed] = useState<number>(() => {
     return Number(localStorage.getItem('zb_receipt_scans_used') || 0);
   });
-  const [receiptBonusCredits, setReceiptBonusCredits] = useState<number>(() => {
-    return Number(localStorage.getItem('zb_receipt_bonus_credits') || 0);
-  });
+  const [receiptTrialUnlocked, setReceiptTrialUnlocked] = useState<boolean>(false);
   const [showReceiptAdModal, setShowReceiptAdModal] = useState<boolean>(false);
   const [isReceiptAdLoading, setIsReceiptAdLoading] = useState<boolean>(false);
 
   const isProUser = localStorage.getItem('zb_subscription_tier')?.startsWith('premium');
-  const hasReceiptAccess = isProUser || receiptScansUsed === 0 || receiptBonusCredits > 0;
+  const hasReceiptAccess = isProUser || (receiptScansUsed === 0 && receiptTrialUnlocked);
 
   const handleWatchReceiptAd = () => {
     setIsReceiptAdLoading(true);
     if (Capacitor.isNativePlatform()) {
       admobService.showRewardedAd(() => {
         setIsReceiptAdLoading(false);
-        const newCredits = receiptBonusCredits + 1;
-        setReceiptBonusCredits(newCredits);
-        localStorage.setItem('zb_receipt_bonus_credits', String(newCredits));
+        setReceiptTrialUnlocked(true);
         setShowReceiptAdModal(false);
-        setTimeout(() => handleCameraScan(), 300);
+        setTimeout(() => handleCameraScan(true), 300);
       }).catch(() => {
         setIsReceiptAdLoading(false);
       });
     } else {
       setTimeout(() => {
         setIsReceiptAdLoading(false);
-        const newCredits = receiptBonusCredits + 1;
-        setReceiptBonusCredits(newCredits);
-        localStorage.setItem('zb_receipt_bonus_credits', String(newCredits));
+        setReceiptTrialUnlocked(true);
         setShowReceiptAdModal(false);
-        setTimeout(() => handleCameraScan(), 300);
+        setTimeout(() => handleCameraScan(true), 300);
       }, 2000);
     }
   };
@@ -299,8 +289,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     }
   };
 
-  const handleCameraScan = async () => {
-    if (!hasReceiptAccess) {
+  const handleCameraScan = async (skipAccessCheck = false) => {
+    if (!skipAccessCheck && !hasReceiptAccess) {
       setShowReceiptAdModal(true);
       return;
     }
@@ -2072,38 +2062,62 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
         <div>
           <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 6px' }}>
-            1 Free Receipt Scan Used!
+            {receiptScansUsed >= 1 ? '👑 1-Time Free Bill Scan Used!' : '🎬 Unlock 1-Time Free Bill Scan'}
           </h3>
           <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>
-            You have experienced your 1-Time Free AI Bill Scan. Watch a sponsor video ad to unlock another AI Bill Scan for <strong style={{ color: '#10b981' }}>FREE</strong>, or upgrade to Pro for unlimited instant scans.
+            {receiptScansUsed >= 1
+              ? 'You have already used your 1-Time Free AI Bill Scan. Upgrade to ZenBudget Pro for unlimited instant camera & invoice scans.'
+              : 'Watch 1 short sponsor video ad to unlock your 1-Time Free AI Bill Scan! Subsequent scans require ZenBudget Pro.'}
           </p>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px' }}>
-          <button
-            type="button"
-            onClick={handleWatchReceiptAd}
-            disabled={isReceiptAdLoading}
-            style={{
-              padding: '14px',
-              borderRadius: '14px',
-              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-              border: 'none',
-              color: '#ffffff',
-              fontSize: '14px',
-              fontWeight: 800,
-              cursor: isReceiptAdLoading ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              boxShadow: '0 4px 15px rgba(245, 158, 11, 0.35)',
-              opacity: isReceiptAdLoading ? 0.7 : 1
-            }}
-          >
-            <Play size={16} fill="#ffffff" />
-            <span>{isReceiptAdLoading ? 'Loading Video Ad...' : '🎬 Watch Video Ad (+1 Free Scan)'}</span>
-          </button>
+          {receiptScansUsed === 0 ? (
+            <button
+              type="button"
+              onClick={handleWatchReceiptAd}
+              disabled={isReceiptAdLoading}
+              style={{
+                padding: '14px',
+                borderRadius: '14px',
+                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                border: 'none',
+                color: '#ffffff',
+                fontSize: '14px',
+                fontWeight: 800,
+                cursor: isReceiptAdLoading ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 15px rgba(245, 158, 11, 0.35)',
+                opacity: isReceiptAdLoading ? 0.7 : 1
+              }}
+            >
+              <Play size={16} fill="#ffffff" />
+              <span>{isReceiptAdLoading ? 'Loading Video Ad...' : '🎬 Watch Video Ad (Unlock 1 Free Scan)'}</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setShowReceiptAdModal(false);
+                window.dispatchEvent(new CustomEvent('open-subscription-modal'));
+              }}
+              style={{
+                padding: '14px',
+                borderRadius: '14px',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                border: 'none',
+                color: '#ffffff',
+                fontSize: '14px',
+                fontWeight: 800,
+                cursor: 'pointer'
+              }}
+            >
+              👑 Upgrade to Pro (₹149/mo)
+            </button>
+          )}
         </div>
       </div>
     </div>,
