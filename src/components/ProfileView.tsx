@@ -42,8 +42,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const [appLockEnabled, setAppLockEnabled] = useState<boolean>(() => localStorage.getItem('zb_app_lock_enabled') !== 'false');
-  const [biometricsEnabled, setBiometricsEnabled] = useState<boolean>(() => localStorage.getItem('zb_biometrics_enabled') !== 'false');
+  const [appLockEnabled, setAppLockEnabled] = useState<boolean>(() => localStorage.getItem('zb_app_lock_enabled') === 'true');
+  const [biometricsEnabled, setBiometricsEnabled] = useState<boolean>(() => localStorage.getItem('zb_biometrics_enabled') === 'true');
 
   const profileId = localStorage.getItem('zb_profile_id') || 'local';
   const [age, setAge] = useState<string>(() => {

@@ -8,4 +8,5 @@ playstore_release
 zenbudget_decoded
 *.jar
 *.idsig
+dist
 

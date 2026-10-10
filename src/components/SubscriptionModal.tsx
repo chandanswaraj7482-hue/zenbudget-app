@@ -522,7 +522,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               
               {isExpired ? (
                 <div style={{ color: 'var(--danger)', fontSize: '12px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Hourglass size={14} /> Free Trial has expired!
+                  <Hourglass size={14} /> Subscription plan has expired!
                 </div>
               ) : (
                 <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>

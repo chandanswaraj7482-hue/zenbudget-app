@@ -88,7 +88,12 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   const [currentProfileId, setCurrentProfileId] = useState<string>(() => localStorage.getItem('zb_profile_id') || '');
   const [userName, setUserName] = useState<string>(() => localStorage.getItem('zb_user_name') || '');
   const [isLocked, setIsLocked] = useState<boolean>(() => {
-    return localStorage.getItem('zb_profile_id') && localStorage.getItem('zb_app_lock_enabled') === 'false' ? false : true;
+    const profileId = localStorage.getItem('zb_profile_id');
+    const lockExplicitlyEnabled = localStorage.getItem('zb_app_lock_enabled') === 'true';
+    if (profileId && !lockExplicitlyEnabled) {
+      return false;
+    }
+    return !profileId ? true : lockExplicitlyEnabled;
   });
   const [isAppLoading, setIsAppLoading] = useState<boolean>(false);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
@@ -1010,11 +1015,12 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     window.addEventListener('click', updateActivity, { passive: true });
     window.addEventListener('scroll', updateActivity, { passive: true });
 
-    // 5-Minute Inactivity Auto-Lock
+    // 5-Minute Inactivity Auto-Lock (only if explicitly enabled by user in Settings)
     intervalId = setInterval(() => {
-      if (Date.now() - lastActivityTime >= 5 * 60 * 1000) {
+      const lockEnabled = localStorage.getItem('zb_app_lock_enabled') === 'true';
+      if (lockEnabled && Date.now() - lastActivityTime >= 5 * 60 * 1000) {
         setIsLocked(true);
-        triggerToast('🔒 ZenBudget Auto-Locked after 5 mins of inactivity for Bank-Grade Security.', 'info');
+        triggerToast('🔒 ZenBudget Auto-Locked after 5 mins of inactivity.', 'info');
       }
     }, 10000); // Check every 10 seconds
 
@@ -1022,10 +1028,11 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     let appStateHandle: any = null;
     if (Capacitor.isNativePlatform()) {
       CapApp.addListener('appStateChange', (state) => {
-        const lockEnabled = localStorage.getItem('zb_app_lock_enabled') !== 'false';
+        const lockEnabled = localStorage.getItem('zb_app_lock_enabled') === 'true';
+        if (!lockEnabled) return;
         if (!state.isActive) {
           sessionStorage.setItem('zb_was_backgrounded', 'true');
-        } else if (sessionStorage.getItem('zb_was_backgrounded') === 'true' && lockEnabled) {
+        } else if (sessionStorage.getItem('zb_was_backgrounded') === 'true') {
           sessionStorage.removeItem('zb_was_backgrounded');
           setIsLocked(true);
         }
@@ -1036,12 +1043,13 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       });
     }
 
-    // Web / PWA visibility change auto-lock
+    // Web / PWA visibility change auto-lock (strictly opt-in)
     const handleVisibilityChange = () => {
-      const lockEnabled = localStorage.getItem('zb_app_lock_enabled') !== 'false';
+      const lockEnabled = localStorage.getItem('zb_app_lock_enabled') === 'true';
+      if (!lockEnabled) return;
       if (document.visibilityState === 'hidden') {
         sessionStorage.setItem('zb_was_backgrounded', 'true');
-      } else if (document.visibilityState === 'visible' && sessionStorage.getItem('zb_was_backgrounded') === 'true' && lockEnabled) {
+      } else if (document.visibilityState === 'visible' && sessionStorage.getItem('zb_was_backgrounded') === 'true') {
         sessionStorage.removeItem('zb_was_backgrounded');
         setIsLocked(true);
       }
@@ -2733,22 +2741,14 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     const isPremium = subscriptionTier === 'premium_monthly' || subscriptionTier === 'premium_yearly' || subscriptionTier === 'premium_lifetime' || subscriptionTier === 'premium';
     if (isPremium) return true;
 
-    // Check trial duration
-    if (isTrialExpired()) {
-      setIsSubBlocker(true);
-      setIsSubModalOpen(true);
-      triggerToast('Your 7-day free trial has expired! Please upgrade.', 'warning');
-      return false;
-    }
-
-    // Check daily transaction counts (10 per day)
+    // Check daily transaction counts (10 per day on free tier)
     const todayStr = new Date().toISOString().split('T')[0];
     const todayTransactions = transactions.filter(t => t.date.startsWith(todayStr));
     
     if (todayTransactions.length >= 10) {
       setIsSubBlocker(false);
       setIsSubModalOpen(true);
-      triggerToast('Daily trial transaction limit reached (max 10). Upgrade to unlock unlimited records!', 'warning');
+      triggerToast('Daily free limit reached (10 transactions/day). Upgrade to Pro for unlimited records!', 'warning');
       return false;
     }
 
@@ -2760,7 +2760,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     if (isSubscriptionExpired()) {
       setIsSubBlocker(true);
       setIsSubModalOpen(true);
-      triggerToast('Your 7-day free trial has expired! Please select a plan to continue.', 'warning');
+      triggerToast('Subscription expired. Please renew your plan to continue.', 'warning');
       return;
     }
     let isEditing = !!txData.id;
@@ -4007,20 +4007,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     );
   }
 
-  if (isAppLoading) {
-    return (
-      <div style={{ width: '100vw', minHeight: '100vh', display: 'flex', justifyContent: 'center', background: 'var(--bg-base)' }}>
-        <div className="app-main-wrapper" style={{ margin: '0 auto', maxWidth: '520px', width: '100%', position: 'relative', minHeight: '100vh', background: 'var(--bg-base)', boxShadow: '0 0 20px rgba(0,0,0,0.4)', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ width: '80px', height: '80px', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px', overflow: 'hidden' }}>
-            <img src="/favicon.png?v=10" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
-          <Loader2 size={40} className="animate-spin" style={{ color: 'var(--primary)', marginBottom: '20px' }} />
-          <span style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: '6px' }}>Preparing Dashboard...</span>
-          <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Syncing your latest transactions 🚀</span>
-        </div>
-      </div>
-    );
-  }
+
 
   if (showOnboarding) {
     return (

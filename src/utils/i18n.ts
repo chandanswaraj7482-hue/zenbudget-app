@@ -165,9 +165,9 @@ const translations: Record<Language, Record<string, string>> = {
     'toast_goal_deleted': 'Goal removed successfully!',
     'toast_goal_reached': '🎉 Congratulations! Goal reached!',
     'toast_upgrade_success': 'Upgrade Successful! Premium features unlocked.',
-    'toast_trial_expired': 'Your 7-day free trial has expired! Please upgrade.',
-    'toast_trial_limit_tx': 'Trial limit: max 10 transactions. Upgrade to unlock unlimited!',
-    'toast_trial_limit_budget': 'Trial limit: max 2 budgets. Upgrade to unlock all!',
+    'toast_trial_expired': 'Upgrade to Premium for unlimited features!',
+    'toast_trial_limit_tx': 'Free limit: max 10 transactions/day. Upgrade to unlock unlimited!',
+    'toast_trial_limit_budget': 'Free limit: max 2 budgets. Upgrade to unlock all!',
     'toast_checkin': 'Daily Check-in! +20 Zen Pet Points! 🌿🐷',
     // Accounts & Loan Keys
     'hello_user': 'Hello, {{name}} 👋',

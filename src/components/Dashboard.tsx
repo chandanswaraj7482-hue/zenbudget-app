@@ -1437,11 +1437,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
               {expiryDate && !isLifetime && <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{expiryDate.toLocaleDateString()}</span>}
             </div>
           );
-        } else if (trialStartDate) {
-          const trialStart = new Date(trialStartDate);
-          const trialEnd = new Date(trialStart.getTime() + 7 * 24 * 60 * 60 * 1000);
-          const daysLeft = Math.max(0, Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
-          
+        } else {
+          // Free Plan (Never expires - Lifetime Free Tier)
           return (
             <div 
               onClick={onUpgradeClick}
@@ -1453,10 +1450,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 display: 'flex', 
                 flexDirection: 'column', 
                 gap: '12px', 
-                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(217, 119, 6, 0.05) 50%, rgba(15, 23, 42, 0.6) 100%)', 
-                border: '1px solid rgba(245, 158, 11, 0.35)',
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 182, 212, 0.05) 50%, rgba(15, 23, 42, 0.6) 100%)', 
+                border: '1px solid rgba(16, 185, 129, 0.35)',
                 borderRadius: '20px',
-                boxShadow: '0 8px 28px -6px rgba(245, 158, 11, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.12)',
+                boxShadow: '0 8px 28px -6px rgba(16, 185, 129, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.12)',
                 cursor: onUpgradeClick ? 'pointer' : 'default',
                 transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
                 backdropFilter: 'blur(16px)',
@@ -1469,26 +1466,26 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     width: '40px', 
                     height: '40px', 
                     borderRadius: '13px', 
-                    background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.15))',
-                    border: '1px solid rgba(245, 158, 11, 0.45)',
+                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(6, 182, 212, 0.15))',
+                    border: '1px solid rgba(16, 185, 129, 0.45)',
                     display: 'flex', 
                     alignItems: 'center', 
                     justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(245, 158, 11, 0.25)',
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
                     flexShrink: 0
                   }}>
-                    <Sparkles size={20} style={{ color: '#fbbf24', filter: 'drop-shadow(0 0 6px rgba(251, 191, 36, 0.6))' }} />
+                    <Sparkles size={20} style={{ color: '#10b981', filter: 'drop-shadow(0 0 6px rgba(16, 185, 129, 0.6))' }} />
                   </div>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ 
                         fontSize: '11px', 
                         fontWeight: 800, 
-                        color: '#fbbf24', 
+                        color: '#10b981', 
                         textTransform: 'uppercase', 
                         letterSpacing: '0.08em' 
                       }}>
-                        FREE TRIAL
+                        FREE FOREVER PLAN
                       </span>
                       <span style={{ 
                         display: 'inline-block', 
@@ -1506,20 +1503,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       margin: '2px 0 0 0',
                       letterSpacing: '-0.01em'
                     }}>
-                      {daysLeft > 0 ? `${daysLeft} days remaining` : 'Trial expired'}
+                      Lifetime Free Access • Unlimited Days
                     </p>
                   </div>
                 </div>
 
                 <div 
                   style={{
-                    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                    background: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
                     color: '#ffffff',
                     padding: '8px 14px',
                     borderRadius: '999px',
                     fontSize: '12px',
                     fontWeight: 800,
-                    boxShadow: '0 4px 14px rgba(245, 158, 11, 0.4)',
+                    boxShadow: '0 4px 14px rgba(16, 185, 129, 0.4)',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '4px',
@@ -1528,40 +1525,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     transition: 'transform 0.15s ease'
                   }}
                 >
-                  Upgrade ⚡
+                  Upgrade Pro ⚡
                 </div>
               </div>
 
-              {/* 7-Segment Active Day Tracker */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '2px' }}>
-                <div style={{ display: 'flex', gap: '5px', width: '100%' }}>
-                  {[1, 2, 3, 4, 5, 6, 7].map((dayNum) => {
-                    const isActive = dayNum <= daysLeft;
-                    return (
-                      <div
-                        key={dayNum}
-                        style={{
-                          flex: 1,
-                          height: '5px',
-                          borderRadius: '4px',
-                          background: isActive 
-                            ? 'linear-gradient(90deg, #f59e0b, #fbbf24)' 
-                            : 'rgba(255, 255, 255, 0.1)',
-                          boxShadow: isActive ? '0 0 8px rgba(245, 158, 11, 0.5)' : 'none',
-                          transition: 'all 0.3s ease'
-                        }}
-                      />
-                    );
-                  })}
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.55)', fontWeight: 500 }}>
-                    Full Pro Features Active
-                  </span>
-                  <span style={{ fontSize: '11px', color: '#fbbf24', fontWeight: 700 }}>
-                    {daysLeft}/7 Days
-                  </span>
-                </div>
+              {/* Status Footer */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '6px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                <span style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.65)', fontWeight: 500 }}>
+                  10 Free Daily Logs • Budgets & Reports Active
+                </span>
+                <span style={{ fontSize: '11px', color: '#10b981', fontWeight: 700 }}>
+                  Active Forever
+                </span>
               </div>
             </div>
           );
