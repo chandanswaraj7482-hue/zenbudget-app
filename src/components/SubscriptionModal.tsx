@@ -22,45 +22,45 @@ interface SubscriptionModalProps {
 export type PlanCycle = 'monthly' | 'yearly' | 'lifetime';
 
 export const LOCALIZED_PRICES_MONTHLY: Record<string, { amount: number; symbol: string; label: string }> = {
-  INR: { amount: 99, symbol: '₹', label: '₹99/mo' },
-  USD: { amount: 1.99, symbol: '$', label: '$1.99/mo' },
-  EUR: { amount: 1.99, symbol: '€', label: '€1.99/mo' },
-  GBP: { amount: 1.79, symbol: '£', label: '£1.79/mo' },
-  CAD: { amount: 2.99, symbol: 'C$', label: 'C$2.99/mo' },
-  AUD: { amount: 2.99, symbol: 'A$', label: 'A$2.99/mo' },
-  JPY: { amount: 299, symbol: '¥', label: '¥299/mo' },
-  AED: { amount: 7.99, symbol: 'AED', label: '7.99 AED/mo' },
-  SAR: { amount: 7.99, symbol: 'SAR', label: '7.99 SAR/mo' },
-  CNY: { amount: 14, symbol: '¥', label: '¥14/mo' },
-  SGD: { amount: 2.99, symbol: 'S$', label: 'S$2.99/mo' }
+  INR: { amount: 149, symbol: '₹', label: '₹149/mo' },
+  USD: { amount: 6.99, symbol: '$', label: '$6.99/mo' },
+  EUR: { amount: 6.99, symbol: '€', label: '€6.99/mo' },
+  GBP: { amount: 5.99, symbol: '£', label: '£5.99/mo' },
+  CAD: { amount: 9.99, symbol: 'C$', label: 'C$9.99/mo' },
+  AUD: { amount: 10.99, symbol: 'A$', label: 'A$10.99/mo' },
+  JPY: { amount: 750, symbol: '¥', label: '¥750/mo' },
+  AED: { amount: 24.99, symbol: 'AED', label: '24.99 AED/mo' },
+  SAR: { amount: 24.99, symbol: 'SAR', label: '24.99 SAR/mo' },
+  CNY: { amount: 35, symbol: '¥', label: '¥35/mo' },
+  SGD: { amount: 9.99, symbol: 'S$', label: 'S$9.99/mo' }
 };
 
 export const LOCALIZED_PRICES_YEARLY: Record<string, { amount: number; symbol: string; label: string }> = {
-  INR: { amount: 499, symbol: '₹', label: '₹499/yr' },
-  USD: { amount: 9.99, symbol: '$', label: '$9.99/yr' },
-  EUR: { amount: 9.99, symbol: '€', label: '€9.99/yr' },
-  GBP: { amount: 8.99, symbol: '£', label: '£8.99/yr' },
-  CAD: { amount: 13.99, symbol: 'C$', label: 'C$13.99/yr' },
-  AUD: { amount: 14.99, symbol: 'A$', label: 'A$14.99/yr' },
-  JPY: { amount: 1499, symbol: '¥', label: '¥1,499/yr' },
-  AED: { amount: 36.99, symbol: 'AED', label: '36.99 AED/yr' },
-  SAR: { intelligent: false, amount: 36.99, symbol: 'SAR', label: '36.99 SAR/yr' } as any,
-  CNY: { amount: 69, symbol: '¥', label: '¥69/yr' },
-  SGD: { amount: 13.99, symbol: 'S$', label: 'S$13.99/yr' }
+  INR: { amount: 1499, symbol: '₹', label: '₹1,499/yr' },
+  USD: { amount: 19.99, symbol: '$', label: '$19.99/yr' },
+  EUR: { amount: 19.99, symbol: '€', label: '€19.99/yr' },
+  GBP: { amount: 17.99, symbol: '£', label: '£17.99/yr' },
+  CAD: { amount: 27.99, symbol: 'C$', label: 'C$27.99/yr' },
+  AUD: { amount: 29.99, symbol: 'A$', label: 'A$29.99/yr' },
+  JPY: { amount: 7500, symbol: '¥', label: '¥7,500/yr' },
+  AED: { amount: 69.99, symbol: 'AED', label: '69.99 AED/yr' },
+  SAR: { amount: 69.99, symbol: 'SAR', label: '69.99 SAR/yr' },
+  CNY: { amount: 350, symbol: '¥', label: '¥350/yr' },
+  SGD: { amount: 27.99, symbol: 'S$', label: 'S$27.99/yr' }
 };
 
 export const LOCALIZED_PRICES_LIFETIME: Record<string, { amount: number; symbol: string; label: string }> = {
-  INR: { amount: 999, symbol: '₹', label: '₹999' },
-  USD: { amount: 19.99, symbol: '$', label: '$19.99' },
-  EUR: { amount: 19.99, symbol: '€', label: '€19.99' },
-  GBP: { amount: 16.99, symbol: '£', label: '£16.99' },
-  CAD: { amount: 26.99, symbol: 'C$', label: 'C$26.99' },
-  AUD: { amount: 29.99, symbol: 'A$', label: 'A$29.99' },
-  JPY: { amount: 2999, symbol: '¥', label: '¥2,999' },
-  AED: { amount: 79.99, symbol: 'AED', label: '79.99 AED' },
-  SAR: { amount: 79.99, symbol: 'SAR', label: '79.99 SAR' },
-  CNY: { amount: 149, symbol: '¥', label: '¥149' },
-  SGD: { amount: 26.99, symbol: 'S$', label: 'S$26.99' }
+  INR: { amount: 2499, symbol: '₹', label: '₹2,499' },
+  USD: { amount: 29.99, symbol: '$', label: '$29.99' },
+  EUR: { amount: 29.99, symbol: '€', label: '€29.99' },
+  GBP: { amount: 24.99, symbol: '£', label: '£24.99' },
+  CAD: { amount: 39.99, symbol: 'C$', label: 'C$39.99' },
+  AUD: { amount: 44.99, symbol: 'A$', label: 'A$44.99' },
+  JPY: { amount: 15000, symbol: '¥', label: '¥15,000' },
+  AED: { amount: 109.99, symbol: 'AED', label: '109.99 AED' },
+  SAR: { amount: 109.99, symbol: 'SAR', label: '109.99 SAR' },
+  CNY: { amount: 750, symbol: '¥', label: '¥750' },
+  SGD: { amount: 39.99, symbol: 'S$', label: 'S$39.99' }
 };
 
 export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
@@ -531,17 +531,15 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               )}
             </div>
 
-            {/* Trial Usage Limits Card (7 Days & 10 Transactions) */}
+            {/* Current Plan Status Card */}
             <div className="glass-panel" style={{ padding: '12px 14px', background: 'var(--bg-input)', border: '1px solid var(--border-input)', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: 600, gap: '8px' }}>
-                <span style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>Free Trial (7 Days Max):</span>
-                <span style={{ color: remainingDays > 3 ? 'var(--primary)' : 'var(--danger)', fontWeight: 800, whiteSpace: 'nowrap', flexShrink: 0, marginLeft: 'auto' }}>{remainingDays} / 7 Days Left</span>
+                <span style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>Current Plan:</span>
+                <span style={{ color: 'var(--primary)', fontWeight: 800, whiteSpace: 'nowrap' }}>Free Forever (Ad-Supported)</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: 600, gap: '8px' }}>
-                <span style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>Daily Logs (10 Max):</span>
-                <span style={{ color: _currentTransactionsCount >= 10 ? 'var(--danger)' : 'var(--primary)', fontWeight: 800, whiteSpace: 'nowrap', flexShrink: 0, marginLeft: 'auto' }}>
-                  {_currentTransactionsCount} / 10 Logged
-                </span>
+                <span style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>Daily Expense Tracking:</span>
+                <span style={{ color: 'var(--success)', fontWeight: 800, whiteSpace: 'nowrap' }}>100% Free & Unlimited</span>
               </div>
             </div>
 
@@ -565,7 +563,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               >
                 <div>
                   <div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--text-primary)' }}>Monthly</div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Flexibility to cancel anytime</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>100% Ad-Free, cancel anytime</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   {getPlanPriceDisplay('monthly')}
@@ -605,7 +603,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                 </div>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--text-primary)' }}>Yearly</div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Full annual savings & features</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Full annual savings & all features</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   {getPlanPriceDisplay('yearly')}
@@ -659,7 +657,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
             </div>
 
-            {/* Premium Perks & Trial Comparison list */}
+            {/* Premium Perks & Plan Comparison list */}
             <div style={{
               display: 'flex',
               flexDirection: 'column',
@@ -671,9 +669,17 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             }}>
               <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--brand-primary)' }}>✨ What unlocks in Pro:</span>
-                <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>Trial vs Pro</span>
+                <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>Free vs Pro</span>
               </div>
               
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'space-between', fontSize: '11.5px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                  <Check size={13} color="var(--success)" style={{ flexShrink: 0 }} />
+                  <span style={{ color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>100% Ad-Free Experience</span>
+                </div>
+                <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 700, flexShrink: 0, width: '100px', textAlign: 'right' }}>✓ Zero Ads</span>
+              </div>
+
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'space-between', fontSize: '11.5px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
                   <Check size={13} color="var(--success)" style={{ flexShrink: 0 }} />
