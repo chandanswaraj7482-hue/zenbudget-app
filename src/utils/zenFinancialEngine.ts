@@ -612,7 +612,7 @@ export function resolveUserFinancialQuery(
   const financialAppKeywords = [
     'paisa', 'paise', 'money', 'budget', 'save', 'saving', 'savings', 'spend', 'spending', 'expense', 'income', 'salary',
     'loan', 'emi', 'afford', 'buy', 'kharid', 'rupee', 'rs', 'inr', 'zen', 'app', 'account', 'bank', 'balance', 'audit',
-    'score', 'roast', 'limit', 'goal', 'history', 'ledger', 'tag', 'transaction', 'transfer', 'sub', 'premium', 'cashfree',
+    'score', 'roast', 'limit', 'goal', 'history', 'ledger', 'tag', 'transaction', 'transfer', 'sub', 'premium', 'payment',
     'hi', 'hello', 'hey', 'sup', 'kaise ho', 'bhai', 'bro', 'naam', 'email', 'id', 'who are you', 'help'
   ];
 

@@ -1386,7 +1386,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                         ₹{estimatedRevenue.toLocaleString()}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.25rem' }}>
-                        From Cashfree Subscription Sales
+                        From Direct Subscription Sales
                       </div>
                     </div>
 

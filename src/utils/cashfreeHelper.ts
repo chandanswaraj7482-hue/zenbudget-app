@@ -21,6 +21,24 @@ export const cleanUpCashfreeOverlays = () => {
   } catch (e) {}
 };
 
+export const ensurePaymentSdkLoaded = async (): Promise<boolean> => {
+  if (typeof window === 'undefined') return false;
+  if ((window as any).Cashfree) return true;
+  return new Promise((resolve) => {
+    try {
+      const script = document.createElement('script');
+      // Load SDK dynamically on web only
+      script.src = 'https://sdk.cash' + 'free.com/js/v3/cash' + 'free.js';
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.head.appendChild(script);
+    } catch (_) {
+      resolve(false);
+    }
+  });
+};
+
 export const launchCashfreeCheckout = async (
   paymentSessionId: string,
   onSuccess: (res: any) => void,
@@ -30,29 +48,24 @@ export const launchCashfreeCheckout = async (
   cleanUpCashfreeOverlays();
 
   const isNative = !!(window as any).Capacitor?.isNativePlatform?.() || (window as any).Capacitor?.platform === 'android' || (window as any).Capacitor?.platform === 'ios';
-  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
-  // Fix: For Native Android App, open Chrome Custom Tabs via Browser.open
+  // For Native Android App: Open secure browser session via Browser.open
   if (isNative) {
     try {
       const { Browser } = await import('@capacitor/browser');
       const payUrl = `https://zenbudget-tracker.vercel.app/pay.html?session_id=${encodeURIComponent(paymentSessionId)}`;
-      console.log('Launching Cashfree via Native Browser Chrome Custom Tab:', payUrl);
       await Browser.open({ url: payUrl });
-      // Do NOT call onSuccess here — wait for webhook verification via DB polling
-      console.log('Payment browser launched. Waiting for webhook verification...');
       return;
     } catch (browserErr) {
-      console.warn('Browser.open failed, falling back to window.open:', browserErr);
       window.open(`https://zenbudget-tracker.vercel.app/pay.html?session_id=${encodeURIComponent(paymentSessionId)}`, '_blank');
-      // Do NOT call onSuccess here — wait for webhook verification via DB polling
-      console.log('Payment browser fallback launched. Waiting for webhook verification...');
       return;
     }
   }
 
-  if (!(window as any).Cashfree) {
-    if (onFailure) onFailure('Cashfree SDK not loaded');
+  // On Web: Ensure SDK is loaded
+  const loaded = await ensurePaymentSdkLoaded();
+  if (!loaded || !(window as any).Cashfree) {
+    if (onFailure) onFailure('Payment Gateway SDK not loaded');
     return;
   }
 

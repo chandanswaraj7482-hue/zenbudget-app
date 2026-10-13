@@ -3215,7 +3215,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     const priceDisplay = getExtraSlotPriceDisplay();
     const amountNum = getExtraSlotAmountNumber();
     try {
-      triggerToast(`Initializing Cashfree payment (${priceDisplay})...`, 'info');
+      triggerToast(`Initializing Secure Payment (${priceDisplay})...`, 'info');
       let payment_session_id = '';
       const endpoints = [
         '/api/create-payment-session',
@@ -3249,7 +3249,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       }
 
       if (!payment_session_id) {
-        triggerToast('Could not launch Cashfree payment gateway. Please try again.', 'warning');
+        triggerToast('Could not launch payment gateway. Please try again.', 'warning');
         return;
       }
 

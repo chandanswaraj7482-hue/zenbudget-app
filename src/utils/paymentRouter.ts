@@ -34,7 +34,7 @@ export interface PaymentPayload {
 
 /**
  * 🛠️ UNIFIED ACCESS GATEKEEPER
- * Checks if user has unlocked Lifetime Scan & Pay access via Cashfree (₹79) or Admin override.
+ * Checks if user has unlocked Lifetime Scan & Pay access (₹79) or Admin override.
  */
 export function checkHasScanPayAccess(userProfile?: UserProfile | null): boolean {
   const profileId = userProfile?.id || (typeof localStorage !== 'undefined' ? localStorage.getItem('zb_profile_id') : '') || '';

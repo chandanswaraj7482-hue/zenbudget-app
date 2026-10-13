@@ -1028,7 +1028,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               expiry_date: restoredExpiry,
               payment_id: 'restored_' + Date.now(),
               payment_status: 'success',
-              payment_provider: 'cashfree'
+              payment_provider: 'online'
             }]);
         }
       } catch (restoreErr) {

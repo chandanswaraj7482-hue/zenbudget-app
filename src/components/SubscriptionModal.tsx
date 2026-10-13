@@ -856,7 +856,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                     }
 
                     if (!payment_session_id) {
-                      throw new Error('Could not create Cashfree payment order. Please try again.');
+                      throw new Error('Could not create payment order. Please try again.');
                     }
 
                     if (appliedCoupon) {
@@ -867,31 +867,27 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                     const payUrl = `https://zenbudget-tracker.vercel.app/pay.html?session_id=${payment_session_id}`;
 
                     if (isNative) {
-                      // Native APK: Open pay.html via Browser plugin
+                      // Native App: Open secure checkout via Browser plugin
                       try {
                         await Browser.open({ url: payUrl });
                       } catch (browserErr) {
-                        console.warn('Browser.open failed, launching window fallback:', browserErr);
                         try { window.open(payUrl, '_system'); } catch (e) { window.location.href = payUrl; }
                       }
                       // Stay in processing — the polling useEffect will detect the webhook update
                       setPaymentStep('processing');
                     } else {
-                      // Web / Mobile Browser: Launch Cashfree Drop-in Checkout Modal
-                      // Keep modal open in processing state so polling can detect webhook updates
+                      // Web / Mobile Browser: Launch Drop-in Checkout Modal
                       setPaymentStep('processing');
                       launchCashfreeCheckout(
                         payment_session_id,
                         (result: any) => {
-                          console.log('Payment intent completed. Waiting for webhook verification...');
                           setPaymentStep('processing');
                         },
                         (err: any) => {
-                          console.warn('Cashfree payment modal dismissed/failed:', err);
                           setPaymentStep('details');
                           try { playErrorSound(); } catch (_) {}
                           window.dispatchEvent(new CustomEvent('toast-alert', { detail: { message: 'Payment incomplete or cancelled. Please try again.', type: 'error' } }));
-                          if (err && typeof err === 'string' && err.includes('Cashfree SDK')) {
+                          if (err && typeof err === 'string' && err.includes('SDK')) {
                             // Direct UPI Fallback intent if SDK not loaded
                             const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
                             if (isMobile) {
@@ -904,7 +900,6 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                       );
                     }
                   } catch (sdkErr: any) {
-                    console.error('Cashfree checkout session error:', sdkErr);
                     setPaymentStep('details');
                     setCouponMessage(sdkErr.message || 'Payment Gateway connection failed. Please try again.');
                     setCouponError(true);
