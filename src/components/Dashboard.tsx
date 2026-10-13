@@ -1430,11 +1430,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <Clock size={18} style={{ color: '#8b5cf6', flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
                 <span style={{ fontSize: '12px', fontWeight: 700, color: '#8b5cf6', textTransform: 'uppercase' }}>{tierTitle}</span>
-                <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.8)', marginTop: '2px' }}>
+                <p style={{ fontSize: '13px', color: 'var(--text-primary)', marginTop: '2px', fontWeight: 500 }}>
                   {descText}
                 </p>
               </div>
-              {expiryDate && !isLifetime && <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{expiryDate.toLocaleDateString()}</span>}
+              {expiryDate && !isLifetime && <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>{expiryDate.toLocaleDateString()}</span>}
             </div>
           );
         } else {

@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:447630870272:android:ea49595ad663eeda7015e5",
         "android_client_info": {
-          "package_name": "com.zenbudget.app"
+          "package_name": "app.zenbudget.app"
         }
       },
       "oauth_client": [],

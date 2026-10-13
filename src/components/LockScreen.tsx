@@ -39,26 +39,26 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [referralCodeInput, setReferralCodeInput] = useState('');
-  
+
   // Verification variables
   const [enteredPin, setEnteredPin] = useState('');
   const [isIncorrect, setIsIncorrect] = useState(false);
-  
+
   // Loaded user profile reference
-  const [dbProfile, setDbProfile] = useState<{ 
-    name: string; 
-    pin: string; 
-    subscription_tier: string; 
-    trial_start_date: string; 
+  const [dbProfile, setDbProfile] = useState<{
+    name: string;
+    pin: string;
+    subscription_tier: string;
+    trial_start_date: string;
     premium_expires_at: string | null;
     trial_expire_date?: string | null;
     referral_code?: string;
     referred_by?: string;
   } | null>(null);
-  
+
   // Biometric authentication states
   const [biometricsAvailable, setBiometricsAvailable] = useState(false);
-  
+
   // iOS Safari PWA setup state
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
 
@@ -86,7 +86,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           }
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // Check if session already exists on load & listen to redirect events
@@ -136,7 +136,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             // 1. Check for PKCE Authorization Code
             if (urlStr.includes('code=')) {
               try {
-                const fakeUrl = new URL(urlStr.replace('com.zenbudget.app://', 'https://dummy.app/'));
+                const fakeUrl = new URL(urlStr.replace('app.zenbudget.app://', 'https://dummy.app/'));
                 const code = fakeUrl.searchParams.get('code') || urlStr.split('code=')[1]?.split('&')[0];
                 if (code) {
                   const { data: exchData, error: exchErr } = await supabase.auth.exchangeCodeForSession(code);
@@ -200,7 +200,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
     // Setup active state change listener (critical for OAuth redirects)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("LockScreen: supabase.auth.onAuthStateChange triggered", event, session?.user?.email);
-      
+
       // IMPORTANT FIX: Ignore SIGNED_OUT event if user has a valid local cached session
       // This prevents random auto-logouts when Supabase token refreshes or expires
       if (event === 'SIGNED_OUT') {
@@ -210,7 +210,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           return;
         }
       }
-      
+
       if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user) {
         localStorage.setItem('zb_oauth_just_completed', 'true');
         setUserId(session.user.id);
@@ -254,7 +254,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         console.warn('Failed to get Capacitor hardware device ID, falling back to localStorage UUID:', e);
       }
     }
-    
+
     const { screen, navigator } = window;
 
     // Check if on mobile browser
@@ -264,14 +264,14 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
     // Hardware Fingerprint for Web (Chrome/Edge on same device will have same ID)
     const hardwareString = `${screen.width}x${screen.height}-${navigator.hardwareConcurrency || 2}-${navigator.platform}-${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
-    
+
     let hash = 0;
     for (let i = 0; i < hardwareString.length; i++) {
       const char = hardwareString.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
       hash = hash & hash;
     }
-    
+
     const fingerprint = Math.abs(hash).toString(36) + '-' + (screen.width * screen.height).toString(36);
     const finalId = `${prefix}${fingerprint}`;
     localStorage.setItem('zb_device_id', finalId);
@@ -283,7 +283,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       try {
         const info = await Device.getInfo();
         return `${info.operatingSystem.toUpperCase()} - ${info.model}`;
-      } catch (e) {}
+      } catch (e) { }
     }
     return 'Web - ' + navigator.userAgent.substring(0, 40);
   }
@@ -396,7 +396,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             const newIds = ids.filter((id: string) => (isMobile ? !id.startsWith('mobile_') : !id.startsWith('desktop_')));
             if (!newIds.includes(currentDeviceId)) newIds.push(currentDeviceId);
             const newDeviceIdString = newIds.join('|');
-            
+
             if (newDeviceIdString !== userProf.device_id) {
               await supabase.from('profiles').update({ device_id: newDeviceIdString }).eq('id', uid);
               userProf.device_id = newDeviceIdString;
@@ -415,7 +415,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           setUsername(userProf.name);
           localStorage.setItem('zb_user_name', userProf.name);
         }
-        
+
         // Store profile details locally to avoid logouts
         localStorage.setItem('zb_local_session_profile', JSON.stringify({ userId: uid, profile: userProf }));
         localStorage.setItem('zb_profile_id', userProf.id || uid);
@@ -429,7 +429,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           const googleAvatar = localStorage.getItem('zb_google_avatar');
           if (!existingAvatar && googleAvatar) {
             localStorage.setItem('zb_user_avatar', googleAvatar);
-            supabase.from('profiles').update({ avatar_url: googleAvatar }).eq('id', uid).catch(() => {});
+            supabase.from('profiles').update({ avatar_url: googleAvatar }).eq('id', uid).catch(() => { });
           } else if (!existingAvatar) {
             const initAvatar = getInitialsAvatar(getInitialsName(userProf.name, userProf.email || storedEmail));
             localStorage.setItem('zb_user_avatar', initAvatar);
@@ -441,11 +441,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         setIsLoading(false);
         // If user authenticated via Google/Apple OAuth, directly unlock into the app!
         const isFromOAuth = (typeof window !== 'undefined' && (
-          window.location.href.includes('access_token=') || 
+          window.location.href.includes('access_token=') ||
           window.location.href.includes('code=')
-        )) || 
-        localStorage.getItem('zb_oauth_just_completed') === 'true' ||
-        localStorage.getItem('zb_oauth_in_progress') === 'true';
+        )) ||
+          localStorage.getItem('zb_oauth_just_completed') === 'true' ||
+          localStorage.getItem('zb_oauth_in_progress') === 'true';
 
         if (isFromOAuth) {
           localStorage.removeItem('zb_oauth_just_completed');
@@ -539,7 +539,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
     try {
       console.log("LockScreen: Running checkCurrentSession()");
-      
+
       let session: any = null;
       const href = typeof window !== 'undefined' ? window.location.href : '';
       const isOAuthRedirect = href.includes('access_token=') || href.includes('code=');
@@ -677,7 +677,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       } else {
         // Web/PWA biometric via WebAuthn
         const storedCredId = localStorage.getItem('zb_webauthn_cred_id');
-        
+
         if (storedCredId) {
           // Use existing credential for biometric verification
           const credIdBuffer = Uint8Array.from(atob(storedCredId), c => c.charCodeAt(0));
@@ -716,7 +716,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               timeout: 60000
             }
           }) as PublicKeyCredential | null;
-          
+
           if (credential) {
             // Store credential ID for future biometric unlocks
             const credId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
@@ -726,7 +726,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           }
         }
       }
-      
+
       if (activeProfile.referral_code) {
         localStorage.setItem('zb_invite_code', activeProfile.referral_code);
       }
@@ -857,7 +857,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
       if (Capacitor.isNativePlatform()) {
         // Native OAuth flow using Capacitor Browser with direct session listener
-        const { data, error } = await supabase.auth.signInWithOAuth({ 
+        const { data, error } = await supabase.auth.signInWithOAuth({
           provider,
           options: {
             redirectTo: 'https://zenbudget-tracker.vercel.app/',
@@ -867,7 +867,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         if (error) throw error;
         if (data?.url) {
           const { Browser } = await import('@capacitor/browser');
-          
+
           const onBrowserFinished = async () => {
             console.log('LockScreen: Browser dismissed, checking active session...');
             const { data: sessData } = await supabase.auth.getSession();
@@ -882,7 +882,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         }
       } else {
         // Web OAuth flow
-        const { error } = await supabase.auth.signInWithOAuth({ 
+        const { error } = await supabase.auth.signInWithOAuth({
           provider,
           options: {
             redirectTo: window.location.origin + '/'
@@ -909,8 +909,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
     } catch (e) {
       let localId = localStorage.getItem('zb_fallback_device_id');
       if (!localId) {
-        localId = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function' 
-          ? crypto.randomUUID() 
+        localId = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
           : Math.random().toString(36).substring(2) + Date.now().toString(36);
         localStorage.setItem('zb_fallback_device_id', localId);
       }
@@ -950,17 +950,17 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       if (dbProfile) {
         const { error } = await supabase.from('profiles').update({ pin: pin }).eq('id', currentUserId);
         if (error) throw error;
-        
+
         localStorage.setItem('zb_user_pin', pin);
         localStorage.setItem('zb_pin_created', 'true');
         playNotificationSound('success');
         onUnlock(
-          currentUserId, 
-          dbProfile.name || username || 'User', 
-          dbProfile.subscription_tier || 'trial', 
-          dbProfile.trial_start_date || new Date().toISOString(), 
-          pin, 
-          dbProfile.premium_expires_at || null, 
+          currentUserId,
+          dbProfile.name || username || 'User',
+          dbProfile.subscription_tier || 'trial',
+          dbProfile.trial_start_date || new Date().toISOString(),
+          pin,
+          dbProfile.premium_expires_at || null,
           dbProfile.trial_expire_date || null
         );
         return;
@@ -1049,7 +1049,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       };
 
       let { error } = await supabase.from('profiles').upsert(newProfile);
-      
+
       // If table lacks referral_code columns, fallback to basic schema
       if (error && (error.message.includes('column') || error.message.includes('referral_code') || error.message.includes('referred_by'))) {
         console.warn('LockScreen: Referral columns missing, retrying basic upsert...');
@@ -1092,11 +1092,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
     if (step === 'onboard-pin' || step === 'onboard-confirm') {
       const current = step === 'onboard-pin' ? pin : confirmPin;
       const setter = step === 'onboard-pin' ? setPin : setConfirmPin;
-      
+
       if (current.length < 4) {
         const nextPin = current + num;
         setter(nextPin);
-        
+
         if (nextPin.length === 4) {
           if (step === 'onboard-pin') {
             setTimeout(() => setStep('onboard-confirm'), 300);
@@ -1109,7 +1109,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       if (enteredPin.length < 4) {
         const nextPin = enteredPin + num;
         setEnteredPin(nextPin);
-        
+
         if (nextPin.length === 4) {
           const storedPin = dbProfile?.pin || localStorage.getItem('zb_user_pin') || localStorage.getItem(`zb_pin_${userId}`);
           const isValidPin = !storedPin || nextPin === storedPin || (dbProfile && nextPin === dbProfile.pin);
@@ -1178,7 +1178,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         }
       }
       keysToWipe.forEach(k => {
-        try { localStorage.removeItem(k); } catch (_) {}
+        try { localStorage.removeItem(k); } catch (_) { }
       });
       setUserId('');
       setUsername('');
@@ -1221,304 +1221,337 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         minHeight: 'max-content',
         gap: '20px'
       }}>
-      {/* STEP: Sign In / Sign Up Auth Screen */}
-      {step === 'auth' && (
-        <div
-          className="glass-panel"
-          style={{
-            width: '100%',
-            maxWidth: '360px',
-            padding: '32px 24px 24px',
-            borderRadius: '28px',
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0px'
-          }}
-        >
-          {/* ── Logo & Branding ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '28px' }}>
+        {/* STEP: Sign In / Sign Up Auth Screen */}
+        {step === 'auth' && (
+          <div
+            className="glass-panel"
+            style={{
+              width: '100%',
+              maxWidth: '360px',
+              padding: '32px 24px 24px',
+              borderRadius: '28px',
+              border: '1px solid rgba(255,255,255,0.08)',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0px'
+            }}
+          >
+            {/* ── Logo & Branding ── */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '28px' }}>
+              <div style={{
+                width: '72px', height: '72px', borderRadius: '22px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                marginBottom: '14px', overflow: 'hidden'
+              }}>
+                <img src="/favicon.png?v=10" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+              <h1 style={{ fontSize: '30px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
+                <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
+              </h1>
+              <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', margin: 0, fontWeight: 700 }}>
+                Calm Your Money
+              </p>
+            </div>
+
+            {/* ── Login / Sign Up Tab ── */}
             <div style={{
-              width: '72px', height: '72px', borderRadius: '22px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: '14px', overflow: 'hidden'
+              display: 'flex', background: 'var(--bg-input)', padding: '4px',
+              borderRadius: '14px', border: '1px solid var(--border-input)', marginBottom: '24px'
             }}>
-              <img src="/favicon.png?v=10" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-            <h1 style={{ fontSize: '30px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
-              <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
-            </h1>
-            <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', margin: 0, fontWeight: 700 }}>
-              Calm Your Money
-            </p>
-          </div>
-
-          {/* ── Login / Sign Up Tab ── */}
-          <div style={{
-            display: 'flex', background: 'var(--bg-input)', padding: '4px',
-            borderRadius: '14px', border: '1px solid var(--border-input)', marginBottom: '24px'
-          }}>
-            <button type="button" onClick={() => { setAuthMode('login'); setErrorMsg(''); }} style={{
-              flex: 1, padding: '10px', borderRadius: '10px', border: 'none', cursor: 'pointer',
-              fontSize: '13px', fontWeight: 800,
-              background: authMode === 'login' ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'transparent',
-              color: authMode === 'login' ? '#ffffff' : 'var(--text-secondary)',
-              boxShadow: authMode === 'login' ? '0 4px 12px rgba(34,197,94,0.35)' : 'none',
-              transition: 'all 0.2s ease'
-            }}>Login</button>
-            <button type="button" onClick={() => { setAuthMode('signup'); setErrorMsg(''); }} style={{
-              flex: 1, padding: '10px', borderRadius: '10px', border: 'none', cursor: 'pointer',
-              fontSize: '13px', fontWeight: 800,
-              background: authMode === 'signup' ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'transparent',
-              color: authMode === 'signup' ? '#ffffff' : 'var(--text-secondary)',
-              boxShadow: authMode === 'signup' ? '0 4px 12px rgba(34,197,94,0.35)' : 'none',
-              transition: 'all 0.2s ease'
-            }}>Sign Up</button>
-          </div>
-
-          {/* ── Social Login Buttons ── */}
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-            <button type="button" onClick={() => handleSocialLogin('google')} style={{
-              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
-              padding: '11px 8px', borderRadius: '12px', border: '1px solid var(--border-input)',
-              background: 'var(--bg-input)', color: 'var(--text-primary)',
-              fontSize: '12px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s ease'
-            }}>
-              <svg viewBox="0 0 24 24" width="15" height="15"><path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.62 14.98 1 12 1 7.35 1 3.37 3.65 1.42 7.54l3.86 3C6.26 7.56 8.9 5.04 12 5.04z"/><path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.44h6.44c-.28 1.48-1.12 2.74-2.38 3.58l3.69 2.87c2.16-1.99 3.74-4.92 3.74-8.55z"/><path fill="#FBBC05" d="M5.28 14.54c-.24-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29L1.42 6.96C.52 8.76 0 10.78 0 12.92s.52 4.16 1.42 5.96l3.86-3.34z"/><path fill="#34A853" d="M12 22.88c3.24 0 5.97-1.07 7.96-2.91l-3.69-2.87c-1.02.68-2.33 1.09-4.27 1.09-3.1 0-5.74-2.52-6.68-5.5l-3.86 3C3.37 20.23 7.35 22.88 12 22.88z"/></svg>
-              Google
-            </button>
-            <button type="button" onClick={() => handleSocialLogin('apple')} style={{
-              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
-              padding: '11px 8px', borderRadius: '12px', border: '1px solid var(--border-input)',
-              background: 'var(--bg-input)', color: 'var(--text-primary)',
-              fontSize: '12px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s ease'
-            }}>
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.21.67-2.93 1.49-.62.69-1.16 1.84-1.01 2.96 1.12.09 2.27-.58 2.95-1.39"/></svg>
-              Apple
-            </button>
-          </div>
-
-          {/* ── Divider ── */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-            <div style={{ flex: 1, height: '1px', background: 'var(--border-input)' }} />
-            <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>OR WITH EMAIL</span>
-            <div style={{ flex: 1, height: '1px', background: 'var(--border-input)' }} />
-          </div>
-
-          {/* ── Form ── */}
-          <form onSubmit={handleAuthSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-
-            {authMode === 'signup' && (
-              <>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Full Name</label>
-                  <div style={{ position: 'relative' }}>
-                    <User size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-                    <input type="text" required value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Your full name" className="glass-input" style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px' }} />
-                  </div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Referral Code <span style={{ color: 'var(--text-muted)', textTransform: 'none', fontWeight: 600 }}>(optional)</span></label>
-                  <div style={{ position: 'relative' }}>
-                    <Gift size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-                    <input type="text" value={referralCodeInput} onChange={(e) => setReferralCodeInput(e.target.value.toUpperCase())} placeholder="ZB-XXXX-XXXX" className="glass-input" style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px', textTransform: 'uppercase' }} />
-                  </div>
-                </div>
-              </>
-            )}
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Email Address</label>
-              <div style={{ position: 'relative' }}>
-                <Mail size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@email.com" className="glass-input" style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px' }} />
-              </div>
+              <button type="button" onClick={() => { setAuthMode('login'); setErrorMsg(''); }} style={{
+                flex: 1, padding: '10px', borderRadius: '10px', border: 'none', cursor: 'pointer',
+                fontSize: '13px', fontWeight: 800,
+                background: authMode === 'login' ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'transparent',
+                color: authMode === 'login' ? '#ffffff' : 'var(--text-secondary)',
+                boxShadow: authMode === 'login' ? '0 4px 12px rgba(34,197,94,0.35)' : 'none',
+                transition: 'all 0.2s ease'
+              }}>Login</button>
+              <button type="button" onClick={() => { setAuthMode('signup'); setErrorMsg(''); }} style={{
+                flex: 1, padding: '10px', borderRadius: '10px', border: 'none', cursor: 'pointer',
+                fontSize: '13px', fontWeight: 800,
+                background: authMode === 'signup' ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'transparent',
+                color: authMode === 'signup' ? '#ffffff' : 'var(--text-secondary)',
+                boxShadow: authMode === 'signup' ? '0 4px 12px rgba(34,197,94,0.35)' : 'none',
+                transition: 'all 0.2s ease'
+              }}>Sign Up</button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Password</label>
-                {authMode === 'signup' && password.length > 0 && (
-                  <span style={{ fontSize: '10px', fontWeight: 800, color: getPasswordStrength(password).color }}>
-                    {getPasswordStrength(password).label}
-                  </span>
-                )}
-              </div>
-              <div style={{ position: 'relative' }}>
-                <KeyRound size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-                <input type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="glass-input" style={{ paddingLeft: '38px', paddingRight: '40px', fontSize: '13px', padding: '11px 40px 11px 38px', width: '100%', boxSizing: 'border-box' }} />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', padding: 0 }}>
-                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                </button>
-              </div>
-            </div>
-
-            {/* Remember Me & Forgot Password */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>
-                <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '13px', height: '13px', margin: 0 }} />
-                Remember Me
-              </label>
-              <button type="button" onClick={async () => {
-                if (!email.trim()) { setErrorMsg('Please enter your email first.'); return; }
-                setIsLoading(true);
-                try {
-                  const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: window.location.origin });
-                  if (error) throw error;
-                  setSuccessMsg(`Reset link sent to ${email.trim()}!`);
-                  setErrorMsg('');
-                } catch (err: any) {
-                  setErrorMsg(err.message || 'Failed to send reset link.');
-                } finally { setIsLoading(false); }
-              }} style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: '11px' }}>
-                Forgot Password?
+            {/* ── Social Login Buttons ── */}
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+              <button type="button" onClick={() => handleSocialLogin('google')} style={{
+                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+                padding: '11px 8px', borderRadius: '12px', border: '1px solid var(--border-input)',
+                background: 'var(--bg-input)', color: 'var(--text-primary)',
+                fontSize: '12px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s ease'
+              }}>
+                <svg viewBox="0 0 24 24" width="15" height="15"><path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.62 14.98 1 12 1 7.35 1 3.37 3.65 1.42 7.54l3.86 3C6.26 7.56 8.9 5.04 12 5.04z" /><path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.44h6.44c-.28 1.48-1.12 2.74-2.38 3.58l3.69 2.87c2.16-1.99 3.74-4.92 3.74-8.55z" /><path fill="#FBBC05" d="M5.28 14.54c-.24-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29L1.42 6.96C.52 8.76 0 10.78 0 12.92s.52 4.16 1.42 5.96l3.86-3.34z" /><path fill="#34A853" d="M12 22.88c3.24 0 5.97-1.07 7.96-2.91l-3.69-2.87c-1.02.68-2.33 1.09-4.27 1.09-3.1 0-5.74-2.52-6.68-5.5l-3.86 3C3.37 20.23 7.35 22.88 12 22.88z" /></svg>
+                Google
+              </button>
+              <button type="button" onClick={() => handleSocialLogin('apple')} style={{
+                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+                padding: '11px 8px', borderRadius: '12px', border: '1px solid var(--border-input)',
+                background: 'var(--bg-input)', color: 'var(--text-primary)',
+                fontSize: '12px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s ease'
+              }}>
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.21.67-2.93 1.49-.62.69-1.16 1.84-1.01 2.96 1.12.09 2.27-.58 2.95-1.39" /></svg>
+                Apple
               </button>
             </div>
 
-            {/* Mandatory Terms & Conditions Checkbox */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 10px',
-              borderRadius: '10px',
-              background: 'var(--bg-input)',
-              border: '1px solid var(--border-input)',
-              marginTop: '4px'
-            }}>
-              <input
-                type="checkbox"
-                id="termsCheck"
-                checked={agreedTerms}
-                onChange={(e) => setAgreedTerms(e.target.checked)}
-                style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '15px', height: '15px', flexShrink: 0 }}
-              />
-              <label htmlFor="termsCheck" style={{ fontSize: '11px', color: 'var(--text-secondary)', cursor: 'pointer', lineHeight: 1.3, fontWeight: 600 }}>
-                I agree to the <a href="/terms.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', fontWeight: 800, textDecoration: 'none' }}>Terms of Service</a> & <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', fontWeight: 800, textDecoration: 'none' }}>Privacy Policy</a>
-              </label>
+            {/* ── Divider ── */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+              <div style={{ flex: 1, height: '1px', background: 'var(--border-input)' }} />
+              <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>OR WITH EMAIL</span>
+              <div style={{ flex: 1, height: '1px', background: 'var(--border-input)' }} />
             </div>
 
-            {successMsg && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#16a34a', fontSize: '12px', fontWeight: 700, background: 'rgba(34,197,94,0.12)', padding: '10px 14px', borderRadius: '12px', border: '1px solid rgba(34,197,94,0.3)' }}>
-                <CheckCircle size={15} style={{ flexShrink: 0 }} /> <span>{successMsg}</span>
-              </div>
-            )}
-            {errorMsg && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--danger)', fontSize: '11px', background: 'var(--danger-glow)', padding: '9px 12px', borderRadius: '10px', border: '1px solid rgba(244,63,94,0.2)' }}>
-                <AlertCircle size={14} style={{ flexShrink: 0 }} /> <span>{errorMsg}</span>
-              </div>
-            )}
+            {/* ── Form ── */}
+            <form onSubmit={handleAuthSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
 
-            {/* Submit Button */}
-            <button type="submit" disabled={isLoading} style={{
-              padding: '13px', borderRadius: '14px', fontSize: '14px', fontWeight: 800, marginTop: '4px',
-              background: 'linear-gradient(135deg, #22c55e 0%, #06b6d4 100%)',
-              color: '#ffffff', border: 'none',
-              boxShadow: '0 6px 20px rgba(34, 197, 94, 0.35)',
-              cursor: isLoading ? 'not-allowed' : 'pointer', transition: 'all 0.2s ease', letterSpacing: '0.01em',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-              opacity: isLoading ? 0.75 : 1
-            }}>
-              {isLoading ? (
+              {authMode === 'signup' && (
                 <>
-                  <Loader2 size={16} className="animate-spin" />
-                  <span>{authMode === 'login' ? 'Signing In...' : 'Creating Account...'}</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Full Name</label>
+                    <div style={{ position: 'relative' }}>
+                      <User size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+                      <input type="text" required value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Your full name" className="glass-input" style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px' }} />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Referral Code <span style={{ color: 'var(--text-muted)', textTransform: 'none', fontWeight: 600 }}>(optional)</span></label>
+                    <div style={{ position: 'relative' }}>
+                      <Gift size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+                      <input type="text" value={referralCodeInput} onChange={(e) => setReferralCodeInput(e.target.value.toUpperCase())} placeholder="ZB-XXXX-XXXX" className="glass-input" style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px', textTransform: 'uppercase' }} />
+                    </div>
+                  </div>
                 </>
-              ) : (
-                authMode === 'login' ? '🔓 Login to ZenBudget' : '🚀 Create Account'
               )}
-            </button>
-          </form>
 
-          {/* ── Footer: Security Notice ── */}
-          <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-input)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', width: '100%', boxSizing: 'border-box' }}>
-            <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '0.03em' }}>
-              🔒 256-bit Encrypted • Privacy First
-            </span>
-          </div>
-        </div>
-      )}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Email Address</label>
+                <div style={{ position: 'relative' }}>
+                  <Mail size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+                  <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@email.com" className="glass-input" style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px' }} />
+                </div>
+              </div>
 
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Password</label>
+                  {authMode === 'signup' && password.length > 0 && (
+                    <span style={{ fontSize: '10px', fontWeight: 800, color: getPasswordStrength(password).color }}>
+                      {getPasswordStrength(password).label}
+                    </span>
+                  )}
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <KeyRound size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+                  <input type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="glass-input" style={{ paddingLeft: '38px', paddingRight: '40px', fontSize: '13px', padding: '11px 40px 11px 38px', width: '100%', boxSizing: 'border-box' }} />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', padding: 0 }}>
+                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </div>
 
-      {/* STEP: Onboarding PIN Setup (Choose & Confirm) */}
-      {(step === 'onboard-pin' || step === 'onboard-confirm') && (
-        <div
-          style={{
-            width: '100%',
-            maxWidth: '360px',
-            padding: '24px 20px 20px',
-            borderRadius: '28px',
-            background: 'transparent',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            textAlign: 'center',
-            gap: '0px'
-          }}
-        >
-          {/* ── Logo & Branding ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '20px' }}>
-            <div style={{
-              width: '72px', height: '72px', borderRadius: '22px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: '14px', overflow: 'hidden'
-            }}>
-              <img src="/favicon.png?v=10" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-            <h2 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 4px 0', fontFamily: "'Manrope', sans-serif" }}>
-              {step === 'onboard-pin' ? 'Create PIN' : 'Confirm PIN'}
-            </h2>
-            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0 }}>
-              {step === 'onboard-pin' ? 'Choose a 4-digit security PIN for locks' : 'Type your passcode again to verify'}
-            </p>
-          </div>
+              {/* Remember Me & Forgot Password */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>
+                  <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '13px', height: '13px', margin: 0 }} />
+                  Remember Me
+                </label>
+                <button type="button" onClick={async () => {
+                  if (!email.trim()) { setErrorMsg('Please enter your email first.'); return; }
+                  setIsLoading(true);
+                  try {
+                    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: window.location.origin });
+                    if (error) throw error;
+                    setSuccessMsg(`Reset link sent to ${email.trim()}!`);
+                    setErrorMsg('');
+                  } catch (err: any) {
+                    setErrorMsg(err.message || 'Failed to send reset link.');
+                  } finally { setIsLoading(false); }
+                }} style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: '11px' }}>
+                  Forgot Password?
+                </button>
+              </div>
 
-          {/* Dots */}
-          <div style={{ display: 'flex', gap: '16px', margin: '10px 0 16px' }}>
-            {[0, 1, 2, 3].map((index) => {
-              const active = getDotsCount() > index;
-              return (
-                <div
-                  key={index}
-                  style={{
-                    width: '16px',
-                    height: '16px',
-                    borderRadius: '50%',
-                    border: '2px solid var(--primary)',
-                    backgroundColor: active ? 'var(--primary)' : 'transparent',
-                    boxShadow: active ? '0 0 10px var(--primary)' : 'none',
-                    transition: 'all 0.15s ease'
-                  }}
+              {/* Mandatory Terms & Conditions Checkbox */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 10px',
+                borderRadius: '10px',
+                background: 'var(--bg-input)',
+                border: '1px solid var(--border-input)',
+                marginTop: '4px'
+              }}>
+                <input
+                  type="checkbox"
+                  id="termsCheck"
+                  checked={agreedTerms}
+                  onChange={(e) => setAgreedTerms(e.target.checked)}
+                  style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '15px', height: '15px', flexShrink: 0 }}
                 />
-              );
-            })}
-          </div>
+                <label htmlFor="termsCheck" style={{ fontSize: '11px', color: 'var(--text-secondary)', cursor: 'pointer', lineHeight: 1.3, fontWeight: 600 }}>
+                  I agree to the <a href="/terms.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', fontWeight: 800, textDecoration: 'none' }}>Terms of Service</a> & <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', fontWeight: 800, textDecoration: 'none' }}>Privacy Policy</a>
+                </label>
+              </div>
 
-          {errorMsg && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--danger)', fontSize: '12px', fontWeight: 700, marginBottom: '10px' }}>
-              <AlertCircle size={14} /> {errorMsg}
+              {successMsg && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#16a34a', fontSize: '12px', fontWeight: 700, background: 'rgba(34,197,94,0.12)', padding: '10px 14px', borderRadius: '12px', border: '1px solid rgba(34,197,94,0.3)' }}>
+                  <CheckCircle size={15} style={{ flexShrink: 0 }} /> <span>{successMsg}</span>
+                </div>
+              )}
+              {errorMsg && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--danger)', fontSize: '11px', background: 'var(--danger-glow)', padding: '9px 12px', borderRadius: '10px', border: '1px solid rgba(244,63,94,0.2)' }}>
+                  <AlertCircle size={14} style={{ flexShrink: 0 }} /> <span>{errorMsg}</span>
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <button type="submit" disabled={isLoading} style={{
+                padding: '13px', borderRadius: '14px', fontSize: '14px', fontWeight: 800, marginTop: '4px',
+                background: 'linear-gradient(135deg, #22c55e 0%, #06b6d4 100%)',
+                color: '#ffffff', border: 'none',
+                boxShadow: '0 6px 20px rgba(34, 197, 94, 0.35)',
+                cursor: isLoading ? 'not-allowed' : 'pointer', transition: 'all 0.2s ease', letterSpacing: '0.01em',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                opacity: isLoading ? 0.75 : 1
+              }}>
+                {isLoading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>{authMode === 'login' ? 'Signing In...' : 'Creating Account...'}</span>
+                  </>
+                ) : (
+                  authMode === 'login' ? '🔓 Login to ZenBudget' : '🚀 Create Account'
+                )}
+              </button>
+            </form>
+
+            {/* ── Footer: Security Notice ── */}
+            <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-input)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', width: '100%', boxSizing: 'border-box' }}>
+              <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '0.03em' }}>
+                🔒 256-bit Encrypted • Privacy First
+              </span>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Numeric Keypad */}
-          <div 
+
+        {/* STEP: Onboarding PIN Setup (Choose & Confirm) */}
+        {(step === 'onboard-pin' || step === 'onboard-confirm') && (
+          <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '14px',
               width: '100%',
-              maxWidth: '260px',
-              marginTop: '4px',
-              justifyContent: 'center',
+              maxWidth: '360px',
+              padding: '24px 20px 20px',
+              borderRadius: '28px',
+              background: 'transparent',
+              display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              justifyItems: 'center'
+              textAlign: 'center',
+              gap: '0px'
             }}
           >
-            {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((num) => (
+            {/* ── Logo & Branding ── */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '20px' }}>
+              <div style={{
+                width: '72px', height: '72px', borderRadius: '22px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                marginBottom: '14px', overflow: 'hidden'
+              }}>
+                <img src="/favicon.png?v=10" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+              <h2 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 4px 0', fontFamily: "'Manrope', sans-serif" }}>
+                {step === 'onboard-pin' ? 'Create PIN' : 'Confirm PIN'}
+              </h2>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0 }}>
+                {step === 'onboard-pin' ? 'Choose a 4-digit security PIN for locks' : 'Type your passcode again to verify'}
+              </p>
+            </div>
+
+            {/* Dots */}
+            <div style={{ display: 'flex', gap: '16px', margin: '10px 0 16px' }}>
+              {[0, 1, 2, 3].map((index) => {
+                const active = getDotsCount() > index;
+                return (
+                  <div
+                    key={index}
+                    style={{
+                      width: '16px',
+                      height: '16px',
+                      borderRadius: '50%',
+                      border: '2px solid var(--primary)',
+                      backgroundColor: active ? 'var(--primary)' : 'transparent',
+                      boxShadow: active ? '0 0 10px var(--primary)' : 'none',
+                      transition: 'all 0.15s ease'
+                    }}
+                  />
+                );
+              })}
+            </div>
+
+            {errorMsg && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--danger)', fontSize: '12px', fontWeight: 700, marginBottom: '10px' }}>
+                <AlertCircle size={14} /> {errorMsg}
+              </div>
+            )}
+
+            {/* Numeric Keypad */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '14px',
+                width: '100%',
+                maxWidth: '260px',
+                marginTop: '4px',
+                justifyContent: 'center',
+                alignItems: 'center',
+                justifyItems: 'center'
+              }}
+            >
+              {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((num) => (
+                <button
+                  key={num}
+                  onClick={() => handleKeypadPress(num)}
+                  style={{
+                    height: '56px',
+                    width: '56px',
+                    minWidth: '56px',
+                    maxWidth: '56px',
+                    minHeight: '56px',
+                    maxHeight: '56px',
+                    padding: 0,
+                    borderRadius: '50%',
+                    border: '1px solid var(--border-card)',
+                    background: 'var(--bg-card)',
+                    color: 'var(--text-primary)',
+                    fontSize: '20px',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                    transition: 'all 0.2s ease-out',
+                    margin: '0 auto'
+                  }}
+                  onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.25)'}
+                  onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
+                >
+                  {num}
+                </button>
+              ))}
+
+              <div style={{ height: '56px', width: '56px', margin: '0 auto' }} />
+
               <button
-                key={num}
-                onClick={() => handleKeypadPress(num)}
+                onClick={() => handleKeypadPress('0')}
                 style={{
                   height: '56px',
                   width: '56px',
@@ -1538,256 +1571,289 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                   alignItems: 'center',
                   justifyContent: 'center',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-                  transition: 'all 0.2s ease-out',
+                  transition: 'all 0.2s ease',
                   margin: '0 auto'
                 }}
                 onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.25)'}
                 onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
               >
-                {num}
+                0
               </button>
-            ))}
-            
-            <div style={{ height: '56px', width: '56px', margin: '0 auto' }} />
+
+              <button
+                onClick={handleBackspace}
+                style={{
+                  height: '56px',
+                  width: '56px',
+                  borderRadius: '50%',
+                  border: '1px solid var(--border-card)',
+                  background: 'var(--bg-card)',
+                  color: 'var(--text-primary)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                  transition: 'all 0.2s ease',
+                  margin: '0 auto'
+                }}
+                onMouseDown={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
+                onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
+              >
+                <Delete size={20} />
+              </button>
+            </div>
+
+            {step === 'onboard-confirm' && (
+              <button
+                onClick={() => {
+                  setConfirmPin('');
+                  setStep('onboard-pin');
+                  setErrorMsg('');
+                }}
+                style={{
+                  marginTop: '16px',
+                  padding: '8px 16px',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  borderRadius: '20px',
+                  color: 'var(--text-primary)',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  backdropFilter: 'blur(10px)',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <ArrowLeft size={14} />
+                <span>Back to Create PIN</span>
+              </button>
+            )}
 
             <button
-              onClick={() => handleKeypadPress('0')}
+              onClick={handleSignOut}
               style={{
-                height: '56px',
-                width: '56px',
-                minWidth: '56px',
-                maxWidth: '56px',
-                minHeight: '56px',
-                maxHeight: '56px',
-                padding: 0,
-                borderRadius: '50%',
-                border: '1px solid var(--border-card)',
-                background: 'var(--bg-card)',
-                color: 'var(--text-primary)',
-                fontSize: '20px',
-                fontWeight: 800,
+                marginTop: '32px',
+                padding: '6px 12px',
+                background: 'rgba(239, 68, 68, 0.05)',
+                border: '1px solid rgba(239, 68, 68, 0.2)',
+                borderRadius: '8px',
+                color: '#f87171',
+                fontSize: '11px',
+                fontWeight: 700,
                 cursor: 'pointer',
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-                transition: 'all 0.2s ease',
-                margin: '0 auto'
-              }}
-              onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.25)'}
-              onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
-            >
-              0
-            </button>
-
-            <button
-              onClick={handleBackspace}
-              style={{
-                height: '56px',
-                width: '56px',
-                borderRadius: '50%',
-                border: '1px solid var(--border-card)',
-                background: 'var(--bg-card)',
-                color: 'var(--text-primary)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-                transition: 'all 0.2s ease',
-                margin: '0 auto'
-              }}
-              onMouseDown={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
-              onMouseUp={(e) => e.currentTarget.style.background = 'var(--bg-card)'}
-            >
-              <Delete size={20} />
-            </button>
-          </div>
-
-          {step === 'onboard-confirm' && (
-            <button
-              onClick={() => {
-                setConfirmPin('');
-                setStep('onboard-pin');
-                setErrorMsg('');
-              }}
-              style={{
-                marginTop: '16px',
-                padding: '8px 16px',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                borderRadius: '20px',
-                color: 'var(--text-primary)',
-                fontSize: '12px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                backdropFilter: 'blur(10px)',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.15s ease'
               }}
             >
-              <ArrowLeft size={14} />
-              <span>Back to Create PIN</span>
+              <LogOut size={12} />
+              <span>Sign Out of Account</span>
             </button>
-          )}
 
-          <button
-            onClick={handleSignOut}
+          </div>
+        )}
+
+        {/* STEP: Verify PIN for unlock */}
+        {step === 'unlock' && (
+          <div
             style={{
-              marginTop: '32px',
-              padding: '6px 12px',
-              background: 'rgba(239, 68, 68, 0.05)',
-              border: '1px solid rgba(239, 68, 68, 0.2)',
-              borderRadius: '8px',
-              color: '#f87171',
-              fontSize: '11px',
-              fontWeight: 700,
-              cursor: 'pointer',
+              width: '100%',
+              maxWidth: '360px',
+              padding: '24px 20px 20px',
+              borderRadius: '28px',
+              background: 'transparent',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              gap: '6px',
-              transition: 'all 0.15s ease'
+              textAlign: 'center',
+              gap: '0px'
             }}
           >
-            <LogOut size={12} />
-            <span>Sign Out of Account</span>
-          </button>
-
-        </div>
-      )}
-
-      {/* STEP: Verify PIN for unlock */}
-      {step === 'unlock' && (
-        <div
-          style={{
-            width: '100%',
-            maxWidth: '360px',
-            padding: '24px 20px 20px',
-            borderRadius: '28px',
-            background: 'transparent',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            textAlign: 'center',
-            gap: '0px'
-          }}
-        >
-          {/* ── Logo & Branding ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '8px' }}>
-            <div style={{
-              width: '72px', height: '72px', borderRadius: '22px',
-              background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%)',
-              border: '1px solid rgba(34, 197, 94, 0.25)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 8px 32px rgba(34, 197, 94, 0.2)',
-              marginBottom: '14px', overflow: 'hidden'
-            }}>
-              <img 
-                src="/favicon.png" 
-                alt="ZenBudget Logo" 
-                style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  objectFit: 'cover' 
-                }} 
-              />
-            </div>
-            <h2 style={{ fontSize: '30px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
-              <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
-            </h2>
-            <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', margin: 0, fontWeight: 700 }}>
-              CALM YOUR MONEY
-            </div>
-            <p style={{ fontSize: '13px', color: 'var(--text-primary)', marginTop: '8px', marginBottom: '4px', fontWeight: 700 }}>
-              Welcome back, {dbProfile?.name || username || localStorage.getItem('zb_user_name') || localStorage.getItem('zenbudget_username') || 'User'}
-            </p>
-          </div>
-
-          {/* ── Inspirational Quote & Daily Limit Card ── */}
-          <div style={{
-            width: '100%',
-            maxWidth: '320px',
-            background: 'rgba(255, 255, 255, 0.03)',
-            border: '1px solid rgba(255, 255, 255, 0.06)',
-            borderRadius: '16px',
-            padding: '12px 14px',
-            margin: '6px 0 16px',
-            textAlign: 'center'
-          }}>
-            <p style={{ fontSize: '11px', fontStyle: 'italic', color: '#94a3b8', margin: '0 0 8px', lineHeight: 1.4 }}>
-              "A budget is telling your money where to go instead of wondering where it went."
-            </p>
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              background: 'rgba(34, 197, 94, 0.12)',
-              border: '1px solid rgba(34, 197, 94, 0.25)',
-              borderRadius: '20px',
-              padding: '4px 12px',
-              fontSize: '11px',
-              fontWeight: 700,
-              color: '#22c55e'
-            }}>
-              <span>Today's Limit: Stay under ₹{(parseInt(localStorage.getItem('zb_daily_limit') || '1000', 10)).toLocaleString()}</span>
-              <span>🤝</span>
-            </div>
-          </div>
-
-          {/* Dots */}
-          <div 
-            style={{ 
-              display: 'flex', 
-              gap: '14px', 
-              margin: '4px 0 18px',
-              animation: isIncorrect ? 'shake 0.5s ease-in-out' : 'none'
-            }}
-          >
-            {[0, 1, 2, 3].map((index) => {
-              const active = getDotsCount() > index;
-              return (
-                <div
-                  key={index}
+            {/* ── Logo & Branding ── */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '8px' }}>
+              <div style={{
+                width: '72px', height: '72px', borderRadius: '22px',
+                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%)',
+                border: '1px solid rgba(34, 197, 94, 0.25)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 8px 32px rgba(34, 197, 94, 0.2)',
+                marginBottom: '14px', overflow: 'hidden'
+              }}>
+                <img
+                  src="/favicon.png"
+                  alt="ZenBudget Logo"
                   style={{
-                    width: '14px',
-                    height: '14px',
-                    borderRadius: '50%',
-                    border: '2px solid #22c55e',
-                    backgroundColor: active ? '#22c55e' : 'transparent',
-                    boxShadow: active ? '0 0 12px rgba(34, 197, 94, 0.6)' : 'none',
-                    transition: 'all 0.15s ease'
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
                   }}
                 />
-              );
-            })}
-          </div>
-
-          {errorMsg && (
-            <div style={{ color: 'var(--danger)', fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>
-              {errorMsg}
+              </div>
+              <h2 style={{ fontSize: '30px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
+                <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
+              </h2>
+              <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', margin: 0, fontWeight: 700 }}>
+                CALM YOUR MONEY
+              </div>
+              <p style={{ fontSize: '13px', color: 'var(--text-primary)', marginTop: '8px', marginBottom: '4px', fontWeight: 700 }}>
+                Welcome back, {dbProfile?.name || username || localStorage.getItem('zb_user_name') || localStorage.getItem('zenbudget_username') || 'User'}
+              </p>
             </div>
-          )}
 
-          {/* Numeric Keypad */}
-          <div 
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '12px',
+            {/* ── Inspirational Quote & Daily Limit Card ── */}
+            <div style={{
               width: '100%',
-              maxWidth: '260px',
-              marginTop: '0px',
-              justifyContent: 'center',
-              alignItems: 'center',
-              justifyItems: 'center'
-            }}
-          >
-            {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((num) => (
+              maxWidth: '320px',
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              borderRadius: '16px',
+              padding: '12px 14px',
+              margin: '6px 0 16px',
+              textAlign: 'center'
+            }}>
+              <p style={{ fontSize: '11px', fontStyle: 'italic', color: '#94a3b8', margin: '0 0 8px', lineHeight: 1.4 }}>
+                "A budget is telling your money where to go instead of wondering where it went."
+              </p>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                background: 'rgba(34, 197, 94, 0.12)',
+                border: '1px solid rgba(34, 197, 94, 0.25)',
+                borderRadius: '20px',
+                padding: '4px 12px',
+                fontSize: '11px',
+                fontWeight: 700,
+                color: '#22c55e'
+              }}>
+                <span>Today's Limit: Stay under ₹{(parseInt(localStorage.getItem('zb_daily_limit') || '1000', 10)).toLocaleString()}</span>
+                <span>🤝</span>
+              </div>
+            </div>
+
+            {/* Dots */}
+            <div
+              style={{
+                display: 'flex',
+                gap: '14px',
+                margin: '4px 0 18px',
+                animation: isIncorrect ? 'shake 0.5s ease-in-out' : 'none'
+              }}
+            >
+              {[0, 1, 2, 3].map((index) => {
+                const active = getDotsCount() > index;
+                return (
+                  <div
+                    key={index}
+                    style={{
+                      width: '14px',
+                      height: '14px',
+                      borderRadius: '50%',
+                      border: '2px solid #22c55e',
+                      backgroundColor: active ? '#22c55e' : 'transparent',
+                      boxShadow: active ? '0 0 12px rgba(34, 197, 94, 0.6)' : 'none',
+                      transition: 'all 0.15s ease'
+                    }}
+                  />
+                );
+              })}
+            </div>
+
+            {errorMsg && (
+              <div style={{ color: 'var(--danger)', fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>
+                {errorMsg}
+              </div>
+            )}
+
+            {/* Numeric Keypad */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '12px',
+                width: '100%',
+                maxWidth: '260px',
+                marginTop: '0px',
+                justifyContent: 'center',
+                alignItems: 'center',
+                justifyItems: 'center'
+              }}
+            >
+              {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((num) => (
+                <button
+                  key={num}
+                  onClick={() => handleKeypadPress(num)}
+                  style={{
+                    height: '60px',
+                    width: '60px',
+                    minWidth: '60px',
+                    maxWidth: '60px',
+                    minHeight: '60px',
+                    maxHeight: '60px',
+                    padding: 0,
+                    borderRadius: '50%',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    background: '#131b26',
+                    color: '#ffffff',
+                    fontSize: '22px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.35)',
+                    transition: 'all 0.15s ease-out',
+                    margin: '0 auto'
+                  }}
+                  onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.3)'}
+                  onMouseUp={(e) => e.currentTarget.style.background = '#131b26'}
+                >
+                  {num}
+                </button>
+              ))}
+
+              {/* Left Keypad Column: Biometrics button */}
+              {localStorage.getItem('zb_biometrics_enabled') !== 'false' ? (
+                <button
+                  type="button"
+                  onClick={() => triggerBiometricUnlock()}
+                  style={{
+                    height: '60px',
+                    width: '60px',
+                    minWidth: '60px',
+                    maxWidth: '60px',
+                    minHeight: '60px',
+                    maxHeight: '60px',
+                    padding: 0,
+                    borderRadius: '50%',
+                    border: '1px solid rgba(34, 197, 94, 0.3)',
+                    background: 'rgba(34, 197, 94, 0.12)',
+                    color: '#22c55e',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 0 16px rgba(34, 197, 94, 0.25)',
+                    transition: 'all 0.15s ease',
+                    margin: '0 auto'
+                  }}
+                  onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.3)'}
+                  onMouseUp={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.12)'}
+                >
+                  <Fingerprint size={24} />
+                </button>
+              ) : (
+                <div style={{ width: '60px', height: '60px', margin: '0 auto' }} />
+              )}
+
+              {/* Center Column: 0 */}
               <button
-                key={num}
-                onClick={() => handleKeypadPress(num)}
+                onClick={() => handleKeypadPress('0')}
                 style={{
                   height: '60px',
                   width: '60px',
@@ -1807,21 +1873,18 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                   alignItems: 'center',
                   justifyContent: 'center',
                   boxShadow: '0 4px 16px rgba(0,0,0,0.35)',
-                  transition: 'all 0.15s ease-out',
+                  transition: 'all 0.15s ease',
                   margin: '0 auto'
                 }}
                 onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.3)'}
                 onMouseUp={(e) => e.currentTarget.style.background = '#131b26'}
               >
-                {num}
+                0
               </button>
-            ))}
 
-            {/* Left Keypad Column: Biometrics button */}
-            {localStorage.getItem('zb_biometrics_enabled') !== 'false' ? (
+              {/* Right Column: Delete Backspace */}
               <button
-                type="button"
-                onClick={() => triggerBiometricUnlock()}
+                onClick={handleBackspace}
                 style={{
                   height: '60px',
                   width: '60px',
@@ -1831,221 +1894,158 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                   maxHeight: '60px',
                   padding: 0,
                   borderRadius: '50%',
-                  border: '1px solid rgba(34, 197, 94, 0.3)',
-                  background: 'rgba(34, 197, 94, 0.12)',
-                  color: '#22c55e',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  background: '#131b26',
+                  color: '#ffffff',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 0 16px rgba(34, 197, 94, 0.25)',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.35)',
                   transition: 'all 0.15s ease',
                   margin: '0 auto'
                 }}
-                onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.3)'}
-                onMouseUp={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.12)'}
+                onMouseDown={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.25)'}
+                onMouseUp={(e) => e.currentTarget.style.background = '#131b26'}
               >
-                <Fingerprint size={24} />
+                <Delete size={22} />
               </button>
-            ) : (
-              <div style={{ width: '60px', height: '60px', margin: '0 auto' }} />
-            )}
-
-            {/* Center Column: 0 */}
-            <button
-              onClick={() => handleKeypadPress('0')}
-              style={{
-                height: '60px',
-                width: '60px',
-                minWidth: '60px',
-                maxWidth: '60px',
-                minHeight: '60px',
-                maxHeight: '60px',
-                padding: 0,
-                borderRadius: '50%',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                background: '#131b26',
-                color: '#ffffff',
-                fontSize: '22px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.35)',
-                transition: 'all 0.15s ease',
-                margin: '0 auto'
-              }}
-              onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.3)'}
-              onMouseUp={(e) => e.currentTarget.style.background = '#131b26'}
-            >
-              0
-            </button>
-
-            {/* Right Column: Delete Backspace */}
-            <button
-              onClick={handleBackspace}
-              style={{
-                height: '60px',
-                width: '60px',
-                minWidth: '60px',
-                maxWidth: '60px',
-                minHeight: '60px',
-                maxHeight: '60px',
-                padding: 0,
-                borderRadius: '50%',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                background: '#131b26',
-                color: '#ffffff',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.35)',
-                transition: 'all 0.15s ease',
-                margin: '0 auto'
-              }}
-              onMouseDown={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.25)'}
-              onMouseUp={(e) => e.currentTarget.style.background = '#131b26'}
-            >
-              <Delete size={22} />
-            </button>
-          </div>
-
-          {/* Sign Out Action */}
-          <div style={{ marginTop: '22px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
-            <button
-              onClick={() => setShowSignOutConfirm(true)}
-              style={{
-                background: 'rgba(239, 68, 68, 0.1)',
-                border: '1px solid rgba(239, 68, 68, 0.25)',
-                borderRadius: '20px',
-                padding: '8px 18px',
-                color: '#ef4444',
-                fontSize: '11px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <LogOut size={12} />
-              <span>Sign Out of Account</span>
-            </button>
-
-
-          </div>
-
-          {/* Sign Out Confirmation Popup */}
-          {showSignOutConfirm && (
-            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '20px' }}>
-              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)', borderRadius: '24px', padding: '28px', maxWidth: '300px', width: '100%', textAlign: 'center', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
-                <div style={{ fontSize: '36px', marginBottom: '12px' }}>👋</div>
-                <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>Sign Out?</h3>
-                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '24px' }}>Are you sure you want to sign out? Your data is saved securely.</p>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <button onClick={() => setShowSignOutConfirm(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid var(--border-input)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
-                  <button onClick={() => { setShowSignOutConfirm(false); handleSignOut(); }} style={{ flex: 1, padding: '12px', borderRadius: '12px', border: 'none', background: 'var(--danger)', color: '#ffffff', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Yes, Sign Out</button>
-                </div>
-              </div>
             </div>
-          )}
-        </div>
-      )}
 
-      {/* iOS Standalone App Installation Instructions Modal */}
-      {showIOSInstructions && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.85)',
-          backdropFilter: 'blur(8px)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1200,
-          padding: '20px',
-          animation: 'fadeIn 0.2s ease'
-        }} onClick={() => setShowIOSInstructions(false)}>
-          <div style={{
-            width: '100%',
-            maxWidth: '340px',
-            background: 'rgba(20, 20, 30, 0.95)',
-            border: '1px solid rgba(34, 197, 94, 0.25)',
-            boxShadow: '0 0 30px rgba(34, 197, 94, 0.15)',
-            borderRadius: '24px',
-            padding: '24px',
-            position: 'relative'
-          }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#fff' }}>Install on iPhone / iOS</h3>
+            {/* Sign Out Action */}
+            <div style={{ marginTop: '22px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
               <button
-                onClick={() => setShowIOSInstructions(false)}
+                onClick={() => setShowSignOutConfirm(true)}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '28px',
-                  height: '28px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.25)',
+                  borderRadius: '20px',
+                  padding: '8px 18px',
+                  color: '#ef4444',
+                  fontSize: '11px',
+                  fontWeight: 700,
                   cursor: 'pointer',
-                  color: 'var(--text-secondary)'
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.15s ease'
                 }}
               >
-                <X size={14} />
+                <LogOut size={12} />
+                <span>Sign Out of Account</span>
+              </button>
+
+
+            </div>
+
+            {/* Sign Out Confirmation Popup */}
+            {showSignOutConfirm && (
+              <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '20px' }}>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)', borderRadius: '24px', padding: '28px', maxWidth: '300px', width: '100%', textAlign: 'center', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
+                  <div style={{ fontSize: '36px', marginBottom: '12px' }}>👋</div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>Sign Out?</h3>
+                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '24px' }}>Are you sure you want to sign out? Your data is saved securely.</p>
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button onClick={() => setShowSignOutConfirm(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid var(--border-input)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
+                    <button onClick={() => { setShowSignOutConfirm(false); handleSignOut(); }} style={{ flex: 1, padding: '12px', borderRadius: '12px', border: 'none', background: 'var(--danger)', color: '#ffffff', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Yes, Sign Out</button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* iOS Standalone App Installation Instructions Modal */}
+        {showIOSInstructions && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1200,
+            padding: '20px',
+            animation: 'fadeIn 0.2s ease'
+          }} onClick={() => setShowIOSInstructions(false)}>
+            <div style={{
+              width: '100%',
+              maxWidth: '340px',
+              background: 'rgba(20, 20, 30, 0.95)',
+              border: '1px solid rgba(34, 197, 94, 0.25)',
+              boxShadow: '0 0 30px rgba(34, 197, 94, 0.15)',
+              borderRadius: '24px',
+              padding: '24px',
+              position: 'relative'
+            }} onClick={(e) => e.stopPropagation()}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#fff' }}>Install on iPhone / iOS</h3>
+                <button
+                  onClick={() => setShowIOSInstructions(false)}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '28px',
+                    height: '28px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: 'var(--text-secondary)'
+                  }}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'var(--primary)', fontWeight: 700, fontSize: '11px', flexShrink: 0 }}>1</span>
+                  <span>Open this website in the <strong>Safari</strong> browser on your iPhone.</span>
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'var(--primary)', fontWeight: 700, fontSize: '11px', flexShrink: 0 }}>2</span>
+                  <span>Tap the <strong>Share</strong> button (box with an up arrow <span style={{ fontSize: '14px' }}>⎋</span> at the bottom).</span>
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'var(--primary)', fontWeight: 700, fontSize: '11px', flexShrink: 0 }}>3</span>
+                  <span>Scroll down the share sheet and tap <strong>"Add to Home Screen"</strong>.</span>
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'var(--primary)', fontWeight: 700, fontSize: '11px', flexShrink: 0 }}>4</span>
+                  <span>Tap <strong>"Add"</strong> in the top-right corner to complete the installation.</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowIOSInstructions(false)}
+                className="glass-button active"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(to right, var(--primary), var(--secondary))',
+                  border: 'none',
+                  color: '#fff',
+                  fontWeight: 700,
+                  fontSize: '13px',
+                  marginTop: '20px',
+                  cursor: 'pointer'
+                }}
+              >
+                Got it
               </button>
             </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'var(--primary)', fontWeight: 700, fontSize: '11px', flexShrink: 0 }}>1</span>
-                <span>Open this website in the <strong>Safari</strong> browser on your iPhone.</span>
-              </div>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'var(--primary)', fontWeight: 700, fontSize: '11px', flexShrink: 0 }}>2</span>
-                <span>Tap the <strong>Share</strong> button (box with an up arrow <span style={{ fontSize: '14px' }}>⎋</span> at the bottom).</span>
-              </div>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'var(--primary)', fontWeight: 700, fontSize: '11px', flexShrink: 0 }}>3</span>
-                <span>Scroll down the share sheet and tap <strong>"Add to Home Screen"</strong>.</span>
-              </div>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'var(--primary)', fontWeight: 700, fontSize: '11px', flexShrink: 0 }}>4</span>
-                <span>Tap <strong>"Add"</strong> in the top-right corner to complete the installation.</span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setShowIOSInstructions(false)}
-              className="glass-button active"
-              style={{
-                width: '100%',
-                padding: '12px',
-                borderRadius: '12px',
-                background: 'linear-gradient(to right, var(--primary), var(--secondary))',
-                border: 'none',
-                color: '#fff',
-                fontWeight: 700,
-                fontSize: '13px',
-                marginTop: '20px',
-                cursor: 'pointer'
-              }}
-            >
-              Got it
-            </button>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Styles */}
-      <style>{`
+        {/* Styles */}
+        <style>{`
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
           20%, 60% { transform: translateX(-8px); }

@@ -1,4 +1,4 @@
-package com.zenbudget.app;
+package app.zenbudget.app;
 
 import android.content.Intent;
 import android.net.Uri;

@@ -8,17 +8,17 @@
 
 export const DISTRIBUTION_CONFIG = {
   // Official Play Store Listing Link
-  PLAY_STORE_URL: 'https://play.google.com/store/apps/details?id=com.zenbudget.app',
-  
+  PLAY_STORE_URL: 'https://play.google.com/store/apps/details?id=app.zenbudget.app',
+
   // Package / Application Identifier
-  APP_PACKAGE_ID: 'com.zenbudget.app',
-  
+  APP_PACKAGE_ID: 'app.zenbudget.app',
+
   // Direct APK Download Endpoint
   DIRECT_APK_URL: '/zenbudget.apk',
-  
+
   // Direct APK CDN / Raw Fallback
   DIRECT_APK_FALLBACK_URL: 'https://raw.githubusercontent.com/chandanswaraj7482-hue/zenbudget-app/main/public/zenbudget.apk',
-  
+
   // Current Target: 'website_apk' | 'playstore'
   BUILD_TARGET: (import.meta.env.VITE_BUILD_TARGET as 'website_apk' | 'playstore') || 'website_apk',
 };
