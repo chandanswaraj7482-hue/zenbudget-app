@@ -1723,13 +1723,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       setDeviceOS('web');
     }
 
-    if (!sessionStorage.getItem('zb_welcome_shown')) {
-      const timer = setTimeout(() => {
-        setShowWelcomeModal(true);
-        sessionStorage.setItem('zb_welcome_shown', 'true');
-      }, 1800);
-      return () => clearTimeout(timer);
-    }
+    // Welcome modal auto-popup disabled to prevent unwanted black screen overlay on landing page
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
@@ -3529,7 +3523,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             {/* Tier 3: Pro Annual (Featured) */}
             <div style={{ background: isDark ? '#132219' : '#ffffff', border: '2.5px solid #10b981', borderRadius: '24px', padding: '36px 28px', color: t.text, boxShadow: '0 25px 50px rgba(16,185,129,0.25)', position: 'relative', display: 'flex', flexDirection: 'column', transform: 'scale(1.02)', zIndex: 2 }}>
               <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', fontSize: '11px', fontWeight: 900, padding: '6px 18px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.08em', boxShadow: '0 6px 16px rgba(16,185,129,0.4)', whiteSpace: 'nowrap' }}>
-                🔥 BEST VALUE · SAVE 16%
+                🔥 BEST VALUE · 12 + 3 MONTHS FREE BONUS
               </div>
               
               <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: '#10b981', letterSpacing: '0.1em', marginBottom: '8px' }}>THE WEALTH BUILDER</span>
@@ -3537,9 +3531,9 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               <p style={{ color: t.textSub, fontSize: '14px', marginBottom: '24px', minHeight: '42px', lineHeight: 1.5 }}>Commit to changing your financial life. Get all premium features unlimited.</p>
               
               <div style={{ fontSize: '42px', fontWeight: 900, marginBottom: '6px', color: '#10b981', display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                ₹1,499 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/year</span>
+                ₹1,499 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/year (15 Months Total Access)</span>
               </div>
-              <p style={{ fontSize: '13px', color: '#10b981', marginBottom: '32px', fontWeight: 700 }}>Only ~₹125/month. Complete financial peace of mind!</p>
+              <p style={{ fontSize: '13px', color: '#10b981', marginBottom: '32px', fontWeight: 700 }}>Only ~₹99/month with 3 extra bonus months included! Complete financial peace of mind.</p>
               
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
                 {[
@@ -5392,12 +5386,17 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           
           {/* Brand Left Column */}
           <div style={{ flex: '1 1 320px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-              <img src="/icon.png" alt="ZenBudget" style={{ width: '38px', height: '38px', borderRadius: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }} />
-              <span style={{ fontSize: '22px', fontWeight: 900, color: t.text, letterSpacing: '-0.02em' }}>ZenBudget</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+              <img src="/icon.png" alt="ZenBudget" style={{ width: '40px', height: '40px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }} />
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '22px', fontWeight: 900, color: t.text, letterSpacing: '-0.02em', lineHeight: 1.1 }}>ZenBudget</span>
+                <span style={{ fontSize: '11px', fontWeight: 800, color: '#10b981', letterSpacing: '0.04em', textTransform: 'uppercase', marginTop: '3px' }}>
+                  A Product by Something Labs
+                </span>
+              </div>
             </div>
-            <p style={{ color: t.textSub, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '340px', marginBottom: '28px' }}>
-              ZenBudget uses AI to analyze your spending routines and financial patterns, providing actionable insights. Recognize waste, reduce debt, and take control of your financial health.
+            <p style={{ color: t.textSub, fontSize: '14px', lineHeight: 1.65, maxWidth: '340px', marginBottom: '24px', marginTop: '8px' }}>
+              ZenBudget is an AI-powered financial wellness platform crafted by <strong>Something Labs</strong> to help you master mindful spending, track wealth, and eliminate financial anxiety.
             </p>
             <button onClick={onOpenWebApp} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: isDark ? '#ffffff' : '#111827', color: isDark ? '#111827' : '#ffffff', padding: '14px 28px', borderRadius: '100px', fontSize: '15px', fontWeight: 800, border: 'none', cursor: 'pointer', boxShadow: '0 10px 25px rgba(0,0,0,0.12)', marginBottom: '22px' }} className="hover-lift">
               <span>Try ZenBudget Free</span>
@@ -5741,7 +5740,42 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           <p style={{ fontSize: '11.5px', color: t.textMuted, lineHeight: 1.6, maxWidth: '840px', margin: '0 auto 16px' }}>
             <strong>Financial Disclaimer:</strong> ZenBudget is designed for personal financial wellness and self-tracking. It is <strong>not</strong> a substitute for professional investment advice, tax consulting, or registered banking services.
           </p>
-          <span style={{ fontSize: '12.5px', color: t.textMuted, fontWeight: 700 }}>© 2026 ZenBudget. All Rights Reserved.</span>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            gap: '8px',
+            margin: '0 auto 10px',
+            padding: '8px 18px',
+            borderRadius: '100px',
+            background: isDark ? 'rgba(16, 185, 129, 0.08)' : '#f0fdf4',
+            border: `1px solid ${isDark ? 'rgba(16, 185, 129, 0.25)' : 'rgba(16, 185, 129, 0.2)'}`,
+            maxWidth: 'fit-content'
+          }}>
+            <span style={{ fontSize: '12.5px', fontWeight: 700, color: t.text }}>
+              🌿 ZenBudget is a flagship product of
+            </span>
+            <a
+              href="https://www.instagram.com/somethinglabs.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                color: '#10b981',
+                fontWeight: 900,
+                fontSize: '13px',
+                textDecoration: 'none'
+              }}
+              className="hover-lift"
+            >
+              <span>Something Labs</span>
+              <ArrowUpRight size={13} />
+            </a>
+          </div>
+          <span style={{ fontSize: '12.5px', color: t.textMuted, fontWeight: 700 }}>© 2026 ZenBudget by Something Labs. All Rights Reserved.</span>
         </div>
       </footer>
 
@@ -5865,8 +5899,8 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
         </div>
       )}
 
-      {/* ═══════════════ LUXURY PHONE-OPTIMIZED WELCOME POPUP / BOTTOM SHEET ═══════════════ */}
-      {showWelcomeModal && (
+      {/* Welcome modal popup disabled per user request to prevent screen overlay */}
+      {false && showWelcomeModal && (
         <div 
           className="zb-welcome-backdrop"
           onClick={() => setShowWelcomeModal(false)}

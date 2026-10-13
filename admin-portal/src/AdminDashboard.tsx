@@ -1397,12 +1397,12 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                       border: '1px solid rgba(255, 255, 255, 0.08)'
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                        <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Trial Users</span>
+                        <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Free Plan Users</span>
                         <Activity size={20} color="#38bdf8" />
                       </div>
                       <div style={{ fontSize: '1.8rem', fontWeight: 800 }}>{trialCount}</div>
                       <div style={{ fontSize: '0.75rem', color: '#38bdf8', marginTop: '0.25rem' }}>
-                        Potential Upsell Candidates
+                        Free Tier (Active Forever)
                       </div>
                     </div>
                   </div>
@@ -1631,24 +1631,9 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                                         statusBg = 'rgba(52, 211, 153, 0.15)';
                                       }
                                     } else if (p.subscription_tier === 'trial' || p.subscription_tier === 'free' || !p.subscription_tier) {
-                                      const trialStart = p.trial_start_date ? new Date(p.trial_start_date) : null;
-                                      if (trialStart) {
-                                        const trialEnd = new Date(trialStart.getTime() + 7 * 24 * 60 * 60 * 1000);
-                                        const daysLeft = Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-                                        if (daysLeft > 0) {
-                                          statusText = `Trial Active (${daysLeft}d left)`;
-                                          statusColor = '#38bdf8';
-                                          statusBg = 'rgba(56, 189, 248, 0.15)';
-                                        } else {
-                                          statusText = 'Trial Expired / Inactive ❌';
-                                          statusColor = '#f87171';
-                                          statusBg = 'rgba(248, 113, 113, 0.15)';
-                                        }
-                                      } else {
-                                        statusText = 'Inactive / Free ❌';
-                                        statusColor = '#94a3b8';
-                                        statusBg = 'rgba(148, 163, 184, 0.15)';
-                                      }
+                                      statusText = 'Free Plan (Active Forever)';
+                                      statusColor = '#38bdf8';
+                                      statusBg = 'rgba(56, 189, 248, 0.15)';
                                     }
 
                                     return (
@@ -1766,7 +1751,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
 
                                       <button
                                         onClick={(e) => { e.stopPropagation(); updateUserSubscription(p.id, 'trial'); }}
-                                        title="Revert to Trial"
+                                        title="Revert to Free Plan"
                                         style={{
                                           padding: '0.35rem 0.6rem',
                                           borderRadius: '6px',
@@ -1880,7 +1865,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                                             <button onClick={() => updateUserSubscription(selectedDetailUser.id, 'premium_monthly')} style={{ padding: '8px 14px', borderRadius: '8px', background: 'rgba(16,185,129,0.2)', border: '1px solid rgba(16,185,129,0.4)', color: '#34d399', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}>+1 Month Premium</button>
                                             <button onClick={() => updateUserSubscription(selectedDetailUser.id, 'premium_yearly')} style={{ padding: '8px 14px', borderRadius: '8px', background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#818cf8', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}>+1 Year Premium</button>
                                             <button onClick={() => updateUserSubscription(selectedDetailUser.id, 'premium_lifetime')} style={{ padding: '8px 14px', borderRadius: '8px', background: 'rgba(245,158,11,0.2)', border: '1px solid rgba(245,158,11,0.4)', color: '#fbbf24', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}>Lifetime Premium</button>
-                                            <button onClick={() => updateUserSubscription(selectedDetailUser.id, 'trial')} style={{ padding: '8px 14px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}>Reset Trial</button>
+                                            <button onClick={() => updateUserSubscription(selectedDetailUser.id, 'trial')} style={{ padding: '8px 14px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem' }}>Reset to Free Plan</button>
                                             <button 
                                               onClick={async () => {
                                                 await handleToggleScanPayAccess(selectedDetailUser.id, !!(selectedDetailUser as any).has_scan_pay_access);

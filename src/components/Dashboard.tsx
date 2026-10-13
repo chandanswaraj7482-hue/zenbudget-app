@@ -805,7 +805,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <span style={{ fontSize: '10px', color: '#22c55e', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {timeOfDayGreeting} {timeOfDayEmoji}
             </span>
-            <h1 style={{ fontSize: '18px', fontWeight: 900, color: '#ffffff', margin: 0, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <h1 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {userName || 'User'}
             </h1>
             <span style={{ fontSize: '11px', color: '#22c55e', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -827,11 +827,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
         position: 'relative',
         overflow: 'hidden',
         background: 'var(--bg-balance-card)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
+        border: '1px solid var(--border-card)',
         borderRadius: '22px',
         padding: '18px 20px',
         marginBottom: '0px',
-        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.4)'
+        boxShadow: 'var(--glow-shadow)'
       }}>
         {/* Ambient Glow effect */}
         <div style={{
@@ -845,13 +845,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
         }} />
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-          <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#64748b', fontWeight: 700 }}>
+          <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-secondary)', fontWeight: 700 }}>
             {familyMembers.length > 0 ? 'COMBINED FAMILY BALANCE' : t('total_balance')}
           </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', margin: '8px 0 12px 0', color: '#ffffff', minWidth: 0, maxWidth: '100%' }}>
-          <span style={{ fontSize: 'clamp(30px, 8vw, 42px)', fontWeight: 800, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', margin: '8px 0 12px 0', color: 'var(--text-primary)', minWidth: 0, maxWidth: '100%' }}>
+          <span style={{ fontSize: 'clamp(30px, 8vw, 42px)', fontWeight: 800, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-primary)' }}>
             {formatCurrency(totalBalance, currencySymbol, 0)}
           </span>
         </div>

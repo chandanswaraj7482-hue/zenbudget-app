@@ -431,16 +431,21 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   const [forceUpdate, setForceUpdate] = useState<boolean>(false);
 
   const [theme, setTheme] = useState<'system' | 'dark' | 'light'>(() => {
-    return (localStorage.getItem('zb_theme') as 'system' | 'dark' | 'light') || 'dark';
+    const saved = localStorage.getItem('zb_theme');
+    if (saved === 'light') return 'light';
+    // Default across entire app is always dark
+    if (!saved) {
+      try { localStorage.setItem('zb_theme', 'dark'); } catch (_) {}
+    }
+    return (saved as 'system' | 'dark' | 'light') || 'dark';
   });
 
   useEffect(() => {
-    const savedThemeMode = (localStorage.getItem('zb_theme') as 'system' | 'dark' | 'light') || theme || 'dark';
+    const savedThemeMode = localStorage.getItem('zb_theme') || theme || 'dark';
 
     const applyTheme = () => {
-      const isDark = savedThemeMode === 'system'
-        ? window.matchMedia('(prefers-color-scheme: dark)').matches
-        : savedThemeMode === 'dark';
+      // Default version is strictly DARK unless user explicitly toggled to 'light'
+      const isDark = savedThemeMode === 'light' ? false : true;
 
       const rootEl = document.getElementById('root');
       const docEl = document.documentElement;
@@ -2679,21 +2684,32 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   // Premium Check & Upgrade Handler
   const handleUpgradeSuccess = async (cycle: 'monthly' | 'yearly' | 'lifetime' = 'monthly') => {
     try {
-      const expiryDate = cycle === 'lifetime' 
-        ? null 
-        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      let tier = 'premium_monthly';
+      let expiryDate: string | null = null;
+
+      if (cycle === 'yearly') {
+        tier = 'premium_yearly';
+        // 1 Year (365 days) + 3 Months Free Bonus (90 days) = 455 days (15 months total!)
+        expiryDate = new Date(Date.now() + 455 * 24 * 60 * 60 * 1000).toISOString();
+      } else if (cycle === 'lifetime') {
+        tier = 'premium_lifetime';
+        expiryDate = null;
+      } else {
+        tier = 'premium_monthly';
+        expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      }
 
       const { error } = await supabase
         .from('profiles')
         .update({ 
-          subscription_tier: 'premium',
+          subscription_tier: tier,
           premium_expires_at: expiryDate
         })
         .eq('id', currentProfileId);
 
       if (error) throw error;
 
-      // Handle referral reward checks
+      // Handle referral reward checks: 1 Month free for every 10 paid members
       try {
         const { data: myProfile } = await supabase
           .from('profiles')
@@ -2702,35 +2718,47 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           .maybeSingle();
 
         if (myProfile && myProfile.referred_by) {
-          const { data: inviterProfile } = await supabase
+          // Count total paid referrals for this inviter
+          const { data: paidRefUsers } = await supabase
             .from('profiles')
-            .select('id, subscription_tier, premium_expires_at')
-            .eq('referral_code', myProfile.referred_by)
-            .maybeSingle();
+            .select('id, subscription_tier')
+            .eq('referred_by', myProfile.referred_by)
+            .ilike('subscription_tier', 'premium%');
 
-          if (inviterProfile) {
-            const currentExpiry = inviterProfile.premium_expires_at ? new Date(inviterProfile.premium_expires_at) : new Date();
-            const baseTime = currentExpiry.getTime() > Date.now() ? currentExpiry.getTime() : Date.now();
-            const newExpiryDate = new Date(baseTime + 30 * 24 * 60 * 60 * 1000).toISOString();
+          const paidCount = (paidRefUsers || []).length;
 
-            await supabase
+          // Only reward when a milestone of 10 paid referrals is hit (10, 20, 30...)
+          if (paidCount > 0 && paidCount % 10 === 0) {
+            const { data: inviterProfile } = await supabase
               .from('profiles')
-              .update({
-                subscription_tier: 'premium',
-                premium_expires_at: newExpiryDate
-              })
-              .eq('id', inviterProfile.id);
+              .select('id, subscription_tier, premium_expires_at')
+              .eq('referral_code', myProfile.referred_by)
+              .maybeSingle();
 
-            console.log('ZenBudget: Inviter rewarded with 30 days of Premium successfully.');
+            if (inviterProfile) {
+              const currentExpiry = inviterProfile.premium_expires_at ? new Date(inviterProfile.premium_expires_at) : new Date();
+              const baseTime = currentExpiry.getTime() > Date.now() ? currentExpiry.getTime() : Date.now();
+              const newExpiryDate = new Date(baseTime + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+              await supabase
+                .from('profiles')
+                .update({
+                  subscription_tier: inviterProfile.subscription_tier?.startsWith('premium') ? inviterProfile.subscription_tier : 'premium_monthly',
+                  premium_expires_at: newExpiryDate
+                })
+                .eq('id', inviterProfile.id);
+
+              console.log(`ZenBudget: Inviter rewarded with 30 days of Premium for reaching ${paidCount} paid referrals!`);
+            }
           }
         }
       } catch (refErr) {
         console.warn('ZenBudget: Referral rewarding skipped or columns missing:', refErr);
       }
 
-      setSubscriptionTier('premium');
+      setSubscriptionTier(tier);
       setPremiumExpiresAt(expiryDate);
-      triggerToast('Upgrade Successful! Premium features unlocked.', 'success');
+      triggerToast(cycle === 'yearly' ? 'Upgrade Successful! 15 Months Premium Unlocked (12 + 3 Mo Free Bonus!)' : 'Upgrade Successful! Premium features unlocked.', 'success');
       confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
     } catch (err: any) {
       triggerToast(err.message || 'Failed to update database status.', 'warning');
@@ -4513,7 +4541,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             onNavigateToSharedBudget={() => {
               if (checkExpiredGuard('use Couple Budget Sync')) return;
               if (!isPremiumUser) {
-                toast.info('👑 Couple & Family Sync is an exclusive PRO feature! Upgrade to connect.');
+                triggerToast('👑 Couple & Family Sync is an exclusive PRO feature! Upgrade to connect.', 'warning');
                 setIsSubModalOpen(true);
                 return;
               }

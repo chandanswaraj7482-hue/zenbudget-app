@@ -590,20 +590,23 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   position: 'absolute',
                   top: '-10px',
                   right: '16px',
-                  background: '#10b981',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                   color: '#ffffff',
                   fontSize: '9px',
                   fontWeight: 800,
-                  padding: '2px 8px',
+                  padding: '3px 9px',
                   borderRadius: '10px',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
+                  letterSpacing: '0.05em',
+                  boxShadow: '0 2px 8px rgba(16, 185, 129, 0.4)'
                 }}>
-                  BEST VALUE
+                  🎁 BEST VALUE · +3 MONTHS FREE!
                 </div>
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--text-primary)' }}>Yearly</div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Full annual savings & all features</div>
+                  <div style={{ fontWeight: 800, fontSize: '14px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    Yearly <span style={{ fontSize: '10px', background: 'rgba(16, 185, 129, 0.18)', color: '#34d399', padding: '1px 6px', borderRadius: '6px', fontWeight: 800 }}>12 + 3 Mo Free</span>
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#10b981', fontWeight: 600 }}>15 Months Total Access (Includes 3 Mo Bonus!)</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   {getPlanPriceDisplay('yearly')}
