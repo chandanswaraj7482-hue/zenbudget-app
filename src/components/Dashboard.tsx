@@ -26,7 +26,8 @@ import {
   VolumeX,
   Brain,
   BookOpen,
-  BarChart3
+  BarChart3,
+  Camera
 } from 'lucide-react';
 import type { Transaction, SavingsGoal, CategoryBudget, Account } from '../types';
 import { t } from '../utils/i18n';
@@ -69,6 +70,7 @@ interface DashboardProps {
   onUpgradeClick?: () => void;
   onSaveTransaction?: (tx: Omit<Transaction, 'id'>) => void;
   onDeleteAccount?: (accId: string) => void;
+  onScanReceiptClick?: () => void;
   familyMembers?: { id: string; name: string; couple_code?: string }[];
   partnerName?: string;
   partnerId?: string;
@@ -173,9 +175,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onUpgradeClick,
   onDeleteAccount,
   onSaveTransaction,
+  onScanReceiptClick,
   familyMembers = [],
   partnerName: _partnerName,
-  partnerId
+  partnerId,
+  language = 'en'
 }) => {
   const [selectedDashboardView, setSelectedDashboardView] = useState<'combined' | 'personal' | string>('combined');
   const [avatarError, setAvatarError] = useState(false);
@@ -814,12 +818,41 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
         
-        <button
-          onClick={onAddTransactionClick}
-          style={{ flexShrink: 0, padding: '8px 12px', borderRadius: '12px', background: '#22c55e', color: '#fff', fontSize: '12.5px', fontWeight: 800, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', boxShadow: '0 4px 12px rgba(34,197,94,0.3)', whiteSpace: 'nowrap' }}
-        >
-          <Plus size={15} /> {t('add_new')}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+          <button
+            onClick={onAddTransactionClick}
+            style={{ flexShrink: 0, padding: '8px 12px', borderRadius: '12px', background: '#22c55e', color: '#fff', fontSize: '12.5px', fontWeight: 800, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', boxShadow: '0 4px 12px rgba(34,197,94,0.3)', whiteSpace: 'nowrap' }}
+          >
+            <Plus size={15} /> {t('add_new')}
+          </button>
+
+          {onScanReceiptClick && (
+            <button
+              onClick={onScanReceiptClick}
+              title="Scan Receipt / Bill with Camera or Gallery"
+              style={{
+                flexShrink: 0,
+                padding: '8px 12px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.16) 0%, rgba(6, 182, 212, 0.14) 100%)',
+                border: '1px solid rgba(16, 185, 129, 0.35)',
+                color: '#10b981',
+                fontSize: '12.5px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                whiteSpace: 'nowrap',
+                boxShadow: '0 2px 8px rgba(16, 185, 129, 0.12)',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <Camera size={15} />
+              <span>{language === 'hi' ? 'रसीद स्कैन' : 'Scan Bill'}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Main Glass Balance Card - Premium Design with Sub-Wallets & Glow */}

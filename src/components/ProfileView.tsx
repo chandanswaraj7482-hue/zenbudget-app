@@ -35,6 +35,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const [phoneCode, setPhoneCode] = useState(() => localStorage.getItem('zb_user_phone_code') || '+91');
   const [pin, setPin] = useState(currentPin);
   const [currency, setCurrency] = useState(currentCurrency);
+  const [language, setLanguage] = useState(currentLanguage || localStorage.getItem('zb_language') || 'en');
   const [themeMode, setThemeMode] = useState<'system' | 'dark' | 'light'>(currentTheme === 'light' ? 'light' : 'dark');
   const [showPin, setShowPin] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
