@@ -1,25 +1,37 @@
 {
-  "short_name": "ZenBudget Tracker",
-  "name": "ZenBudget — Best Expense Tracker & Daily Budget Planner App",
+  "id": "/",
+  "short_name": "ZenBudget",
+  "name": "ZenBudget — Calm Your Money",
+  "description": "India's #1 AI Expense Tracker & Daily Budget Planner App.",
   "icons": [
     {
-      "src": "pwa-192x192.png",
+      "src": "/pwa-192x192.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "pwa-512x512.png",
+      "src": "/pwa-512x512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"
     }
   ],
-  "start_url": "/?#app",
-  "background_color": "#0d0e12",
+  "start_url": "/#app",
+  "scope": "/",
+  "background_color": "#09090f",
   "theme_color": "#10b981",
   "display": "standalone",
+  "display_override": [
+    "standalone",
+    "fullscreen",
+    "window-controls-overlay"
+  ],
   "orientation": "portrait",
+  "categories": [
+    "finance",
+    "productivity"
+  ],
   "share_target": {
     "action": "/?shared_receipt=1",
     "method": "POST",

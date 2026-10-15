@@ -906,15 +906,48 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         if (data?.url) {
           const { Browser } = await import('@capacitor/browser');
 
+          let pollInterval: any = null;
+          let timeoutTimer: any = null;
+
+          const closeAndFetch = async () => {
+            if (pollInterval) clearInterval(pollInterval);
+            if (timeoutTimer) clearTimeout(timeoutTimer);
+            try {
+              await Browser.close();
+            } catch (_) {}
+            const { data: sessData } = await supabase.auth.getSession();
+            if (sessData?.session?.user) {
+              await fetchUserProfile(sessData.session.user.id);
+            }
+          };
+
           const onBrowserFinished = async () => {
+            if (pollInterval) clearInterval(pollInterval);
+            if (timeoutTimer) clearTimeout(timeoutTimer);
             console.log('LockScreen: Browser dismissed, checking active session...');
             const { data: sessData } = await supabase.auth.getSession();
             if (sessData?.session?.user) {
               await fetchUserProfile(sessData.session.user.id);
             }
           };
+
           Browser.addListener('browserFinished', onBrowserFinished);
           await Browser.open({ url: data.url, windowName: '_self' });
+
+          // Start active polling so the browser window auto-closes the moment user logs in
+          pollInterval = setInterval(async () => {
+            try {
+              const { data: s } = await supabase.auth.getSession();
+              if (s?.session?.user) {
+                console.log('LockScreen: Session active! Auto-closing browser...');
+                await closeAndFetch();
+              }
+            } catch (_) {}
+          }, 1500);
+
+          timeoutTimer = setTimeout(() => {
+            if (pollInterval) clearInterval(pollInterval);
+          }, 120000);
         } else {
           throw new Error('OAuth authentication URL was not generated.');
         }
