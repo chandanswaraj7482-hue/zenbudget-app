@@ -1815,7 +1815,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
   const handleDownloadApk = () => {
     setShowModal(false);
     const link = document.createElement('a');
-    link.href = '/zenbudget.apk';
+    link.href = 'https://zenbudget-tracker-app.vercel.app/zenbudget.apk';
     link.download = 'zenbudget.apk';
     document.body.appendChild(link);
     link.click();

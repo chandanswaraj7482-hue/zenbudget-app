@@ -579,7 +579,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           setErrorMsg(errText);
           playNotificationSound('warning');
           setStep('auth');
-          window.history.replaceState(null, '', window.location.pathname + '#app');
+          window.history.replaceState(null, '', window.location.pathname);
         } catch (e) {}
       }
 
@@ -599,7 +599,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             if (!error && data?.session) {
               session = data.session;
               localStorage.setItem('zb_oauth_just_completed', 'true');
-              window.history.replaceState(null, '', window.location.pathname + '#app');
+              window.history.replaceState(null, '', window.location.pathname);
             }
           }
         } catch (tokErr) {
@@ -614,7 +614,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             if (!error && data?.session) {
               session = data.session;
               localStorage.setItem('zb_oauth_just_completed', 'true');
-              window.history.replaceState(null, '', window.location.pathname + '#app');
+              window.history.replaceState(null, '', window.location.pathname);
             }
           }
         } catch (codeErr) {
@@ -913,7 +913,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider,
           options: {
-            redirectTo: 'https://zenbudget-tracker.vercel.app/#app',
+            redirectTo: 'https://zenbudget-tracker.vercel.app',
             skipBrowserRedirect: true,
             queryParams: {
               prompt: 'select_account'
@@ -971,7 +971,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         }
       } else {
         // Web OAuth flow
-        const redirectUrl = `${window.location.origin}/#app`;
+        const redirectUrl = window.location.origin;
         const { error } = await supabase.auth.signInWithOAuth({
           provider,
           options: {
