@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.zenbudget.app",
+      "sha256_cert_fingerprints": [
+        "A1:DC:D8:6F:D4:3D:66:B6:E7:0A:D6:CA:81:20:3D:C0:B9:1A:62:9B:D0:89:A0:A5:0F:75:27:61:6B:DE:16:AD"
+      ]
+    }
+  }
+]

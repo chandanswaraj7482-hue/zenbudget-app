@@ -10,30 +10,36 @@ export default function Root() {
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
   const hash = typeof window !== 'undefined' ? window.location.hash : '';
 
-  const isNativeOrInstalled = (
-    Capacitor.isNativePlatform() ||
-    (typeof window !== 'undefined' && (
+  const isNative = Capacitor.isNativePlatform();
+  const isInstalledPwa = (
+    typeof window !== 'undefined' && (
       window.matchMedia('(display-mode: standalone)').matches ||
       window.matchMedia('(display-mode: fullscreen)').matches ||
       (window.navigator as any).standalone === true ||
       document.referrer.includes('android-app://') ||
       window.location.search.includes('source=pwa')
-    ))
+    )
   );
 
-  // Dedicated Landing Page domain (https://zenbudget-tracker-app.vercel.app) or explicit landing path
   const isLandingDomain = (
     hostname.includes('zenbudget-tracker-app') ||
     pathname.startsWith('/landing') ||
     hash.startsWith('#landing')
   );
 
+  // If native app or installed PWA, always default to the full Web App ('app')
+  const initialMode = (isNative || isInstalledPwa)
+    ? 'app'
+    : (isLandingDomain ? 'landing' : 'app');
+
+  const [activeMode, setActiveMode] = React.useState<'landing' | 'app'>(initialMode);
+
   const handleOpenWebApp = () => {
-    window.location.href = 'https://zenbudget-tracker.vercel.app';
+    setActiveMode('app');
   };
 
   const handleBackToLanding = () => {
-    window.location.href = 'https://zenbudget-tracker-app.vercel.app';
+    setActiveMode('landing');
   };
 
   // Dedicated Blog routing
@@ -46,12 +52,12 @@ export default function Root() {
     return <BlogPostView slug={slug} onBackToLanding={handleBackToLanding} onOpenWebApp={handleOpenWebApp} />;
   }
 
-  // If on landing domain or requested landing page, show LandingPage
-  if (isLandingDomain && !isNativeOrInstalled) {
+  // If mode is landing, show LandingPage
+  if (activeMode === 'landing') {
     return <LandingPage onOpenWebApp={handleOpenWebApp} />;
   }
 
-  // Main domain (https://zenbudget-tracker.vercel.app) & Native/PWA opens the Web App directly
+  // Otherwise, render full App directly (no URL redirection, no Chrome header)
   return <App onBackToLanding={handleBackToLanding} />;
 }
 

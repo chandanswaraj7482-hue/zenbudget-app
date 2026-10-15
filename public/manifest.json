@@ -1,8 +1,10 @@
 {
   "id": "/",
   "short_name": "ZenBudget",
-  "name": "ZenBudget — Calm Your Money",
-  "description": "India's #1 AI Expense Tracker & Daily Budget Planner App.",
+  "name": "ZenBudget — India's #1 AI Expense Tracker",
+  "description": "India's #1 AI Expense Tracker, Daily Budget Planner & Bank Statement Scanner. Track kharcha, set daily limits, block impulse buys.",
+  "lang": "en-IN",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/pwa-192x192.png",
@@ -17,20 +19,53 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "/#app",
+  "screenshots": [
+    {
+      "src": "/og-banner.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "label": "ZenBudget — AI Expense Tracker Dashboard"
+    },
+    {
+      "src": "/app-screenshot.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "ZenBudget Mobile App Interface"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add Expense",
+      "url": "/?action=add_expense",
+      "description": "Quickly log a new expense"
+    },
+    {
+      "name": "View Budget",
+      "url": "/?action=budget",
+      "description": "Check your daily budget status"
+    },
+    {
+      "name": "Scan Statement",
+      "url": "/?page=toolkit",
+      "description": "Scan your bank statement"
+    }
+  ],
+  "start_url": "/",
   "scope": "/",
   "background_color": "#09090f",
   "theme_color": "#10b981",
   "display": "standalone",
   "display_override": [
-    "standalone",
     "fullscreen",
+    "standalone",
     "window-controls-overlay"
   ],
   "orientation": "portrait",
   "categories": [
     "finance",
-    "productivity"
+    "productivity",
+    "utilities"
   ],
   "share_target": {
     "action": "/?shared_receipt=1",
