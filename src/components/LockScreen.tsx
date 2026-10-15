@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Delete, AlertCircle, CheckCircle, Mail, KeyRound, Loader2, LogOut, ArrowLeft, User, Download, Fingerprint, X, Gift, Eye, EyeOff, Globe, Zap } from 'lucide-react';
+import { Delete, AlertCircle, CheckCircle, Mail, KeyRound, Loader2, LogOut, ArrowLeft, User, Download, Fingerprint, X, Gift, Eye, EyeOff, Globe, Zap, ShieldCheck } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { playNotificationSound } from '../utils/audio';
 import { Capacitor } from '@capacitor/core';
@@ -32,13 +32,18 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  // Lockscreen steps: 'auth' | 'onboard-pin' | 'onboard-confirm' | 'unlock'
-  const [step, setStep] = useState<'auth' | 'onboard-pin' | 'onboard-confirm' | 'unlock'>('auth');
+  // Lockscreen steps: 'auth' | 'onboard-pin' | 'onboard-confirm' | 'unlock' | 'forgot-pin-email' | 'forgot-pin-otp'
+  const [step, setStep] = useState<'auth' | 'onboard-pin' | 'onboard-confirm' | 'unlock' | 'forgot-pin-email' | 'forgot-pin-otp'>('auth');
   const [userId, setUserId] = useState('');
   const [username, setUsername] = useState('');
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [referralCodeInput, setReferralCodeInput] = useState('');
+
+  // Password / PIN reset with Email OTP states
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetOtp, setResetOtp] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   // Verification variables
   const [enteredPin, setEnteredPin] = useState('');
@@ -890,7 +895,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider,
           options: {
-            redirectTo: 'https://zenbudget-tracker.vercel.app/',
+            redirectTo: 'https://zenbudget-tracker.vercel.app/#app',
             skipBrowserRedirect: true,
             queryParams: {
               prompt: 'select_account'
@@ -915,7 +920,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         }
       } else {
         // Web OAuth flow
-        const redirectUrl = window.location.origin + '/';
+        const redirectUrl = `${window.location.origin}/#app`;
         const { error } = await supabase.auth.signInWithOAuth({
           provider,
           options: {
@@ -932,6 +937,105 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       console.error('LockScreen: Social login error:', err);
       setErrorMsg(err.message || `Failed to authenticate with ${provider}. Please try with Email or check your network connection.`);
       playNotificationSound('warning');
+      setIsLoading(false);
+    }
+  };
+
+  // Cooldown timer for OTP resend
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  const handleSendResetOtp = async (targetEmail?: string) => {
+    const candidateEmail = (targetEmail || resetEmail || email || localStorage.getItem('zb_user_email') || '').trim().toLowerCase();
+    if (!candidateEmail || !candidateEmail.includes('@')) {
+      setErrorMsg('Please enter a valid registered email address.');
+      playNotificationSound('warning');
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    try {
+      // Send 6-digit OTP to the registered email via Supabase Auth
+      const { error } = await supabase.auth.signInWithOtp({
+        email: candidateEmail,
+        options: {
+          shouldCreateUser: false
+        }
+      });
+
+      if (error) {
+        // If user does not exist in Auth, check if they signed up via another method
+        if (error.message?.toLowerCase().includes('signups not allowed') || error.message?.toLowerCase().includes('user not found')) {
+          throw new Error(`No account found for ${candidateEmail}. Please check spelling or sign in.`);
+        }
+        throw error;
+      }
+
+      setResetEmail(candidateEmail);
+      setSuccessMsg(`We sent a 6-digit verification code to ${candidateEmail}. Check your inbox or spam.`);
+      playNotificationSound('success');
+      setResendCooldown(60);
+      setStep('forgot-pin-otp');
+    } catch (err: any) {
+      console.error('LockScreen: send OTP error:', err);
+      setErrorMsg(err.message || 'Failed to send verification code. Please ensure your email is registered.');
+      playNotificationSound('warning');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyResetOtp = async () => {
+    const cleanOtp = resetOtp.trim();
+    if (!cleanOtp || cleanOtp.length < 6) {
+      setErrorMsg('Please enter the complete 6-digit verification code.');
+      playNotificationSound('warning');
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: resetEmail,
+        token: cleanOtp,
+        type: 'email'
+      });
+
+      if (error) throw error;
+
+      if (data?.user) {
+        setUserId(data.user.id);
+        localStorage.setItem('zb_profile_id', data.user.id);
+        localStorage.setItem('zb_user_email', data.user.email || resetEmail);
+        const name = data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'User';
+        setUsername(name);
+        localStorage.setItem('zb_user_name', name);
+      }
+
+      setSuccessMsg('Email verified successfully! Please choose your new 4-digit PIN.');
+      playNotificationSound('success');
+      setPin('');
+      setConfirmPin('');
+      setEnteredPin('');
+      setResetOtp('');
+      // Securely transitions to onboard-pin so user can choose their new PIN
+      setStep('onboard-pin');
+    } catch (err: any) {
+      console.error('LockScreen: verify OTP error:', err);
+      setErrorMsg(err.message || 'Invalid or expired verification code. Please check and try again.');
+      playNotificationSound('warning');
+    } finally {
       setIsLoading(false);
     }
   };
@@ -1974,11 +2078,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               <button
                 type="button"
                 onClick={() => {
-                  setPin('');
-                  setConfirmPin('');
-                  setEnteredPin('');
                   setErrorMsg('');
-                  setStep('onboard-pin');
+                  setSuccessMsg('');
+                  const userEmail = email || localStorage.getItem('zb_user_email') || '';
+                  setResetEmail(userEmail);
+                  setStep('forgot-pin-email');
                 }}
                 style={{
                   background: 'transparent',
@@ -1991,7 +2095,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                   textDecoration: 'underline'
                 }}
               >
-                Forgot PIN? Set New PIN
+                Forgot PIN? Reset via Email OTP
               </button>
             </div>
 
@@ -2035,6 +2139,260 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* STEP: Forgot PIN - Email Request Screen */}
+        {step === 'forgot-pin-email' && (
+          <div
+            className="glass-panel"
+            style={{
+              width: '100%',
+              maxWidth: '400px',
+              padding: '32px 24px',
+              borderRadius: '28px',
+              border: Capacitor.isNativePlatform() ? 'none' : '1px solid rgba(255,255,255,0.08)',
+              boxShadow: Capacitor.isNativePlatform() ? 'none' : '0 20px 60px rgba(0,0,0,0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '18px'
+            }}
+          >
+            {/* Header */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                width: '56px', height: '56px', borderRadius: '18px',
+                background: 'rgba(34, 197, 94, 0.12)', border: '1px solid rgba(34, 197, 94, 0.25)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 14px auto', color: '#22c55e'
+              }}>
+                <ShieldCheck size={28} />
+              </div>
+              <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 6px 0', color: 'var(--text-primary)' }}>
+                Reset Your PIN
+              </h2>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
+                To protect your financial data, we will send a 6-digit verification code to your registered email.
+              </p>
+            </div>
+
+            {errorMsg && (
+              <div style={{
+                background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)',
+                color: '#ef4444', padding: '10px 14px', borderRadius: '12px', fontSize: '13px', fontWeight: 600, textAlign: 'center'
+              }}>
+                {errorMsg}
+              </div>
+            )}
+
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                Registered Account Email
+              </label>
+              <input
+                type="email"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                placeholder="name@example.com"
+                style={{
+                  width: '100%',
+                  padding: '13px 14px',
+                  borderRadius: '14px',
+                  border: '1px solid var(--border-input)',
+                  background: 'var(--bg-input)',
+                  color: 'var(--text-primary)',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            <button
+              type="button"
+              disabled={isLoading || !resetEmail.trim()}
+              onClick={() => handleSendResetOtp()}
+              style={{
+                width: '100%',
+                padding: '14px',
+                borderRadius: '14px',
+                border: 'none',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: '#ffffff',
+                fontSize: '14px',
+                fontWeight: 700,
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                opacity: isLoading || !resetEmail.trim() ? 0.7 : 1,
+                boxShadow: '0 8px 24px rgba(16, 185, 129, 0.35)',
+                transition: 'all 0.2s'
+              }}
+            >
+              {isLoading ? 'Sending Verification Code...' : 'Send 6-Digit Code'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setErrorMsg('');
+                setStep('unlock');
+              }}
+              style={{
+                width: '100%',
+                padding: '11px',
+                borderRadius: '12px',
+                border: '1px solid var(--border-input)',
+                background: 'transparent',
+                color: 'var(--text-secondary)',
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Back to Lock Screen
+            </button>
+          </div>
+        )}
+
+        {/* STEP: Forgot PIN - 6-Digit OTP Verification Screen */}
+        {step === 'forgot-pin-otp' && (
+          <div
+            className="glass-panel"
+            style={{
+              width: '100%',
+              maxWidth: '400px',
+              padding: '32px 24px',
+              borderRadius: '28px',
+              border: Capacitor.isNativePlatform() ? 'none' : '1px solid rgba(255,255,255,0.08)',
+              boxShadow: Capacitor.isNativePlatform() ? 'none' : '0 20px 60px rgba(0,0,0,0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '18px'
+            }}
+          >
+            {/* Header */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                width: '56px', height: '56px', borderRadius: '18px',
+                background: 'rgba(34, 197, 94, 0.12)', border: '1px solid rgba(34, 197, 94, 0.25)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 14px auto', color: '#22c55e'
+              }}>
+                <KeyRound size={28} />
+              </div>
+              <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 6px 0', color: 'var(--text-primary)' }}>
+                Enter Verification Code
+              </h2>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>
+                We sent a 6-digit code to <strong style={{ color: 'var(--text-primary)' }}>{resetEmail}</strong>.
+              </p>
+            </div>
+
+            {errorMsg && (
+              <div style={{
+                background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)',
+                color: '#ef4444', padding: '10px 14px', borderRadius: '12px', fontSize: '13px', fontWeight: 600, textAlign: 'center'
+              }}>
+                {errorMsg}
+              </div>
+            )}
+
+            {successMsg && (
+              <div style={{
+                background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.25)',
+                color: '#22c55e', padding: '10px 14px', borderRadius: '12px', fontSize: '12px', fontWeight: 600, textAlign: 'center'
+              }}>
+                {successMsg}
+              </div>
+            )}
+
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px', textAlign: 'center' }}>
+                6-Digit Security Code
+              </label>
+              <input
+                type="text"
+                maxLength={8}
+                inputMode="numeric"
+                autoFocus
+                value={resetOtp}
+                onChange={(e) => setResetOtp(e.target.value.replace(/[^0-9]/g, ''))}
+                placeholder="123456"
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  borderRadius: '14px',
+                  border: '1px solid var(--border-input)',
+                  background: 'var(--bg-input)',
+                  color: 'var(--text-primary)',
+                  fontSize: '24px',
+                  fontWeight: 800,
+                  letterSpacing: '8px',
+                  textAlign: 'center',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            <button
+              type="button"
+              disabled={isLoading || resetOtp.trim().length < 6}
+              onClick={handleVerifyResetOtp}
+              style={{
+                width: '100%',
+                padding: '14px',
+                borderRadius: '14px',
+                border: 'none',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: '#ffffff',
+                fontSize: '14px',
+                fontWeight: 700,
+                cursor: (isLoading || resetOtp.trim().length < 6) ? 'not-allowed' : 'pointer',
+                opacity: (isLoading || resetOtp.trim().length < 6) ? 0.7 : 1,
+                boxShadow: '0 8px 24px rgba(16, 185, 129, 0.35)',
+                transition: 'all 0.2s'
+              }}
+            >
+              {isLoading ? 'Verifying Code...' : 'Verify Code & Set PIN'}
+            </button>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <button
+                type="button"
+                disabled={resendCooldown > 0 || isLoading}
+                onClick={() => handleSendResetOtp()}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: resendCooldown > 0 ? 'var(--text-secondary)' : 'var(--primary)',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: resendCooldown > 0 ? 'default' : 'pointer',
+                  padding: '4px'
+                }}
+              >
+                {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : 'Resend Code'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setErrorMsg('');
+                  setStep('forgot-pin-email');
+                }}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-secondary)',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  padding: '4px'
+                }}
+              >
+                Change Email
+              </button>
+            </div>
           </div>
         )}
 
