@@ -1815,7 +1815,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
   const handleDownloadApk = () => {
     setShowModal(false);
     const link = document.createElement('a');
-    link.href = 'https://zenbudget-tracker-app.vercel.app/zenbudget.apk';
+    link.href = '/zenbudget.apk';
     link.download = 'zenbudget.apk';
     document.body.appendChild(link);
     link.click();
@@ -2247,7 +2247,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
   ];
 
   return (
-    <div className="landing-container landing-page" style={{ backgroundColor: t.bg, minHeight: '100vh', width: '100%', overflowX: 'hidden' }}>
+    <div className="landing-container landing-page" style={{ backgroundColor: t.bg, minHeight: '100vh', width: '100%', overflowX: 'hidden', display: 'flex', flexDirection: 'column' }}>
       <style>{css}</style>
 
       {/* ═══════════════ HEADER ═══════════════ */}
@@ -4140,7 +4140,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           </div>
         </main>
       ) : (
-        <main>
+        <main style={{ width: '100%', flex: '1 0 auto' }}>
 
 
       {/* ═══════════════ HERO SECTION (INNERHEAL STYLE ANIMATED BACKGROUND) ═══════════════ */}
