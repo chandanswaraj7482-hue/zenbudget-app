@@ -130,8 +130,8 @@ export const WishlistBlocker: React.FC<WishlistBlockerProps> = ({
     setNewItemAmount('');
     setNewItemCategory('shopping');
     setNewItemReason('');
-    if (onShowToast) onShowToast(`Item "${newItem.name}" added to Impulse Blocker lock!`, 'success');
-    admobService.recordActionAndMaybeShowAd(isPremiumUser);
+    const isAdFree = isPremiumUser && localStorage.getItem('zb_is_referral_trial') !== 'true' && localStorage.getItem('zb_subscription_tier') !== 'trial';
+    admobService.recordActionAndMaybeShowAd(isAdFree);
   };
 
   const handleDeleteItem = (id: string) => {

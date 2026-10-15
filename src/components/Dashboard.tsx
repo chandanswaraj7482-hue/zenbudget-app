@@ -2300,7 +2300,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {showShareModal && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(12px)',
+          backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(8px)',
           display: 'flex', justifyContent: 'center', alignItems: 'center',
           zIndex: 2000, padding: '20px'
         }} onClick={() => setShowShareModal(false)}>
@@ -2353,14 +2353,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {showInviteModal && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.88)', backdropFilter: 'blur(12px)',
+          backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(8px)',
           display: 'flex', justifyContent: 'center', alignItems: 'center',
           zIndex: 2000, padding: '16px'
         }} onClick={() => setShowInviteModal(false)}>
           <div
             className="glass-panel animate-slide-up"
             style={{
-              width: '100%', maxWidth: '345px', padding: '18px 20px', borderRadius: '24px',
+              width: '100%', maxWidth: '345px', padding: '18px 20px', borderRadius: '28px',
               background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(9, 9, 15, 0.98) 100%)',
               border: '1px solid rgba(236, 72, 153, 0.3)', position: 'relative',
               textAlign: 'center', color: '#fff', boxShadow: '0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(236,72,153,0.08)',
@@ -2575,7 +2575,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         return (
           <div style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(8px)',
             display: 'flex', justifyContent: 'center', alignItems: 'center',
             zIndex: 2000, padding: '20px'
           }} onClick={() => setShowMonthlyLetter(false)}>
@@ -2644,7 +2644,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {editingChallengeId !== null && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(12px)',
+          backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(8px)',
           display: 'flex', justifyContent: 'center', alignItems: 'center',
           zIndex: 2000, padding: '20px'
         }} onClick={() => setEditingChallengeId(null)}>
@@ -2942,14 +2942,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {showAddGoalModal && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)',
+          backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(8px)',
           display: 'flex', justifyContent: 'center', alignItems: 'center',
           zIndex: 2000, padding: '20px'
         }} onClick={() => setShowAddGoalModal(false)}>
           <div
             className="glass-panel animate-slide-up"
             style={{
-              width: '100%', maxWidth: '350px', padding: '24px', borderRadius: '24px',
+              width: '100%', maxWidth: '350px', padding: '24px', borderRadius: '28px',
               background: 'var(--bg-card)',
               border: '1px solid var(--border-card)', position: 'relative',
               textAlign: 'left', color: 'var(--text-primary)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
@@ -3063,14 +3063,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {editingGoalId && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)',
+          backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(8px)',
           display: 'flex', justifyContent: 'center', alignItems: 'center',
           zIndex: 2000, padding: '20px'
         }} onClick={() => setEditingGoalId(null)}>
           <div
             className="glass-panel animate-slide-up"
             style={{
-              width: '100%', maxWidth: '350px', padding: '24px', borderRadius: '24px',
+              width: '100%', maxWidth: '350px', padding: '24px', borderRadius: '28px',
               background: 'var(--bg-card)',
               border: '1px solid var(--border-card)', position: 'relative',
               textAlign: 'left', color: 'var(--text-primary)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)',

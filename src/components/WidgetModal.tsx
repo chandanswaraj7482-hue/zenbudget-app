@@ -52,16 +52,16 @@ export const WidgetModal: React.FC<WidgetModalProps> = ({ isOpen, onClose, curre
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'rgba(0, 0, 0, 0.85)',
-      backdropFilter: 'blur(12px)',
+      background: 'rgba(15, 23, 42, 0.65)',
+      backdropFilter: 'blur(8px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '20px',
       zIndex: 2500,
       animation: 'fadeIn 0.2s ease-out'
-    }}>
-      <div className="glass-panel" style={{
+    }} onClick={onClose}>
+      <div className="glass-panel" onClick={(e) => e.stopPropagation()} style={{
         width: '100%',
         maxWidth: '440px',
         padding: '24px',

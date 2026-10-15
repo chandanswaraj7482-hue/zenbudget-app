@@ -509,7 +509,7 @@ export const Budgets: React.FC<BudgetsProps> = ({
         <div style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(0, 0, 0, 0.82)',
+          background: 'rgba(15, 23, 42, 0.65)',
           backdropFilter: 'blur(8px)',
           zIndex: 9999,
           display: 'flex',
@@ -520,7 +520,7 @@ export const Budgets: React.FC<BudgetsProps> = ({
           <div style={{
             background: 'var(--bg-card, #0f172a)',
             border: '1.5px solid rgba(16, 185, 129, 0.35)',
-            borderRadius: '26px',
+            borderRadius: '28px',
             maxWidth: '380px',
             width: '100%',
             overflow: 'hidden',

@@ -127,6 +127,13 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     return false;
   })();
 
+  // Ads should ONLY be hidden for actual PAID subscribers. 7-Day trial / Referral unlock users MUST see ads to generate revenue!
+  const isAdFree = (() => {
+    if (subscriptionTier === 'trial') return false;
+    if (localStorage.getItem('zb_is_referral_trial') === 'true') return false;
+    return isPremiumUser;
+  })();
+
   // Auto-demote expired Monthly/Yearly subscriptions back to Free tier
   useEffect(() => {
     if (['premium', 'premium_monthly', 'premium_yearly'].includes(subscriptionTier)) {
@@ -154,9 +161,9 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     isPremiumUserRef.current = isPremiumUser;
   }, [isPremiumUser]);
 
-  // Google AdMob: Show adaptive bottom banner for free users, hide for Pro / Lifetime users
+  // Google AdMob: Show adaptive bottom banner for free & trial/referral users, hide ONLY for paid subscribers
   useEffect(() => {
-    if (!isPremiumUser) {
+    if (!isAdFree) {
       admobService.showBanner(false);
     } else {
       admobService.hideBanner();
@@ -164,7 +171,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     return () => {
       admobService.hideBanner();
     };
-  }, [isPremiumUser]);
+  }, [isAdFree]);
 
   const [transactions, setTransactions] = useState<Transaction[]>(() => {
     const profileId = localStorage.getItem('zb_profile_id') || '';
@@ -386,12 +393,24 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
   // Dynamic Calculation for Today's Limit based on Category Budgets, Income & Expenses
   const computedDailyLimit = useMemo(() => {
+    const effectiveId = currentProfileId || localStorage.getItem('zb_profile_id') || 'local';
+    
+    // Check if user has a custom set daily limit
+    const customLimitStr = localStorage.getItem(`zb_custom_daily_limit_${effectiveId}`);
+    if (customLimitStr && parseInt(customLimitStr, 10) > 0) {
+      return parseInt(customLimitStr, 10);
+    }
+
     const totalMonthlyBudget = (Array.isArray(budgets) ? budgets : []).reduce((sum, b) => sum + (b.limit || 0), 0);
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
     const currentDay = now.getDate();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+    // Check user's individual monthly salary
+    const salaryStr = localStorage.getItem(`zb_monthly_salary_${effectiveId}`);
+    const userSalary = salaryStr ? parseFloat(salaryStr) : 0;
 
     // Filter current month expenses
     const currentMonthExpenses = (Array.isArray(transactions) ? transactions : [])
@@ -412,28 +431,44 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     // Case 1: Category budgets configured
     if (totalMonthlyBudget > 0) {
       const dailyBase = Math.round(totalMonthlyBudget / daysInMonth);
-      return Math.max(500, dailyBase);
+      return Math.max(200, dailyBase);
     }
 
-    // Case 2: Income logged
+    // Case 2: Individual Monthly Salary specified by this user
+    if (userSalary > 0) {
+      const dailyFromSalary = Math.round((userSalary * 0.75) / daysInMonth);
+      return Math.max(200, dailyFromSalary);
+    }
+
+    // Case 3: Income logged
     if (currentMonthIncome > 0) {
       const dailyFromIncome = Math.round((currentMonthIncome * 0.75) / daysInMonth);
-      return Math.max(500, dailyFromIncome);
+      return Math.max(200, dailyFromIncome);
     }
 
-    // Case 3: Expenses logged
+    // Case 4: Expenses logged
     if (currentMonthExpenses > 0) {
       const avgDaily = Math.round((currentMonthExpenses / Math.max(1, currentDay)) * 1.15);
-      return Math.max(500, avgDaily);
+      return Math.max(200, avgDaily);
+    }
+
+    // Fallback: derive dynamic default from user's account balances if available
+    const totalAccountsBal = (Array.isArray(accounts) ? accounts : []).reduce((sum, a) => sum + (a.balance || 0), 0);
+    if (totalAccountsBal > 0) {
+      return Math.max(200, Math.round((totalAccountsBal * 0.5) / daysInMonth));
     }
 
     return 1000;
-  }, [budgets, transactions]);
+  }, [budgets, transactions, currentProfileId, accounts]);
 
   useEffect(() => {
     setDailyLimit(computedDailyLimit);
     localStorage.setItem('zb_daily_limit', computedDailyLimit.toString());
-  }, [computedDailyLimit]);
+    const effectiveId = currentProfileId || localStorage.getItem('zb_profile_id') || 'local';
+    if (effectiveId) {
+      localStorage.setItem(`zb_daily_limit_${effectiveId}`, computedDailyLimit.toString());
+    }
+  }, [computedDailyLimit, currentProfileId]);
   const [updateUrl, setUpdateUrl] = useState<string>('https://raw.githubusercontent.com/chandanswaraj7482-hue/zenbudget-app/main/public/zenbudget.apk');
   const [updateReleaseNotes, setUpdateReleaseNotes] = useState<string>('Initial release.');
   const [forceUpdate, setForceUpdate] = useState<boolean>(false);
@@ -711,7 +746,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       localStorage.setItem(`zb_loans_${currentProfileId}`, JSON.stringify(updated));
     }
     triggerToast(`Loan entry for ${loanData.personName} saved!`, 'success');
-    admobService.recordActionAndMaybeShowAd(isPremiumUser);
+    admobService.recordActionAndMaybeShowAd(isAdFree);
   };
 
   const handleRepayLoan = (loanId: string, repayAmount: number, accountId: string) => {
@@ -762,7 +797,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       type: isBorrowed ? 'expense' : 'income',
       notes: `Loan Repayment record (${targetLoan.personName})`
     });
-    admobService.recordActionAndMaybeShowAd(isPremiumUser);
+    admobService.recordActionAndMaybeShowAd(isAdFree);
   };
 
   const [upiPayeeModal, setUpiPayeeModal] = useState<{ isOpen: boolean, loan: LoanRecord | null, amount: number, accountId: string }>({ isOpen: false, loan: null, amount: 0, accountId: '' });
@@ -1811,13 +1846,9 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
     const isDismissedPermanent = localStorage.getItem(`zb_financial_profile_dismissed_${effectiveId}`) === 'true';
 
+    // Do NOT show automatic popup on login. Financial profile can be updated from Profile/Dashboard anytime.
     if (!isCompleted && !hasDismissedSession && !isDismissedPermanent) {
-      // Prompt once gently after a delay, and mark as prompted so it never annoys the user again
-      const timer = setTimeout(() => {
-        setShowFinancialProfileModal(true);
-        localStorage.setItem(`zb_financial_profile_dismissed_${effectiveId}`, 'true');
-      }, 1500);
-      return () => clearTimeout(timer);
+      localStorage.setItem(`zb_financial_profile_dismissed_${effectiveId}`, 'true');
     }
   }, [isLocked, isAppLoading, showOnboarding, currentProfileId]);
 
@@ -1853,52 +1884,69 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       const dayOfMonth = now.getDate();
       const remainingDays = Math.max(1, daysInMonth - dayOfMonth + 1);
 
+      // Check if user set a custom daily limit
+      const customLimitStr = localStorage.getItem(`zb_custom_daily_limit_${currentProfileId}`);
+      if (customLimitStr && parseInt(customLimitStr, 10) > 0) {
+        const val = parseInt(customLimitStr, 10);
+        setDailyLimit(val);
+        localStorage.setItem('zb_daily_limit', val.toString());
+        localStorage.setItem(`zb_daily_limit_${currentProfileId}`, val.toString());
+        return;
+      }
+
+      // Check user's individual monthly salary
+      const salaryStr = localStorage.getItem(`zb_monthly_salary_${currentProfileId}`);
+      const userSalary = salaryStr ? parseFloat(salaryStr) : 0;
+
       // Income calculation
       const currentMonth = now.getMonth();
       const currentYear = now.getFullYear();
-      const thisMonthIncome = convertedTransactions
+      const actualMonthIncome = convertedTransactions
         .filter(t => {
           const d = new Date(t.date);
           return d.getMonth() === currentMonth && d.getFullYear() === currentYear && t.type === 'income';
         })
-        .reduce((sum, t) => sum + t.amount, 0) || 50000;
-
-      // Savings Target
-      const monthlySavingsGoal = goals.reduce((sum, g) => sum + (g.targetAmount / 12), 0) || 5000;
-
-      // Budgets limit sum
-      const monthlyBudgetsSum = convertedBudgets.reduce((sum, b) => sum + b.limit, 0) || 20000;
-
-      const netDisposable = Math.max(2000, thisMonthIncome - monthlySavingsGoal);
-      const budgetPool = Math.min(netDisposable, monthlyBudgetsSum > 0 ? monthlyBudgetsSum : netDisposable);
-
-      const spentThisMonth = convertedTransactions
-        .filter(t => {
-          const d = new Date(t.date);
-          return d.getMonth() === currentMonth && d.getFullYear() === currentYear && t.type === 'expense';
-        })
         .reduce((sum, t) => sum + t.amount, 0);
 
-      const remainingBudget = Math.max(1000, budgetPool - spentThisMonth);
-      const baseLimit = remainingBudget / remainingDays;
+      const thisMonthIncome = userSalary > 0 
+        ? userSalary 
+        : (actualMonthIncome > 0 ? actualMonthIncome : 0);
 
-      // Adjustment based on past 7 days spending history
-      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const last7DaysExpenses = convertedTransactions.filter(t => new Date(t.date) >= sevenDaysAgo && t.type === 'expense');
-      const avgDailySpent = last7DaysExpenses.reduce((sum, t) => sum + t.amount, 0) / 7;
+      // Savings Target
+      const monthlySavingsGoal = goals.reduce((sum, g) => sum + (g.targetAmount / 12), 0) || 0;
 
-      let finalLimit = baseLimit;
-      if (avgDailySpent > 0) {
-        if (avgDailySpent > baseLimit) {
-          finalLimit = baseLimit * 0.9 + avgDailySpent * 0.1;
+      // Budgets limit sum
+      const monthlyBudgetsSum = convertedBudgets.reduce((sum, b) => sum + b.limit, 0);
+
+      let calculated = 1000;
+
+      if (monthlyBudgetsSum > 0) {
+        calculated = Math.round(monthlyBudgetsSum / daysInMonth);
+      } else if (thisMonthIncome > 0) {
+        const netDisposable = Math.max(1000, thisMonthIncome - monthlySavingsGoal);
+        const spentThisMonth = convertedTransactions
+          .filter(t => {
+            const d = new Date(t.date);
+            return d.getMonth() === currentMonth && d.getFullYear() === currentYear && t.type === 'expense';
+          })
+          .reduce((sum, t) => sum + t.amount, 0);
+
+        const remainingBudget = Math.max(500, (netDisposable * 0.75) - spentThisMonth);
+        calculated = Math.round(remainingBudget / remainingDays);
+      } else {
+        // Fallback based on accounts balance if available
+        const totalAccountsBal = (Array.isArray(accounts) ? accounts : []).reduce((sum, a) => sum + (a.balance || 0), 0);
+        if (totalAccountsBal > 0) {
+          calculated = Math.round((totalAccountsBal * 0.4) / daysInMonth);
         } else {
-          finalLimit = baseLimit * 0.95 + avgDailySpent * 0.05;
+          calculated = 800;
         }
       }
 
-      const calculated = Math.max(200, Math.round(finalLimit));
+      calculated = Math.max(200, calculated);
       setDailyLimit(calculated);
       localStorage.setItem('zb_today_smart_limit', calculated.toString());
+      localStorage.setItem('zb_daily_limit', calculated.toString());
       if (currentProfileId) {
         localStorage.setItem(`zb_daily_limit_${currentProfileId}`, calculated.toString());
         localStorage.setItem(`zb_currency_symbol_${currentProfileId}`, currencySymbol);
@@ -3753,7 +3801,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       const keysToWipe: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && (k.startsWith('zb_transactions') || k.startsWith('zb_accounts') || k.startsWith('zb_budgets') || k.startsWith('zb_goals') || k.startsWith('zb_debts') || k.startsWith('zb_loans') || k === 'zb_local_session_profile' || k === 'zb_profile_id' || k === 'zb_user_pin' || k === 'zb_pin_created' || k === 'zb_user_name' || k === 'zb_user_avatar')) {
+        if (k && (k.startsWith('zb_transactions') || k.startsWith('zb_accounts') || k.startsWith('zb_budgets') || k.startsWith('zb_goals') || k.startsWith('zb_debts') || k.startsWith('zb_loans') || k === 'zb_local_session_profile' || k === 'zb_profile_id' || k === 'zb_user_name' || k === 'zb_user_avatar')) {
           keysToWipe.push(k);
         }
       }
@@ -4097,7 +4145,12 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       localStorage.setItem('zb_user_name', validName);
       localStorage.setItem('zb_subscription_tier', validTier);
       localStorage.setItem('zb_trial_start_date', validStart);
-      if (validPin) localStorage.setItem('zb_user_pin', validPin);
+      if (validPin) {
+        localStorage.setItem('zb_user_pin', validPin);
+        localStorage.setItem('zb_saved_device_pin', validPin);
+        localStorage.setItem('zb_pin_created', 'true');
+        if (validProfileId) localStorage.setItem(`zb_pin_${validProfileId}`, validPin);
+      }
       if (premiumExpires) {
         localStorage.setItem('zb_premium_expires_at', premiumExpires);
       } else {
@@ -5015,15 +5068,13 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(0, 0, 0, 0.55)',
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)',
+            background: 'rgba(0, 0, 0, 0.65)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 11000,
             padding: '20px',
-            animation: 'fadeIn 0.25s ease-out'
+            animation: 'fadeIn 0.2s ease-out'
           }}
         >
           <div style={{
@@ -5032,17 +5083,15 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             maxHeight: '85vh',
             display: 'flex',
             flexDirection: 'column',
-            background: 'linear-gradient(160deg, rgba(20,15,35,0.98) 0%, rgba(10,8,18,0.98) 100%)',
+            background: 'var(--bg-card, #131722)',
             border: announcementPopup.type === 'coupon'
               ? '1px solid rgba(234,179,8,0.6)'
               : announcementPopup.type === 'warning'
               ? '1px solid rgba(239,68,68,0.5)'
               : '1px solid rgba(99,102,241,0.5)',
-            borderRadius: '28px',
-            padding: '28px',
-            boxShadow: announcementPopup.type === 'coupon'
-              ? '0 0 40px rgba(234,179,8,0.2), 0 20px 60px rgba(0,0,0,0.8)'
-              : '0 0 40px rgba(99,102,241,0.15), 0 20px 60px rgba(0,0,0,0.8)',
+            borderRadius: '24px',
+            padding: '24px',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
             textAlign: 'center',
             position: 'relative',
             overflow: 'hidden'
@@ -5298,8 +5347,9 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.85)',
-          backdropFilter: 'blur(8px)',
+          backgroundColor: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -5418,8 +5468,9 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.85)',
-          backdropFilter: 'blur(8px)',
+          backgroundColor: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -6322,7 +6373,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       {activeLoanReminderModal && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 9999,
-          backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(12px)',
+          backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px',
           animation: 'fadeIn 0.2s ease-out'
         }}>
@@ -6529,7 +6580,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       {insufficientBalanceModalData && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 99999,
-          backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(12px)',
+          backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px',
           animation: 'fadeIn 0.2s ease-out'
         }}>
@@ -6596,7 +6647,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       {showGranularResetModal && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 99999,
-          backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(12px)',
+          backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px',
           animation: 'fadeIn 0.2s ease-out'
@@ -6741,7 +6792,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
       {/* UPI Payee Intent Modal */}
       {upiPayeeModal.isOpen && upiPayeeModal.loan && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
           <div className="glass-panel animate-slide-up" style={{ width: '100%', maxWidth: '380px', padding: '24px', borderRadius: '24px', background: 'var(--bg-card)', border: '1px solid var(--border-card)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
             <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>Send Money via UPI</h3>
             <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '20px', lineHeight: 1.5 }}>

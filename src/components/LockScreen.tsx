@@ -477,25 +477,29 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         localStorage.removeItem('zb_oauth_just_completed');
         localStorage.removeItem('zb_oauth_in_progress');
 
-        // Check if user has a valid personal 4-digit PIN
-        const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem(`zb_pin_${uid}`);
+        // Check if user has a valid personal 4-digit PIN (DB profile or locally saved)
+        const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem(`zb_pin_${uid}`) || localStorage.getItem('zb_saved_device_pin');
         const effectivePin = (localPin && localPin !== '0000' && localPin.length >= 4)
           ? localPin
           : (userProf.pin && userProf.pin !== '0000' && userProf.pin.length >= 4 ? userProf.pin : null);
 
         if (effectivePin) {
           localStorage.setItem('zb_user_pin', effectivePin);
+          localStorage.setItem('zb_saved_device_pin', effectivePin);
+          localStorage.setItem(`zb_pin_${uid}`, effectivePin);
           localStorage.setItem('zb_pin_created', 'true');
           setStep('unlock');
         } else {
-          // User hasn't chosen their personal 4-digit PIN yet -> ALWAYS take them to create PIN!
+          // User hasn't chosen their personal 4-digit PIN yet -> only for first-time users!
           localStorage.removeItem('zb_pin_created');
           setStep('onboard-pin');
         }
       } else {
         // No DB profile found — check if local valid PIN exists
-        const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem(`zb_pin_${uid}`);
+        const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem(`zb_pin_${uid}`) || localStorage.getItem('zb_saved_device_pin');
         if (localPin && localPin !== '0000' && localPin.length >= 4) {
+          localStorage.setItem('zb_user_pin', localPin);
+          localStorage.setItem('zb_saved_device_pin', localPin);
           localStorage.setItem('zb_pin_created', 'true');
           setStep('unlock');
         } else {
@@ -538,15 +542,18 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           setUsername(cachedData.profile.name);
           setStep('unlock');
         } catch (_) { setStep('auth'); }
-      } else {
         // Even without session cache, check PIN or profile ID
-        const localPin = localStorage.getItem('zb_user_pin');
+        const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem('zb_saved_device_pin');
         const localProfileId = localStorage.getItem('zb_profile_id');
         if (localPin && localPin !== '0000' && localPin.length >= 4) {
           setStep('unlock');
         } else if (localProfileId) {
           setUserId(localProfileId);
-          setStep('onboard-pin');
+          if (localStorage.getItem('zb_pin_created') === 'true') {
+            setStep('unlock');
+          } else {
+            setStep('onboard-pin');
+          }
         } else {
           setStep('auth');
         }
@@ -654,13 +661,17 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           }
         } else {
           // No cached session — but check if user is already signed in or created a profile
-          const localPin = localStorage.getItem('zb_user_pin');
+          const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem('zb_saved_device_pin');
           const localProfileId = localStorage.getItem('zb_profile_id');
           if (localPin && localPin !== '0000' && localPin.length >= 4) {
             setStep('unlock');
           } else if (localProfileId) {
             setUserId(localProfileId);
-            setStep('onboard-pin');
+            if (localStorage.getItem('zb_pin_created') === 'true') {
+              setStep('unlock');
+            } else {
+              setStep('onboard-pin');
+            }
           } else {
             setStep('auth');
           }
@@ -854,7 +865,14 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         if (error) throw error;
         if (data.user) {
           setUserId(data.user.id);
-          setStep('onboard-pin');
+          const existingPin = localStorage.getItem(`zb_pin_${data.user.id}`) || localStorage.getItem(`zb_pin_${cleanEmail}`) || localStorage.getItem('zb_saved_device_pin') || localStorage.getItem('zb_user_pin');
+          if (existingPin && existingPin !== '0000' && existingPin.length >= 4) {
+            localStorage.setItem('zb_user_pin', existingPin);
+            localStorage.setItem('zb_pin_created', 'true');
+            setStep('unlock');
+          } else {
+            setStep('onboard-pin');
+          }
         }
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
@@ -1129,6 +1147,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         }
 
         localStorage.setItem('zb_user_pin', pin);
+        localStorage.setItem('zb_saved_device_pin', pin);
+        localStorage.setItem(`zb_pin_${currentUserId}`, pin);
         localStorage.setItem('zb_pin_created', 'true');
         localStorage.setItem('zb_app_lock_enabled', 'true');
         playNotificationSound('success');
@@ -1254,6 +1274,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       // Store generated invite code for local UI referral sharing
       localStorage.setItem('zb_invite_code', myReferralCode);
       localStorage.setItem('zb_user_pin', pin);
+      localStorage.setItem('zb_saved_device_pin', pin);
+      localStorage.setItem(`zb_pin_${currentUserId}`, pin);
       localStorage.setItem('zb_pin_created', 'true');
       localStorage.setItem('zb_app_lock_enabled', 'true');
 
@@ -1367,7 +1389,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       const keysToWipe: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && (k.startsWith('zb_transactions') || k.startsWith('zb_accounts') || k.startsWith('zb_budgets') || k.startsWith('zb_goals') || k.startsWith('zb_debts') || k.startsWith('zb_loans') || k === 'zb_local_session_profile' || k === 'zb_profile_id' || k === 'zb_user_pin' || k === 'zb_pin_created' || k === 'zb_user_name' || k === 'zb_user_avatar' || k === 'zb_user_email' || k === 'zb_google_avatar')) {
+        if (k && (k.startsWith('zb_transactions') || k.startsWith('zb_accounts') || k.startsWith('zb_budgets') || k.startsWith('zb_goals') || k.startsWith('zb_debts') || k.startsWith('zb_loans') || k === 'zb_local_session_profile' || k === 'zb_profile_id' || k === 'zb_user_name' || k === 'zb_user_avatar' || k === 'zb_user_email' || k === 'zb_google_avatar')) {
           keysToWipe.push(k);
         }
       }
@@ -1925,7 +1947,17 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                 fontWeight: 700,
                 color: '#22c55e'
               }}>
-                <span>Today's Limit: Stay under ₹{(parseInt(localStorage.getItem('zb_daily_limit') || '1000', 10)).toLocaleString()}</span>
+                <span>Today's Limit: Stay under ₹{(() => {
+                  const currentId = userId || localStorage.getItem('zb_profile_id') || 'local';
+                  const userCustom = localStorage.getItem(`zb_custom_daily_limit_${currentId}`);
+                  if (userCustom && parseInt(userCustom, 10) > 0) return parseInt(userCustom, 10).toLocaleString();
+                  const userLimit = localStorage.getItem(`zb_daily_limit_${currentId}`);
+                  if (userLimit && parseInt(userLimit, 10) > 0) return parseInt(userLimit, 10).toLocaleString();
+                  const userSalary = localStorage.getItem(`zb_monthly_salary_${currentId}`);
+                  if (userSalary && parseFloat(userSalary) > 0) return Math.max(200, Math.round((parseFloat(userSalary) * 0.75) / 30)).toLocaleString();
+                  const globalLimit = localStorage.getItem('zb_daily_limit');
+                  return (globalLimit ? parseInt(globalLimit, 10) : 1000).toLocaleString();
+                })()}</span>
                 <span>🤝</span>
               </div>
             </div>

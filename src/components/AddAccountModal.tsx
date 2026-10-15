@@ -60,28 +60,38 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'rgba(0, 0, 0, 0.85)',
-      backdropFilter: 'blur(12px)',
-      WebkitBackdropFilter: 'blur(12px)',
+      background: 'rgba(15, 23, 42, 0.65)',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '16px',
-      zIndex: 10000
-    }}>
-      <div className="glass-panel" style={{
-        width: '100%',
-        maxWidth: '380px',
-        maxHeight: 'calc(100vh - 32px)',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        padding: '24px'
-      }}>
+      zIndex: 10000,
+      animation: 'fadeIn 0.2s ease-out'
+    }}
+    onClick={onClose}
+    >
+      <div 
+        className="glass-panel" 
+        style={{
+          width: '100%',
+          maxWidth: '380px',
+          maxHeight: 'calc(100vh - 32px)',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          padding: '24px',
+          borderRadius: '28px',
+          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.4), 0 0 40px rgba(34, 197, 94, 0.1)',
+          border: '1px solid var(--border-card)'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexShrink: 0 }}>
-          <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>{t('add_account')}</h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
-            <X size={20} />
+          <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>{t('add_account')}</h3>
+          <button onClick={onClose} style={{ background: 'rgba(255, 255, 255, 0.08)', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <X size={18} />
           </button>
         </div>
 
@@ -204,7 +214,7 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
           <button
             type="submit"
             className="glass-button active"
-            style={{ padding: '12px', borderRadius: '12px', marginTop: '10px', fontSize: '14px', fontWeight: 800 }}
+            style={{ padding: '14px', borderRadius: '18px', marginTop: '10px', fontSize: '14px', fontWeight: 800, width: '100%' }}
           >
             Save Account
           </button>

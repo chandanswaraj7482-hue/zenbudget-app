@@ -69,45 +69,15 @@ export const launchCashfreeCheckout = async (
     return;
   }
 
-  // Inject Emergency Floating Close Button on top of Cashfree overlay
-  try {
-    removeCashfreeEmergencyButton();
-    const closeBtn = document.createElement('button');
-    closeBtn.id = 'cf-emergency-close-btn';
-    closeBtn.innerText = '✕ Close Payment Overlay';
-    closeBtn.style.cssText = `
-      position: fixed !important;
-      top: 16px !important;
-      right: 16px !important;
-      z-index: 20000000 !important;
-      padding: 10px 18px !important;
-      border-radius: 30px !important;
-      background: rgba(239, 68, 68, 0.95) !important;
-      color: #ffffff !important;
-      font-size: 13px !important;
-      font-weight: 800 !important;
-      border: 1px solid rgba(255, 255, 255, 0.4) !important;
-      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5) !important;
-      cursor: pointer !important;
-      font-family: system-ui, -apple-system, sans-serif !important;
-      letter-spacing: 0.02em !important;
-    `;
-    closeBtn.onclick = () => {
-      cleanUpCashfreeOverlays();
-      if (onFailure) onFailure('User closed Cashfree overlay');
-    };
-    document.body.appendChild(closeBtn);
-  } catch (e) {}
-
-  // Determine mode: if environment is explicitly sandbox, or if it's localhost, or if payment session looks like sandbox.
-  // Sometimes sandbox sessions start with session_xxx
+  // Determine mode
   const mode = (environment === 'sandbox' || paymentSessionId.includes('sandbox')) ? 'sandbox' : 'production';
   const cf = (window as any).Cashfree({ mode });
 
   try {
+    // Open Cashfree checkout directly without intermediate popups or iframes
     cf.checkout({
       paymentSessionId: paymentSessionId,
-      redirectTarget: '_modal'
+      redirectTarget: '_self'
     }).then((result: any) => {
       cleanUpCashfreeOverlays();
       if (result && result.paymentDetails) {

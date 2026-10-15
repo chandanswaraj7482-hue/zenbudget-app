@@ -575,9 +575,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.85)',
-      backdropFilter: 'blur(12px)',
-      WebkitBackdropFilter: 'blur(12px)',
+      backgroundColor: 'rgba(15, 23, 42, 0.65)',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
@@ -592,7 +592,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           width: '100%',
           maxWidth: '380px',
           padding: '24px',
-          borderRadius: '24px',
+          borderRadius: '28px',
           position: 'relative',
           animation: 'slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
           maxHeight: 'calc(100vh - 32px)',
@@ -1785,8 +1785,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         <div style={{
           position: 'fixed',
           top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.85)',
-          backdropFilter: 'blur(16px)',
+          backgroundColor: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(10px)',
           zIndex: 1300,
           display: 'flex',
           justifyContent: 'center',
@@ -1797,6 +1797,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           <div className="glass-panel" style={{
             width: '100%',
             maxWidth: '400px',
+            borderRadius: '28px',
             background: 'linear-gradient(180deg, rgba(30, 20, 45, 0.98) 0%, rgba(15, 12, 25, 0.98) 100%)',
             border: '1px solid rgba(236, 72, 153, 0.3)',
             borderRadius: '24px',
@@ -1932,12 +1933,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       {showNoAccountModal && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(10px)',
+          backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(8px)',
           display: 'flex', justifyContent: 'center', alignItems: 'center',
           zIndex: 999999, padding: '20px'
         }}>
           <div className="glass-panel animate-scale-up" style={{
-            width: '100%', maxWidth: '340px', padding: '24px', borderRadius: '24px',
+            width: '100%', maxWidth: '340px', padding: '24px', borderRadius: '28px',
             background: 'rgba(15, 23, 42, 0.98)', border: '1px solid rgba(239, 68, 68, 0.5)',
             textAlign: 'center', color: '#fff', boxShadow: '0 20px 50px rgba(239, 68, 68, 0.3)'
           }}>

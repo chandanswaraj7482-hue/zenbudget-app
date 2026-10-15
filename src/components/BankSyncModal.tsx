@@ -104,16 +104,16 @@ export const BankSyncModal: React.FC<BankSyncModalProps> = ({ isOpen, onClose, o
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'rgba(0, 0, 0, 0.85)',
-      backdropFilter: 'blur(12px)',
+      background: 'rgba(15, 23, 42, 0.65)',
+      backdropFilter: 'blur(8px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '20px',
       zIndex: 2200,
       animation: 'fadeIn 0.25s ease-out'
-    }}>
-      <div className="glass-panel" style={{
+    }} onClick={onClose}>
+      <div className="glass-panel" onClick={(e) => e.stopPropagation()} style={{
         width: '100%',
         maxWidth: '440px',
         maxHeight: '90vh',
