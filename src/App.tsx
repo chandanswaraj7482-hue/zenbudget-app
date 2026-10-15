@@ -90,11 +90,15 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   const [userName, setUserName] = useState<string>(() => localStorage.getItem('zb_user_name') || '');
   const [isLocked, setIsLocked] = useState<boolean>(() => {
     const profileId = localStorage.getItem('zb_profile_id');
-    const lockExplicitlyEnabled = localStorage.getItem('zb_app_lock_enabled') === 'true';
-    if (profileId && !lockExplicitlyEnabled) {
+    const userPin = localStorage.getItem('zb_user_pin');
+    const lockExplicitlyDisabled = localStorage.getItem('zb_app_lock_enabled') === 'false';
+    if (lockExplicitlyDisabled) {
       return false;
     }
-    return !profileId ? true : lockExplicitlyEnabled;
+    if (userPin && userPin !== '0000' && userPin.length >= 4) {
+      return true;
+    }
+    return !profileId;
   });
   const [isAppLoading, setIsAppLoading] = useState<boolean>(false);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
@@ -1022,21 +1026,21 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     window.addEventListener('click', updateActivity, { passive: true });
     window.addEventListener('scroll', updateActivity, { passive: true });
 
-    // 5-Minute Inactivity Auto-Lock (only if explicitly enabled by user in Settings)
+    // 5-Minute Bank-Grade Inactivity Auto-Lock (Enabled by default for all accounts with PIN)
     intervalId = setInterval(() => {
-      const lockEnabled = localStorage.getItem('zb_app_lock_enabled') === 'true';
-      if (lockEnabled && Date.now() - lastActivityTime >= 5 * 60 * 1000) {
+      const isLockActive = localStorage.getItem('zb_app_lock_enabled') !== 'false' && Boolean(localStorage.getItem('zb_user_pin'));
+      if (isLockActive && Date.now() - lastActivityTime >= 5 * 60 * 1000) {
         setIsLocked(true);
-        triggerToast('🔒 ZenBudget Auto-Locked after 5 mins of inactivity.', 'info');
+        triggerToast('🔒 ZenBudget Auto-Locked after 5 mins of inactivity (Bank-Grade Security).', 'info');
       }
     }, 10000); // Check every 10 seconds
 
-    // Capacitor Native app background / resume auto-lock (only if backgrounded for > 3 minutes)
+    // Capacitor Native app background / resume auto-lock (after 5 minutes in background)
     let appStateHandle: any = null;
     if (Capacitor.isNativePlatform()) {
       CapApp.addListener('appStateChange', (state) => {
-        const lockEnabled = localStorage.getItem('zb_app_lock_enabled') === 'true';
-        if (!lockEnabled) return;
+        const isLockActive = localStorage.getItem('zb_app_lock_enabled') !== 'false' && Boolean(localStorage.getItem('zb_user_pin'));
+        if (!isLockActive) return;
         if (!state.isActive) {
           sessionStorage.setItem('zb_bg_time', Date.now().toString());
         } else {
@@ -1045,9 +1049,9 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           sessionStorage.removeItem('zb_was_backgrounded');
           if (bgTimeStr) {
             const bgTime = parseInt(bgTimeStr, 10);
-            if (!isNaN(bgTime) && Date.now() - bgTime >= 3 * 60 * 1000) {
+            if (!isNaN(bgTime) && Date.now() - bgTime >= 5 * 60 * 1000) {
               setIsLocked(true);
-              triggerToast('🔒 ZenBudget Auto-Locked after 3 mins in background.', 'info');
+              triggerToast('🔒 ZenBudget Auto-Locked after 5 mins in background (Bank Security).', 'info');
             }
           }
         }
@@ -1058,10 +1062,10 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       });
     }
 
-    // Web / PWA visibility change auto-lock (strictly opt-in, only if backgrounded for > 3 minutes)
+    // Web / PWA visibility change auto-lock (after 5 minutes in background/hidden tab)
     const handleVisibilityChange = () => {
-      const lockEnabled = localStorage.getItem('zb_app_lock_enabled') === 'true';
-      if (!lockEnabled) return;
+      const isLockActive = localStorage.getItem('zb_app_lock_enabled') !== 'false' && Boolean(localStorage.getItem('zb_user_pin'));
+      if (!isLockActive) return;
       if (document.visibilityState === 'hidden') {
         sessionStorage.setItem('zb_bg_time', Date.now().toString());
       } else if (document.visibilityState === 'visible') {
@@ -1070,9 +1074,9 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         sessionStorage.removeItem('zb_was_backgrounded');
         if (bgTimeStr) {
           const bgTime = parseInt(bgTimeStr, 10);
-          if (!isNaN(bgTime) && Date.now() - bgTime >= 3 * 60 * 1000) {
+          if (!isNaN(bgTime) && Date.now() - bgTime >= 5 * 60 * 1000) {
             setIsLocked(true);
-            triggerToast('🔒 ZenBudget Auto-Locked after 3 mins in background.', 'info');
+            triggerToast('🔒 ZenBudget Auto-Locked after 5 mins in background (Bank Security).', 'info');
           }
         }
       }

@@ -58,6 +58,16 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
   // Biometric authentication states
   const [biometricsAvailable, setBiometricsAvailable] = useState(false);
+  const [showBiometricPrompt, setShowBiometricPrompt] = useState(false);
+  const [pendingUnlockData, setPendingUnlockData] = useState<{
+    userId: string;
+    name: string;
+    tier: string;
+    trialStart: string;
+    pin: string;
+    premiumExpires: string | null;
+    trialExpire: string | null;
+  } | null>(null);
 
   // iOS Safari PWA setup state
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
@@ -953,16 +963,18 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
         localStorage.setItem('zb_user_pin', pin);
         localStorage.setItem('zb_pin_created', 'true');
+        localStorage.setItem('zb_app_lock_enabled', 'true');
         playNotificationSound('success');
-        onUnlock(
-          currentUserId,
-          dbProfile.name || username || 'User',
-          dbProfile.subscription_tier || 'trial',
-          dbProfile.trial_start_date || new Date().toISOString(),
+        setPendingUnlockData({
+          userId: currentUserId,
+          name: dbProfile.name || username || 'User',
+          tier: dbProfile.subscription_tier || 'trial',
+          trialStart: dbProfile.trial_start_date || new Date().toISOString(),
           pin,
-          dbProfile.premium_expires_at || null,
-          dbProfile.trial_expire_date || null
-        );
+          premiumExpires: dbProfile.premium_expires_at || null,
+          trialExpire: dbProfile.trial_expire_date || null
+        });
+        setShowBiometricPrompt(true);
         return;
       }
 
@@ -1076,9 +1088,19 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       localStorage.setItem('zb_invite_code', myReferralCode);
       localStorage.setItem('zb_user_pin', pin);
       localStorage.setItem('zb_pin_created', 'true');
+      localStorage.setItem('zb_app_lock_enabled', 'true');
 
       playNotificationSound('success');
-      onUnlock(currentUserId, newProfile.name, restoredTier, newProfile.trial_start_date, pin, restoredExpiry, null);
+      setPendingUnlockData({
+        userId: currentUserId,
+        name: newProfile.name,
+        tier: restoredTier,
+        trialStart: newProfile.trial_start_date,
+        pin,
+        premiumExpires: restoredExpiry,
+        trialExpire: null
+      });
+      setShowBiometricPrompt(true);
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to create profile. Try again.');
       playNotificationSound('warning');
@@ -1227,11 +1249,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             className="glass-panel"
             style={{
               width: '100%',
-              maxWidth: '360px',
+              maxWidth: '420px',
               padding: '32px 24px 24px',
               borderRadius: '28px',
-              border: '1px solid rgba(255,255,255,0.08)',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+              border: Capacitor.isNativePlatform() ? 'none' : '1px solid rgba(255,255,255,0.08)',
+              boxShadow: Capacitor.isNativePlatform() ? 'none' : '0 20px 60px rgba(0,0,0,0.5)',
               display: 'flex',
               flexDirection: 'column',
               gap: '0px'
@@ -1446,7 +1468,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           <div
             style={{
               width: '100%',
-              maxWidth: '360px',
+              maxWidth: '420px',
               padding: '24px 20px 20px',
               borderRadius: '28px',
               background: 'transparent',
@@ -1663,7 +1685,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           <div
             style={{
               width: '100%',
-              maxWidth: '360px',
+              maxWidth: '420px',
               padding: '24px 20px 20px',
               borderRadius: '28px',
               background: 'transparent',
@@ -2040,6 +2062,142 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               >
                 Got it
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Biometric Enable Prompt Modal (Immediately after PIN Creation) */}
+        {showBiometricPrompt && (
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 99999,
+            background: 'rgba(5, 10, 18, 0.92)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}>
+            <div style={{
+              width: '100%',
+              maxWidth: '390px',
+              background: 'linear-gradient(165deg, rgba(17, 24, 39, 0.98) 0%, rgba(10, 15, 29, 0.98) 100%)',
+              borderRadius: '26px',
+              border: '1.5px solid rgba(16, 185, 129, 0.35)',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 35px rgba(16, 185, 129, 0.2)',
+              padding: '28px 22px',
+              textAlign: 'center',
+              color: '#f8fafc',
+              animation: 'fadeIn 0.2s ease-out'
+            }}>
+              {/* Animated Fingerprint Icon with Glowing Aura */}
+              <div style={{
+                width: '74px',
+                height: '74px',
+                borderRadius: '24px',
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(6, 182, 212, 0.15) 100%)',
+                border: '1.5px solid rgba(16, 185, 129, 0.45)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 18px',
+                boxShadow: '0 0 30px rgba(16, 185, 129, 0.3)'
+              }}>
+                <Fingerprint size={40} color="#34d399" />
+              </div>
+
+              <h3 style={{ fontSize: '19.5px', fontWeight: 900, margin: '0 0 8px', color: '#f8fafc' }}>
+                Enable Biometric Login? 👆
+              </h3>
+              
+              <p style={{ fontSize: '13px', color: '#94a3b8', lineHeight: 1.55, margin: '0 0 22px' }}>
+                PIN set ho gaya! Ab aap 1-tap me Fingerprint ya Face ID se login kar sakte hain. Bank-grade encrypted.
+              </p>
+
+              {/* Buttons */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    localStorage.setItem('zb_biometrics_enabled', 'true');
+                    setShowBiometricPrompt(false);
+                    if (pendingUnlockData) {
+                      try {
+                        await triggerBiometricUnlock({
+                          name: pendingUnlockData.name,
+                          pin: pendingUnlockData.pin,
+                          subscription_tier: pendingUnlockData.tier,
+                          trial_start_date: pendingUnlockData.trialStart,
+                          premium_expires_at: pendingUnlockData.premiumExpires,
+                          trial_expire_date: pendingUnlockData.trialExpire
+                        } as any);
+                      } catch (_) {}
+                      onUnlock(
+                        pendingUnlockData.userId,
+                        pendingUnlockData.name,
+                        pendingUnlockData.tier,
+                        pendingUnlockData.trialStart,
+                        pendingUnlockData.pin,
+                        pendingUnlockData.premiumExpires,
+                        pendingUnlockData.trialExpire
+                      );
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '14px',
+                    borderRadius: '16px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    color: '#fff',
+                    fontSize: '14.5px',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 8px 20px rgba(16, 185, 129, 0.35)'
+                  }}
+                >
+                  <Fingerprint size={19} />
+                  <span>Yes, Enable Biometrics 👆</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    localStorage.setItem('zb_biometrics_enabled', 'false');
+                    setShowBiometricPrompt(false);
+                    if (pendingUnlockData) {
+                      onUnlock(
+                        pendingUnlockData.userId,
+                        pendingUnlockData.name,
+                        pendingUnlockData.tier,
+                        pendingUnlockData.trialStart,
+                        pendingUnlockData.pin,
+                        pendingUnlockData.premiumExpires,
+                        pendingUnlockData.trialExpire
+                      );
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    borderRadius: '14px',
+                    background: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    color: '#94a3b8',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Skip for Now (Use PIN Only)
+                </button>
+              </div>
             </div>
           </div>
         )}
