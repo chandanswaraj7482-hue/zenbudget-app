@@ -1131,10 +1131,10 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     try {
-      const saved = localStorage.getItem('zb_landing_theme');
+      const saved = localStorage.getItem('zb_landing_theme') || localStorage.getItem('zb_theme');
       if (saved === 'dark' || saved === 'light') return saved;
     } catch (e) {}
-    return 'dark'; // Default is dark unless explicitly changed by user
+    return 'light'; // Default is light mode
   });
   const [activePage, setActivePage] = useState<string>('home');
   const [landingAiQuery, setLandingAiQuery] = useState('');
@@ -1758,7 +1758,17 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
   const toggleTheme = () => {
     setTheme(prev => {
       const newTheme = prev === 'dark' ? 'light' : 'dark';
-      try { localStorage.setItem('zb_landing_theme', newTheme); } catch (e) {}
+      try { 
+        localStorage.setItem('zb_landing_theme', newTheme);
+        localStorage.setItem('zb_theme', newTheme);
+        if (newTheme === 'dark') {
+          document.documentElement.classList.add('dark-theme');
+          document.documentElement.classList.remove('light-theme');
+        } else {
+          document.documentElement.classList.add('light-theme');
+          document.documentElement.classList.remove('dark-theme');
+        }
+      } catch (e) {}
       return newTheme;
     });
   };
@@ -1793,10 +1803,12 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
   const handleDownloadAction = () => {
     setShowModal(false);
-    if (deviceOS === 'ios' || deviceOS === 'mac') {
+    if (deviceOS === 'ios') {
       setShowIosGuideModal(true);
-    } else {
+    } else if (deviceOS === 'android') {
       handleDownloadApk();
+    } else {
+      onOpenWebApp();
     }
   };
 
@@ -1874,14 +1886,14 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
   const scoreInfo = getScoreDetails(scorePercentage);
 
   const t = {
-    bg: isDark ? '#0d110e' : '#FAFAF8',
-    text: isDark ? '#ffffff' : '#1f2937',
-    textMuted: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.6)` : 'rgba(31,41,55,0.6)',
-    textSub: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.75)` : 'rgba(31,41,55,0.75)',
-    headerBg: isDark ? 'rgba(13,17,14,0.92)' : 'rgba(255,255,255,0.92)',
-    border: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.08)` : 'rgba(0,0,0,0.08)',
-    cardBg: isDark ? '#161d18' : '#ffffff',
-    inputBg: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.06)` : 'rgba(0,0,0,0.04)',
+    bg: isDark ? '#090d0b' : '#ffffff',
+    text: isDark ? '#ffffff' : '#0f172a',
+    textMuted: isDark ? 'rgba(255,255,255,0.6)' : '#64748b',
+    textSub: isDark ? 'rgba(255,255,255,0.75)' : '#334155',
+    headerBg: isDark ? 'rgba(9,13,11,0.85)' : 'rgba(255,255,255,0.85)',
+    border: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0',
+    cardBg: isDark ? '#111a14' : '#ffffff',
+    inputBg: isDark ? 'rgba(255,255,255,0.06)' : '#f8fafc',
   };
 
   const css = `
@@ -2335,20 +2347,26 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
             <button 
               onClick={handleDownloadAction} 
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#1c1917', color: '#fff', padding: '12px 24px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 14px rgba(0,0,0,0.1)' }} 
-              className="desktop-only"
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', padding: '10px 20px', borderRadius: '100px', fontSize: '13.5px', fontWeight: 800, border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 14px rgba(16,185,129,0.35)' }} 
+              className="desktop-only hover-lift"
             >
-              {deviceOS === 'ios' || deviceOS === 'mac' ? (
+              {deviceOS === 'ios' ? (
                 <>
-                  <Smartphone size={16} color="#10b981" />
+                  <Smartphone size={16} color="#ffffff" />
                   <span>Install on iOS</span>
-                  <ArrowRight size={16} color="#fff" />
+                  <ArrowRight size={15} color="#fff" />
+                </>
+              ) : deviceOS === 'android' ? (
+                <>
+                  <Download size={16} color="#ffffff" />
+                  <span>Download APK</span>
+                  <ArrowRight size={15} color="#fff" />
                 </>
               ) : (
                 <>
-                  <Download size={16} color="#10b981" />
-                  <span>Download APK</span>
-                  <ArrowRight size={16} color="#fff" />
+                  <Sparkles size={16} color="#ffffff" />
+                  <span>Launch Web App</span>
+                  <ArrowRight size={15} color="#fff" />
                 </>
               )}
             </button>
@@ -3523,7 +3541,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             {/* Tier 3: Pro Annual (Featured) */}
             <div style={{ background: isDark ? '#132219' : '#ffffff', border: '2.5px solid #10b981', borderRadius: '24px', padding: '36px 28px', color: t.text, boxShadow: '0 25px 50px rgba(16,185,129,0.25)', position: 'relative', display: 'flex', flexDirection: 'column', transform: 'scale(1.02)', zIndex: 2 }}>
               <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', fontSize: '11px', fontWeight: 900, padding: '6px 18px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.08em', boxShadow: '0 6px 16px rgba(16,185,129,0.4)', whiteSpace: 'nowrap' }}>
-                🔥 BEST VALUE · 12 + 3 MONTHS FREE BONUS
+                🔥 BEST VALUE · 12 + 1 MONTH FREE BONUS
               </div>
               
               <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: '#10b981', letterSpacing: '0.1em', marginBottom: '8px' }}>THE WEALTH BUILDER</span>
@@ -3531,9 +3549,9 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               <p style={{ color: t.textSub, fontSize: '14px', marginBottom: '24px', minHeight: '42px', lineHeight: 1.5 }}>Commit to changing your financial life. Get all premium features unlimited.</p>
               
               <div style={{ fontSize: '42px', fontWeight: 900, marginBottom: '6px', color: '#10b981', display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                ₹1,499 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/year (15 Months Total Access)</span>
+                ₹1,499 <span style={{ fontSize: '15px', color: t.textMuted, fontWeight: 600 }}>/year (13 Months Total Access)</span>
               </div>
-              <p style={{ fontSize: '13px', color: '#10b981', marginBottom: '32px', fontWeight: 700 }}>Only ~₹99/month with 3 extra bonus months included! Complete financial peace of mind.</p>
+              <p style={{ fontSize: '13px', color: '#10b981', marginBottom: '32px', fontWeight: 700 }}>Only ~₹115/month with 1 extra bonus month included! Complete financial peace of mind.</p>
               
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 36px', display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
                 {[
@@ -4097,7 +4115,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
           {/* Bottom Download CTA Banner */}
           <div style={{ background: '#10b981', borderRadius: '32px', padding: '48px 32px', textAlign: 'center', color: '#ffffff', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', boxShadow: '0 20px 40px rgba(16,185,129,0.3)' }}>
-            <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', fontWeight: 900, margin: 0 }}>Start your financial transformation today</h2>
+            <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', fontWeight: 900, margin: 0, color: '#ffffff' }}>Start your financial transformation today</h2>
             <p style={{ fontSize: '16px', opacity: 0.9, maxWidth: '600px', margin: 0, lineHeight: 1.6 }}>
               Join smart budgeters using ZenBudget's zero-knowledge private budget tools to master their money.
             </p>
@@ -4127,19 +4145,19 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
       {/* ═══════════════ HERO SECTION (INNERHEAL STYLE ANIMATED BACKGROUND) ═══════════════ */}
       <div className="landing-hero-container">
-        <section style={{ borderRadius: '2.5rem', border: `1px solid ${t.border}`, position: 'relative', paddingTop: '42px', paddingBottom: '32px', background: isDark ? 'linear-gradient(180deg, #111812 0%, #162018 100%)' : 'linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%)', boxShadow: isDark ? '0 20px 50px rgba(0,0,0,0.5)' : '0 20px 50px rgba(16,185,129,0.08)' }}>
+        <section style={{ borderRadius: '2.5rem', border: isDark ? `1px solid ${t.border}` : '1px solid rgba(16,185,129,0.2)', position: 'relative', paddingTop: '42px', paddingBottom: '32px', background: isDark ? 'linear-gradient(180deg, #111812 0%, #162018 100%)' : 'linear-gradient(180deg, #ffffff 0%, #f0fdf4 40%, #ecfdf5 100%)', boxShadow: isDark ? '0 20px 50px rgba(0,0,0,0.5)' : '0 24px 60px -15px rgba(16,185,129,0.15), 0 1px 3px rgba(0,0,0,0.04)' }}>
           
           {/* Glowing Animated Background Canvas (InnerHeal Mesh & Aura) */}
           <div style={{ position: 'absolute', inset: 0, zIndex: 0, overflow: 'hidden', borderRadius: '2.5rem', pointerEvents: 'none' }}>
             
             {/* Primary Glowing Organic Light Beam behind phone mockups */}
-            <div className="innerheal-rotate" style={{ position: 'absolute', top: '-25%', right: '-10%', width: '75%', height: '120%', background: isDark ? 'radial-gradient(circle, rgba(163,230,53,0.22) 0%, rgba(16,185,129,0.28) 40%, rgba(5,150,105,0.05) 70%, transparent 85%)' : 'radial-gradient(circle, rgba(134,239,172,0.55) 0%, rgba(74,222,128,0.35) 45%, transparent 75%)', filter: 'blur(80px)', opacity: 0.9 }}></div>
+            <div className="innerheal-rotate" style={{ position: 'absolute', top: '-25%', right: '-10%', width: '75%', height: '120%', background: isDark ? 'radial-gradient(circle, rgba(163,230,53,0.22) 0%, rgba(16,185,129,0.28) 40%, rgba(5,150,105,0.05) 70%, transparent 85%)' : 'radial-gradient(circle, rgba(52,211,153,0.25) 0%, rgba(16,185,129,0.15) 45%, transparent 75%)', filter: 'blur(80px)', opacity: 0.9 }}></div>
             
             {/* Secondary Ambient Left Blob */}
-            <div className="innerheal-glow" style={{ position: 'absolute', top: '10%', left: '-15%', width: '60%', height: '90%', background: isDark ? 'radial-gradient(circle, rgba(16,185,129,0.18) 0%, rgba(59,130,246,0.12) 50%, transparent 80%)' : 'radial-gradient(circle, rgba(167,243,208,0.6) 0%, transparent 75%)', filter: 'blur(75px)' }}></div>
+            <div className="innerheal-glow" style={{ position: 'absolute', top: '10%', left: '-15%', width: '60%', height: '90%', background: isDark ? 'radial-gradient(circle, rgba(16,185,129,0.18) 0%, rgba(59,130,246,0.12) 50%, transparent 80%)' : 'radial-gradient(circle, rgba(167,243,208,0.4) 0%, transparent 75%)', filter: 'blur(75px)' }}></div>
             
             {/* Third Deep Accent Aura */}
-            <div style={{ position: 'absolute', bottom: '-20%', left: '30%', width: '50%', height: '60%', background: isDark ? 'radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(192,132,252,0.2) 0%, transparent 70%)', filter: 'blur(90px)', animation: 'mesh1 18s ease-in-out infinite alternate' }}></div>
+            <div style={{ position: 'absolute', bottom: '-20%', left: '30%', width: '50%', height: '60%', background: isDark ? 'radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(192,132,252,0.15) 0%, transparent 70%)', filter: 'blur(90px)', animation: 'mesh1 18s ease-in-out infinite alternate' }}></div>
 
             {/* Floating Sparkle Particles */}
             <div style={{ position: 'absolute', inset: 0 }}>
@@ -4166,42 +4184,42 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 
                 {/* User Avatar Stack & Ratings */}
-                <div className="hero-animate" style={{ display: 'flex', alignItems: 'center', background: isDark ? 'rgba(255,255,255,0.06)' : '#ffffff', backdropFilter: 'blur(12px)', border: `1px solid ${t.border}`, padding: '6px 16px', borderRadius: '100px', marginBottom: '20px', boxShadow: '0 4px 14px rgba(0,0,0,0.08)' }}>
+                <div className="hero-animate" style={{ display: 'flex', alignItems: 'center', background: isDark ? 'rgba(255,255,255,0.12)' : '#ffffff', backdropFilter: 'blur(12px)', border: isDark ? '1px solid rgba(255,255,255,0.18)' : '1px solid rgba(16,185,129,0.22)', padding: '6px 16px', borderRadius: '100px', marginBottom: '20px', boxShadow: isDark ? '0 4px 14px rgba(0,0,0,0.15)' : '0 4px 16px rgba(16,185,129,0.1)' }}>
                   <div style={{ display: 'flex', marginRight: '10px' }}>
                     {[
                       'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop',
                       'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=100&auto=format&fit=crop',
                       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop'
                     ].map((src, i) => (
-                      <img key={i} src={src} alt="User avatar" style={{ width: '26px', height: '26px', borderRadius: '50%', border: `2px solid ${t.cardBg}`, marginLeft: i > 0 ? '-8px' : 0, zIndex: 3 - i, objectFit: 'cover' }} />
+                      <img key={i} src={src} alt="User avatar" style={{ width: '26px', height: '26px', borderRadius: '50%', border: `2px solid ${isDark ? t.cardBg : '#ffffff'}`, marginLeft: i > 0 ? '-8px' : 0, zIndex: 3 - i, objectFit: 'cover' }} />
                     ))}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Star size={14} fill="#84cc16" color="#84cc16" />
-                    <span style={{ fontSize: '13px', fontWeight: 800, color: t.text }}>Trusted by <span style={{ color: '#84cc16' }}>4,200+</span> active users</span>
+                    <span style={{ fontSize: '13px', fontWeight: 800, color: isDark ? '#ffffff' : '#0f172a' }}>Trusted by <span style={{ color: '#10b981' }}>4,200+</span> active users</span>
                   </div>
                 </div>
 
                 {/* Sub-badge pill */}
-                <div className="hero-animate" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', background: isDark ? 'rgba(16,185,129,0.15)' : '#dcfce7', border: `1px solid ${isDark ? 'rgba(16,185,129,0.3)' : '#86efac'}`, padding: '6px 14px', borderRadius: '100px' }}>
-                  <div style={{ width: '22px', height: '22px', background: '#10b981', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '16px', background: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(16,185,129,0.12)', border: isDark ? '1px solid rgba(255,255,255,0.22)' : '1px solid rgba(16,185,129,0.28)', padding: '6px 14px', borderRadius: '100px', maxWidth: '100%', width: 'fit-content' }}>
+                  <div style={{ width: '22px', height: '22px', background: '#10b981', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <Sparkles size={12} color="white" />
                   </div>
-                  <span style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', color: isDark ? '#a7f3d0' : '#166534' }}>ZENBUDGET TRACKER · #1 AI EXPENSE TRACKER &amp; DAILY BUDGET APP</span>
+                  <span style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: isDark ? '#a7f3d0' : '#047857', whiteSpace: 'nowrap' }}>ZENBUDGET TRACKER · #1 AI EXPENSE MANAGER</span>
                 </div>
 
                 {/* Main Hero Title with Typing Animation */}
-                <h1 className="hero-animate hero-title" style={{ fontSize: 'clamp(2.4rem, 5vw, 3.8rem)', fontWeight: 900, lineHeight: 1.08, letterSpacing: '-0.03em', marginBottom: '20px', color: t.text }}>
-                  <span style={{ display: 'block', fontSize: 'clamp(14px, 2vw, 18px)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.14em', color: '#10b981', marginBottom: '10px' }}>ZenBudget Tracker</span>
-                  Stop Wondering Where<br />Your Money{' '}
-                  <span style={{ color: '#ef4444', display: 'inline-flex', alignItems: 'center', fontWeight: 900 }}>
+                <h1 className="hero-animate hero-title" style={{ fontSize: 'clamp(2.4rem, 5vw, 3.8rem)', fontWeight: 900, lineHeight: 1.12, letterSpacing: '-0.03em', marginBottom: '20px', color: isDark ? '#ffffff' : '#0f172a' }}>
+                  <span style={{ display: 'block', fontSize: 'clamp(14px, 2vw, 18px)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.14em', color: isDark ? '#10b981' : '#059669', marginBottom: '10px' }}>ZenBudget Tracker</span>
+                  <span style={{ color: isDark ? '#ffffff' : '#0f172a' }}>Stop Wondering Where<br />Your Money{' '}</span>
+                  <span style={{ color: isDark ? '#f87171' : '#e11d48', display: 'inline-flex', alignItems: 'center', fontWeight: 900, textShadow: isDark ? '0 0 24px rgba(248,113,113,0.55)' : 'none' }}>
                     <span>{typedText}</span>
                     <span className="typewriter-cursor"></span>
                   </span>
                 </h1>
 
-                <p className="hero-animate" style={{ fontSize: 'clamp(16px, 2vw, 19px)', fontWeight: 500, lineHeight: 1.6, color: t.textSub, maxWidth: '540px', marginBottom: '32px' }}>
-                  Identify hidden leaks, crush impulse spending, and build wealth on autopilot. Join <strong style={{ color: t.text }}>4,200+ users</strong> who saved an average of ₹8,400 in their first 30 days.
+                <p className="hero-animate" style={{ fontSize: 'clamp(16px, 2vw, 19px)', fontWeight: 500, lineHeight: 1.6, color: isDark ? 'rgba(255,255,255,0.75)' : '#475569', maxWidth: '540px', marginBottom: '32px' }}>
+                  Identify hidden leaks, crush impulse spending, and build wealth on autopilot. Join <strong style={{ color: isDark ? '#ffffff' : '#0f172a' }}>4,200+ users</strong> who saved an average of ₹8,400 in their first 30 days.
                 </p>
 
                 <div className="hero-animate" style={{ display: 'flex', gap: '16px', marginBottom: '36px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -4261,14 +4279,14 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
                 {/* Bottom Highlights Bar (InnerHeal Style stats) */}
                 <div className="hero-animate" style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13.5px', fontWeight: 700, color: t.textSub }}>
-                    <Brain size={16} color="#84cc16" /> 20+ Auto Categories
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13.5px', fontWeight: 700, color: isDark ? 'rgba(255,255,255,0.75)' : '#475569' }}>
+                    <Brain size={16} color="#10b981" /> 20+ Auto Categories
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13.5px', fontWeight: 700, color: t.textSub }}>
-                    <Shield size={16} color="#10b981" /> 100% Private
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13.5px', fontWeight: 700, color: isDark ? 'rgba(255,255,255,0.75)' : '#475569' }}>
+                    <Shield size={16} color="#059669" /> 100% Private
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13.5px', fontWeight: 700, color: t.textSub }}>
-                    <Users size={16} color="#3b82f6" /> <AnimatedCounter end={4200} duration={2000} />+ Users
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13.5px', fontWeight: 700, color: isDark ? 'rgba(255,255,255,0.75)' : '#475569' }}>
+                    <Users size={16} color="#2563eb" /> <AnimatedCounter end={4200} duration={2000} />+ Users
                   </div>
                 </div>
 
@@ -4277,25 +4295,25 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               {/* Hero Right Mockup Graphics - InnerHeal Inspired Dual Phones Overflowing Card Edge */}
               <div className="hero-animate hero-mockup-scale desktop-only" style={{ position: 'relative', width: '100%', minHeight: '400px', height: '560px', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', overflow: 'visible' }}>
                 
-                {/* Floating Pill 1 (Top Center above phone 1): Feeling Financially Secure */}
-                <div className="floating-pill-reverse" style={{ position: 'absolute', top: '15px', left: '10px', zIndex: 38, display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '100px', background: '#ffffff', boxShadow: '0 16px 40px rgba(0,0,0,0.22)', padding: '10px 18px', color: '#111827' }}>
-                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#fce7f3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {/* Floating Pill 1 (Top Right above phone 1): Feeling Financially Secure */}
+                <div className="floating-pill-reverse" style={{ position: 'absolute', top: '15px', right: '160px', zIndex: 38, display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '100px', background: '#ffffff', boxShadow: '0 16px 40px rgba(0,0,0,0.22)', padding: '10px 18px', color: '#111827', whiteSpace: 'nowrap' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#fce7f3', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <Heart size={16} color="#ec4899" fill="#ec4899" />
                   </div>
-                  <span style={{ fontSize: '13.5px', fontWeight: 800, color: '#111827' }}>Feeling financially calm</span>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#111827' }}>Feeling financially calm</span>
                 </div>
 
                 {/* Floating Pill 2 (Top Right above phone 2): Savings Up 32% */}
-                <div className="floating-pill" style={{ position: 'absolute', top: '75px', right: '-10px', zIndex: 38, display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '100px', background: '#ffffff', boxShadow: '0 16px 40px rgba(0,0,0,0.22)', padding: '10px 18px' }}>
-                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#f3e8ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="floating-pill" style={{ position: 'absolute', top: '80px', right: '-10px', zIndex: 38, display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '100px', background: '#ffffff', boxShadow: '0 16px 40px rgba(0,0,0,0.22)', padding: '10px 18px', whiteSpace: 'nowrap' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#f3e8ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <TrendingUp size={16} color="#7c3aed" />
                   </div>
-                  <span style={{ fontSize: '13.5px', fontWeight: 800, color: '#7c3aed' }}>Savings up 32%</span>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#7c3aed' }}>Savings up 32%</span>
                 </div>
 
                 {/* Floating Pill 3 (Bottom Right attached to phone 2): Financial Journey */}
-                <div className="badge-floating" style={{ position: 'absolute', bottom: '60px', right: '-5px', zIndex: 38, display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '100px', background: '#dcfce7', boxShadow: '0 16px 40px rgba(0,0,0,0.22)', border: '1px solid #86efac', padding: '10px 18px' }}>
-                  <span style={{ fontSize: '13.5px', fontWeight: 800, color: '#166534' }}>✨ Zen Wealth Journey</span>
+                <div className="badge-floating" style={{ position: 'absolute', bottom: '45px', right: '-5px', zIndex: 38, display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '100px', background: '#dcfce7', boxShadow: '0 16px 40px rgba(0,0,0,0.22)', border: '1px solid #86efac', padding: '10px 18px', whiteSpace: 'nowrap' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#166534' }}>✨ Zen Wealth Journey</span>
                 </div>
 
                 {/* Main Foreground Mobile Mockup (iPhone Frame 1 - Popping Out Bottom Edge) */}
@@ -4381,26 +4399,26 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
       {/* ═══════════════ STAT COUNTER BANNER ═══════════════ */}
       <section style={{ padding: '0 24px', maxWidth: '1440px', margin: 'clamp(40px, 8vw, 60px) auto clamp(60px, 12vw, 100px)' }}>
-        <div className="scroll-fade-up hover-lift" style={{ background: 'linear-gradient(105deg, #1c1e1a 0%, #1c1e1a 45%, #6a8844 80%, #303d21 100%)', borderRadius: '2.5rem', padding: 'clamp(32px, 6vw, 60px) clamp(24px, 5vw, 40px)', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around', gap: 'clamp(24px, 5vw, 40px)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.05)` }}>
+        <div className="scroll-fade-up hover-lift" style={{ background: isDark ? 'linear-gradient(105deg, #141f17 0%, #1c2e21 50%, #141f17 100%)' : 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 50%, #ecfdf5 100%)', borderRadius: '2.5rem', padding: 'clamp(32px, 6vw, 60px) clamp(24px, 5vw, 40px)', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around', gap: 'clamp(24px, 5vw, 40px)', boxShadow: isDark ? '0 20px 40px rgba(0,0,0,0.3)' : '0 20px 40px rgba(16,185,129,0.08)', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(16,185,129,0.18)' }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={4200} duration={2500} />+</div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Members</div>
-            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>securing their future today</div>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: isDark ? '#ffffff' : '#0f172a', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={4200} duration={2500} />+</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: isDark ? '#cbe0a3' : '#059669' }}>Members</div>
+            <div style={{ fontSize: '12px', color: isDark ? 'rgba(255,255,255,0.6)' : '#64748b', marginTop: '4px' }}>securing their future today</div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>₹<AnimatedCounter end={2.4} decimals={1} duration={2500} />Cr+</div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Debt Paid Off</div>
-            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>by our community</div>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: isDark ? '#ffffff' : '#0f172a', letterSpacing: '-0.02em', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>₹<AnimatedCounter end={2.4} decimals={1} duration={2500} />Cr+</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: isDark ? '#cbe0a3' : '#059669' }}>Debt Paid Off</div>
+            <div style={{ fontSize: '12px', color: isDark ? 'rgba(255,255,255,0.6)' : '#64748b', marginTop: '4px' }}>by our community</div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={14} duration={2500} /> Days</div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Average Time</div>
-            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>to spot invisible leaks</div>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: isDark ? '#ffffff' : '#0f172a', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={14} duration={2500} /> Days</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: isDark ? '#cbe0a3' : '#059669' }}>Average Time</div>
+            <div style={{ fontSize: '12px', color: isDark ? 'rgba(255,255,255,0.6)' : '#64748b', marginTop: '4px' }}>to spot invisible leaks</div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={95} duration={2500} />%</div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Users Save Money</div>
-            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>in their very first month</div>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: isDark ? '#ffffff' : '#0f172a', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={95} duration={2500} />%</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: isDark ? '#cbe0a3' : '#059669' }}>Users Save Money</div>
+            <div style={{ fontSize: '12px', color: isDark ? 'rgba(255,255,255,0.6)' : '#64748b', marginTop: '4px' }}>in their very first month</div>
           </div>
         </div>
       </section>
@@ -4409,7 +4427,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       <section style={{ padding: '40px 24px 80px', maxWidth: '1440px', margin: '0 auto', overflow: 'hidden' }}>
         <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '64px' }}>
           <span style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#D58B6D', marginBottom: '16px', display: 'block' }}>The 3-Step Process</span>
-          <h2 style={{ fontSize: 'clamp(24px, 4vw, 3.4rem)', lineHeight: 1.1, fontWeight: 800, letterSpacing: '-0.02em' }}>How We Plug The Leaks</h2>
+          <h2 style={{ fontSize: 'clamp(24px, 4vw, 3.4rem)', lineHeight: 1.1, fontWeight: 800, letterSpacing: '-0.02em', color: t.text }}>How We Plug The Leaks</h2>
           <p style={{ color: t.textSub, fontSize: '18px', marginTop: '16px', maxWidth: '580px', margin: '16px auto 0' }}>Stop treating symptoms and cure the root cause of your financial anxiety.</p>
         </div>
 
@@ -4446,7 +4464,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#D58B6D', marginBottom: '16px', display: 'block' }}>Your Toolkit</span>
-            <h2 style={{ fontSize: 'clamp(24px, 3vw, 2.8rem)', lineHeight: 1.1, fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '28px' }}>Build a Wealthier Life with Proven Tools</h2>
+            <h2 style={{ fontSize: 'clamp(24px, 3vw, 2.8rem)', lineHeight: 1.1, fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '28px', color: t.text }}>Build a Wealthier Life with Proven Tools</h2>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {toolkitItems.map((item, i) => (
@@ -4499,7 +4517,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       <section id="features" style={{ padding: '40px 24px 80px', maxWidth: '1440px', margin: '0 auto', overflow: 'hidden' }}>
         <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '64px' }}>
           <span style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#D58B6D', marginBottom: '16px', display: 'block' }}>Platform Features</span>
-          <h2 style={{ fontSize: 'clamp(24px, 4vw, 3.4rem)', lineHeight: 1.1, fontWeight: 800, letterSpacing: '-0.02em' }}>Everything you need to master your money</h2>
+          <h2 style={{ fontSize: 'clamp(24px, 4vw, 3.4rem)', lineHeight: 1.1, fontWeight: 800, letterSpacing: '-0.02em', color: t.text }}>Everything you need to master your money</h2>
           <p style={{ color: t.textSub, fontSize: '18px', marginTop: '16px', maxWidth: '580px', margin: '16px auto 0' }}>Your AI financial coach, expense tracker, zero-based budget planner, and insights hub — all in one private space.</p>
         </div>
 
@@ -4569,7 +4587,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       <section id="inside-app" style={{ padding: '40px 24px 80px', maxWidth: '1440px', margin: '0 auto', overflow: 'hidden' }}>
         <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '48px' }}>
           <span style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#D58B6D', marginBottom: '16px', display: 'block' }}>Interactive Feature Showcase</span>
-          <h2 style={{ fontSize: 'clamp(24px, 4vw, 3.4rem)', lineHeight: 1.1, fontWeight: 800, letterSpacing: '-0.02em' }}>See ZenBudget in Action</h2>
+          <h2 style={{ fontSize: 'clamp(24px, 4vw, 3.4rem)', lineHeight: 1.1, fontWeight: 800, letterSpacing: '-0.02em', color: t.text }}>See ZenBudget in Action</h2>
           <p style={{ color: t.textSub, fontSize: '18px', marginTop: '16px', maxWidth: '580px', margin: '16px auto 0' }}>Click any tab below to inspect the live interface mockups and feature details.</p>
         </div>
 
@@ -5159,7 +5177,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       <section id="community" style={{ padding: '80px 24px', maxWidth: '1440px', margin: '0 auto', overflow: 'hidden' }}>
         <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '64px' }}>
           <span style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#D58B6D', marginBottom: '16px', display: 'block' }}>Member Experiences</span>
-          <h2 style={{ fontSize: 'clamp(28px, 4vw, 3.4rem)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.1 }}>Financial Experiences<br />Shared By Our Users</h2>
+          <h2 style={{ fontSize: 'clamp(28px, 4vw, 3.4rem)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.1, color: t.text }}>Financial Experiences<br />Shared By Our Users</h2>
         </div>
 
         <div className="scroll-fade-up" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' }}>
