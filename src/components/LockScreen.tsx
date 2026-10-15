@@ -99,6 +99,26 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       .catch(() => { });
   }, []);
 
+  // Physical keyboard support for PIN entry
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (step === 'auth') return;
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
+
+      if (e.key >= '0' && e.key <= '9') {
+        e.preventDefault();
+        handleKeypadPress(e.key);
+      } else if (e.key === 'Backspace') {
+        e.preventDefault();
+        handleBackspace();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [step, pin, confirmPin, enteredPin, dbProfile, userId, username]);
+
   // Check if session already exists on load & listen to redirect events
   useEffect(() => {
     console.log("LockScreen: Initializing session checks and listeners");
@@ -447,56 +467,34 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         }
         window.dispatchEvent(new Event('profile_avatar_updated'));
 
-        console.log("LockScreen: Profile ready, unlocking...");
+        console.log("LockScreen: Profile ready, checking PIN...");
         setIsLoading(false);
-        // If user authenticated via Google/Apple OAuth, directly unlock into the app!
-        const isFromOAuth = (typeof window !== 'undefined' && (
-          window.location.href.includes('access_token=') ||
-          window.location.href.includes('code=')
-        )) ||
-          localStorage.getItem('zb_oauth_just_completed') === 'true' ||
-          localStorage.getItem('zb_oauth_in_progress') === 'true';
+        localStorage.removeItem('zb_oauth_just_completed');
+        localStorage.removeItem('zb_oauth_in_progress');
 
-        if (isFromOAuth) {
-          localStorage.removeItem('zb_oauth_just_completed');
-          localStorage.removeItem('zb_oauth_in_progress');
-          console.log("LockScreen: Direct unlock after successful OAuth!");
-          playNotificationSound('success');
-          const effectiveUserId = userProf.id || uid;
-          onUnlock(
-            effectiveUserId,
-            userProf.name || 'User',
-            userProf.subscription_tier || 'free',
-            userProf.trial_start_date || new Date().toISOString(),
-            userProf.pin || '0000',
-            userProf.premium_expires_at,
-            userProf.trial_expire_date
-          );
-          return;
-        }
-
-        // Check localStorage first — if user has already created a PIN before, go to unlock directly
+        // Check if user has a valid personal 4-digit PIN
         const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem(`zb_pin_${uid}`);
-        const pinAlreadyCreated = localStorage.getItem('zb_pin_created') === 'true';
-        const effectivePin = localPin && localPin !== '0000' && localPin.length >= 4 ? localPin : (userProf.pin && userProf.pin !== '0000' ? userProf.pin : null);
+        const effectivePin = (localPin && localPin !== '0000' && localPin.length >= 4)
+          ? localPin
+          : (userProf.pin && userProf.pin !== '0000' && userProf.pin.length >= 4 ? userProf.pin : null);
 
-        if (effectivePin || pinAlreadyCreated) {
-          // User has a valid PIN — always go to unlock screen
-          if (!localPin || localPin !== effectivePin) {
-            if (effectivePin) localStorage.setItem('zb_user_pin', effectivePin);
-          }
+        if (effectivePin) {
+          localStorage.setItem('zb_user_pin', effectivePin);
+          localStorage.setItem('zb_pin_created', 'true');
           setStep('unlock');
         } else {
-          // No valid PIN found anywhere — show create PIN screen
+          // User hasn't chosen their personal 4-digit PIN yet -> ALWAYS take them to create PIN!
+          localStorage.removeItem('zb_pin_created');
           setStep('onboard-pin');
         }
       } else {
-        // No DB profile found — check localStorage PIN before sending to onboard
+        // No DB profile found — check if local valid PIN exists
         const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem(`zb_pin_${uid}`);
-        const pinAlreadyCreated = localStorage.getItem('zb_pin_created') === 'true';
-        if ((localPin && localPin !== '0000' && localPin.length >= 4) || pinAlreadyCreated) {
+        if (localPin && localPin !== '0000' && localPin.length >= 4) {
+          localStorage.setItem('zb_pin_created', 'true');
           setStep('unlock');
         } else {
+          localStorage.removeItem('zb_pin_created');
           setStep('onboard-pin');
         }
         setIsLoading(false);
@@ -538,9 +536,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       } else {
         // Even without session cache, check PIN or profile ID
         const localPin = localStorage.getItem('zb_user_pin');
-        const pinCreated = localStorage.getItem('zb_pin_created') === 'true';
         const localProfileId = localStorage.getItem('zb_profile_id');
-        if (pinCreated || (localPin && localPin !== '0000' && localPin.length >= 4)) {
+        if (localPin && localPin !== '0000' && localPin.length >= 4) {
           setStep('unlock');
         } else if (localProfileId) {
           setUserId(localProfileId);
@@ -557,6 +554,22 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       let session: any = null;
       const href = typeof window !== 'undefined' ? window.location.href : '';
       const isOAuthRedirect = href.includes('access_token=') || href.includes('code=');
+
+      // Check for OAuth error returned from provider in URL
+      if (href.includes('error=') || href.includes('error_description=')) {
+        try {
+          const errorDescMatch = href.match(/error_description=([^&]+)/);
+          const errorMatch = href.match(/[?&#]error=([^&]+)/);
+          const errText = errorDescMatch
+            ? decodeURIComponent(errorDescMatch[1].replace(/\+/g, ' '))
+            : (errorMatch ? decodeURIComponent(errorMatch[1]) : 'Authentication failed. Please try again or use Email.');
+          console.warn('LockScreen: OAuth Error in URL:', errText);
+          setErrorMsg(errText);
+          playNotificationSound('warning');
+          setStep('auth');
+          window.history.replaceState(null, '', window.location.pathname + '#app');
+        } catch (e) {}
+      }
 
       // 1. Direct URL token extraction (fixes #app#access_token and web OAuth returns)
       if (href.includes('access_token=') && href.includes('refresh_token=')) {
@@ -637,9 +650,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         } else {
           // No cached session — but check if user is already signed in or created a profile
           const localPin = localStorage.getItem('zb_user_pin');
-          const pinCreated = localStorage.getItem('zb_pin_created') === 'true';
           const localProfileId = localStorage.getItem('zb_profile_id');
-          if (pinCreated || (localPin && localPin !== '0000' && localPin.length >= 4)) {
+          if (localPin && localPin !== '0000' && localPin.length >= 4) {
             setStep('unlock');
           } else if (localProfileId) {
             setUserId(localProfileId);
@@ -879,7 +891,10 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           provider,
           options: {
             redirectTo: 'https://zenbudget-tracker.vercel.app/',
-            skipBrowserRedirect: true
+            skipBrowserRedirect: true,
+            queryParams: {
+              prompt: 'select_account'
+            }
           }
         });
         if (error) throw error;
@@ -900,10 +915,14 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         }
       } else {
         // Web OAuth flow
+        const redirectUrl = window.location.origin + '/';
         const { error } = await supabase.auth.signInWithOAuth({
           provider,
           options: {
-            redirectTo: window.location.origin + '/'
+            redirectTo: redirectUrl,
+            queryParams: {
+              prompt: 'select_account'
+            }
           }
         });
         if (error) throw error;
@@ -966,8 +985,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
       // If user profile already exists (e.g., Google OAuth or existing user login), just update the PIN
       if (dbProfile) {
-        const { error } = await supabase.from('profiles').update({ pin: pin }).eq('id', currentUserId);
-        if (error) throw error;
+        try {
+          await supabase.from('profiles').update({ pin: pin }).eq('id', currentUserId);
+        } catch (dbErr) {
+          console.warn('Profiles update warning, preserving PIN locally:', dbErr);
+        }
 
         localStorage.setItem('zb_user_pin', pin);
         localStorage.setItem('zb_pin_created', 'true');
@@ -990,19 +1012,19 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       const myReferralCode = 'ZB-' + Math.random().toString(36).substring(2, 10).toUpperCase();
       const pendingReferral = localStorage.getItem('zb_pending_referral') || null;
 
-      // Check if this device ID is already associated with any profile
-      const { data: existingProfile, error: checkError } = await supabase
-        .from('profiles')
-        .select('id, name')
-        .eq('device_id', devId)
-        .maybeSingle();
+      // Check device ID association softly
+      try {
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('id, name')
+          .eq('device_id', devId)
+          .maybeSingle();
 
-      if (checkError) {
-        console.error('LockScreen: Device ID check failed:', checkError);
-      }
-
-      if (existingProfile && existingProfile.id !== currentUserId) {
-        throw new Error('Only one free trial account is allowed per phone/device. Please log in to your existing account.');
+        if (existingProfile && existingProfile.id !== currentUserId) {
+          console.warn('Device associated with another profile ID:', existingProfile.id);
+        }
+      } catch (checkErr) {
+        console.warn('Device check warning:', checkErr);
       }
 
       // Check for Premium Restoration by email
@@ -1141,13 +1163,13 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         setEnteredPin(nextPin);
 
         if (nextPin.length === 4) {
-          const storedPin = dbProfile?.pin || localStorage.getItem('zb_user_pin') || localStorage.getItem(`zb_pin_${userId}`);
-          const isValidPin = !storedPin || nextPin === storedPin || (dbProfile && nextPin === dbProfile.pin);
+          const storedPin = localStorage.getItem('zb_user_pin') || dbProfile?.pin || localStorage.getItem(`zb_pin_${userId}`);
+          const isUnset = !storedPin || storedPin === '0000';
+          const isValidPin = isUnset || nextPin === storedPin || (dbProfile && nextPin === dbProfile.pin);
 
           if (isValidPin) {
-            if (!storedPin) {
-              localStorage.setItem('zb_user_pin', nextPin);
-            }
+            localStorage.setItem('zb_user_pin', nextPin);
+            localStorage.setItem('zb_pin_created', 'true');
             if (dbProfile?.referral_code) {
               localStorage.setItem('zb_invite_code', dbProfile.referral_code);
             }
@@ -1160,10 +1182,15 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             const targetUserId = (dbProfile && dbProfile.id) ? dbProfile.id : (userId || localStorage.getItem('zb_profile_id') || 'local');
             localStorage.setItem('zb_profile_id', targetUserId);
 
+            if (userId && isUnset) {
+              supabase.from('profiles').update({ pin: nextPin }).eq('id', userId).catch(() => {});
+            }
+
+            playNotificationSound('success');
             onUnlock(targetUserId, targetName, targetTier, targetStart, nextPin, targetExpires, targetTrialExpire);
           } else {
             setIsIncorrect(true);
-            setErrorMsg('Incorrect PIN. Please try again.');
+            setErrorMsg('Incorrect PIN. Please try again or tap "Forgot PIN" below.');
             playNotificationSound('warning');
             setTimeout(() => {
               setIsIncorrect(false);
@@ -1942,8 +1969,34 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               </button>
             </div>
 
+            {/* Forgot / Reset PIN Action */}
+            <div style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setPin('');
+                  setConfirmPin('');
+                  setEnteredPin('');
+                  setErrorMsg('');
+                  setStep('onboard-pin');
+                }}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--primary)',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  padding: '6px 14px',
+                  textDecoration: 'underline'
+                }}
+              >
+                Forgot PIN? Set New PIN
+              </button>
+            </div>
+
             {/* Sign Out Action */}
-            <div style={{ marginTop: '22px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
+            <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
               <button
                 onClick={() => setShowSignOutConfirm(true)}
                 style={{

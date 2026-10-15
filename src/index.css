@@ -256,6 +256,21 @@ body.light-theme .app-main-wrapper {
 }
 
 /* Explicit Story Modal / Dark Overlay Protection */
+.dark-mode-context h1,
+.dark-mode-context h2,
+.dark-mode-context h3,
+.dark-mode-context h4,
+.light-theme .dark-mode-context h1,
+.light-theme .dark-mode-context h2,
+.light-theme .dark-mode-context h3,
+.light-theme .dark-mode-context h4 {
+  color: #ffffff !important;
+}
+.dark-mode-context p,
+.light-theme .dark-mode-context p {
+  color: #f1f5f9 !important;
+}
+
 .story-modal-overlay,
 .story-modal-overlay * {
   color: unset;

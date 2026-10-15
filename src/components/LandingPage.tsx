@@ -2247,7 +2247,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
   ];
 
   return (
-    <div style={{ backgroundColor: t.bg, minHeight: '100vh', width: '100%', overflowX: 'hidden' }}>
+    <div className="landing-container landing-page" style={{ backgroundColor: t.bg, minHeight: '100vh', width: '100%', overflowX: 'hidden' }}>
       <style>{css}</style>
 
       {/* ═══════════════ HEADER ═══════════════ */}
@@ -5254,7 +5254,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           justify: 'space-between',
           gap: '36px',
           boxShadow: '0 30px 60px -15px rgba(6, 78, 59, 0.6), inset 0 1px 1px rgba(255,255,255,0.2)'
-        }} className="mobile-padding">
+        }} className="mobile-padding dark-mode-context">
           
           {/* Glowing Ambient Mesh Light */}
           <div style={{ position: 'absolute', top: '-30%', right: '5%', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(52, 211, 153, 0.25) 0%, transparent 70%)', filter: 'blur(60px)', pointerEvents: 'none' }}></div>
@@ -5270,13 +5270,13 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             </div>
 
             <h2 style={{ fontSize: 'clamp(26px, 3.8vw, 40px)', fontWeight: 900, color: '#ffffff', lineHeight: 1.15, marginBottom: '14px', letterSpacing: '-0.03em' }}>
-              Every day you wait is<br />
-              <span style={{ background: 'linear-gradient(135deg, #a7f3d0 0%, #34d399 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              <span style={{ color: '#ffffff', display: 'inline-block' }}>Every day you wait is</span><br />
+              <span style={{ background: 'linear-gradient(135deg, #a7f3d0 0%, #34d399 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', display: 'inline-block' }}>
                 another day of financial anxiety.
               </span>
             </h2>
 
-            <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.85)', marginBottom: '28px', lineHeight: 1.6, maxWidth: '480px' }}>
+            <p style={{ fontSize: '15px', color: '#f1f5f9', marginBottom: '28px', lineHeight: 1.6, maxWidth: '480px', opacity: 0.95 }}>
               Stop procrastinating on your wealth. Take the 3-minute assessment and get your custom action plan before you make your next impulse purchase.
             </p>
             
@@ -5335,13 +5335,13 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
             {/* Trust Micro Indicators */}
             <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.18)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#f8fafc', fontWeight: 700 }}>
                 <Shield size={14} color="#34d399" /> 100% Encrypted
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#f8fafc', fontWeight: 700 }}>
                 <Brain size={14} color="#34d399" /> 60-Sec AI Tracking
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#f8fafc', fontWeight: 700 }}>
                 <Star size={14} color="#facc15" fill="#facc15" /> 4.9/5 Rating
               </div>
             </div>
