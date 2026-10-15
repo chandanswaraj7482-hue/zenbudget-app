@@ -908,13 +908,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
         )}
 
         {/* Income / Expense Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', borderTop: '1px solid var(--border-divider)', paddingTop: '16px' }}>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center', background: 'rgba(34, 197, 94, 0.06)', border: '1px solid rgba(34, 197, 94, 0.16)', borderRadius: '16px', padding: '12px 14px' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '10px', backgroundColor: 'rgba(34, 197, 94, 0.18)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <ArrowUpRight size={18} />
             </div>
             <div>
-              <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600 }}>{t('income')}</span>
+              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>{t('income')}</span>
               <p style={{ fontSize: '14px', fontWeight: 800, color: '#34d399', margin: 0 }}>
                 +{formatCurrency(income, currencySymbol, 0)}
               </p>
@@ -926,7 +926,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <ArrowDownRight size={18} />
             </div>
             <div>
-              <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600 }}>{t('expenses')}</span>
+              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>{t('expenses')}</span>
               <p style={{ fontSize: '14px', fontWeight: 800, color: '#f87171', margin: 0 }}>
                 -{formatCurrency(expenses, currencySymbol, 0)}
               </p>
@@ -1312,7 +1312,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     borderRadius: '100px',
                     background: isSpeaking ? 'rgba(16, 185, 129, 0.25)' : 'rgba(255, 255, 255, 0.08)',
                     border: isSpeaking ? '1px solid #10b981' : '1px solid rgba(255, 255, 255, 0.2)',
-                    color: isSpeaking ? '#34d399' : '#f8fafc',
+                    color: isSpeaking ? '#34d399' : 'var(--text-primary)',
                     fontSize: '11px',
                     fontWeight: 700,
                     cursor: 'pointer',
@@ -1336,7 +1336,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
             </div>
 
-            <p style={{ fontSize: '14px', color: '#f1f5f9', margin: 0, lineHeight: '1.5', fontWeight: 600 }}>
+            <p style={{ fontSize: '14px', color: 'var(--text-primary)', margin: 0, lineHeight: '1.5', fontWeight: 600 }}>
               {coachMessage}
             </p>
 

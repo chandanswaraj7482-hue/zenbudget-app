@@ -73,50 +73,50 @@ ul, ol, li {
 .light-theme, body.light-theme {
   color-scheme: light;
   
-  /* Apple Signature Canvas & Surfaces */
-  --bg-dark: #F2F2F7;
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #F8F8FA;
-  --bg-balance-card: linear-gradient(145deg, #FFFFFF 0%, rgba(16, 185, 129, 0.08) 100%);
-  --bg-app-gradient: #F2F2F7;
-  --bg-nav-glass: rgba(255, 255, 255, 0.88);
+  /* Modern High-Contrast Canvas & Surfaces */
+  --bg-dark: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --bg-balance-card: linear-gradient(135deg, #ffffff 0%, #f0fdf4 45%, #ecfdf5 100%);
+  --bg-app-gradient: #f1f5f9;
+  --bg-nav-glass: rgba(255, 255, 255, 0.95);
 
-  /* Hairline Borders with Subtle Green Accent */
-  --border-card: rgba(0, 0, 0, 0.06);
-  --border-card-active: rgba(16, 185, 129, 0.4);
-  --border-balance-card: rgba(16, 185, 129, 0.25);
-  --border-divider: rgba(0, 0, 0, 0.06);
-  --border-button: rgba(0, 0, 0, 0.08);
+  /* High-Contrast Clear Borders */
+  --border-card: #e2e8f0;
+  --border-card-active: #10b981;
+  --border-balance-card: rgba(16, 185, 129, 0.35);
+  --border-divider: #e2e8f0;
+  --border-button: #cbd5e1;
 
   /* 🌿 ZenBudget Official Logo Green Branding */
   --primary: #10b981;            /* ZenBudget Logo Emerald */
   --primary-glow: rgba(16, 185, 129, 0.15);
-  --secondary: #14b8a6;          /* Teal */
-  --secondary-glow: rgba(20, 184, 166, 0.15);
-  --success: #10b981;            /* Green */
-  --success-glow: rgba(16, 185, 129, 0.15);
-  --danger: #FF3B30;             /* Apple Red */
-  --danger-glow: rgba(255, 59, 48, 0.12);
-  --warning: #FF9500;            /* Apple Orange */
-  --warning-glow: rgba(255, 149, 0, 0.12);
-  --info: #06b6d4;               /* Cyan */
-  --info-glow: rgba(6, 182, 212, 0.15);
+  --secondary: #0d9488;          /* Teal */
+  --secondary-glow: rgba(13, 148, 136, 0.15);
+  --success: #16a34a;            /* Green */
+  --success-glow: rgba(22, 163, 74, 0.15);
+  --danger: #dc2626;             /* Apple Red */
+  --danger-glow: rgba(220, 38, 38, 0.12);
+  --warning: #d97706;            /* Apple Orange */
+  --warning-glow: rgba(217, 119, 6, 0.12);
+  --info: #0284c7;               /* Cyan */
+  --info-glow: rgba(2, 132, 199, 0.15);
 
-  /* Apple Typography Hierarchy */
-  --text-primary: #1D1D1F;       /* Apple Headline Black */
-  --text-secondary: #6E6E73;     /* Apple Secondary Gray */
-  --text-muted: #86868B;         /* Apple Caption/Muted Gray */
-  --text-balance: #1D1D1F;
+  /* High Contrast Typography */
+  --text-primary: #0f172a;       /* Deep Slate Black */
+  --text-secondary: #475569;     /* Slate Gray */
+  --text-muted: #64748b;         /* Muted Gray */
+  --text-balance: #0f172a;
 
-  /* Apple Multi-layer Diffused Shadows */
-  --glow-shadow: 0 2px 12px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.03);
+  /* Polished Shadows */
+  --glow-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
 
-  /* Apple Native Inputs */
-  --bg-input: #F2F2F7;
-  --border-input: rgba(0, 0, 0, 0.08);
-  --bg-input-focus: #FFFFFF;
-  --scroll-thumb: rgba(0, 0, 0, 0.16);
-  --bg-base: #F2F2F7;
+  /* Crisp Inputs */
+  --bg-input: #f8fafc;
+  --border-input: #cbd5e1;
+  --bg-input-focus: #ffffff;
+  --scroll-thumb: rgba(0, 0, 0, 0.18);
+  --bg-base: #f1f5f9;
 }
 
 /* Global Light Mode Canvas */
@@ -124,28 +124,39 @@ html.light-theme,
 body.light-theme,
 #root.light-theme {
   color-scheme: light !important;
-  background-color: #F2F2F7 !important;
-  background: #F2F2F7 !important;
-  color: #1D1D1F !important;
+  background-color: #f1f5f9 !important;
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
 }
 
-html.light-theme #root {
-  box-shadow: 0 0 50px rgba(0, 0, 0, 0.05) !important;
-  border-left: 1px solid rgba(0, 0, 0, 0.05) !important;
-  border-right: 1px solid rgba(0, 0, 0, 0.05) !important;
+/* Light Theme App Device Frame on Desktop */
+html.light-theme .app-main-wrapper,
+body.light-theme .app-main-wrapper {
+  background: #ffffff !important;
+  box-shadow: 0 20px 60px -15px rgba(15, 23, 42, 0.14), 0 0 0 1px rgba(15, 23, 42, 0.08) !important;
+  border-radius: 24px !important;
+  overflow: hidden;
 }
 
-/* Apple Primary Card Surfaces */
+@media (max-width: 540px) {
+  html.light-theme .app-main-wrapper,
+  body.light-theme .app-main-wrapper {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Light Theme Card Surfaces */
 .light-theme .glass-panel,
 .light-theme [class*="glass-panel"] {
-  background-color: #FFFFFF !important;
-  background: #FFFFFF !important;
-  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border: 1.5px solid #e2e8f0 !important;
   border-radius: 20px !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 6px 16px rgba(0, 0, 0, 0.02) !important;
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
 }
 
-/* Apple Inner Grouped / Nested Surfaces */
+/* Light Theme Inner Grouped / Nested Surfaces */
 .light-theme div[style*="background: 'rgba(255, 255, 255, 0.02)'"],
 .light-theme div[style*="background: 'rgba(255, 255, 255, 0.03)'"],
 .light-theme div[style*="background: 'rgba(255, 255, 255, 0.04)'"],
@@ -157,17 +168,44 @@ html.light-theme #root {
 .light-theme div[style*="background: rgba(255, 255, 255, 0.05)"],
 .light-theme div[style*="background: rgba(255, 255, 255, 0.06)"],
 .light-theme div[style*="background-color: rgba(255, 255, 255"] {
-  background-color: #F6F7F9 !important;
-  background: #F6F7F9 !important;
-  border-color: rgba(0, 0, 0, 0.05) !important;
+  background-color: #f8fafc !important;
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
 }
 
 /* ZenBudget Logo Green Balance Card */
 .light-theme .glass-panel[style*="var(--bg-balance-card)"],
 .light-theme [style*="var(--bg-balance-card)"] {
-  background: linear-gradient(145deg, #FFFFFF 0%, rgba(16, 185, 129, 0.08) 100%) !important;
-  border: 1px solid rgba(16, 185, 129, 0.25) !important;
-  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.08), 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 45%, #ecfdf5 100%) !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.35) !important;
+  box-shadow: 0 8px 25px -4px rgba(16, 185, 129, 0.12), 0 2px 6px rgba(15, 23, 42, 0.04) !important;
+}
+
+/* Income Pill in Light Mode */
+.light-theme div[style*="background: 'rgba(34, 197, 94"],
+.light-theme div[style*="background: rgba(34, 197, 94"] {
+  background: #f0fdf4 !important;
+  border: 1.5px solid #bbf7d0 !important;
+}
+
+/* Expense Pill in Light Mode */
+.light-theme div[style*="background: 'rgba(239, 68, 68"],
+.light-theme div[style*="background: rgba(239, 68, 68"] {
+  background: #fef2f2 !important;
+  border: 1.5px solid #fecaca !important;
+}
+
+/* Income & Expense Text Colors in Light Mode */
+.light-theme p[style*="color: #34d399"],
+.light-theme span[style*="color: #34d399"] {
+  color: #15803d !important;
+  font-weight: 800 !important;
+}
+
+.light-theme p[style*="color: #f87171"],
+.light-theme span[style*="color: #f87171"] {
+  color: #b91c1c !important;
+  font-weight: 800 !important;
 }
 
 /* Apple Typography in Light Mode (Excludes dark context, landing hero & story modals) */

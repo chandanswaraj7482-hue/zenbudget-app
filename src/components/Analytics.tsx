@@ -77,6 +77,9 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
     bills: { label: 'Bills', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)' },
     travel: { label: 'Travel', color: '#06b6d4', bg: 'rgba(6, 182, 212, 0.1)' },
     health: { label: 'Health', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
+    rent: { label: 'Rent/Housing', color: '#e11d48', bg: 'rgba(225, 29, 72, 0.1)' },
+    groceries: { label: 'Groceries', color: '#84cc16', bg: 'rgba(132, 204, 22, 0.1)' },
+    salary: { label: 'Salary/Income', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
     other: { label: 'Other', color: '#64748b', bg: 'rgba(100, 116, 139, 0.1)' },
   };
 
@@ -839,7 +842,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
             padding: '4px 10px',
             borderRadius: '10px'
           }}>
-            Avg: {currencySymbol}{(trendData.reduce((sum, d) => sum + d.amount, 0) / 7).toFixed(0)}/day
+            Avg: {currencySymbol}{(trendData.reduce((sum, d) => sum + d.amount, 0) / 7).toFixed(0)}/day (Last 7 Days)
           </span>
         </div>
 

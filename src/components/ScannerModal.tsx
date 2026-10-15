@@ -165,6 +165,17 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
     }
   }, [activePayTab, isOpen]);
 
+  // Turn off hardware flashlight if modal closes or unmounts
+  useEffect(() => {
+    return () => {
+      if (typeof (window as any).AndroidNativeTorch !== 'undefined') {
+        try {
+          (window as any).AndroidNativeTorch.toggleTorch(false);
+        } catch (_) {}
+      }
+    };
+  }, []);
+
   const today = new Date().toISOString().split('T')[0];
   const todayDisplay = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
 
@@ -229,6 +240,11 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
   };
 
   const stopCamera = () => {
+    if (typeof (window as any).AndroidNativeTorch !== 'undefined') {
+      try {
+        (window as any).AndroidNativeTorch.toggleTorch(false);
+      } catch (_) {}
+    }
     if (isTorchOn && streamRef.current) {
       try {
         const track = streamRef.current.getVideoTracks()[0];
@@ -248,28 +264,52 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ isOpen, onClose, onS
   };
 
   const toggleTorch = async () => {
-    if (!streamRef.current || !isScanning) {
-      window.dispatchEvent(new CustomEvent('toast-alert', { 
-        detail: { message: 'Start camera first to turn on flashlight', type: 'info' } 
-      }));
-      return;
-    }
-    const track = streamRef.current.getVideoTracks()[0];
-    if (!track) return;
-    try {
-      const nextState = !isTorchOn;
-      await (track as any).applyConstraints({
-        advanced: [{ torch: nextState }]
-      });
-      setIsTorchOn(nextState);
-      if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
-        navigator.vibrate(30);
+    const nextState = !isTorchOn;
+    let handledNatively = false;
+
+    // 1. Real Hardware Flashlight on Android Native via AndroidNativeTorch Bridge
+    if (typeof (window as any).AndroidNativeTorch !== 'undefined') {
+      try {
+        const success = (window as any).AndroidNativeTorch.toggleTorch(nextState);
+        if (success) {
+          handledNatively = true;
+          setIsTorchOn(nextState);
+          if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
+            navigator.vibrate(35);
+          }
+          window.dispatchEvent(new CustomEvent('toast-alert', { 
+            detail: { message: nextState ? '🔦 Flashlight turned ON' : 'Flashlight turned OFF', type: 'info' } 
+          }));
+        }
+      } catch (nativeErr) {
+        console.warn('Native torch bridge error:', nativeErr);
       }
-    } catch (err) {
-      console.warn('Torch toggle failed:', err);
-      window.dispatchEvent(new CustomEvent('toast-alert', { 
-        detail: { message: 'Flashlight is not available on this device camera', type: 'warning' } 
-      }));
+    }
+
+    // 2. Web / Browser WebRTC MediaStreamTrack fallback
+    if (!handledNatively) {
+      if (!streamRef.current || !isScanning) {
+        window.dispatchEvent(new CustomEvent('toast-alert', { 
+          detail: { message: 'Start camera first to turn on flashlight', type: 'info' } 
+        }));
+        return;
+      }
+      const track = streamRef.current.getVideoTracks()[0];
+      if (!track) return;
+      try {
+        await (track as any).applyConstraints({
+          advanced: [{ torch: nextState }]
+        });
+        setIsTorchOn(nextState);
+        if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
+          navigator.vibrate(30);
+        }
+      } catch (err) {
+        console.warn('Torch toggle failed:', err);
+        window.dispatchEvent(new CustomEvent('toast-alert', { 
+          detail: { message: 'Flashlight is not available on this device camera', type: 'warning' } 
+        }));
+      }
     }
   };
 

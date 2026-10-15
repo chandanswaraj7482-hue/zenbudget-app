@@ -37,8 +37,8 @@ export default async function handler(req, res) {
       } else {
         if (orderId.includes('yearly')) {
           tier = 'premium_yearly';
-          // 1 Year (365 days) + 3 Months Free Bonus (90 days) = 455 days (15 months total!)
-          expiresAt = new Date(Date.now() + 455 * 86400000).toISOString();
+          // 1 Year (365 days) + 1 Month Free Bonus (30 days) = 395 days (13 months total!)
+          expiresAt = new Date(Date.now() + 395 * 86400000).toISOString();
         } else if (orderId.includes('lifetime')) {
           tier = 'premium_lifetime';
           expiresAt = new Date(Date.now() + 100 * 365 * 86400000).toISOString();

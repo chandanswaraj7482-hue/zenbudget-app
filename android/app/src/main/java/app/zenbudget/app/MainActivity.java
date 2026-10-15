@@ -1,9 +1,12 @@
 package app.zenbudget.app;
 
+import android.content.Context;
 import android.content.Intent;
+import android.hardware.camera2.CameraManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Base64;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import com.getcapacitor.BridgeActivity;
 import org.json.JSONObject;
@@ -12,11 +15,50 @@ import java.io.InputStream;
 
 public class MainActivity extends BridgeActivity {
     private String pendingSharedData = null;
+    private NativeTorchBridge torchBridge = null;
+
+    public class NativeTorchBridge {
+        private boolean isTorchOn = false;
+
+        @JavascriptInterface
+        public boolean toggleTorch(boolean enable) {
+            try {
+                CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+                if (cameraManager != null) {
+                    String[] cameraIds = cameraManager.getCameraIdList();
+                    for (String id : cameraIds) {
+                        try {
+                            cameraManager.setTorchMode(id, enable);
+                            isTorchOn = enable;
+                            return true;
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        @JavascriptInterface
+        public boolean isTorchActive() {
+            return isTorchOn;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        torchBridge = new NativeTorchBridge();
+        registerTorchBridge();
         handleSendIntent(getIntent());
+    }
+
+    private void registerTorchBridge() {
+        if (getBridge() != null && getBridge().getWebView() != null) {
+            getBridge().getWebView().addJavascriptInterface(torchBridge, "AndroidNativeTorch");
+        }
     }
 
     @Override
@@ -89,8 +131,17 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onResume() {
         super.onResume();
+        registerTorchBridge();
         if (pendingSharedData != null) {
             sendPayloadToWebView(pendingSharedData);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (torchBridge != null && torchBridge.isTorchActive()) {
+            torchBridge.toggleTorch(false);
         }
     }
 }

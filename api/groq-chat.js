@@ -23,10 +23,15 @@ export default async function handler(req, res) {
     }
 
     const ai = new GoogleGenAI({ apiKey });
-    const { messages } = req.body;
+    const { messages, isPremium } = req.body;
     
+    // Tone and Manner of Speaking Directive according to user subscription
+    const membershipDirective = isPremium
+      ? `👑 USER MEMBERSHIP STATUS: ZENBUDGET PRO (VIP MEMBER)\nVIP SPEAKING STYLE & BEHAVIOR:\n- Address them with VIP warmth and respect.\n- Deliver comprehensive, elite, multi-step financial diagnostics, category leak analysis, multi-year compounding insights, and debt elimination strategies.\n- Unlimited depth and detailed tactical guidance. No basic limits or upsells.\n\n`
+      : `🌿 USER MEMBERSHIP STATUS: FREE TIER USER (BASIC MODE)\nFREE TIER SPEAKING STYLE & BEHAVIOR:\n- Keep response CRISP, CONCISE, AND BASIC (strictly 2 to 3 sentences or short bullets).\n- Simple, friendly, and practical tone in user's language (Hindi/Hinglish/English).\n- Answer immediately, but omit deep forensic multi-year modeling.\n- Conclude with a helpful short tip: '💡 *Tip: Upgrade to ZenBudget Pro for deep multi-year wealth forecasting & unlimited 24/7 AI chats!*'\n\n`;
+
     // Convert generic OpenAI-style messages to a single prompt for Gemini
-    let promptText = "STRICT AI DIRECTIVE: You are Zen, the dedicated Personal Finance & ZenBudget App AI Coach. You ONLY answer personal finance, budget, savings, expense tracking, and ZenBudget app questions. If the user asks non-financial off-topic questions (e.g. recipes like 'egg kaise bante ha', movies, coding, sports, weather), strictly refuse in a friendly witty Hinglish/English tone stating: 'Main aapka AI Financial Coach hu! 💸 Main sirf money, budget aur savings handle karta hu. Recipe/Search ke liye YouTube/Google dekhein, par agar grocery budget plan karna ho toh batao! 😉🌿'\n\n";
+    let promptText = "STRICT AI DIRECTIVE: You are Zen, the dedicated Personal Finance & ZenBudget App AI Coach. You ONLY answer personal finance, budget, savings, expense tracking, and ZenBudget app questions. If the user asks non-financial off-topic questions (e.g. recipes like 'egg kaise bante ha', movies, coding, sports, weather), strictly refuse in a friendly witty Hinglish/English tone stating: 'Main aapka AI Financial Coach hu! 💸 Main sirf money, budget aur savings handle karta hu. Recipe/Search ke liye YouTube/Google dekhein, par agar grocery budget plan karna ho toh batao! 😉🌿'\n\n" + membershipDirective;
     messages.forEach(m => {
       if (m.role === "system") {
         promptText += "System Context: " + m.content + "\n";

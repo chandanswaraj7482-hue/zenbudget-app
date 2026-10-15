@@ -4,6 +4,7 @@ import { X, QrCode, Zap, Check, Lock, ShieldCheck, Loader2 } from 'lucide-react'
 import { supabase } from '../supabaseClient';
 import { launchCashfreeCheckout } from '../utils/cashfreeHelper';
 import { triggerFireworksCelebration, playErrorSound } from '../utils/audio';
+import { Capacitor } from '@capacitor/core';
 
 interface ScanPayUnlockModalProps {
   isOpen: boolean;
@@ -245,11 +246,31 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
         }
       }
 
+      const isNative = Capacitor.isNativePlatform();
+      const phonepeUrl = `phonepe://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${finalPrice}&cu=INR&tn=Unlock%20Scan%20%26%20Pay%20Lifetime`;
+      const directUpiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${finalPrice}&cu=INR&tn=Unlock%20Scan%20%26%20Pay%20Lifetime`;
+
+      if (isNative) {
+        try {
+          const { AppLauncher } = await import('@capacitor/app-launcher');
+          const canOpen = await AppLauncher.canOpenUrl({ url: 'phonepe://pay' }).then(r => r.value).catch(() => false);
+          if (canOpen) {
+            await AppLauncher.openUrl({ url: phonepeUrl });
+          } else {
+            await AppLauncher.openUrl({ url: directUpiUrl });
+          }
+        } catch (e) {
+          window.location.href = directUpiUrl;
+        }
+        setPaymentStep('processing');
+        setIsProcessing(false);
+        return;
+      }
+
       if (payment_session_id) {
         launchCashfreeCheckout(
           payment_session_id,
           async (result: any) => {
-            // Keep in processing state, wait for webhook
             setPaymentStep('processing');
           },
           (err: any) => {
@@ -262,14 +283,12 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
           (window as any)._lastCfEnv
         );
       } else {
-        // Direct PhonePe / UPI App intent fallback when server payment session is unavailable
         const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        const directUpiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${finalPrice}&cu=INR&tn=Unlock%20Scan%20%26%20Pay%20Lifetime`;
         if (isMobile) {
-          try { window.location.href = directUpiUrl; } catch (e) {}
+          try { window.location.href = phonepeUrl; } catch (e) { window.location.href = directUpiUrl; }
         }
-        // Wait for webhook
         setPaymentStep('processing');
+        setIsProcessing(false);
       }
     } catch (err: any) {
       setModalErr('An unexpected error occurred. Please try again.');
@@ -285,9 +304,9 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
   return createPortal(
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(2, 4, 12, 0.92)',
-      backdropFilter: 'blur(24px)',
-      WebkitBackdropFilter: 'blur(24px)',
+      background: 'rgba(0, 0, 0, 0.65)',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
       zIndex: 99999999,
       display: 'flex', justifyContent: 'center', alignItems: 'center',
       padding: '16px',

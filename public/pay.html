@@ -94,11 +94,21 @@
     <div class="logo">🧘</div>
     <div class="brand">ZenBudget Pay</div>
 
+    <!-- Direct UPI App Launcher (PhonePe / GPay) -->
+    <div style="margin-bottom: 22px; display: flex; flex-direction: column; gap: 10px;">
+      <a id="btn-phonepe-app" href="phonepe://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&cu=INR" class="btn" style="background: linear-gradient(135deg, #5f259f 0%, #4a1d7c 100%); color: #ffffff; text-decoration: none; font-weight: 800; font-size: 14px; padding: 14px; border-radius: 14px; box-shadow: 0 4px 16px rgba(95,37,159,0.4); display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <span>🟣 Pay via PhonePe App</span>
+      </a>
+      <a id="btn-upi-app" href="upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&cu=INR" class="btn btn-primary" style="text-decoration: none; font-weight: 800; font-size: 13.5px; padding: 12px; border-radius: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <span>⚡ Pay via Any UPI (Google Pay, Paytm)</span>
+      </a>
+    </div>
+
     <!-- Loading State -->
     <div id="state-loading">
       <div class="spinner"></div>
-      <div class="title">Connecting to Payment...</div>
-      <div class="msg" id="status-msg">Initializing secure Cashfree gateway...</div>
+      <div class="title">Or Pay via Card / Netbanking</div>
+      <div class="msg" id="status-msg">Initializing secure payment gateway...</div>
     </div>
 
     <!-- Success State -->
@@ -158,6 +168,20 @@
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('session_id');
     const statusParam = urlParams.get('status'); // from return_url callback
+    const amountParam = urlParams.get('amount');
+    const planParam = urlParams.get('plan') || 'Subscription';
+
+    if (amountParam) {
+      const upiUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${encodeURIComponent(amountParam)}&cu=INR&tn=ZenBudget_${encodeURIComponent(planParam)}`;
+      const phonepeUrl = `phonepe://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${encodeURIComponent(amountParam)}&cu=INR&tn=ZenBudget_${encodeURIComponent(planParam)}`;
+      const upiBtn = document.getElementById('btn-upi-app');
+      const phonepeBtn = document.getElementById('btn-phonepe-app');
+      if (upiBtn) upiBtn.href = upiUrl;
+      if (phonepeBtn) {
+        phonepeBtn.href = phonepeUrl;
+        phonepeBtn.innerHTML = `<span>🟣 Pay ₹${amountParam} via PhonePe App</span>`;
+      }
+    }
 
     // If Cashfree redirected back with status
     if (statusParam) {

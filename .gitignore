@@ -54,4 +54,6 @@ zenbudget_decoded/
 *.jar
 *.idsig
 *.sql
+*.aab
+playstore_release/
 .env*

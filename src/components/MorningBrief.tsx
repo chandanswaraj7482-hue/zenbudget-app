@@ -142,8 +142,8 @@ export const MorningBrief: React.FC<MorningBriefProps> = ({
   return (
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(12px)',
-      WebkitBackdropFilter: 'blur(12px)',
+      backgroundColor: 'rgba(0, 0, 0, 0.55)', backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
       display: 'flex', justifyContent: 'center', alignItems: 'center',
       zIndex: 10000, padding: '20px', animation: 'fadeIn 0.3s ease-out'
     }} onClick={onClose}>

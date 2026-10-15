@@ -193,7 +193,10 @@
         <ul>
           <li><strong>Account Identification:</strong> Email address and authentication tokens via Supabase Auth to enable multi-device sync and subscription status restoration.</li>
           <li><strong>Financial Logs (Self-Reported):</strong> Expense categories, budgets, income logs, and envelope allocations inputted manually or via OCR scans.</li>
-          <li><strong>AI Camera & Receipt OCR Scans:</strong> Images captured through the AI Smart Scanner are processed transiently in memory to extract vendor names and amounts, then stored locally on your device vault.</li>
+          <li><strong>AI Camera & Receipt OCR Scans:</strong> Images captured through the AI Smart Scanner are processed transiently in memory to extract vendor names and amounts, then stored locally in your device vault.</li>
+          <li><strong>Bank Statement & Passbook Documents:</strong> Bank statements or passbooks (PDF/images) imported for analysis are parsed strictly transiently in memory. Raw statement files, net banking passwords, and credentials are never recorded, uploaded, or shared with third parties.</li>
+          <li><strong>Microphone & Voice Input:</strong> Microphone audio access is used exclusively in real-time to transcribe spoken expense logs (e.g. "Chai 20 rupees"). Raw voice audio is never stored, recorded on remote servers, or used for biometric profiling.</li>
+          <li><strong>Couple & Family Sync:</strong> When connecting with a partner or family member via secure invite codes, only shared household transactions, category limits, and joint progress are synchronized across authorized vault participants. Private account passwords and personal cards remain strictly confidential.</li>
           <li><strong>Device & Analytics Telemetry:</strong> Anonymized crash logs and app performance telemetry to improve stability and uptime.</li>
         </ul>
       </div>

@@ -96,14 +96,7 @@ interface LiveActivity {
   avatar: string;
 }
 
-const LIVE_ACTIVITIES: LiveActivity[] = [
-  { id: '1', name: 'Priya S.', city: 'Bengaluru', score: 1420, badge: '👑 Zen Legend', timeAgo: '1m ago', avatar: '👩‍💼' },
-  { id: '2', name: 'Rahul M.', city: 'Mumbai', score: 980, badge: '📈 SIP Master', timeAgo: '3m ago', avatar: '👨‍💻' },
-  { id: '3', name: 'Ananya P.', city: 'Delhi', score: 1650, badge: '🛡️ Fortress', timeAgo: '5m ago', avatar: '👩‍🎓' },
-  { id: '4', name: 'Vikram K.', city: 'Pune', score: 850, badge: '💼 Disciplined', timeAgo: '8m ago', avatar: '👨‍💼' },
-  { id: '5', name: 'Sneha R.', city: 'Hyderabad', score: 1890, badge: '👑 Zen Legend', timeAgo: '12m ago', avatar: '👩‍🔬' },
-  { id: '6', name: 'Kunal D.', city: 'Jaipur', score: 1120, badge: '🛡️ Fortress', timeAgo: '15m ago', avatar: '🧑‍💻' },
-];
+
 
 export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
   currencySymbol = '₹',
@@ -176,15 +169,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
   const [hasRevivedWithAd, setHasRevivedWithAd] = useState(false);
   const [adLoading, setAdLoading] = useState(false);
   const [currentTipIndex] = useState(() => Math.floor(Math.random() * FINANCIAL_TIPS.length));
-  const [activityIndex, setActivityIndex] = useState(0);
 
-  // Rotate live activity stream
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActivityIndex(prev => (prev + 1) % LIVE_ACTIVITIES.length);
-    }, 4200);
-    return () => clearInterval(interval);
-  }, []);
 
   const touchXRef = useRef<number | null>(null);
 
@@ -1238,7 +1223,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         </div>
       </div>
 
-      {/* Live Social Proof Activity Stream */}
+      {/* Gameplay Tip Banner */}
       <div style={{
         padding: '7px 16px',
         background: 'rgba(16, 185, 129, 0.08)',
@@ -1259,11 +1244,11 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
             flexShrink: 0
           }} />
           <span style={{ color: 'var(--text-primary)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {LIVE_ACTIVITIES[activityIndex].avatar} <strong>{LIVE_ACTIVITIES[activityIndex].name}</strong> ({LIVE_ACTIVITIES[activityIndex].city}) scored <strong style={{ color: '#10b981' }}>{currencySymbol}{LIVE_ACTIVITIES[activityIndex].score}</strong>
+            Catch 🪙 gold coins & 💎 gems to build wealth • Dodge 💣 traps!
           </span>
         </div>
-        <span style={{ fontSize: '10px', color: 'var(--text-secondary)', flexShrink: 0, marginLeft: '8px' }}>
-          {LIVE_ACTIVITIES[activityIndex].timeAgo}
+        <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 700, flexShrink: 0, marginLeft: '8px' }}>
+          Zen Arcade
         </span>
       </div>
 

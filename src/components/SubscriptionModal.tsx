@@ -1085,14 +1085,14 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                 <Zap size={18} />
                 <span>
                   {currency === 'INR'
-                    ? `Proceed to Pay ₹${upiAmountINR} via Cashfree`
+                    ? (Capacitor.isNativePlatform() ? `Upgrade to Pro (₹${upiAmountINR})` : `Proceed to Pay ₹${upiAmountINR}`)
                     : `${getCtaText()} (${priceInfo.symbol}${priceInfo.amount})`}
                 </span>
               </button>
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '11.5px', color: '#94a3b8', marginTop: '4px' }}>
                 <ShieldCheck size={14} color="#10b981" />
-                <span>Instant UPI, Cards & NetBanking via Cashfree · 256-Bit Bank-Grade Secure</span>
+                <span>Instant UPI, Cards & NetBanking · 256-Bit Bank-Grade Secure</span>
               </div>
               <div style={{ textAlign: 'center', fontSize: '9px', color: 'var(--text-muted)', marginTop: '4px', fontStyle: 'italic' }}>
                 * Auto-pay is automatically enabled via secure e-mandate. You can cancel anytime.

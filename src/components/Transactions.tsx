@@ -428,7 +428,7 @@ export const Transactions: React.FC<TransactionsProps> = ({
         >
           {totalSpentSoFar > 0 ? (
             <>
-              You've spent <strong style={{ color: 'var(--text-primary, #fff)' }}>{currencySymbol}{totalSpentSoFar.toLocaleString()}</strong> so far — around <strong style={{ color: 'var(--text-primary, #fff)' }}>{currencySymbol}{dailyAvg.toLocaleString()}/day</strong> across {currentDay} of {daysInMonth} days. On this pace you're heading toward about <strong style={{ color: 'var(--text-primary, #fff)' }}>{currencySymbol}{projectedMonthEnd.toLocaleString()}</strong> by month-end.
+              You've spent <strong style={{ color: 'var(--text-primary, #fff)' }}>{currencySymbol}{totalSpentSoFar.toLocaleString()}</strong> so far — around <strong style={{ color: 'var(--text-primary, #fff)' }}>{currencySymbol}{dailyAvg.toLocaleString()}/day (This Month)</strong> across {currentDay} of {daysInMonth} days. On this pace you're heading toward about <strong style={{ color: 'var(--text-primary, #fff)' }}>{currencySymbol}{projectedMonthEnd.toLocaleString()}</strong> by month-end.
             </>
           ) : (
             <>

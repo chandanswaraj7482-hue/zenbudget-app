@@ -60,6 +60,19 @@ export const HelpModal: React.FC<HelpModalProps> = ({
   const [feedbackGiven, setFeedbackGiven] = useState<Record<string, 'up' | 'down'>>({});
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  // Daily 10-Chat Limit tracking for Free Tier
+  const todayKey = new Date().toISOString().split('T')[0];
+  const effectiveProfileId = typeof localStorage !== 'undefined' ? (localStorage.getItem('zb_profile_id') || 'local') : 'local';
+  const chatCountKey = `zb_ai_chat_count_${effectiveProfileId}_${todayKey}`;
+
+  const [dailyChatCount, setDailyChatCount] = useState<number>(() => {
+    try {
+      return parseInt(localStorage.getItem(chatCountKey) || '0', 10);
+    } catch {
+      return 0;
+    }
+  });
+
   // Analyze user spending activity for AI Coach
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
@@ -411,6 +424,28 @@ export const HelpModal: React.FC<HelpModalProps> = ({
     const rawText = (customPrompt || inputVal).trim();
     if (!rawText) return;
 
+    // Daily 10-Chat Limit Guard for Free Tier Users
+    if (!isPremiumUser && dailyChatCount >= 10) {
+      const userMsg: ChatMessage = {
+        id: Date.now().toString(),
+        sender: 'user',
+        text: rawText,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      const limitNoticeMsg: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        sender: 'bot',
+        text: `🔒 **Daily Free AI Chat Limit Reached (10/10 Chats Used Today)** 🌿\n\nAapne aaj ke 10 free AI chats use kar liye hain!\n\nUpgrade to **ZenBudget Pro** to unlock:\n👑 **Unlimited 24/7 AI Coach Guidance**\n📈 **Multi-Year Compounding Wealth Projections**\n🎯 **Deep Spending Leak Analysis & Debt-Free Roadmaps**\n\nNeeche 'Unlock Unlimited Pro' button se instantly upgrade karein aur 24/7 unlimited chats continue karein! 🚀`,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setMessages(prev => [...prev, userMsg, limitNoticeMsg]);
+      setInputVal('');
+      window.dispatchEvent(new CustomEvent('toast-alert', {
+        detail: { message: 'Daily free AI chat limit reached (10/10). Upgrade to Pro for unlimited chats! ⚡', type: 'warning' }
+      }));
+      return;
+    }
+
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
       sender: 'user',
@@ -494,7 +529,8 @@ ${JSON.stringify(structCtx, null, 2)}`;
                   messages: [
                     { role: 'system', content: sysInstr },
                     { role: 'user', content: rawText }
-                  ]
+                  ],
+                  isPremium: isPremiumUser
                 })
               });
               clearTimeout(timeoutId);
@@ -532,6 +568,15 @@ ${JSON.stringify(structCtx, null, 2)}`;
     
     setMessages(prev => [...prev, botResponse]);
     setIsTyping(false);
+
+    // Increment daily chat counter for free tier users
+    if (!isPremiumUser) {
+      const nextChatCount = dailyChatCount + 1;
+      setDailyChatCount(nextChatCount);
+      try {
+        localStorage.setItem(chatCountKey, nextChatCount.toString());
+      } catch (_) {}
+    }
   };
 
   const handleMessageFeedback = async (messageId: string, type: 'up' | 'down') => {
@@ -607,16 +652,17 @@ ${JSON.stringify(structCtx, null, 2)}`;
               <h3 style={{ fontSize: '15px', fontWeight: 800, margin: 0 }}>
                 {isPremiumUser ? '👑 Zen Pro AI Coach' : '🌿 Zen AI Coach'}
               </h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px', flexWrap: 'wrap' }}>
                 <span style={{
                   fontSize: '10px',
                   fontWeight: 700,
-                  color: isPremiumUser ? '#34d399' : '#94a3b8',
-                  background: isPremiumUser ? 'rgba(52, 211, 153, 0.15)' : 'rgba(255, 255, 255, 0.08)',
-                  padding: '1px 6px',
-                  borderRadius: '4px'
+                  color: isPremiumUser ? '#34d399' : (dailyChatCount >= 10 ? '#ef4444' : '#fbbf24'),
+                  background: isPremiumUser ? 'rgba(52, 211, 153, 0.15)' : (dailyChatCount >= 10 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(251, 191, 36, 0.12)'),
+                  border: isPremiumUser ? '1px solid rgba(52, 211, 153, 0.3)' : (dailyChatCount >= 10 ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(251, 191, 36, 0.3)'),
+                  padding: '2px 8px',
+                  borderRadius: '6px'
                 }}>
-                  {isPremiumUser ? 'DEEP ANALYSIS' : 'BASIC MODE (FREE)'}
+                  {isPremiumUser ? '👑 PRO VIP · UNLIMITED CHATS' : `🌿 FREE: ${Math.max(0, 10 - dailyChatCount)}/10 CHATS LEFT TODAY`}
                 </span>
                 {!isPremiumUser && onOpenSubscriptionModal && (
                   <button
@@ -624,15 +670,16 @@ ${JSON.stringify(structCtx, null, 2)}`;
                     style={{
                       fontSize: '10px',
                       fontWeight: 800,
-                      color: '#fbbf24',
-                      background: 'rgba(251, 191, 36, 0.15)',
-                      border: '1px solid rgba(251, 191, 36, 0.3)',
-                      padding: '1px 6px',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
+                      color: '#ffffff',
+                      background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                      border: 'none',
+                      padding: '2px 8px',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 8px rgba(245, 158, 11, 0.3)'
                     }}
                   >
-                    Unlock Pro ⚡
+                    Get Unlimited ⚡
                   </button>
                 )}
               </div>
@@ -928,13 +975,52 @@ ${JSON.stringify(structCtx, null, 2)}`;
                 <div ref={chatEndRef} />
               </div>
 
+              {/* Daily Limit Warning Banner for Free Tier Users */}
+              {!isPremiumUser && dailyChatCount >= 10 && (
+                <div style={{
+                  padding: '10px 14px',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(217, 119, 6, 0.22) 100%)',
+                  border: '1px solid rgba(245, 158, 11, 0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '8px',
+                  marginBottom: '8px',
+                  flexShrink: 0
+                }}>
+                  <div style={{ fontSize: '11px', color: '#fef08a', fontWeight: 700 }}>
+                    🔒 Daily limit reached (10/10 chats). Upgrade for unlimited AI!
+                  </div>
+                  {onOpenSubscriptionModal && (
+                    <button
+                      type="button"
+                      onClick={onOpenSubscriptionModal}
+                      style={{
+                        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                        border: 'none',
+                        color: '#fff',
+                        fontSize: '11px',
+                        fontWeight: 800,
+                        padding: '5px 10px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      Upgrade ⚡
+                    </button>
+                  )}
+                </div>
+              )}
+
               {/* Chat Input form */}
               <form onSubmit={(e) => handleSend(e)} style={{ display: 'flex', gap: '8px', borderTop: '1px solid var(--border-input)', paddingTop: '10px', flexShrink: 0 }}>
                 <input
                   type="text"
                   value={inputVal}
                   onChange={(e) => setInputVal(e.target.value)}
-                  placeholder="Ask ZenBot..."
+                  placeholder={!isPremiumUser && dailyChatCount >= 10 ? 'Daily 10 chats limit reached. Upgrade to Pro...' : 'Ask Zen AI Coach anything...'}
                   style={{
                     flex: 1,
                     background: 'var(--bg-input)',

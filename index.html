@@ -64,17 +64,17 @@
     <script>
       (function() {
         try {
-          var saved = localStorage.getItem('zb_theme');
-          if (saved === 'light') {
-            document.documentElement.classList.add('light-theme');
-          } else {
+          var saved = localStorage.getItem('zb_theme') || localStorage.getItem('zb_landing_theme');
+          if (saved === 'dark') {
             document.documentElement.classList.add('dark-theme');
+          } else {
+            document.documentElement.classList.add('light-theme');
             if (!saved) {
-              localStorage.setItem('zb_theme', 'dark');
+              localStorage.setItem('zb_theme', 'light');
             }
           }
         } catch (e) {
-          document.documentElement.classList.add('dark-theme');
+          document.documentElement.classList.add('light-theme');
         }
       })();
     </script>
@@ -364,10 +364,21 @@
   </head>
   <body>
     <div id="root">
-      <div id="zen-init-loader" style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0d110e; color: #ffffff; font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif; text-align: center; padding: 24px;">
-        <div style="width: 56px; height: 56px; border-radius: 18px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 16px; box-shadow: 0 0 30px rgba(16, 185, 129, 0.25);">🌱</div>
-        <div style="font-size: 19px; font-weight: 800; color: #f8fafc; letter-spacing: -0.01em;">ZenBudget Tracker</div>
-        <div style="font-size: 13px; color: #64748b; margin-top: 6px; font-weight: 500;">Loading smart expense manager...</div>
+      <div id="zen-init-loader" style="min-height: 100vh; width: 100vw; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; color: #0f172a; font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif; text-align: center; padding: 24px; box-sizing: border-box;">
+        <div style="width: 72px; height: 72px; border-radius: 22px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; box-shadow: 0 10px 32px rgba(16, 185, 129, 0.2); overflow: hidden; background: #ffffff; border: 1px solid rgba(16, 185, 129, 0.2);">
+          <img src="/favicon.png?v=10" alt="ZenBudget" style="width: 100%; height: 100%; object-fit: cover;" />
+        </div>
+        <div style="font-size: 20px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">ZenBudget</div>
+        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; color: #059669; margin-top: 4px; font-weight: 700;">Calm Your Money</div>
+        <div style="width: 130px; height: 4px; background: rgba(16, 185, 129, 0.12); border-radius: 99px; overflow: hidden; margin-top: 24px; position: relative;">
+          <div style="width: 45%; height: 100%; background: linear-gradient(90deg, #10b981, #06b6d4); border-radius: 99px; animation: zenPulseBar 1.2s ease-in-out infinite;"></div>
+        </div>
+        <style>
+          @keyframes zenPulseBar {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(250%); }
+          }
+        </style>
       </div>
     </div>
 

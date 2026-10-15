@@ -132,9 +132,7 @@ export const WealthSimulator: React.FC<WealthSimulatorProps> = ({
   });
   const monthIncome = currentMonthTx.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
   const monthExpenses = currentMonthTx.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
-  const realSavings = Math.max(0, monthIncome - monthExpenses);
-
-  const [monthlyInvest, setMonthlyInvest] = useState<number>(realSavings > 0 ? Math.round(realSavings) : 5000);
+  const [monthlyInvest, setMonthlyInvest] = useState<number>(5000);
   const [years, setYears] = useState<number>(10);
   const [selectedAssetId, setSelectedAssetId] = useState<string>('index');
 
@@ -823,12 +821,13 @@ export const WealthSimulator: React.FC<WealthSimulatorProps> = ({
       )}
 
       {/* Disclaimers / Educational Note */}
-      <div className="glass-panel" style={{ padding: '16px', display: 'flex', gap: '12px', alignItems: 'flex-start', background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)' }}>
+      <div className="glass-panel" style={{ padding: '16px', display: 'flex', gap: '12px', alignItems: 'flex-start', background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: '16px' }}>
         <AlertTriangle size={18} style={{ color: '#f59e0b', flexShrink: 0, marginTop: '2px' }} />
         <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.5, textAlign: 'left', margin: 0 }}>
+          <strong style={{ color: '#f59e0b' }}>For educational purposes only, not investment/tax advice.</strong>{' '}
           {activeTab === 'tax' 
-            ? 'Estimates are based on latest Indian Income Tax slabs for FY 2024-25 / FY 2025-26. Actual tax liabilities may vary depending on surcharges, capital gains, and official tax filings.'
-            : 'Illustrative assumptions only — not guaranteed returns. These tools are designed for financial planning & educational purposes.'}
+            ? 'Estimates are based on standard Indian Income Tax provisions for FY 2024-25 / FY 2025-26. Actual tax liabilities may vary depending on surcharges, deductions, capital gains, and official tax filings. Please consult a qualified Chartered Accountant (CA) or tax professional.'
+            : 'Illustrative assumptions only — not guaranteed returns. Past performance does not guarantee future results. These simulation tools are designed solely for financial planning and educational exploration.'}
         </p>
       </div>
 

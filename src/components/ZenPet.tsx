@@ -504,12 +504,12 @@ export const ZenPet: React.FC<ZenPetProps> = ({ currentProfileId, spentPercentag
             <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)' }}>
               {isLevel2Unlocked ? 'Golden Zen Dragon' : 'Zen Piggy'}
             </span>
-            <span style={{ fontSize: '9px', fontWeight: 800, padding: '2px 6px', borderRadius: '8px', background: activeAccessory ? 'rgba(251,191,36,0.15)' : 'rgba(239, 68, 68, 0.15)', color: activeAccessory ? '#d97706' : '#dc2626' }}>
+            <span style={{ fontSize: '9px', fontWeight: 800, padding: '2px 6px', borderRadius: '8px', background: activeAccessory ? 'rgba(251,191,36,0.15)' : 'rgba(16, 185, 129, 0.15)', color: activeAccessory ? '#d97706' : '#10b981' }}>
               {(() => {
                 if (equippedId === 'crown') return 'Thrilled & Royal 👑';
                 if (equippedId === 'detective_hat') return 'Smart & Proud 🎩';
                 if (equippedId === 'sunglasses') return 'Cool & Cheerful 😎';
-                return 'Regretful 😔';
+                return 'Calm & Ready 🧘';
               })()}
             </span>
           </div>
@@ -520,7 +520,7 @@ export const ZenPet: React.FC<ZenPetProps> = ({ currentProfileId, spentPercentag
               ? 'Wearing Detective Hat! Zen Companion feels proud, smart, and ready for budgeting.'
               : equippedId === 'sunglasses'
               ? 'Wearing Cool Sunglasses! Your companion is cheered up and feeling great!'
-              : 'Zen Piggy feels low and regretful. Equip items in the shop to cheer up your companion step-by-step!';
+              : 'Zen Piggy is calm, happy, and excited to build wealth with you! Track daily expenses and unlock fun items in the shop.';
 
             const needsTruncation = fullDesc.length > 50;
             const truncatedText = fullDesc.length > 50 ? fullDesc.slice(0, 50) : fullDesc;

@@ -89,16 +89,18 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   const [currentProfileId, setCurrentProfileId] = useState<string>(() => localStorage.getItem('zb_profile_id') || '');
   const [userName, setUserName] = useState<string>(() => localStorage.getItem('zb_user_name') || '');
   const [isLocked, setIsLocked] = useState<boolean>(() => {
-    const profileId = localStorage.getItem('zb_profile_id');
-    const userPin = localStorage.getItem('zb_user_pin');
-    const lockExplicitlyDisabled = localStorage.getItem('zb_app_lock_enabled') === 'false';
-    if (lockExplicitlyDisabled) {
-      return false;
+    // Only bypass lock screen if authenticated in this exact browser tab session within 5 minutes
+    const sessionAuth = sessionStorage.getItem('zb_session_authenticated');
+    const lastActive = sessionStorage.getItem('zb_last_active_time');
+    const now = Date.now();
+    if (sessionAuth === 'true' && lastActive) {
+      const elapsed = now - parseInt(lastActive, 10);
+      if (!isNaN(elapsed) && elapsed < 5 * 60 * 1000) {
+        return false;
+      }
     }
-    if (userPin && userPin !== '0000' && userPin.length >= 4) {
-      return true;
-    }
-    return !profileId;
+    // ALWAYS start locked on launch / refresh / new tab to protect user financial data
+    return true;
   });
   const [isAppLoading, setIsAppLoading] = useState<boolean>(false);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
@@ -1018,6 +1020,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
     const updateActivity = () => {
       lastActivityTime = Date.now();
+      sessionStorage.setItem('zb_last_active_time', lastActivityTime.toString());
     };
 
     window.addEventListener('mousemove', updateActivity, { passive: true });
@@ -1026,10 +1029,11 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     window.addEventListener('click', updateActivity, { passive: true });
     window.addEventListener('scroll', updateActivity, { passive: true });
 
-    // 5-Minute Bank-Grade Inactivity Auto-Lock (Enabled by default for all accounts with PIN)
+    // 5-Minute Bank-Grade Inactivity Auto-Lock (Enabled by default for all accounts)
     intervalId = setInterval(() => {
-      const isLockActive = localStorage.getItem('zb_app_lock_enabled') !== 'false' && Boolean(localStorage.getItem('zb_user_pin'));
-      if (isLockActive && Date.now() - lastActivityTime >= 5 * 60 * 1000) {
+      if (Date.now() - lastActivityTime >= 5 * 60 * 1000) {
+        sessionStorage.removeItem('zb_session_authenticated');
+        sessionStorage.removeItem('zb_last_active_time');
         setIsLocked(true);
         triggerToast('🔒 ZenBudget Auto-Locked after 5 mins of inactivity (Bank-Grade Security).', 'info');
       }
@@ -1039,8 +1043,6 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     let appStateHandle: any = null;
     if (Capacitor.isNativePlatform()) {
       CapApp.addListener('appStateChange', (state) => {
-        const isLockActive = localStorage.getItem('zb_app_lock_enabled') !== 'false' && Boolean(localStorage.getItem('zb_user_pin'));
-        if (!isLockActive) return;
         if (!state.isActive) {
           sessionStorage.setItem('zb_bg_time', Date.now().toString());
         } else {
@@ -1050,6 +1052,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           if (bgTimeStr) {
             const bgTime = parseInt(bgTimeStr, 10);
             if (!isNaN(bgTime) && Date.now() - bgTime >= 5 * 60 * 1000) {
+              sessionStorage.removeItem('zb_session_authenticated');
+              sessionStorage.removeItem('zb_last_active_time');
               setIsLocked(true);
               triggerToast('🔒 ZenBudget Auto-Locked after 5 mins in background (Bank Security).', 'info');
             }
@@ -1064,8 +1068,6 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
     // Web / PWA visibility change auto-lock (after 5 minutes in background/hidden tab)
     const handleVisibilityChange = () => {
-      const isLockActive = localStorage.getItem('zb_app_lock_enabled') !== 'false' && Boolean(localStorage.getItem('zb_user_pin'));
-      if (!isLockActive) return;
       if (document.visibilityState === 'hidden') {
         sessionStorage.setItem('zb_bg_time', Date.now().toString());
       } else if (document.visibilityState === 'visible') {
@@ -1075,6 +1077,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         if (bgTimeStr) {
           const bgTime = parseInt(bgTimeStr, 10);
           if (!isNaN(bgTime) && Date.now() - bgTime >= 5 * 60 * 1000) {
+            sessionStorage.removeItem('zb_session_authenticated');
+            sessionStorage.removeItem('zb_last_active_time');
             setIsLocked(true);
             triggerToast('🔒 ZenBudget Auto-Locked after 5 mins in background (Bank Security).', 'info');
           }
@@ -3756,6 +3760,9 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       keysToWipe.forEach(k => {
         try { localStorage.removeItem(k); } catch (_) {}
       });
+      sessionStorage.removeItem('zb_session_authenticated');
+      sessionStorage.removeItem('zb_last_active_time');
+      sessionStorage.removeItem('zb_bg_time');
       setIsLocked(true);
       setCurrentProfileId('');
       setUserName('');
@@ -4122,6 +4129,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
       sessionStorage.removeItem('zb_bg_time');
       sessionStorage.removeItem('zb_was_backgrounded');
+      sessionStorage.setItem('zb_session_authenticated', 'true');
+      sessionStorage.setItem('zb_last_active_time', Date.now().toString());
       setIsLocked(false);
       setIsAppLoading(false);
       fetchDataFromSupabase().catch(() => {});

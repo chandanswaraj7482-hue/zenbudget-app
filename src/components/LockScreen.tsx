@@ -536,11 +536,15 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           setStep('unlock');
         } catch (_) { setStep('auth'); }
       } else {
-        // Even without session cache, if PIN was created go to unlock
+        // Even without session cache, check PIN or profile ID
         const localPin = localStorage.getItem('zb_user_pin');
         const pinCreated = localStorage.getItem('zb_pin_created') === 'true';
+        const localProfileId = localStorage.getItem('zb_profile_id');
         if (pinCreated || (localPin && localPin !== '0000' && localPin.length >= 4)) {
           setStep('unlock');
+        } else if (localProfileId) {
+          setUserId(localProfileId);
+          setStep('onboard-pin');
         } else {
           setStep('auth');
         }
@@ -631,11 +635,15 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             setStep('auth');
           }
         } else {
-          // No cached session — but if PIN was created before, go to unlock not auth
+          // No cached session — but check if user is already signed in or created a profile
           const localPin = localStorage.getItem('zb_user_pin');
           const pinCreated = localStorage.getItem('zb_pin_created') === 'true';
+          const localProfileId = localStorage.getItem('zb_profile_id');
           if (pinCreated || (localPin && localPin !== '0000' && localPin.length >= 4)) {
             setStep('unlock');
+          } else if (localProfileId) {
+            setUserId(localProfileId);
+            setStep('onboard-pin');
           } else {
             setStep('auth');
           }
