@@ -1,5 +1,5 @@
 # ZenBudget SEO & AI Search Engine Robots.txt
-# Official Web: https://zenbudget-tracker.vercel.app
+# Official Web: https://zenbudget-tracker-app.vercel.app
 
 User-agent: *
 Allow: /
@@ -59,8 +59,8 @@ User-agent: cohere-ai
 Allow: /
 
 # Sitemaps & AI Index
-Sitemap: https://zenbudget-tracker.vercel.app/sitemap.xml
-# LLM Context: https://zenbudget-tracker.vercel.app/llms.txt
+Sitemap: https://zenbudget-tracker-app.vercel.app/sitemap.xml
+# LLM Context: https://zenbudget-tracker-app.vercel.app/llms.txt
 
 # Host
-Host: https://zenbudget-tracker.vercel.app
+Host: https://zenbudget-tracker-app.vercel.app

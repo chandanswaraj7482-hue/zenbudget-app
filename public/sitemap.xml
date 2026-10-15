@@ -7,42 +7,42 @@
 
   <!-- Main Homepage -->
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <image:image>
-      <image:loc>https://zenbudget-tracker.vercel.app/zen_website.png</image:loc>
+      <image:loc>https://zenbudget-tracker-app.vercel.app/zen_website.png</image:loc>
       <image:title>ZenBudget Tracker AI Expense Tracker Dashboard</image:title>
       <image:caption>ZenBudget Tracker AI Expense Tracker &amp; Daily Budget Planner Full Web App Interface</image:caption>
     </image:image>
     <image:image>
-      <image:loc>https://zenbudget-tracker.vercel.app/hero-mockup.png</image:loc>
+      <image:loc>https://zenbudget-tracker-app.vercel.app/hero-mockup.png</image:loc>
       <image:title>ZenBudget Mobile App Interface &amp; Daily Limits</image:title>
       <image:caption>Mobile app interface showing real-time daily safe-to-spend limits and impulse buy pause timer</image:caption>
     </image:image>
     <image:image>
-      <image:loc>https://zenbudget-tracker.vercel.app/images/toolkit_ocr.jpg</image:loc>
+      <image:loc>https://zenbudget-tracker-app.vercel.app/images/toolkit_ocr.jpg</image:loc>
       <image:title>ZenBudget AI Bank Statement OCR Passbook Scanner</image:title>
       <image:caption>AI-powered bank passbook scanner and automatic UPI expense logger</image:caption>
     </image:image>
     <image:image>
-      <image:loc>https://zenbudget-tracker.vercel.app/images/toolkit_coach.jpg</image:loc>
+      <image:loc>https://zenbudget-tracker-app.vercel.app/images/toolkit_coach.jpg</image:loc>
       <image:title>ZenBudget AI Financial Coach &amp; Money Mentor</image:title>
       <image:caption>Personalized AI money mentor detecting spending leaks and building automated wealth plans</image:caption>
     </image:image>
     <image:image>
-      <image:loc>https://zenbudget-tracker.vercel.app/images/toolkit_couple.jpg</image:loc>
+      <image:loc>https://zenbudget-tracker-app.vercel.app/images/toolkit_couple.jpg</image:loc>
       <image:title>ZenBudget Couples Shared Budget Ledger Sync</image:title>
       <image:caption>Real-time shared household expense sync for couples and roommates</image:caption>
     </image:image>
     <image:image>
-      <image:loc>https://zenbudget-tracker.vercel.app/images/zen_sanctuary.jpg</image:loc>
+      <image:loc>https://zenbudget-tracker-app.vercel.app/images/zen_sanctuary.jpg</image:loc>
       <image:title>ZenBudget Financial Mindfulness Sanctuary</image:title>
       <image:caption>Gamified pet garden and mindfulness rewards for staying under daily budget</image:caption>
     </image:image>
     <image:image>
-      <image:loc>https://zenbudget-tracker.vercel.app/icon.png</image:loc>
+      <image:loc>https://zenbudget-tracker-app.vercel.app/icon.png</image:loc>
       <image:title>ZenBudget Tracker Official Logo</image:title>
       <image:caption>ZenBudget Tracker Official Application Icon</image:caption>
     </image:image>
@@ -50,7 +50,7 @@
 
   <!-- Official Android APK Direct Download -->
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/zenbudget.apk</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/zenbudget.apk</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -58,12 +58,12 @@
 
   <!-- Financial Coin Catcher Game -->
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/?game=coin_catcher</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/?game=coin_catcher</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
     <image:image>
-      <image:loc>https://zenbudget-tracker.vercel.app/logo.png</image:loc>
+      <image:loc>https://zenbudget-tracker-app.vercel.app/logo.png</image:loc>
       <image:title>ZenBudget Financial Arcade Coin Catcher</image:title>
       <image:caption>Financial coin catcher discipline mini-game</image:caption>
     </image:image>
@@ -71,12 +71,12 @@
 
   <!-- Web App Login/Dashboard -->
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/#app</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/#app</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
     <image:image>
-      <image:loc>https://zenbudget-tracker.vercel.app/zen_website.png</image:loc>
+      <image:loc>https://zenbudget-tracker-app.vercel.app/zen_website.png</image:loc>
       <image:title>ZenBudget Web App Daily Money Manager</image:title>
       <image:caption>Interactive web dashboard for daily money management</image:caption>
     </image:image>
@@ -84,12 +84,12 @@
 
   <!-- Financial Quiz Page -->
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/?page=quiz</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/?page=quiz</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
     <image:image>
-      <image:loc>https://zenbudget-tracker.vercel.app/images/interactive_modules.jpg</image:loc>
+      <image:loc>https://zenbudget-tracker-app.vercel.app/images/interactive_modules.jpg</image:loc>
       <image:title>ZenBudget Financial Assessment Quiz</image:title>
       <image:caption>Interactive 3-minute financial leak assessment quiz</image:caption>
     </image:image>
@@ -97,17 +97,17 @@
 
   <!-- Financial Toolkit -->
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/?page=toolkit</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/?page=toolkit</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zenbudget-tracker.vercel.app/images/toolkit_ocr.jpg</image:loc>
+      <image:loc>https://zenbudget-tracker-app.vercel.app/images/toolkit_ocr.jpg</image:loc>
       <image:title>ZenBudget OCR Statement Toolkit</image:title>
       <image:caption>Financial toolkit with bank statement scanning</image:caption>
     </image:image>
     <image:image>
-      <image:loc>https://zenbudget-tracker.vercel.app/images/toolkit_coach.jpg</image:loc>
+      <image:loc>https://zenbudget-tracker-app.vercel.app/images/toolkit_coach.jpg</image:loc>
       <image:title>ZenBudget AI Money Coach Toolkit</image:title>
       <image:caption>AI money advisor toolkit</image:caption>
     </image:image>
@@ -115,12 +115,12 @@
 
   <!-- Community Stories -->
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/?page=community</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/?page=community</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zenbudget-tracker.vercel.app/images/community_toolkit.jpg</image:loc>
+      <image:loc>https://zenbudget-tracker-app.vercel.app/images/community_toolkit.jpg</image:loc>
       <image:title>ZenBudget Community Savings Challenge</image:title>
       <image:caption>Community wealth building and budget challenges</image:caption>
     </image:image>
@@ -128,12 +128,12 @@
 
   <!-- AI Coach / Zen AI Features -->
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/?page=ai-coach</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/?page=ai-coach</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
     <image:image>
-      <image:loc>https://zenbudget-tracker.vercel.app/images/toolkit_coach.jpg</image:loc>
+      <image:loc>https://zenbudget-tracker-app.vercel.app/images/toolkit_coach.jpg</image:loc>
       <image:title>Zen AI Personal Finance Coach</image:title>
       <image:caption>Smart financial recommendations and personalized wealth coach</image:caption>
     </image:image>
@@ -141,12 +141,12 @@
 
   <!-- Budget Planner -->
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/?page=budget-planner</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/?page=budget-planner</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
     <image:image>
-      <image:loc>https://zenbudget-tracker.vercel.app/zen_website.png</image:loc>
+      <image:loc>https://zenbudget-tracker-app.vercel.app/zen_website.png</image:loc>
       <image:title>ZenBudget 50-30-20 Planner</image:title>
       <image:caption>Interactive monthly budget planner tool</image:caption>
     </image:image>
@@ -154,12 +154,12 @@
 
   <!-- Savings Goals -->
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/?page=savings-goals</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/?page=savings-goals</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zenbudget-tracker.vercel.app/hero-mockup.png</image:loc>
+      <image:loc>https://zenbudget-tracker-app.vercel.app/hero-mockup.png</image:loc>
       <image:title>ZenBudget Savings Goals Tracker</image:title>
       <image:caption>Automated savings goal tracker and visual progress indicators</image:caption>
     </image:image>
@@ -167,12 +167,12 @@
 
   <!-- Android APK Download Page -->
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/download.html</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/download.html</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
     <image:image>
-      <image:loc>https://zenbudget-tracker.vercel.app/hero-mockup.png</image:loc>
+      <image:loc>https://zenbudget-tracker-app.vercel.app/hero-mockup.png</image:loc>
       <image:title>ZenBudget Android APK Free Download</image:title>
       <image:caption>Official ZenBudget Android App APK direct download</image:caption>
     </image:image>
@@ -180,7 +180,7 @@
 
   <!-- Android APK Direct File -->
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/zenbudget.apk</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/zenbudget.apk</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
@@ -188,17 +188,17 @@
 
   <!-- Blog Home -->
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
     <image:image>
-      <image:loc>https://zenbudget-tracker.vercel.app/og-banner.jpg</image:loc>
+      <image:loc>https://zenbudget-tracker-app.vercel.app/og-banner.jpg</image:loc>
       <image:title>ZenBudget Financial Wisdom &amp; Modern Guides Blog</image:title>
       <image:caption>Evidence-based personal finance, budgeting strategies, and spending psychology</image:caption>
     </image:image>
     <image:image>
-      <image:loc>https://zenbudget-tracker.vercel.app/logo.png</image:loc>
+      <image:loc>https://zenbudget-tracker-app.vercel.app/logo.png</image:loc>
       <image:title>ZenBudget Official Logo</image:title>
       <image:caption>ZenBudget Logo</image:caption>
     </image:image>
@@ -206,7 +206,7 @@
 
   <!-- Blog Articles with Dedicated Image Tags for Instant Google Image Indexing -->
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/how-to-manage-personal-finances</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/how-to-manage-personal-finances</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -218,7 +218,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/50-30-20-budget-rule-india</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/50-30-20-budget-rule-india</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -230,7 +230,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/how-to-stop-impulse-spending</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/how-to-stop-impulse-spending</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -242,7 +242,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/building-emergency-fund</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/building-emergency-fund</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -254,7 +254,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/hidden-subscriptions-audit</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/hidden-subscriptions-audit</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -266,7 +266,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/benefits-of-expense-tracking-apps</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/benefits-of-expense-tracking-apps</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -278,7 +278,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/best-expense-tracker-apps-india-2026</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/best-expense-tracker-apps-india-2026</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -290,7 +290,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/couples-budgeting-shared-expenses-guide</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/couples-budgeting-shared-expenses-guide</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -302,7 +302,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/smart-money-habits-students-young-professionals</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/smart-money-habits-students-young-professionals</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -314,7 +314,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/how-to-escape-credit-card-debt-snowball-vs-avalanche</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/how-to-escape-credit-card-debt-snowball-vs-avalanche</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -326,7 +326,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/grocery-shopping-hacks-to-cut-food-bill-in-half</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/grocery-shopping-hacks-to-cut-food-bill-in-half</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -338,7 +338,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/lifestyle-inflation-trap-and-how-to-prevent-it</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/lifestyle-inflation-trap-and-how-to-prevent-it</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -350,7 +350,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/freelancer-gig-worker-budgeting-irregular-income</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/freelancer-gig-worker-budgeting-irregular-income</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -362,7 +362,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/how-to-save-first-1-lakh-rupees-roadmap</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/how-to-save-first-1-lakh-rupees-roadmap</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -374,7 +374,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/how-to-track-cash-expenses-daily-tips</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/how-to-track-cash-expenses-daily-tips</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -386,7 +386,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/tax-saving-hacks-salaried-employees-india</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/tax-saving-hacks-salaried-employees-india</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -398,7 +398,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/zero-based-budgeting-method-explained</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/zero-based-budgeting-method-explained</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -410,7 +410,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/mindful-spending-vs-extreme-frugality</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/mindful-spending-vs-extreme-frugality</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -422,7 +422,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/sip-vs-lumpsum-mutual-funds-beginners</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/sip-vs-lumpsum-mutual-funds-beginners</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -434,7 +434,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/how-to-do-a-no-spend-month-challenge</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/how-to-do-a-no-spend-month-challenge</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -446,7 +446,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/psychology-of-money-morgan-housel-summary-habits</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/psychology-of-money-morgan-housel-summary-habits</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -458,7 +458,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/rent-vs-buy-home-india-2026</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/rent-vs-buy-home-india-2026</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -470,7 +470,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/how-to-negotiate-salary-appraisal-script</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/how-to-negotiate-salary-appraisal-script</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -482,7 +482,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/how-to-protect-from-online-upi-payment-frauds</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/how-to-protect-from-online-upi-payment-frauds</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -494,7 +494,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/how-to-plan-indian-wedding-on-budget</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/how-to-plan-indian-wedding-on-budget</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -506,7 +506,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/fire-movement-india-retire-early-guide</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/fire-movement-india-retire-early-guide</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -518,7 +518,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/cibil-credit-score-improvement-guide</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/cibil-credit-score-improvement-guide</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -530,7 +530,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/gold-vs-mutual-funds-vs-real-estate-comparison</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/gold-vs-mutual-funds-vs-real-estate-comparison</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -542,7 +542,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/passive-income-ideas-india-students-professionals</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/passive-income-ideas-india-students-professionals</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -554,7 +554,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/how-to-talk-to-partner-about-money</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/how-to-talk-to-partner-about-money</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -566,7 +566,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/emergency-fund-mistakes-where-to-park-money</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/emergency-fund-mistakes-where-to-park-money</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -578,7 +578,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/how-to-cut-swiggy-zomato-food-delivery-expenses</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/how-to-cut-swiggy-zomato-food-delivery-expenses</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -590,7 +590,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/index-funds-vs-active-mutual-funds-india</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/index-funds-vs-active-mutual-funds-india</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -602,7 +602,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/freelance-tax-section-44ada-presumptive-tax</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/freelance-tax-section-44ada-presumptive-tax</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -614,7 +614,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/how-to-budget-first-salary-complete-breakdown</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/how-to-budget-first-salary-complete-breakdown</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -626,7 +626,7 @@
   </url>
 
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/blog/best-money-saving-challenges-gamified</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/blog/best-money-saving-challenges-gamified</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -639,7 +639,7 @@
 
   <!-- Privacy Policy -->
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/privacy.html</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/privacy.html</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -647,7 +647,7 @@
 
   <!-- Terms & Conditions -->
   <url>
-    <loc>https://zenbudget-tracker.vercel.app/terms.html</loc>
+    <loc>https://zenbudget-tracker-app.vercel.app/terms.html</loc>
     <lastmod>2026-10-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
