@@ -14,7 +14,8 @@ import {
   MessageCircle,
   User,
   ArrowRight,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Camera
 } from 'lucide-react';
 import { triggerSparklesExplosion } from './utils/audio';
 import { MoreToolsView } from './components/MoreToolsView';
@@ -374,6 +375,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   const [showUpdatePopup, setShowUpdatePopup] = useState<boolean>(false);
   const [updateVersion, setUpdateVersion] = useState<string>('');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState<boolean>(false);
+  const [showReceiptSourceModal, setShowReceiptSourceModal] = useState<boolean>(false);
   const [dailyLimit, setDailyLimit] = useState<number>(1000);
 
   // Dynamic Calculation for Today's Limit based on Category Budgets, Income & Expenses
@@ -1029,17 +1031,25 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       }
     }, 10000); // Check every 10 seconds
 
-    // Capacitor Native app background / resume auto-lock
+    // Capacitor Native app background / resume auto-lock (only if backgrounded for > 3 minutes)
     let appStateHandle: any = null;
     if (Capacitor.isNativePlatform()) {
       CapApp.addListener('appStateChange', (state) => {
         const lockEnabled = localStorage.getItem('zb_app_lock_enabled') === 'true';
         if (!lockEnabled) return;
         if (!state.isActive) {
-          sessionStorage.setItem('zb_was_backgrounded', 'true');
-        } else if (sessionStorage.getItem('zb_was_backgrounded') === 'true') {
+          sessionStorage.setItem('zb_bg_time', Date.now().toString());
+        } else {
+          const bgTimeStr = sessionStorage.getItem('zb_bg_time');
+          sessionStorage.removeItem('zb_bg_time');
           sessionStorage.removeItem('zb_was_backgrounded');
-          setIsLocked(true);
+          if (bgTimeStr) {
+            const bgTime = parseInt(bgTimeStr, 10);
+            if (!isNaN(bgTime) && Date.now() - bgTime >= 3 * 60 * 1000) {
+              setIsLocked(true);
+              triggerToast('🔒 ZenBudget Auto-Locked after 3 mins in background.', 'info');
+            }
+          }
         }
       }).then((handle) => {
         appStateHandle = handle;
@@ -1048,15 +1058,23 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       });
     }
 
-    // Web / PWA visibility change auto-lock (strictly opt-in)
+    // Web / PWA visibility change auto-lock (strictly opt-in, only if backgrounded for > 3 minutes)
     const handleVisibilityChange = () => {
       const lockEnabled = localStorage.getItem('zb_app_lock_enabled') === 'true';
       if (!lockEnabled) return;
       if (document.visibilityState === 'hidden') {
-        sessionStorage.setItem('zb_was_backgrounded', 'true');
-      } else if (document.visibilityState === 'visible' && sessionStorage.getItem('zb_was_backgrounded') === 'true') {
+        sessionStorage.setItem('zb_bg_time', Date.now().toString());
+      } else if (document.visibilityState === 'visible') {
+        const bgTimeStr = sessionStorage.getItem('zb_bg_time');
+        sessionStorage.removeItem('zb_bg_time');
         sessionStorage.removeItem('zb_was_backgrounded');
-        setIsLocked(true);
+        if (bgTimeStr) {
+          const bgTime = parseInt(bgTimeStr, 10);
+          if (!isNaN(bgTime) && Date.now() - bgTime >= 3 * 60 * 1000) {
+            setIsLocked(true);
+            triggerToast('🔒 ZenBudget Auto-Locked after 3 mins in background.', 'info');
+          }
+        }
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -1130,63 +1148,74 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           return;
         }
 
-        if (data && data.length > 0) {
+        const validBroadcasts = data || [];
+        const activeBroadcastIds = new Set(validBroadcasts.map(b => `broadcast_${b.id}`));
+        const activeIds = new Set(validBroadcasts.map(b => String(b.id)));
+
+        // 1. Immediately dismiss announcement popup if deleted
+        setAnnouncementPopup(current => {
+          if (current && !activeIds.has(String(current.id))) {
+            return null;
+          }
+          return current;
+        });
+
+        // 2. Reconcile notifications list
+        setNotifications(prev => {
+          // Keep only non-broadcast notifications + broadcasts that still exist in Supabase
+          const nonBroadcastNotifications = prev.filter(n => !n.id.startsWith('broadcast_'));
+          const survivingBroadcasts = prev.filter(n => n.id.startsWith('broadcast_') && activeBroadcastIds.has(n.id));
+          const updated = [...nonBroadcastNotifications, ...survivingBroadcasts];
+
           const shownKey = `zb_shown_announcements_${currentProfileId}`;
           let shownIds: string[] = [];
           try { shownIds = JSON.parse(localStorage.getItem(shownKey) || '[]'); } catch (_) {}
+          shownIds = shownIds.filter(id => activeIds.has(id));
 
-          setNotifications(prev => {
-            const updated = [...prev];
-            let modified = false;
-            let latestUnseen: typeof data[0] | null = null;
+          let latestUnseen: typeof validBroadcasts[0] | null = null;
 
-            // Iterate backward to add older ones first so newer ones end up on top
-            for (let i = data.length - 1; i >= 0; i--) {
-              const b = data[i];
-              const notificationId = `broadcast_${b.id}`;
-              
-              if (!updated.some(n => n.id === notificationId)) {
-                updated.unshift({
-                  id: notificationId,
-                  type: b.type === 'coupon' ? 'success' : (b.type || 'info'),
-                  title: b.title,
-                  desc: b.message,
-                  timestamp: b.created_at,
-                  unread: true
-                });
-                modified = true;
-              }
-              
-              // Track latest unseen for popup
-              if (!shownIds.includes(String(b.id))) {
-                latestUnseen = b;
-              }
+          // Add any new valid broadcasts not yet in updated
+          for (let i = validBroadcasts.length - 1; i >= 0; i--) {
+            const b = validBroadcasts[i];
+            const notificationId = `broadcast_${b.id}`;
+
+            if (!updated.some(n => n.id === notificationId)) {
+              updated.unshift({
+                id: notificationId,
+                type: b.type === 'coupon' ? 'success' : (b.type || 'info'),
+                title: b.title,
+                desc: b.message,
+                timestamp: b.created_at,
+                unread: true
+              });
             }
 
-            if (modified) {
-              localStorage.setItem(`zb_notifications_${currentProfileId}`, JSON.stringify(updated));
+            if (!shownIds.includes(String(b.id))) {
+              latestUnseen = b;
             }
+          }
 
-            // Show popup for the latest unseen announcement
-            if (latestUnseen) {
-              const lUnseen = latestUnseen;
-              setTimeout(() => {
-                setAnnouncementPopup({
-                  id: String(lUnseen.id),
-                  title: lUnseen.title,
-                  message: lUnseen.message,
-                  type: lUnseen.type || 'info',
-                  createdAt: lUnseen.created_at,
-                  linkUrl: lUnseen.link_url || undefined,
-                  buttonText: lUnseen.button_text || undefined
-                });
-              }, 1500);
-              localStorage.setItem(shownKey, JSON.stringify([...shownIds, String(lUnseen.id)]));
-            }
+          localStorage.setItem(`zb_notifications_${currentProfileId}`, JSON.stringify(updated));
+          localStorage.setItem(shownKey, JSON.stringify(shownIds));
 
-            return updated;
-          });
-        }
+          if (latestUnseen) {
+            const lUnseen = latestUnseen;
+            setTimeout(() => {
+              setAnnouncementPopup({
+                id: String(lUnseen.id),
+                title: lUnseen.title,
+                message: lUnseen.message,
+                type: lUnseen.type || 'info',
+                createdAt: lUnseen.created_at,
+                linkUrl: lUnseen.link_url || undefined,
+                buttonText: lUnseen.button_text || undefined
+              });
+            }, 1500);
+            localStorage.setItem(shownKey, JSON.stringify([...shownIds, String(lUnseen.id)]));
+          }
+
+          return updated;
+        });
       } catch (err) {
         console.warn('Failed to sync broadcast notifications:', err);
       }
@@ -1249,6 +1278,24 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
               }).catch(e => console.warn('Local push failed', e));
             }).catch(() => {});
           }
+        }
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'broadcast_notifications' }, (payload) => {
+        const deletedId = payload.old?.id;
+        if (deletedId) {
+          // Instantly close announcement popup if active
+          setAnnouncementPopup(current => {
+            if (current && String(current.id) === String(deletedId)) {
+              return null;
+            }
+            return current;
+          });
+          // Remove notification from notifications state and localStorage
+          setNotifications(prev => {
+            const updated = prev.filter(n => n.id !== `broadcast_${deletedId}`);
+            localStorage.setItem(`zb_notifications_${currentProfileId}`, JSON.stringify(updated));
+            return updated;
+          });
         }
       })
       .subscribe();
@@ -1397,7 +1444,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         const todayStr = new Date().toISOString().split('T')[0];
         const usedScans = Number(localStorage.getItem(`zb_gallery_scans_${todayStr}`) || 0);
         const bonusScans = Number(localStorage.getItem(`zb_gallery_bonus_${todayStr}`) || 0);
-        const maxAllowed = 2 + bonusScans;
+        const maxAllowed = 3 + bonusScans;
         if (usedScans >= maxAllowed) {
           setShowGalleryLimitModal(true);
           triggerToast(`📸 Daily free AI scan limit reached (${usedScans}/${maxAllowed}). Watch ad for +1!`, 'warning');
@@ -1463,6 +1510,9 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       input.click();
     };
     (window as any).openReceiptPicker = openReceiptPicker;
+    (window as any).openReceiptCamera = () => {
+      handleOpenReceiptCamera();
+    };
 
     // Window Drag & Drop screenshot listener
     const handleDragOver = (e: DragEvent) => e.preventDefault();
@@ -1751,11 +1801,14 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       return;
     }
 
-    if (!isCompleted && !hasDismissedSession) {
-      // Prompt one time when user unlocks app/logs in
+    const isDismissedPermanent = localStorage.getItem(`zb_financial_profile_dismissed_${effectiveId}`) === 'true';
+
+    if (!isCompleted && !hasDismissedSession && !isDismissedPermanent) {
+      // Prompt once gently after a delay, and mark as prompted so it never annoys the user again
       const timer = setTimeout(() => {
         setShowFinancialProfileModal(true);
-      }, 700);
+        localStorage.setItem(`zb_financial_profile_dismissed_${effectiveId}`, 'true');
+      }, 1500);
       return () => clearTimeout(timer);
     }
   }, [isLocked, isAppLoading, showOnboarding, currentProfileId]);
@@ -2006,20 +2059,13 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
     const syncAdminProfile = async () => {
       try {
-        const { data: profData, error: profErr } = await supabase
+        const { data: profResult, error: profErr } = await supabase
           .from('profiles')
           .select('subscription_tier, premium_expires_at, has_scan_pay_access, is_admin_unlocked, status, pin, name')
           .eq('id', currentProfileId)
           .maybeSingle();
-
-        if (!profData && !profErr && currentProfileId && currentProfileId !== 'local') {
-          const { data: authSession } = await supabase.auth.getSession();
-          if (authSession?.session) {
-            await performCompleteLogoutAndDataWipe();
-            return;
-          }
-        }
-
+        const profData = profResult as any;
+        // Safe read: do not wipe data if network/RLS temporarily returns null
         if (profData) {
           if (profData.subscription_tier) {
             setSubscriptionTier(profData.subscription_tier);
@@ -2045,13 +2091,13 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     };
 
     syncAdminProfile();
-    const interval = setInterval(syncAdminProfile, 3000);
+    const interval = setInterval(syncAdminProfile, 8000);
 
     const channel = supabase
       .channel(`admin_sync_${currentProfileId}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${currentProfileId}` }, (payload) => {
         if (payload.new) {
-          const p = payload.new;
+          const p = payload.new as any;
           if (p.subscription_tier) {
             setSubscriptionTier(p.subscription_tier);
             localStorage.setItem('zb_subscription_tier', p.subscription_tier);
@@ -2071,8 +2117,10 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           }
         }
       })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'profiles', filter: `id=eq.${currentProfileId}` }, () => {
-        performCompleteLogoutAndDataWipe();
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'profiles', filter: `id=eq.${currentProfileId}` }, (payload: any) => {
+        if (payload?.old?.id === currentProfileId) {
+          performCompleteLogoutAndDataWipe();
+        }
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => {
         fetchDataFromSupabase();
@@ -2181,14 +2229,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         return;
       }
 
-      if (!profData && !profErr && currentProfileId && currentProfileId !== 'local') {
-        const { data: authSession } = await supabase.auth.getSession();
-        if (authSession?.session) {
-          await performCompleteLogoutAndDataWipe();
-          return;
-        }
-      }
-
+      // Safe read: avoid destructive auto-wipe on temporary null query results
       if (profData) {
         let userCoupleCode = profData.couple_code;
         if (!userCoupleCode) {
@@ -2689,8 +2730,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
       if (cycle === 'yearly') {
         tier = 'premium_yearly';
-        // 1 Year (365 days) + 3 Months Free Bonus (90 days) = 455 days (15 months total!)
-        expiryDate = new Date(Date.now() + 455 * 24 * 60 * 60 * 1000).toISOString();
+        // 1 Year (365 days) + 1 Month Free Bonus (30 days) = 395 days (13 months total!)
+        expiryDate = new Date(Date.now() + 395 * 24 * 60 * 60 * 1000).toISOString();
       } else if (cycle === 'lifetime') {
         tier = 'premium_lifetime';
         expiryDate = null;
@@ -2758,7 +2799,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
       setSubscriptionTier(tier);
       setPremiumExpiresAt(expiryDate);
-      triggerToast(cycle === 'yearly' ? 'Upgrade Successful! 15 Months Premium Unlocked (12 + 3 Mo Free Bonus!)' : 'Upgrade Successful! Premium features unlocked.', 'success');
+      triggerToast(cycle === 'yearly' ? 'Upgrade Successful! 13 Months Premium Unlocked (12 + 1 Mo Free Bonus!)' : 'Upgrade Successful! Premium features unlocked.', 'success');
       confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
     } catch (err: any) {
       triggerToast(err.message || 'Failed to update database status.', 'warning');
@@ -3000,7 +3041,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     const todayStr = new Date().toISOString().split('T')[0];
     const usedScans = Number(localStorage.getItem(`zb_gallery_scans_${todayStr}`) || 0);
     const bonusScans = Number(localStorage.getItem(`zb_gallery_bonus_${todayStr}`) || 0);
-    const maxAllowed = 2 + bonusScans;
+    const maxAllowed = 3 + bonusScans;
     const isLimitReached = !isPremiumUser && usedScans >= maxAllowed;
     return { todayStr, usedScans, bonusScans, maxAllowed, isLimitReached };
   };
@@ -3014,6 +3055,54 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       return;
     }
     (window as any).openReceiptPicker?.();
+  };
+
+  const handleOpenReceiptCamera = async () => {
+    if (checkExpiredGuard('scan receipt camera')) return;
+    const { isLimitReached, usedScans, maxAllowed } = getGalleryDailyLimitState();
+    if (isLimitReached) {
+      setShowGalleryLimitModal(true);
+      triggerToast(`📸 Daily free AI scan limit reached (${usedScans}/${maxAllowed}). Watch ad for +1!`, 'warning');
+      return;
+    }
+
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const { Camera: CapCamera, CameraResultType, CameraSource } = await import('@capacitor/camera');
+        const photo = await CapCamera.getPhoto({
+          quality: 90,
+          allowEditing: false,
+          resultType: CameraResultType.DataUrl,
+          source: CameraSource.Camera
+        });
+        if (photo?.dataUrl) {
+          (window as any).handleIncomingSharedContent?.({ type: 'image', data: photo.dataUrl });
+        }
+      } catch (camErr: any) {
+        if (!camErr?.message?.includes('cancel') && !camErr?.message?.includes('denied')) {
+          console.warn('ZenBudget Camera error:', camErr);
+          triggerToast('Camera could not be opened: ' + (camErr?.message || 'Error'), 'warning');
+        }
+      }
+    } else {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.setAttribute('capture', 'environment');
+      input.onchange = (e: any) => {
+        const file = e.target?.files?.[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            if (reader.result) {
+              (window as any).handleIncomingSharedContent?.({ type: 'image', data: reader.result as string });
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+      input.click();
+    }
   };
 
   const handleWatchGalleryLimitAd = () => {
@@ -3966,9 +4055,10 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   };
 
   if (isLocked) {
+    const isMobileNative = Capacitor.isNativePlatform() || (typeof window !== 'undefined' && window.innerWidth <= 540);
     return (
       <div style={{ width: '100vw', minHeight: '100vh', display: 'flex', justifyContent: 'center', background: 'var(--bg-base)' }}>
-        <div className="app-main-wrapper" style={{ margin: '0 auto', maxWidth: '520px', width: '100%', position: 'relative', minHeight: '100vh', background: 'var(--bg-base)', boxShadow: '0 0 20px rgba(0,0,0,0.4)' }}>
+        <div className="app-main-wrapper" style={{ margin: '0 auto', maxWidth: isMobileNative ? '100%' : '520px', width: '100%', position: 'relative', minHeight: '100vh', background: 'var(--bg-base)', boxShadow: isMobileNative ? 'none' : '0 0 20px rgba(0,0,0,0.4)' }}>
           <LockScreen onBackToLanding={onBackToLanding} onUnlock={(profileId, name, tier, trialStart, pin, premiumExpires, trialExpire) => {
       const validProfileId = profileId || localStorage.getItem('zb_profile_id') || 'local';
       const validName = name || localStorage.getItem('zb_user_name') || 'User';
@@ -4026,6 +4116,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         userTracker.recordLogin(validProfileId, validName, localStorage.getItem('zb_user_email') || '');
       } catch (_) {}
 
+      sessionStorage.removeItem('zb_bg_time');
+      sessionStorage.removeItem('zb_was_backgrounded');
       setIsLocked(false);
       setIsAppLoading(false);
       fetchDataFromSupabase().catch(() => {});
@@ -4183,13 +4275,13 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             <QrCode size={18} strokeWidth={2.5} />
           </button>
 
-          {/* Screenshot / Netbanking Receipt Scanner Button */}
+          {/* Screenshot / Netbanking / Camera Receipt Scanner Button */}
           <button
-            onClick={handleOpenGalleryReceiptPicker}
-            title={isPremiumUser ? "Scan Screenshot from Gallery (Unlimited Pro)" : "Scan Screenshot from Gallery (2 Free Daily Scans)"}
+            onClick={() => setShowReceiptSourceModal(true)}
+            title="Scan Receipt / Bill (Camera & Gallery)"
             style={{
-              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.12) 100%)',
-              border: '1px solid rgba(16, 185, 129, 0.3)',
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(6, 182, 212, 0.14) 100%)',
+              border: '1px solid rgba(16, 185, 129, 0.35)',
               borderRadius: '12px',
               width: '36px',
               height: '36px',
@@ -4198,11 +4290,11 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 8px rgba(16, 185, 129, 0.15)',
               transition: 'all 0.15s ease'
             }}
           >
-            <ImageIcon size={16} />
+            <Camera size={17} />
           </button>
 
           {/* Notifications Button */}
@@ -4408,6 +4500,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             onOpenProfile={() => setActiveView('profile')}
             onDeleteAccount={handleDeleteBankAccount}
             onSaveTransaction={handleSaveTransaction}
+            onScanReceiptClick={() => setShowReceiptSourceModal(true)}
             familyMembers={familyMembers}
             partnerName={partnerName || undefined}
             partnerId={partnerId || undefined}
@@ -4481,8 +4574,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
               setTheme(newTheme);
               localStorage.setItem('zb_theme', newTheme);
             }}
-            onBack={() => setActiveView('more')}
-            onLogout={() => setShowLogoutConfirmModal(true)}
+            onBack={() => setActiveView('dashboard')}
+            onLogout={() => setShowLogoutConfirm(true)}
           />
         )}
         {activeView === 'wishlist' && (
@@ -4517,7 +4610,6 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           <MoreToolsView
             key={langKey}
             onNavigateToImpulseBlocker={() => {
-              if (checkExpiredGuard('use Impulse Blocker')) return;
               if (!isPremiumUser) {
                 admobService.showInterstitial(isPremiumUser, 20000);
               }
@@ -4910,15 +5002,15 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(0, 0, 0, 0.88)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
+            background: 'rgba(0, 0, 0, 0.55)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 11000,
             padding: '20px',
-            animation: 'fadeIn 0.3s ease-out'
+            animation: 'fadeIn 0.25s ease-out'
           }}
         >
           <div style={{
@@ -5460,12 +5552,11 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           currencySymbol={currencySymbol}
           userName={userName}
           accounts={accounts}
-          isPremiumUser={!isSubscriptionExpired()}
+          isPremiumUser={isPremiumUser}
           onOpenSubscriptionModal={() => {
             setIsHelpOpen(false);
-            setIsSubBlocker(isSubscriptionExpired());
+            setIsSubBlocker(false);
             setIsSubModalOpen(true);
-            triggerToast('Free trial expired! Upgrade to Premium to chat with ZenBot AI Coach.', 'warning');
           }}
         />
       )}
@@ -5549,6 +5640,196 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             setIsModalOpen(true);
           }}
         />
+      )}
+
+      {/* Receipt / Bill Scan Source Selector Modal (Camera vs Gallery) */}
+      {showReceiptSourceModal && (
+        <div 
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            background: 'rgba(0, 0, 0, 0.55)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowReceiptSourceModal(false);
+          }}
+        >
+          <div 
+            className="animate-fade-in"
+            style={{
+              width: '100%',
+              maxWidth: '380px',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-card)',
+              borderRadius: '24px',
+              padding: '22px 20px',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px'
+            }}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  🧾 {language === 'hi' ? 'रसीद / बिल स्कैन करें' : 'Scan Receipt / Bill'}
+                </h3>
+                <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '4px 0 0 0', fontWeight: 500 }}>
+                  {language === 'hi' ? 'AI विजन से सीधे अमाउंट और मर्चेंट निकालें' : 'Extract merchant, amount & category instantly'}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowReceiptSourceModal(false)}
+                style={{
+                  background: 'var(--bg-input)',
+                  border: '1px solid var(--border-input)',
+                  borderRadius: '12px',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Daily limit badge */}
+            <div style={{
+              background: isPremiumUser ? 'rgba(34, 197, 94, 0.12)' : 'rgba(245, 158, 11, 0.12)',
+              border: isPremiumUser ? '1px solid rgba(34, 197, 94, 0.25)' : '1px solid rgba(245, 158, 11, 0.25)',
+              borderRadius: '12px',
+              padding: '8px 12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontSize: '11.5px',
+              fontWeight: 700,
+              color: isPremiumUser ? '#22c55e' : '#f59e0b'
+            }}>
+              <span>{isPremiumUser ? '👑 PRO VIP: Unlimited Scans' : `📸 Free Daily Scans: ${getGalleryDailyLimitState().usedScans}/${getGalleryDailyLimitState().maxAllowed}`}</span>
+              <span style={{ fontSize: '11px', opacity: 0.9 }}>AI Vision ⚡</span>
+            </div>
+
+            {/* Options */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {/* Option 1: Live Camera */}
+              <button
+                onClick={() => {
+                  setShowReceiptSourceModal(false);
+                  setTimeout(() => handleOpenReceiptCamera(), 80);
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '14px',
+                  padding: '14px 16px',
+                  borderRadius: '16px',
+                  border: '1.5px solid #22c55e',
+                  background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(16, 185, 129, 0.08) 100%)',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  boxShadow: '0 4px 14px rgba(34, 197, 94, 0.15)',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <div style={{
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '14px',
+                  background: '#22c55e',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#fff',
+                  flexShrink: 0,
+                  boxShadow: '0 4px 10px rgba(34, 197, 94, 0.35)'
+                }}>
+                  <Camera size={22} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                  <span style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--text-primary)' }}>
+                    📷 {language === 'hi' ? 'कैमरा से लाइव फोटो लें' : 'Take Photo (Camera)'}
+                  </span>
+                  <span style={{ fontSize: '11.5px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                    {language === 'hi' ? 'कागजी रसीद, रेस्टोरेंट या दुकान का बिल' : 'Snap printed receipt, food or shop bill'}
+                  </span>
+                </div>
+              </button>
+
+              {/* Option 2: Gallery Screenshot */}
+              <button
+                onClick={() => {
+                  setShowReceiptSourceModal(false);
+                  setTimeout(() => handleOpenGalleryReceiptPicker(), 80);
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '14px',
+                  padding: '14px 16px',
+                  borderRadius: '16px',
+                  border: '1px solid var(--border-input)',
+                  background: 'var(--bg-input)',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <div style={{
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '14px',
+                  background: 'rgba(6, 182, 212, 0.15)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#06b6d4',
+                  flexShrink: 0
+                }}>
+                  <ImageIcon size={22} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                  <span style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--text-primary)' }}>
+                    🖼️ {language === 'hi' ? 'गैलरी / स्क्रीनशॉट चुनें' : 'Choose from Gallery'}
+                  </span>
+                  <span style={{ fontSize: '11.5px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                    {language === 'hi' ? 'GPay, Paytm, PhonePe या बैंक स्क्रीनशॉट' : 'Upload payment screenshot or saved image'}
+                  </span>
+                </div>
+              </button>
+            </div>
+
+            {/* Cancel Button */}
+            <button
+              onClick={() => setShowReceiptSourceModal(false)}
+              style={{
+                padding: '11px',
+                borderRadius: '14px',
+                border: '1px solid var(--border-input)',
+                background: 'transparent',
+                color: 'var(--text-secondary)',
+                fontSize: '13px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                marginTop: '4px'
+              }}
+            >
+              {language === 'hi' ? 'रद्द करें' : 'Cancel'}
+            </button>
+          </div>
+        </div>
       )}
 
       {showStoryReport && (
@@ -5636,17 +5917,26 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
       {/* Trial Expiry Urgency Countdown Modal (<= 3 days remaining) */}
       {showTrialUrgencyModal && subscriptionTier === 'trial' && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 9998,
-          backgroundColor: 'rgba(0,0,0,0.8)',
-          backdropFilter: 'blur(10px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '1.25rem'
-        }}>
+        <div 
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowTrialUrgencyModal(false);
+              localStorage.setItem(`zb_dismissed_trial_urgency_${getRemainingDays()}`, 'true');
+            }
+          }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9998,
+            backgroundColor: 'rgba(0, 0, 0, 0.55)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1.25rem',
+            animation: 'fadeIn 0.25s ease-out'
+          }}>
           <div style={{
             maxWidth: '420px',
             width: '100%',
@@ -5825,17 +6115,26 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
       {/* Smart 5-Star Rating Prompt Modal */}
       {showRatingModal && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 9998,
-          backgroundColor: 'rgba(0,0,0,0.8)',
-          backdropFilter: 'blur(10px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '1.25rem'
-        }}>
+        <div 
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowRatingModal(false);
+              localStorage.setItem('zb_rating_dismissed', 'true');
+            }
+          }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9998,
+            backgroundColor: 'rgba(0, 0, 0, 0.55)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1.25rem',
+            animation: 'fadeIn 0.25s ease-out'
+          }}>
           <div style={{
             maxWidth: '400px',
             width: '100%',

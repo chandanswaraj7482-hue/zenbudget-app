@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Sparkles, Check, Hourglass, Loader2, ShieldCheck } from 'lucide-react';
+import { X, Sparkles, Check, Hourglass, Loader2, ShieldCheck, Zap } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { supabase } from '../supabaseClient';
 import { launchCashfreeCheckout } from '../utils/cashfreeHelper';
@@ -376,6 +376,178 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     return 'Get Lifetime Access';
   };
 
+  const launchNativeUpi = async (targetApp: 'phonepe' | 'gpay' | 'any') => {
+    const currentProfileId = localStorage.getItem('zb_profile_id') || 'usr';
+    const note = `ZenBudget_${billingCycle}_${currentProfileId.slice(0, 8)}`;
+    const universalUpi = `upi://pay?pa=chandanswaraj7482@okicici&pn=${encodeURIComponent("ZenBudget")}&am=${upiAmountINR}&cu=INR&tn=${encodeURIComponent(note)}`;
+    const phonepeUpi = `phonepe://pay?pa=chandanswaraj7482@okicici&pn=${encodeURIComponent("ZenBudget")}&am=${upiAmountINR}&cu=INR&tn=${encodeURIComponent(note)}`;
+    const gpayUpi = `tez://upi/pay?pa=chandanswaraj7482@okicici&pn=${encodeURIComponent("ZenBudget")}&am=${upiAmountINR}&cu=INR&tn=${encodeURIComponent(note)}`;
+
+    const selectedUri = targetApp === 'phonepe' ? phonepeUpi : (targetApp === 'gpay' ? gpayUpi : universalUpi);
+
+    setPaymentStep('processing');
+
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const { AppLauncher } = await import('@capacitor/app-launcher');
+        const canOpen = await AppLauncher.canOpenUrl({ url: selectedUri }).then(r => r.value).catch(() => false);
+        if (canOpen) {
+          await AppLauncher.openUrl({ url: selectedUri });
+          return;
+        }
+        await AppLauncher.openUrl({ url: universalUpi });
+        return;
+      } catch (err) {
+        console.warn('AppLauncher intent failed:', err);
+      }
+    }
+
+    try {
+      window.location.href = selectedUri;
+      setTimeout(() => {
+        try { window.location.href = universalUpi; } catch (_) {}
+      }, 1200);
+    } catch (e) {
+      window.location.href = universalUpi;
+    }
+  };
+
+  const handleManualCompletion = async () => {
+    const profileId = localStorage.getItem('zb_profile_id') || '';
+    const targetTier = billingCycle === 'yearly' ? 'premium_yearly' : (billingCycle === 'lifetime' ? 'premium_lifetime' : 'premium_monthly');
+    const durationDays = billingCycle === 'yearly' ? 395 : (billingCycle === 'lifetime' ? 36500 : 30);
+    const newExpiresAt = new Date(Date.now() + durationDays * 86400000).toISOString();
+
+    localStorage.setItem('zb_subscription_tier', targetTier);
+    localStorage.setItem('zb_premium_expires_at', newExpiresAt);
+    if (profileId) {
+      try {
+        await supabase.from('profiles').update({
+          subscription_tier: targetTier,
+          premium_expires_at: newExpiresAt,
+          updated_at: new Date().toISOString()
+        }).eq('id', profileId);
+      } catch (e) {
+        console.warn('Profile tier update failed:', e);
+      }
+    }
+    setPaymentStep('success');
+    try { triggerFireworksCelebration(); } catch (_) {}
+    setTimeout(() => {
+      onUpgradeSuccess(billingCycle);
+      onClose();
+      setPaymentStep('details');
+    }, 1800);
+  };
+
+  const handleWebPayment = async () => {
+    setPaymentStep('processing');
+    try {
+      const currentProfileId = localStorage.getItem('zb_profile_id');
+      const userEmail = localStorage.getItem('zb_user_email') || 'user@example.com';
+
+      if (!currentProfileId) {
+        throw new Error('Please login to upgrade to premium.');
+      }
+
+      let payment_session_id = '';
+      let responseText = '';
+
+      try {
+        const response = await fetch(`/api/create-payment-session`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: upiAmountINR,
+            planType: billingCycle,
+            email: userEmail,
+            phone: localStorage.getItem('zb_user_phone') || '',
+            userId: currentProfileId
+          })
+        });
+        responseText = await response.text();
+      } catch (fetchErr) {
+        console.warn('Local API fetch failed, attempting fallback:', fetchErr);
+      }
+
+      if (!responseText || responseText.trim().startsWith('<')) {
+        try {
+          const response = await fetch(`https://zenbudget-tracker.vercel.app/api/create-payment-session`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              amount: upiAmountINR,
+              planType: billingCycle,
+              email: userEmail,
+              phone: localStorage.getItem('zb_user_phone') || '',
+              userId: currentProfileId
+            })
+          });
+          responseText = await response.text();
+        } catch (e) {
+          console.warn('Fallback function fetch failed:', e);
+        }
+      }
+
+      if (responseText && !responseText.trim().startsWith('<')) {
+        try {
+          const data = JSON.parse(responseText);
+          if (data.error) throw new Error(data.error);
+          if (data.payment_session_id) {
+            payment_session_id = data.payment_session_id;
+            if (data.environment) {
+              (window as any)._lastCfEnv = data.environment;
+            }
+          }
+        } catch (jsonErr: any) {
+          console.warn('JSON parsing error:', jsonErr);
+          throw new Error(jsonErr.message || 'Could not parse payment session response.');
+        }
+      }
+
+      if (!payment_session_id) {
+        throw new Error('Could not create payment order. Please try again.');
+      }
+
+      if (appliedCoupon) {
+        localStorage.setItem('zb_pending_coupon', appliedCoupon.code);
+      }
+
+      const isNative = Capacitor.isNativePlatform();
+      const payUrl = `https://zenbudget-tracker.vercel.app/pay.html?session_id=${payment_session_id}&amount=${upiAmountINR}&plan=${billingCycle}`;
+
+      if (isNative) {
+        try {
+          await Browser.open({ url: payUrl });
+        } catch (browserErr) {
+          try { window.open(payUrl, '_system'); } catch (e) { window.location.href = payUrl; }
+        }
+        setPaymentStep('processing');
+      } else {
+        setPaymentStep('processing');
+        launchCashfreeCheckout(
+          payment_session_id,
+          (result: any) => {
+            setPaymentStep('processing');
+          },
+          (err: any) => {
+            setPaymentStep('details');
+            try { playErrorSound(); } catch (_) {}
+            window.dispatchEvent(new CustomEvent('toast-alert', { detail: { message: 'Payment incomplete or cancelled. Please try again.', type: 'error' } }));
+            if (err && typeof err === 'string' && err.includes('SDK')) {
+              launchNativeUpi('any');
+            }
+          },
+          (window as any)._lastCfEnv
+        );
+      }
+    } catch (sdkErr: any) {
+      setPaymentStep('details');
+      setCouponMessage(sdkErr.message || 'Payment Gateway connection failed. Please try again.');
+      setCouponError(true);
+    }
+  };
+
   return (
     <div 
       className="subscription-modal-wrapper"
@@ -385,9 +557,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(5, 10, 20, 0.88)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
+        backgroundColor: 'rgba(0, 0, 0, 0.65)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -446,10 +618,116 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
         {/* PROCESSING STEP */}
         {paymentStep === 'processing' && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 0', gap: '20px' }}>
-            <Loader2 size={48} className="animate-spin" style={{ color: 'var(--secondary)' }} />
-            <h3 style={{ fontSize: '18px', fontWeight: 700 }}>Verifying Transaction...</h3>
-            <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Securing your credentials, please wait.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 8px', gap: '16px', textAlign: 'center' }}>
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(95, 37, 159, 0.25) 0%, rgba(16, 185, 129, 0.15) 100%)',
+              border: '2px solid rgba(95, 37, 159, 0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 0 30px rgba(95, 37, 159, 0.3)'
+            }}>
+              <Loader2 size={32} className="animate-spin" style={{ color: '#a855f7' }} />
+            </div>
+
+            <div>
+              <h3 style={{ fontSize: '19px', fontWeight: 800, margin: '0 0 6px 0', color: '#fff' }}>
+                Complete Payment in PhonePe / UPI
+              </h3>
+              <p style={{ fontSize: '12.5px', color: '#94a3b8', margin: 0, lineHeight: 1.5 }}>
+                Amount: <strong style={{ color: '#34d399' }}>₹{upiAmountINR}</strong> ({billingCycle.toUpperCase()} Plan)<br />
+                Complete payment in your UPI app, then tap below.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', maxWidth: '340px', marginTop: '6px' }}>
+              <button
+                type="button"
+                onClick={() => launchNativeUpi('phonepe')}
+                style={{
+                  width: '100%',
+                  padding: '13px 16px',
+                  borderRadius: '14px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #5f259f 0%, #4a1d7c 100%)',
+                  color: '#fff',
+                  fontSize: '14px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 18px rgba(95, 37, 159, 0.45)'
+                }}
+              >
+                <span>🟣 Open PhonePe App</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => launchNativeUpi('any')}
+                style={{
+                  width: '100%',
+                  padding: '11px 16px',
+                  borderRadius: '14px',
+                  border: '1px solid rgba(16, 185, 129, 0.35)',
+                  background: 'rgba(16, 185, 129, 0.12)',
+                  color: '#34d399',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+              >
+                <Zap size={15} /> <span>Open Any UPI App (GPay / Paytm)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleManualCompletion}
+                style={{
+                  width: '100%',
+                  padding: '13px 16px',
+                  borderRadius: '14px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  color: '#fff',
+                  fontSize: '14px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 18px rgba(16, 185, 129, 0.4)'
+                }}
+              >
+                <span>✅ I've Completed the ₹{upiAmountINR} Payment</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPaymentStep('details')}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#94a3b8',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  padding: '6px',
+                  marginTop: '4px'
+                }}
+              >
+                ← Change Plan / Back
+              </button>
+            </div>
           </div>
         )}
 
@@ -600,13 +878,13 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   letterSpacing: '0.05em',
                   boxShadow: '0 2px 8px rgba(16, 185, 129, 0.4)'
                 }}>
-                  🎁 BEST VALUE · +3 MONTHS FREE!
+                  🎁 BEST VALUE · +1 MONTH FREE!
                 </div>
                 <div>
                   <div style={{ fontWeight: 800, fontSize: '14px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    Yearly <span style={{ fontSize: '10px', background: 'rgba(16, 185, 129, 0.18)', color: '#34d399', padding: '1px 6px', borderRadius: '6px', fontWeight: 800 }}>12 + 3 Mo Free</span>
+                    Yearly <span style={{ fontSize: '10px', background: 'rgba(16, 185, 129, 0.18)', color: '#34d399', padding: '1px 6px', borderRadius: '6px', fontWeight: 800 }}>12 + 1 Mo Free</span>
                   </div>
-                  <div style={{ fontSize: '12px', color: '#10b981', fontWeight: 600 }}>15 Months Total Access (Includes 3 Mo Bonus!)</div>
+                  <div style={{ fontSize: '12px', color: '#10b981', fontWeight: 600 }}>13 Months Total Access (Includes 1 Mo Bonus!)</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   {getPlanPriceDisplay('yearly')}
@@ -785,147 +1063,36 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <button
                 type="button"
-                onClick={async () => {
-                  setPaymentStep('processing');
-                  try {
-                    const currentProfileId = localStorage.getItem('zb_profile_id');
-                    const userEmail = localStorage.getItem('zb_user_email') || 'user@example.com';
-                    
-                    if (!currentProfileId) {
-                      throw new Error('Please login to upgrade to premium.');
-                    }
-
-                    let payment_session_id = '';
-                    let responseText = '';
-
-                    // Try local /api/create-payment-session endpoint first
-                    try {
-                      const response = await fetch(`/api/create-payment-session`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          amount: upiAmountINR,
-                          planType: billingCycle,
-                          email: userEmail,
-                          phone: localStorage.getItem('zb_user_phone') || '',
-                          userId: currentProfileId
-                        })
-                      });
-                      responseText = await response.text();
-                    } catch (fetchErr) {
-                      console.warn('Local API fetch failed, attempting fallback:', fetchErr);
-                    }
-
-                    // Fallback to main app serverless endpoint
-                    if (!responseText || responseText.trim().startsWith('<')) {
-                      try {
-                        const response = await fetch(`https://zenbudget-tracker.vercel.app/api/create-payment-session`, {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({
-                            amount: upiAmountINR,
-                            planType: billingCycle,
-                            email: userEmail,
-                            phone: localStorage.getItem('zb_user_phone') || '',
-                            userId: currentProfileId
-                          })
-                        });
-                        responseText = await response.text();
-                      } catch (e) {
-                        console.warn('Fallback function fetch failed:', e);
-                      }
-                    }
-
-                    if (responseText && !responseText.trim().startsWith('<')) {
-                      try {
-                        const data = JSON.parse(responseText);
-                        if (data.error) {
-                          throw new Error(data.error);
-                        }
-                        if (data.payment_session_id) {
-                          payment_session_id = data.payment_session_id;
-                          // If backend returned environment, save it
-                          if (data.environment) {
-                            (window as any)._lastCfEnv = data.environment;
-                          }
-                        }
-                      } catch (jsonErr: any) {
-                        console.warn('JSON parsing error:', jsonErr);
-                        throw new Error(jsonErr.message || 'Could not parse payment session response.');
-                      }
-                    }
-
-                    if (!payment_session_id) {
-                      throw new Error('Could not create payment order. Please try again.');
-                    }
-
-                    if (appliedCoupon) {
-                      localStorage.setItem('zb_pending_coupon', appliedCoupon.code);
-                    }
-
-                    const isNative = Capacitor.isNativePlatform();
-                    const payUrl = `https://zenbudget-tracker.vercel.app/pay.html?session_id=${payment_session_id}`;
-
-                    if (isNative) {
-                      // Native App: Open secure checkout via Browser plugin
-                      try {
-                        await Browser.open({ url: payUrl });
-                      } catch (browserErr) {
-                        try { window.open(payUrl, '_system'); } catch (e) { window.location.href = payUrl; }
-                      }
-                      // Stay in processing — the polling useEffect will detect the webhook update
-                      setPaymentStep('processing');
-                    } else {
-                      // Web / Mobile Browser: Launch Drop-in Checkout Modal
-                      setPaymentStep('processing');
-                      launchCashfreeCheckout(
-                        payment_session_id,
-                        (result: any) => {
-                          setPaymentStep('processing');
-                        },
-                        (err: any) => {
-                          setPaymentStep('details');
-                          try { playErrorSound(); } catch (_) {}
-                          window.dispatchEvent(new CustomEvent('toast-alert', { detail: { message: 'Payment incomplete or cancelled. Please try again.', type: 'error' } }));
-                          if (err && typeof err === 'string' && err.includes('SDK')) {
-                            // Direct UPI Fallback intent if SDK not loaded
-                            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-                            if (isMobile) {
-                              const rawUrl = `upi://pay?pa=chandanswaraj7482@okicici&pn=ZenBudget&am=${upiAmountINR}&cu=INR&tn=ZenBudget_Subscription`;
-                              try { window.location.href = rawUrl; } catch (e) {}
-                            }
-                          }
-                        },
-                        (window as any)._lastCfEnv
-                      );
-                    }
-                  } catch (sdkErr: any) {
-                    setPaymentStep('details');
-                    setCouponMessage(sdkErr.message || 'Payment Gateway connection failed. Please try again.');
-                    setCouponError(true);
-                  }
-                }}
+                onClick={handleWebPayment}
                 style={{
-                  padding: '14px',
+                  padding: '16px',
                   borderRadius: '16px',
                   border: 'none',
                   background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                   color: '#fff',
-                  fontSize: '14px',
+                  fontSize: '15px',
                   fontWeight: 800,
                   cursor: 'pointer',
-                  boxShadow: '0 4px 20px rgba(16, 185, 129, 0.3)',
+                  boxShadow: '0 6px 24px rgba(16, 185, 129, 0.4)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  gap: '10px',
+                  transition: 'all 0.2s ease'
                 }}
+                className="hover-lift"
               >
-                {getCtaText()} ({currency === 'INR' ? `₹${upiAmountINR}` : `${priceInfo.symbol}${priceInfo.amount}`})
+                <Zap size={18} />
+                <span>
+                  {currency === 'INR'
+                    ? `Proceed to Pay ₹${upiAmountINR} via Cashfree`
+                    : `${getCtaText()} (${priceInfo.symbol}${priceInfo.amount})`}
+                </span>
               </button>
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '11px', color: '#94a3b8' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '11.5px', color: '#94a3b8', marginTop: '4px' }}>
                 <ShieldCheck size={14} color="#10b981" />
-                <span>256-Bit Bank-Grade Encrypted Secure Payment</span>
+                <span>Instant UPI, Cards & NetBanking via Cashfree · 256-Bit Bank-Grade Secure</span>
               </div>
               <div style={{ textAlign: 'center', fontSize: '9px', color: 'var(--text-muted)', marginTop: '4px', fontStyle: 'italic' }}>
                 * Auto-pay is automatically enabled via secure e-mandate. You can cancel anytime.

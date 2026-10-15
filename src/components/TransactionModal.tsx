@@ -14,6 +14,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Camera as CameraIcon,
+  Image as ImageIcon,
   Lock,
   Clock,
   Briefcase,
@@ -99,6 +100,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   const [isScanning, setIsScanning] = useState(false);
   const [scanMessage, setScanMessage] = useState<{text: string; type: 'success' | 'error' | 'info'} | null>(null);
   const receiptFileRef = React.useRef<HTMLInputElement>(null);
+  const receiptCameraRef = React.useRef<HTMLInputElement>(null);
+  const receiptGalleryRef = React.useRef<HTMLInputElement>(null);
 
   // QR Code Scanner States
   const [isQrScanning, setIsQrScanning] = useState(false);
@@ -181,7 +184,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   const processReceiptBase64 = async (base64Data: string) => {
     setScanMessage({ text: '🔍 Analyzing receipt with AI Vision...', type: 'info' });
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -289,7 +292,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     }
   };
 
-  const handleCameraScan = async (skipAccessCheck = false) => {
+  const handleCameraScan = async (source: 'camera' | 'gallery' = 'camera', skipAccessCheck = false) => {
     if (!skipAccessCheck && !hasReceiptAccess) {
       setShowReceiptAdModal(true);
       return;
@@ -297,7 +300,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     setIsScanning(true);
     setScanMessage(null);
     try {
-      // On native Capacitor: use camera. On web: trigger file picker
+      // On native Capacitor: use camera or gallery directly. On web: trigger corresponding file input
       if (Capacitor.isNativePlatform()) {
         let image;
         try {
@@ -305,7 +308,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             quality: 85,
             allowEditing: false,
             resultType: CameraResultType.Base64,
-            source: CameraSource.Prompt
+            source: source === 'camera' ? CameraSource.Camera : CameraSource.Photos
           });
         } catch (camErr: any) {
           if (camErr?.message?.includes('cancel') || camErr?.message?.includes('denied')) {
@@ -318,8 +321,20 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         if (!base64Data) throw new Error('Failed to read image data.');
         await processReceiptBase64(base64Data);
       } else {
-        // Web: open file picker
-        receiptFileRef.current?.click();
+        // Web: trigger camera or gallery input
+        if (source === 'camera') {
+          if (receiptCameraRef.current) {
+            receiptCameraRef.current.click();
+          } else {
+            receiptFileRef.current?.click();
+          }
+        } else {
+          if (receiptGalleryRef.current) {
+            receiptGalleryRef.current.click();
+          } else {
+            receiptFileRef.current?.click();
+          }
+        }
         setIsScanning(false); // will restart inside handleReceiptFileUpload
         return;
       }
@@ -363,7 +378,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
       setQrScanError('Reading QR code / Merchant details with AI...');
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -613,33 +628,93 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           
           {/* Scan Receipt: Only show when creating a NEW transaction */}
           {!editingTransaction && type === 'expense' && (
-            <>
-              <button 
-                type="button"
-                onClick={handleCameraScan}
-                disabled={isScanning}
-                className="glass-panel"
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  gap: '8px', 
-                  padding: '16px', 
-                  border: '1px solid var(--primary)', 
-                  background: 'rgba(34, 197, 94, 0.1)', 
-                  cursor: isScanning ? 'not-allowed' : 'pointer', 
-                  borderRadius: '16px', 
-                  color: 'var(--primary)', 
-                  fontWeight: 700,
-                  opacity: isScanning ? 0.7 : 1,
-                  width: '100%'
-                }}
-              >
-                <CameraIcon size={20} className={isScanning ? "animate-spin" : ""} />
-                <span>{isScanning ? 'Scanning Receipt...' : '📷 Scan Receipt (Camera / Upload)'}</span>
-              </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2px' }}>
+                <span style={{ fontSize: '11.5px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  🧾 Scan Receipt / Bill
+                </span>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: hasReceiptAccess ? '#22c55e' : '#f59e0b' }}>
+                  {hasReceiptAccess ? '⚡ AI Vision Ready' : '🎁 Free Scan Available'}
+                </span>
+              </div>
 
-              {/* Hidden file input for web-based receipt upload */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                {/* Live Camera Button */}
+                <button 
+                  type="button"
+                  onClick={() => handleCameraScan('camera')}
+                  disabled={isScanning}
+                  className="glass-panel"
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    gap: '7px', 
+                    padding: '13px 10px', 
+                    border: '1.5px solid #22c55e', 
+                    background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.16) 0%, rgba(16, 185, 129, 0.08) 100%)', 
+                    cursor: isScanning ? 'not-allowed' : 'pointer', 
+                    borderRadius: '14px', 
+                    color: '#22c55e', 
+                    fontWeight: 800,
+                    fontSize: '13px',
+                    opacity: isScanning ? 0.7 : 1,
+                    boxShadow: '0 2px 8px rgba(34, 197, 94, 0.15)',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <CameraIcon size={18} className={isScanning ? "animate-spin" : ""} />
+                  <span>{isScanning ? 'Scanning...' : '📷 Camera'}</span>
+                </button>
+
+                {/* Gallery Upload Button */}
+                <button 
+                  type="button"
+                  onClick={() => handleCameraScan('gallery')}
+                  disabled={isScanning}
+                  className="glass-panel"
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    gap: '7px', 
+                    padding: '13px 10px', 
+                    border: '1px solid var(--border-input)', 
+                    background: 'var(--bg-input)', 
+                    cursor: isScanning ? 'not-allowed' : 'pointer', 
+                    borderRadius: '14px', 
+                    color: 'var(--text-primary)', 
+                    fontWeight: 700,
+                    fontSize: '13px',
+                    opacity: isScanning ? 0.7 : 1,
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <ImageIcon size={18} />
+                  <span>🖼️ Gallery</span>
+                </button>
+              </div>
+
+              {/* Hidden file input for web-based live camera capture */}
+              <input
+                type="file"
+                ref={receiptCameraRef}
+                accept="image/*"
+                capture="environment"
+                onChange={handleReceiptFileUpload}
+                style={{ display: 'none' }}
+              />
+
+              {/* Hidden file input for web-based gallery upload */}
+              <input
+                type="file"
+                ref={receiptGalleryRef}
+                accept="image/*"
+                onChange={handleReceiptFileUpload}
+                style={{ display: 'none' }}
+              />
+
+              {/* Legacy fallback ref */}
               <input
                 type="file"
                 ref={receiptFileRef}
@@ -647,7 +722,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 onChange={handleReceiptFileUpload}
                 style={{ display: 'none' }}
               />
-            </>
+            </div>
           )}
 
           {/* Scan Status Message (inline, no alert) */}

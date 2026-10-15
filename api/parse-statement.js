@@ -61,23 +61,45 @@ Extract in strict JSON format:
 }
 Return ONLY valid JSON without markdown code blocks. Extract up to 50 clearest visible transactions.`;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { text: prompt },
-            {
-              inlineData: {
-                mimeType: mimeType || "image/jpeg",
-                data: cleanBase64
+    let response;
+    try {
+      response = await ai.models.generateContent({
+        model: "gemini-3.5-flash-lite",
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: prompt },
+              {
+                inlineData: {
+                  mimeType: mimeType || "image/jpeg",
+                  data: cleanBase64
+                }
               }
-            }
-          ]
-        }
-      ]
-    });
+            ]
+          }
+        ]
+      });
+    } catch (err) {
+      console.warn("Fallback to gemini-3.8-flash in parse-statement:", err);
+      response = await ai.models.generateContent({
+        model: "gemini-3.8-flash",
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: prompt },
+              {
+                inlineData: {
+                  mimeType: mimeType || "image/jpeg",
+                  data: cleanBase64
+                }
+              }
+            ]
+          }
+        ]
+      });
+    }
 
     const text = response.text ? response.text.replace(/```json|```/g, '').trim() : "{}";
     let parsed;

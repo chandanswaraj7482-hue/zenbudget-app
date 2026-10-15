@@ -159,13 +159,38 @@ export const Forest: React.FC<ForestProps> = ({ onBack, transactions }) => {
               <linearGradient id="treeGrad" x1="0" y1="1" x2="0" y2="0">
                 <stop offset="0%" stopColor="#5c3a21" /> {/* Trunk is always brown */}
                 <stop offset="25%" stopColor="#5c3a21" />
-                
-                {/* Dynamic transition from brown trunk to leaves colored based on percentage */}
                 <stop offset="25%" stopColor={percentage > 0 ? stage.color : '#334155'} />
                 <stop offset={`${25 + (percentage * 0.75)}%`} stopColor={stage.color} />
                 <stop offset={`${25 + (percentage * 0.75)}%`} stopColor="#1e293b" />
                 <stop offset="100%" stopColor="#1e293b" />
               </linearGradient>
+
+              {/* Dormant Seed Rich Gradients */}
+              <linearGradient id="soilGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#5c3317" />
+                <stop offset="100%" stopColor="#291206" />
+              </linearGradient>
+              <linearGradient id="seedCapGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#a16207" />
+                <stop offset="50%" stopColor="#854d0e" />
+                <stop offset="100%" stopColor="#713f12" />
+              </linearGradient>
+              <linearGradient id="seedNutGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#f59e0b" />
+                <stop offset="35%" stopColor="#d97706" />
+                <stop offset="75%" stopColor="#b45309" />
+                <stop offset="100%" stopColor="#78350f" />
+              </linearGradient>
+              <linearGradient id="seedGlossGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="rgba(255,255,255,0.7)" />
+                <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+              </linearGradient>
+              <radialGradient id="seedAuraGrad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="rgba(245, 158, 11, 0.45)" />
+                <stop offset="50%" stopColor="rgba(16, 185, 129, 0.2)" />
+                <stop offset="100%" stopColor="rgba(0,0,0,0)" />
+              </radialGradient>
+
               <filter id="shadow">
                 <feDropShadow dx="0" dy="1" stdDeviation="1" floodColor="#000" floodOpacity="0.5"/>
               </filter>
@@ -175,39 +200,105 @@ export const Forest: React.FC<ForestProps> = ({ onBack, transactions }) => {
             <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" strokeDasharray="3,3" />
             <circle cx="50" cy="50" r="43" fill="none" stroke={stage.color} strokeWidth="0.5" strokeOpacity="0.2" />
 
-            {/* Tree Silhouette filled with dynamic gradient */}
-            <g filter="url(#shadow)">
-              {/* Ground level line */}
-              <line x1="20" y1="85" x2="80" y2="85" stroke="rgba(255,255,255,0.15)" strokeWidth="2" strokeLinecap="round" />
-              <line x1="30" y1="85" x2="70" y2="85" stroke={stage.color} strokeWidth="1" strokeLinecap="round" strokeOpacity="0.4" />
+            {streak < 3 ? (
+              /* 🌰 REAL DORMANT SEED SVG ILLUSTRATION */
+              <g filter="url(#shadow)">
+                {/* Fertile Soil Mound */}
+                <ellipse cx="50" cy="82" rx="34" ry="7" fill="url(#soilGrad)" />
+                <ellipse cx="50" cy="80" rx="26" ry="4" fill="#3d2314" opacity="0.8" />
+                <circle cx="28" cy="82" r="1.5" fill="#78350f" />
+                <circle cx="72" cy="81" r="1.3" fill="#78350f" />
+                <circle cx="38" cy="84" r="1" fill="#92400e" />
+                <circle cx="62" cy="83" r="1.4" fill="#92400e" />
 
-              {/* Combined Tree Path (Trunk + Foliage layers) */}
-              <path 
-                d="
-                  M 47,85 L 53,85 L 52,65 L 56,60 L 52,58 L 51,48 
-                  C 56,47 62,48 65,42 C 69,36 67,28 60,26 C 62,20 57,13 50,13 C 43,13 38,20 40,26 C 33,28 31,36 35,42 C 38,48 44,47 49,48 
-                  L 48,58 L 44,60 L 48,65 Z
-                " 
-                fill="url(#treeGrad)" 
-                stroke="rgba(255,255,255,0.1)"
-                strokeWidth="0.5"
-                style={{ transition: 'fill 0.8s ease' }}
-              />
+                {/* Soft Ambient Aura */}
+                <circle cx="50" cy="58" r="24" fill="url(#seedAuraGrad)" />
 
-              {/* Decorative extra leaf clusters that color up depending on streak milestones */}
-              {streak >= 3 && <circle cx="38" cy="38" r="4" fill={stage.color} opacity="0.8" />}
-              {streak >= 7 && <circle cx="62" cy="38" r="4.5" fill={stage.color} opacity="0.8" />}
-              {streak >= 14 && <circle cx="50" cy="20" r="5" fill={stage.color} opacity="0.9" />}
-              {streak >= 21 && <circle cx="50" cy="32" r="6" fill={stage.color} opacity="0.9" />}
+                {/* Acorn Stem */}
+                <path d="M 50,38 C 49,33 52,29 55,26" fill="none" stroke="#78350f" strokeWidth="2.5" strokeLinecap="round" />
 
-              {/* Little birds or flowers when maxed */}
-              {streak >= 21 && (
-                <>
-                  <path d="M 33,30 Q 35,28 37,30 Q 39,28 41,30" fill="none" stroke="#fff" strokeWidth="0.5" />
-                  <path d="M 61,24 Q 63,22 65,24 Q 67,22 69,24" fill="none" stroke="#fff" strokeWidth="0.5" />
-                </>
-              )}
-            </g>
+                {/* Acorn Textured Cap */}
+                <path 
+                  d="M 33,52 C 33,42 41,37 50,37 C 59,37 67,42 67,52 C 67,54 65,55 50,55 C 35,55 33,54 33,52 Z" 
+                  fill="url(#seedCapGrad)" 
+                  stroke="#713f12"
+                  strokeWidth="0.8"
+                />
+                {/* Cap Scale Texture Lines */}
+                <path d="M 37,44 Q 44,40 50,44 Q 56,40 63,44" fill="none" stroke="#5c2e0b" strokeWidth="0.7" opacity="0.5" strokeDasharray="1.5,1.5" />
+                <path d="M 39,48 Q 45,45 50,48 Q 55,45 61,48" fill="none" stroke="#5c2e0b" strokeWidth="0.7" opacity="0.5" strokeDasharray="1.5,1.5" />
+
+                {/* Seed Nut / Shiny Shell Body */}
+                <path 
+                  d="M 34,53 C 34,66 43,78 50,81 C 57,78 66,66 66,53 C 66,51 34,51 34,53 Z" 
+                  fill="url(#seedNutGrad)" 
+                  stroke="#78350f"
+                  strokeWidth="0.8"
+                />
+
+                {/* Specular Glow Reflection */}
+                <path 
+                  d="M 38,55 C 37,63 42,70 45,74 C 43,70 40,64 40,56 C 40,54 44,53 45,53 C 41,53 38,54 38,55 Z" 
+                  fill="url(#seedGlossGrad)" 
+                  opacity="0.65" 
+                />
+                <ellipse cx="43" cy="58" rx="2" ry="4.5" fill="#ffffff" opacity="0.35" transform="rotate(-15 43 58)" />
+
+                {/* Glowing Golden Core */}
+                <circle cx="50" cy="63" r="3.2" fill="#fbbf24" opacity="0.85">
+                  <animate attributeName="r" values="2.6;4.2;2.6" dur="3s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite" />
+                </circle>
+
+                {/* Gentle Sprouting Magical Particles */}
+                <circle cx="42" cy="46" r="1.3" fill="#f59e0b">
+                  <animate attributeName="cy" values="46;37;46" dur="3.5s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.2;0.8;0.2" dur="3.5s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="58" cy="43" r="1.1" fill="#34d399">
+                  <animate attributeName="cy" values="43;34;43" dur="4s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.25;0.9;0.25" dur="4s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="50" cy="32" r="1.4" fill="#fbbf24">
+                  <animate attributeName="cy" values="32;24;32" dur="2.7s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.3;1;0.3" dur="2.7s" repeatCount="indefinite" />
+                </circle>
+              </g>
+            ) : (
+              /* Tree Silhouette filled with dynamic gradient for streak >= 3 */
+              <g filter="url(#shadow)">
+                {/* Ground level line */}
+                <line x1="20" y1="85" x2="80" y2="85" stroke="rgba(255,255,255,0.15)" strokeWidth="2" strokeLinecap="round" />
+                <line x1="30" y1="85" x2="70" y2="85" stroke={stage.color} strokeWidth="1" strokeLinecap="round" strokeOpacity="0.4" />
+
+                {/* Combined Tree Path (Trunk + Foliage layers) */}
+                <path 
+                  d="
+                    M 47,85 L 53,85 L 52,65 L 56,60 L 52,58 L 51,48 
+                    C 56,47 62,48 65,42 C 69,36 67,28 60,26 C 62,20 57,13 50,13 C 43,13 38,20 40,26 C 33,28 31,36 35,42 C 38,48 44,47 49,48 
+                    L 48,58 L 44,60 L 48,65 Z
+                  " 
+                  fill="url(#treeGrad)" 
+                  stroke="rgba(255,255,255,0.1)"
+                  strokeWidth="0.5"
+                  style={{ transition: 'fill 0.8s ease' }}
+                />
+
+                {/* Decorative extra leaf clusters that color up depending on streak milestones */}
+                {streak >= 3 && <circle cx="38" cy="38" r="4" fill={stage.color} opacity="0.8" />}
+                {streak >= 7 && <circle cx="62" cy="38" r="4.5" fill={stage.color} opacity="0.8" />}
+                {streak >= 14 && <circle cx="50" cy="20" r="5" fill={stage.color} opacity="0.9" />}
+                {streak >= 21 && <circle cx="50" cy="32" r="6" fill={stage.color} opacity="0.9" />}
+
+                {/* Little birds or flowers when maxed */}
+                {streak >= 21 && (
+                  <>
+                    <path d="M 33,30 Q 35,28 37,30 Q 39,28 41,30" fill="none" stroke="#fff" strokeWidth="0.5" />
+                    <path d="M 61,24 Q 63,22 65,24 Q 67,22 69,24" fill="none" stroke="#fff" strokeWidth="0.5" />
+                  </>
+                )}
+              </g>
+            )}
           </svg>
 
           {/* Percentage Center Text Overlay */}

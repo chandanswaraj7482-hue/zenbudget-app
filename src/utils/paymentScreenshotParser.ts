@@ -22,6 +22,7 @@ const CATEGORY_KEYWORDS: Record<string, RegExp> = {
   Shopping: /\b(amazon|flipkart|myntra|meesho|zara|h&m|ajio|nykaa|reliancedigital|croma|shopping|clothing|fashion|retail|store|mart)\b/i,
   Bills: /\b(bescom|electricity|water|wifi|airtel|jio|vi|broadband|cylinder|indane|bharatgas|dth|tata\s*play|recharge|bill)\b/i,
   Entertainment: /\b(bookmyshow|pvr|inox|cinema|movie|netflix|spotify|prime|hotstar|youtube|gaming|steam|playstation)\b/i,
+  Rent: /\b(rent|kiraya|house\s*rent|room\s*rent|flat\s*rent|pg\s*rent|nobroker|magicbricks|landlord|housing|maintenance)\b/i,
   Health: /\b(apollo|pharmeasy|1mg|medical|pharmacy|chemist|hospital|clinic|doctor|lab|medplus)\b/i
 };
 
@@ -146,7 +147,7 @@ Return ONLY pure JSON without markdown code blocks.`;
       let response;
       try {
         response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.5-flash-lite',
           contents: [
             {
               role: 'user',
@@ -163,9 +164,9 @@ Return ONLY pure JSON without markdown code blocks.`;
           ]
         });
       } catch (modelErr) {
-        console.warn('Gemini 2.5 flash retry with 1.5 flash:', modelErr);
+        console.warn('Gemini 3.5 flash lite retry with 3.8 flash:', modelErr);
         response = await ai.models.generateContent({
-          model: 'gemini-1.5-flash',
+          model: 'gemini-3.8-flash',
           contents: [
             {
               role: 'user',
