@@ -4399,26 +4399,26 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
       {/* ═══════════════ STAT COUNTER BANNER ═══════════════ */}
       <section style={{ padding: '0 24px', maxWidth: '1440px', margin: 'clamp(40px, 8vw, 60px) auto clamp(60px, 12vw, 100px)' }}>
-        <div className="scroll-fade-up hover-lift" style={{ background: isDark ? 'linear-gradient(105deg, #141f17 0%, #1c2e21 50%, #141f17 100%)' : 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 50%, #ecfdf5 100%)', borderRadius: '2.5rem', padding: 'clamp(32px, 6vw, 60px) clamp(24px, 5vw, 40px)', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around', gap: 'clamp(24px, 5vw, 40px)', boxShadow: isDark ? '0 20px 40px rgba(0,0,0,0.3)' : '0 20px 40px rgba(16,185,129,0.08)', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(16,185,129,0.18)' }}>
+        <div className="scroll-fade-up hover-lift" style={{ background: 'linear-gradient(105deg, #1c1e1a 0%, #1c1e1a 45%, #6a8844 80%, #303d21 100%)', borderRadius: '2.5rem', padding: 'clamp(32px, 6vw, 60px) clamp(24px, 5vw, 40px)', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around', gap: 'clamp(24px, 5vw, 40px)', boxShadow: '0 20px 40px rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.08)' }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: isDark ? '#ffffff' : '#0f172a', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={4200} duration={2500} />+</div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: isDark ? '#cbe0a3' : '#059669' }}>Members</div>
-            <div style={{ fontSize: '12px', color: isDark ? 'rgba(255,255,255,0.6)' : '#64748b', marginTop: '4px' }}>securing their future today</div>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={4200} duration={2500} />+</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Members</div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.65)', marginTop: '4px' }}>securing their future today</div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: isDark ? '#ffffff' : '#0f172a', letterSpacing: '-0.02em', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>₹<AnimatedCounter end={2.4} decimals={1} duration={2500} />Cr+</div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: isDark ? '#cbe0a3' : '#059669' }}>Debt Paid Off</div>
-            <div style={{ fontSize: '12px', color: isDark ? 'rgba(255,255,255,0.6)' : '#64748b', marginTop: '4px' }}>by our community</div>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>₹<AnimatedCounter end={2.4} decimals={1} duration={2500} />Cr+</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Debt Paid Off</div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.65)', marginTop: '4px' }}>by our community</div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: isDark ? '#ffffff' : '#0f172a', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={14} duration={2500} /> Days</div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: isDark ? '#cbe0a3' : '#059669' }}>Average Time</div>
-            <div style={{ fontSize: '12px', color: isDark ? 'rgba(255,255,255,0.6)' : '#64748b', marginTop: '4px' }}>to spot invisible leaks</div>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={14} duration={2500} /> Days</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Average Time</div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.65)', marginTop: '4px' }}>to spot invisible leaks</div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: isDark ? '#ffffff' : '#0f172a', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={95} duration={2500} />%</div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: isDark ? '#cbe0a3' : '#059669' }}>Users Save Money</div>
-            <div style={{ fontSize: '12px', color: isDark ? 'rgba(255,255,255,0.6)' : '#64748b', marginTop: '4px' }}>in their very first month</div>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={95} duration={2500} />%</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Users Save Money</div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.65)', marginTop: '4px' }}>in their very first month</div>
           </div>
         </div>
       </section>
@@ -5287,7 +5287,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   setTimeout(() => startFreshQuiz(), 500);
                 }} 
                 style={{ 
-                  background: 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)', 
+                  background: '#ffffff', 
                   color: '#064e3b', 
                   padding: '16px 32px', 
                   borderRadius: '100px', 
@@ -5304,7 +5304,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 className="glow-btn hover-lift"
               >
                 <Brain size={18} color="#059669" />
-                <span>Take The Free Assessment</span>
+                <span style={{ color: '#064e3b', fontWeight: 900 }}>Take The Free Assessment</span>
               </button>
 
               <GooglePlayBadge variant="outline" />
@@ -5312,9 +5312,9 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               <button 
                 onClick={onOpenWebApp} 
                 style={{ 
-                  background: 'rgba(0,0,0,0.12)', 
+                  background: 'rgba(255,255,255,0.12)', 
                   color: '#ffffff', 
-                  border: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.3)`, 
+                  border: '1px solid rgba(255,255,255,0.25)', 
                   padding: '16px 28px', 
                   borderRadius: '100px', 
                   fontSize: '15px', 
@@ -5334,14 +5334,14 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             </div>
 
             {/* Trust Micro Indicators */}
-            <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginTop: '24px', paddingTop: '20px', borderTop: `1px solid rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.15)` }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'rgba(255,255,255,0.8)', fontWeight: 700 }}>
+            <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.18)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>
                 <Shield size={14} color="#34d399" /> 100% Encrypted
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'rgba(255,255,255,0.8)', fontWeight: 700 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>
                 <Brain size={14} color="#34d399" /> 60-Sec AI Tracking
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'rgba(255,255,255,0.8)', fontWeight: 700 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>
                 <Star size={14} color="#facc15" fill="#facc15" /> 4.9/5 Rating
               </div>
             </div>
