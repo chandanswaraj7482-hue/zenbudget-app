@@ -7,6 +7,7 @@ import { Device } from '@capacitor/device';
 import { getInitialsAvatar } from '../utils/avatar';
 import { GooglePlayIcon } from './GooglePlayBadge';
 import { DISTRIBUTION_CONFIG } from '../config/buildConfig';
+import { getPinSecurityStatus, recordFailedPinAttempt, resetPinSecurityStatus } from '../utils/securityGuard';
 
 interface LockScreenProps {
   onUnlock: (userId: string, username: string, tier: string, trialStart: string, pin: string, premiumExpiresAt: string | null, trialExpireDate?: string | null) => void;
@@ -1314,6 +1315,13 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         }
       }
     } else if (step === 'unlock') {
+      const secStatus = getPinSecurityStatus();
+      if (secStatus.isLockedOut) {
+        setErrorMsg(`🔒 Security Shield: Too many failed attempts! Cooldown active for ${secStatus.secondsRemaining}s.`);
+        playNotificationSound('warning');
+        return;
+      }
+
       if (enteredPin.length < 4) {
         const nextPin = enteredPin + num;
         setEnteredPin(nextPin);
@@ -1324,6 +1332,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           const isValidPin = isUnset || nextPin === storedPin || (dbProfile && nextPin === dbProfile.pin);
 
           if (isValidPin) {
+            resetPinSecurityStatus();
             localStorage.setItem('zb_user_pin', nextPin);
             localStorage.setItem('zb_pin_created', 'true');
             if (dbProfile?.referral_code) {
@@ -1345,8 +1354,13 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             playNotificationSound('success');
             onUnlock(targetUserId, targetName, targetTier, targetStart, nextPin, targetExpires, targetTrialExpire);
           } else {
+            const attempt = recordFailedPinAttempt();
             setIsIncorrect(true);
-            setErrorMsg('Incorrect PIN. Please try again or tap "Forgot PIN" below.');
+            if (attempt.isLockedOut) {
+              setErrorMsg(`🔒 Security Shield: Too many failed attempts! Cooldown active for ${attempt.secondsRemaining}s.`);
+            } else {
+              setErrorMsg('Incorrect PIN. Please try again or tap "Forgot PIN" below.');
+            }
             playNotificationSound('warning');
             setTimeout(() => {
               setIsIncorrect(false);

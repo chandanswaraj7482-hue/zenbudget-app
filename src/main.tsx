@@ -4,6 +4,10 @@ import './index.css'
 import Root from './Root.tsx'
 import { bootstrapSession } from './supabaseClient'
 import './utils/audio'
+import { initZenSecurityShield } from './utils/securityGuard'
+
+// Initialize Multi-Layer Security Shield & Firewall
+initZenSecurityShield();
 
 // Strip console logs in production for security
 if (import.meta.env.PROD) {
