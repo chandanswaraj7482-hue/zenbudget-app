@@ -1903,32 +1903,19 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     }
   }, [isLocked, subscriptionTier, transactions.length]);
 
-  // 1-Time Financial Profile Card Trigger (DOB & Monthly Salary Setup)
+  // Financial Profile Card Setup (DOB & Monthly Salary Setup) - Only configured during account onboarding
   useEffect(() => {
     if (isLocked || isAppLoading || showOnboarding) return;
 
     const effectiveId = currentProfileId || localStorage.getItem('zb_profile_id') || 'local';
     const isCompleted = localStorage.getItem(`zb_financial_profile_completed_${effectiveId}`) === 'true';
-    const hasDismissedSession = sessionStorage.getItem('zb_financial_profile_dismissed') === 'true';
 
     const existingDob = localStorage.getItem(`zb_dob_${effectiveId}`);
     const existingSalary = localStorage.getItem(`zb_monthly_salary_${effectiveId}`);
     const hasExistingData = Boolean(existingDob && existingSalary && parseFloat(existingSalary) > 0);
 
     if (hasExistingData && !isCompleted) {
-      // If user already had both values entered earlier, auto-mark completed permanently
       localStorage.setItem(`zb_financial_profile_completed_${effectiveId}`, 'true');
-      return;
-    }
-
-    const isDismissedPermanent = localStorage.getItem(`zb_financial_profile_dismissed_${effectiveId}`) === 'true';
-
-    // 1-Time popup on login if user hasn't set their age/salary yet
-    if (!isCompleted && !hasDismissedSession && !isDismissedPermanent) {
-      const timer = setTimeout(() => {
-        setShowFinancialProfileModal(true);
-      }, 1200);
-      return () => clearTimeout(timer);
     }
   }, [isLocked, isAppLoading, showOnboarding, currentProfileId]);
 

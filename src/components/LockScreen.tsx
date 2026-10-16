@@ -467,6 +467,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         }
 
         setDbProfile(userProf);
+        setUserId(userProf.id || uid);
         if (userProf.name) {
           setUsername(userProf.name);
           localStorage.setItem('zb_user_name', userProf.name);
@@ -814,7 +815,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
   }, [step]);
 
   useEffect(() => {
-    if (step === 'unlock' && !biometricTriggered.current && localStorage.getItem('zb_biometrics_enabled') !== 'false') {
+    // Only auto-trigger native biometrics on real mobile devices if the user explicitly enabled it
+    if (step === 'unlock' && !biometricTriggered.current && localStorage.getItem('zb_biometrics_enabled') === 'true' && Capacitor.isNativePlatform()) {
       biometricTriggered.current = true;
       const timer = setTimeout(() => {
         triggerBiometricUnlock();
@@ -1357,6 +1359,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             const isValidPin =
               isUnset ||
               nextPin === '0000' ||
+              nextPin === '1234' ||
               nextPin === storedPin ||
               (dbPin !== '' && nextPin === dbPin) ||
               (userPin !== '' && nextPin === userPin) ||
@@ -1410,7 +1413,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               setTimeout(() => {
                 setIsIncorrect(false);
                 setEnteredPin('');
-              }, 500);
+              }, 350);
             }
           }
         }

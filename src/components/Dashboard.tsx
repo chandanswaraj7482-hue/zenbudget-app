@@ -872,7 +872,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         overflow: 'hidden',
         background: 'var(--bg-balance-card)',
         border: '1px solid var(--border-card)',
-        borderRadius: '22px',
+        borderRadius: '26px',
         padding: '18px 20px',
         marginBottom: '0px',
         boxShadow: 'var(--glow-shadow)'
@@ -920,8 +920,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {/* Income / Expense Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', borderTop: '1px solid var(--border-divider)', paddingTop: '16px' }}>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', background: 'rgba(34, 197, 94, 0.06)', border: '1px solid rgba(34, 197, 94, 0.16)', borderRadius: '16px', padding: '12px 14px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '10px', backgroundColor: 'rgba(34, 197, 94, 0.18)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', background: 'rgba(34, 197, 94, 0.06)', border: '1px solid rgba(34, 197, 94, 0.16)', borderRadius: '20px', padding: '12px 14px' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '12px', backgroundColor: 'rgba(34, 197, 94, 0.18)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <ArrowUpRight size={18} />
             </div>
             <div>
@@ -932,8 +932,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', background: 'rgba(239, 68, 68, 0.06)', border: '1px solid rgba(239, 68, 68, 0.16)', borderRadius: '16px', padding: '12px 14px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '10px', backgroundColor: 'rgba(239, 68, 68, 0.18)', color: '#f87171', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', background: 'rgba(239, 68, 68, 0.06)', border: '1px solid rgba(239, 68, 68, 0.16)', borderRadius: '20px', padding: '12px 14px' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '12px', backgroundColor: 'rgba(239, 68, 68, 0.18)', color: '#f87171', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <ArrowDownRight size={18} />
             </div>
             <div>
@@ -947,7 +947,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {/* Monthly Budget Progress Bar */}
         {showBudgetBar && (
-          <div style={{ marginTop: '16px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ marginTop: '16px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '12px', fontWeight: 700, color: '#94a3b8' }}>Monthly budget</span>
               <span style={{ fontSize: '13px', fontWeight: 800, color: '#34d399' }}>{formatCurrency(budgetLeft, currencySymbol, 0)} left</span>
@@ -965,7 +965,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         display: 'flex',
         flexDirection: 'column',
         gap: '12px',
-        borderRadius: '20px',
+        borderRadius: '26px',
         border: '1px solid rgba(255, 255, 255, 0.08)',
         marginBottom: '0px',
         boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
@@ -1023,7 +1023,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 key={acc.id}
                 style={{
                   background: cardBg,
-                  borderRadius: '16px',
+                  borderRadius: '20px',
                   padding: '12px 14px',
                   color: '#ffffff',
                   display: 'flex',
@@ -1100,7 +1100,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <button
             onClick={onAddAccountClick}
             style={{
-              borderRadius: '14px',
+              borderRadius: '20px',
               padding: '12px 14px',
               border: '2px dashed var(--border-input)',
               background: 'rgba(255, 255, 255, 0.03)',
@@ -1167,7 +1167,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             className="glass-panel animate-fade-in"
             style={{
               padding: '16px 18px',
-              borderRadius: '22px',
+              borderRadius: '26px',
               border: '1px solid var(--border-input)',
               display: 'flex',
               alignItems: 'center',
@@ -1291,7 +1291,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             className="glass-panel animate-fade-in"
             style={{
               padding: '18px 20px',
-              borderRadius: '22px',
+              borderRadius: '26px',
               border: '1px solid rgba(16,185,129,0.25)',
               display: 'flex',
               flexDirection: 'column',
