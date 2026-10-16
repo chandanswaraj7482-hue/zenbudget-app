@@ -32,10 +32,10 @@ interface Character {
 }
 
 const CHARACTERS: Character[] = [
-  { id: 'piggy', name: 'Zen Piggy', emoji: '🐷', perk: 'Balanced Saver (Classic)', tag: 'CLASSIC', glow: '#ec4899', speedMultiplier: 1.0 },
-  { id: 'bull', name: 'Bull Run', emoji: '🐂', perk: '+15% Speed & Magnet Pull', tag: 'TURBO', glow: '#10b981', speedMultiplier: 1.15 },
-  { id: 'cat', name: 'Lucky Neko', emoji: '🐱', perk: '+25% Extra Coin Value', tag: 'LUCKY', glow: '#fbbf24', speedMultiplier: 1.0 },
-  { id: 'bot', name: 'Crypto Bot', emoji: '🤖', perk: '+1 Extra Shield Matrix', tag: 'ARMOR', glow: '#06b6d4', speedMultiplier: 1.05 }
+  { id: 'investor', name: 'Smart Investor', emoji: '💼', perk: 'Disciplined SIP & Compounding', tag: 'DISCIPLINED', glow: '#10b981', speedMultiplier: 1.0 },
+  { id: 'titan', name: 'Wealth Titan', emoji: '👑', perk: '+15% Speed & Capital Inflow', tag: 'PORTFOLIO', glow: '#fbbf24', speedMultiplier: 1.15 },
+  { id: 'strategist', name: 'Asset Planner', emoji: '📊', perk: '+25% Extra Dividend Return', tag: 'HIGH YIELD', glow: '#38bdf8', speedMultiplier: 1.0 },
+  { id: 'fortress', name: 'Risk Hedger', emoji: '🛡️', perk: '+1 Emergency Reserve Shield', tag: 'PROTECTED', glow: '#a855f7', speedMultiplier: 1.05 }
 ];
 
 interface FallingItem {
@@ -121,7 +121,11 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
 
   // Character selection
   const [selectedCharId, setSelectedCharId] = useState<string>(() => {
-    return localStorage.getItem('zb_game_char') || 'piggy';
+    const saved = localStorage.getItem('zb_game_char');
+    if (saved && ['investor', 'titan', 'strategist', 'fortress'].includes(saved)) {
+      return saved;
+    }
+    return 'investor';
   });
 
   // Mode: 'blitz' (high action) vs 'zen' (relaxed speed)
@@ -311,7 +315,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
       const coinItem = coinPool[Math.floor(2 + Math.random() * 4)];
 
       let coinVal = coinItem.value;
-      if (selectedChar.id === 'cat') {
+      if (selectedChar.id === 'strategist') {
         coinVal = Math.round(coinVal * 1.25);
       }
 
@@ -382,7 +386,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         x: safeCoinX,
         y: -35,
         type: 'coin',
-        value: selectedChar.id === 'cat' ? 45 : 35,
+        value: selectedChar.id === 'strategist' ? 45 : 35,
         emoji: '📈',
         label: 'SIP Growth',
         speed: baseSpeed,
@@ -413,7 +417,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         x: oppositeX,
         y: -30,
         type: 'coin',
-        value: selectedChar.id === 'cat' ? 120 : 100,
+        value: selectedChar.id === 'strategist' ? 120 : 100,
         emoji: '💰',
         label: 'Salary Inflow',
         speed: baseSpeed,
@@ -444,7 +448,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
     if (subRoll < 0.70) {
       const c = FINANCIAL_ITEMS.coins[Math.floor(Math.random() * FINANCIAL_ITEMS.coins.length)];
       let val = c.value;
-      if (selectedChar.id === 'cat') val = Math.round(val * 1.25);
+      if (selectedChar.id === 'strategist') val = Math.round(val * 1.25);
 
       gs.items.push({
         id: gs.nextItemId++,
@@ -501,15 +505,15 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
 
   const resetGame = useCallback(() => {
     const gs = gameStateRef.current;
-    const startLives = selectedChar.id === 'bot' ? 6 : (gameMode === 'zen' ? 7 : 5);
-    const startShield = selectedChar.id === 'bot';
+    const startLives = selectedChar.id === 'fortress' ? 6 : (gameMode === 'zen' ? 7 : 5);
+    const startShield = selectedChar.id === 'fortress';
 
     gs.playerX = 190;
     gs.score = 0;
     gs.lives = startLives;
     gs.invulnerableTimer = 0;
     gs.hasShield = startShield;
-    gs.magnetTimer = selectedChar.id === 'bull' ? 120 : 0;
+    gs.magnetTimer = selectedChar.id === 'titan' ? 120 : 0;
     gs.crashTimer = 0;
     gs.nextCrashScore = 650;
     gs.items = [];
@@ -637,8 +641,8 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         }
 
         // Magnet attraction
-        const magnetReach = selectedChar.id === 'bull' ? 120 : 90;
-        if ((gs.magnetTimer > 0 || selectedChar.id === 'bull') && (item.type === 'coin' || item.type === 'shield' || item.type === 'heart')) {
+        const magnetReach = selectedChar.id === 'titan' ? 120 : 90;
+        if ((gs.magnetTimer > 0 || selectedChar.id === 'titan') && (item.type === 'coin' || item.type === 'shield' || item.type === 'heart')) {
           const dist = Math.abs(gs.playerX - item.x);
           if (dist < magnetReach && item.y < H - 60) {
             item.x += (gs.playerX - item.x) * 0.09;
@@ -992,7 +996,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
       ctx.fill();
 
       // Magnet Pulsing Ring
-      if (gs.magnetTimer > 0 || selectedChar.id === 'bull') {
+      if (gs.magnetTimer > 0 || selectedChar.id === 'titan') {
         const ringRadius = 30 + (gs.frameCount % 20) * 1.5;
         ctx.strokeStyle = 'rgba(251, 191, 36, 0.45)';
         ctx.lineWidth = 1.5;
@@ -1408,7 +1412,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
                 marginBottom: '6px',
                 textAlign: 'center'
               }}>
-                CHOOSE YOUR AVATAR
+                SELECT WEALTH STRATEGY
               </div>
 
               <div style={{
