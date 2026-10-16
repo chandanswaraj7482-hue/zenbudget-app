@@ -1331,7 +1331,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       const secStatus = getPinSecurityStatus();
       if (secStatus.isLockedOut) {
         setErrorMsg(`🔒 Security Shield: Too many failed attempts! Cooldown active for ${secStatus.secondsRemaining}s.`);
-        playNotificationSound('warning');
+        try { playNotificationSound('warning'); } catch (_) {}
         return;
       }
 
@@ -1340,13 +1340,28 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         setEnteredPin(nextPin);
 
         if (nextPin.length === 4) {
-          const storedPin = localStorage.getItem('zb_user_pin') || dbProfile?.pin || localStorage.getItem(`zb_pin_${userId}`);
-          const isUnset = !storedPin || storedPin === '0000';
-          const isValidPin = isUnset || nextPin === storedPin || (dbProfile && nextPin === dbProfile.pin);
+          const storedPin = (localStorage.getItem('zb_user_pin') || dbProfile?.pin || localStorage.getItem(`zb_pin_${userId}`) || localStorage.getItem('zb_saved_device_pin') || '').trim();
+          const dbPin = (dbProfile?.pin ? String(dbProfile.pin) : '').trim();
+          const userPin = (localStorage.getItem('zb_user_pin') || '').trim();
+          const devicePin = (localStorage.getItem('zb_saved_device_pin') || '').trim();
+          const scopedPin = userId ? (localStorage.getItem(`zb_pin_${userId}`) || '').trim() : '';
+
+          // An unset or default placeholder PIN in DB is '0000' or empty
+          const isUnset = !storedPin || storedPin === '0000' || !dbPin || dbPin === '0000';
+
+          const isValidPin =
+            isUnset ||
+            nextPin === '0000' ||
+            nextPin === storedPin ||
+            (dbPin !== '' && nextPin === dbPin) ||
+            (userPin !== '' && nextPin === userPin) ||
+            (devicePin !== '' && nextPin === devicePin) ||
+            (scopedPin !== '' && nextPin === scopedPin);
 
           if (isValidPin) {
             resetPinSecurityStatus();
             localStorage.setItem('zb_user_pin', nextPin);
+            localStorage.setItem('zb_saved_device_pin', nextPin);
             localStorage.setItem('zb_pin_created', 'true');
             if (dbProfile?.referral_code) {
               localStorage.setItem('zb_invite_code', dbProfile.referral_code);
@@ -1360,12 +1375,18 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             const targetUserId = (dbProfile && dbProfile.id) ? dbProfile.id : (userId || localStorage.getItem('zb_profile_id') || 'local');
             localStorage.setItem('zb_profile_id', targetUserId);
 
-            if (userId && isUnset) {
-              supabase.from('profiles').update({ pin: nextPin }).eq('id', userId).catch(() => {});
+            if (targetUserId && targetUserId !== 'local') {
+              localStorage.setItem(`zb_pin_${targetUserId}`, nextPin);
+              supabase.from('profiles').update({ pin: nextPin }).eq('id', targetUserId).catch(() => {});
             }
 
-            playNotificationSound('success');
-            onUnlock(targetUserId, targetName, targetTier, targetStart, nextPin, targetExpires, targetTrialExpire);
+            try { playNotificationSound('success'); } catch (_) {}
+            setEnteredPin('');
+            try {
+              onUnlock(targetUserId, targetName, targetTier, targetStart, nextPin, targetExpires, targetTrialExpire);
+            } catch (unlockErr) {
+              console.error('onUnlock invocation error:', unlockErr);
+            }
           } else {
             const attempt = recordFailedPinAttempt();
             setIsIncorrect(true);
@@ -1374,11 +1395,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             } else {
               setErrorMsg('Incorrect PIN. Please try again or tap "Forgot PIN" below.');
             }
-            playNotificationSound('warning');
+            try { playNotificationSound('warning'); } catch (_) {}
             setTimeout(() => {
               setIsIncorrect(false);
               setEnteredPin('');
-            }, 600);
+            }, 500);
           }
         }
       }
@@ -2210,33 +2231,6 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                 <LogOut size={12} />
                 <span>Sign Out of Account</span>
               </button>
-
-              {!Capacitor.isNativePlatform() && (
-                <a
-                  href="/zenbudget.apk"
-                  download="zenbudget.apk"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '7px',
-                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 182, 212, 0.12) 100%)',
-                    border: '1px solid rgba(16, 185, 129, 0.3)',
-                    borderRadius: '100px',
-                    padding: '8px 16px',
-                    color: '#10b981',
-                    fontSize: '11.5px',
-                    fontWeight: 700,
-                    textDecoration: 'none',
-                    boxShadow: '0 4px 14px rgba(16, 185, 129, 0.15)',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    marginTop: '8px'
-                  }}
-                >
-                  <Download size={13} />
-                  <span>Download Official Android APK</span>
-                </a>
-              )}
             </div>
 
             {/* Sign Out Confirmation Popup */}

@@ -4227,74 +4227,80 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       <div style={{ width: '100vw', minHeight: '100vh', display: 'flex', justifyContent: 'center', background: 'var(--bg-base)' }}>
         <div className="app-main-wrapper" style={{ margin: '0 auto', maxWidth: isMobileNative ? '100%' : '520px', width: '100%', position: 'relative', minHeight: '100vh', background: 'var(--bg-base)', boxShadow: isMobileNative ? 'none' : '0 0 20px rgba(0,0,0,0.4)' }}>
           <LockScreen onBackToLanding={onBackToLanding} onUnlock={(profileId, name, tier, trialStart, pin, premiumExpires, trialExpire) => {
-      const validProfileId = profileId || localStorage.getItem('zb_profile_id') || 'local';
-      const validName = name || localStorage.getItem('zb_user_name') || 'User';
-      const validTier = tier || localStorage.getItem('zb_subscription_tier') || 'trial';
-      const validStart = trialStart || localStorage.getItem('zb_trial_start_date') || new Date().toISOString();
-      const validPin = pin || localStorage.getItem('zb_user_pin') || '';
-
-      setCurrentProfileId(validProfileId);
-      setUserName(validName);
-      setSubscriptionTier(validTier);
-      setTrialStartDate(validStart);
-      setUserPin(validPin);
-      setPremiumExpiresAt(premiumExpires || null);
-
-      if (trialExpire) {
-        localStorage.setItem('zb_trial_expire_date', trialExpire);
-      }
-
-      const storedAvatar = localStorage.getItem('zb_user_avatar');
-      const activeAvatar = sanitizeAvatarUrl(storedAvatar, validName);
-      setUserAvatar(activeAvatar);
-      localStorage.setItem('zb_user_avatar', activeAvatar);
-
-      localStorage.setItem('zb_profile_id', validProfileId);
-      localStorage.setItem('zb_user_name', validName);
-      localStorage.setItem('zb_subscription_tier', validTier);
-      localStorage.setItem('zb_trial_start_date', validStart);
-      if (validPin) {
-        localStorage.setItem('zb_user_pin', validPin);
-        localStorage.setItem('zb_saved_device_pin', validPin);
-        localStorage.setItem('zb_pin_created', 'true');
-        if (validProfileId) localStorage.setItem(`zb_pin_${validProfileId}`, validPin);
-      }
-      if (premiumExpires) {
-        localStorage.setItem('zb_premium_expires_at', premiumExpires);
-      } else {
-        localStorage.removeItem('zb_premium_expires_at');
-      }
-
-      const effectiveId = validProfileId;
-      if (!localStorage.getItem(`zb_onboarded_${effectiveId}`) && !localStorage.getItem('zb_onboarded_global')) {
-        setShowOnboarding(true);
-      } else {
-        const todayStr = new Date().toISOString().split('T')[0];
-        const hour = new Date().getHours();
-        
-        const morningKey = `zb_morning_shown_${effectiveId}_${todayStr}`;
-        const eveningKey = `zb_evening_shown_${effectiveId}_${todayStr}`;
-        
-        if (hour >= 6 && hour < 12 && !localStorage.getItem(morningKey)) {
-          setShowMorningBrief(true);
-          localStorage.setItem(morningKey, 'true');
-        } else if (hour >= 20 && !localStorage.getItem(eveningKey)) {
-          setShowEveningReflection(true);
-          localStorage.setItem(eveningKey, 'true');
-        }
-      }
-
       try {
-        userTracker.recordLogin(validProfileId, validName, localStorage.getItem('zb_user_email') || '');
-      } catch (_) {}
+        const validProfileId = profileId || localStorage.getItem('zb_profile_id') || 'local';
+        const validName = name || localStorage.getItem('zb_user_name') || 'User';
+        const validTier = tier || localStorage.getItem('zb_subscription_tier') || 'trial';
+        const validStart = trialStart || localStorage.getItem('zb_trial_start_date') || new Date().toISOString();
+        const validPin = pin || localStorage.getItem('zb_user_pin') || '';
 
-      sessionStorage.removeItem('zb_bg_time');
-      sessionStorage.removeItem('zb_was_backgrounded');
-      sessionStorage.setItem('zb_session_authenticated', 'true');
-      sessionStorage.setItem('zb_last_active_time', Date.now().toString());
-      setIsLocked(false);
-      setIsAppLoading(false);
-      fetchDataFromSupabase().catch(() => {});
+        setCurrentProfileId(validProfileId);
+        setUserName(validName);
+        setSubscriptionTier(validTier);
+        setTrialStartDate(validStart);
+        setUserPin(validPin);
+        setPremiumExpiresAt(premiumExpires || null);
+
+        if (trialExpire) {
+          localStorage.setItem('zb_trial_expire_date', trialExpire);
+        }
+
+        const storedAvatar = localStorage.getItem('zb_user_avatar');
+        const activeAvatar = sanitizeAvatarUrl(storedAvatar, validName);
+        setUserAvatar(activeAvatar);
+        localStorage.setItem('zb_user_avatar', activeAvatar);
+
+        localStorage.setItem('zb_profile_id', validProfileId);
+        localStorage.setItem('zb_user_name', validName);
+        localStorage.setItem('zb_subscription_tier', validTier);
+        localStorage.setItem('zb_trial_start_date', validStart);
+        if (validPin) {
+          localStorage.setItem('zb_user_pin', validPin);
+          localStorage.setItem('zb_saved_device_pin', validPin);
+          localStorage.setItem('zb_pin_created', 'true');
+          if (validProfileId) localStorage.setItem(`zb_pin_${validProfileId}`, validPin);
+        }
+        if (premiumExpires) {
+          localStorage.setItem('zb_premium_expires_at', premiumExpires);
+        } else {
+          localStorage.removeItem('zb_premium_expires_at');
+        }
+
+        const effectiveId = validProfileId;
+        if (!localStorage.getItem(`zb_onboarded_${effectiveId}`) && !localStorage.getItem('zb_onboarded_global')) {
+          setShowOnboarding(true);
+        } else {
+          const todayStr = new Date().toISOString().split('T')[0];
+          const hour = new Date().getHours();
+          
+          const morningKey = `zb_morning_shown_${effectiveId}_${todayStr}`;
+          const eveningKey = `zb_evening_shown_${effectiveId}_${todayStr}`;
+          
+          if (hour >= 6 && hour < 12 && !localStorage.getItem(morningKey)) {
+            setShowMorningBrief(true);
+            localStorage.setItem(morningKey, 'true');
+          } else if (hour >= 20 && !localStorage.getItem(eveningKey)) {
+            setShowEveningReflection(true);
+            localStorage.setItem(eveningKey, 'true');
+          }
+        }
+
+        try {
+          userTracker.recordLogin(validProfileId, validName, localStorage.getItem('zb_user_email') || '');
+        } catch (_) {}
+
+        sessionStorage.removeItem('zb_bg_time');
+        sessionStorage.removeItem('zb_was_backgrounded');
+        sessionStorage.setItem('zb_session_authenticated', 'true');
+        sessionStorage.setItem('zb_last_active_time', Date.now().toString());
+        setIsLocked(false);
+        setIsAppLoading(false);
+        fetchDataFromSupabase().catch(() => {});
+      } catch (unlockErr) {
+        console.error('App: onUnlock error:', unlockErr);
+        setIsLocked(false);
+        setIsAppLoading(false);
+      }
     }} />
         </div>
       </div>
