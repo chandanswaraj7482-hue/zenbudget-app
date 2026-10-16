@@ -1852,9 +1852,12 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
     const isDismissedPermanent = localStorage.getItem(`zb_financial_profile_dismissed_${effectiveId}`) === 'true';
 
-    // Do NOT show automatic popup on login. Financial profile can be updated from Profile/Dashboard anytime.
+    // 1-Time popup on login if user hasn't set their age/salary yet
     if (!isCompleted && !hasDismissedSession && !isDismissedPermanent) {
-      localStorage.setItem(`zb_financial_profile_dismissed_${effectiveId}`, 'true');
+      const timer = setTimeout(() => {
+        setShowFinancialProfileModal(true);
+      }, 1200);
+      return () => clearTimeout(timer);
     }
   }, [isLocked, isAppLoading, showOnboarding, currentProfileId]);
 

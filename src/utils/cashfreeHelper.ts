@@ -1,3 +1,5 @@
+import { isPlayStoreBuild } from '../config/buildConfig';
+
 export const removeCashfreeEmergencyButton = () => {
   try {
     const btn = document.getElementById('cf-emergency-close-btn');
@@ -23,6 +25,7 @@ export const cleanUpCashfreeOverlays = () => {
 
 export const ensurePaymentSdkLoaded = async (): Promise<boolean> => {
   if (typeof window === 'undefined') return false;
+  if (isPlayStoreBuild()) return false;
   if ((window as any).Cashfree) return true;
   return new Promise((resolve) => {
     try {
@@ -47,19 +50,11 @@ export const launchCashfreeCheckout = async (
 ) => {
   cleanUpCashfreeOverlays();
 
-  const isNative = !!(window as any).Capacitor?.isNativePlatform?.() || (window as any).Capacitor?.platform === 'android' || (window as any).Capacitor?.platform === 'ios';
-
-  // For Native Android App: Open secure browser session via Browser.open
-  if (isNative) {
-    try {
-      const { Browser } = await import('@capacitor/browser');
-      const payUrl = `https://zenbudget-tracker.vercel.app/pay.html?session_id=${encodeURIComponent(paymentSessionId)}`;
-      await Browser.open({ url: payUrl });
-      return;
-    } catch (browserErr) {
-      window.open(`https://zenbudget-tracker.vercel.app/pay.html?session_id=${encodeURIComponent(paymentSessionId)}`, '_blank');
-      return;
-    }
+  // STRICT GOOGLE PLAY COMPLIANCE: NEVER launch external Cashfree in Play Store builds
+  if (isPlayStoreBuild()) {
+    console.warn('Play Store build: External payment gateway disabled for Google Play compliance.');
+    if (onFailure) onFailure('Google Play Edition: Purchases are managed via Google Play.');
+    return;
   }
 
   // On Web: Ensure SDK is loaded

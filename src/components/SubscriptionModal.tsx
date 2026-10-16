@@ -6,6 +6,7 @@ import { launchCashfreeCheckout } from '../utils/cashfreeHelper';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { triggerFireworksCelebration, playErrorSound } from '../utils/audio';
+import { isPlayStoreBuild } from '../config/buildConfig';
 
 interface SubscriptionModalProps {
   isOpen: boolean;
@@ -483,6 +484,12 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   };
 
   const handleWebPayment = async () => {
+    // Play Store compliance: completely bypass Cashfree and activate directly
+    if (isPlayStoreBuild()) {
+      await handleManualCompletion();
+      return;
+    }
+
     setPaymentStep('processing');
     try {
       const currentProfileId = localStorage.getItem('zb_profile_id');

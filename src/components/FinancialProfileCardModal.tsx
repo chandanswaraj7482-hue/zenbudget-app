@@ -82,9 +82,9 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.55)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
+        backgroundColor: 'rgba(15, 23, 42, 0.5)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -99,14 +99,14 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
         style={{
           width: '100%',
           maxWidth: '420px',
-          background: 'linear-gradient(165deg, rgba(17, 24, 39, 0.96) 0%, rgba(10, 15, 29, 0.98) 100%)',
+          background: 'var(--bg-card)',
           borderRadius: '26px',
-          border: '1px solid rgba(16, 185, 129, 0.3)',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 35px rgba(16, 185, 129, 0.15)',
+          border: '1px solid var(--border-card-active, rgba(16, 185, 129, 0.35))',
+          boxShadow: 'var(--glow-shadow)',
           padding: '24px',
           position: 'relative',
           overflow: 'hidden',
-          color: '#f8fafc'
+          color: 'var(--text-primary)'
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -119,8 +119,8 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
             position: 'absolute',
             top: '16px',
             right: '16px',
-            background: 'rgba(255, 255, 255, 0.08)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
+            background: 'var(--bg-input)',
+            border: '1px solid var(--border-input)',
             borderRadius: '50%',
             width: '32px',
             height: '32px',
@@ -128,7 +128,7 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            color: '#94a3b8',
+            color: 'var(--text-secondary)',
             transition: 'all 0.2s ease',
             zIndex: 10
           }}
@@ -147,7 +147,7 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#34d399',
+            color: 'var(--primary, #10b981)',
             boxShadow: '0 4px 15px rgba(16, 185, 129, 0.2)'
           }}>
             <Sparkles size={22} />
@@ -161,19 +161,19 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
               fontWeight: 800,
               textTransform: 'uppercase',
               letterSpacing: '0.06em',
-              color: '#34d399',
+              color: 'var(--primary, #10b981)',
               marginBottom: '2px'
             }}>
               <ShieldCheck size={11} /> 1-Time Setup
             </div>
-            <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: '#ffffff', letterSpacing: '-0.02em' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
               Financial Profile 🎯
             </h3>
           </div>
         </div>
 
-        <p style={{ fontSize: '12px', color: '#94a3b8', lineHeight: 1.5, margin: '0 0 18px 0' }}>
-          Welcome, <strong style={{ color: '#f1f5f9' }}>{userName}</strong>! Set your Age & Monthly Salary to unlock automated daily limits and wealth compounding.
+        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: '0 0 18px 0' }}>
+          Welcome, <strong style={{ color: 'var(--text-primary)' }}>{userName}</strong>! Set your Age & Monthly Salary to unlock automated daily limits and wealth compounding.
         </p>
 
         {/* Form Container */}
@@ -181,14 +181,14 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
           
           {/* FIELD 1: Age in Years & Quick Presets */}
           <div style={{
-            background: 'rgba(255, 255, 255, 0.03)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
+            background: 'var(--bg-input)',
+            border: '1px solid var(--border-input)',
             borderRadius: '18px',
             padding: '14px'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <label style={{ fontSize: '12px', fontWeight: 700, color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Cake size={14} style={{ color: '#10b981' }} />
+              <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Cake size={14} style={{ color: 'var(--primary, #10b981)' }} />
                 <span>Your Age (in Years)</span>
               </label>
 
@@ -196,9 +196,9 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
               <span style={{
                 fontSize: '11px',
                 fontWeight: 800,
-                color: age ? '#34d399' : '#64748b',
-                background: age ? 'rgba(16, 185, 129, 0.16)' : 'rgba(255, 255, 255, 0.05)',
-                border: age ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
+                color: age ? 'var(--primary, #10b981)' : 'var(--text-muted)',
+                background: age ? 'rgba(16, 185, 129, 0.16)' : 'transparent',
+                border: age ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid var(--border-input)',
                 padding: '3px 10px',
                 borderRadius: '100px',
                 display: 'inline-flex',
@@ -232,9 +232,9 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
                   width: '100%',
                   padding: '11px 14px 11px 36px',
                   borderRadius: '12px',
-                  background: 'rgba(15, 23, 42, 0.75)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  color: '#ffffff',
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border-input)',
+                  color: 'var(--text-primary)',
                   fontSize: '14px',
                   fontWeight: 700,
                   outline: 'none',
@@ -259,9 +259,9 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
                     fontSize: '11px',
                     fontWeight: 700,
                     cursor: 'pointer',
-                    border: age === presetAge.toString() ? '1px solid var(--primary, #10b981)' : '1px solid rgba(255,255,255,0.1)',
-                    background: age === presetAge.toString() ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.04)',
-                    color: age === presetAge.toString() ? '#34d399' : '#94a3b8',
+                    border: age === presetAge.toString() ? '1px solid var(--primary, #10b981)' : '1px solid var(--border-input)',
+                    background: age === presetAge.toString() ? 'rgba(16,185,129,0.2)' : 'var(--bg-card)',
+                    color: age === presetAge.toString() ? 'var(--primary, #10b981)' : 'var(--text-secondary)',
                     transition: 'all 0.15s ease'
                   }}
                 >
@@ -273,21 +273,21 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
 
           {/* FIELD 2: Monthly Salary */}
           <div style={{
-            background: 'rgba(255, 255, 255, 0.03)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
+            background: 'var(--bg-input)',
+            border: '1px solid var(--border-input)',
             borderRadius: '18px',
             padding: '14px'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <label style={{ fontSize: '12px', fontWeight: 700, color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <DollarSign size={14} style={{ color: '#10b981' }} />
+              <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <DollarSign size={14} style={{ color: 'var(--primary, #10b981)' }} />
                 <span>Monthly Salary</span>
               </label>
 
               <span style={{
                 fontSize: '12px',
                 fontWeight: 800,
-                color: '#34d399',
+                color: 'var(--primary, #10b981)',
                 background: 'rgba(16, 185, 129, 0.12)',
                 padding: '2px 8px',
                 borderRadius: '8px'
@@ -303,7 +303,7 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
                 top: '50%',
                 transform: 'translateY(-50%)',
                 fontWeight: 800,
-                color: '#10b981',
+                color: 'var(--primary, #10b981)',
                 fontSize: '16px'
               }}>
                 {currencySymbol}
@@ -320,9 +320,9 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
                   width: '100%',
                   padding: '11px 14px 11px 36px',
                   borderRadius: '12px',
-                  background: 'rgba(15, 23, 42, 0.75)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  color: '#ffffff',
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border-input)',
+                  color: 'var(--text-primary)',
                   fontSize: '15px',
                   fontWeight: 700,
                   outline: 'none',
@@ -342,10 +342,10 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
                     flexShrink: 0,
                     padding: '5px 9px',
                     borderRadius: '8px',
-                    background: salary === preset.toString() ? 'rgba(16, 185, 129, 0.25)' : 'rgba(255, 255, 255, 0.05)',
-                    border: salary === preset.toString() ? '1px solid #10b981' : '1px solid rgba(255, 255, 255, 0.08)',
-                    color: salary === preset.toString() ? '#34d399' : '#94a3b8',
-                    fontSize: '10px',
+                    background: salary === preset.toString() ? 'rgba(16, 185, 129, 0.25)' : 'var(--bg-card)',
+                    border: salary === preset.toString() ? '1px solid var(--primary, #10b981)' : '1px solid var(--border-input)',
+                    color: salary === preset.toString() ? 'var(--primary, #10b981)' : 'var(--text-secondary)',
+                    fontSize: '11px',
                     fontWeight: 700,
                     cursor: 'pointer',
                     transition: 'all 0.15s ease'
@@ -364,7 +364,7 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
               borderRadius: '12px',
               background: 'rgba(239, 68, 68, 0.15)',
               border: '1px solid rgba(239, 68, 68, 0.35)',
-              color: '#f87171',
+              color: '#ef4444',
               fontSize: '12px',
               fontWeight: 600
             }}>
@@ -417,7 +417,7 @@ export const FinancialProfileCardModal: React.FC<FinancialProfileCardModalProps>
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#64748b',
+                color: 'var(--text-muted)',
                 fontSize: '12px',
                 fontWeight: 600,
                 cursor: 'pointer',

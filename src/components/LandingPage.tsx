@@ -5426,6 +5426,11 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             </button>
 
             {/* Official App Social Media Handles */}
+            <div style={{ marginBottom: '8px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#10b981' }}>
+                Follow Something Labs
+              </span>
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
               <a
                 href="https://www.instagram.com/somethinglabs.in/"

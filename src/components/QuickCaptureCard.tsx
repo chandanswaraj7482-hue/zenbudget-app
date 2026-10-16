@@ -862,9 +862,9 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
         <div style={{
           position: 'fixed',
           top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0, 0, 0, 0.75)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
+          background: 'rgba(15, 23, 42, 0.5)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
           zIndex: 999999,
           display: 'flex',
           alignItems: 'center',
@@ -873,7 +873,7 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
         }} className="animate-fade-in">
           <div className="glass-panel animate-scale-up" style={{
             background: 'var(--bg-card)',
-            border: '1px solid var(--border-card)',
+            border: '1px solid var(--border-card-active, var(--border-card))',
             borderRadius: '24px',
             padding: '28px 24px',
             maxWidth: '360px',
@@ -887,7 +887,7 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
               onClick={() => setShowNoAccountModal(false)}
               style={{ 
                 position: 'absolute', top: '16px', right: '16px', 
-                background: 'rgba(0,0,0,0.05)', border: 'none', 
+                background: 'var(--bg-input)', border: '1px solid var(--border-input)', 
                 borderRadius: '50%', width: '32px', height: '32px',
                 color: 'var(--text-secondary)', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center'

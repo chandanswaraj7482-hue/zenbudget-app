@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+import { isPlayStoreBuild } from '../config/buildConfig';
 
 export interface UserProfile {
   id?: string;
@@ -35,8 +36,11 @@ export interface PaymentPayload {
 /**
  * 🛠️ UNIFIED ACCESS GATEKEEPER
  * Checks if user has unlocked Lifetime Scan & Pay access (₹79) or Admin override.
+ * In Play Store builds, this is 100% unlocked/compliant.
  */
 export function checkHasScanPayAccess(userProfile?: UserProfile | null): boolean {
+  if (isPlayStoreBuild()) return true;
+
   const profileId = userProfile?.id || (typeof localStorage !== 'undefined' ? localStorage.getItem('zb_profile_id') : '') || '';
   
   if (userProfile && typeof userProfile.has_scan_pay_access === 'boolean') {

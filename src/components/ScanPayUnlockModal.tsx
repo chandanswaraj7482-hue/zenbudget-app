@@ -5,6 +5,7 @@ import { supabase } from '../supabaseClient';
 import { launchCashfreeCheckout } from '../utils/cashfreeHelper';
 import { triggerFireworksCelebration, playErrorSound } from '../utils/audio';
 import { Capacitor } from '@capacitor/core';
+import { isPlayStoreBuild } from '../config/buildConfig';
 
 interface ScanPayUnlockModalProps {
   isOpen: boolean;
@@ -26,6 +27,15 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
   const [showInAppGateway, setShowInAppGateway] = useState(false);
   const [modalErr, setModalErr] = useState<string | null>(null);
 
+  // Play Store build compliance: automatically unlock Scan & Pay without third-party payments
+  React.useEffect(() => {
+    if (isOpen && isPlayStoreBuild()) {
+      localStorage.setItem('has_scan_pay_access', 'true');
+      onUnlockSuccess();
+      onClose();
+    }
+  }, [isOpen, onUnlockSuccess, onClose]);
+
   const [dynamicPrices, setDynamicPrices] = useState<any>(() => {
     try {
       return JSON.parse(localStorage.getItem('zb_dynamic_prices') || '{}');
@@ -39,6 +49,8 @@ export const ScanPayUnlockModal: React.FC<ScanPayUnlockModalProps> = ({
     window.addEventListener('zenbudget_prices_updated', handlePricesUpdated);
     return () => window.removeEventListener('zenbudget_prices_updated', handlePricesUpdated);
   }, []);
+
+  if (!isOpen || isUnlocked || isPlayStoreBuild()) return null;
 
   let numPrice = 79;
   let priceFormatted = `${currencySymbol}79`;

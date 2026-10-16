@@ -1,3 +1,5 @@
+import { Capacitor } from '@capacitor/core';
+
 /**
  * 🚀 ZenBudget Build & Distribution Configuration
  * 
@@ -20,13 +22,13 @@ export const DISTRIBUTION_CONFIG = {
   DIRECT_APK_FALLBACK_URL: 'https://raw.githubusercontent.com/chandanswaraj7482-hue/zenbudget-app/main/public/zenbudget.apk',
 
   // Current Target: 'website_apk' | 'playstore'
-  BUILD_TARGET: (import.meta.env.VITE_BUILD_TARGET as 'website_apk' | 'playstore') || 'website_apk',
+  BUILD_TARGET: 'playstore' as 'website_apk' | 'playstore',
 };
 
 export const isPlayStoreBuild = (): boolean => {
-  return DISTRIBUTION_CONFIG.BUILD_TARGET === 'playstore';
+  return DISTRIBUTION_CONFIG.BUILD_TARGET === 'playstore' || Capacitor.isNativePlatform();
 };
 
 export const isWebsiteApkBuild = (): boolean => {
-  return DISTRIBUTION_CONFIG.BUILD_TARGET === 'website_apk';
+  return !isPlayStoreBuild();
 };
