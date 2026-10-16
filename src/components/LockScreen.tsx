@@ -338,36 +338,43 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       console.log("LockScreen: fetchUserProfile() starting for uid", uid);
       let userProf: any = null;
 
-      // 1. Try fetching profile by id with a 3-second timeout race
-      const queryPromise = supabase.from('profiles').select('*').eq('id', uid).maybeSingle();
-      const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
-        setTimeout(() => resolve({ data: null, error: new Error('Query timeout') }), 3000)
-      );
-
-      const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
-      if (error) {
-        console.error("LockScreen: fetchUserProfile database query error or timeout:", error);
-        throw error;
+      // 1. Try fetching profile by id with timeout
+      try {
+        const queryPromise = supabase.from('profiles').select('*').eq('id', uid).maybeSingle();
+        const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
+          setTimeout(() => resolve({ data: null, error: new Error('Query timeout') }), 3000)
+        );
+        const { data } = await Promise.race([queryPromise, timeoutPromise]);
+        if (data) userProf = data;
+      } catch (eQuery) {
+        console.warn("LockScreen: fetchUserProfile by id warning:", eQuery);
       }
-      userProf = data;
 
-      // 2. If not found by id, try matching by email for multi-device sync
-      const storedEmail = (email || localStorage.getItem('zb_user_email') || '').trim().toLowerCase();
+      // 2. If not found by id, try matching by email for existing users / multi-device sync
+      let storedEmail = (email || localStorage.getItem('zb_user_email') || '').trim().toLowerCase();
+      if (!storedEmail) {
+        try {
+          const { data: sessData } = await supabase.auth.getSession();
+          if (sessData?.session?.user?.email) {
+            storedEmail = sessData.session.user.email.trim().toLowerCase();
+            localStorage.setItem('zb_user_email', storedEmail);
+          }
+        } catch (_) {}
+      }
+
       if (!userProf && storedEmail) {
         try {
           const { data: emailMatch } = await supabase.from('profiles').select('*').ilike('email', storedEmail).maybeSingle();
           if (emailMatch) {
             userProf = emailMatch;
-            // Update profile id to link to current auth uid
-            await supabase.from('profiles').update({ id: uid }).eq('id', emailMatch.id);
           }
         } catch (eMatch) {
           console.warn('Email profile matching check failed:', eMatch);
         }
       }
 
+      // 3. Only if user genuinely does not exist in DB (e.g., brand new signup or account was deleted)
       if (!userProf) {
-        // Auto-provision brand new Google / OAuth user profile
         try {
           const { data: currentSess } = await supabase.auth.getSession();
           const meta = currentSess?.session?.user?.user_metadata || {};
@@ -407,6 +414,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             }
           }
           userProf = finalProfile;
+          // Newly created profile: user must set PIN for the first time
+          localStorage.removeItem('zb_pin_created');
         } catch (eProf) {
           console.warn('Auto-provisioning fallback profile:', eProf);
         }
@@ -414,7 +423,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
       console.log("LockScreen: fetchUserProfile database query result:", userProf);
       if (userProf) {
-        if (userProf.is_suspended) {
+        if (userProf.is_suspended || userProf.status === 'suspended') {
           setErrorMsg('⚠️ Your account has been suspended by the administrator. Please contact support.');
           setIsLoading(false);
           setStep('auth');
@@ -427,23 +436,21 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         try {
           if (userProf.device_id) {
             const ids = (userProf.device_id || '').split('|').filter(Boolean);
-            // Merge and save IDs
             const newIds = ids.filter((id: string) => (isMobile ? !id.startsWith('mobile_') : !id.startsWith('desktop_')));
             if (!newIds.includes(currentDeviceId)) newIds.push(currentDeviceId);
             const newDeviceIdString = newIds.join('|');
 
             if (newDeviceIdString !== userProf.device_id) {
-              await supabase.from('profiles').update({ device_id: newDeviceIdString }).eq('id', uid);
+              await supabase.from('profiles').update({ device_id: newDeviceIdString }).eq('id', userProf.id || uid);
               userProf.device_id = newDeviceIdString;
             }
           } else {
-            await supabase.from('profiles').update({ device_id: currentDeviceId }).eq('id', uid);
+            await supabase.from('profiles').update({ device_id: currentDeviceId }).eq('id', userProf.id || uid);
             userProf.device_id = currentDeviceId;
           }
         } catch (deviceErr) {
           console.warn('Device session registration failed:', deviceErr);
         }
-        // ------------------------------------------------
 
         setDbProfile(userProf);
         if (userProf.name) {
@@ -451,20 +458,19 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           localStorage.setItem('zb_user_name', userProf.name);
         }
 
-        // Store profile details locally to avoid logouts
-        localStorage.setItem('zb_local_session_profile', JSON.stringify({ userId: uid, profile: userProf }));
-        localStorage.setItem('zb_profile_id', userProf.id || uid);
+        const targetProfileId = userProf.id || uid;
+        localStorage.setItem('zb_local_session_profile', JSON.stringify({ userId: targetProfileId, profile: userProf }));
+        localStorage.setItem('zb_profile_id', targetProfileId);
 
-        // Sync database avatar to localstorage (preserve user custom uploaded photo)
+        // Sync database avatar to localstorage
         if (userProf.avatar_url) {
           localStorage.setItem('zb_user_avatar', userProf.avatar_url);
         } else {
-          // If no database avatar, use existing local avatar or google avatar or initials
           const existingAvatar = localStorage.getItem('zb_user_avatar');
           const googleAvatar = localStorage.getItem('zb_google_avatar');
           if (!existingAvatar && googleAvatar) {
             localStorage.setItem('zb_user_avatar', googleAvatar);
-            supabase.from('profiles').update({ avatar_url: googleAvatar }).eq('id', uid).catch(() => { });
+            supabase.from('profiles').update({ avatar_url: googleAvatar }).eq('id', targetProfileId).catch(() => { });
           } else if (!existingAvatar) {
             const initAvatar = getInitialsAvatar(getInitialsName(userProf.name, userProf.email || storedEmail));
             localStorage.setItem('zb_user_avatar', initAvatar);
@@ -477,27 +483,26 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         localStorage.removeItem('zb_oauth_just_completed');
         localStorage.removeItem('zb_oauth_in_progress');
 
-        // Check if user has a valid personal 4-digit PIN (DB profile or locally saved)
-        const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem(`zb_pin_${uid}`) || localStorage.getItem('zb_saved_device_pin');
-        const effectivePin = (localPin && localPin !== '0000' && localPin.length >= 4)
+        // Check PIN: An existing user has their PIN saved or in DB.
+        // We ALWAYS direct existing users to 'unlock' to enter their PIN.
+        const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem(`zb_pin_${targetProfileId}`) || localStorage.getItem('zb_saved_device_pin');
+        const dbPin = userProf.pin;
+        const effectivePin = (localPin && localPin.length >= 4)
           ? localPin
-          : (userProf.pin && userProf.pin !== '0000' && userProf.pin.length >= 4 ? userProf.pin : null);
+          : (dbPin && dbPin.length >= 4 ? dbPin : null);
 
         if (effectivePin) {
           localStorage.setItem('zb_user_pin', effectivePin);
           localStorage.setItem('zb_saved_device_pin', effectivePin);
-          localStorage.setItem(`zb_pin_${uid}`, effectivePin);
-          localStorage.setItem('zb_pin_created', 'true');
-          setStep('unlock');
-        } else {
-          // User hasn't chosen their personal 4-digit PIN yet -> only for first-time users!
-          localStorage.removeItem('zb_pin_created');
-          setStep('onboard-pin');
+          localStorage.setItem(`zb_pin_${targetProfileId}`, effectivePin);
         }
+        localStorage.setItem('zb_pin_created', 'true');
+        // Existing user always enters PIN to unlock!
+        setStep('unlock');
       } else {
-        // No DB profile found — check if local valid PIN exists
+        // No DB profile found (user deleted account or fresh start)
         const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem(`zb_pin_${uid}`) || localStorage.getItem('zb_saved_device_pin');
-        if (localPin && localPin !== '0000' && localPin.length >= 4) {
+        if (localPin && localPin.length >= 4) {
           localStorage.setItem('zb_user_pin', localPin);
           localStorage.setItem('zb_saved_device_pin', localPin);
           localStorage.setItem('zb_pin_created', 'true');
@@ -542,18 +547,14 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           setUsername(cachedData.profile.name);
           setStep('unlock');
         } catch (_) { setStep('auth'); }
-        // Even without session cache, check PIN or profile ID
+      } else {
         const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem('zb_saved_device_pin');
         const localProfileId = localStorage.getItem('zb_profile_id');
-        if (localPin && localPin !== '0000' && localPin.length >= 4) {
+        if (localPin && localPin.length >= 4) {
           setStep('unlock');
         } else if (localProfileId) {
           setUserId(localProfileId);
-          if (localStorage.getItem('zb_pin_created') === 'true') {
-            setStep('unlock');
-          } else {
-            setStep('onboard-pin');
-          }
+          setStep('unlock');
         } else {
           setStep('auth');
         }
@@ -663,15 +664,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           // No cached session — but check if user is already signed in or created a profile
           const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem('zb_saved_device_pin');
           const localProfileId = localStorage.getItem('zb_profile_id');
-          if (localPin && localPin !== '0000' && localPin.length >= 4) {
+          if (localPin && localPin.length >= 4) {
             setStep('unlock');
           } else if (localProfileId) {
             setUserId(localProfileId);
-            if (localStorage.getItem('zb_pin_created') === 'true') {
-              setStep('unlock');
-            } else {
-              setStep('onboard-pin');
-            }
+            setStep('unlock');
           } else {
             setStep('auth');
           }
