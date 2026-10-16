@@ -114,20 +114,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   // Auth & Profile states
   const [currentProfileId, setCurrentProfileId] = useState<string>(() => localStorage.getItem('zb_profile_id') || '');
   const [userName, setUserName] = useState<string>(() => localStorage.getItem('zb_user_name') || '');
-  const [isLocked, setIsLocked] = useState<boolean>(() => {
-    // Only bypass lock screen if authenticated in this exact browser tab session within 5 minutes
-    const sessionAuth = sessionStorage.getItem('zb_session_authenticated');
-    const lastActive = sessionStorage.getItem('zb_last_active_time');
-    const now = Date.now();
-    if (sessionAuth === 'true' && lastActive) {
-      const elapsed = now - parseInt(lastActive, 10);
-      if (!isNaN(elapsed) && elapsed < 5 * 60 * 1000) {
-        return false;
-      }
-    }
-    // ALWAYS start locked on launch / refresh / new tab to protect user financial data
-    return true;
-  });
+  // ALWAYS start locked on launch, refresh, or reopen so the user enters PIN every time
+  const [isLocked, setIsLocked] = useState<boolean>(true);
   const [isAppLoading, setIsAppLoading] = useState<boolean>(false);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
   const [showMorningBrief, setShowMorningBrief] = useState<boolean>(false);
@@ -1136,7 +1124,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       }
     }, 10000); // Check every 10 seconds
 
-    // Capacitor Native app background / resume auto-lock (after 5 minutes in background)
+    // Capacitor Native app background / resume auto-lock (asks for PIN on resume)
     let appStateHandle: any = null;
     if (Capacitor.isNativePlatform()) {
       CapApp.addListener('appStateChange', (state) => {
@@ -1148,11 +1136,10 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           sessionStorage.removeItem('zb_was_backgrounded');
           if (bgTimeStr) {
             const bgTime = parseInt(bgTimeStr, 10);
-            if (!isNaN(bgTime) && Date.now() - bgTime >= 5 * 60 * 1000) {
+            if (!isNaN(bgTime) && Date.now() - bgTime >= 3000) {
               sessionStorage.removeItem('zb_session_authenticated');
               sessionStorage.removeItem('zb_last_active_time');
               setIsLocked(true);
-              triggerToast('🔒 ZenBudget Auto-Locked after 5 mins in background (Bank Security).', 'info');
             }
           }
         }
@@ -1163,7 +1150,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       });
     }
 
-    // Web / PWA visibility change auto-lock (after 5 minutes in background/hidden tab)
+    // Web / PWA visibility change auto-lock (asks for PIN on returning to tab)
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         sessionStorage.setItem('zb_bg_time', Date.now().toString());
@@ -1173,11 +1160,10 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         sessionStorage.removeItem('zb_was_backgrounded');
         if (bgTimeStr) {
           const bgTime = parseInt(bgTimeStr, 10);
-          if (!isNaN(bgTime) && Date.now() - bgTime >= 5 * 60 * 1000) {
+          if (!isNaN(bgTime) && Date.now() - bgTime >= 3000) {
             sessionStorage.removeItem('zb_session_authenticated');
             sessionStorage.removeItem('zb_last_active_time');
             setIsLocked(true);
-            triggerToast('🔒 ZenBudget Auto-Locked after 5 mins in background (Bank Security).', 'info');
           }
         }
       }
