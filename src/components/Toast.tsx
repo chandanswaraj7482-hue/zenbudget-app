@@ -14,16 +14,20 @@ interface ToastProps {
 
 export const Toast: React.FC<ToastProps> = ({ toast, onClose }) => {
   useEffect(() => {
-    if (!toast) return;
+    if (!toast || !toast.message || typeof toast.message !== 'string' || !toast.message.trim()) return;
     const timer = setTimeout(() => {
       onClose();
     }, 3800); // Auto close after 3.8s
     return () => clearTimeout(timer);
   }, [toast, onClose]);
 
-  if (!toast) return null;
+  if (!toast || !toast.message || typeof toast.message !== 'string' || !toast.message.trim()) {
+    return null;
+  }
 
-  const isLight = typeof document !== 'undefined' && document.body.classList.contains('light-theme');
+  const isLight = typeof document !== 'undefined' && 
+    (document.documentElement.classList.contains('light-theme') || document.body.classList.contains('light-theme'));
+
 
   const getDetails = () => {
     switch (toast.type) {

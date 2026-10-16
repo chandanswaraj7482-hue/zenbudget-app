@@ -321,19 +321,21 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
         </div>
       )}
 
-      {/* Header */}
+      {/* Header - Sticky Frozen at top */}
       <header style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '16px 20px',
+        padding: '14px 18px',
         background: 'var(--bg-card)',
         borderBottom: '1px solid var(--border-divider)',
         position: 'sticky',
         top: 0,
-        zIndex: 20
+        zIndex: 50,
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button
             onClick={onBack}
             style={{
@@ -346,14 +348,15 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              color: 'var(--text-primary)'
+              color: 'var(--text-primary)',
+              flexShrink: 0
             }}
           >
             <ChevronLeft size={20} />
           </button>
-          <div>
+          <div style={{ minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <h2 style={{ fontSize: '17px', fontWeight: 800, margin: 0 }}>
+              <h2 style={{ fontSize: '17px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
                 AI Bank Assistant
               </h2>
               <span style={{
@@ -362,13 +365,19 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
                 fontSize: '10px',
                 fontWeight: 800,
                 padding: '2px 8px',
-                borderRadius: '999px',
-                letterSpacing: '0.05em'
+                borderRadius: '6px',
+                letterSpacing: '0.06em',
+                whiteSpace: 'nowrap',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                lineHeight: 1.2,
+                flexShrink: 0
               }}>
                 PRO
               </span>
             </div>
-            <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: 0 }}>
+            <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               Statement Intelligence & Passbook Parser
             </p>
           </div>
@@ -382,147 +391,97 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
           color: '#f59e0b',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          flexShrink: 0
         }}>
           <Landmark size={20} />
         </div>
       </header>
 
       {/* Main Content */}
-      <div style={{ padding: '20px', flex: 1, maxWidth: '640px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+      <div style={{ padding: '16px 20px', flex: 1, maxWidth: '640px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
         
-        {/* PRO / 1-Time Free Trial Banner */}
+        {/* Compact Pro / Trial Bar */}
         {!isPremiumUser && (
           <div style={{
             background: scansUsed >= 1 
               ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%)'
-              : 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(99, 102, 241, 0.1) 100%)',
-            border: scansUsed >= 1 ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(16, 185, 129, 0.35)',
-            borderRadius: '24px',
-            padding: '20px',
-            marginBottom: '20px',
-            position: 'relative',
-            overflow: 'hidden'
+              : 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 182, 212, 0.1) 100%)',
+            border: scansUsed >= 1 ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(16, 185, 129, 0.3)',
+            borderRadius: '16px',
+            padding: '12px 16px',
+            marginBottom: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '10px',
+            flexWrap: 'wrap'
           }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
-              <div style={{
-                width: '42px',
-                height: '42px',
-                borderRadius: '14px',
-                background: scansUsed >= 1 ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 'linear-gradient(135deg, #10b981, #059669)',
-                color: '#fff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}>
-                {scansUsed >= 1 ? <Lock size={20} /> : <Sparkles size={20} />}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: scansUsed >= 1 ? '#ef4444' : '#10b981' }}>
-                    {scansUsed >= 1 ? '👑 1-Time Free Statement Used!' : '🎬 1st Statement: 100% Free Trial'}
-                  </h3>
-                </div>
-                <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '6px 0 14px', lineHeight: '1.5' }}>
-                  {scansUsed >= 1
-                    ? 'You have already used your 1-Time Free Bank Statement import. Upgrade to ZenBudget Pro for unlimited automated statement imports.'
-                    : 'Watch 1 short sponsor video ad to scan your 1st bank statement 100% FREE! Subsequent statements require ZenBudget Pro.'}
-                </p>
-
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                  {scansUsed === 0 && !trialUnlocked && (
-                    <button
-                      onClick={() => setShowAdModal(true)}
-                      style={{
-                        padding: '10px 18px',
-                        borderRadius: '12px',
-                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                        border: 'none',
-                        color: '#ffffff',
-                        fontSize: '13px',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px'
-                      }}
-                    >
-                      <Play size={14} fill="#ffffff" />
-                      <span>Watch Ad (Scan 1st Statement Free)</span>
-                    </button>
-                  )}
-                  <button
-                    onClick={onOpenSubscriptionModal}
-                    style={{
-                      padding: '10px 18px',
-                      borderRadius: '12px',
-                      background: scansUsed >= 1 ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 'rgba(255, 255, 255, 0.08)',
-                      border: scansUsed >= 1 ? 'none' : '1px solid rgba(255, 255, 255, 0.15)',
-                      color: '#ffffff',
-                      fontSize: '13px',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    <Sparkles size={14} />
-                    <span>{scansUsed >= 1 ? 'Unlock Pro (From ₹149/mo)' : 'Get Pro for Unlimited'}</span>
-                  </button>
-                </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
+              <span style={{ fontSize: '18px' }}>{scansUsed >= 1 ? '👑' : '🎬'}</span>
+              <div style={{ minWidth: 0 }}>
+                <span style={{ fontSize: '13px', fontWeight: 800, color: scansUsed >= 1 ? '#ef4444' : '#10b981', display: 'block' }}>
+                  {scansUsed >= 1 ? 'Free Trial Used' : '1st Statement Free Trial'}
+                </span>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block' }}>
+                  {scansUsed >= 1 ? 'Upgrade to Pro for unlimited parsing' : 'Watch 1 short sponsor video to unlock free scan'}
+                </span>
               </div>
             </div>
+
+            <button
+              onClick={() => {
+                if (scansUsed >= 1) {
+                  onOpenSubscriptionModal();
+                } else if (!trialUnlocked) {
+                  setShowAdModal(true);
+                } else {
+                  onOpenSubscriptionModal();
+                }
+              }}
+              style={{
+                padding: '7px 14px',
+                borderRadius: '10px',
+                background: scansUsed >= 1 
+                  ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+                  : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                border: 'none',
+                color: '#ffffff',
+                fontSize: '11.5px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                flexShrink: 0,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+              }}
+            >
+              {scansUsed >= 1 ? <Sparkles size={12} /> : <Play size={12} fill="#fff" />}
+              <span>{scansUsed >= 1 ? 'Get Pro' : (trialUnlocked ? 'Unlocked ✓' : 'Watch Ad')}</span>
+            </button>
           </div>
         )}
 
-        {/* Android APK 1-Tap Netbanking Share Guide */}
+        {/* Compact Netbanking Share Hint */}
         <div style={{
-          background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%)',
-          border: '1px solid rgba(16, 185, 129, 0.25)',
-          borderRadius: '20px',
-          padding: '16px',
+          background: 'rgba(255, 255, 255, 0.03)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '14px',
+          padding: '10px 14px',
           marginBottom: '16px',
           display: 'flex',
-          gap: '12px',
-          alignItems: 'flex-start'
+          alignItems: 'center',
+          gap: '10px'
         }}>
-          <div style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '12px',
-            background: 'linear-gradient(135deg, #10b981, #059669)',
-            color: '#fff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            marginTop: '2px'
-          }}>
-            <Landmark size={18} />
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--text-primary)' }}>
-                📲 1-Tap Direct Share from Netbanking APK
-              </span>
-              <span style={{ fontSize: '10px', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', padding: '2px 8px', borderRadius: '100px', fontWeight: 800 }}>
-                ANDROID APK
-              </span>
-            </div>
-            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '4px 0 8px', lineHeight: 1.5 }}>
-              Open your <strong>HDFC, SBI, ICICI, Axis, Kotak</strong> netbanking app or <strong>GPay</strong> ➔ Download/View Statement PDF ➔ Tap <strong>"Share"</strong> ➔ Select <strong>ZenBudget</strong> to auto-import instantly with zero manual file search!
-            </p>
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-              {['HDFC Bank', 'SBI e-Pay', 'ICICI iMobile', 'Axis Mobile', 'Kotak 811', 'GPay UPI'].map((b, i) => (
-                <span key={i} style={{ fontSize: '10.5px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: 'var(--bg-input, rgba(255,255,255,0.05))', color: 'var(--text-secondary)', border: '1px solid var(--border-input, rgba(255,255,255,0.1))' }}>
-                  {b}
-                </span>
-              ))}
-            </div>
+          <span style={{ fontSize: '16px' }}>📲</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ fontSize: '11.5px', color: 'var(--text-secondary)', display: 'block', lineHeight: 1.4 }}>
+              <strong style={{ color: 'var(--text-primary)' }}>1-Tap Direct Share:</strong> Download Bank Statement PDF in any netbanking app or GPay ➔ Tap <strong>"Share"</strong> ➔ Select <strong>ZenBudget</strong>
+            </span>
           </div>
         </div>
+
 
         {/* =================================================================== */}
         {/* FILE UPLOAD CARD (WHEN NO RESULT YET)                                */}
@@ -570,19 +529,15 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
                 {isLocked ? <Lock size={32} /> : needsAdUnlock ? <Sparkles size={32} /> : <UploadCloud size={32} />}
               </div>
 
-              <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 6px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 6px', color: 'var(--text-primary)' }}>
                 {isLocked
-                  ? '1-Time Free Statement Used'
-                  : needsAdUnlock
-                    ? '🎬 1st Statement: 100% FREE (Watch Ad)'
-                    : (file ? file.name : 'Select Bank Statement')}
+                  ? 'Pro Subscription Required'
+                  : (file ? file.name : 'Select Bank Statement')}
               </h3>
               <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 0 16px' }}>
                 {isLocked
                   ? 'Upgrade to ZenBudget Pro for unlimited statement imports'
-                  : needsAdUnlock
-                    ? 'Tap to watch 1 sponsor video ad & scan your 1st statement 100% free!'
-                    : 'Supports HDFC, SBI, ICICI, Axis PDF, CSV & Passbook Photos'}
+                  : 'Supports HDFC, SBI, ICICI, Axis, Kotak PDF, CSV & Passbook Photos'}
               </p>
 
               <div style={{

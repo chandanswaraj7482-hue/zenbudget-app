@@ -1293,13 +1293,13 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           localStorage.setItem(`zb_notifications_${currentProfileId}`, JSON.stringify(updated));
           localStorage.setItem(shownKey, JSON.stringify(shownIds));
 
-          if (latestUnseen) {
+          if (latestUnseen && (latestUnseen.title?.trim() || latestUnseen.message?.trim())) {
             const lUnseen = latestUnseen;
             setTimeout(() => {
               setAnnouncementPopup({
                 id: String(lUnseen.id),
-                title: lUnseen.title,
-                message: lUnseen.message,
+                title: lUnseen.title || '',
+                message: lUnseen.message || '',
                 type: lUnseen.type || 'info',
                 createdAt: lUnseen.created_at,
                 linkUrl: lUnseen.link_url || undefined,
@@ -1337,17 +1337,21 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         return updated;
       });
 
-      // Show full popup for real-time announcements immediately
-      setAnnouncementPopup({
-        id: String(b.id),
-        title: b.title,
-        message: b.message,
-        type: b.type || 'info',
-        createdAt: b.created_at || new Date().toISOString(),
-        linkUrl: b.link_url || undefined,
-        buttonText: b.button_text || undefined
-      });
-      triggerToast(`📣 ${b.title}`, b.type === 'coupon' ? 'success' : 'info');
+      // Show full popup for real-time announcements immediately if valid
+      if (b.title?.trim() || b.message?.trim()) {
+        setAnnouncementPopup({
+          id: String(b.id),
+          title: b.title || '',
+          message: b.message || '',
+          type: b.type || 'info',
+          createdAt: b.created_at || new Date().toISOString(),
+          linkUrl: b.link_url || undefined,
+          buttonText: b.button_text || undefined
+        });
+        if (b.title?.trim()) {
+          triggerToast(`📣 ${b.title.trim()}`, b.type === 'coupon' ? 'success' : 'info');
+        }
+      }
       try { playNotificationSound('info'); } catch (_) {}
 
       if (Capacitor.isNativePlatform()) {
@@ -1512,11 +1516,12 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     });
   };
 
-  // Trigger toast & notification sound helper
+  // Trigger toast & notification sound helper with strict empty/null prevention
   const triggerToast = (message: string, type: 'success' | 'warning' | 'info') => {
+    if (!message || typeof message !== 'string' || !message.trim()) return;
     setToast({
       id: Math.random().toString(),
-      message,
+      message: message.trim(),
       type
     });
     playNotificationSound(type);
@@ -1656,9 +1661,10 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
 
     const handleToastAlert = (e: any) => {
-      const msg = e.detail?.message || 'Notification';
+      const msg = e.detail?.message;
+      if (!msg || typeof msg !== 'string' || !msg.trim()) return;
       const t = e.detail?.type === 'error' || e.detail?.type === 'danger' ? 'warning' : (e.detail?.type || 'info');
-      triggerToast(msg, t);
+      triggerToast(msg.trim(), t);
     };
     window.addEventListener('toast-alert', handleToastAlert);
 

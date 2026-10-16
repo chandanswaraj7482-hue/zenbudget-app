@@ -44,7 +44,9 @@ export const TopAnnouncementBanner: React.FC<TopAnnouncementBannerProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [announcement?.id]);
 
-  if (!announcement) return null;
+  if (!announcement || (!announcement.title?.trim() && !announcement.message?.trim())) {
+    return null;
+  }
 
   const handleDismiss = () => {
     setIsClosing(true);
@@ -54,7 +56,9 @@ export const TopAnnouncementBanner: React.FC<TopAnnouncementBannerProps> = ({
     }, 240);
   };
 
-  const isLight = typeof document !== 'undefined' && document.body.classList.contains('light-theme');
+  const isLight = typeof document !== 'undefined' && 
+    (document.documentElement.classList.contains('light-theme') || document.body.classList.contains('light-theme'));
+
 
   const getTypeStyle = () => {
     switch (announcement.type) {
