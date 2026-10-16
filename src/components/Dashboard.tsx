@@ -805,14 +805,25 @@ export const Dashboard: React.FC<DashboardProps> = ({
              </div>
           )}
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', minWidth: 0, overflow: 'hidden' }}>
-            <span style={{ fontSize: '10px', color: '#22c55e', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', minWidth: 0, overflow: 'hidden', flex: '1 1 0%' }}>
+            <span style={{ display: 'block', fontSize: '10px', color: '#22c55e', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.2 }}>
               {timeOfDayGreeting} {timeOfDayEmoji}
             </span>
-            <h1 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <h1 style={{ display: 'block', fontSize: '17px', fontWeight: 900, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.2 }}>
               {userName || 'User'}
             </h1>
-            <span style={{ fontSize: '11px', color: '#22c55e', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <span style={{ 
+              display: 'block', 
+              fontSize: '11px', 
+              color: 'var(--text-secondary)', 
+              fontWeight: 500, 
+              whiteSpace: 'nowrap', 
+              overflow: 'hidden', 
+              textOverflow: 'ellipsis',
+              lineHeight: 1.2,
+              WebkitMaskImage: 'linear-gradient(to right, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)',
+              maskImage: 'linear-gradient(to right, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)'
+            }}>
               {dailyQuote} 🌟
             </span>
           </div>
