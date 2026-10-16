@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { Calendar } from 'lucide-react';
 import { t } from '../utils/i18n';
 import type { Transaction, CategoryType, Account } from '../types';
+import { ZenDatePickerModal } from './ZenDatePickerModal';
 
 type MoodTimeframe = '7d' | '15d' | '1m' | '2m' | '5m' | '1y' | 'custom';
 
@@ -23,6 +25,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
     return d.toISOString().split('T')[0];
   });
   const [moodEndDate, setMoodEndDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
+  const [activePicker, setActivePicker] = useState<'start' | 'end' | null>(null);
   const [todayMood, setTodayMood] = useState<string>(() => {
     const todayObj = new Date();
     const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
@@ -381,25 +384,66 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
 
         {/* Custom date range inputs */}
         {moodTimeframe === 'custom' && (
-          <div style={{ display: 'flex', gap: '10px', background: 'var(--bg-input)', padding: '12px', borderRadius: '14px', border: '1px solid var(--border-input)' }}>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>Start Date</span>
-              <input
-                type="date"
-                value={moodStartDate}
-                onChange={e => setMoodStartDate(e.target.value)}
-                style={{ background: 'var(--bg-card)', border: '1px solid var(--border-input)', color: 'var(--text-primary)', padding: '6px 8px', borderRadius: '8px', fontSize: '11px', outline: 'none', width: '100%', boxSizing: 'border-box' }}
-              />
+          <div style={{ display: 'flex', gap: '10px', background: 'var(--bg-input)', padding: '10px 12px', borderRadius: '14px', border: '1px solid var(--border-input)' }}>
+            <div 
+              onClick={() => setActivePicker('start')}
+              style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px', cursor: 'pointer' }}
+            >
+              <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Start Date</span>
+              <div style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-input)',
+                color: 'var(--text-primary)',
+                padding: '8px 10px',
+                borderRadius: '10px',
+                fontSize: '12px',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <span>{moodStartDate || 'Pick date'}</span>
+                <Calendar size={13} style={{ color: 'var(--primary)' }} />
+              </div>
             </div>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>End Date</span>
-              <input
-                type="date"
-                value={moodEndDate}
-                onChange={e => setMoodEndDate(e.target.value)}
-                style={{ background: 'var(--bg-card)', border: '1px solid var(--border-input)', color: 'var(--text-primary)', padding: '6px 8px', borderRadius: '8px', fontSize: '11px', outline: 'none', width: '100%', boxSizing: 'border-box' }}
-              />
+
+            <div 
+              onClick={() => setActivePicker('end')}
+              style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px', cursor: 'pointer' }}
+            >
+              <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>End Date</span>
+              <div style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-input)',
+                color: 'var(--text-primary)',
+                padding: '8px 10px',
+                borderRadius: '10px',
+                fontSize: '12px',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <span>{moodEndDate || 'Pick date'}</span>
+                <Calendar size={13} style={{ color: 'var(--primary)' }} />
+              </div>
             </div>
+
+            <ZenDatePickerModal
+              isOpen={activePicker === 'start'}
+              value={moodStartDate}
+              onChange={(d) => { setMoodStartDate(d); setActivePicker(null); }}
+              onClose={() => setActivePicker(null)}
+              title="Select Start Date"
+            />
+
+            <ZenDatePickerModal
+              isOpen={activePicker === 'end'}
+              value={moodEndDate}
+              onChange={(d) => { setMoodEndDate(d); setActivePicker(null); }}
+              onClose={() => setActivePicker(null)}
+              title="Select End Date"
+            />
           </div>
         )}
 

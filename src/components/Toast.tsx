@@ -60,30 +60,35 @@ export const Toast: React.FC<ToastProps> = ({ toast, onClose }) => {
   const details = getDetails();
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: '20px',
-      left: '50%',
-      transform: 'translateX(-50%)',
-      width: 'auto',
-      minWidth: '280px',
-      maxWidth: 'calc(100% - 32px)',
-      zIndex: 100000,
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px',
-      padding: '12px 18px',
-      borderRadius: '9999px',
-      background: isLight ? details.bgLight : details.bgDark,
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
-      border: `1px solid ${isLight ? details.borderLight : details.borderDark}`,
-      boxShadow: isLight
-        ? `0 12px 30px -6px rgba(0, 0, 0, 0.12), 0 0 16px ${details.color}25`
-        : `0 12px 32px 0 rgba(0, 0, 0, 0.5), 0 0 16px ${details.color}30`,
-      animation: 'slideDownToast 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-      boxSizing: 'border-box'
-    }}>
+    <div 
+      className="zen-toast-capsule"
+      style={{
+        position: 'fixed',
+        top: 'calc(env(safe-area-inset-top, 0px) + 16px)',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: 'max-content',
+        minWidth: '280px',
+        maxWidth: 'calc(100% - 32px)',
+        height: 'auto !important' as any,
+        zIndex: 100010,
+        pointerEvents: 'auto',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        padding: '11px 16px',
+        borderRadius: '20px',
+        background: isLight ? details.bgLight : details.bgDark,
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        border: `1px solid ${isLight ? details.borderLight : details.borderDark}`,
+        boxShadow: isLight
+          ? `0 12px 30px -6px rgba(0, 0, 0, 0.12), 0 0 16px ${details.color}25`
+          : `0 12px 32px 0 rgba(0, 0, 0, 0.5), 0 0 16px ${details.color}30`,
+        animation: 'slideDownToast 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        boxSizing: 'border-box'
+      }}
+    >
       <div style={{
         color: details.color,
         background: `${details.color}18`,
@@ -134,6 +139,11 @@ export const Toast: React.FC<ToastProps> = ({ toast, onClose }) => {
 
       {/* Slide down keyframe styles */}
       <style>{`
+        .zen-toast-capsule {
+          aspect-ratio: auto !important;
+          height: auto !important;
+          max-height: 90px !important;
+        }
         @keyframes slideDownToast {
           from {
             opacity: 0;

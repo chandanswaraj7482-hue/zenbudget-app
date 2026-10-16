@@ -15,11 +15,9 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     try {
+      const explicit = localStorage.getItem('zb_theme_user_set');
       const saved = localStorage.getItem('zb_landing_theme') || localStorage.getItem('zb_theme');
-      if (saved === 'light' || saved === 'dark') return saved;
-      if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-        return 'light';
-      }
+      if (explicit === 'true' && saved === 'light') return 'light';
     } catch (e) {}
     return 'dark';
   });
@@ -193,7 +191,13 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
           {/* Left: Back & Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <button
-              onClick={onBackToLanding}
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.history.pushState({}, '', '/');
+                  window.dispatchEvent(new Event('popstate'));
+                }
+                onBackToLanding();
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -215,7 +219,13 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
             </button>
 
             <div 
-              onClick={onBackToLanding} 
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.history.pushState({}, '', '/');
+                  window.dispatchEvent(new Event('popstate'));
+                }
+                onBackToLanding();
+              }} 
               style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
             >
               <img

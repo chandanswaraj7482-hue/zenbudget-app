@@ -7,9 +7,6 @@ import { Capacitor } from '@capacitor/core';
 
 export default function Root() {
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
-  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
-  const hash = typeof window !== 'undefined' ? window.location.hash : '';
-
   const isNative = Capacitor.isNativePlatform();
   const isInstalledPwa = (
     typeof window !== 'undefined' && (
@@ -21,10 +18,23 @@ export default function Root() {
     )
   );
 
+  const [currentPath, setCurrentPath] = React.useState<string>(() => {
+    return typeof window !== 'undefined' ? window.location.pathname : '/';
+  });
+
+  // Listen to popstate for proper in-app SPA history navigation
+  React.useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const isLandingDomain = (
     hostname.includes('zenbudget-tracker-app') ||
-    pathname.startsWith('/landing') ||
-    hash.startsWith('#landing')
+    currentPath.startsWith('/landing') ||
+    (typeof window !== 'undefined' && window.location.hash.startsWith('#landing'))
   );
 
   // If native app or installed PWA, always default to the full Web App ('app')
@@ -35,15 +45,25 @@ export default function Root() {
   const [activeMode, setActiveMode] = React.useState<'landing' | 'app'>(initialMode);
 
   const handleOpenWebApp = () => {
+    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/blog')) {
+      window.history.pushState({}, '', '/');
+      setCurrentPath('/');
+    }
     setActiveMode('app');
   };
 
   const handleBackToLanding = () => {
+    if (typeof window !== 'undefined') {
+      if (window.location.pathname.startsWith('/blog')) {
+        window.history.pushState({}, '', '/');
+        setCurrentPath('/');
+      }
+    }
     setActiveMode('landing');
   };
 
   // Dedicated Blog routing
-  const normalizedPath = pathname.replace(/\/+$/, '') || '/';
+  const normalizedPath = currentPath.replace(/\/+$/, '') || '/';
   if (normalizedPath === '/blog') {
     return <BlogView onBackToLanding={handleBackToLanding} onOpenWebApp={handleOpenWebApp} />;
   }
@@ -57,7 +77,6 @@ export default function Root() {
     return <LandingPage onOpenWebApp={handleOpenWebApp} />;
   }
 
-  // Otherwise, render full App directly (no URL redirection, no Chrome header)
+  // Otherwise, render full App directly
   return <App onBackToLanding={handleBackToLanding} />;
 }
-

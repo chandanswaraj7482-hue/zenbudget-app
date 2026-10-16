@@ -193,6 +193,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       localStorage.setItem('zb_user_phone', phone.trim());
       localStorage.setItem('zb_user_phone_code', phoneCode);
       localStorage.setItem('zb_theme', themeMode);
+      localStorage.setItem('zb_theme_user_set', 'true');
       localStorage.setItem('zb_currency_user_selected', 'true');
       localStorage.setItem('zb_app_lock_enabled', String(appLockEnabled));
       localStorage.setItem('zb_biometrics_enabled', String(biometricsEnabled));

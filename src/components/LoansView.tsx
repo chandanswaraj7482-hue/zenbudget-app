@@ -11,6 +11,7 @@ import {
 import type { LoanRecord, Account } from '../types';
 import { t } from '../utils/i18n';
 import { formatCurrency } from '../utils/formatCurrency';
+import { ZenDatePickerModal } from './ZenDatePickerModal';
 
 interface LoansViewProps {
   onBack: () => void;
@@ -50,6 +51,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
   };
 
   const [dueDate, setDueDate] = useState(getInitialDueDate);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const updateTenure = (months: number) => {
     const valid = Math.max(1, months);
@@ -742,30 +744,58 @@ export const LoansView: React.FC<LoansViewProps> = ({
               </span>
             </div>
             <div style={{ position: 'relative', marginTop: '6px' }}>
-              <input
-                type="date"
+              <div
+                onClick={() => setShowDatePicker(true)}
+                className="glass-input hover-lift"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px 14px',
+                  borderRadius: '14px',
+                  cursor: 'pointer',
+                  border: '1.5px solid var(--border-input)',
+                  background: 'var(--bg-input)',
+                  boxSizing: 'border-box',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '8px',
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#10b981'
+                  }}>
+                    <Calendar size={15} />
+                  </div>
+                  <span style={{ fontSize: '13.5px', fontWeight: 700, color: dueDate ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+                    {dueDate 
+                      ? new Date(dueDate.replace(/-/g, '/')).toLocaleDateString('en-IN', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric'
+                        })
+                      : 'Pick a due date'}
+                  </span>
+                </div>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: '#10b981', background: 'rgba(16, 185, 129, 0.12)', padding: '3px 8px', borderRadius: '8px' }}>
+                  Change ▾
+                </span>
+              </div>
+
+              <ZenDatePickerModal
+                isOpen={showDatePicker}
                 value={dueDate}
-                onChange={e => handleDueDateChange(e.target.value)}
-                className="glass-input custom-date-input"
-                style={{ width: '100%', paddingRight: '40px', cursor: 'pointer' }}
+                onChange={handleDueDateChange}
+                onClose={() => setShowDatePicker(false)}
+                title="Select Loan Due Date"
               />
-              <Calendar size={18} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', pointerEvents: 'none' }} />
-              <style>
-                {`
-                  .custom-date-input::-webkit-calendar-picker-indicator {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    width: auto;
-                    height: auto;
-                    color: transparent;
-                    background: transparent;
-                    cursor: pointer;
-                  }
-                `}
-              </style>
             </div>
           </div>
 

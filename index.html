@@ -91,16 +91,17 @@
       (function() {
         try {
           var saved = localStorage.getItem('zb_theme') || localStorage.getItem('zb_landing_theme');
-          if (saved === 'dark') {
-            document.documentElement.classList.add('dark-theme');
-          } else {
+          if (saved === 'light') {
             document.documentElement.classList.add('light-theme');
+          } else {
+            document.documentElement.classList.remove('light-theme');
+            document.documentElement.classList.add('dark-theme');
             if (!saved) {
-              localStorage.setItem('zb_theme', 'light');
+              localStorage.setItem('zb_theme', 'dark');
             }
           }
         } catch (e) {
-          document.documentElement.classList.add('light-theme');
+          document.documentElement.classList.add('dark-theme');
         }
       })();
     </script>

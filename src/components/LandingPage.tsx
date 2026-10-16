@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useLayoutEffect, useMemo } from 're
 import { Sparkles, ArrowRight, ArrowLeft, Search, Sun, Moon, Target, Shield, Users, Clock, Star, Smartphone, Brain, TrendingUp, TrendingDown, Heart, Activity, ChevronDown, MessageCircleHeart, ChartLine, BookHeart, Lock, ArrowUpRight, Wallet, PiggyBank, Receipt, BarChart3, Banknote, CircleCheck, Circle, Flame, Play, BookOpen, MessageCircle, X, Download, Menu, CheckCircle, CheckCircle2, ChevronRight, Zap, RefreshCw, HelpCircle, Award, Check, Monitor, Pause, ShieldCheck } from 'lucide-react';
 import { GooglePlayBadge, GooglePlayIcon } from './GooglePlayBadge';
 import { DISTRIBUTION_CONFIG } from '../config/buildConfig';
-import { YouTubeIcon, TikTokIcon, InstagramIcon, FacebookIcon, LinkedInIcon, XIcon, renderSocialIcon } from './SocialIcons';
+import { YouTubeIcon, TikTokIcon, InstagramIcon, FacebookIcon, LinkedInIcon, XIcon } from './SocialIcons';
 
 interface LandingPageProps {
   onOpenWebApp: () => void;
@@ -1131,10 +1131,11 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     try {
+      const explicit = localStorage.getItem('zb_theme_user_set');
       const saved = localStorage.getItem('zb_landing_theme') || localStorage.getItem('zb_theme');
-      if (saved === 'dark' || saved === 'light') return saved;
+      if (explicit === 'true' && saved === 'light') return 'light';
     } catch (e) {}
-    return 'light'; // Default is light mode
+    return 'dark'; // Default is dark/black mode
   });
   const [activePage, setActivePage] = useState<string>('home');
   const [landingAiQuery, setLandingAiQuery] = useState('');
@@ -1761,6 +1762,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       try { 
         localStorage.setItem('zb_landing_theme', newTheme);
         localStorage.setItem('zb_theme', newTheme);
+        localStorage.setItem('zb_theme_user_set', 'true');
         if (newTheme === 'dark') {
           document.documentElement.classList.add('dark-theme');
           document.documentElement.classList.remove('light-theme');
@@ -5601,96 +5603,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             <a onClick={handleDownloadApk} style={{ color: t.textSub, textDecoration: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color = '#10b981')} onMouseLeave={e => (e.currentTarget.style.color = t.textSub)}>Download Direct APK</a>
           </div>
 
-          {/* Social & Connect Column (Exact In-App Design from FollowUsView) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: '270px' }}>
-            <span style={{ fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: t.text, marginBottom: '4px' }}>Follow Something Labs</span>
-            {[
-              {
-                platform: 'YouTube',
-                handle: '@SomethingLabsai',
-                url: 'https://www.youtube.com/channel/UCa2ewl3C6Q3qGTXjbAMeAtA',
-                color: '#ff0000'
-              },
-              {
-                platform: 'TikTok',
-                handle: '@zenbudget_tracker',
-                url: 'https://www.tiktok.com/@zenbudget_tracker?lang=en-GB',
-                color: '#00f2fe'
-              },
-              {
-                platform: 'Instagram',
-                handle: '@somethinglabs.in',
-                url: 'https://www.instagram.com/somethinglabs.in/',
-                color: '#e1306c'
-              },
-              {
-                platform: 'Facebook',
-                handle: '@somethinglabs.in',
-                url: 'https://www.facebook.com/somethinglabs.in',
-                color: '#1877f2'
-              }
-            ].map((social) => (
-              <a
-                key={social.platform}
-                href={social.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '11px 13px',
-                  borderRadius: '16px',
-                  background: isDark ? 'rgba(15, 23, 42, 0.85)' : '#ffffff',
-                  border: `1px solid ${t.border}`,
-                  textDecoration: 'none',
-                  color: t.text,
-                  transition: 'all 0.2s ease',
-                  boxShadow: isDark ? '0 4px 14px rgba(0,0,0,0.25)' : '0 2px 8px rgba(0,0,0,0.04)'
-                }}
-                className="hover-lift"
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '11px' }}>
-                  <div style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '13px',
-                    background: isDark ? `${social.color}22` : `${social.color}12`,
-                    border: `1px solid ${social.color}${isDark ? '44' : '28'}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    transition: 'transform 0.2s ease'
-                  }}>
-                    {renderSocialIcon(social.platform, 22, social.platform === 'TikTok' ? (isDark ? '#00f2fe' : '#111827') : undefined)}
-                  </div>
-                  <div>
-                    <h4 style={{ fontSize: '13.5px', fontWeight: 800, margin: 0, color: t.text }}>{social.platform}</h4>
-                    <span style={{ fontSize: '11px', color: t.textMuted, display: 'block', maxWidth: '130px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {social.handle}
-                    </span>
-                  </div>
-                </div>
 
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '6px 12px',
-                  borderRadius: '10px',
-                  background: isDark ? `${social.color}15` : `${social.color}0d`,
-                  color: social.color,
-                  fontWeight: 800,
-                  fontSize: '11.5px',
-                  border: `1px solid ${social.color}33`
-                }}>
-                  <span>Follow</span>
-                  <ArrowUpRight size={12} color={social.color} />
-                </div>
-              </a>
-            ))}
-          </div>
 
         </div>
 
