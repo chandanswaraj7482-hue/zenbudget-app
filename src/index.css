@@ -8,6 +8,16 @@ ul, ol, li {
   list-style: none !important;
 }
 
+body {
+  -webkit-touch-callout: none;
+}
+
+input, textarea, [contenteditable="true"] {
+  -webkit-touch-callout: default;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 :root {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", 'Manrope', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.5;

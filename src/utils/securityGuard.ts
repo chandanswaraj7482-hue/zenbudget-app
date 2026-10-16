@@ -119,31 +119,65 @@ export const initConsoleDataShield = () => {
   if (import.meta.env.PROD && typeof window !== 'undefined') {
     const noop = () => {};
     // Suppress console outputs that could leak tokens, keys or internal IDs
+    window.console.log = noop;
+    window.console.info = noop;
+    window.console.warn = noop;
     window.console.debug = noop;
     window.console.dir = noop;
     window.console.trace = noop;
   }
 };
 
-// ── LAYER 6: Anti-Tamper & Shortcut Protection (Production Web) ──
+// ── LAYER 6: Anti-Tamper & Shortcut Protection (Production Web & APK) ──
 export const initTamperProtection = () => {
-  if (import.meta.env.PROD && typeof window !== 'undefined') {
-    // Intercept common devtools inspection hotkeys
-    window.addEventListener('keydown', (e) => {
-      // F12 or Ctrl+Shift+I or Ctrl+Shift+J or Ctrl+U
-      if (
-        e.key === 'F12' ||
-        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) ||
-        (e.metaKey && e.altKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'U' || e.key === 'u')) ||
-        (e.ctrlKey && (e.key === 'u' || e.key === 'U'))
-      ) {
-        // Allow in local dev, block in production
-        if (!window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')) {
-          e.preventDefault();
-        }
-      }
-    }, { capture: true });
-  }
+  if (typeof window === 'undefined') return;
+
+  // Only bypass in local Vite dev server; active in all production builds (Web & APK)
+  if (import.meta.env.DEV) return;
+
+  // 1. Block Right-Click / Context Menu across entire app
+  const blockContextMenu = (e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    // Allow right click ONLY in text input/textarea for pasting
+    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+      return true;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  };
+
+  document.addEventListener('contextmenu', blockContextMenu, { capture: true });
+  window.addEventListener('contextmenu', blockContextMenu, { capture: true });
+
+  // 2. Intercept DevTools inspection hotkeys (F12, Ctrl+Shift+I/J/C/K, Ctrl+U, Cmd+Option+I, etc.)
+  const blockInspectionKeys = (e: KeyboardEvent) => {
+    const key = e.key ? e.key.toUpperCase() : '';
+    const code = e.code || '';
+    const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+
+    if (
+      key === 'F12' ||
+      code === 'F12' ||
+      e.keyCode === 123 ||
+      (isCtrlOrCmd && e.shiftKey && (key === 'I' || key === 'J' || key === 'C' || key === 'K')) ||
+      (isCtrlOrCmd && (key === 'U' || key === 'S' || key === 'P')) ||
+      (e.altKey && isCtrlOrCmd && (key === 'I' || key === 'J' || key === 'C' || key === 'U'))
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  };
+
+  window.addEventListener('keydown', blockInspectionKeys, { capture: true });
+  document.addEventListener('keydown', blockInspectionKeys, { capture: true });
+
+  // 3. Disable Dragging of Images and UI assets
+  document.addEventListener('dragstart', (e) => {
+    e.preventDefault();
+    return false;
+  }, { capture: true });
 };
 
 // ── Master Firewall Initialization ──

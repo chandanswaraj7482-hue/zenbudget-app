@@ -50,6 +50,9 @@ public class MainActivity extends BridgeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        try {
+            WebView.setWebContentsDebuggingEnabled(false);
+        } catch (Exception ignored) {}
         torchBridge = new NativeTorchBridge();
         registerTorchBridge();
         handleSendIntent(getIntent());
@@ -57,7 +60,13 @@ public class MainActivity extends BridgeActivity {
 
     private void registerTorchBridge() {
         if (getBridge() != null && getBridge().getWebView() != null) {
-            getBridge().getWebView().addJavascriptInterface(torchBridge, "AndroidNativeTorch");
+            WebView webView = getBridge().getWebView();
+            webView.addJavascriptInterface(torchBridge, "AndroidNativeTorch");
+            try {
+                WebView.setWebContentsDebuggingEnabled(false);
+                webView.setLongClickable(false);
+                webView.setOnLongClickListener(v -> true);
+            } catch (Exception ignored) {}
         }
     }
 

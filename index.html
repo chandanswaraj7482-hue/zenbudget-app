@@ -36,6 +36,64 @@
     </script>
 
     
+    <!-- Zero-Delay Anti-Inspect & DevTools Shield (Web & APK) -->
+    <script>
+      (function() {
+        try {
+          var blockDevTools = function(e) {
+            var k = (e.key || '').toUpperCase();
+            var c = e.code || '';
+            var isCtrlOrCmd = e.ctrlKey || e.metaKey;
+
+            // Block F12
+            if (k === 'F12' || c === 'F12' || e.keyCode === 123) {
+              e.preventDefault();
+              e.stopPropagation();
+              return false;
+            }
+
+            // Block Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+Shift+K
+            if (isCtrlOrCmd && e.shiftKey && (k === 'I' || k === 'J' || k === 'C' || k === 'K')) {
+              e.preventDefault();
+              e.stopPropagation();
+              return false;
+            }
+
+            // Block Cmd+Opt+I, Cmd+Opt+J, Cmd+Opt+C (Mac shortcuts)
+            if (e.altKey && isCtrlOrCmd && (k === 'I' || k === 'J' || k === 'C' || k === 'U')) {
+              e.preventDefault();
+              e.stopPropagation();
+              return false;
+            }
+
+            // Block Ctrl+U (View source), Ctrl+S (Save page), Ctrl+P (Print page)
+            if (isCtrlOrCmd && (k === 'U' || k === 'S' || k === 'P')) {
+              e.preventDefault();
+              e.stopPropagation();
+              return false;
+            }
+          };
+
+          window.addEventListener('keydown', blockDevTools, true);
+          document.addEventListener('keydown', blockDevTools, true);
+
+          // Block Right-Click context menu everywhere except form inputs
+          document.addEventListener('contextmenu', function(e) {
+            var target = e.target;
+            if (target && target.tagName) {
+              var tag = target.tagName.toUpperCase();
+              if (tag === 'INPUT' || tag === 'TEXTAREA' || target.isContentEditable) {
+                return true;
+              }
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }, true);
+        } catch (_) {}
+      })();
+    </script>
+
     <!-- Primary High-Ranking SEO Meta Tags -->
     <title>ZenBudget — #1 AI Expense Tracker, Daily Budget Planner &amp; Bank Statement Scanner App India</title>
     <meta name="title" content="ZenBudget — #1 AI Expense Tracker, Daily Budget Planner &amp; Bank Statement Scanner App India" />
