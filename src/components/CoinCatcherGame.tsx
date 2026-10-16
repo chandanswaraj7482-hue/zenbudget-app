@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Gamepad2, Trophy, RotateCcw, Play, Coins, Share2, Copy, Check, Sparkles, Shield, AlertTriangle, Flame, Video } from 'lucide-react';
+import { Gamepad2, Trophy, RotateCcw, Play, Coins, Share2, Copy, Check, Sparkles, Shield, AlertTriangle, Flame, Video, Volume2, VolumeX, Zap, Heart, Magnet, Bomb } from 'lucide-react';
 import { admobService } from '../services/admobService';
 import {
   playCoinSound,
@@ -9,7 +9,9 @@ import {
   playGameOverSound,
   playPowerupSound,
   playNotificationSound,
-  playCelebrationSound
+  playCelebrationSound,
+  playClickSound,
+  triggerSparklesExplosion
 } from '../utils/audio';
 
 interface CoinCatcherGameProps {
@@ -18,6 +20,23 @@ interface CoinCatcherGameProps {
   defaultExpanded?: boolean;
   title?: string;
 }
+
+interface Character {
+  id: string;
+  name: string;
+  emoji: string;
+  perk: string;
+  tag: string;
+  glow: string;
+  speedMultiplier: number;
+}
+
+const CHARACTERS: Character[] = [
+  { id: 'piggy', name: 'Zen Piggy', emoji: '🐷', perk: 'Balanced Saver (Classic)', tag: 'CLASSIC', glow: '#ec4899', speedMultiplier: 1.0 },
+  { id: 'bull', name: 'Bull Run', emoji: '🐂', perk: '+15% Speed & Magnet Pull', tag: 'TURBO', glow: '#10b981', speedMultiplier: 1.15 },
+  { id: 'cat', name: 'Lucky Neko', emoji: '🐱', perk: '+25% Extra Coin Value', tag: 'LUCKY', glow: '#fbbf24', speedMultiplier: 1.0 },
+  { id: 'bot', name: 'Crypto Bot', emoji: '🤖', perk: '+1 Extra Shield Matrix', tag: 'ARMOR', glow: '#06b6d4', speedMultiplier: 1.05 }
+];
 
 interface FallingItem {
   id: number;
@@ -86,27 +105,49 @@ const FINANCIAL_TIPS = [
   'Avoid 36%+ APR credit card debt — always clear bills in full before due date!'
 ];
 
-interface LiveActivity {
-  id: string;
-  name: string;
-  city: string;
-  score: number;
-  badge: string;
-  timeAgo: string;
-  avatar: string;
-}
-
-
-
 export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
   currencySymbol = '₹',
   userReferralCode = '',
   defaultExpanded = false,
-  title = '💰 Zen Coin Catcher'
+  title = '🎮 Zen Coin Catcher Arcade'
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animFrameRef = useRef<number>(0);
-  
+
+  // Sound toggle (stored in localStorage)
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    return localStorage.getItem('zb_game_sound') !== 'false';
+  });
+
+  // Character selection
+  const [selectedCharId, setSelectedCharId] = useState<string>(() => {
+    return localStorage.getItem('zb_game_char') || 'piggy';
+  });
+
+  // Mode: 'blitz' (high action) vs 'zen' (relaxed speed)
+  const [gameMode, setGameMode] = useState<'blitz' | 'zen'>('blitz');
+
+  const selectedChar = CHARACTERS.find(c => c.id === selectedCharId) || CHARACTERS[0];
+
+  const playSound = useCallback((fn: () => void) => {
+    if (soundEnabled) {
+      try { fn(); } catch (_) {}
+    }
+  }, [soundEnabled]);
+
+  const toggleSound = () => {
+    const next = !soundEnabled;
+    setSoundEnabled(next);
+    localStorage.setItem('zb_game_sound', next ? 'true' : 'false');
+    if (next) playClickSound();
+  };
+
+  const handleSelectChar = (char: Character) => {
+    setSelectedCharId(char.id);
+    localStorage.setItem('zb_game_char', char.id);
+    playSound(playClickSound);
+  };
+
   const gameStateRef = useRef<{
     playerX: number;
     playerWidth: number;
@@ -130,9 +171,12 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
     trapsDodged: number;
     frameCount: number;
     nextItemId: number;
+    screenShake: number;
+    celebrated500: boolean;
+    celebratedHigh: boolean;
   }>({
-    playerX: 175,
-    playerWidth: 50,
+    playerX: 190,
+    playerWidth: 54,
     score: 0,
     lives: 5,
     invulnerableTimer: 0,
@@ -152,7 +196,10 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
     coinsCollected: 0,
     trapsDodged: 0,
     frameCount: 0,
-    nextItemId: 1
+    nextItemId: 1,
+    screenShake: 0,
+    celebrated500: false,
+    celebratedHigh: false
   });
 
   const [score, setScore] = useState(0);
@@ -170,7 +217,6 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
   const [adLoading, setAdLoading] = useState(false);
   const [currentTipIndex] = useState(() => Math.floor(Math.random() * FINANCIAL_TIPS.length));
 
-
   const touchXRef = useRef<number | null>(null);
 
   // Derive Referral Code & Viral Share text
@@ -178,16 +224,16 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
   const appShareUrl = `https://zenbudget-tracker.vercel.app/?ref=${encodeURIComponent(refCode)}&game=coin_catcher`;
 
   const getFinancialRank = (pts: number) => {
-    if (pts >= 1200) return { title: '👑 Zen Wealth Legend', color: '#fbbf24' };
-    if (pts >= 700) return { title: '🛡️ Financial Fortress', color: '#38bdf8' };
-    if (pts >= 350) return { title: '📈 SIP Wealth Builder', color: '#34d399' };
-    if (pts >= 150) return { title: '💼 Disciplined Saver', color: '#a78bfa' };
-    return { title: '🐣 Budget Beginner', color: '#94a3b8' };
+    if (pts >= 1200) return { title: '👑 Zen Wealth Legend', color: '#fbbf24', nextGoal: 'MAX RANK' };
+    if (pts >= 700) return { title: '🛡️ Financial Fortress', color: '#38bdf8', nextGoal: `₹${1200 - pts} to Legend` };
+    if (pts >= 350) return { title: '📈 SIP Wealth Builder', color: '#34d399', nextGoal: `₹${700 - pts} to Fortress` };
+    if (pts >= 150) return { title: '💼 Disciplined Saver', color: '#a78bfa', nextGoal: `₹${350 - pts} to SIP Builder` };
+    return { title: '🐣 Budget Beginner', color: '#94a3b8', nextGoal: `₹${150 - pts} to Saver` };
   };
 
   const getShareMessage = (pts: number) => {
     const rank = getFinancialRank(pts).title;
-    return `🚨 *Reality Check:* 83% of people lose ₹4,500+ every month to untracked small spends & hidden charges! 💸\n\n🎮 I scored *${currencySymbol}${pts.toLocaleString()}* in ZenBudget Financial Coin Catcher!\n🏆 Wealth Rank: *${rank}*\n🛡️ Dodged 36% Credit Card Traps & Compounded my SIP!\n\n🧠 *Can your brain dodge financial traps & build real wealth?*\nChallenge my score now & try the AI Money Manager that saves ₹5,000+ every month:\n\n📲 *Download Android APK / Play Free:* \n👉 ${appShareUrl}\n\n⚡ _(Auto-tracks daily spends, scans bank passbooks & blocks impulse buys!)_`;
+    return `🚨 *Reality Check:* 83% of people lose ₹4,500+ every month to untracked small spends & hidden charges! 💸\n\n🎮 I scored *${currencySymbol}${pts.toLocaleString()}* playing as ${selectedChar.name} in Zen Coin Catcher!\n🏆 Wealth Rank: *${rank}*\n🛡️ Dodged 36% Credit Card Traps & Compounded my SIP!\n\n🧠 *Can your brain dodge financial traps & build real wealth?*\nChallenge my score now & try the AI Money Manager that saves ₹5,000+ every month:\n\n📲 *Download Android APK / Play Free:* \n👉 ${appShareUrl}\n\n⚡ _(Auto-tracks daily spends, scans bank passbooks & blocks impulse buys!)_`;
   };
 
   const handleCopyLink = async () => {
@@ -242,69 +288,75 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
       y,
       text,
       color,
-      life: 38
+      life: 40
     });
   }, []);
 
-  // 🎯 TACTICAL FORMATIONS SPAWNER (NORMAL SPEED, HIGH SKILL & TACTICS)
+  // 🎯 TACTICAL FORMATIONS SPAWNER
   const spawnFormation = useCallback((canvasWidth: number) => {
     const gs = gameStateRef.current;
     const isCrash = gs.crashTimer > 0;
+    const isZenMode = gameMode === 'zen';
 
-    // Relaxed, super smooth falling speed (1.4 - 1.7 px/frame)
-    const baseSpeed = isCrash ? 1.7 : 1.45 + Math.min(0.2, (gs.difficulty - 1) * 0.02);
+    // Speed calculation
+    const modeMultiplier = isZenMode ? 0.8 : 1.0;
+    const baseSpeed = (isCrash ? 1.7 : 1.45 + Math.min(0.2, (gs.difficulty - 1) * 0.02)) * modeMultiplier;
 
     const roll = Math.random();
 
-    // 1. 🥪 THE SANDWICH TRAP (25% chance): High-value coin flanked with wide clearance!
-    if (roll < 0.25) {
+    // 1. 🥪 THE SANDWICH TRAP (High-value coin flanked by traps)
+    if (roll < (isZenMode ? 0.15 : 0.25)) {
       const centerX = 80 + Math.random() * (canvasWidth - 160);
       const coinPool = FINANCIAL_ITEMS.coins;
-      const coinItem = coinPool[Math.floor(2 + Math.random() * 4)]; // 60, 100, 150, or 250
-      
-      // Center Coin
+      const coinItem = coinPool[Math.floor(2 + Math.random() * 4)];
+
+      let coinVal = coinItem.value;
+      if (selectedChar.id === 'cat') {
+        coinVal = Math.round(coinVal * 1.25);
+      }
+
       gs.items.push({
         id: gs.nextItemId++,
         x: centerX,
         y: -30,
         type: 'coin',
-        value: coinItem.value,
+        value: coinVal,
         emoji: coinItem.emoji,
         label: coinItem.label,
         speed: baseSpeed,
         size: coinItem.size
       });
 
-      // Left Flanking Trap (70px generous gap)
-      gs.items.push({
-        id: gs.nextItemId++,
-        x: centerX - 70,
-        y: -30,
-        type: 'expense',
-        value: -1,
-        emoji: '💳',
-        label: 'Card Fee',
-        speed: baseSpeed,
-        size: 20
-      });
+      if (!isZenMode) {
+        gs.items.push({
+          id: gs.nextItemId++,
+          x: centerX - 75,
+          y: -30,
+          type: 'expense',
+          value: -1,
+          emoji: '💳',
+          label: 'Card Fee',
+          speed: baseSpeed,
+          size: 20
+        });
 
-      // Right Flanking Trap (70px generous gap)
-      gs.items.push({
-        id: gs.nextItemId++,
-        x: centerX + 70,
-        y: -30,
-        type: 'expense',
-        value: -1,
-        emoji: '💸',
-        label: 'Impulse Buy',
-        speed: baseSpeed,
-        size: 20
-      });
+        gs.items.push({
+          id: gs.nextItemId++,
+          x: centerX + 75,
+          y: -30,
+          type: 'expense',
+          value: -1,
+          emoji: '💸',
+          label: 'Impulse Buy',
+          speed: baseSpeed,
+          size: 20
+        });
+      }
       return;
     }
 
-    // 2. 〰️ OSCILLATING SWEEPER (20% chance): Hazard swings back and forth across lanes
-    if (roll < 0.50) {
+    // 2. 〰️ OSCILLATING SWEEPER
+    if (roll < 0.45 && !isZenMode) {
       const startX = 60 + Math.random() * (canvasWidth - 120);
       gs.items.push({
         id: gs.nextItemId++,
@@ -318,20 +370,19 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         size: 25,
         startX,
         oscillation: {
-          amp: 48 + Math.random() * 18,
+          amp: 45 + Math.random() * 15,
           freq: 0.048,
           phase: Math.random() * Math.PI * 2
         }
       });
 
-      // Also spawn a regular coin on a different column
       const safeCoinX = startX > canvasWidth / 2 ? 45 + Math.random() * 60 : canvasWidth - 105 + Math.random() * 60;
       gs.items.push({
         id: gs.nextItemId++,
         x: safeCoinX,
         y: -35,
         type: 'coin',
-        value: 35,
+        value: selectedChar.id === 'cat' ? 45 : 35,
         emoji: '📈',
         label: 'SIP Growth',
         speed: baseSpeed,
@@ -340,9 +391,9 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
       return;
     }
 
-    // 3. 💣 DEBT BOMB BLAST (15% chance): Drops slowly, but explodes near the ground!
-    if (roll < 0.65) {
-      const bombX = 45 + Math.random() * (canvasWidth - 90);
+    // 3. 💣 DEBT BOMB CASCADE (Only in Blitz mode)
+    if (roll < 0.65 && !isZenMode && gs.score > 80) {
+      const bombX = 50 + Math.random() * (canvasWidth - 100);
       gs.items.push({
         id: gs.nextItemId++,
         x: bombX,
@@ -351,107 +402,89 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         value: -1,
         emoji: '💣',
         label: 'Debt Bomb',
-        speed: baseSpeed * 0.9,
-        size: 27,
-        fuseTimer: 0
+        speed: baseSpeed * 1.1,
+        size: 28,
+        fuseTimer: 180
       });
 
-      // Tempting coin nearby
-      const coinX = bombX > canvasWidth / 2 ? 40 + Math.random() * 70 : canvasWidth - 110 + Math.random() * 70;
+      const oppositeX = bombX < canvasWidth / 2 ? canvasWidth - 80 : 80;
       gs.items.push({
         id: gs.nextItemId++,
-        x: coinX,
+        x: oppositeX,
         y: -30,
         type: 'coin',
-        value: 60,
-        emoji: '🛡️',
-        label: 'Emergency Fund',
+        value: selectedChar.id === 'cat' ? 120 : 100,
+        emoji: '💰',
+        label: 'Salary Inflow',
         speed: baseSpeed,
-        size: 27
+        size: 28
       });
       return;
     }
 
-    // 4. 🎣 SCAM / RUGPULL BAIT (12% chance): Deceptive coin that costs points & shatters streak!
-    if (roll < 0.77) {
+    // 4. 🎣 SCAM / RUGPULL FAKE (Looks like diamond but is trap)
+    if (roll < 0.75 && !isZenMode && gs.score > 120) {
       const scamX = 40 + Math.random() * (canvasWidth - 80);
       gs.items.push({
         id: gs.nextItemId++,
         x: scamX,
         y: -30,
         type: 'scam',
-        value: -75,
-        emoji: '🎣',
-        label: 'Fake Ponzi Scam',
-        speed: baseSpeed,
-        size: 25
-      });
-
-      // Genuine coin somewhere else
-      const realX = scamX > canvasWidth / 2 ? 45 + Math.random() * 70 : canvasWidth - 115 + Math.random() * 70;
-      gs.items.push({
-        id: gs.nextItemId++,
-        x: realX,
-        y: -32,
-        type: 'coin',
-        value: 40,
-        emoji: '🪙',
-        label: 'Daily Savings',
-        speed: baseSpeed,
-        size: 25
+        value: -30,
+        emoji: '🎰',
+        label: 'F&O Gamble Trap',
+        speed: baseSpeed * 1.05,
+        size: 27
       });
       return;
     }
 
-    // 5. 💰 QUAD COIN SHOWER (15% chance): Rich shower of positive coins across lanes!
-    if (roll < 0.90) {
-      const step = (canvasWidth - 50) / 4;
-      const emojis = ['🪙', '📈', '💎', '💰'];
-      const values = [40, 50, 75, 100];
-      for (let i = 0; i < 4; i++) {
-        const laneX = 25 + i * step + step / 2;
-        gs.items.push({
-          id: gs.nextItemId++,
-          x: laneX,
-          y: -30 - (i % 2) * 18,
-          type: 'coin',
-          value: values[i],
-          emoji: emojis[i],
-          label: 'Wealth Bonus',
-          speed: baseSpeed * 0.92,
-          size: 26
-        });
-      }
-      return;
-    }
+    // 5. 🪙 STANDARD COIN / POWERUP SPAWN
+    const subRoll = Math.random();
+    if (subRoll < 0.70) {
+      const c = FINANCIAL_ITEMS.coins[Math.floor(Math.random() * FINANCIAL_ITEMS.coins.length)];
+      let val = c.value;
+      if (selectedChar.id === 'cat') val = Math.round(val * 1.25);
 
-    // 6. 🎁 POWER-UP OR EXTRA HEALTH (10% chance)
-    const powerRoll = Math.random();
-    if (gs.lives < 5 && powerRoll < 0.65) {
       gs.items.push({
         id: gs.nextItemId++,
         x: 40 + Math.random() * (canvasWidth - 80),
         y: -30,
-        type: 'heart',
-        value: 50,
-        emoji: '💖',
-        label: 'Health Shield',
-        speed: baseSpeed * 0.85,
-        size: 26
+        type: 'coin',
+        value: val,
+        emoji: c.emoji,
+        label: c.label,
+        speed: baseSpeed,
+        size: c.size
       });
-    } else if (powerRoll < 0.75 && !gs.hasShield) {
+    } else if (subRoll < 0.85) {
+      // Shield Powerup
       gs.items.push({
         id: gs.nextItemId++,
         x: 40 + Math.random() * (canvasWidth - 80),
         y: -30,
         type: 'shield',
-        value: 40,
+        value: 50,
         emoji: '🛡️',
+        label: 'Emergency Shield',
+        speed: baseSpeed,
+        size: 26
+      });
+    } else if (subRoll < 0.94) {
+      // Heart Life
+      gs.items.push({
+        id: gs.nextItemId++,
+        x: 40 + Math.random() * (canvasWidth - 80),
+        y: -30,
+        type: 'heart',
+        value: 0,
+        emoji: '❤️',
         label: 'Emergency Buffer',
         speed: baseSpeed,
         size: 26
       });
     } else {
+      // Magnet
       gs.items.push({
         id: gs.nextItemId++,
         x: 40 + Math.random() * (canvasWidth - 80),
@@ -464,16 +497,19 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         size: 26
       });
     }
-  }, []);
+  }, [gameMode, selectedChar.id]);
 
   const resetGame = useCallback(() => {
     const gs = gameStateRef.current;
-    gs.playerX = 175;
+    const startLives = selectedChar.id === 'bot' ? 6 : (gameMode === 'zen' ? 7 : 5);
+    const startShield = selectedChar.id === 'bot';
+
+    gs.playerX = 190;
     gs.score = 0;
-    gs.lives = 5;
+    gs.lives = startLives;
     gs.invulnerableTimer = 0;
-    gs.hasShield = false;
-    gs.magnetTimer = 0;
+    gs.hasShield = startShield;
+    gs.magnetTimer = selectedChar.id === 'bull' ? 120 : 0;
     gs.crashTimer = 0;
     gs.nextCrashScore = 650;
     gs.items = [];
@@ -488,15 +524,20 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
     gs.coinsCollected = 0;
     gs.trapsDodged = 0;
     gs.frameCount = 0;
+    gs.screenShake = 0;
+    gs.celebrated500 = false;
+    gs.celebratedHigh = false;
+
     setScore(0);
-    setLives(5);
-    setHasShield(false);
+    setLives(startLives);
+    setHasShield(startShield);
     setGameOver(false);
     setStarted(true);
     setCombo(0);
     setHasRevivedWithAd(false);
+    playSound(playClickSound);
     admobService.recordActionAndMaybeShowAd();
-  }, []);
+  }, [gameMode, selectedChar.id, playSound]);
 
   const handleReviveWithAd = async () => {
     setAdLoading(true);
@@ -510,7 +551,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         setLives(3);
         setGameOver(false);
         setHasRevivedWithAd(true);
-        playCelebrationSound();
+        playSound(playCelebrationSound);
       });
     } finally {
       setAdLoading(false);
@@ -521,7 +562,8 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
     const canvas = canvasRef.current;
     if (!canvas) return;
     const gs = gameStateRef.current;
-    gs.playerX = Math.max(26, Math.min(canvas.width - 26, gs.playerX + deltaX));
+    const speedBonus = selectedChar.speedMultiplier;
+    gs.playerX = Math.max(28, Math.min(canvas.width - 28, gs.playerX + deltaX * speedBonus));
   };
 
   // 🕹️ GAME LOOP
@@ -541,42 +583,41 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
       gs.frameCount++;
 
       // Invulnerability tick down
-      if (gs.invulnerableTimer > 0) {
-        gs.invulnerableTimer--;
-      }
+      if (gs.invulnerableTimer > 0) gs.invulnerableTimer--;
 
       // Magnet timer tick down
-      if (gs.magnetTimer > 0) {
-        gs.magnetTimer--;
-      }
+      if (gs.magnetTimer > 0) gs.magnetTimer--;
 
-      // Market Crash Event logic
-      if (gs.crashTimer > 0) {
-        gs.crashTimer--;
-        if (gs.crashTimer === 0) {
-          // Crash survived! Big reward!
-          gs.score += 200;
-          gs.hasShield = true;
-          setScore(gs.score);
-          setHasShield(true);
-          playCelebrationSound();
-          createFloatingText(W / 2, H / 2 - 20, `🎉 CRASH SURVIVED! +${currencySymbol}200 & 🛡️ SHIELD!`, '#34d399');
-          createParticles(W / 2, H / 2, '#34d399', 24);
+      // Screen shake decay
+      if (gs.screenShake > 0) gs.screenShake--;
+
+      // Market Crash Event logic (Blitz Mode only)
+      if (gameMode === 'blitz') {
+        if (gs.crashTimer > 0) {
+          gs.crashTimer--;
+          if (gs.crashTimer === 0) {
+            gs.score += 200;
+            gs.hasShield = true;
+            setScore(gs.score);
+            setHasShield(true);
+            playSound(playCelebrationSound);
+            createFloatingText(W / 2, H / 2 - 20, `🎉 CRASH SURVIVED! +${currencySymbol}200 & 🛡️ SHIELD!`, '#34d399');
+            createParticles(W / 2, H / 2, '#34d399', 24);
+          }
+        } else if (gs.score >= gs.nextCrashScore) {
+          gs.crashTimer = 480; // 8 seconds
+          gs.nextCrashScore += 450;
+          playSound(() => playNotificationSound('warning'));
+          createFloatingText(W / 2, 60, `🚨 MARKET CRASH! SURVIVE 8 SECONDS!`, '#f43f5e');
         }
-      } else if (gs.score >= gs.nextCrashScore) {
-        // Trigger Market Crash
-        gs.crashTimer = 480; // 8 seconds at 60 FPS
-        gs.nextCrashScore += 350;
-        playNotificationSound('warning');
-        createFloatingText(W / 2, 60, `🚨 MARKET CRASH! SURVIVE 8 SECONDS!`, '#f43f5e');
       }
 
-      // Gentle difficulty scaling
+      // Difficulty scaling
       gs.difficulty = 1 + Math.floor(gs.score / 250) * 0.15;
 
-      // Spawning with steady cadence (Normal speed, high tactics)
+      // Spawning with steady cadence
       gs.spawnTimer++;
-      const spawnCadence = gs.crashTimer > 0 ? 32 : Math.max(36, 48 - Math.floor(gs.difficulty * 2));
+      const spawnCadence = gs.crashTimer > 0 ? 30 : Math.max(34, 46 - Math.floor(gs.difficulty * 2));
       if (gs.spawnTimer >= spawnCadence) {
         spawnFormation(W);
         gs.spawnTimer = 0;
@@ -584,10 +625,8 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
 
       // Update items
       gs.items = gs.items.filter(item => {
-        // Vertical descent at normal speed
         item.y += item.speed;
 
-        // Oscillating trajectory (sine wave)
         if (item.oscillation && item.startX !== undefined) {
           const osc = item.oscillation;
           item.x = item.startX + Math.sin(gs.frameCount * osc.freq + osc.phase) * osc.amp;
@@ -597,28 +636,27 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
           else if (item.x > W - 24) { item.x = W - 24; item.vx = -Math.abs(item.vx); }
         }
 
-        // Magnetism: if magnet is active, gently attract positive coins within 85px
-        if (gs.magnetTimer > 0 && (item.type === 'coin' || item.type === 'shield' || item.type === 'heart')) {
+        // Magnet attraction
+        const magnetReach = selectedChar.id === 'bull' ? 120 : 90;
+        if ((gs.magnetTimer > 0 || selectedChar.id === 'bull') && (item.type === 'coin' || item.type === 'shield' || item.type === 'heart')) {
           const dist = Math.abs(gs.playerX - item.x);
-          if (dist < 85 && item.y < H - 55) {
-            item.x += (gs.playerX - item.x) * 0.08;
+          if (dist < magnetReach && item.y < H - 60) {
+            item.x += (gs.playerX - item.x) * 0.09;
           }
         }
 
-        const playerY = H - 55;
+        const playerY = H - 60;
         const playerLeft = gs.playerX - gs.playerWidth / 2;
         const playerRight = gs.playerX + gs.playerWidth / 2;
 
-        const isVerticallyAligned = item.y + item.size / 2 > playerY && item.y - item.size / 2 < playerY + 36;
+        const isVerticallyAligned = item.y + item.size / 2 > playerY && item.y - item.size / 2 < playerY + 38;
 
-        // 💥 DEBT BOMB LOGIC
+        // 💥 DEBT BOMB
         if (item.type === 'bomb') {
-          // As bomb nears ground, fuse burns
-          if (item.y >= H - 50) {
-            // Detonate!
-            const blastRadius = 32;
+          if (item.y >= H - 52) {
+            const blastRadius = 34;
             const distToPlayer = Math.abs(gs.playerX - item.x);
-            createParticles(item.x, H - 40, '#f97316', 22);
+            createParticles(item.x, H - 42, '#f97316', 22);
 
             if (distToPlayer < blastRadius && isVerticallyAligned) {
               if (gs.invulnerableTimer === 0) {
@@ -626,7 +664,8 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
                   gs.hasShield = false;
                   setHasShield(false);
                   gs.invulnerableTimer = 65;
-                  playDangerHitSound();
+                  gs.screenShake = 8;
+                  playSound(playDangerHitSound);
                   createParticles(item.x, item.y, '#38bdf8', 16);
                   createFloatingText(item.x, item.y - 12, '🛡️ Shield Absorbed Bomb!', '#38bdf8');
                   return false;
@@ -634,9 +673,10 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
                 gs.lives--;
                 gs.invulnerableTimer = 70;
                 gs.combo = 0;
+                gs.screenShake = 14;
                 setLives(gs.lives);
                 setCombo(0);
-                playDangerHitSound();
+                playSound(playDangerHitSound);
                 if (navigator.vibrate) try { navigator.vibrate([100, 50, 100]); } catch {}
                 createFloatingText(item.x, item.y - 12, '💣 Debt Bomb Blast! -1 Life', '#f43f5e');
 
@@ -645,75 +685,101 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
                   gs.started = false;
                   setGameOver(true);
                   setStarted(false);
-                  playGameOverSound();
+                  playSound(playGameOverSound);
                   if (gs.score > highScore) {
                     setHighScore(gs.score);
                     localStorage.setItem('zb_coin_catcher_high', gs.score.toString());
                   }
                 }
+                return false;
               }
-            } else {
-              // Successfully dodged blast!
-              gs.trapsDodged++;
-              createFloatingText(item.x, H - 45, '💣 Blast Dodged!', '#38bdf8');
             }
             return false;
           }
         }
 
-        // 🪙 COINS & POSITIVE BUFFS
-        if (item.type === 'coin' || item.type === 'heart' || item.type === 'shield' || item.type === 'magnet') {
-          if (isVerticallyAligned && item.x > playerLeft - 18 && item.x < playerRight + 18) {
-            if (item.type === 'heart') {
-              gs.lives = Math.min(5, gs.lives + 1);
-              setLives(gs.lives);
-              gs.score += item.value;
-              setScore(gs.score);
-              playPowerupSound();
-              createParticles(item.x, item.y, '#ec4899', 18);
-              createFloatingText(item.x, item.y - 12, `💖 Life Restored! (+${currencySymbol}50)`, '#f472b6');
-            } else if (item.type === 'shield') {
-              gs.hasShield = true;
-              setHasShield(true);
-              gs.score += item.value;
-              setScore(gs.score);
-              playPowerupSound();
-              createParticles(item.x, item.y, '#38bdf8', 18);
-              createFloatingText(item.x, item.y - 12, `🛡️ Emergency Buffer Shield!`, '#38bdf8');
-            } else if (item.type === 'magnet') {
-              gs.magnetTimer = 300; // 5 seconds
-              gs.score += item.value;
-              setScore(gs.score);
-              playPowerupSound();
-              createParticles(item.x, item.y, '#fbbf24', 18);
-              createFloatingText(item.x, item.y - 12, `🧲 Compound Magnet (5s)!`, '#fbbf24');
-            } else {
-              const comboBonus = Math.floor(gs.combo * 2.0);
-              const totalEarned = item.value + comboBonus;
-              gs.score += totalEarned;
-              gs.combo++;
-              gs.coinsCollected++;
-              if (gs.combo > gs.maxCombo) gs.maxCombo = gs.combo;
-              
-              playCoinSound(gs.combo);
-              if (navigator.vibrate) try { navigator.vibrate(20); } catch {}
-              createParticles(item.x, item.y, '#34d399', 12);
-              createFloatingText(item.x, item.y - 10, `+${currencySymbol}${totalEarned} ${item.label}`, '#86efac');
-              setScore(gs.score);
-              setCombo(gs.combo);
-            }
+        // 🛡️ SHIELD
+        if (item.type === 'shield') {
+          if (isVerticallyAligned && item.x > playerLeft - 4 && item.x < playerRight + 4) {
+            gs.hasShield = true;
+            gs.score += item.value;
+            setHasShield(true);
+            setScore(gs.score);
+            playSound(playPowerupSound);
+            createParticles(item.x, item.y, '#38bdf8', 18);
+            createFloatingText(item.x, item.y - 12, '🛡️ EMERGENCY SHIELD EQUIPPED!', '#38bdf8');
             return false;
           }
         }
 
-        // 🎣 SCAM / RUGPULL ITEM
+        // 🧲 MAGNET
+        if (item.type === 'magnet') {
+          if (isVerticallyAligned && item.x > playerLeft - 4 && item.x < playerRight + 4) {
+            gs.magnetTimer = 360; // 6 seconds
+            gs.score += item.value;
+            setScore(gs.score);
+            playSound(playPowerupSound);
+            createParticles(item.x, item.y, '#fbbf24', 18);
+            createFloatingText(item.x, item.y - 12, '🧲 COMPOUND MAGNET ACTIVE!', '#fbbf24');
+            return false;
+          }
+        }
+
+        // ❤️ HEART
+        if (item.type === 'heart') {
+          if (isVerticallyAligned && item.x > playerLeft - 4 && item.x < playerRight + 4) {
+            gs.lives = Math.min(5, gs.lives + 1);
+            setLives(gs.lives);
+            playSound(playPowerupSound);
+            createParticles(item.x, item.y, '#ec4899', 16);
+            createFloatingText(item.x, item.y - 12, '❤️ +1 EMERGENCY BUFFER LIFE!', '#ec4899');
+            return false;
+          }
+        }
+
+        // 🪙 COINS
+        if (item.type === 'coin') {
+          if (isVerticallyAligned && item.x > playerLeft - 2 && item.x < playerRight + 2) {
+            gs.combo++;
+            gs.coinsCollected++;
+            if (gs.combo > gs.maxCombo) gs.maxCombo = gs.combo;
+
+            let multiplier = 1;
+            if (gs.combo >= 10) multiplier = 3.0;
+            else if (gs.combo >= 6) multiplier = 2.0;
+            else if (gs.combo >= 3) multiplier = 1.5;
+
+            const totalEarned = Math.round(item.value * multiplier);
+            gs.score += totalEarned;
+
+            // Milestone celebrations
+            if (gs.score >= 500 && !gs.celebrated500) {
+              gs.celebrated500 = true;
+              triggerSparklesExplosion(0.5, 0.4);
+            }
+            if (highScore > 0 && gs.score > highScore && !gs.celebratedHigh) {
+              gs.celebratedHigh = true;
+              triggerSparklesExplosion(0.5, 0.3);
+            }
+
+            playSound(playCoinSound);
+            createParticles(item.x, item.y, '#34d399', 14);
+            createFloatingText(item.x, item.y - 10, `+${currencySymbol}${totalEarned} ${multiplier > 1 ? `(${multiplier}x)` : ''}`, '#86efac');
+            setScore(gs.score);
+            setCombo(gs.combo);
+            return false;
+          }
+        }
+
+        // 🎣 SCAM
         if (item.type === 'scam') {
           if (isVerticallyAligned && item.x > playerLeft - 4 && item.x < playerRight + 4) {
             gs.score = Math.max(0, gs.score - 30);
             gs.combo = 0;
+            gs.screenShake = 6;
             setScore(gs.score);
             setCombo(0);
-            playNotificationSound('warning');
+            playSound(() => playNotificationSound('warning'));
             if (navigator.vibrate) try { navigator.vibrate([60, 40, 60]); } catch {}
             createParticles(item.x, item.y, '#f87171', 16);
             createFloatingText(item.x, item.y - 12, `🚨 SCAM BUSTED! -${currencySymbol}30 & Streak Lost!`, '#f87171');
@@ -721,18 +787,17 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
           }
         }
 
-        // ⚠️ HAZARD / TRAP ITEMS
+        // ⚠️ HAZARD
         if (item.type === 'expense') {
           if (isVerticallyAligned && item.x > playerLeft + 6 && item.x < playerRight - 6) {
-            if (gs.invulnerableTimer > 0) {
-              return false;
-            }
+            if (gs.invulnerableTimer > 0) return false;
 
             if (gs.hasShield) {
               gs.hasShield = false;
               setHasShield(false);
               gs.invulnerableTimer = 65;
-              playDangerHitSound();
+              gs.screenShake = 8;
+              playSound(playDangerHitSound);
               createParticles(item.x, item.y, '#38bdf8', 14);
               createFloatingText(item.x, item.y - 10, `🛡️ Shield Absorbed Trap!`, '#38bdf8');
               return false;
@@ -741,9 +806,10 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
             gs.lives--;
             gs.invulnerableTimer = 65;
             gs.combo = 0;
+            gs.screenShake = 12;
             setLives(gs.lives);
             setCombo(0);
-            playDangerHitSound();
+            playSound(playDangerHitSound);
             if (navigator.vibrate) try { navigator.vibrate([80, 50, 80]); } catch {}
             createParticles(item.x, item.y, '#f43f5e', 20);
             createFloatingText(item.x, item.y - 10, `💔 -1 Life (${item.label})`, '#fda4af');
@@ -753,7 +819,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
               gs.started = false;
               setGameOver(true);
               setStarted(false);
-              playGameOverSound();
+              playSound(playGameOverSound);
               if (gs.score > highScore) {
                 setHighScore(gs.score);
                 localStorage.setItem('zb_coin_catcher_high', gs.score.toString());
@@ -791,13 +857,19 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
       });
 
       // --- 🎨 RENDER CANVAS ---
+      ctx.save();
+      if (gs.screenShake > 0) {
+        ctx.translate((Math.random() - 0.5) * 8, (Math.random() - 0.5) * 8);
+      }
+
       const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
       bgGrad.addColorStop(0, '#060a14');
-      bgGrad.addColorStop(1, '#0c1427');
+      bgGrad.addColorStop(0.5, '#0a1024');
+      bgGrad.addColorStop(1, '#0e1834');
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, W, H);
 
-      // Subtle Cyber Grid
+      // Cyber Grid Lines
       ctx.strokeStyle = 'rgba(52, 211, 153, 0.05)';
       ctx.lineWidth = 0.5;
       for (let i = 0; i < W; i += 28) {
@@ -813,7 +885,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         ctx.stroke();
       }
 
-      // Market Crash Red Edge Alert Pulsing
+      // Market Crash Red Edge Alert
       if (gs.crashTimer > 0) {
         const pulseAlpha = 0.15 + Math.sin(gs.frameCount * 0.12) * 0.1;
         ctx.fillStyle = `rgba(244, 63, 94, ${pulseAlpha})`;
@@ -823,34 +895,32 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         ctx.lineWidth = 3;
         ctx.strokeRect(1, 1, W - 2, H - 2);
 
-        // Crash banner
         ctx.font = 'bold 11px sans-serif';
         ctx.fillStyle = '#fca5a5';
         ctx.textAlign = 'center';
         ctx.fillText(`🚨 MARKET CRASH! SURVIVE: ${Math.ceil(gs.crashTimer / 60)}s`, W / 2, 44);
       }
 
-      // Ground Line
-      const groundGrad = ctx.createLinearGradient(0, H - 14, 0, H);
+      // Ground Line with glow
+      const groundGrad = ctx.createLinearGradient(0, H - 16, 0, H);
       groundGrad.addColorStop(0, 'rgba(52, 211, 153, 0.35)');
       groundGrad.addColorStop(1, 'rgba(52, 211, 153, 0.05)');
       ctx.fillStyle = groundGrad;
-      ctx.fillRect(0, H - 14, W, 14);
+      ctx.fillRect(0, H - 16, W, 16);
       ctx.strokeStyle = '#10b981';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.moveTo(0, H - 14);
-      ctx.lineTo(W, H - 14);
+      ctx.moveTo(0, H - 16);
+      ctx.lineTo(W, H - 16);
       ctx.stroke();
 
       // Falling items
       gs.items.forEach(item => {
-        // Bomb Danger Blast Radius Indicator
-        if (item.type === 'bomb' && item.y > H - 85) {
+        if (item.type === 'bomb' && item.y > H - 90) {
           const pulse = Math.sin(gs.frameCount * 0.25) * 0.15 + 0.25;
           ctx.fillStyle = `rgba(244, 63, 94, ${pulse})`;
           ctx.beginPath();
-          ctx.arc(item.x, H - 40, 46, 0, Math.PI * 2);
+          ctx.arc(item.x, H - 42, 44, 0, Math.PI * 2);
           ctx.fill();
           ctx.strokeStyle = '#f43f5e';
           ctx.setLineDash([4, 4]);
@@ -886,8 +956,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         ctx.fillText(item.emoji, item.x, item.y);
         ctx.shadowBlur = 0;
 
-        // Label below item
-        ctx.font = 'bold 8px sans-serif';
+        ctx.font = 'bold 8.5px sans-serif';
         if (item.type === 'coin') {
           ctx.fillStyle = '#a7f3d0';
           ctx.fillText(`+${item.value}`, item.x, item.y + item.size / 2 + 8);
@@ -912,20 +981,20 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         }
       });
 
-      // Piggy Character
+      // Player Avatar
       const pX = gs.playerX;
-      const pY = H - 55;
+      const pY = H - 60;
 
       // Platform Glow
-      ctx.fillStyle = 'rgba(52, 211, 153, 0.28)';
+      ctx.fillStyle = selectedChar.glow + '40';
       ctx.beginPath();
-      ctx.ellipse(pX, pY + 38, 24, 6, 0, 0, Math.PI * 2);
+      ctx.ellipse(pX, pY + 40, 26, 6, 0, 0, Math.PI * 2);
       ctx.fill();
 
       // Magnet Pulsing Ring
-      if (gs.magnetTimer > 0) {
-        const ringRadius = 28 + (gs.frameCount % 20) * 1.5;
-        ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
+      if (gs.magnetTimer > 0 || selectedChar.id === 'bull') {
+        const ringRadius = 30 + (gs.frameCount % 20) * 1.5;
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.45)';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.arc(pX, pY + 16, ringRadius, 0, Math.PI * 2);
@@ -939,12 +1008,12 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         ctx.shadowColor = '#38bdf8';
         ctx.shadowBlur = 16;
         ctx.beginPath();
-        ctx.arc(pX, pY + 16, 26, 0, Math.PI * 2);
+        ctx.arc(pX, pY + 16, 28, 0, Math.PI * 2);
         ctx.stroke();
         ctx.shadowBlur = 0;
       }
 
-      // Invulnerability protective flash
+      // Invulnerability flash
       const isInvulnerable = gs.invulnerableTimer > 0;
       const isFlashed = isInvulnerable && Math.floor(gs.frameCount / 5) % 2 === 0;
 
@@ -952,18 +1021,18 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         ctx.strokeStyle = '#94a3b8';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.arc(pX, pY + 16, 22, 0, Math.PI * 2);
+        ctx.arc(pX, pY + 16, 24, 0, Math.PI * 2);
         ctx.stroke();
       }
 
-      // Piggy
+      // Render Player Character Emoji
       ctx.globalAlpha = isFlashed ? 0.45 : 1;
-      ctx.shadowColor = gs.hasShield ? '#38bdf8' : '#10b981';
-      ctx.shadowBlur = 16;
+      ctx.shadowColor = gs.hasShield ? '#38bdf8' : selectedChar.glow;
+      ctx.shadowBlur = 18;
       ctx.font = '38px serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('🐷', pX, pY + 16);
+      ctx.fillText(selectedChar.emoji, pX, pY + 16);
       ctx.shadowBlur = 0;
       ctx.globalAlpha = 1;
 
@@ -980,7 +1049,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
       // Floating Texts
       gs.floatingTexts.forEach(ft => {
         ctx.globalAlpha = Math.min(1, ft.life / 15);
-        ctx.font = 'bold 10px sans-serif';
+        ctx.font = 'bold 10.5px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillStyle = ft.color;
         ctx.fillText(ft.text, ft.x, ft.y);
@@ -993,22 +1062,25 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         ctx.fillStyle = '#fbbf24';
         ctx.textAlign = 'center';
         ctx.shadowColor = '#fbbf24';
-        ctx.shadowBlur = 10;
-        ctx.fillText(`🔥 ${gs.combo}x SIP STREAK!`, W / 2, 24);
+        ctx.shadowBlur = 12;
+        const multiplierText = gs.combo >= 10 ? '3x' : gs.combo >= 6 ? '2x' : '1.5x';
+        ctx.fillText(`🔥 ${gs.combo}x SIP STREAK (${multiplierText})`, W / 2, 26);
         ctx.shadowBlur = 0;
       }
 
       // HUD: Score
-      ctx.font = 'bold 13px sans-serif';
+      ctx.font = 'bold 14px sans-serif';
       ctx.textAlign = 'left';
       ctx.fillStyle = '#f8fafc';
-      ctx.fillText(`${currencySymbol}${gs.score}`, 12, 22);
+      ctx.fillText(`${currencySymbol}${gs.score}`, 14, 24);
 
       // HUD: Lives & Shield
       ctx.textAlign = 'right';
       ctx.font = '13px sans-serif';
       const shieldIcon = gs.hasShield ? ' 🛡️' : '';
-      ctx.fillText(`${'❤️'.repeat(Math.max(0, gs.lives))}${shieldIcon}`, W - 12, 22);
+      ctx.fillText(`${'❤️'.repeat(Math.max(0, gs.lives))}${shieldIcon}`, W - 14, 24);
+
+      ctx.restore();
 
       animFrameRef.current = requestAnimationFrame(loop);
     };
@@ -1018,19 +1090,25 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
     return () => {
       cancelAnimationFrame(animFrameRef.current);
     };
-  }, [isExpanded, started, gameOver, spawnFormation, createParticles, createFloatingText, currencySymbol, highScore]);
+  }, [isExpanded, started, gameOver, spawnFormation, createParticles, createFloatingText, currencySymbol, highScore, selectedChar, gameMode, playSound]);
 
-  // Controls (Keyboard)
+  // Controls (Keyboard: Arrow Keys & Spacebar to start)
   useEffect(() => {
-    if (!isExpanded || !started || gameOver) return;
     const handleKey = (e: KeyboardEvent) => {
-      const step = 16;
+      if (e.code === 'Space') {
+        if (!started || gameOver) {
+          e.preventDefault();
+          resetGame();
+        }
+      }
+      if (!isExpanded || !started || gameOver) return;
+      const step = 18;
       if (e.key === 'ArrowLeft' || e.key === 'a') movePlayerBy(-step);
       if (e.key === 'ArrowRight' || e.key === 'd') movePlayerBy(step);
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [isExpanded, started, gameOver]);
+  }, [isExpanded, started, gameOver, resetGame]);
 
   // Controls (Touch Gestures & Mouse Drag)
   useEffect(() => {
@@ -1043,7 +1121,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
       const scaleX = canvas.width / rect.width;
       const targetX = (touch.clientX - rect.left) * scaleX;
       const gs = gameStateRef.current;
-      gs.playerX = Math.max(26, Math.min(canvas.width - 26, targetX));
+      gs.playerX = Math.max(28, Math.min(canvas.width - 28, targetX));
       touchXRef.current = targetX;
     };
 
@@ -1065,7 +1143,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
       const gs = gameStateRef.current;
-      gs.playerX = Math.max(26, Math.min(canvas.width - 26, (e.clientX - rect.left) * scaleX));
+      gs.playerX = Math.max(28, Math.min(canvas.width - 28, (e.clientX - rect.left) * scaleX));
     };
 
     canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
@@ -1145,50 +1223,86 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
 
   return (
     <div style={{
-      marginTop: '20px',
+      marginTop: '10px',
       marginBottom: '20px',
       borderRadius: '24px',
-      border: '1px solid rgba(16, 185, 129, 0.3)',
-      background: 'var(--bg-card)',
+      border: '1.5px solid rgba(16, 185, 129, 0.35)',
+      background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(6, 10, 20, 0.98) 100%)',
       overflow: 'hidden',
-      boxShadow: '0 12px 35px rgba(0,0,0,0.12)'
+      boxShadow: '0 16px 40px rgba(0, 0, 0, 0.4), 0 0 24px rgba(16, 185, 129, 0.15)'
     }}>
-      {/* Game Header */}
+      {/* Arcade Marquee Header */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '14px 18px',
-        borderBottom: '1px solid var(--border-input, rgba(255,255,255,0.08))',
-        color: 'var(--text-primary)'
+        padding: '12px 16px',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        background: 'linear-gradient(90deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%)',
+        color: '#f8fafc'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Gamepad2 size={18} color="#10b981" />
-          <span style={{ fontSize: '14px', fontWeight: 800 }}>{title}</span>
+          <span style={{ fontSize: '13.5px', fontWeight: 900, letterSpacing: '-0.01em' }}>
+            {title}
+          </span>
+          <span style={{
+            fontSize: '9px',
+            padding: '2px 6px',
+            borderRadius: '999px',
+            background: 'rgba(16, 185, 129, 0.2)',
+            color: '#34d399',
+            fontWeight: 800,
+            border: '1px solid rgba(16, 185, 129, 0.4)'
+          }}>
+            TURBO
+          </span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Sound Toggle */}
+          <button
+            onClick={toggleSound}
+            title={soundEnabled ? 'Mute Sound' : 'Enable Sound'}
+            style={{
+              background: soundEnabled ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.06)',
+              border: `1px solid ${soundEnabled ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
+              borderRadius: '8px',
+              padding: '6px',
+              color: soundEnabled ? '#34d399' : '#94a3b8',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            {soundEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}
+          </button>
+
+          {/* Trophy High Score Pill */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
             gap: '5px',
-            background: 'rgba(251, 191, 36, 0.12)',
+            background: 'rgba(251, 191, 36, 0.15)',
             padding: '4px 10px',
             borderRadius: '999px',
-            border: '1px solid rgba(251, 191, 36, 0.3)'
+            border: '1px solid rgba(251, 191, 36, 0.4)'
           }}>
             <Trophy size={13} color="#fbbf24" />
-            <span style={{ fontSize: '11px', fontWeight: 800, color: '#fbbf24' }}>
+            <span style={{ fontSize: '11px', fontWeight: 900, color: '#fbbf24' }}>
               {currencySymbol}{highScore}
             </span>
           </div>
+
           <button
             onClick={() => { setIsExpanded(false); setStarted(false); setGameOver(false); }}
             style={{
-              background: 'var(--bg-input)',
-              border: '1px solid var(--border-input)',
+              background: 'rgba(255, 255, 255, 0.06)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
               borderRadius: '8px',
-              padding: '4px 10px',
-              color: 'var(--text-secondary)',
+              padding: '4px 9px',
+              color: '#94a3b8',
               fontSize: '11px',
               fontWeight: 700,
               cursor: 'pointer'
@@ -1199,74 +1313,47 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
         </div>
       </div>
 
-      {/* Stats Bar */}
+      {/* Real-time In-Game HUD Bar */}
       <div style={{
-        display: 'flex',
-        justifyContent: 'space-around',
-        padding: '10px 16px',
-        background: 'rgba(0,0,0,0.04)',
-        borderBottom: '1px solid var(--border-input, rgba(255,255,255,0.06))'
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        padding: '8px 12px',
+        background: 'rgba(0, 0, 0, 0.25)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.06)'
       }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '9px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>Wealth Scored</div>
-          <div style={{ fontSize: '16px', fontWeight: 800, color: '#10b981' }}>{currencySymbol}{score}</div>
+          <div style={{ fontSize: '9px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>WEALTH</div>
+          <div style={{ fontSize: '16px', fontWeight: 900, color: '#10b981' }}>{currencySymbol}{score}</div>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '9px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>Financial Health</div>
-          <div style={{ fontSize: '15px' }}>{'❤️'.repeat(Math.max(0, lives))}{hasShield ? ' 🛡️' : ''}</div>
+          <div style={{ fontSize: '9px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>HEALTH</div>
+          <div style={{ fontSize: '14px', letterSpacing: '1px' }}>{'❤️'.repeat(Math.max(0, lives))}{hasShield ? ' 🛡️' : ''}</div>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '9px', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase' }}>SIP Streak</div>
-          <div style={{ fontSize: '16px', fontWeight: 800, color: combo >= 3 ? '#fbbf24' : 'var(--text-secondary)' }}>
+          <div style={{ fontSize: '9px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>SIP STREAK</div>
+          <div style={{ fontSize: '16px', fontWeight: 900, color: combo >= 3 ? '#fbbf24' : '#94a3b8' }}>
             {combo >= 3 ? `🔥${combo}x` : `${combo}x`}
           </div>
         </div>
       </div>
 
-      {/* Gameplay Tip Banner */}
-      <div style={{
-        padding: '7px 16px',
-        background: 'rgba(16, 185, 129, 0.08)',
-        borderBottom: '1px solid rgba(16, 185, 129, 0.16)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        fontSize: '11px',
-        overflow: 'hidden'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-          <span style={{
-            width: '7px',
-            height: '7px',
-            borderRadius: '50%',
-            backgroundColor: '#10b981',
-            boxShadow: '0 0 8px #10b981',
-            flexShrink: 0
-          }} />
-          <span style={{ color: 'var(--text-primary)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            Catch 🪙 gold coins & 💎 gems to build wealth • Dodge 💣 traps!
-          </span>
-        </div>
-        <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 700, flexShrink: 0, marginLeft: '8px' }}>
-          Zen Arcade
-        </span>
-      </div>
-
-      {/* Canvas Box */}
-      <div style={{ position: 'relative' }}>
+      {/* Game Canvas Container */}
+      <div style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
         <canvas
           ref={canvasRef}
-          width={350}
-          height={310}
+          width={380}
+          height={430}
           style={{
             width: '100%',
+            aspectRatio: '380 / 430',
             display: 'block',
             background: '#060a14',
-            touchAction: 'none'
+            touchAction: 'none',
+            cursor: started && !gameOver ? 'ew-resize' : 'default'
           }}
         />
 
-        {/* Start Overlay */}
+        {/* 🌟 VIBRANT ARCADE START OVERLAY */}
         {!started && !gameOver && (
           <div style={{
             position: 'absolute',
@@ -1274,60 +1361,262 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
-            background: 'rgba(6, 10, 20, 0.94)',
-            backdropFilter: 'blur(8px)',
-            gap: '12px',
-            padding: '16px'
+            justifyContent: 'space-between',
+            background: 'radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.18) 0%, rgba(6, 10, 20, 0.98) 75%)',
+            backdropFilter: 'blur(10px)',
+            padding: '16px 14px 14px 14px',
+            boxSizing: 'border-box'
           }}>
-            <div style={{ fontSize: '42px', animation: 'bounce 1s infinite' }}>🐷</div>
-            <h3 style={{ fontSize: '19px', fontWeight: 800, margin: 0, color: '#f8fafc' }}>
-              Zen Coin Catcher
-            </h3>
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '3px 10px',
-              borderRadius: '999px',
-              background: 'rgba(16, 185, 129, 0.15)',
-              border: '1px solid rgba(16, 185, 129, 0.3)',
-              fontSize: '11px',
-              fontWeight: 700,
-              color: '#34d399'
-            }}>
-              <span>⚡ Normal Speed • Tactical Hard Mode</span>
-            </div>
-            <p style={{ fontSize: '11.5px', color: '#94a3b8', textAlign: 'center', margin: '0', lineHeight: 1.5, maxWidth: '290px' }}>
-              Slide or swipe your finger across screen to steer 🐷<br/>
-              • Weave between <span style={{ color: '#fbbf24', fontWeight: 700 }}>Sandwich Traps</span> & sweeping hazards<br/>
-              • Dodge <span style={{ color: '#f87171', fontWeight: 700 }}>Debt Bombs 💣 & Fake Scams 🎣</span><br/>
-              • Don't miss coins or your <span style={{ color: '#38bdf8', fontWeight: 700 }}>SIP streak resets!</span>
-            </p>
-            <button
-              onClick={resetGame}
-              style={{
-                padding: '12px 32px',
-                borderRadius: '16px',
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                border: 'none',
-                color: '#ffffff',
-                fontSize: '14px',
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'flex',
+            {/* Top Badge & Title */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                display: 'inline-flex',
                 alignItems: 'center',
-                gap: '8px',
-                boxShadow: '0 8px 24px rgba(16, 185, 129, 0.45)'
-              }}
-            >
-              <Coins size={18} />
-              Start Game
-            </button>
+                gap: '6px',
+                padding: '3px 10px',
+                borderRadius: '999px',
+                background: 'rgba(16, 185, 129, 0.15)',
+                border: '1px solid rgba(16, 185, 129, 0.35)',
+                fontSize: '10px',
+                fontWeight: 800,
+                color: '#34d399',
+                marginBottom: '6px'
+              }}>
+                <Zap size={11} />
+                <span>FINANCIAL AGILITY ARCADE</span>
+              </div>
+              <h3 style={{
+                fontSize: '20px',
+                fontWeight: 900,
+                margin: '0',
+                color: '#f8fafc',
+                letterSpacing: '-0.02em',
+                textShadow: '0 2px 10px rgba(16, 185, 129, 0.4)'
+              }}>
+                Zen Coin Catcher
+              </h3>
+            </div>
+
+            {/* Character Selector Section */}
+            <div style={{ width: '100%', maxWidth: '340px' }}>
+              <div style={{
+                fontSize: '10px',
+                fontWeight: 800,
+                color: '#94a3b8',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                marginBottom: '6px',
+                textAlign: 'center'
+              }}>
+                CHOOSE YOUR AVATAR
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: '6px'
+              }}>
+                {CHARACTERS.map(c => {
+                  const isSelected = c.id === selectedCharId;
+                  return (
+                    <button
+                      key={c.id}
+                      onClick={() => handleSelectChar(c)}
+                      style={{
+                        padding: '8px 4px',
+                        borderRadius: '12px',
+                        border: isSelected ? `2px solid ${c.glow}` : '1px solid rgba(255, 255, 255, 0.08)',
+                        background: isSelected ? `${c.glow}20` : 'rgba(255, 255, 255, 0.03)',
+                        boxShadow: isSelected ? `0 0 14px ${c.glow}50` : 'none',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '2px',
+                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                      }}
+                    >
+                      <span style={{ fontSize: '26px', transform: isSelected ? 'scale(1.15)' : 'scale(1)', transition: 'transform 0.2s' }}>
+                        {c.emoji}
+                      </span>
+                      <span style={{ fontSize: '9px', fontWeight: 800, color: isSelected ? '#ffffff' : '#94a3b8', whiteSpace: 'nowrap' }}>
+                        {c.name}
+                      </span>
+                      <span style={{
+                        fontSize: '7.5px',
+                        fontWeight: 900,
+                        color: c.glow,
+                        background: `${c.glow}18`,
+                        padding: '1px 4px',
+                        borderRadius: '4px'
+                      }}>
+                        {c.tag}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Character Perk Subtitle */}
+              <div style={{
+                textAlign: 'center',
+                fontSize: '10px',
+                color: selectedChar.glow,
+                fontWeight: 700,
+                marginTop: '5px'
+              }}>
+                ⚡ {selectedChar.name}: {selectedChar.perk}
+              </div>
+            </div>
+
+            {/* Visual Power-Up Cards (Replaces boring wall of text) */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '6px',
+              width: '100%',
+              maxWidth: '340px'
+            }}>
+              <div style={{
+                padding: '6px 4px',
+                borderRadius: '10px',
+                background: 'rgba(16, 185, 129, 0.08)',
+                border: '1px solid rgba(16, 185, 129, 0.2)',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '15px' }}>🪙</div>
+                <div style={{ fontSize: '9px', fontWeight: 800, color: '#34d399' }}>SIP Coins</div>
+                <div style={{ fontSize: '7.5px', color: '#94a3b8' }}>+₹15 to +₹250</div>
+              </div>
+
+              <div style={{
+                padding: '6px 4px',
+                borderRadius: '10px',
+                background: 'rgba(251, 191, 36, 0.08)',
+                border: '1px solid rgba(251, 191, 36, 0.2)',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '15px' }}>🧲</div>
+                <div style={{ fontSize: '9px', fontWeight: 800, color: '#fbbf24' }}>Magnet</div>
+                <div style={{ fontSize: '7.5px', color: '#94a3b8' }}>Pulls Money</div>
+              </div>
+
+              <div style={{
+                padding: '6px 4px',
+                borderRadius: '10px',
+                background: 'rgba(56, 189, 248, 0.08)',
+                border: '1px solid rgba(56, 189, 248, 0.2)',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '15px' }}>🛡️</div>
+                <div style={{ fontSize: '9px', fontWeight: 800, color: '#38bdf8' }}>Shield</div>
+                <div style={{ fontSize: '7.5px', color: '#94a3b8' }}>Absorbs 1 Trap</div>
+              </div>
+
+              <div style={{
+                padding: '6px 4px',
+                borderRadius: '10px',
+                background: 'rgba(239, 68, 68, 0.08)',
+                border: '1px solid rgba(239, 68, 68, 0.2)',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '15px' }}>💣</div>
+                <div style={{ fontSize: '9px', fontWeight: 800, color: '#f87171' }}>Debt Bomb</div>
+                <div style={{ fontSize: '7.5px', color: '#94a3b8' }}>Dodge Hazard!</div>
+              </div>
+            </div>
+
+            {/* Mode Selector */}
+            <div style={{
+              display: 'flex',
+              gap: '6px',
+              width: '100%',
+              maxWidth: '340px'
+            }}>
+              <button
+                onClick={() => { setGameMode('blitz'); playSound(playClickSound); }}
+                style={{
+                  flex: 1,
+                  padding: '7px 8px',
+                  borderRadius: '10px',
+                  border: gameMode === 'blitz' ? '1.5px solid #10b981' : '1px solid rgba(255, 255, 255, 0.08)',
+                  background: gameMode === 'blitz' ? 'rgba(16, 185, 129, 0.18)' : 'rgba(255, 255, 255, 0.03)',
+                  color: gameMode === 'blitz' ? '#ffffff' : '#94a3b8',
+                  fontSize: '10.5px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '4px'
+                }}
+              >
+                <Flame size={12} color={gameMode === 'blitz' ? '#fbbf24' : '#94a3b8'} />
+                <span>⚡ Turbo Blitz</span>
+              </button>
+
+              <button
+                onClick={() => { setGameMode('zen'); playSound(playClickSound); }}
+                style={{
+                  flex: 1,
+                  padding: '7px 8px',
+                  borderRadius: '10px',
+                  border: gameMode === 'zen' ? '1.5px solid #06b6d4' : '1px solid rgba(255, 255, 255, 0.08)',
+                  background: gameMode === 'zen' ? 'rgba(6, 182, 212, 0.18)' : 'rgba(255, 255, 255, 0.03)',
+                  color: gameMode === 'zen' ? '#ffffff' : '#94a3b8',
+                  fontSize: '10.5px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '4px'
+                }}
+              >
+                <Sparkles size={12} color={gameMode === 'zen' ? '#06b6d4' : '#94a3b8'} />
+                <span>🌿 Chill Zen</span>
+              </button>
+            </div>
+
+            {/* Launch Action Button */}
+            <div style={{ width: '100%', maxWidth: '340px' }}>
+              <button
+                onClick={resetGame}
+                style={{
+                  width: '100%',
+                  padding: '13px 20px',
+                  borderRadius: '14px',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  border: 'none',
+                  color: '#ffffff',
+                  fontSize: '14px',
+                  fontWeight: 900,
+                  letterSpacing: '0.02em',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 8px 25px rgba(16, 185, 129, 0.45)',
+                  transition: 'transform 0.15s ease'
+                }}
+              >
+                <Coins size={18} />
+                <span>START ARCADE GAME</span>
+              </button>
+              <div style={{
+                textAlign: 'center',
+                fontSize: '9.5px',
+                color: '#64748b',
+                marginTop: '4px'
+              }}>
+                Slide finger to steer • Press Spacebar to play
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Game Over & Share Overlay */}
+        {/* 🏆 GAMIFIED VICTORY & SHARE OVERLAY */}
         {gameOver && (
           <div style={{
             position: 'absolute',
@@ -1336,61 +1625,89 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'rgba(6, 10, 20, 0.96)',
-            backdropFilter: 'blur(10px)',
-            gap: '10px',
+            background: 'radial-gradient(circle at 50% 30%, rgba(15, 23, 42, 0.98) 0%, rgba(6, 10, 20, 0.99) 100%)',
+            backdropFilter: 'blur(12px)',
+            gap: '8px',
             padding: '16px'
           }}>
-            <div style={{ fontSize: '38px' }}>
+            <div style={{ fontSize: '38px', animation: 'bounce 0.8s infinite' }}>
               {score >= highScore && score > 0 ? '🏆' : '💸'}
             </div>
-            <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: '#f8fafc' }}>
-              {score >= highScore && score > 0 ? 'New Wealth Record!' : 'Game Over!'}
+            <h3 style={{ fontSize: '19px', fontWeight: 900, margin: 0, color: '#f8fafc', letterSpacing: '-0.02em' }}>
+              {score >= highScore && score > 0 ? '🎉 New Wealth Record!' : 'Game Over!'}
             </h3>
-            
+
+            {/* Rank Badge */}
             <div style={{
-              background: 'rgba(255,255,255,0.06)',
-              padding: '6px 14px',
+              background: `${userRank.color}15`,
+              padding: '5px 14px',
               borderRadius: '999px',
-              border: `1px solid ${userRank.color}40`,
+              border: `1.5px solid ${userRank.color}50`,
               color: userRank.color,
               fontSize: '12px',
-              fontWeight: 800
+              fontWeight: 900,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
             }}>
-              {userRank.title}
+              <span>{userRank.title}</span>
             </div>
 
+            {/* Score Stats Grid */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '8px',
-              width: '220px',
-              marginTop: '2px'
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '6px',
+              width: '100%',
+              maxWidth: '310px',
+              marginTop: '4px'
             }}>
               <div style={{
-                background: 'rgba(255,255,255,0.04)',
+                background: 'rgba(255, 255, 255, 0.04)',
                 borderRadius: '12px',
                 padding: '8px',
                 textAlign: 'center',
-                border: '1px solid rgba(255,255,255,0.08)'
+                border: '1px solid rgba(255, 255, 255, 0.08)'
               }}>
-                <div style={{ fontSize: '9px', color: '#94a3b8', fontWeight: 700 }}>WEALTH</div>
-                <div style={{ fontSize: '17px', fontWeight: 800, color: '#10b981' }}>{currencySymbol}{score}</div>
+                <div style={{ fontSize: '8.5px', color: '#94a3b8', fontWeight: 700 }}>WEALTH</div>
+                <div style={{ fontSize: '16px', fontWeight: 900, color: '#10b981' }}>{currencySymbol}{score}</div>
               </div>
               <div style={{
-                background: 'rgba(255,255,255,0.04)',
+                background: 'rgba(255, 255, 255, 0.04)',
                 borderRadius: '12px',
                 padding: '8px',
                 textAlign: 'center',
-                border: '1px solid rgba(255,255,255,0.08)'
+                border: '1px solid rgba(255, 255, 255, 0.08)'
               }}>
-                <div style={{ fontSize: '9px', color: '#94a3b8', fontWeight: 700 }}>BEST RECORD</div>
-                <div style={{ fontSize: '17px', fontWeight: 800, color: '#fbbf24' }}>{currencySymbol}{highScore}</div>
+                <div style={{ fontSize: '8.5px', color: '#94a3b8', fontWeight: 700 }}>HIGH SCORE</div>
+                <div style={{ fontSize: '16px', fontWeight: 900, color: '#fbbf24' }}>{currencySymbol}{highScore}</div>
+              </div>
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.04)',
+                borderRadius: '12px',
+                padding: '8px',
+                textAlign: 'center',
+                border: '1px solid rgba(255, 255, 255, 0.08)'
+              }}>
+                <div style={{ fontSize: '8.5px', color: '#94a3b8', fontWeight: 700 }}>MAX STREAK</div>
+                <div style={{ fontSize: '16px', fontWeight: 900, color: '#38bdf8' }}>{gameStateRef.current.maxCombo}x</div>
               </div>
             </div>
 
+            {/* Next Rank Progress */}
+            {userRank.nextGoal !== 'MAX RANK' && (
+              <div style={{
+                fontSize: '10px',
+                color: '#94a3b8',
+                fontWeight: 600,
+                textAlign: 'center'
+              }}>
+                Target: <span style={{ color: userRank.color, fontWeight: 800 }}>{userRank.nextGoal}</span>
+              </div>
+            )}
+
             {/* Viral Share Buttons */}
-            <div style={{ display: 'flex', gap: '8px', marginTop: '6px', width: '100%', maxWidth: '280px' }}>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '4px', width: '100%', maxWidth: '310px' }}>
               <button
                 onClick={handleShare}
                 style={{
@@ -1407,7 +1724,7 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '6px',
-                  boxShadow: '0 4px 14px rgba(37, 211, 102, 0.4)'
+                  boxShadow: '0 4px 14px rgba(37, 211, 102, 0.35)'
                 }}
               >
                 <Share2 size={14} />
@@ -1420,8 +1737,8 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
                   flex: 1,
                   padding: '10px',
                   borderRadius: '12px',
-                  background: 'rgba(255,255,255,0.1)',
-                  border: '1px solid rgba(255,255,255,0.2)',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.18)',
                   color: '#ffffff',
                   fontSize: '12px',
                   fontWeight: 700,
@@ -1437,19 +1754,20 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
               </button>
             </div>
 
+            {/* Watch Video Ad to Revive */}
             {!hasRevivedWithAd && (
               <button
                 onClick={handleReviveWithAd}
                 disabled={adLoading}
                 style={{
                   width: '100%',
-                  maxWidth: '280px',
-                  padding: '11px',
+                  maxWidth: '310px',
+                  padding: '10px',
                   borderRadius: '12px',
                   background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
                   border: 'none',
                   color: '#ffffff',
-                  fontSize: '12.5px',
+                  fontSize: '12px',
                   fontWeight: 800,
                   cursor: adLoading ? 'not-allowed' : 'pointer',
                   display: 'flex',
@@ -1457,52 +1775,55 @@ export const CoinCatcherGame: React.FC<CoinCatcherGameProps> = ({
                   justifyContent: 'center',
                   gap: '8px',
                   boxShadow: '0 4px 14px rgba(245, 158, 11, 0.4)',
-                  marginTop: '8px',
                   opacity: adLoading ? 0.7 : 1
                 }}
               >
-                <Video size={15} />
+                <Video size={14} />
                 {adLoading ? 'Loading Sponsor Video...' : '🎬 Watch Video Ad to Revive (+3 Lives)'}
               </button>
             )}
 
+            {/* Play Again Button */}
             <button
               onClick={resetGame}
               style={{
-                padding: '10px 24px',
+                width: '100%',
+                maxWidth: '310px',
+                padding: '11px',
                 borderRadius: '12px',
                 background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                 border: 'none',
                 color: '#ffffff',
                 fontSize: '13px',
-                fontWeight: 800,
+                fontWeight: 900,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'center',
                 gap: '6px',
-                marginTop: '4px'
+                boxShadow: '0 6px 18px rgba(16, 185, 129, 0.4)'
               }}
             >
-              <RotateCcw size={14} />
-              Play Again
+              <RotateCcw size={15} />
+              PLAY AGAIN
             </button>
           </div>
         )}
       </div>
 
-      {/* Financial Wisdom Tip */}
+      {/* Financial Wisdom Banner Footer */}
       <div style={{
         padding: '10px 16px',
-        background: 'rgba(16, 185, 129, 0.05)',
-        borderTop: '1px solid var(--border-input, rgba(255,255,255,0.06))',
+        background: 'rgba(16, 185, 129, 0.06)',
+        borderTop: '1px solid rgba(255, 255, 255, 0.06)',
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
         fontSize: '11px',
-        color: 'var(--text-secondary)'
+        color: '#94a3b8'
       }}>
         <Sparkles size={14} color="#10b981" style={{ flexShrink: 0 }} />
-        <span style={{ lineHeight: 1.4 }}>{FINANCIAL_TIPS[currentTipIndex]}</span>
+        <span style={{ lineHeight: 1.4, color: '#cbd5e1' }}>{FINANCIAL_TIPS[currentTipIndex]}</span>
       </div>
     </div>
   );

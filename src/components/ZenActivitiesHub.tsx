@@ -458,10 +458,11 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
             flex: 1,
             overflowY: 'auto',
             padding: '14px 14px 50px 14px',
-            maxWidth: '560px',
+            maxWidth: activeTab === 'game' ? '620px' : '560px',
             width: '100%',
             margin: '0 auto',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            transition: 'max-width 0.3s ease'
           }}>
             {/* 3 Activity Tabs Selector */}
             <div style={{
