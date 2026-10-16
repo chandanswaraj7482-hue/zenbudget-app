@@ -288,11 +288,11 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
             textAlign: 'left'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
             <div style={{
-              width: '46px',
-              height: '46px',
-              borderRadius: '16px',
+              width: '44px',
+              height: '44px',
+              borderRadius: '14px',
               background: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
               display: 'flex',
               alignItems: 'center',
@@ -303,24 +303,31 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
             }}>
               🎮
             </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <p style={{ fontSize: '15px', fontWeight: 900, margin: 0, color: 'var(--text-primary)' }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'nowrap' }}>
+                <span style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   Zen Arcade &amp; Brain Hub
-                </p>
+                </span>
                 <span style={{
-                  fontSize: '10px',
+                  fontSize: '9.5px',
                   fontWeight: 800,
-                  padding: '2px 8px',
-                  borderRadius: '999px',
-                  background: '#10b981',
-                  color: '#ffffff'
+                  padding: '2px 7px',
+                  borderRadius: '6px',
+                  background: 'rgba(16, 185, 129, 0.2)',
+                  color: '#34d399',
+                  border: '1px solid rgba(16, 185, 129, 0.35)',
+                  whiteSpace: 'nowrap',
+                  lineHeight: 1.2,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
                 }}>
                   3-in-1
                 </span>
               </div>
-              <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', margin: '3px 0 0 0' }}>
-                🎮 Coin Game • 🧠 Money IQ Quiz • ⚡ Can I Afford It?
+              <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: '3px 0 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                🎮 Coin Game • 🧠 Money IQ • ⚡ Afford?
               </p>
             </div>
           </div>
@@ -328,18 +335,20 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
-            padding: '8px 16px',
-            borderRadius: '999px',
-            background: '#10b981',
+            gap: '4px',
+            padding: '7px 12px',
+            borderRadius: '12px',
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
             color: '#ffffff',
-            fontSize: '12px',
+            fontSize: '11.5px',
             fontWeight: 800,
-            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)',
-            flexShrink: 0
+            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+            flexShrink: 0,
+            marginLeft: '8px',
+            whiteSpace: 'nowrap'
           }}>
-            <span>Play &amp; Learn</span>
-            <ChevronRight size={15} />
+            <span>Play</span>
+            <ChevronRight size={14} />
           </div>
         </button>
       </div>
@@ -402,10 +411,17 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
                   <span style={{
                     fontSize: '9.5px',
                     fontWeight: 800,
-                    padding: '2px 8px',
-                    borderRadius: '999px',
-                    background: '#10b981',
-                    color: '#ffffff'
+                    padding: '2px 7px',
+                    borderRadius: '6px',
+                    background: 'rgba(16, 185, 129, 0.2)',
+                    color: '#34d399',
+                    border: '1px solid rgba(16, 185, 129, 0.35)',
+                    whiteSpace: 'nowrap',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    lineHeight: 1.2
                   }}>
                     3-in-1
                   </span>
