@@ -85,6 +85,31 @@ const generateId = () => {
     : Date.now().toString(36) + Math.random().toString(36).substring(2);
 };
 
+export const mergeDuplicateAccounts = (accList: Account[]): { merged: Account[]; duplicateIdsToDelete: string[] } => {
+  const mergedMap = new Map<string, Account>();
+  const duplicateIdsToDelete: string[] = [];
+
+  for (const acc of accList) {
+    if (!acc || !acc.name) continue;
+    const isFamily = Boolean(acc.isFamilyAccount);
+    // Key by owner + trimmed lowercased name or type if cash
+    const normalizedName = acc.name.trim().toLowerCase();
+    const key = `${acc.user_id || 'me'}_${acc.type === 'cash' ? 'cash' : normalizedName}`;
+    if (mergedMap.has(key) && !isFamily) {
+      const existing = mergedMap.get(key)!;
+      existing.balance = (Number(existing.balance) || 0) + (Number(acc.balance) || 0);
+      duplicateIdsToDelete.push(acc.id);
+    } else {
+      mergedMap.set(key, { ...acc, balance: Number(acc.balance) || 0 });
+    }
+  }
+
+  return {
+    merged: Array.from(mergedMap.values()),
+    duplicateIdsToDelete
+  };
+};
+
 const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   // Auth & Profile states
   const [currentProfileId, setCurrentProfileId] = useState<string>(() => localStorage.getItem('zb_profile_id') || '');
@@ -212,7 +237,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       try {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+          const { merged } = mergeDuplicateAccounts(parsed);
+          return merged;
         }
       } catch (e) {}
     }
@@ -595,6 +621,36 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
   const handleAddAccount = async (newAcc: Omit<Account, 'id'>) => {
     if (checkExpiredGuard('add bank accounts')) return;
+
+    // Check if account already exists with same name or is duplicate cash
+    const normalizedNewName = (newAcc.name || '').trim().toLowerCase();
+    const existingIndex = accounts.findIndex(a => {
+      if (a.isFamilyAccount) return false;
+      if (newAcc.type === 'cash' && a.type === 'cash') return true;
+      return (a.name || '').trim().toLowerCase() === normalizedNewName;
+    });
+
+    if (existingIndex !== -1) {
+      // Auto-merge with existing account rather than duplicating cards
+      const existing = accounts[existingIndex];
+      const addedBalance = Number(newAcc.balance) || 0;
+      const newTotalBalance = (Number(existing.balance) || 0) + addedBalance;
+      const updatedAccount = { ...existing, balance: newTotalBalance };
+      const updated = [...accounts];
+      updated[existingIndex] = updatedAccount;
+      setAccounts(updated);
+
+      if (currentProfileId) {
+        localStorage.setItem(`zb_accounts_${currentProfileId}`, JSON.stringify(updated));
+        try {
+          await supabase.from('accounts').update({ balance: newTotalBalance }).eq('id', existing.id);
+        } catch (_) {}
+      }
+
+      triggerToast(`Merged ₹${addedBalance.toLocaleString('en-IN')} into existing "${existing.name}" account!`, 'success');
+      return;
+    }
+
     const accId = generateId();
     const created: any = { 
       ...newAcc, 
@@ -2673,8 +2729,20 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
               isFamilyAccount: Boolean(a.user_id && currentProfileId && a.user_id !== currentProfileId)
             };
           });
-          setAccounts(annotatedAccounts);
-          localStorage.setItem(`zb_accounts_${currentProfileId}`, JSON.stringify(annotatedAccounts));
+          const { merged, duplicateIdsToDelete } = mergeDuplicateAccounts(annotatedAccounts);
+          setAccounts(merged);
+          localStorage.setItem(`zb_accounts_${currentProfileId}`, JSON.stringify(merged));
+
+          if (duplicateIdsToDelete.length > 0) {
+            try {
+              await supabase.from('accounts').delete().in('id', duplicateIdsToDelete);
+            } catch (_) {}
+            for (const acc of merged) {
+              try {
+                await supabase.from('accounts').update({ balance: acc.balance }).eq('id', acc.id);
+              } catch (_) {}
+            }
+          }
         } else {
           // Fallback: use locally cached accounts if Supabase has none
           const cachedAccs = localStorage.getItem(`zb_accounts_${currentProfileId}`);
@@ -2682,7 +2750,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             try {
               const parsed = JSON.parse(cachedAccs);
               if (Array.isArray(parsed) && parsed.length > 0) {
-                setAccounts(parsed);
+                const { merged } = mergeDuplicateAccounts(parsed);
+                setAccounts(merged);
               }
             } catch (_) {}
           }
@@ -2690,7 +2759,13 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       } catch (_accErr) {
         const cachedAccs = localStorage.getItem(`zb_accounts_${currentProfileId}`);
         if (cachedAccs) {
-          try { setAccounts(JSON.parse(cachedAccs)); } catch (_) {}
+          try {
+            const parsed = JSON.parse(cachedAccs);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              const { merged } = mergeDuplicateAccounts(parsed);
+              setAccounts(merged);
+            }
+          } catch (_) {}
         }
       }
 
