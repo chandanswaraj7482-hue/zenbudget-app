@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Authenticating ZenBudget...</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #09090f;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+      text-align: center;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 28px;
+      padding: 36px 28px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .spinner {
+      width: 52px;
+      height: 52px;
+      border: 4px solid rgba(16, 185, 129, 0.2);
+      border-top-color: #10b981;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-top: 6px;
+    }
+    p {
+      font-size: 14px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .btn {
+      margin-top: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 800;
+      padding: 14px 28px;
+      border-radius: 100px;
+      text-decoration: none;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+      transition: transform 0.15s ease;
+      cursor: pointer;
+      border: none;
+      width: 100%;
+    }
+    .btn:active {
+      transform: scale(0.97);
+    }
+    .subtext {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="spinner"></div>
+    <h2>Login Successful!</h2>
+    <p id="msg">Redirecting back to your ZenBudget App...</p>
+    <a id="openAppBtn" class="btn" href="#">Open ZenBudget App</a>
+    <span class="subtext">Tap the button above if the app didn't open automatically.</span>
+  </div>
+
+  <script>
+    (function() {
+      var search = window.location.search || '';
+      var hash = window.location.hash || '';
+      var deepLink = 'app.zenbudget.app://auth' + search + hash;
+
+      var btn = document.getElementById('openAppBtn');
+      if (btn) btn.href = deepLink;
+
+      // Try triggering deep link immediately
+      try {
+        window.location.href = deepLink;
+      } catch (e) {
+        console.warn('Deep link auto-trigger failed:', e);
+      }
+
+      // Fallback timer to prompt user
+      setTimeout(function() {
+        var msg = document.getElementById('msg');
+        if (msg) msg.textContent = 'Please tap "Open ZenBudget App" to finish signing in.';
+      }, 1500);
+    })();
+  </script>
+</body>
+</html>

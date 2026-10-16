@@ -14,6 +14,27 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
+    <!-- Native Android App OAuth Return Bridge: Forward login tokens back into the APK -->
+    <script>
+      (function() {
+        try {
+          var search = window.location.search || '';
+          var hash = window.location.hash || '';
+          var isFromApp = search.indexOf('source=app') !== -1;
+          var hasTokens = (search.indexOf('code=') !== -1 || hash.indexOf('access_token=') !== -1);
+          var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+          var isCapacitor = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+
+          if (!isCapacitor && (isFromApp || (hasTokens && isMobile))) {
+            var deepLink = 'app.zenbudget.app://auth' + search + (hash ? hash : '');
+            window.location.href = deepLink;
+          }
+        } catch (e) {
+          console.warn('OAuth deep link bridge error:', e);
+        }
+      })();
+    </script>
+
     
     <!-- Primary High-Ranking SEO Meta Tags -->
     <title>ZenBudget — #1 AI Expense Tracker, Daily Budget Planner &amp; Bank Statement Scanner App India</title>

@@ -191,13 +191,26 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             }
 
             // 2. Check for Implicit Access Token + Refresh Token
-            if (urlStr.includes('access_token=') && urlStr.includes('refresh_token=')) {
+            if (urlStr.includes('access_token=')) {
+              let accessToken = '';
+              let refreshToken = '';
+
               const hashIndex = urlStr.indexOf('#');
               const queryIndex = urlStr.indexOf('?');
               const paramsStr = hashIndex !== -1 ? urlStr.substring(hashIndex + 1) : (queryIndex !== -1 ? urlStr.substring(queryIndex + 1) : '');
               const params = new URLSearchParams(paramsStr);
-              const accessToken = params.get('access_token');
-              const refreshToken = params.get('refresh_token');
+              accessToken = params.get('access_token') || '';
+              refreshToken = params.get('refresh_token') || '';
+
+              if (!accessToken) {
+                const matchAcc = urlStr.match(/access_token=([^&]+)/);
+                if (matchAcc) accessToken = decodeURIComponent(matchAcc[1]);
+              }
+              if (!refreshToken) {
+                const matchRef = urlStr.match(/refresh_token=([^&]+)/);
+                if (matchRef) refreshToken = decodeURIComponent(matchRef[1]);
+              }
+
               if (accessToken && refreshToken) {
                 const { data: sessData, error: sessErr } = await supabase.auth.setSession({
                   access_token: accessToken,
@@ -907,11 +920,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       localStorage.setItem('zb_oauth_in_progress', 'true');
 
       if (Capacitor.isNativePlatform()) {
-        // Native OAuth flow using Capacitor Browser with direct session listener
+        // Native OAuth flow using Capacitor Browser with direct session listener & deep link redirect bridge
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider,
           options: {
-            redirectTo: 'https://zenbudget-tracker.vercel.app',
+            redirectTo: 'https://zenbudget-tracker.vercel.app/auth-callback.html?source=app',
             skipBrowserRedirect: true,
             queryParams: {
               prompt: 'select_account'
