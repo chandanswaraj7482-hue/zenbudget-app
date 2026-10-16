@@ -2198,7 +2198,32 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                 <span>Sign Out of Account</span>
               </button>
 
-
+              {!Capacitor.isNativePlatform() && (
+                <a
+                  href="/zenbudget.apk"
+                  download="zenbudget.apk"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '7px',
+                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 182, 212, 0.12) 100%)',
+                    border: '1px solid rgba(16, 185, 129, 0.3)',
+                    borderRadius: '100px',
+                    padding: '8px 16px',
+                    color: '#10b981',
+                    fontSize: '11.5px',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    boxShadow: '0 4px 14px rgba(16, 185, 129, 0.15)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    marginTop: '8px'
+                  }}
+                >
+                  <Download size={13} />
+                  <span>Download Official Android APK</span>
+                </a>
+              )}
             </div>
 
             {/* Sign Out Confirmation Popup */}

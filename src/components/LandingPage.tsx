@@ -1816,12 +1816,8 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
   const handleDownloadApk = () => {
     setShowModal(false);
-    const link = document.createElement('a');
-    link.href = '/zenbudget.apk';
-    link.download = 'zenbudget.apk';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Direct navigation forces immediate browser download of the binary
+    window.location.href = '/zenbudget.apk';
   };
 
   // Quiz Handling
@@ -2349,8 +2345,8 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
             <button 
               onClick={handleDownloadAction} 
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', padding: '10px 20px', borderRadius: '100px', fontSize: '13.5px', fontWeight: 800, border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 14px rgba(16,185,129,0.35)' }} 
-              className="desktop-only hover-lift"
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', padding: '9px 18px', borderRadius: '100px', fontSize: '13px', fontWeight: 800, border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 14px rgba(16,185,129,0.35)' }} 
+              className="hover-lift"
             >
               {deviceOS === 'ios' ? (
                 <>
@@ -2886,7 +2882,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                     background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
                     border: 'none', 
                     color: '#ffffff', 
-                    padding: '16px 32px', 
+                    padding: '16px 30px', 
                     borderRadius: '100px', 
                     fontSize: '15.5px', 
                     fontWeight: 800, 
@@ -2899,6 +2895,29 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   <Wallet size={18} color="#ffffff" />
                   <span>Open Web App</span>
                   <ArrowRight size={16} />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDownloadApk}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '9px',
+                    background: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+                    border: `1px solid ${t.border}`,
+                    color: t.text,
+                    padding: '16px 26px',
+                    borderRadius: '100px',
+                    fontSize: '15px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                  className="hover-lift about-hero-btn"
+                >
+                  <Download size={18} color="#10b981" />
+                  <span>Download APK (Free)</span>
                 </button>
 
                 <GooglePlayBadge variant="badge" showProtect />

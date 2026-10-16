@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { X, ExternalLink, ChevronDown, ChevronUp, Bell, Tag, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, ExternalLink, Bell, Tag, AlertTriangle, CheckCircle2, Sparkles } from 'lucide-react';
 import { playNotificationSound } from '../utils/audio';
 
 export interface AnnouncementItem {
@@ -21,15 +21,11 @@ export const TopAnnouncementBanner: React.FC<TopAnnouncementBannerProps> = ({
   announcement,
   onClose
 }) => {
-  const [expanded, setExpanded] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  const timerRef = useRef<any>(null);
-  const isHoveredRef = useRef(false);
 
-  // Play sound and set auto-dismiss timer on appear
+  // Play sound on appear
   useEffect(() => {
     if (!announcement) {
-      setExpanded(false);
       setIsClosing(false);
       return;
     }
@@ -38,21 +34,15 @@ export const TopAnnouncementBanner: React.FC<TopAnnouncementBannerProps> = ({
       playNotificationSound('info');
     } catch (_) {}
 
-    const startTimer = () => {
-      clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => {
-        if (!isHoveredRef.current && !expanded) {
-          handleDismiss();
-        }
-      }, 8500); // 8.5 seconds auto-dismiss
+    // Handle Escape key to dismiss
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleDismiss();
+      }
     };
-
-    startTimer();
-
-    return () => {
-      clearTimeout(timerRef.current);
-    };
-  }, [announcement?.id, expanded]);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [announcement?.id]);
 
   if (!announcement) return null;
 
@@ -61,7 +51,7 @@ export const TopAnnouncementBanner: React.FC<TopAnnouncementBannerProps> = ({
     setTimeout(() => {
       setIsClosing(false);
       onClose();
-    }, 280);
+    }, 240);
   };
 
   const isLight = typeof document !== 'undefined' && document.body.classList.contains('light-theme');
@@ -70,311 +60,333 @@ export const TopAnnouncementBanner: React.FC<TopAnnouncementBannerProps> = ({
     switch (announcement.type) {
       case 'coupon':
         return {
-          icon: <Tag size={16} />,
-          badgeColor: '#eab308',
-          badgeBg: 'rgba(234, 179, 8, 0.15)',
-          badgeBorder: 'rgba(234, 179, 8, 0.35)',
-          glow: 'rgba(234, 179, 8, 0.25)',
-          border: 'rgba(234, 179, 8, 0.45)',
+          icon: <Tag size={22} />,
+          badgeColor: '#f59e0b',
+          badgeBg: 'rgba(245, 158, 11, 0.16)',
+          badgeBorder: 'rgba(245, 158, 11, 0.35)',
+          glow: 'rgba(245, 158, 11, 0.28)',
+          border: 'rgba(245, 158, 11, 0.45)',
+          gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
           tagText: 'Special Offer'
         };
       case 'warning':
         return {
-          icon: <AlertTriangle size={16} />,
+          icon: <AlertTriangle size={22} />,
           badgeColor: '#ef4444',
-          badgeBg: 'rgba(239, 68, 68, 0.15)',
+          badgeBg: 'rgba(239, 68, 68, 0.16)',
           badgeBorder: 'rgba(239, 68, 68, 0.35)',
-          glow: 'rgba(239, 68, 68, 0.25)',
+          glow: 'rgba(239, 68, 68, 0.28)',
           border: 'rgba(239, 68, 68, 0.45)',
-          tagText: 'Notice'
+          gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+          tagText: 'Important Notice'
         };
       case 'success':
         return {
-          icon: <CheckCircle2 size={16} />,
+          icon: <CheckCircle2 size={22} />,
           badgeColor: '#10b981',
-          badgeBg: 'rgba(16, 185, 129, 0.15)',
+          badgeBg: 'rgba(16, 185, 129, 0.16)',
           badgeBorder: 'rgba(16, 185, 129, 0.35)',
-          glow: 'rgba(16, 185, 129, 0.25)',
+          glow: 'rgba(16, 185, 129, 0.28)',
           border: 'rgba(16, 185, 129, 0.45)',
-          tagText: 'Update'
+          gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+          tagText: 'Zen Update'
         };
       default:
         return {
-          icon: <Bell size={16} />,
+          icon: <Bell size={22} />,
           badgeColor: '#6366f1',
-          badgeBg: 'rgba(99, 102, 241, 0.15)',
+          badgeBg: 'rgba(99, 102, 241, 0.16)',
           badgeBorder: 'rgba(99, 102, 241, 0.35)',
-          glow: 'rgba(99, 102, 241, 0.25)',
-          border: 'rgba(99, 102, 241, 0.4)',
-          tagText: 'Announcement'
+          glow: 'rgba(99, 102, 241, 0.28)',
+          border: 'rgba(99, 102, 241, 0.45)',
+          gradient: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+          tagText: 'Admin Announcement'
         };
     }
   };
 
   const styleConfig = getTypeStyle();
-  const isLongMessage = announcement.message && announcement.message.length > 120;
 
   return (
     <div
-      role="alert"
-      aria-live="polite"
-      onMouseEnter={() => {
-        isHoveredRef.current = true;
-      }}
-      onMouseLeave={() => {
-        isHoveredRef.current = false;
-      }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="center-announcement-title"
+      onClick={handleDismiss}
       style={{
         position: 'fixed',
-        top: 'calc(env(safe-area-inset-top, 0px) + 12px)',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: 'min(calc(100% - 24px), 460px)',
+        inset: 0,
         zIndex: 100005,
-        pointerEvents: 'auto',
-        background: isLight ? 'rgba(255, 255, 255, 0.96)' : 'rgba(15, 23, 42, 0.95)',
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-        border: `1px solid ${styleConfig.border}`,
-        borderRadius: '20px',
-        padding: '14px 16px',
-        boxShadow: isLight
-          ? `0 14px 34px -6px rgba(0, 0, 0, 0.14), 0 0 20px ${styleConfig.glow}`
-          : `0 16px 40px -8px rgba(0, 0, 0, 0.65), 0 0 24px ${styleConfig.glow}`,
-        animation: isClosing
-          ? 'slideUpDismiss 0.28s cubic-bezier(0.4, 0, 1, 1) forwards'
-          : 'slideDownNotification 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-        boxSizing: 'border-box',
-        overflow: 'hidden',
-        transition: 'all 0.2s ease-in-out'
-      }}
-    >
-      {/* Top Meta Row: Icon + Badge + ZenBudget label + Close button */}
-      <div style={{
+        background: 'rgba(0, 0, 0, 0.72)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '8px',
-        marginBottom: '8px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-          {/* Circular Type Icon */}
-          <div style={{
-            width: '26px',
-            height: '26px',
-            borderRadius: '50%',
-            background: styleConfig.badgeBg,
-            border: `1px solid ${styleConfig.badgeBorder}`,
-            color: styleConfig.badgeColor,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0
-          }}>
-            {styleConfig.icon}
-          </div>
-
-          {/* App & Tag Info */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
-            <span style={{
-              fontSize: '11px',
-              fontWeight: 800,
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
-              color: isLight ? '#0f172a' : '#f8fafc',
-              whiteSpace: 'nowrap'
-            }}>
-              ZenBudget
-            </span>
-            <span style={{ color: isLight ? '#94a3b8' : '#64748b', fontSize: '10px' }}>•</span>
-            <span style={{
-              fontSize: '10.5px',
-              fontWeight: 700,
-              color: styleConfig.badgeColor,
-              whiteSpace: 'nowrap'
-            }}>
-              {styleConfig.tagText}
-            </span>
-          </div>
-        </div>
-
-        {/* Close Button */}
-        <button
-          type="button"
-          onClick={handleDismiss}
-          aria-label="Dismiss notification"
-          style={{
-            background: isLight ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.08)',
-            border: isLight ? '1px solid rgba(0, 0, 0, 0.08)' : '1px solid rgba(255, 255, 255, 0.12)',
-            borderRadius: '50%',
-            width: '24px',
-            height: '24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            color: isLight ? '#64748b' : '#94a3b8',
-            padding: 0,
-            flexShrink: 0,
-            outline: 'none',
-            transition: 'all 0.15s ease'
-          }}
-        >
-          <X size={13} />
-        </button>
-      </div>
-
-      {/* Main Content Area */}
-      <div style={{ paddingLeft: '34px' }}>
-        {/* Title */}
-        <h4 style={{
-          margin: '0 0 4px 0',
-          fontSize: '13.5px',
-          fontWeight: 800,
-          color: isLight ? '#0f172a' : '#f8fafc',
-          lineHeight: '1.35',
-          wordBreak: 'break-word'
-        }}>
-          {announcement.title}
-        </h4>
-
-        {/* Message body */}
-        <p style={{
-          margin: 0,
-          fontSize: '12.5px',
-          color: isLight ? '#475569' : '#cbd5e1',
-          lineHeight: '1.5',
-          wordBreak: 'break-word',
-          whiteSpace: 'pre-line',
-          maxHeight: expanded ? 'none' : '58px',
+        justifyContent: 'center',
+        padding: '20px',
+        animation: isClosing ? 'backdropFadeOut 0.22s ease-out forwards' : 'backdropFadeIn 0.25s ease-out forwards'
+      }}
+    >
+      {/* Central Announcement Card Modal */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: 'min(100%, 460px)',
+          background: isLight 
+            ? '#ffffff' 
+            : 'linear-gradient(165deg, #131b2e 0%, #0b1120 100%)',
+          border: `1px solid ${styleConfig.border}`,
+          borderRadius: '26px',
+          padding: '24px 22px 20px',
+          boxShadow: isLight
+            ? `0 24px 50px -10px rgba(0, 0, 0, 0.2), 0 0 35px ${styleConfig.glow}`
+            : `0 30px 70px -15px rgba(0, 0, 0, 0.8), 0 0 45px ${styleConfig.glow}`,
+          boxSizing: 'border-box',
+          position: 'relative',
           overflow: 'hidden',
-          display: expanded ? 'block' : '-webkit-box',
-          WebkitLineClamp: expanded ? 'unset' : 3,
-          WebkitBoxOrient: 'vertical'
-        }}>
-          {announcement.message}
-        </p>
+          animation: isClosing 
+            ? 'zoomOutModal 0.22s cubic-bezier(0.4, 0, 1, 1) forwards' 
+            : 'zoomInModal 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px'
+        }}
+      >
+        {/* Ambient Top Glow Bar */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '4px',
+          background: styleConfig.gradient
+        }} />
 
-        {/* Expand toggle for long messages */}
-        {isLongMessage && (
-          <button
-            type="button"
-            onClick={() => setExpanded(!expanded)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: styleConfig.badgeColor,
-              fontSize: '11px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              padding: '4px 0 0 0',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '3px'
-            }}
-          >
-            {expanded ? (
-              <>Show Less <ChevronUp size={12} /></>
-            ) : (
-              <>Read More <ChevronDown size={12} /></>
-            )}
-          </button>
-        )}
-
-        {/* Bottom Actions Row: Link CTA / Timestamp */}
+        {/* Top Header Row: Icon + Badge + Close 'X' */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '8px',
-          marginTop: '10px',
-          paddingTop: '8px',
-          borderTop: isLight ? '1px solid rgba(0, 0, 0, 0.06)' : '1px solid rgba(255, 255, 255, 0.08)'
+          gap: '12px'
         }}>
-          {/* Timestamp */}
-          <span style={{
-            fontSize: '10.5px',
-            color: isLight ? '#94a3b8' : '#64748b',
-            fontWeight: 500
-          }}>
-            {announcement.createdAt
-              ? new Date(announcement.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-              : 'Just now'}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {/* Glowing Icon Orb */}
+            <div style={{
+              width: '46px',
+              height: '46px',
+              borderRadius: '16px',
+              background: styleConfig.badgeBg,
+              border: `1px solid ${styleConfig.badgeBorder}`,
+              color: styleConfig.badgeColor,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              boxShadow: `0 4px 16px ${styleConfig.glow}`
+            }}>
+              {styleConfig.icon}
+            </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {/* CTA Link Button if URL provided */}
-            {announcement.linkUrl && (
-              <button
-                type="button"
-                onClick={() => {
-                  if (announcement.linkUrl) {
-                    window.open(announcement.linkUrl, '_blank');
-                  }
-                  handleDismiss();
-                }}
-                style={{
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  color: styleConfig.badgeColor,
                   background: styleConfig.badgeBg,
                   border: `1px solid ${styleConfig.badgeBorder}`,
-                  borderRadius: '12px',
-                  color: styleConfig.badgeColor,
-                  fontSize: '11.5px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  padding: '5px 12px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <span>{announcement.buttonText || 'Open Link'}</span>
-                <ExternalLink size={11} />
-              </button>
-            )}
+                  padding: '2px 8px',
+                  borderRadius: '100px'
+                }}>
+                  {styleConfig.tagText}
+                </span>
+                <span style={{
+                  fontSize: '11px',
+                  color: isLight ? '#64748b' : '#94a3b8',
+                  fontWeight: 600
+                }}>
+                  • ZenBudget Official
+                </span>
+              </div>
+              <span style={{
+                fontSize: '11px',
+                color: isLight ? '#94a3b8' : '#64748b',
+                fontWeight: 500
+              }}>
+                {announcement.createdAt 
+                  ? new Date(announcement.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })
+                  : 'Just now'}
+              </span>
+            </div>
+          </div>
 
-            {/* Quick Dismiss Pill */}
+          {/* Close Button */}
+          <button
+            type="button"
+            onClick={handleDismiss}
+            aria-label="Close Announcement"
+            style={{
+              background: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)',
+              border: isLight ? '1px solid rgba(0,0,0,0.1)' : '1px solid rgba(255,255,255,0.14)',
+              borderRadius: '50%',
+              width: '32px',
+              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: isLight ? '#0f172a' : '#ffffff',
+              outline: 'none',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Announcement Title */}
+        <h3
+          id="center-announcement-title"
+          style={{
+            margin: '4px 0 0',
+            fontSize: '19px',
+            fontWeight: 800,
+            color: isLight ? '#0f172a' : '#ffffff',
+            lineHeight: 1.35,
+            wordBreak: 'break-word',
+            letterSpacing: '-0.02em'
+          }}
+        >
+          {announcement.title}
+        </h3>
+
+        {/* Announcement Message Body */}
+        <div style={{
+          background: isLight ? '#f8fafc' : 'rgba(255, 255, 255, 0.04)',
+          border: isLight ? '1px solid #e2e8f0' : '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '16px',
+          padding: '14px 16px',
+          maxHeight: '260px',
+          overflowY: 'auto'
+        }}>
+          <p style={{
+            margin: 0,
+            fontSize: '14px',
+            color: isLight ? '#334155' : '#e2e8f0',
+            lineHeight: 1.65,
+            wordBreak: 'break-word',
+            whiteSpace: 'pre-line',
+            fontWeight: 500
+          }}>
+            {announcement.message}
+          </p>
+        </div>
+
+        {/* Action Buttons Row */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          marginTop: '6px'
+        }}>
+          {/* Custom CTA link if provided */}
+          {announcement.linkUrl && (
             <button
               type="button"
-              onClick={handleDismiss}
+              onClick={() => {
+                if (announcement.linkUrl) {
+                  window.open(announcement.linkUrl, '_blank');
+                }
+                handleDismiss();
+              }}
               style={{
-                background: isLight ? '#f1f5f9' : 'rgba(255, 255, 255, 0.08)',
+                flex: 1,
+                background: styleConfig.gradient,
+                color: '#ffffff',
                 border: 'none',
-                borderRadius: '12px',
-                color: isLight ? '#475569' : '#cbd5e1',
-                fontSize: '11px',
-                fontWeight: 700,
+                borderRadius: '14px',
+                padding: '13px 18px',
+                fontSize: '14px',
+                fontWeight: 800,
                 cursor: 'pointer',
-                padding: '5px 10px',
-                transition: 'all 0.15s ease'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: `0 8px 20px ${styleConfig.glow}`,
+                transition: 'transform 0.15s ease'
               }}
             >
-              Dismiss
+              <span>{announcement.buttonText || 'Open Link'}</span>
+              <ExternalLink size={15} />
             </button>
-          </div>
+          )}
+
+          {/* Got it / Dismiss Button */}
+          <button
+            type="button"
+            onClick={handleDismiss}
+            style={{
+              flex: announcement.linkUrl ? undefined : 1,
+              minWidth: announcement.linkUrl ? '100px' : undefined,
+              background: announcement.linkUrl
+                ? (isLight ? '#f1f5f9' : 'rgba(255,255,255,0.08)')
+                : styleConfig.gradient,
+              color: announcement.linkUrl
+                ? (isLight ? '#334155' : '#e2e8f0')
+                : '#ffffff',
+              border: announcement.linkUrl
+                ? (isLight ? '1px solid #cbd5e1' : '1px solid rgba(255,255,255,0.12)')
+                : 'none',
+              borderRadius: '14px',
+              padding: '13px 18px',
+              fontSize: '14px',
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              boxShadow: !announcement.linkUrl ? `0 8px 20px ${styleConfig.glow}` : 'none',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            {!announcement.linkUrl && <Sparkles size={16} />}
+            <span>Got it, Thanks!</span>
+          </button>
         </div>
       </div>
 
-      {/* Animation keyframes */}
+      {/* Center Modal Animations */}
       <style>{`
-        @keyframes slideDownNotification {
+        @keyframes backdropFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes backdropFadeOut {
+          from { opacity: 1; }
+          to { opacity: 0; }
+        }
+        @keyframes zoomInModal {
           0% {
             opacity: 0;
-            transform: translate(-50%, -36px) scale(0.96);
+            transform: scale(0.92) translateY(12px);
           }
           100% {
             opacity: 1;
-            transform: translate(-50%, 0) scale(1);
+            transform: scale(1) translateY(0);
           }
         }
-        @keyframes slideUpDismiss {
+        @keyframes zoomOutModal {
           0% {
             opacity: 1;
-            transform: translate(-50%, 0) scale(1);
+            transform: scale(1) translateY(0);
           }
           100% {
             opacity: 0;
-            transform: translate(-50%, -36px) scale(0.96);
+            transform: scale(0.92) translateY(12px);
           }
         }
       `}</style>
