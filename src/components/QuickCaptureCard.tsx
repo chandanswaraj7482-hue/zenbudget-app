@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { Mic, MicOff, ArrowRight, Sparkles, Check, RefreshCw, AlertCircle, Wallet, Plus, X } from 'lucide-react';
+import { Mic, MicOff, ArrowRight, Sparkles, Check, RefreshCw, AlertCircle, Wallet, Plus, X, ArrowLeftRight } from 'lucide-react';
 import type { Transaction, Account } from '../types';
 import confetti from 'canvas-confetti';
 import { t } from '../utils/i18n';
@@ -23,6 +23,7 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
   const [isListening, setIsListening] = useState(false);
   const [lastSavedSummary, setLastSavedSummary] = useState<string | null>(null);
   const [showNoAccountModal, setShowNoAccountModal] = useState(false);
+  const [detectedTransferNotice, setDetectedTransferNotice] = useState<{ fromName: string; toName: string } | null>(null);
   const recognitionRef = useRef<any>(null);
 
   const [selectedAccountId, setSelectedAccountId] = useState<string>(() => accounts[0]?.id || '1');
@@ -43,6 +44,144 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
   }, [accounts, selectedAccountId, selectedTransferToAccountId]);
 
   const [parseError, setParseError] = useState<string | null>(null);
+
+  // Helper to find account matching user keyword or alias
+  const findAccountByKeyword = (keyword: string, accs: Account[]): Account | undefined => {
+    if (!keyword || !accs || accs.length === 0) return undefined;
+    const kw = keyword.toLowerCase().trim();
+    if (!kw) return undefined;
+
+    // 1. Exact match on name
+    const exact = accs.find(a => a.name.toLowerCase() === kw);
+    if (exact) return exact;
+
+    // 2. Contains match (either way)
+    const partial = accs.find(a => {
+      const name = a.name.toLowerCase();
+      return name.includes(kw) || kw.includes(name);
+    });
+    if (partial) return partial;
+
+    // 3. Match by account type or common Indian bank / payment aliases
+    if (/^(bank|khata|account|savings|current|hdfc|sbi|icici|axis|kotak|pnb|bob|canara|union|indusind)$/i.test(kw)) {
+      return accs.find(a => a.type === 'bank' || /bank|sbi|hdfc|icici|axis|kotak/i.test(a.name));
+    }
+    if (/^(cash|nakad|rokda|pocket|hath)$/i.test(kw)) {
+      return accs.find(a => a.type === 'cash' || /cash/i.test(a.name));
+    }
+    if (/^(upi|gpay|googlepay|google pay|phonepe|phone pe|paytm|bhim|cred)$/i.test(kw)) {
+      return accs.find(a => a.type === 'upi' || /upi|gpay|phonepe|paytm/i.test(a.name));
+    }
+    if (/^(wallet|batua|paytmwallet)$/i.test(kw)) {
+      return accs.find(a => a.type === 'wallet' || /wallet/i.test(a.name));
+    }
+    return undefined;
+  };
+
+  // Detect transfer intent and source/destination accounts from text/speech
+  const detectTransferDetails = (rawText: string, accs: Account[]) => {
+    const text = rawText.toLowerCase();
+    const isTransferKeyword = /\b(transfer|transferred|send|sent|move|moved|shift|shifted|bheja|bheje|bhejna|dala|dale|dalna|nikala|nikale|transferring)\b/i.test(text);
+    const hasFromToPattern = /\b(from|se)\b/i.test(text) && /\b(to|me|mein|mai|ko|in|into)\b/i.test(text);
+
+    let fromAcc: Account | undefined;
+    let toAcc: Account | undefined;
+
+    // Pattern 1: English "from <A> to <B>" or "from <A> into <B>"
+    const fromToMatch = text.match(/from\s+([a-z0-9]+(?:\s+[a-z0-9]+)?)\s+(?:to|in|into)\s+([a-z0-9]+(?:\s+[a-z0-9]+)?)/i);
+    if (fromToMatch) {
+      fromAcc = findAccountByKeyword(fromToMatch[1], accs);
+      toAcc = findAccountByKeyword(fromToMatch[2], accs);
+    }
+
+    // Pattern 2: Hinglish "<A> se <B> (me|mein|ko|mai|par|transfer|dala|bheja)"
+    if (!fromAcc && !toAcc) {
+      const seMeMatch = text.match(/([a-z0-9]+)\s+se\s+([a-z0-9]+)(?:\s+(?:me|mein|mai|ko|par|transfer|bheja|dala))?/i);
+      if (seMeMatch) {
+        fromAcc = findAccountByKeyword(seMeMatch[1], accs);
+        toAcc = findAccountByKeyword(seMeMatch[2], accs);
+      }
+    }
+
+    // Pattern 3: Simple "<A> to <B>" e.g., "bank to cash 500"
+    if (!fromAcc && !toAcc) {
+      const simpleToMatch = text.match(/([a-z0-9]+)\s+(?:to|➔|->)\s+([a-z0-9]+)/i);
+      if (simpleToMatch) {
+        fromAcc = findAccountByKeyword(simpleToMatch[1], accs);
+        toAcc = findAccountByKeyword(simpleToMatch[2], accs);
+      }
+    }
+
+    // Pattern 4: Target only e.g. "to <B>" or "<B> me"
+    if (!toAcc) {
+      const singleToMatch = text.match(/(?:to|in|into)\s+([a-z0-9]+)/i) || text.match(/([a-z0-9]+)\s+(?:me|mein|mai)\b/i);
+      if (singleToMatch) {
+        toAcc = findAccountByKeyword(singleToMatch[1], accs);
+      }
+    }
+
+    // Pattern 5: Source only e.g. "from <A>" or "<A> se"
+    if (!fromAcc) {
+      const singleFromMatch = text.match(/from\s+([a-z0-9]+)/i) || text.match(/([a-z0-9]+)\s+se\b/i);
+      if (singleFromMatch) {
+        fromAcc = findAccountByKeyword(singleFromMatch[1], accs);
+      }
+    }
+
+    const isTransfer = isTransferKeyword || hasFromToPattern || (Boolean(fromAcc) && Boolean(toAcc));
+
+    return {
+      isTransfer,
+      fromId: fromAcc?.id || null,
+      toId: toAcc?.id || null,
+      fromName: fromAcc?.name || null,
+      toName: toAcc?.name || null
+    };
+  };
+
+  // Swap From and To accounts
+  const handleSwapAccounts = () => {
+    if (accounts.length < 2) return;
+    const prevFrom = selectedAccountId;
+    const prevTo = selectedTransferToAccountId;
+    setSelectedAccountId(prevTo);
+    setSelectedTransferToAccountId(prevFrom);
+    if (detectedTransferNotice) {
+      setDetectedTransferNotice({
+        fromName: detectedTransferNotice.toName,
+        toName: detectedTransferNotice.fromName
+      });
+    }
+  };
+
+  // Synchronized input handler for typed text and voice transcription
+  const handleInputChange = (val: string) => {
+    setInputQuery(val);
+    if (parseError) setParseError(null);
+
+    if (accounts && accounts.length > 0) {
+      const details = detectTransferDetails(val, accounts);
+      if (details.isTransfer) {
+        if (activeTab !== 'transfer') {
+          setActiveTab('transfer');
+        }
+        if (details.fromId) {
+          setSelectedAccountId(details.fromId);
+        }
+        if (details.toId && details.toId !== details.fromId) {
+          setSelectedTransferToAccountId(details.toId);
+        } else if (details.fromId && selectedTransferToAccountId === details.fromId) {
+          const other = accounts.find(a => a.id !== details.fromId);
+          if (other) setSelectedTransferToAccountId(other.id);
+        }
+        if (details.fromName && details.toName && details.fromName !== details.toName) {
+          setDetectedTransferNotice({ fromName: details.fromName, toName: details.toName });
+        }
+      } else {
+        if (detectedTransferNotice) setDetectedTransferNotice(null);
+      }
+    }
+  };
 
   // Convert Indic / Regional digits (Devanagari, Bengali, Arabic, etc.) to 0-9
   const normalizeDigits = (str: string): string => {

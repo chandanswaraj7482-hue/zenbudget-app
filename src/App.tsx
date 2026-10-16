@@ -5086,6 +5086,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             setIsSubBlocker(false);
           }}
           isBlocker={false}
+          premiumExpiresAt={premiumExpiresAt}
           currency={currency}
           rates={rates}
         />

@@ -17,6 +17,7 @@ interface SubscriptionModalProps {
   isBlocker?: boolean; // If true, force upgrade (can't close)
   currency: string;
   rates: Record<string, number>;
+  premiumExpiresAt?: string | null;
 }
 
 export type PlanCycle = 'monthly' | 'yearly' | 'lifetime';
@@ -72,7 +73,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   onUpgradeSuccess,
   isBlocker = false,
   currency,
-  rates
+  rates,
+  premiumExpiresAt
 }) => {
   const [paymentStep, setPaymentStep] = useState<'details' | 'processing' | 'success'>('details');
   const [billingCycle, setBillingCycle] = useState<PlanCycle>('yearly');
@@ -347,9 +349,49 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   };
 
   const remainingDays = getRemainingTrialDays();
-  const isPremium = subscriptionTier === 'premium_monthly' || subscriptionTier === 'premium_yearly' || subscriptionTier === 'premium_lifetime' || subscriptionTier === 'premium';
-  const isExpired = remainingDays <= 0 && !isPremium;
+  const isLifetime = subscriptionTier === 'premium_lifetime';
+  const isMonthly = subscriptionTier === 'premium_monthly';
+  const isYearly = subscriptionTier === 'premium_yearly';
+  const isPaidPremium = isMonthly || isYearly || isLifetime || subscriptionTier === 'premium';
+  
+  // A paid plan is expired ONLY if the user is on a time-limited paid tier and its expiry date has passed.
+  // CRITICAL: Lifetime plan NEVER expires!
+  const hasPaidSubscriptionExpired = Boolean(
+    !isLifetime &&
+    ['premium', 'premium_monthly', 'premium_yearly'].includes(subscriptionTier) &&
+    premiumExpiresAt &&
+    !isNaN(new Date(premiumExpiresAt).getTime()) &&
+    Date.now() > new Date(premiumExpiresAt).getTime()
+  );
+
+  // If user is explicitly on trial tier and 7 days passed
+  const isTrialExpired = subscriptionTier === 'trial' && remainingDays <= 0;
+
+  // Free tier users who never paid or are using the free forever tier are NOT "expired"
+  const isExpired = hasPaidSubscriptionExpired || isTrialExpired;
   const effectiveIsBlocker = isBlocker;
+
+  // Dynamic Current Plan Status
+  let currentPlanLabel = 'Free Forever (Ad-Supported)';
+  let currentPlanColor = 'var(--primary)';
+  if (isLifetime) {
+    currentPlanLabel = 'ZenBudget Lifetime Pro (Unlimited)';
+    currentPlanColor = '#8b5cf6';
+  } else if (isYearly && !hasPaidSubscriptionExpired) {
+    currentPlanLabel = 'ZenBudget Pro (Yearly)';
+    currentPlanColor = '#10b981';
+  } else if (isMonthly && !hasPaidSubscriptionExpired) {
+    currentPlanLabel = 'ZenBudget Pro (Monthly)';
+    currentPlanColor = '#3b82f6';
+  } else if (hasPaidSubscriptionExpired) {
+    currentPlanLabel = 'Expired Premium (Shifted to Free Forever)';
+    currentPlanColor = 'var(--danger)';
+  } else if (subscriptionTier === 'trial') {
+    currentPlanLabel = isTrialExpired 
+      ? '7-Day Trial Ended (Free Forever Tier)' 
+      : `7-Day Pro Trial (${remainingDays} days left)`;
+    currentPlanColor = '#f59e0b';
+  }
 
   // Get active pricing info
   const getPriceInfo = () => {
@@ -798,9 +840,17 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               </div>
               <h3 style={{ fontSize: '20px', fontWeight: 800 }}>Choose Your ZenBudget Plan</h3>
               
-              {isExpired ? (
+              {isLifetime ? (
+                <div style={{ color: '#8b5cf6', fontSize: '12px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Sparkles size={14} /> You have Lifetime Premium! Unlimited access forever.
+                </div>
+              ) : hasPaidSubscriptionExpired ? (
                 <div style={{ color: 'var(--danger)', fontSize: '12px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Hourglass size={14} /> Subscription plan has expired!
+                  <Hourglass size={14} /> Premium subscription expired · You are now on Free Forever. Renew anytime for Pro features.
+                </div>
+              ) : isTrialExpired ? (
+                <div style={{ color: '#f59e0b', fontSize: '12px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Hourglass size={14} /> 7-Day Pro Trial ended · You are on Free Forever tier. Upgrade for Pro features.
                 </div>
               ) : (
                 <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
@@ -813,12 +863,18 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             <div className="glass-panel" style={{ padding: '12px 14px', background: 'var(--bg-input)', border: '1px solid var(--border-input)', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: 600, gap: '8px' }}>
                 <span style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>Current Plan:</span>
-                <span style={{ color: 'var(--primary)', fontWeight: 800, whiteSpace: 'nowrap' }}>Free Forever (Ad-Supported)</span>
+                <span style={{ color: currentPlanColor, fontWeight: 800, whiteSpace: 'nowrap' }}>{currentPlanLabel}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: 600, gap: '8px' }}>
                 <span style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>Daily Expense Tracking:</span>
                 <span style={{ color: 'var(--success)', fontWeight: 800, whiteSpace: 'nowrap' }}>100% Free & Unlimited</span>
               </div>
+              {isLifetime && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', fontWeight: 700, color: '#8b5cf6' }}>
+                  <span>Lifetime Benefits:</span>
+                  <span>Unlimited AI, Cloud Sync, No Ads 👑</span>
+                </div>
+              )}
             </div>
 
             {/* 3-Plan Selection Cards */}
@@ -1098,7 +1154,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                 * Auto-pay is automatically enabled via secure e-mandate. You can cancel anytime.
               </div>
 
-              {isExpired && (
+              {!effectiveIsBlocker && (
                 <button
                   type="button"
                   onClick={(e) => {
