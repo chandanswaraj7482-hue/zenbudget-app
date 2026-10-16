@@ -686,7 +686,9 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
           .update({ subscription_tier: newTier })
           .eq('id', userId);
       }
-    } catch (_) {}
+    } catch (err) {
+      console.warn('Admin subscription update sync deferred:', err);
+    }
   };
 
   const toggleUserSuspension = async (userId: string, currentSuspended: boolean) => {
@@ -694,24 +696,30 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
 
     // 1. UPDATE LOCAL STATE IMMEDIATELY FOR INSTANT UI RESPONSE
     setProfiles(prev => {
-      const updated = prev.map(p => p.id === userId ? { ...p, is_suspended: newSuspended } : p);
+      const updated = prev.map(p => p.id === userId ? { ...p, is_suspended: newSuspended, status: newSuspended ? 'suspended' : 'active' } : p);
       localStorage.setItem('zb_admin_profiles_cache', JSON.stringify(updated));
       return updated;
     });
 
     if (selectedDetailUser && selectedDetailUser.id === userId) {
-      setSelectedDetailUser(prev => prev ? { ...prev, is_suspended: newSuspended } : null);
+      setSelectedDetailUser(prev => prev ? { ...prev, is_suspended: newSuspended, status: newSuspended ? 'suspended' : 'active' } : null);
     }
 
     if (onShowToast) onShowToast(`User ${newSuspended ? 'Suspended 🚫' : 'Activated ✅'}!`, 'info');
 
     // 2. BACKGROUND SYNC TO SUPABASE
     try {
-      await supabaseClient
+      const { error } = await supabaseClient
         .from('profiles')
-        .update({ is_suspended: newSuspended })
+        .update({ 
+          is_suspended: newSuspended,
+          status: newSuspended ? 'suspended' : 'active'
+        })
         .eq('id', userId);
-    } catch (_) {}
+      if (error) console.warn('Supabase toggleUserSuspension warning:', error);
+    } catch (err) {
+      console.warn('Supabase toggleUserSuspension error:', err);
+    }
   };
 
   const handleToggleScanPayAccess = async (userId: string, currentAccess: boolean) => {
@@ -719,24 +727,30 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
 
     // 1. UPDATE LOCAL STATE IMMEDIATELY FOR INSTANT UI RESPONSE
     setProfiles(prev => {
-      const updated = prev.map(p => p.id === userId ? { ...p, has_scan_pay_access: newAccess } : p);
+      const updated = prev.map(p => p.id === userId ? { ...p, has_scan_pay_access: newAccess, is_admin_unlocked: newAccess } : p);
       localStorage.setItem('zb_admin_profiles_cache', JSON.stringify(updated));
       return updated;
     });
 
     if (selectedDetailUser && selectedDetailUser.id === userId) {
-      setSelectedDetailUser(prev => prev ? { ...prev, has_scan_pay_access: newAccess } : null);
+      setSelectedDetailUser(prev => prev ? { ...prev, has_scan_pay_access: newAccess, is_admin_unlocked: newAccess } : null);
     }
 
     if (onShowToast) onShowToast(`Scan & Pay Access ${newAccess ? 'Granted FREE ⚡' : 'Revoked'} for user!`, 'success');
 
     // 2. BACKGROUND SYNC TO SUPABASE
     try {
-      await supabaseClient
+      const { error } = await supabaseClient
         .from('profiles')
-        .update({ has_scan_pay_access: newAccess })
+        .update({ 
+          has_scan_pay_access: newAccess,
+          is_admin_unlocked: newAccess
+        })
         .eq('id', userId);
-    } catch (_) {}
+      if (error) console.warn('Supabase handleToggleScanPayAccess warning:', error);
+    } catch (err) {
+      console.warn('Supabase handleToggleScanPayAccess error:', err);
+    }
   };
 
   const toggleSelectUser = (id: string, e?: React.MouseEvent) => {

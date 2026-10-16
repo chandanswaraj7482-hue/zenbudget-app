@@ -2182,28 +2182,35 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       try {
         const { data: profResult, error: profErr } = await supabase
           .from('profiles')
-          .select('subscription_tier, premium_expires_at, has_scan_pay_access, is_admin_unlocked, status, pin, name')
+          .select('subscription_tier, premium_expires_at, has_scan_pay_access, is_admin_unlocked, status, is_suspended, pin, name')
           .eq('id', currentProfileId)
           .maybeSingle();
         const profData = profResult as any;
-        // Safe read: do not wipe data if network/RLS temporarily returns null
         if (profData) {
           if (profData.subscription_tier) {
             setSubscriptionTier(profData.subscription_tier);
             localStorage.setItem('zb_subscription_tier', profData.subscription_tier);
           }
-          if (profData.premium_expires_at) {
-            setPremiumExpiresAt(profData.premium_expires_at);
-            localStorage.setItem('zb_premium_expires_at', profData.premium_expires_at);
+          if (profData.premium_expires_at !== undefined) {
+            setPremiumExpiresAt(profData.premium_expires_at || null);
+            if (profData.premium_expires_at) {
+              localStorage.setItem('zb_premium_expires_at', profData.premium_expires_at);
+            } else {
+              localStorage.removeItem('zb_premium_expires_at');
+            }
           }
-          if (profData.has_scan_pay_access || profData.is_admin_unlocked) {
-            setHasScanPayAccess(true);
+          const hasAccess = Boolean(profData.has_scan_pay_access || profData.is_admin_unlocked);
+          setHasScanPayAccess(hasAccess);
+          if (hasAccess) {
             localStorage.setItem('has_scan_pay_access', 'true');
             localStorage.setItem(`zb_scan_pay_access_${currentProfileId}`, 'true');
+          } else {
+            localStorage.removeItem('has_scan_pay_access');
+            localStorage.removeItem(`zb_scan_pay_access_${currentProfileId}`);
           }
-          if (profData.status === 'suspended') {
+          if (profData.status === 'suspended' || profData.is_suspended) {
             setIsLocked(true);
-            triggerToast('🔒 Your account is suspended by Admin.', 'warning');
+            triggerToast('🔒 Your account has been suspended by Admin.', 'warning');
           }
         }
       } catch (err) {
@@ -2212,7 +2219,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     };
 
     syncAdminProfile();
-    const interval = setInterval(syncAdminProfile, 8000);
+    const interval = setInterval(syncAdminProfile, 4000);
 
     const channel = supabase
       .channel(`admin_sync_${currentProfileId}`)
@@ -2222,17 +2229,29 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           if (p.subscription_tier) {
             setSubscriptionTier(p.subscription_tier);
             localStorage.setItem('zb_subscription_tier', p.subscription_tier);
+            triggerToast(`✨ Plan updated to ${p.subscription_tier.replace('_', ' ').toUpperCase()}!`, 'success');
           }
-          if (p.premium_expires_at) {
-            setPremiumExpiresAt(p.premium_expires_at);
-            localStorage.setItem('zb_premium_expires_at', p.premium_expires_at);
+          if (p.premium_expires_at !== undefined) {
+            setPremiumExpiresAt(p.premium_expires_at || null);
+            if (p.premium_expires_at) {
+              localStorage.setItem('zb_premium_expires_at', p.premium_expires_at);
+            } else {
+              localStorage.removeItem('zb_premium_expires_at');
+            }
           }
-          if (p.has_scan_pay_access || p.is_admin_unlocked) {
-            setHasScanPayAccess(true);
-            localStorage.setItem('has_scan_pay_access', 'true');
-            localStorage.setItem(`zb_scan_pay_access_${currentProfileId}`, 'true');
+          if (p.has_scan_pay_access !== undefined || p.is_admin_unlocked !== undefined) {
+            const hasAccess = Boolean(p.has_scan_pay_access || p.is_admin_unlocked);
+            setHasScanPayAccess(hasAccess);
+            if (hasAccess) {
+              localStorage.setItem('has_scan_pay_access', 'true');
+              localStorage.setItem(`zb_scan_pay_access_${currentProfileId}`, 'true');
+              triggerToast('⚡ Scan & Pay access unlocked by Admin!', 'success');
+            } else {
+              localStorage.removeItem('has_scan_pay_access');
+              localStorage.removeItem(`zb_scan_pay_access_${currentProfileId}`);
+            }
           }
-          if (p.status === 'suspended') {
+          if (p.status === 'suspended' || p.is_suspended) {
             setIsLocked(true);
             triggerToast('🔒 Account status updated to Suspended by Admin.', 'warning');
           }
