@@ -159,7 +159,11 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           localStorage.setItem('zb_subscription_tier', 'free');
           const profId = localStorage.getItem('zb_profile_id');
           if (profId) {
-            supabase.from('profiles').update({ subscription_tier: 'free' }).eq('id', profId).catch(() => {});
+            (async () => {
+              try {
+                await supabase.from('profiles').update({ subscription_tier: 'free' }).eq('id', profId);
+              } catch (_) {}
+            })();
           }
         }
       }

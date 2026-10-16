@@ -484,7 +484,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           const googleAvatar = localStorage.getItem('zb_google_avatar');
           if (!existingAvatar && googleAvatar) {
             localStorage.setItem('zb_user_avatar', googleAvatar);
-            supabase.from('profiles').update({ avatar_url: googleAvatar }).eq('id', targetProfileId).catch(() => { });
+            (async () => {
+              try {
+                await supabase.from('profiles').update({ avatar_url: googleAvatar }).eq('id', targetProfileId);
+              } catch (_) {}
+            })();
           } else if (!existingAvatar) {
             const initAvatar = getInitialsAvatar(getInitialsName(userProf.name, userProf.email || storedEmail));
             localStorage.setItem('zb_user_avatar', initAvatar);
@@ -1310,99 +1314,110 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
   };
 
   const handleKeypadPress = (num: string) => {
-    setErrorMsg('');
-    if (step === 'onboard-pin' || step === 'onboard-confirm') {
-      const current = step === 'onboard-pin' ? pin : confirmPin;
-      const setter = step === 'onboard-pin' ? setPin : setConfirmPin;
+    try {
+      setErrorMsg('');
+      if (step === 'onboard-pin' || step === 'onboard-confirm') {
+        const current = step === 'onboard-pin' ? pin : confirmPin;
+        const setter = step === 'onboard-pin' ? setPin : setConfirmPin;
 
-      if (current.length < 4) {
-        const nextPin = current + num;
-        setter(nextPin);
+        if (current.length < 4) {
+          const nextPin = current + num;
+          setter(nextPin);
 
-        if (nextPin.length === 4) {
-          if (step === 'onboard-pin') {
-            setTimeout(() => setStep('onboard-confirm'), 300);
-          } else if (step === 'onboard-confirm') {
-            setTimeout(() => handlePinConfirmSubmit(nextPin), 300);
+          if (nextPin.length === 4) {
+            if (step === 'onboard-pin') {
+              setTimeout(() => setStep('onboard-confirm'), 300);
+            } else if (step === 'onboard-confirm') {
+              setTimeout(() => handlePinConfirmSubmit(nextPin), 300);
+            }
           }
         }
-      }
-    } else if (step === 'unlock') {
-      const secStatus = getPinSecurityStatus();
-      if (secStatus.isLockedOut) {
-        setErrorMsg(`🔒 Security Shield: Too many failed attempts! Cooldown active for ${secStatus.secondsRemaining}s.`);
-        try { playNotificationSound('warning'); } catch (_) {}
-        return;
-      }
+      } else if (step === 'unlock') {
+        const secStatus = getPinSecurityStatus();
+        if (secStatus.isLockedOut) {
+          setErrorMsg(`🔒 Security Shield: Too many failed attempts! Cooldown active for ${secStatus.secondsRemaining}s.`);
+          try { playNotificationSound('warning'); } catch (_) {}
+          return;
+        }
 
-      if (enteredPin.length < 4) {
-        const nextPin = enteredPin + num;
-        setEnteredPin(nextPin);
+        if (enteredPin.length < 4) {
+          const nextPin = enteredPin + num;
+          setEnteredPin(nextPin);
 
-        if (nextPin.length === 4) {
-          const storedPin = (localStorage.getItem('zb_user_pin') || dbProfile?.pin || localStorage.getItem(`zb_pin_${userId}`) || localStorage.getItem('zb_saved_device_pin') || '').trim();
-          const dbPin = (dbProfile?.pin ? String(dbProfile.pin) : '').trim();
-          const userPin = (localStorage.getItem('zb_user_pin') || '').trim();
-          const devicePin = (localStorage.getItem('zb_saved_device_pin') || '').trim();
-          const scopedPin = userId ? (localStorage.getItem(`zb_pin_${userId}`) || '').trim() : '';
+          if (nextPin.length === 4) {
+            const storedPin = (localStorage.getItem('zb_user_pin') || dbProfile?.pin || localStorage.getItem(`zb_pin_${userId}`) || localStorage.getItem('zb_saved_device_pin') || '').trim();
+            const dbPin = (dbProfile?.pin ? String(dbProfile.pin) : '').trim();
+            const userPin = (localStorage.getItem('zb_user_pin') || '').trim();
+            const devicePin = (localStorage.getItem('zb_saved_device_pin') || '').trim();
+            const scopedPin = userId ? (localStorage.getItem(`zb_pin_${userId}`) || '').trim() : '';
 
-          // An unset or default placeholder PIN in DB is '0000' or empty
-          const isUnset = !storedPin || storedPin === '0000' || !dbPin || dbPin === '0000';
+            // An unset or default placeholder PIN in DB is '0000' or empty
+            const isUnset = !storedPin || storedPin === '0000' || !dbPin || dbPin === '0000';
 
-          const isValidPin =
-            isUnset ||
-            nextPin === '0000' ||
-            nextPin === storedPin ||
-            (dbPin !== '' && nextPin === dbPin) ||
-            (userPin !== '' && nextPin === userPin) ||
-            (devicePin !== '' && nextPin === devicePin) ||
-            (scopedPin !== '' && nextPin === scopedPin);
+            const isValidPin =
+              isUnset ||
+              nextPin === '0000' ||
+              nextPin === storedPin ||
+              (dbPin !== '' && nextPin === dbPin) ||
+              (userPin !== '' && nextPin === userPin) ||
+              (devicePin !== '' && nextPin === devicePin) ||
+              (scopedPin !== '' && nextPin === scopedPin);
 
-          if (isValidPin) {
-            resetPinSecurityStatus();
-            localStorage.setItem('zb_user_pin', nextPin);
-            localStorage.setItem('zb_saved_device_pin', nextPin);
-            localStorage.setItem('zb_pin_created', 'true');
-            if (dbProfile?.referral_code) {
-              localStorage.setItem('zb_invite_code', dbProfile.referral_code);
-            }
-            const targetName = dbProfile?.name || localStorage.getItem('zb_user_name') || username || 'User';
-            localStorage.setItem('zb_user_name', targetName);
-            const targetTier = dbProfile?.subscription_tier || localStorage.getItem('zb_subscription_tier') || 'trial';
-            const targetStart = dbProfile?.trial_start_date || localStorage.getItem('zb_trial_start_date') || new Date().toISOString();
-            const targetExpires = dbProfile?.premium_expires_at || localStorage.getItem('zb_premium_expires_at') || null;
-            const targetTrialExpire = dbProfile?.trial_expire_date || null;
-            const targetUserId = (dbProfile && dbProfile.id) ? dbProfile.id : (userId || localStorage.getItem('zb_profile_id') || 'local');
-            localStorage.setItem('zb_profile_id', targetUserId);
+            if (isValidPin) {
+              resetPinSecurityStatus();
+              localStorage.setItem('zb_user_pin', nextPin);
+              localStorage.setItem('zb_saved_device_pin', nextPin);
+              localStorage.setItem('zb_pin_created', 'true');
+              if (dbProfile?.referral_code) {
+                localStorage.setItem('zb_invite_code', dbProfile.referral_code);
+              }
+              const targetName = dbProfile?.name || localStorage.getItem('zb_user_name') || username || 'User';
+              localStorage.setItem('zb_user_name', targetName);
+              const targetTier = dbProfile?.subscription_tier || localStorage.getItem('zb_subscription_tier') || 'trial';
+              const targetStart = dbProfile?.trial_start_date || localStorage.getItem('zb_trial_start_date') || new Date().toISOString();
+              const targetExpires = dbProfile?.premium_expires_at || localStorage.getItem('zb_premium_expires_at') || null;
+              const targetTrialExpire = dbProfile?.trial_expire_date || null;
+              const targetUserId = (dbProfile && dbProfile.id) ? dbProfile.id : (userId || localStorage.getItem('zb_profile_id') || 'local');
+              localStorage.setItem('zb_profile_id', targetUserId);
 
-            if (targetUserId && targetUserId !== 'local') {
-              localStorage.setItem(`zb_pin_${targetUserId}`, nextPin);
-              supabase.from('profiles').update({ pin: nextPin }).eq('id', targetUserId).catch(() => {});
-            }
+              if (targetUserId && targetUserId !== 'local') {
+                localStorage.setItem(`zb_pin_${targetUserId}`, nextPin);
+                (async () => {
+                  try {
+                    await supabase.from('profiles').update({ pin: nextPin }).eq('id', targetUserId);
+                  } catch (syncErr) {
+                    console.warn('Background PIN sync error:', syncErr);
+                  }
+                })();
+              }
 
-            try { playNotificationSound('success'); } catch (_) {}
-            setEnteredPin('');
-            try {
-              onUnlock(targetUserId, targetName, targetTier, targetStart, nextPin, targetExpires, targetTrialExpire);
-            } catch (unlockErr) {
-              console.error('onUnlock invocation error:', unlockErr);
-            }
-          } else {
-            const attempt = recordFailedPinAttempt();
-            setIsIncorrect(true);
-            if (attempt.isLockedOut) {
-              setErrorMsg(`🔒 Security Shield: Too many failed attempts! Cooldown active for ${attempt.secondsRemaining}s.`);
-            } else {
-              setErrorMsg('Incorrect PIN. Please try again or tap "Forgot PIN" below.');
-            }
-            try { playNotificationSound('warning'); } catch (_) {}
-            setTimeout(() => {
-              setIsIncorrect(false);
+              try { playNotificationSound('success'); } catch (_) {}
               setEnteredPin('');
-            }, 500);
+              try {
+                onUnlock(targetUserId, targetName, targetTier, targetStart, nextPin, targetExpires, targetTrialExpire);
+              } catch (unlockErr) {
+                console.error('onUnlock invocation error:', unlockErr);
+              }
+            } else {
+              const attempt = recordFailedPinAttempt();
+              setIsIncorrect(true);
+              if (attempt.isLockedOut) {
+                setErrorMsg(`🔒 Security Shield: Too many failed attempts! Cooldown active for ${attempt.secondsRemaining}s.`);
+              } else {
+                setErrorMsg('Incorrect PIN. Please try again or tap "Forgot PIN" below.');
+              }
+              try { playNotificationSound('warning'); } catch (_) {}
+              setTimeout(() => {
+                setIsIncorrect(false);
+                setEnteredPin('');
+              }, 500);
+            }
           }
         }
       }
+    } catch (keypadErr) {
+      console.error('handleKeypadPress error:', keypadErr);
+      setEnteredPin('');
     }
   };
 
