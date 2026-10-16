@@ -1312,76 +1312,93 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       }
     };
 
-    fetchBroadcastAnnouncements();
+    const handleNewAnnouncementReceived = (b: any) => {
+      if (!b) return;
+      const notificationId = `broadcast_${b.id}`;
+      
+      setNotifications(prev => {
+        if (prev.some(n => n.id === notificationId)) return prev;
+        const updated = [
+          {
+            id: notificationId,
+            type: b.type === 'coupon' ? 'success' : (b.type || 'info'),
+            title: b.title,
+            desc: b.message,
+            timestamp: b.created_at || new Date().toISOString(),
+            unread: true
+          },
+          ...prev
+        ];
+        localStorage.setItem(`zb_notifications_${currentProfileId}`, JSON.stringify(updated));
+        return updated;
+      });
 
-    // Subscribe to public:broadcast_notifications Supabase Realtime channel
+      // Show full popup for real-time announcements immediately
+      setAnnouncementPopup({
+        id: String(b.id),
+        title: b.title,
+        message: b.message,
+        type: b.type || 'info',
+        createdAt: b.created_at || new Date().toISOString(),
+        linkUrl: b.link_url || undefined,
+        buttonText: b.button_text || undefined
+      });
+      triggerToast(`📣 ${b.title}`, b.type === 'coupon' ? 'success' : 'info');
+      try { playNotificationSound('info'); } catch (_) {}
+
+      if (Capacitor.isNativePlatform()) {
+        import('@capacitor/local-notifications').then(({ LocalNotifications }) => {
+          LocalNotifications.schedule({
+            notifications: [
+              {
+                title: b.title || 'New Announcement',
+                body: b.message || 'Check out the latest update in ZenBudget.',
+                id: Math.floor(Math.random() * 1000000),
+                schedule: { at: new Date(Date.now() + 1000) },
+                sound: undefined,
+                attachments: undefined,
+                actionTypeId: '',
+                extra: null
+              }
+            ]
+          }).catch(e => console.warn('Local push failed', e));
+        }).catch(() => {});
+      }
+    };
+
+    fetchBroadcastAnnouncements();
+    // 10s Background Auto-Polling so announcements appear even if WebSocket is sleeping on mobile
+    const pollTimer = setInterval(fetchBroadcastAnnouncements, 10000);
+
+    // 1. Subscribe to public:broadcast_notifications Supabase Postgres Changes
     const channel = supabase
       .channel('public:broadcast_notifications')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'broadcast_notifications' }, (payload) => {
-        const b = payload.new;
-        if (b) {
-          const notificationId = `broadcast_${b.id}`;
-          
-          setNotifications(prev => {
-            if (prev.some(n => n.id === notificationId)) return prev;
-            const updated = [
-              {
-                id: notificationId,
-                type: b.type === 'coupon' ? 'success' : (b.type || 'info'),
-                title: b.title,
-                desc: b.message,
-                timestamp: b.created_at,
-                unread: true
-              },
-              ...prev
-            ];
-            localStorage.setItem(`zb_notifications_${currentProfileId}`, JSON.stringify(updated));
-            return updated;
-          });
-          // Show full popup for real-time announcements immediately
-          setAnnouncementPopup({
-            id: String(b.id),
-            title: b.title,
-            message: b.message,
-            type: b.type || 'info',
-            createdAt: b.created_at,
-            linkUrl: b.link_url || undefined,
-            buttonText: b.button_text || undefined
-          });
-          triggerToast(`📣 ${b.title}`, b.type === 'coupon' ? 'success' : 'info');
-          try { playNotificationSound('info'); } catch (_) {}
-
-          if (Capacitor.isNativePlatform()) {
-            import('@capacitor/local-notifications').then(({ LocalNotifications }) => {
-              LocalNotifications.schedule({
-                notifications: [
-                  {
-                    title: b.title || 'New Announcement',
-                    body: b.message || 'Check out the latest update in ZenBudget.',
-                    id: Math.floor(Math.random() * 1000000),
-                    schedule: { at: new Date(Date.now() + 1000) },
-                    sound: undefined,
-                    attachments: undefined,
-                    actionTypeId: '',
-                    extra: null
-                  }
-                ]
-              }).catch(e => console.warn('Local push failed', e));
-            }).catch(() => {});
-          }
-        }
+        handleNewAnnouncementReceived(payload.new);
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'broadcast_notifications' }, (payload) => {
         const deletedId = payload.old?.id;
         if (deletedId) {
-          // Instantly close announcement popup if active
-          setAnnouncementPopup(current => {
-            if (current && String(current.id) === String(deletedId)) {
-              return null;
-            }
-            return current;
+          setAnnouncementPopup(current => (current && String(current.id) === String(deletedId) ? null : current));
+          setNotifications(prev => {
+            const updated = prev.filter(n => n.id !== `broadcast_${deletedId}`);
+            localStorage.setItem(`zb_notifications_${currentProfileId}`, JSON.stringify(updated));
+            return updated;
           });
-          // Remove notification from notifications state and localStorage
+        }
+      })
+      .subscribe();
+
+    // 2. Direct WebSocket Stream Channel for instantaneous delivery (0ms latency)
+    const streamChannel = supabase
+      .channel('zenbudget_broadcast_stream')
+      .on('broadcast', { event: 'new_announcement' }, (event) => {
+        handleNewAnnouncementReceived(event.payload);
+      })
+      .on('broadcast', { event: 'delete_announcement' }, (event) => {
+        const deletedId = event.payload?.id;
+        if (deletedId) {
+          setAnnouncementPopup(current => (current && String(current.id) === String(deletedId) ? null : current));
           setNotifications(prev => {
             const updated = prev.filter(n => n.id !== `broadcast_${deletedId}`);
             localStorage.setItem(`zb_notifications_${currentProfileId}`, JSON.stringify(updated));
@@ -1392,7 +1409,9 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       .subscribe();
 
     return () => {
+      clearInterval(pollTimer);
       supabase.removeChannel(channel);
+      supabase.removeChannel(streamChannel);
     };
   }, [currentProfileId]);
 

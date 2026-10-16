@@ -921,7 +921,26 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
       if (error) {
         console.warn('Broadcast Supabase insert error:', error);
       } else if (data && data.length > 0) {
-        setBroadcasts(prev => prev.map(b => b.id === newId ? { ...b, id: data[0].id } : b));
+        const savedBc = { ...newBc, id: data[0].id };
+        setBroadcasts(prev => prev.map(b => b.id === newId ? savedBc : b));
+
+        // Direct Realtime Broadcast Push to all live devices instantly
+        try {
+          const streamChannel = supabaseClient.channel('zenbudget_broadcast_stream');
+          streamChannel.subscribe((status: string) => {
+            if (status === 'SUBSCRIBED') {
+              streamChannel.send({
+                type: 'broadcast',
+                event: 'new_announcement',
+                payload: savedBc
+              }).then(() => {
+                setTimeout(() => supabaseClient.removeChannel(streamChannel), 3000);
+              });
+            }
+          });
+        } catch (wsErr) {
+          console.warn('Broadcast direct stream error:', wsErr);
+        }
       }
     } catch (err) {
       console.warn('Broadcast Supabase sync failed:', err);
@@ -931,6 +950,20 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   const handleDeleteBroadcast = async (id: string) => {
     try {
       await supabaseClient.from('broadcast_notifications').delete().eq('id', id);
+      try {
+        const streamChannel = supabaseClient.channel('zenbudget_broadcast_stream');
+        streamChannel.subscribe((status: string) => {
+          if (status === 'SUBSCRIBED') {
+            streamChannel.send({
+              type: 'broadcast',
+              event: 'delete_announcement',
+              payload: { id }
+            }).then(() => {
+              setTimeout(() => supabaseClient.removeChannel(streamChannel), 3000);
+            });
+          }
+        });
+      } catch (_) {}
     } catch (err: any) {}
 
     setBroadcasts(prev => prev.filter(b => b.id !== id));
