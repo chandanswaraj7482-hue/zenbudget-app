@@ -5051,14 +5051,15 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         )}
       </main>
 
-      {/* Bottom Attached Modern Navigation Bar (Clean & Native Edge-to-Edge) */}
+      {/* Bottom Attached Modern Navigation Bar (Pinned to Phone Frame) */}
       <nav style={{
         position: 'fixed',
         bottom: 0,
-        left: 0,
-        right: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
         width: '100%',
-        background: theme === 'light' ? 'rgba(255, 255, 255, 0.96)' : 'rgba(11, 15, 25, 0.95)',
+        maxWidth: '520px',
+        background: theme === 'light' ? 'rgba(255, 255, 255, 0.96)' : 'rgba(11, 15, 25, 0.96)',
         borderTop: theme === 'light' ? '1px solid rgba(0,0,0,0.08)' : '1px solid rgba(255, 255, 255, 0.1)',
         backdropFilter: 'blur(24px) saturate(200%)',
         WebkitBackdropFilter: 'blur(24px) saturate(200%)',
