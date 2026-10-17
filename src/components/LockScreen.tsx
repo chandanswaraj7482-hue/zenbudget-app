@@ -1361,28 +1361,19 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           setEnteredPin(nextPin);
 
           if (nextPin.length === 4) {
-            const storedPin = (localStorage.getItem('zb_user_pin') || dbProfile?.pin || localStorage.getItem(`zb_pin_${userId}`) || localStorage.getItem('zb_saved_device_pin') || '').trim();
-            const dbPin = (dbProfile?.pin ? String(dbProfile.pin) : '').trim();
+            const rawDbPin = dbProfile?.pin !== undefined && dbProfile?.pin !== null ? String(dbProfile.pin).trim() : '';
+            const dbPin = rawDbPin ? (rawDbPin.length < 4 ? rawDbPin.padStart(4, '0') : rawDbPin) : '';
             const userPin = (localStorage.getItem('zb_user_pin') || '').trim();
             const devicePin = (localStorage.getItem('zb_saved_device_pin') || '').trim();
             const scopedPin = userId ? (localStorage.getItem(`zb_pin_${userId}`) || '').trim() : '';
+            const storedPin = (userPin || dbPin || scopedPin || devicePin || '').trim();
 
-            // User matches if it matches ANY known stored pin, or if no pin has ever been stored on device
-            let isValidPin = !hasStoredPin ||
-              (storedPin !== '' && nextPin === storedPin) ||
-              (dbPin !== '' && nextPin === dbPin) ||
-              (userPin !== '' && nextPin === userPin) ||
-              (devicePin !== '' && nextPin === devicePin) ||
-              (scopedPin !== '' && nextPin === scopedPin);
-
-            // Resilient unlock: If user has an active authenticated session (userId or active Supabase session)
-            // or local profile, do NOT permanently lock out the verified account owner.
-            if (!isValidPin && (userId || dbProfile?.id || localStorage.getItem('zb_profile_id'))) {
-              const prevFailed = parseInt(localStorage.getItem('zb_pin_fail_count') || '0', 10);
-              // If entered on their verified logged-in account, accept and auto-update their PIN
-              console.log('LockScreen: Auto-updating PIN for authenticated account owner to match entered PIN:', nextPin);
-              isValidPin = true;
-            }
+            const candidatePins = [storedPin, dbPin, userPin, devicePin, scopedPin].filter(p => Boolean(p && p.length >= 4));
+            
+            // Strictly check if entered PIN matches the user's registered PIN
+            const isValidPin = candidatePins.length > 0
+              ? candidatePins.some(cand => cand === nextPin)
+              : false;
 
             if (isValidPin) {
               resetPinSecurityStatus();
@@ -1404,13 +1395,6 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
               if (targetUserId && targetUserId !== 'local') {
                 localStorage.setItem(`zb_pin_${targetUserId}`, nextPin);
-                (async () => {
-                  try {
-                    await supabase.from('profiles').update({ pin: nextPin }).eq('id', targetUserId);
-                  } catch (syncErr) {
-                    console.warn('Background PIN sync error:', syncErr);
-                  }
-                })();
               }
 
               try { playNotificationSound('success'); } catch (_) {}
@@ -2232,55 +2216,29 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             </div>
 
             {/* Forgot / Reset PIN Action */}
-            <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setErrorMsg('');
-                    setSuccessMsg('');
-                    setEnteredPin('');
-                    setPin('');
-                    setConfirmPin('');
-                    setStep('onboard-pin');
-                  }}
-                  style={{
-                    background: 'rgba(34, 197, 94, 0.1)',
-                    border: '1px solid rgba(34, 197, 94, 0.25)',
-                    borderRadius: '16px',
-                    color: '#22c55e',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    padding: '6px 14px',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  ⚡ Set New PIN
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setErrorMsg('');
-                    setSuccessMsg('');
-                    const userEmail = email || localStorage.getItem('zb_user_email') || '';
-                    setResetEmail(userEmail);
-                    setStep('forgot-pin-email');
-                  }}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: 'var(--text-secondary)',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    padding: '6px 8px',
-                    textDecoration: 'underline'
-                  }}
-                >
-                  Reset via Email OTP
-                </button>
-              </div>
+            <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setErrorMsg('');
+                  setSuccessMsg('');
+                  const userEmail = email || localStorage.getItem('zb_user_email') || '';
+                  setResetEmail(userEmail);
+                  setStep('forgot-pin-email');
+                }}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-secondary)',
+                  fontSize: '12.5px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  padding: '4px 14px',
+                  textDecoration: 'underline'
+                }}
+              >
+                Forgot PIN? Reset via Email OTP
+              </button>
             </div>
 
             {/* Sign Out Action */}
