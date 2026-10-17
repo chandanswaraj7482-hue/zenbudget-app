@@ -4556,48 +4556,78 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         </div>
       </header>
 
-      {/* Smart AI Insights Banner in Header */}
-      {(() => {
-        const h = new Date().getHours();
-        const isMorning = h >= 5 && h < 12;
-        const isEvening = h >= 18;
-        if (isMorning || isEvening) {
-          return (
-            <div 
-              className="animate-fade-in"
-              onClick={() => isMorning ? setShowMorningBrief(true) : setShowEveningReflection(true)}
-              style={{
-                margin: '12px 18px 0',
-                padding: '10px 14px',
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%)',
-                border: '1px solid rgba(16, 185, 129, 0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                cursor: 'pointer'
-              }}
-            >
-              <div style={{ padding: '6px', background: 'rgba(16, 185, 129, 0.15)', borderRadius: '8px', color: 'var(--primary)' }}>
-                <Sparkles size={16} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <p style={{ margin: 0, fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)' }}>
-                  {isMorning ? 'Tap for Morning Brief ☀️' : 'Tap for Evening Reflection 🌙'}
-                </p>
-                <p style={{ margin: 0, fontSize: '11px', color: 'var(--text-secondary)' }}>
-                  {isMorning ? 'Start your day with smart budget insights' : 'Review your daily spending patterns'}
-                </p>
-              </div>
-              <ArrowRight size={14} color="var(--primary)" />
-            </div>
-          );
-        }
-        return null;
-      })()}
-
       {/* Main View Area */}
       <main ref={mainScrollRef} className="scroll-container" style={{ padding: '20px 20px calc(110px + env(safe-area-inset-bottom)) 20px', minHeight: 'calc(100vh - 70px)' }}>
+        {/* Smart AI Insights Banner (Natural scroll flow inside main) */}
+        {(() => {
+          const h = new Date().getHours();
+          const isMorning = h >= 5 && h < 12;
+          const isEvening = h >= 18;
+          const dismissKey = `zb_dismiss_ai_brief_${new Date().toISOString().split('T')[0]}_${isMorning ? 'm' : 'e'}`;
+          const isDismissed = typeof window !== 'undefined' && localStorage.getItem(dismissKey) === 'true';
+
+          if ((isMorning || isEvening) && !isDismissed && activeView === 'dashboard') {
+            return (
+              <div 
+                className="animate-fade-in"
+                style={{
+                  margin: '0 0 16px 0',
+                  padding: '11px 14px',
+                  borderRadius: '16px',
+                  background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.06) 100%)',
+                  border: '1px solid rgba(16, 185, 129, 0.25)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  boxShadow: '0 4px 14px rgba(0,0,0,0.1)'
+                }}
+              >
+                <div 
+                  onClick={() => isMorning ? setShowMorningBrief(true) : setShowEveningReflection(true)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, cursor: 'pointer', minWidth: 0 }}
+                >
+                  <div style={{ padding: '6px', background: 'rgba(16, 185, 129, 0.18)', borderRadius: '10px', color: 'var(--primary)', flexShrink: 0 }}>
+                    <Sparkles size={16} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ margin: 0, fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {isMorning ? 'Tap for Morning Brief ☀️' : 'Tap for Evening Reflection 🌙'}
+                    </p>
+                    <p style={{ margin: 0, fontSize: '11px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {isMorning ? 'Start your day with smart budget insights' : 'Review your daily spending patterns'}
+                    </p>
+                  </div>
+                  <ArrowRight size={14} color="var(--primary)" style={{ flexShrink: 0 }} />
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    localStorage.setItem(dismissKey, 'true');
+                    setLangKey(prev => prev + 1);
+                  }}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '50%',
+                    flexShrink: 0
+                  }}
+                  title="Dismiss"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            );
+          }
+          return null;
+        })()}
+
         {activeView === 'dashboard' && (
           <Dashboard 
             key={langKey}
