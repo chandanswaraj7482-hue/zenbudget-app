@@ -67,12 +67,10 @@ input, textarea, [contenteditable="true"] {
 }
 
 /* Ensure circular avatars, badges, and icon buttons inside the application retain 100% round circles and never squish into ovals */
-img[style*="border-radius: 50%"],
-img[style*="border-radius:50%"],
-button[style*="border-radius: 50%"],
-button[style*="border-radius:50%"],
 .avatar-circle,
-.rounded-avatar {
+.rounded-avatar,
+.circle-avatar,
+img.avatar-circle {
   aspect-ratio: 1 / 1 !important;
   flex-shrink: 0 !important;
   box-sizing: border-box !important;
@@ -820,10 +818,8 @@ div[style*="position:fixed"] {
   /* Ensure only circular icons, avatars, and explicit circle buttons stay round */
   .avatar-circle,
   .rounded-avatar,
-  img[style*="border-radius: 50%"],
-  button[style*="border-radius: 50%"],
-  button[style*="borderRadius: '50%'"],
-  button[style*="borderRadius: 50%"] {
+  .circle-avatar,
+  img.avatar-circle {
     aspect-ratio: 1 / 1 !important;
     flex-shrink: 0 !important;
   }

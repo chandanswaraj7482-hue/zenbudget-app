@@ -141,12 +141,12 @@ export const Toast: React.FC<ToastProps> = ({ toast, onClose }) => {
         <X size={13} />
       </button>
 
-      {/* Slide down keyframe styles */}
       <style>{`
         .zen-toast-capsule {
           aspect-ratio: auto !important;
           height: auto !important;
-          max-height: 90px !important;
+          max-height: 80px !important;
+          border-radius: 20px !important;
         }
         @keyframes slideDownToast {
           from {
