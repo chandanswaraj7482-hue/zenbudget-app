@@ -98,25 +98,15 @@ export const Budgets: React.FC<BudgetsProps> = ({
   };
 
   const handleEditClick = (cat: CategoryType, currentLimit: number) => {
-    // If category already has a limit, allow editing freely
-    if (currentLimit > 0) {
-      setEditingCategory(cat);
-      setLimitInput(currentLimit.toString());
-      return;
-    }
-
-    // If setting a NEW limit and cap is reached for free user, prompt ad / pro
-    if (isLimitCapped) {
+    // For free users: Each budget limit setting / updating requires watching an Ad unless Premium!
+    if (!isPremiumUser) {
       playNotificationSound();
       setPendingCategory(cat);
       if (Capacitor.isNativePlatform()) {
         admobService.showRewardedAd(() => {
           playCelebrationSound();
-          const newBonus = bonusSlots + 1;
-          setBonusSlots(newBonus);
-          localStorage.setItem('zb_bonus_budget_slots', String(newBonus));
           setEditingCategory(cat);
-          setLimitInput('');
+          setLimitInput(currentLimit > 0 ? currentLimit.toString() : '');
         });
       } else {
         setAdModalOpen(true);
@@ -125,7 +115,7 @@ export const Budgets: React.FC<BudgetsProps> = ({
     }
 
     setEditingCategory(cat);
-    setLimitInput('');
+    setLimitInput(currentLimit > 0 ? currentLimit.toString() : '');
   };
 
   const handleSave = (cat: CategoryType) => {
@@ -579,11 +569,11 @@ export const Budgets: React.FC<BudgetsProps> = ({
                   </div>
 
                   <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 8px 0' }}>
-                    Free Limit Cap Reached (2/2 Used)
+                    Watch a Quick Ad to Set Limit
                   </h3>
 
                   <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: '0 0 20px 0' }}>
-                    Free users can set monthly caps on up to <strong>2 categories</strong>. Watch a quick 10-second sponsor ad to unlock <strong>+1 extra category limit</strong>, or upgrade to <strong>ZenBudget Pro</strong> for unlimited caps!
+                    Free users watch a short sponsor ad to configure or change budget limits. Upgrade to <strong>ZenBudget Pro</strong> to enjoy 100% ad-free instant budget management!
                   </p>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -608,7 +598,7 @@ export const Budgets: React.FC<BudgetsProps> = ({
                       }}
                     >
                       <Play size={16} fill="#ffffff" />
-                      <span>Watch 10s Sponsor Ad (+1 Slot)</span>
+                      <span>Watch Sponsor Ad (Unlock Limit)</span>
                     </button>
 
                     {/* Go Pro Button */}
