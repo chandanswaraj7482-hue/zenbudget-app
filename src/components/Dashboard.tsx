@@ -27,7 +27,8 @@ import {
   Brain,
   BookOpen,
   BarChart3,
-  Camera
+  Camera,
+  Bot
 } from 'lucide-react';
 import type { Transaction, SavingsGoal, CategoryBudget, Account } from '../types';
 import { t } from '../utils/i18n';
@@ -959,6 +960,112 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
         )}
+
+        {/* ── USER FRIENDLY QUICK ACTIONS BAR ── */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: '8px',
+          marginTop: '16px',
+          paddingTop: '14px',
+          borderTop: '1px solid var(--border-divider)'
+        }}>
+          <button
+            type="button"
+            onClick={onAddTransactionClick}
+            style={{
+              background: 'rgba(34, 197, 94, 0.12)',
+              border: '1px solid rgba(34, 197, 94, 0.3)',
+              borderRadius: '16px',
+              padding: '10px 4px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '6px',
+              color: '#34d399',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#22c55e', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Plus size={18} />
+            </div>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#ffffff' }}>Add Entry</span>
+          </button>
+
+          {onScanReceiptClick && (
+            <button
+              type="button"
+              onClick={onScanReceiptClick}
+              style={{
+                background: 'rgba(6, 182, 212, 0.12)',
+                border: '1px solid rgba(6, 182, 212, 0.3)',
+                borderRadius: '16px',
+                padding: '10px 4px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '6px',
+                color: '#22d3ee',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#06b6d4', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Camera size={16} />
+              </div>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: '#ffffff' }}>Scan Bill</span>
+            </button>
+          )}
+
+          {onOpenAI && (
+            <button
+              type="button"
+              onClick={onOpenAI}
+              style={{
+                background: 'rgba(168, 85, 247, 0.12)',
+                border: '1px solid rgba(168, 85, 247, 0.3)',
+                borderRadius: '16px',
+                padding: '10px 4px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '6px',
+                color: '#c084fc',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Bot size={16} />
+              </div>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: '#ffffff' }}>AI Coach</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={onAddAccountClick}
+            style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '16px',
+              padding: '10px 4px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '6px',
+              color: '#94a3b8',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.12)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Wallet size={16} />
+            </div>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#ffffff' }}>+ Account</span>
+          </button>
+        </div>
       </div>
 
       {/* ─── My Accounts in Wallet Section ─── */}
