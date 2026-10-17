@@ -569,10 +569,26 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
 
       if (payData) setPayments(payData);
 
-      // Fetch AI Reviews (Wrapped in try/catch in case SQL migration hasn't run yet)
+      // Fetch AI Reviews & Feedback (Unified with app_ratings fallback)
       try {
         const { data: aiRevData } = await supabaseClient.from('ai_reviews').select('*').order('created_at', { ascending: false });
-        if (aiRevData) setAiReviews(aiRevData);
+        if (aiRevData && aiRevData.length > 0) {
+          setAiReviews(aiRevData);
+        } else {
+          // Fallback to app_ratings so user submissions from AI Coach & app reviews immediately populate here!
+          const { data: fallbackRatings } = await supabaseClient.from('app_ratings').select('*').order('created_at', { ascending: false });
+          if (fallbackRatings && fallbackRatings.length > 0) {
+            const mapped = fallbackRatings.map(r => ({
+              id: r.id,
+              user_name: r.user_name || 'Anonymous User',
+              rating: r.rating_stars || r.rating || 5,
+              review_text: r.feedback || '',
+              profile_id: r.user_email || r.user_id || 'app_user',
+              created_at: r.created_at || new Date().toISOString()
+            }));
+            setAiReviews(mapped);
+          }
+        }
         
         const { data: aiFeedbackData } = await supabaseClient.from('ai_message_feedback').select('*').order('created_at', { ascending: false });
         if (aiFeedbackData) setAiFeedback(aiFeedbackData);

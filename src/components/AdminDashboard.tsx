@@ -25,7 +25,11 @@ import {
   Upload,
   Eye,
   CheckCircle,
-  Globe
+  Globe,
+  MessageSquare,
+  ThumbsUp,
+  ThumbsDown,
+  Sparkles
 } from 'lucide-react';
 import { AdminGeoMap } from './AdminGeoMap';
 import { 
@@ -569,10 +573,26 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
 
       if (payData) setPayments(payData);
 
-      // Fetch AI Reviews (Wrapped in try/catch in case SQL migration hasn't run yet)
+      // Fetch AI Reviews & Feedback (Unified with app_ratings fallback)
       try {
         const { data: aiRevData } = await supabaseClient.from('ai_reviews').select('*').order('created_at', { ascending: false });
-        if (aiRevData) setAiReviews(aiRevData);
+        if (aiRevData && aiRevData.length > 0) {
+          setAiReviews(aiRevData);
+        } else {
+          // Fallback to app_ratings so user submissions from AI Coach & app reviews immediately populate here!
+          const { data: fallbackRatings } = await supabaseClient.from('app_ratings').select('*').order('created_at', { ascending: false });
+          if (fallbackRatings && fallbackRatings.length > 0) {
+            const mapped = fallbackRatings.map(r => ({
+              id: r.id,
+              user_name: r.user_name || 'Anonymous User',
+              rating: r.rating_stars || r.rating || 5,
+              review_text: r.feedback || '',
+              profile_id: r.user_email || r.user_id || 'app_user',
+              created_at: r.created_at || new Date().toISOString()
+            }));
+            setAiReviews(mapped);
+          }
+        }
         
         const { data: aiFeedbackData } = await supabaseClient.from('ai_message_feedback').select('*').order('created_at', { ascending: false });
         if (aiFeedbackData) setAiFeedback(aiFeedbackData);
@@ -2359,74 +2379,188 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
               {/* TAB: AI COACH REVIEWS & ANALYTICS */}
               {activeTab === 'ai_coach' && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
-                  <div style={{ padding: '1.5rem', backgroundColor: 'rgba(255, 255, 255, 0.02)', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                      <div style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', padding: '0.75rem', borderRadius: '12px' }}>
-                        <Bot size={20} style={{ color: '#22c55e' }} />
+                  {/* Top Header Card */}
+                  <div style={{ padding: '1.75rem', backgroundColor: 'rgba(255, 255, 255, 0.02)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                        <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '0.85rem', borderRadius: '16px', color: '#10b981' }}>
+                          <Bot size={24} />
+                        </div>
+                        <div>
+                          <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#f8fafc', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span>Zen AI Coach V2 Analytics</span>
+                            <span style={{ fontSize: '11px', background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>LIVE</span>
+                          </h2>
+                          <p style={{ color: '#94a3b8', fontSize: '0.875rem', marginTop: '0.35rem', marginBottom: 0 }}>
+                            Real-time intelligence on user questions, helpfulness ratings, and qualitative feedback.
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: '#f8fafc', margin: 0 }}>Zen AI Coach V2 Analytics</h2>
-                        <p style={{ color: '#94a3b8', fontSize: '0.875rem', marginTop: '0.25rem', marginBottom: 0 }}>
-                          Monitor user engagement and feedback for the AI Financial Assistant.
-                        </p>
+                      <button
+                        onClick={() => fetchAdminData()}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '8px 14px',
+                          borderRadius: '10px',
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          color: '#e2e8f0',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
+                        <span>Refresh Data</span>
+                      </button>
+                    </div>
+
+                    {/* KPI Stat Cards */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+                      <div style={{ padding: '1.2rem', background: 'var(--bg-input)', borderRadius: '16px', border: '1px solid var(--border-input)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                          <span style={{ color: 'var(--text-secondary)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.05em' }}>AI REVIEWS & RATINGS</span>
+                          <Star size={16} color="#fbbf24" fill="#fbbf24" />
+                        </div>
+                        <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                          {aiReviews.length > 0 ? aiReviews.length : ratings.length}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#10b981', marginTop: '4px' }}>
+                          Avg Rating: {(() => {
+                            const pool = aiReviews.length > 0 ? aiReviews : ratings;
+                            if (pool.length === 0) return '5.0 ★';
+                            const avg = pool.reduce((acc: number, cur: any) => acc + (cur.rating || cur.rating_stars || 5), 0) / pool.length;
+                            return `${avg.toFixed(1)} ★`;
+                          })()}
+                        </div>
+                      </div>
+
+                      <div style={{ padding: '1.2rem', background: 'var(--bg-input)', borderRadius: '16px', border: '1px solid var(--border-input)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                          <span style={{ color: 'var(--text-secondary)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.05em' }}>MESSAGE REACTIONS</span>
+                          <ThumbsUp size={16} color="#10b981" />
+                        </div>
+                        <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                          {aiFeedback.length}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                          👍 {aiFeedback.filter(f => f.feedback === 'thumbs_up').length} positive feedback
+                        </div>
+                      </div>
+
+                      <div style={{ padding: '1.2rem', background: 'var(--bg-input)', borderRadius: '16px', border: '1px solid var(--border-input)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                          <span style={{ color: 'var(--text-secondary)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.05em' }}>TOTAL APP MEMBERS</span>
+                          <Users size={16} color="#60a5fa" />
+                        </div>
+                        <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                          {totalUsers}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                          Eligible for 24/7 AI Money Coaching
+                        </div>
+                      </div>
+
+                      <div style={{ padding: '1.2rem', background: 'var(--bg-input)', borderRadius: '16px', border: '1px solid var(--border-input)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                          <span style={{ color: 'var(--text-secondary)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.05em' }}>AI COACH ENGINE</span>
+                          <Sparkles size={16} color="#a855f7" />
+                        </div>
+                        <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#a855f7' }}>
+                          Gemini 2.5 Pro
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                          Hybrid Local + Serverless
+                        </div>
                       </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-                      <div style={{ padding: '1rem', background: 'var(--bg-input)', borderRadius: '12px', border: '1px solid var(--border-input)' }}>
-                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.5rem' }}>TOTAL FEEDBACK (THUMBS UP/DOWN)</div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)' }}>{aiFeedback.length}</div>
-                      </div>
-                      <div style={{ padding: '1rem', background: 'var(--bg-input)', borderRadius: '12px', border: '1px solid var(--border-input)' }}>
-                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.5rem' }}>AI REVIEWS SUBMITTED</div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)' }}>{aiReviews.length}</div>
-                      </div>
-                    </div>
-
-                    <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#e2e8f0', marginBottom: '1rem' }}>Recent Message Feedback</h3>
+                    <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <ThumbsUp size={16} color="#10b981" />
+                      <span>Recent In-Chat Message Feedback ({aiFeedback.length})</span>
+                    </h3>
                     {aiFeedback.length === 0 ? (
-                      <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>No AI feedback recorded yet.</p>
+                      <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8', backgroundColor: 'var(--bg-input)', borderRadius: '14px', border: '1px solid var(--border-input)' }}>
+                        No in-chat message feedback reactions logged yet. Reactions submitted by users during AI chat sessions will be automatically captured here.
+                      </div>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {aiFeedback.slice(0, 20).map(f => (
-                          <div key={f.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', backgroundColor: 'var(--bg-input)', borderRadius: '12px', border: '1px solid var(--border-input)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <div style={{ padding: '8px', borderRadius: '50%', background: f.feedback === 'thumbs_up' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)' }}>
+                          <div key={f.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.2rem', backgroundColor: 'var(--bg-input)', borderRadius: '14px', border: '1px solid var(--border-input)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                              <div style={{ padding: '8px', borderRadius: '50%', background: f.feedback === 'thumbs_up' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)' }}>
                                 <ThumbsUp size={16} fill={f.feedback === 'thumbs_up' ? '#22c55e' : '#ef4444'} style={{ transform: f.feedback === 'thumbs_down' ? 'scaleY(-1)' : 'none', color: f.feedback === 'thumbs_up' ? '#22c55e' : '#ef4444' }} />
                               </div>
                               <div>
-                                <div style={{ fontSize: '0.875rem', color: 'var(--text-primary)', fontWeight: 600 }}>Message ID: {f.message_id}</div>
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{new Date(f.created_at).toLocaleString()}</div>
+                                <div style={{ fontSize: '0.875rem', color: 'var(--text-primary)', fontWeight: 600 }}>
+                                  User reaction: <strong style={{ color: f.feedback === 'thumbs_up' ? '#22c55e' : '#ef4444' }}>{f.feedback === 'thumbs_up' ? 'Helpful / Thumbs Up' : 'Not Helpful / Thumbs Down'}</strong>
+                                </div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                                  {new Date(f.created_at).toLocaleString()} • Message ID: {f.message_id || 'AI response'}
+                                </div>
                               </div>
                             </div>
+                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.05)', padding: '3px 8px', borderRadius: '8px' }}>
+                              Logged
+                            </span>
                           </div>
                         ))}
                       </div>
                     )}
                   </div>
                   
-                  {/* AI Coach Detailed Reviews Section */}
-                  <div style={{ padding: '1.5rem', backgroundColor: 'rgba(255, 255, 255, 0.02)', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#e2e8f0', marginBottom: '1rem' }}>Detailed App Reviews (AI Coach Section)</h3>
-                    {aiReviews.length === 0 ? (
-                      <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>No AI coach reviews submitted yet.</p>
+                  {/* AI Coach & App Reviews Section */}
+                  <div style={{ padding: '1.75rem', backgroundColor: 'rgba(255, 255, 255, 0.02)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '8px' }}>
+                      <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#e2e8f0', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Star size={18} color="#fbbf24" fill="#fbbf24" />
+                        <span>AI Financial Coach & App Reviews ({aiReviews.length > 0 ? aiReviews.length : ratings.length})</span>
+                      </h3>
+                      <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                        All user reviews from AI Coach & app feedback
+                      </span>
+                    </div>
+
+                    {((aiReviews.length === 0 && ratings.length === 0)) ? (
+                      <div style={{ padding: '2.5rem', textAlign: 'center', color: '#94a3b8', backgroundColor: 'var(--bg-input)', borderRadius: '16px', border: '1px solid var(--border-input)' }}>
+                        <Bot size={32} style={{ margin: '0 auto 12px auto', color: '#94a3b8', opacity: 0.5 }} />
+                        <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600 }}>No reviews submitted yet.</p>
+                        <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>When users rate the AI Coach or submit monthly feedback, their ratings and suggestions will appear here instantly.</p>
+                      </div>
                     ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        {aiReviews.slice(0, 50).map(r => (
-                          <div key={r.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '1rem', backgroundColor: 'var(--bg-input)', borderRadius: '12px', border: '1px solid var(--border-input)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <div style={{ fontWeight: 800, color: '#eab308' }}>★ {r.rating} / 5</div>
-                                <div style={{ fontSize: '0.875rem', color: 'var(--text-primary)', fontWeight: 600 }}>{r.user_name || 'Anonymous User'}</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {(aiReviews.length > 0 ? aiReviews : ratings.map(r => ({
+                          id: r.id,
+                          user_name: r.user_name || 'Anonymous User',
+                          rating: r.rating_stars || 5,
+                          review_text: r.feedback || '',
+                          profile_id: r.user_email || 'app_user',
+                          created_at: r.created_at
+                        }))).slice(0, 50).map(r => (
+                          <div key={r.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '1.2rem', backgroundColor: 'var(--bg-input)', borderRadius: '16px', border: '1px solid var(--border-input)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div style={{ fontWeight: 800, color: '#eab308', background: 'rgba(234, 179, 8, 0.12)', border: '1px solid rgba(234, 179, 8, 0.25)', padding: '4px 10px', borderRadius: '10px', fontSize: '13px' }}>
+                                  ★ {r.rating} / 5
+                                </div>
+                                <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: 700 }}>
+                                  {r.user_name || 'Anonymous User'}
+                                </div>
                               </div>
-                              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{new Date(r.created_at).toLocaleString()}</div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                {new Date(r.created_at).toLocaleString()}
+                              </div>
                             </div>
                             {r.review_text && (
-                              <div style={{ fontSize: '0.875rem', color: '#cbd5e1', fontStyle: 'italic', backgroundColor: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '8px' }}>
+                              <div style={{ fontSize: '0.875rem', color: '#cbd5e1', fontStyle: 'italic', backgroundColor: 'rgba(255,255,255,0.03)', padding: '12px 14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.04)', lineHeight: 1.5 }}>
                                 "{r.review_text}"
                               </div>
                             )}
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Profile ID: {r.profile_id}</div>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span>User ID / Email: <strong>{r.profile_id}</strong></span>
+                            </div>
                           </div>
                         ))}
                       </div>
