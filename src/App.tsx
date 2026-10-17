@@ -4729,9 +4729,6 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             premiumExpiresAt={premiumExpiresAt}
             onEditGoal={handleEditGoal}
             onDeleteGoal={handleDeleteGoal}
-            onForestClick={() => {
-              setActiveView('forest');
-            }}
             referralCount={referralCount}
             onAddAccountClick={() => {
               if (checkExpiredGuard('add bank accounts')) return;
@@ -4776,13 +4773,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             onPayLoanViaUPI={handlePayLoanViaUPI}
           />
         )}
-        {activeView === 'forest' && (
-          <Forest 
-            key={langKey}
-            onBack={() => setActiveView('dashboard')}
-            transactions={convertedTransactions}
-          />
-        )}
+
         {activeView === 'transactions' && (
           <Transactions 
             key={langKey}
@@ -4913,10 +4904,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
               if (checkExpiredGuard('chat with ZenBot AI Coach')) return;
               setIsHelpOpen(true);
             }}
-            onNavigateToMoneyForest={() => {
-              if (checkExpiredGuard('enter Money Forest')) return;
-              setActiveView('forest');
-            }}
+            onNavigateToMoneyForest={() => {}}
             onNavigateToSettings={() => setActiveView('profile')}
             onOpenHelp={() => {
               if (checkExpiredGuard('chat with ZenBot AI Coach')) return;

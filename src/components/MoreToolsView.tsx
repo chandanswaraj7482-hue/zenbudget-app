@@ -318,33 +318,6 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
             <ChevronRight size={18} color="#94a3b8" />
           </button>
 
-          {/* Money Forest */}
-          <button
-            onClick={onNavigateToMoneyForest}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '14px',
-              borderRadius: '14px',
-              border: 'none',
-              background: 'rgba(255,255,255,0.02)',
-              cursor: 'pointer',
-              color: 'var(--text-primary)',
-              textAlign: 'left'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <TreePine size={20} />
-              </div>
-              <div>
-                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>{t('money_forest')}</p>
-                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('money_forest_sub')}</span>
-              </div>
-            </div>
-            <ChevronRight size={18} color="#94a3b8" />
-          </button>
         </div>
 
         {/* 2-in-1 Zen Arcade & Brain Hub: Coin Game & Money IQ Quiz */}
