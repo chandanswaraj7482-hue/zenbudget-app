@@ -2329,24 +2329,47 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* Empty State visual recommendations for new user */}
       {transactions.length === 0 && (
         <div className="glass-panel" style={{
-          padding: '24px',
+          padding: '24px 20px',
           textAlign: 'center',
-          background: 'linear-gradient(135deg, rgba(20,20,33,0.5) 0%, rgba(99,102,241,0.05) 100%)',
-          border: '1px dashed rgba(99,102,241,0.2)',
+          background: 'linear-gradient(135deg, rgba(20,20,33,0.7) 0%, rgba(34,197,94,0.08) 100%)',
+          border: '1px dashed rgba(34,197,94,0.3)',
+          borderRadius: '24px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           gap: '12px'
         }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'var(--primary-glow)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Sparkles size={22} />
+          <div style={{ width: '52px', height: '52px', borderRadius: '50%', backgroundColor: 'rgba(34,197,94,0.18)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Sparkles size={24} />
           </div>
           <div>
-            <h4 style={{ fontSize: '16px', fontWeight: 700 }}>Your Ledger is Empty</h4>
-            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: '1.4' }}>
-              Welcome to zenbudget! Start tracking your cash flow by clicking the "Add New" button at the top.
+            <h4 style={{ fontSize: '17px', fontWeight: 800, color: '#ffffff' }}>No Transactions Logged Yet</h4>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: '1.4', maxWidth: '320px' }}>
+              Keep 100% control of your money! Tap below to record your first income or expense in seconds.
             </p>
           </div>
+          <button
+            type="button"
+            onClick={onAddTransactionClick}
+            style={{
+              marginTop: '4px',
+              background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '16px',
+              padding: '10px 20px',
+              fontSize: '13px',
+              fontWeight: 800,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+              boxShadow: '0 4px 15px rgba(34,197,94,0.35)'
+            }}
+          >
+            <Plus size={16} />
+            <span>Add Your First Entry</span>
+          </button>
         </div>
       )}
 
