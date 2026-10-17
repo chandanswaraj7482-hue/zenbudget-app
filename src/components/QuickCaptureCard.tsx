@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { Mic, MicOff, ArrowRight, Sparkles, Check, RefreshCw, AlertCircle, Wallet, Plus, X, ArrowLeftRight } from 'lucide-react';
+import { Mic, MicOff, ArrowRight, Sparkles, Check, RefreshCw, AlertCircle, Wallet, Plus, X, ArrowLeftRight, Clock, Lock } from 'lucide-react';
 import type { Transaction, Account } from '../types';
 import confetti from 'canvas-confetti';
 import { t } from '../utils/i18n';
+import { checkImpulseLock, type ImpulseLockCheckResult } from './WishlistBlocker';
 
 interface QuickCaptureCardProps {
   onSaveTransaction: (tx: Omit<Transaction, 'id'>) => void;
@@ -24,7 +25,42 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
   const [lastSavedSummary, setLastSavedSummary] = useState<string | null>(null);
   const [showNoAccountModal, setShowNoAccountModal] = useState(false);
   const [detectedTransferNotice, setDetectedTransferNotice] = useState<{ fromName: string; toName: string } | null>(null);
+  const [impulseLockData, setImpulseLockData] = useState<ImpulseLockCheckResult | null>(null);
+  const [showImpulseLockModal, setShowImpulseLockModal] = useState(false);
+  const [countdownStr, setCountdownStr] = useState('');
+  const [cooledPercent, setCooledPercent] = useState(0);
+  const [pendingQuickTx, setPendingQuickTx] = useState<any>(null);
+  const [budgetLimitWarning, setBudgetLimitWarning] = useState<{
+    categoryName: string;
+    limit: number;
+    spentBefore: number;
+    amount: number;
+    type: 'category' | 'daily';
+  } | null>(null);
   const recognitionRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (!showImpulseLockModal || !impulseLockData?.item) return;
+
+    const updateTimer = () => {
+      const now = Date.now();
+      const elapsed = now - new Date(impulseLockData.item!.createdAt).getTime();
+      const LOCK_PERIOD = 48 * 3600 * 1000;
+      const left = Math.max(0, LOCK_PERIOD - elapsed);
+
+      const hours = Math.floor(left / (3600 * 1000));
+      const mins = Math.floor((left % (3600 * 1000)) / (60 * 1000));
+      const secs = Math.floor((left % (60 * 1000)) / 1000);
+
+      setCountdownStr(`${hours}h ${mins}m ${secs}s left`);
+      const pct = Math.min(100, Math.max(0, Math.round((elapsed / LOCK_PERIOD) * 100)));
+      setCooledPercent(pct);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [showImpulseLockModal, impulseLockData]);
 
   const [selectedAccountId, setSelectedAccountId] = useState<string>(() => accounts[0]?.id || '1');
   const [selectedTransferToAccountId, setSelectedTransferToAccountId] = useState<string>(() => accounts[1]?.id || accounts[0]?.id || '1');
@@ -510,6 +546,63 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
         });
         return; // STOP EXECUTION! DO NOT SAVE OR FIRE CONFETTI!
       }
+    }
+
+    // Impulse Lock Check for Expenses
+    if (parsed.type === 'expense') {
+      const profileId = localStorage.getItem('zb_profile_id') || '';
+      const lockCheck = checkImpulseLock(profileId, parsed.title.trim(), parsed.amount);
+      if (lockCheck.isLocked) {
+        setImpulseLockData(lockCheck);
+        setPendingQuickTx({
+          title: parsed.title,
+          amount: Math.round(parsed.amount),
+          category: parsed.category,
+          date: parsed.date,
+          type: parsed.type,
+          accountId: finalAccountId,
+          notes: `Quick captured from: "${inputQuery}"`
+        });
+        setShowImpulseLockModal(true);
+        return;
+      }
+
+      // Category / Daily Budget Limit Warning Check
+      try {
+        const rawBudgets = localStorage.getItem(`zb_budgets_${profileId}`) || localStorage.getItem(`zb_budgets_cache_${profileId}`);
+        const parsedBudgets: Array<{ category: string; limit: number }> = rawBudgets ? JSON.parse(rawBudgets) : [];
+        const catNorm = (parsed.category || '').toLowerCase();
+        const matchedBudget = parsedBudgets.find(b => (b.category || '').toLowerCase() === catNorm && b.limit > 0);
+
+        if (matchedBudget) {
+          const rawTxs = localStorage.getItem(`zb_transactions_${profileId}`);
+          const txs: Transaction[] = rawTxs ? JSON.parse(rawTxs) : [];
+          const curMonth = new Date().toISOString().substring(0, 7);
+          const spentThisMonth = txs
+            .filter(t => t.type === 'expense' && (t.category || '').toLowerCase() === catNorm && (t.date || '').startsWith(curMonth))
+            .reduce((s, t) => s + (t.amount || 0), 0);
+
+          if (spentThisMonth + parsed.amount > matchedBudget.limit) {
+            setBudgetLimitWarning({
+              categoryName: parsed.category,
+              limit: matchedBudget.limit,
+              spentBefore: spentThisMonth,
+              amount: Math.round(parsed.amount),
+              type: 'category'
+            });
+            setPendingQuickTx({
+              title: parsed.title,
+              amount: Math.round(parsed.amount),
+              category: parsed.category,
+              date: parsed.date,
+              type: parsed.type,
+              accountId: finalAccountId,
+              notes: `Quick captured from: "${inputQuery}"`
+            });
+            return;
+          }
+        }
+      } catch (e) {}
     }
 
     onSaveTransaction({
@@ -1011,6 +1104,298 @@ export const QuickCaptureCard: React.FC<QuickCaptureCardProps> = ({
             >
               {insufficientBalanceError.type === 'transfer' ? 'Understand & Select Source Wallet' : 'Understand & Select Different Wallet'}
             </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Impulse Lock Warning Modal Popup with 48h Countdown Timer */}
+      {showImpulseLockModal && impulseLockData?.item && ReactDOM.createPortal(
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(12px)',
+          zIndex: 99999,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '20px',
+          animation: 'fadeIn 0.2s ease-out'
+        }}>
+          <div className="glass-panel" style={{
+            width: '100%',
+            maxWidth: '380px',
+            background: 'linear-gradient(180deg, rgba(30, 20, 45, 0.98) 0%, rgba(15, 12, 25, 0.98) 100%)',
+            border: '1.5px solid rgba(236, 72, 153, 0.4)',
+            borderRadius: '26px',
+            padding: '24px 20px',
+            boxShadow: '0 25px 60px rgba(0,0,0,0.85), 0 0 30px rgba(236, 72, 153, 0.2)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '15px',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              width: '60px',
+              height: '60px',
+              borderRadius: '20px',
+              background: 'rgba(236, 72, 153, 0.15)',
+              border: '1.5px solid rgba(236, 72, 153, 0.35)',
+              color: '#ec4899',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto',
+              boxShadow: '0 0 20px rgba(236, 72, 153, 0.25)'
+            }}>
+              <Lock size={30} />
+            </div>
+
+            <div>
+              <h3 style={{ fontSize: '18.5px', fontWeight: 900, color: '#f8fafc', margin: '0 0 6px 0' }}>
+                Impulse Purchase Locked! ⏳
+              </h3>
+              <p style={{ fontSize: '12.5px', color: '#94a3b8', margin: 0, lineHeight: 1.45 }}>
+                Yeh item aapke <strong>Impulse Blocker</strong> me 48-ghante ke cooling timer par locked hai!
+              </p>
+            </div>
+
+            {/* Item Card with Live Timer */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.04)',
+              borderRadius: '16px',
+              padding: '14px',
+              border: '1px solid rgba(236, 72, 153, 0.25)',
+              textAlign: 'left',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '15px', fontWeight: 800, color: '#f8fafc' }}>{impulseLockData.item.name}</span>
+                <span style={{ fontSize: '16px', fontWeight: 900, color: '#ec4899' }}>{currencySymbol}{impulseLockData.item.amount.toLocaleString()}</span>
+              </div>
+              {impulseLockData.item.reason && (
+                <p style={{ fontSize: '11.5px', color: '#94a3b8', margin: 0 }}>
+                  💡 <i>"{impulseLockData.item.reason}"</i>
+                </p>
+              )}
+
+              {/* Countdown Progress Bar */}
+              <div style={{ marginTop: '4px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#ec4899', fontWeight: 700, marginBottom: '6px' }}>
+                  <span><Clock size={12} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} /> {countdownStr}</span>
+                  <span>{cooledPercent}% Cooled</span>
+                </div>
+                <div style={{ width: '100%', height: '6px', borderRadius: '3px', background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+                  <div style={{
+                    width: `${cooledPercent}%`,
+                    height: '100%',
+                    background: 'linear-gradient(90deg, #ec4899 0%, #8b5cf6 100%)',
+                    borderRadius: '3px',
+                    transition: 'width 0.5s ease-out'
+                  }} />
+                </div>
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '12px', padding: '10px', fontSize: '11.5px', color: '#f87171', textAlign: 'left', lineHeight: 1.4 }}>
+              🛑 <strong>Zen Safeguard:</strong> 48 hours rukne se 84% unnecessary regret purchases bach jaati hain!
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowImpulseLockModal(false);
+                  setPendingQuickTx(null);
+                  setInputQuery('');
+                }}
+                style={{
+                  width: '100%',
+                  padding: '13px',
+                  borderRadius: '16px',
+                  background: 'linear-gradient(135deg, #ec4899 0%, #d946ef 100%)',
+                  color: '#ffffff',
+                  fontWeight: 900,
+                  fontSize: '14px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  boxShadow: '0 8px 20px rgba(236, 72, 153, 0.35)'
+                }}
+              >
+                Keep Paused (Save ₹{impulseLockData.item.amount}) 🛡️
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (pendingQuickTx) {
+                    onSaveTransaction(pendingQuickTx);
+                    try {
+                      confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+                    } catch (_) {}
+                    setLastSavedSummary(`Bypassed lock ✨ Saved ${currencySymbol}${pendingQuickTx.amount} for ${pendingQuickTx.title}`);
+                    setInputQuery('');
+                    setTimeout(() => setLastSavedSummary(null), 4000);
+                  }
+                  setShowImpulseLockModal(false);
+                  setPendingQuickTx(null);
+                }}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#64748b',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  padding: '6px',
+                  textDecoration: 'underline'
+                }}
+              >
+                I really need this now, override & log anyway
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Budget Limit Exceeded Warning Modal */}
+      {budgetLimitWarning && ReactDOM.createPortal(
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.78)',
+          backdropFilter: 'blur(12px)',
+          zIndex: 99999,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '20px',
+          animation: 'fadeIn 0.2s ease-out'
+        }}>
+          <div className="glass-panel" style={{
+            width: '100%',
+            maxWidth: '380px',
+            background: 'linear-gradient(180deg, rgba(35, 25, 20, 0.98) 0%, rgba(18, 14, 15, 0.98) 100%)',
+            border: '1.5px solid rgba(245, 158, 11, 0.45)',
+            borderRadius: '26px',
+            padding: '24px 20px',
+            boxShadow: '0 25px 60px rgba(0,0,0,0.85), 0 0 30px rgba(245, 158, 11, 0.2)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '15px',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              width: '60px',
+              height: '60px',
+              borderRadius: '20px',
+              background: 'rgba(245, 158, 11, 0.15)',
+              border: '1.5px solid rgba(245, 158, 11, 0.4)',
+              color: '#f59e0b',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto',
+              boxShadow: '0 0 20px rgba(245, 158, 11, 0.25)'
+            }}>
+              <AlertCircle size={32} />
+            </div>
+
+            <div>
+              <h3 style={{ fontSize: '18.5px', fontWeight: 900, color: '#f8fafc', margin: '0 0 6px 0' }}>
+                Budget Limit Exceeded! ⚠️
+              </h3>
+              <p style={{ fontSize: '12.5px', color: '#94a3b8', margin: 0, lineHeight: 1.45 }}>
+                Yeh expense aapke <strong>{budgetLimitWarning.categoryName}</strong> budget limit ko exceed kar raha hai!
+              </p>
+            </div>
+
+            {/* Budget Limit Stats Card */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.04)',
+              borderRadius: '16px',
+              padding: '14px',
+              border: '1px solid rgba(245, 158, 11, 0.25)',
+              textAlign: 'left',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '13px', color: '#94a3b8' }}>Monthly Budget Limit:</span>
+                <span style={{ fontSize: '14px', fontWeight: 800, color: '#f8fafc' }}>{currencySymbol}{budgetLimitWarning.limit.toLocaleString()}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '13px', color: '#94a3b8' }}>Already Spent:</span>
+                <span style={{ fontSize: '14px', fontWeight: 700, color: '#f59e0b' }}>{currencySymbol}{budgetLimitWarning.spentBefore.toLocaleString()}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '6px' }}>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: '#ef4444' }}>This Expense:</span>
+                <span style={{ fontSize: '15px', fontWeight: 900, color: '#ef4444' }}>+{currencySymbol}{budgetLimitWarning.amount.toLocaleString()}</span>
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: '12px', padding: '10px', fontSize: '11.5px', color: '#fbbf24', textAlign: 'left', lineHeight: 1.4 }}>
+              💡 <strong>Zen Alert:</strong> Total kharcha <strong>{currencySymbol}{(budgetLimitWarning.spentBefore + budgetLimitWarning.amount).toLocaleString()}</strong> ho jayega, jo budget se <strong>{currencySymbol}{((budgetLimitWarning.spentBefore + budgetLimitWarning.amount) - budgetLimitWarning.limit).toLocaleString()}</strong> zyada hai!
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setBudgetLimitWarning(null);
+                  setPendingQuickTx(null);
+                  setInputQuery('');
+                }}
+                style={{
+                  width: '100%',
+                  padding: '13px',
+                  borderRadius: '16px',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  color: '#ffffff',
+                  fontWeight: 900,
+                  fontSize: '14px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  boxShadow: '0 8px 20px rgba(16, 185, 129, 0.35)'
+                }}
+              >
+                Cancel Expense (Stay within Budget) 🛡️
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (pendingQuickTx) {
+                    onSaveTransaction(pendingQuickTx);
+                    try {
+                      confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+                    } catch (_) {}
+                    setLastSavedSummary(`Logged beyond limit ⚠️ Saved ${currencySymbol}${pendingQuickTx.amount} for ${pendingQuickTx.title}`);
+                    setInputQuery('');
+                    setTimeout(() => setLastSavedSummary(null), 4000);
+                  }
+                  setBudgetLimitWarning(null);
+                  setPendingQuickTx(null);
+                }}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#94a3b8',
+                  fontSize: '11.5px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  padding: '6px',
+                  textDecoration: 'underline'
+                }}
+              >
+                Log anyway (Exceed Limit)
+              </button>
+            </div>
           </div>
         </div>,
         document.body
