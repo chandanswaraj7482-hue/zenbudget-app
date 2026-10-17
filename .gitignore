@@ -57,3 +57,4 @@ zenbudget_decoded/
 *.aab
 playstore_release/
 .env*
+.env

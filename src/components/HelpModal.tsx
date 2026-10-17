@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { HelpCircle, X, Bot, Star, Mail, Send, MessageSquare, Sparkles, ThumbsUp, CheckCircle, CheckCircle2, Play, Lock } from 'lucide-react';
+import { HelpCircle, X, Bot, Star, Mail, Send, MessageSquare, Sparkles, ThumbsUp, CheckCircle, CheckCircle2, Play, Lock, ArrowLeft } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { admobService } from '../services/admobService';
 import { GoogleGenAI } from '@google/genai';
@@ -617,39 +617,50 @@ ${JSON.stringify(structCtx, null, 2)}`;
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(15, 23, 42, 0.65)',
-      backdropFilter: 'blur(8px)',
+      backgroundColor: 'var(--bg-dark, #090d16)',
       display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
+      flexDirection: 'column',
       zIndex: 1100,
-      padding: '20px',
+      padding: 0,
       animation: 'fadeIn 0.2s ease-out'
-    }} onClick={onClose}>
+    }}>
       <div 
-        className="glass-panel"
         style={{
           width: '100%',
-          maxWidth: '480px',
-          height: '85vh',
-          maxHeight: '640px',
+          maxWidth: '520px',
+          height: '100%',
+          margin: '0 auto',
           display: 'flex',
           flexDirection: 'column',
-          padding: '18px',
-          borderRadius: '28px',
+          padding: '16px 16px 20px 16px',
           position: 'relative',
-          border: '1px solid rgba(16, 185, 129, 0.3)',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(16, 185, 129, 0.15)',
-          animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+          background: 'var(--bg-dark, #090d16)',
+          boxSizing: 'border-box'
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <HelpCircle size={18} style={{ color: 'var(--primary)' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button
+              onClick={onClose}
+              style={{
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '12px',
+                width: '36px',
+                height: '36px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: 'var(--text-primary, #ffffff)'
+              }}
+              title="Back"
+            >
+              <ArrowLeft size={18} />
+            </button>
             <div>
-              <h3 style={{ fontSize: '15px', fontWeight: 800, margin: 0 }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: 'var(--text-primary, #ffffff)' }}>
                 {isPremiumUser ? '👑 Zen Pro AI Coach' : '🌿 Zen AI Coach'}
               </h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px', flexWrap: 'wrap' }}>

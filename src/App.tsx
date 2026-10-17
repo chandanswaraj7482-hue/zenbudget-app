@@ -4118,18 +4118,46 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     }
 
     try {
-      // Flexible lookup matching ID slice, couple_code, referral_code, or full UUID
-      const searchPattern = strippedInput ? `%${strippedInput}%` : `%${rawInput}%`;
-      const { data: allProfiles, error: partnerErr } = await supabase
+      // 1. Direct query matching exact code or partial
+      let candidates: any[] = [];
+      const orFilters = [
+        `couple_code.ilike.${rawInput}`,
+        `referral_code.ilike.${rawInput}`,
+        `couple_code.ilike.%${rawInput}%`,
+        `referral_code.ilike.%${rawInput}%`,
+        `id.ilike.${rawInput}%`
+      ];
+
+      if (strippedInput && strippedInput !== rawInput) {
+        orFilters.push(`couple_code.ilike.%${strippedInput}%`);
+        orFilters.push(`referral_code.ilike.%${strippedInput}%`);
+      }
+
+      const { data: directProfiles, error: partnerErr } = await supabase
         .from('profiles')
         .select('id, name, couple_code, referral_code, subscription_tier, family_group_id')
-        .or(`couple_code.ilike.${searchPattern},referral_code.ilike.${searchPattern}`)
+        .or(orFilters.join(','))
         .neq('id', currentProfileId)
         .limit(50);
 
-      if (partnerErr) throw partnerErr;
+      if (partnerErr) {
+        console.warn('Direct partner search error, falling back:', partnerErr);
+      } else if (directProfiles && directProfiles.length > 0) {
+        candidates = directProfiles;
+      }
 
-      const partnerProf = (allProfiles || []).find(p => {
+      // 2. Fallback: If no candidate found (e.g. hyphens mismatch like CPQI7ILG2E vs CP-QI7I-LG2E), fetch recent profiles
+      if (candidates.length === 0) {
+        const { data: fallbackProfiles } = await supabase
+          .from('profiles')
+          .select('id, name, couple_code, referral_code, subscription_tier, family_group_id')
+          .neq('id', currentProfileId)
+          .limit(100);
+
+        candidates = fallbackProfiles || [];
+      }
+
+      const partnerProf = candidates.find(p => {
         if (!p || !p.id) return false;
         const pIdCode = (p.id || '').replace(/-/g, '').slice(0, 8).toUpperCase();
         const pIdShort = (p.id || '').slice(0, 8).toUpperCase();
@@ -4138,15 +4166,16 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         const rCode = (p.referral_code || '').toUpperCase();
         const cStripped = cCode.replace(/[^A-Z0-9]/g, '');
         const rStripped = rCode.replace(/[^A-Z0-9]/g, '');
+        const pIdStripped = pIdFull.replace(/[^A-Z0-9]/g, '');
 
         return pIdShort === rawInput ||
                pIdCode === rawInput ||
                pIdFull.startsWith(rawInput) ||
+               pIdStripped.startsWith(strippedInput) ||
                cCode === rawInput || 
                rCode === rawInput || 
-               (cStripped && cStripped === strippedInput) || 
-               (rStripped && rStripped === strippedInput) ||
-               (cStripped && strippedInput && cStripped.includes(strippedInput));
+               (cStripped && (cStripped === strippedInput || cStripped.includes(strippedInput))) || 
+               (rStripped && (rStripped === strippedInput || rStripped.includes(strippedInput)));
       });
 
       if (!partnerProf) {
@@ -4154,7 +4183,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         return false;
       }
 
-      const isPartnerPremium = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime', 'pro'].includes(partnerProf.subscription_tier || '');
+      const isPartnerPremium = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime', 'pro', 'trial'].includes(partnerProf.subscription_tier || '');
       if (!isPartnerPremium) {
         triggerToast('👑 Premium Compulsory: Both members MUST have an active Premium Plan to connect! Partner account is on the Free plan.', 'warning');
         setIsSubModalOpen(true);

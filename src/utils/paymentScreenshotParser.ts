@@ -150,7 +150,7 @@ If amount is visible anywhere (e.g. ₹ 500, Rs. 1,200, Amount Transferred: 5000
       let response;
       try {
         response = await ai.models.generateContent({
-          model: 'gemini-3.5-flash-lite',
+          model: 'gemini-3.8-flash',
           contents: [
             {
               role: 'user',
@@ -167,9 +167,9 @@ If amount is visible anywhere (e.g. ₹ 500, Rs. 1,200, Amount Transferred: 5000
           ]
         });
       } catch (modelErr) {
-        console.warn('Gemini 3.5 flash lite retry with 3.8 flash:', modelErr);
+        console.warn('Gemini 3.8 flash retry with flash:', modelErr);
         response = await ai.models.generateContent({
-          model: 'gemini-3.8-flash',
+          model: 'gemini-2.5-flash',
           contents: [
             {
               role: 'user',
