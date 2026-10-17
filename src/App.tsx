@@ -5048,120 +5048,152 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         )}
       </main>
 
-      {/* Glass Bottom Navigation Bar */}
+      {/* Floating Modern Glass Island Navigation Bar */}
       <nav style={{
         position: 'fixed',
-        bottom: 0,
+        bottom: '12px',
         left: '50%',
         transform: 'translateX(-50%)',
-        width: '100%',
-        maxWidth: '520px',
-        background: 'var(--bg-nav-glass)',
-        borderTop: '1px solid var(--border-divider)',
-        backdropFilter: 'blur(20px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+        width: 'calc(100% - 24px)',
+        maxWidth: '480px',
+        background: theme === 'light' ? 'rgba(255, 255, 255, 0.92)' : 'rgba(15, 23, 42, 0.88)',
+        border: theme === 'light' ? '1px solid rgba(0,0,0,0.08)' : '1px solid rgba(255, 255, 255, 0.12)',
+        borderRadius: '26px',
+        backdropFilter: 'blur(24px) saturate(190%)',
+        WebkitBackdropFilter: 'blur(24px) saturate(190%)',
         display: 'flex',
+        alignItems: 'center',
         justifyContent: 'space-around',
-        padding: '12px 10px calc(env(safe-area-inset-bottom) + 16px) 10px',
-        zIndex: 999
+        padding: '6px 8px calc(env(safe-area-inset-bottom) + 6px) 8px',
+        boxShadow: theme === 'light' 
+          ? '0 12px 36px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0,0,0,0.04)' 
+          : '0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(34, 197, 94, 0.12)',
+        zIndex: 999,
+        transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
       }}>
+        {/* 1. Home / Dashboard */}
         <button
           onClick={() => handleNavClick('dashboard')}
           style={{
-            background: 'none',
-            border: 'none',
+            background: activeView === 'dashboard' ? 'rgba(34, 197, 94, 0.15)' : 'transparent',
+            border: activeView === 'dashboard' ? '1px solid rgba(34, 197, 94, 0.35)' : '1px solid transparent',
+            borderRadius: '18px',
+            padding: '7px 12px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '4px',
-            color: activeView === 'dashboard' ? 'var(--primary)' : 'var(--text-muted)',
+            gap: '3px',
+            color: activeView === 'dashboard' ? '#22c55e' : 'var(--text-muted)',
             cursor: 'pointer',
-            fontSize: '10px',
-            fontWeight: 600,
-            transition: 'var(--transition-smooth)'
+            fontSize: '11px',
+            fontWeight: activeView === 'dashboard' ? 800 : 600,
+            transition: 'all 0.2s ease',
+            flex: 1
           }}
         >
-          <LayoutDashboard size={20} style={{ color: activeView === 'dashboard' ? 'var(--primary)' : undefined }} />
+          <LayoutDashboard size={20} strokeWidth={activeView === 'dashboard' ? 2.6 : 2} style={{ color: activeView === 'dashboard' ? '#22c55e' : undefined }} />
           <span>{t('dashboard', { defaultValue: 'Home' })}</span>
         </button>
 
+        {/* 2. Ledger / Transactions */}
         <button
           onClick={() => handleNavClick('transactions')}
           style={{
-            background: 'none',
-            border: 'none',
+            background: activeView === 'transactions' ? 'rgba(34, 197, 94, 0.15)' : 'transparent',
+            border: activeView === 'transactions' ? '1px solid rgba(34, 197, 94, 0.35)' : '1px solid transparent',
+            borderRadius: '18px',
+            padding: '7px 12px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '4px',
-            color: activeView === 'transactions' ? 'var(--primary)' : 'var(--text-muted)',
+            gap: '3px',
+            color: activeView === 'transactions' ? '#22c55e' : 'var(--text-muted)',
             cursor: 'pointer',
-            fontSize: '10px',
-            fontWeight: 600,
-            transition: 'var(--transition-smooth)'
+            fontSize: '11px',
+            fontWeight: activeView === 'transactions' ? 800 : 600,
+            transition: 'all 0.2s ease',
+            flex: 1
           }}
         >
-          <Receipt size={20} style={{ color: activeView === 'transactions' ? 'var(--primary)' : undefined }} />
+          <Receipt size={20} strokeWidth={activeView === 'transactions' ? 2.6 : 2} style={{ color: activeView === 'transactions' ? '#22c55e' : undefined }} />
           <span>{t('ledger', { defaultValue: 'Ledger' })}</span>
         </button>
 
+        {/* Center Quick Action Floating Add Button */}
+        <button
+          onClick={() => {
+            if (checkExpiredGuard('log new transactions')) return;
+            setEditingTransaction(null);
+            setIsModalOpen(true);
+          }}
+          title="Add Transaction"
+          style={{
+            background: 'linear-gradient(135deg, #22c55e 0%, #10b981 50%, #06b6d4 100%)',
+            border: 'none',
+            borderRadius: '50%',
+            width: '46px',
+            height: '46px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#ffffff',
+            boxShadow: '0 6px 18px rgba(34, 197, 94, 0.5), 0 0 12px rgba(6, 182, 212, 0.3)',
+            cursor: 'pointer',
+            margin: '0 4px',
+            flexShrink: 0,
+            transition: 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)'
+          }}
+          onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.92)')}
+          onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+        >
+          <Plus size={24} strokeWidth={3} />
+        </button>
+
+        {/* 3. Budget Limits */}
         <button
           onClick={() => handleNavClick('budgets')}
           style={{
-            background: 'none',
-            border: 'none',
+            background: activeView === 'budgets' ? 'rgba(34, 197, 94, 0.15)' : 'transparent',
+            border: activeView === 'budgets' ? '1px solid rgba(34, 197, 94, 0.35)' : '1px solid transparent',
+            borderRadius: '18px',
+            padding: '7px 12px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '4px',
-            color: activeView === 'budgets' ? 'var(--primary)' : 'var(--text-muted)',
+            gap: '3px',
+            color: activeView === 'budgets' ? '#22c55e' : 'var(--text-muted)',
             cursor: 'pointer',
-            fontSize: '10px',
-            fontWeight: 600,
-            transition: 'var(--transition-smooth)'
+            fontSize: '11px',
+            fontWeight: activeView === 'budgets' ? 800 : 600,
+            transition: 'all 0.2s ease',
+            flex: 1
           }}
         >
-          <PiggyBank size={20} style={{ color: activeView === 'budgets' ? 'var(--primary)' : undefined }} />
+          <PiggyBank size={20} strokeWidth={activeView === 'budgets' ? 2.6 : 2} style={{ color: activeView === 'budgets' ? '#22c55e' : undefined }} />
           <span>{t('limits', { defaultValue: 'Limits' })}</span>
         </button>
 
-        <button
-          onClick={() => handleNavClick('analytics')}
-          style={{
-            background: 'none',
-            border: 'none',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '4px',
-            color: activeView === 'analytics' ? 'var(--primary)' : 'var(--text-muted)',
-            cursor: 'pointer',
-            fontSize: '10px',
-            fontWeight: 600,
-            transition: 'var(--transition-smooth)'
-          }}
-        >
-          <BarChart3 size={20} style={{ color: activeView === 'analytics' ? 'var(--primary)' : undefined }} />
-          <span>{t('stats', { defaultValue: 'Stats' })}</span>
-        </button>
-
+        {/* 4. More & Tools Hub */}
         <button
           onClick={() => handleNavClick('more')}
           style={{
-            background: 'none',
-            border: 'none',
+            background: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 'rgba(34, 197, 94, 0.15)' : 'transparent',
+            border: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? '1px solid rgba(34, 197, 94, 0.35)' : '1px solid transparent',
+            borderRadius: '18px',
+            padding: '7px 12px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '4px',
-            color: ['more', 'profile', 'wishlist', 'simulator', 'forest', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 'var(--primary)' : 'var(--text-muted)',
+            gap: '3px',
+            color: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? '#22c55e' : 'var(--text-muted)',
             cursor: 'pointer',
-            fontSize: '10px',
-            fontWeight: 600,
-            transition: 'var(--transition-smooth)'
+            fontSize: '11px',
+            fontWeight: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 800 : 600,
+            transition: 'all 0.2s ease',
+            flex: 1
           }}
         >
-          <Grid size={20} style={{ color: ['more', 'profile', 'wishlist', 'simulator', 'forest', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 'var(--primary)' : undefined }} />
+          <Grid size={20} strokeWidth={['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 2.6 : 2} style={{ color: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? '#22c55e' : undefined }} />
           <span>{t('more', { defaultValue: 'More' })}</span>
         </button>
       </nav>
