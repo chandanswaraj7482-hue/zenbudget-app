@@ -447,54 +447,49 @@ export const Budgets: React.FC<BudgetsProps> = ({
           return (
             <div 
               key={cat.id} 
-              className="glass-panel" 
+              className="fintech-card" 
               style={{ 
                 display: 'flex', 
                 flexDirection: 'column', 
-                gap: '10px',
-                background: 'var(--bg-card)',
-                border: isOver ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid rgba(255, 255, 255, 0.08)',
-                borderRadius: '18px',
-                padding: '14px 16px',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
+                gap: '12px',
+                background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.88) 0%, rgba(11, 17, 31, 0.94) 100%)',
+                border: isOver ? '1.5px solid rgba(244, 63, 94, 0.45)' : '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '22px',
+                padding: '16px 18px',
+                boxShadow: isOver ? '0 8px 24px rgba(244, 63, 94, 0.15)' : '0 4px 18px rgba(0,0,0,0.3)'
               }}
             >
               {/* Category Header Row */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', width: '100%' }}>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
                   <div style={{ 
-                    width: '40px', 
-                    height: '40px', 
-                    borderRadius: '12px', 
+                    width: '42px', 
+                    height: '42px', 
+                    borderRadius: '14px', 
                     backgroundColor: cat.bg, 
+                    border: `1px solid ${cat.color}40`,
                     color: cat.color,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    flexShrink: 0
+                    flexShrink: 0,
+                    boxShadow: `0 4px 12px ${cat.color}20`
                   }}>
                     {cat.icon}
                   </div>
                   <div style={{ minWidth: 0, flex: '1 1 0%', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                      <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{cat.label}</h4>
+                      <h4 style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{cat.label}</h4>
                       {limit > 0 && (
-                        <span style={{ 
-                          fontSize: '10px', 
-                          fontWeight: 800, 
-                          padding: '2px 7px', 
-                          borderRadius: '6px', 
-                          background: 'rgba(34, 197, 94, 0.12)', 
-                          color: '#22c55e', 
-                          border: '1px solid rgba(34, 197, 94, 0.25)',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.04em'
+                        <span className="fintech-badge" style={{ 
+                          fontSize: '9.5px', 
+                          padding: '2px 8px'
                         }}>
                           {bgt?.period === 'daily' ? 'Daily' : bgt?.period === 'weekly' ? 'Weekly' : bgt?.period === 'custom' ? `${bgt.customDays || 7}D Custom` : 'Monthly'}
                         </span>
                       )}
                     </div>
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginTop: '2px' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginTop: '3px' }}>
                       Spent: <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(spent, currencySymbol)}</strong> {limit > 0 ? `of ${formatCurrency(limit, currencySymbol)}` : ''}
                     </span>
                   </div>

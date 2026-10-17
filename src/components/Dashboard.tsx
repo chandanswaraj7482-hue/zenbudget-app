@@ -861,44 +861,53 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      {/* Main Glass Balance Card - Premium Design with Sub-Wallets & Glow */}
-      <div className="glass-panel" style={{
+      {/* Main Glass Balance Card - Ultra-Modern Fintech Card with Dynamic Glow */}
+      <div className="fintech-card" style={{
         position: 'relative',
         overflow: 'hidden',
         background: 'var(--bg-balance-card)',
-        border: '1px solid var(--border-card)',
-        borderRadius: '26px',
-        padding: '18px 20px',
+        border: '1.5px solid var(--border-balance-card)',
+        borderRadius: '28px',
+        padding: '22px 20px',
         marginBottom: '0px',
         boxShadow: 'var(--glow-shadow)'
       }}>
-        {/* Ambient Glow effect */}
+        {/* Ambient Top Glow effect */}
         <div style={{
           position: 'absolute',
-          top: '-60px',
-          right: '-60px',
-          width: '180px',
-          height: '180px',
-          background: 'radial-gradient(circle, rgba(34, 197, 94, 0.28) 0%, rgba(34, 197, 94, 0) 70%)',
+          top: '-70px',
+          right: '-70px',
+          width: '210px',
+          height: '210px',
+          background: 'radial-gradient(circle, rgba(16, 185, 129, 0.32) 0%, rgba(16, 185, 129, 0) 70%)',
+          pointerEvents: 'none'
+        }} />
+        <div style={{
+          position: 'absolute',
+          bottom: '-60px',
+          left: '-60px',
+          width: '160px',
+          height: '160px',
+          background: 'radial-gradient(circle, rgba(6, 182, 212, 0.2) 0%, rgba(6, 182, 212, 0) 70%)',
           pointerEvents: 'none'
         }} />
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#22c55e', fontWeight: 800 }}>
-              {familyMembers.length > 0 ? 'COMBINED FAMILY BALANCE' : 'TOTAL AVAILABLE BALANCE'}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#10b981', fontWeight: 800 }}>
+              {familyMembers.length > 0 ? 'COMBINED FAMILY BALANCE' : 'NET WORTH / TOTAL BALANCE'}
             </span>
-            <span style={{ fontSize: '9.5px', background: 'rgba(34, 197, 94, 0.15)', color: '#22c55e', padding: '2px 6px', borderRadius: '6px', fontWeight: 700 }}>
-              Live
+            <span className="fintech-badge" style={{ padding: '2px 7px', fontSize: '9px' }}>
+              ● Live
             </span>
           </div>
           <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>
-            All Accounts Combined
+            All Wallets
           </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', margin: '8px 0 12px 0', color: 'var(--text-primary)', minWidth: 0, maxWidth: '100%' }}>
-          <span style={{ fontSize: 'clamp(32px, 8.5vw, 44px)', fontWeight: 900, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#ffffff' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', margin: '10px 0 14px 0', color: 'var(--text-primary)', minWidth: 0, maxWidth: '100%' }}>
+          <span style={{ fontSize: 'clamp(34px, 8.8vw, 46px)', fontWeight: 900, letterSpacing: '-0.025em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#ffffff' }}>
             {formatCurrency(totalBalance, currencySymbol, 0)}
           </span>
         </div>
@@ -922,27 +931,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
         )}
 
         {/* Income / Expense Grid (Clickable to open Detailed Stats & Analytics) */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', borderTop: '1px solid var(--border-divider)', paddingTop: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', borderTop: '1px solid var(--border-divider)', paddingTop: '16px' }}>
           <div 
             onClick={onOpenAnalytics}
             style={{ 
               display: 'flex', 
               gap: '10px', 
               alignItems: 'center', 
-              background: 'rgba(34, 197, 94, 0.08)', 
-              border: '1px solid rgba(34, 197, 94, 0.22)', 
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.04) 100%)', 
+              border: '1px solid rgba(16, 185, 129, 0.28)', 
               borderRadius: '20px', 
               padding: '12px 14px',
               cursor: onOpenAnalytics ? 'pointer' : 'default',
-              transition: 'all 0.15s ease'
+              transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+              boxShadow: '0 4px 14px rgba(16, 185, 129, 0.08)'
             }}
           >
-            <div style={{ width: '32px', height: '32px', borderRadius: '12px', backgroundColor: 'rgba(34, 197, 94, 0.22)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <ArrowUpRight size={18} />
+            <div style={{ width: '34px', height: '34px', borderRadius: '12px', backgroundColor: 'rgba(16, 185, 129, 0.25)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <ArrowUpRight size={19} />
             </div>
             <div>
               <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>{t('income')}</span>
-              <p style={{ fontSize: '14px', fontWeight: 800, color: '#34d399', margin: 0 }}>
+              <p style={{ fontSize: '14.5px', fontWeight: 800, color: '#10b981', margin: 0 }}>
                 +{formatCurrency(income, currencySymbol, 0)}
               </p>
             </div>
@@ -954,20 +964,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
               display: 'flex', 
               gap: '10px', 
               alignItems: 'center', 
-              background: 'rgba(239, 68, 68, 0.08)', 
-              border: '1px solid rgba(239, 68, 68, 0.22)', 
+              background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.12) 0%, rgba(244, 63, 94, 0.04) 100%)', 
+              border: '1px solid rgba(244, 63, 94, 0.28)', 
               borderRadius: '20px', 
               padding: '12px 14px',
               cursor: onOpenAnalytics ? 'pointer' : 'default',
-              transition: 'all 0.15s ease'
+              transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+              boxShadow: '0 4px 14px rgba(244, 63, 94, 0.08)'
             }}
           >
-            <div style={{ width: '32px', height: '32px', borderRadius: '12px', backgroundColor: 'rgba(239, 68, 68, 0.22)', color: '#f87171', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <ArrowDownRight size={18} />
+            <div style={{ width: '34px', height: '34px', borderRadius: '12px', backgroundColor: 'rgba(244, 63, 94, 0.25)', color: '#f43f5e', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <ArrowDownRight size={19} />
             </div>
             <div>
               <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>{t('expenses')}</span>
-              <p style={{ fontSize: '14px', fontWeight: 800, color: '#f87171', margin: 0 }}>
+              <p style={{ fontSize: '14.5px', fontWeight: 800, color: '#f43f5e', margin: 0 }}>
                 -{formatCurrency(expenses, currencySymbol, 0)}
               </p>
             </div>
@@ -976,13 +987,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {/* Monthly Budget Progress Bar */}
         {showBudgetBar && (
-          <div style={{ marginTop: '16px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ marginTop: '16px', background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '12px', fontWeight: 700, color: '#94a3b8' }}>Monthly budget</span>
-              <span style={{ fontSize: '13px', fontWeight: 800, color: '#34d399' }}>{formatCurrency(budgetLeft, currencySymbol, 0)} left</span>
+              <span style={{ fontSize: '13px', fontWeight: 800, color: '#10b981' }}>{formatCurrency(budgetLeft, currencySymbol, 0)} left</span>
             </div>
-            <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.08)', borderRadius: '4px', overflow: 'hidden' }}>
-              <div style={{ width: `${budgetPercent}%`, height: '100%', background: budgetPercent > 90 ? '#ef4444' : budgetPercent > 75 ? '#f59e0b' : '#34d399', borderRadius: '4px', transition: 'width 0.4s ease' }} />
+            <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.08)', borderRadius: '99px', overflow: 'hidden' }}>
+              <div style={{ width: `${budgetPercent}%`, height: '100%', background: budgetPercent > 90 ? '#f43f5e' : budgetPercent > 75 ? '#f59e0b' : '#10b981', borderRadius: '99px', transition: 'width 0.4s ease' }} />
             </div>
           </div>
         )}
@@ -991,30 +1002,30 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(5, 1fr)',
-          gap: '6px',
+          gap: '8px',
           marginTop: '16px',
-          paddingTop: '14px',
+          paddingTop: '16px',
           borderTop: '1px solid var(--border-divider)'
         }}>
           <button
             type="button"
             onClick={onAddTransactionClick}
             style={{
-              background: 'rgba(34, 197, 94, 0.12)',
-              border: '1px solid rgba(34, 197, 94, 0.3)',
-              borderRadius: '16px',
-              padding: '10px 2px',
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.16) 0%, rgba(16, 185, 129, 0.05) 100%)',
+              border: '1px solid rgba(16, 185, 129, 0.32)',
+              borderRadius: '18px',
+              padding: '10px 4px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               gap: '6px',
-              color: '#34d399',
+              color: '#10b981',
               cursor: 'pointer',
-              transition: 'all 0.15s ease'
+              transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
             }}
           >
-            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#22c55e', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Plus size={18} />
+            <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)' }}>
+              <Plus size={18} strokeWidth={2.8} />
             </div>
             <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#ffffff' }}>Add</span>
           </button>
@@ -1025,21 +1036,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
               type="button"
               onClick={onOpenAnalytics}
               style={{
-                background: 'rgba(245, 158, 11, 0.12)',
-                border: '1px solid rgba(245, 158, 11, 0.3)',
-                borderRadius: '16px',
-                padding: '10px 2px',
+                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, rgba(245, 158, 11, 0.05) 100%)',
+                border: '1px solid rgba(245, 158, 11, 0.32)',
+                borderRadius: '18px',
+                padding: '10px 4px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: '6px',
                 color: '#fbbf24',
                 cursor: 'pointer',
-                transition: 'all 0.15s ease'
+                transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
               }}
             >
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <BarChart3 size={16} />
+              <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(245, 158, 11, 0.4)' }}>
+                <BarChart3 size={17} />
               </div>
               <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#ffffff' }}>Stats</span>
             </button>
@@ -1050,21 +1061,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
               type="button"
               onClick={onScanReceiptClick}
               style={{
-                background: 'rgba(6, 182, 212, 0.12)',
-                border: '1px solid rgba(6, 182, 212, 0.3)',
-                borderRadius: '16px',
-                padding: '10px 2px',
+                background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.16) 0%, rgba(6, 182, 212, 0.05) 100%)',
+                border: '1px solid rgba(6, 182, 212, 0.32)',
+                borderRadius: '18px',
+                padding: '10px 4px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: '6px',
                 color: '#22d3ee',
                 cursor: 'pointer',
-                transition: 'all 0.15s ease'
+                transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
               }}
             >
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#06b6d4', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Camera size={16} />
+              <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(6, 182, 212, 0.4)' }}>
+                <Camera size={17} />
               </div>
               <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#ffffff' }}>Scan Bill</span>
             </button>
@@ -1075,21 +1086,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
               type="button"
               onClick={onOpenAI}
               style={{
-                background: 'rgba(168, 85, 247, 0.12)',
-                border: '1px solid rgba(168, 85, 247, 0.3)',
-                borderRadius: '16px',
-                padding: '10px 2px',
+                background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.16) 0%, rgba(168, 85, 247, 0.05) 100%)',
+                border: '1px solid rgba(168, 85, 247, 0.32)',
+                borderRadius: '18px',
+                padding: '10px 4px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: '6px',
                 color: '#c084fc',
                 cursor: 'pointer',
-                transition: 'all 0.15s ease'
+                transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
               }}
             >
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Bot size={16} />
+              <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(168, 85, 247, 0.4)' }}>
+                <Bot size={17} />
               </div>
               <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#ffffff' }}>AI Coach</span>
             </button>
@@ -1099,21 +1110,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
             type="button"
             onClick={onAddAccountClick}
             style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: '16px',
-              padding: '10px 2px',
+              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%)',
+              border: '1px solid rgba(255, 255, 255, 0.14)',
+              borderRadius: '18px',
+              padding: '10px 4px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               gap: '6px',
-              color: '#94a3b8',
+              color: '#cbd5e1',
               cursor: 'pointer',
-              transition: 'all 0.15s ease'
+              transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
             }}
           >
-            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.12)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Wallet size={16} />
+            <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.14)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)' }}>
+              <Wallet size={17} />
             </div>
             <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#ffffff' }}>+ Wallet</span>
           </button>

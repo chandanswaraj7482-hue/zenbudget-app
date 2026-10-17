@@ -96,41 +96,47 @@ const SwipeableTransactionItem = ({ t, meta, isMenuOpen, currencySymbol, formatC
           gap: isMenuOpen ? '12px' : '0',
           position: 'relative',
           zIndex: 1,
-          background: 'var(--bg-card)',
+          background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.88) 0%, rgba(11, 17, 31, 0.94) 100%)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '20px',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.25)',
           touchAction: 'pan-y'
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', width: '100%' }}>
           <div 
-            style={{ display: 'flex', gap: '10px', alignItems: 'center', cursor: 'pointer', flex: '1 1 0%', minWidth: 0 }}
+            style={{ display: 'flex', gap: '12px', alignItems: 'center', cursor: 'pointer', flex: '1 1 0%', minWidth: 0 }}
             onClick={() => onEditTransaction(t)}
           >
             <div style={{ 
-              width: '38px', 
-              height: '38px', 
-              borderRadius: '12px', 
-              backgroundColor: t.type === 'income' ? 'var(--success-glow)' : meta.bg, 
-              color: t.type === 'income' ? 'var(--success)' : meta.color,
+              width: '42px', 
+              height: '42px', 
+              borderRadius: '14px', 
+              backgroundColor: t.type === 'income' ? 'rgba(16, 185, 129, 0.16)' : meta.bg, 
+              border: `1px solid ${t.type === 'income' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
+              color: t.type === 'income' ? '#10b981' : meta.color,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              flexShrink: 0
+              flexShrink: 0,
+              boxShadow: t.type === 'income' ? '0 4px 12px rgba(16, 185, 129, 0.2)' : 'none'
             }}>
               {getCategoryIcon(t.category, t.type)}
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <h4 style={{ fontSize: '13.5px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', margin: 0, lineHeight: 1.3 }}>
+              <h4 style={{ fontSize: '14px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', margin: 0, lineHeight: 1.3, color: 'var(--text-primary)' }}>
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>{t.title}</span>
                 {t.paidBy && (
                   <span style={{ 
                     fontSize: '9px', 
                     fontWeight: 800, 
-                    padding: '2px 6px', 
-                    borderRadius: '8px', 
-                    background: t.paidBy === 'You' ? 'rgba(34,197,94,0.1)' : 'rgba(236,72,153,0.1)', 
-                    color: t.paidBy === 'You' ? 'var(--primary)' : '#ec4899',
+                    padding: '2px 7px', 
+                    borderRadius: '999px', 
+                    background: t.paidBy === 'You' ? 'rgba(16, 185, 129, 0.14)' : 'rgba(236,72,153,0.14)', 
+                    border: `1px solid ${t.paidBy === 'You' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(236,72,153,0.3)'}`,
+                    color: t.paidBy === 'You' ? '#10b981' : '#ec4899',
                     textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
+                    letterSpacing: '0.04em',
                     flexShrink: 0
                   }}>
                     {t.paidBy}
@@ -140,12 +146,13 @@ const SwipeableTransactionItem = ({ t, meta, isMenuOpen, currencySymbol, formatC
                   <span style={{
                     fontSize: '9px',
                     fontWeight: 800,
-                    padding: '2px 6px',
-                    borderRadius: '8px',
+                    padding: '2px 7px',
+                    borderRadius: '999px',
                     background: 'rgba(139,92,246,0.15)',
+                    border: '1px solid rgba(139,92,246,0.3)',
                     color: '#a78bfa',
                     textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
+                    letterSpacing: '0.04em',
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '3px',
@@ -165,9 +172,9 @@ const SwipeableTransactionItem = ({ t, meta, isMenuOpen, currencySymbol, formatC
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
             <span style={{ 
-              fontSize: '14px', 
-              fontWeight: 700, 
-              color: t.type === 'income' ? 'var(--success)' : 'var(--text-primary)',
+              fontSize: '15px', 
+              fontWeight: 800, 
+              color: t.type === 'income' ? '#10b981' : 'var(--text-primary)',
               whiteSpace: 'nowrap'
             }}>
               {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount, currencySymbol)}

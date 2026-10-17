@@ -115,7 +115,7 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
           {t('money_tools')}
         </h3>
 
-        <div className="glass-panel" style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div className="fintech-card" style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {/* Loans & Udhaar Tracker */}
           {onNavigateToLoans && (
             <button
@@ -124,17 +124,18 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '14px',
-                borderRadius: '14px',
-                border: 'none',
-                background: 'rgba(255,255,255,0.02)',
+                padding: '12px 14px',
+                borderRadius: '16px',
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+                background: 'rgba(255, 255, 255, 0.03)',
                 cursor: 'pointer',
                 color: 'var(--text-primary)',
-                textAlign: 'left'
+                textAlign: 'left',
+                transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '13px', background: 'rgba(245, 158, 11, 0.16)', border: '1px solid rgba(245, 158, 11, 0.3)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(245, 158, 11, 0.15)' }}>
                   <HandCoins size={20} />
                 </div>
                 <div>
@@ -153,17 +154,18 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '14px',
-              borderRadius: '14px',
-              border: 'none',
-              background: 'rgba(255,255,255,0.02)',
+              padding: '12px 14px',
+              borderRadius: '16px',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+              background: 'rgba(255, 255, 255, 0.03)',
               cursor: 'pointer',
               color: 'var(--text-primary)',
-              textAlign: 'left'
+              textAlign: 'left',
+              transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '13px', background: 'rgba(245, 158, 11, 0.16)', border: '1px solid rgba(245, 158, 11, 0.3)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(245, 158, 11, 0.15)' }}>
                 <Hourglass size={20} />
               </div>
               <div>
@@ -181,17 +183,18 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '14px',
-              borderRadius: '14px',
-              border: 'none',
-              background: 'rgba(255,255,255,0.02)',
+              padding: '12px 14px',
+              borderRadius: '16px',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+              background: 'rgba(255, 255, 255, 0.03)',
               cursor: 'pointer',
               color: 'var(--text-primary)',
-              textAlign: 'left'
+              textAlign: 'left',
+              transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(34, 197, 94, 0.15)', color: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '13px', background: 'rgba(16, 185, 129, 0.16)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.15)' }}>
                 <TrendingUp size={20} />
               </div>
               <div>
@@ -209,30 +212,29 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '14px',
-              borderRadius: '14px',
-              border: 'none',
-              background: 'rgba(255,255,255,0.02)',
+              padding: '12px 14px',
+              borderRadius: '16px',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+              background: 'rgba(255, 255, 255, 0.03)',
               cursor: 'pointer',
               color: 'var(--text-primary)',
-              textAlign: 'left'
+              textAlign: 'left',
+              transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(139, 92, 246, 0.15)', color: '#a78bfa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '13px', background: 'rgba(139, 92, 246, 0.16)', border: '1px solid rgba(139, 92, 246, 0.3)', color: '#a78bfa', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(139, 92, 246, 0.15)' }}>
                 <Users size={20} />
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>{t('shared_budget')}</p>
-                  <span style={{
-                    background: 'linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)',
-                    color: '#fff',
+                  <span className="fintech-badge" style={{
+                    background: 'rgba(139, 92, 246, 0.18)',
+                    borderColor: 'rgba(139, 92, 246, 0.35)',
+                    color: '#c084fc',
                     fontSize: '9.5px',
-                    fontWeight: 800,
-                    padding: '2px 7px',
-                    borderRadius: '999px',
-                    letterSpacing: '0.04em'
+                    padding: '2px 7px'
                   }}>
                     👑 PRO
                   </span>
