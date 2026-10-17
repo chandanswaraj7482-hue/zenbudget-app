@@ -892,13 +892,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
         }} />
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-          <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-secondary)', fontWeight: 700 }}>
-            {familyMembers.length > 0 ? 'COMBINED FAMILY BALANCE' : t('total_balance')}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#22c55e', fontWeight: 800 }}>
+              {familyMembers.length > 0 ? 'COMBINED FAMILY BALANCE' : 'TOTAL AVAILABLE BALANCE'}
+            </span>
+            <span style={{ fontSize: '9.5px', background: 'rgba(34, 197, 94, 0.15)', color: '#22c55e', padding: '2px 6px', borderRadius: '6px', fontWeight: 700 }}>
+              Live
+            </span>
+          </div>
+          <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+            All Accounts Combined
           </span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', margin: '8px 0 12px 0', color: 'var(--text-primary)', minWidth: 0, maxWidth: '100%' }}>
-          <span style={{ fontSize: 'clamp(30px, 8vw, 42px)', fontWeight: 800, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-primary)' }}>
+          <span style={{ fontSize: 'clamp(32px, 8.5vw, 44px)', fontWeight: 900, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#ffffff' }}>
             {formatCurrency(totalBalance, currencySymbol, 0)}
           </span>
         </div>
