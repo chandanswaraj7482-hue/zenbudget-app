@@ -34,7 +34,14 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
   const [successMsg, setSuccessMsg] = useState('');
 
   // Lockscreen steps: 'auth' | 'onboard-pin' | 'onboard-confirm' | 'unlock' | 'forgot-pin-email' | 'forgot-pin-otp'
-  const [step, setStep] = useState<'auth' | 'onboard-pin' | 'onboard-confirm' | 'unlock' | 'forgot-pin-email' | 'forgot-pin-otp'>('auth');
+  const [step, setStep] = useState<'auth' | 'onboard-pin' | 'onboard-confirm' | 'unlock' | 'forgot-pin-email' | 'forgot-pin-otp'>(() => {
+    try {
+      const hasSession = localStorage.getItem('zb_local_session_profile') || localStorage.getItem('zb_profile_id') || localStorage.getItem('zb_user_pin');
+      return hasSession ? 'unlock' : 'auth';
+    } catch (_) {
+      return 'auth';
+    }
+  });
   const [userId, setUserId] = useState('');
   const [username, setUsername] = useState('');
   const [pin, setPin] = useState('');
@@ -819,15 +826,15 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
   }, [step]);
 
   useEffect(() => {
-    // Auto-trigger native biometrics on unlock screen unless explicitly disabled
+    // Auto-trigger native biometrics instantly when entering the 'unlock' PIN screen
     if (step === 'unlock' && !biometricTriggered.current && localStorage.getItem('zb_biometrics_enabled') !== 'false' && Capacitor.isNativePlatform()) {
       biometricTriggered.current = true;
       const timer = setTimeout(() => {
         triggerBiometricUnlock();
-      }, 350);
+      }, 200);
       return () => clearTimeout(timer);
     }
-  }, [step, biometricsAvailable, dbProfile]);
+  }, [step, dbProfile]);
 
   const [agreedTerms, setAgreedTerms] = useState(true);
 
