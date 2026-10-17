@@ -299,12 +299,12 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
               boxShadow: '0 6px 16px rgba(16, 185, 129, 0.35)',
               flexShrink: 0
             }}>
-              🎮
+              🧠
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'nowrap' }}>
                 <span style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  Zen Arcade &amp; Brain Hub
+                  Zen Financial IQ &amp; Calculators
                 </span>
                 <span style={{
                   fontSize: '9.5px',
@@ -321,11 +321,11 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
                   justifyContent: 'center',
                   flexShrink: 0
                 }}>
-                  3-in-1
+                  Smart Hub
                 </span>
               </div>
               <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: '3px 0 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                🎮 Coin Game • 🧠 Money IQ • ⚡ Afford?
+                🧠 60s Money IQ Quiz • ⚡ Can I Afford It?
               </p>
             </div>
           </div>
@@ -345,7 +345,7 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
             marginLeft: '8px',
             whiteSpace: 'nowrap'
           }}>
-            <span>Play</span>
+            <span>Explore</span>
             <ChevronRight size={14} />
           </div>
         </button>
@@ -404,7 +404,7 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ fontSize: '15px', fontWeight: 900, color: 'var(--text-primary, #fff)' }}>
-                    Zen Arcade &amp; Brain Hub
+                    Zen Financial IQ &amp; Calculators
                   </span>
                   <span style={{
                     fontSize: '9.5px',
@@ -421,11 +421,11 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
                     flexShrink: 0,
                     lineHeight: 1.2
                   }}>
-                    3-in-1
+                    Smart Hub
                   </span>
                 </div>
                 <p style={{ fontSize: '11px', color: 'var(--text-secondary, #94a3b8)', margin: '1px 0 0 0' }}>
-                  🎮 Arcade • 🧠 IQ Quiz • ⚡ Can I Afford It?
+                  🧠 60s Money IQ Quiz • ⚡ Can I Afford It?
                 </p>
               </div>
             </div>
