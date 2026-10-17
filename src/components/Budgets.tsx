@@ -17,7 +17,7 @@ import {
   CheckCircle2,
   Tv
 } from 'lucide-react';
-import type { CategoryBudget, CategoryType, Transaction } from '../types';
+import type { CategoryBudget, CategoryType, Transaction, BudgetPeriod } from '../types';
 import { formatCurrency } from '../utils/formatCurrency';
 import { playCelebrationSound, playNotificationSound } from '../utils/audio';
 import { Capacitor } from '@capacitor/core';
@@ -27,7 +27,7 @@ interface BudgetsProps {
   budgets: CategoryBudget[];
   transactions: Transaction[];
   currencySymbol: string;
-  onSaveBudget: (category: CategoryType, limit: number) => void;
+  onSaveBudget: (category: CategoryType, limit: number, period?: BudgetPeriod, customDays?: number) => void;
   isPremiumUser?: boolean;
   onOpenSubscriptionModal?: () => void;
 }
@@ -54,6 +54,8 @@ export const Budgets: React.FC<BudgetsProps> = ({
 }) => {
   const [editingCategory, setEditingCategory] = useState<CategoryType | null>(null);
   const [limitInput, setLimitInput] = useState<string>('');
+  const [selectedPeriod, setSelectedPeriod] = useState<BudgetPeriod>('monthly');
+  const [customDaysInput, setCustomDaysInput] = useState<string>('7');
   const [hiddenCategories, setHiddenCategories] = useState<string[]>(() => {
     try { return JSON.parse(localStorage.getItem('zb_hidden_categories') || '[]'); } catch { return []; }
   });
@@ -72,32 +74,83 @@ export const Budgets: React.FC<BudgetsProps> = ({
   const [adCountdown, setAdCountdown] = useState(10);
   const [adRewarded, setAdRewarded] = useState(false);
 
-  const currentMonth = new Date().getMonth();
-  const currentYear = new Date().getFullYear();
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  const todayStr = now.toISOString().split('T')[0];
 
   // Active limits currently set
   const activeLimitCount = budgets.filter(b => b.limit > 0).length;
   const maxAllowedSlots = isPremiumUser ? 999 : (FREE_BASE_LIMIT + bonusSlots);
   const isLimitCapped = !isPremiumUser && activeLimitCount >= maxAllowedSlots;
 
+  // Calculate current active window for a budget depending on period
+  const getActiveWindowForBudget = (b?: CategoryBudget) => {
+    const period = b?.period || 'monthly';
+    const nowMs = now.getTime();
+
+    if (period === 'daily') {
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const endOfDay = startOfDay + 24 * 60 * 60 * 1000 - 1;
+      return { startMs: startOfDay, endMs: endOfDay, label: 'Today', daysLeft: 1 };
+    }
+
+    if (period === 'weekly') {
+      const day = now.getDay();
+      const diffToMonday = (day + 6) % 7; // Monday as week start
+      const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday);
+      const startMs = monday.getTime();
+      const endMs = startMs + 7 * 24 * 60 * 60 * 1000 - 1;
+      const daysLeft = Math.max(1, Math.ceil((endMs - nowMs) / (24 * 60 * 60 * 1000)));
+      return { startMs, endMs, label: 'This Week', daysLeft };
+    }
+
+    if (period === 'custom') {
+      const days = Math.max(1, Number(b?.customDays) || 7);
+      const startBase = b?.startDate ? new Date(b.startDate).getTime() : nowMs;
+      const cycleMs = days * 24 * 60 * 60 * 1000;
+      const elapsed = Math.max(0, nowMs - startBase);
+      const cyclesPassed = Math.floor(elapsed / cycleMs);
+      const currentCycleStart = startBase + cyclesPassed * cycleMs;
+      const currentCycleEnd = currentCycleStart + cycleMs - 1;
+      const daysLeft = Math.max(1, Math.ceil((currentCycleEnd - nowMs) / (24 * 60 * 60 * 1000)));
+      return { startMs: currentCycleStart, endMs: currentCycleEnd, label: `${days} Days Cycle`, daysLeft };
+    }
+
+    // Default: 'monthly' (Auto-renews on the 1st of every calendar month)
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).getTime();
+    const daysLeft = Math.max(1, Math.ceil((endOfMonth - nowMs) / (24 * 60 * 60 * 1000)));
+    return { startMs: startOfMonth, endMs: endOfMonth, label: 'This Month', daysLeft };
+  };
+
   const getSpentAmount = (cat: CategoryType) => {
+    const b = budgets.find(item => item.category === cat);
+    const window = getActiveWindowForBudget(b);
+
     return transactions
       .filter(t => {
-        const txDate = new Date(t.date);
-        return t.type === 'expense' && 
-               t.category === cat && 
-               txDate.getMonth() === currentMonth && 
-               txDate.getFullYear() === currentYear;
+        if (t.type !== 'expense' || t.category !== cat) return false;
+        const txMs = new Date(t.date).getTime();
+        return txMs >= window.startMs && txMs <= window.endMs;
       })
       .reduce((sum, t) => sum + t.amount, 0);
   };
 
+  const getBudget = (cat: CategoryType) => {
+    return budgets.find(b => b.category === cat);
+  };
+
   const getBudgetLimit = (cat: CategoryType) => {
-    const b = budgets.find(b => b.category === cat);
+    const b = getBudget(cat);
     return b ? b.limit : 0;
   };
 
   const handleEditClick = (cat: CategoryType, currentLimit: number) => {
+    const existing = getBudget(cat);
+    setSelectedPeriod(existing?.period || 'monthly');
+    setCustomDaysInput(existing?.customDays ? String(existing.customDays) : '7');
+
     // For free users: Each budget limit setting / updating requires watching an Ad unless Premium!
     if (!isPremiumUser) {
       playNotificationSound();
@@ -123,7 +176,8 @@ export const Budgets: React.FC<BudgetsProps> = ({
     if (isNaN(val) || val < 0) {
       return;
     }
-    onSaveBudget(cat, val);
+    const days = selectedPeriod === 'custom' ? (parseInt(customDaysInput, 10) || 7) : undefined;
+    onSaveBudget(cat, val, selectedPeriod, days);
     setEditingCategory(null);
   };
 
@@ -379,8 +433,10 @@ export const Budgets: React.FC<BudgetsProps> = ({
       {/* Categories Budget List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         {CATEGORIES.filter(cat => !hiddenCategories.includes(cat.id) || getBudgetLimit(cat.id) > 0 || getSpentAmount(cat.id) > 0).map((cat) => {
+          const bgt = getBudget(cat.id);
           const limit = getBudgetLimit(cat.id);
           const spent = getSpentAmount(cat.id);
+          const windowInfo = getActiveWindowForBudget(bgt);
           const isEditing = editingCategory === cat.id;
           const isOver = limit > 0 && spent > limit;
 
@@ -399,11 +455,12 @@ export const Budgets: React.FC<BudgetsProps> = ({
                 boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', width: '100%' }}>
+              {/* Category Header Row */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', width: '100%' }}>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
                   <div style={{ 
-                    width: '38px', 
-                    height: '38px', 
+                    width: '40px', 
+                    height: '40px', 
                     borderRadius: '12px', 
                     backgroundColor: cat.bg, 
                     color: cat.color,
@@ -415,56 +472,32 @@ export const Budgets: React.FC<BudgetsProps> = ({
                     {cat.icon}
                   </div>
                   <div style={{ minWidth: 0, flex: '1 1 0%', overflow: 'hidden' }}>
-                    <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 1px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cat.label}</h4>
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      <h4 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{cat.label}</h4>
+                      {limit > 0 && (
+                        <span style={{ 
+                          fontSize: '10px', 
+                          fontWeight: 800, 
+                          padding: '2px 7px', 
+                          borderRadius: '6px', 
+                          background: 'rgba(34, 197, 94, 0.12)', 
+                          color: '#22c55e', 
+                          border: '1px solid rgba(34, 197, 94, 0.25)',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.04em'
+                        }}>
+                          {bgt?.period === 'daily' ? 'Daily' : bgt?.period === 'weekly' ? 'Weekly' : bgt?.period === 'custom' ? `${bgt.customDays || 7}D Custom` : 'Monthly'}
+                        </span>
+                      )}
+                    </div>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginTop: '2px' }}>
                       Spent: <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(spent, currencySymbol)}</strong> {limit > 0 ? `of ${formatCurrency(limit, currencySymbol)}` : ''}
                     </span>
                   </div>
                 </div>
 
-                {/* Limit Editor */}
-                {isEditing ? (
-                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0, marginLeft: 'auto' }}>
-                    <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)' }}>{currencySymbol}</span>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={limitInput}
-                      onChange={(e) => setLimitInput(e.target.value.replace(/[^0-9]/g, ''))}
-                      placeholder="Limit"
-                      style={{
-                        width: '78px',
-                        background: 'var(--bg-dark)',
-                        border: '1px solid var(--primary)',
-                        borderRadius: '8px',
-                        padding: '6px 8px',
-                        color: 'var(--text-primary)',
-                        outline: 'none',
-                        fontSize: '13px',
-                        fontWeight: 700
-                      }}
-                      autoFocus
-                    />
-                    <button
-                      onClick={() => handleSave(cat.id)}
-                      style={{
-                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                        border: 'none',
-                        borderRadius: '8px',
-                        width: '30px',
-                        height: '30px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#fff',
-                        cursor: 'pointer',
-                        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)'
-                      }}
-                    >
-                      <Check size={15} />
-                    </button>
-                  </div>
-                ) : (
+                {/* Edit Button or Trigger */}
+                {!isEditing && (
                   <button
                     onClick={() => handleEditClick(cat.id, limit)}
                     style={{
@@ -479,14 +512,189 @@ export const Budgets: React.FC<BudgetsProps> = ({
                       boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
                       transition: 'all 0.15s ease',
                       whiteSpace: 'nowrap',
-                      flexShrink: 0,
-                      marginLeft: 'auto'
+                      flexShrink: 0
                     }}
                   >
                     {limit > 0 ? formatCurrency(limit, currencySymbol) : `+ ${t('set_limit')}`}
                   </button>
                 )}
               </div>
+
+              {/* In-place Limit & Period Editor */}
+              {isEditing && (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                  padding: '12px',
+                  borderRadius: '14px',
+                  background: 'rgba(0,0,0,0.2)',
+                  border: '1px solid var(--border-input)',
+                  marginTop: '4px'
+                }}>
+                  {/* Period Selection Pills */}
+                  <div>
+                    <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>
+                      Budget Cycle / Renewal Period:
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
+                      {(['daily', 'weekly', 'monthly', 'custom'] as BudgetPeriod[]).map((p) => {
+                        const isSelected = selectedPeriod === p;
+                        const labelMap = { daily: 'Per Day', weekly: 'Weekly', monthly: 'Per Month', custom: 'Custom' };
+                        return (
+                          <button
+                            key={p}
+                            type="button"
+                            onClick={() => setSelectedPeriod(p)}
+                            style={{
+                              padding: '6px 4px',
+                              borderRadius: '8px',
+                              border: isSelected ? '1.5px solid #22c55e' : '1px solid var(--border-input)',
+                              background: isSelected ? 'rgba(34, 197, 94, 0.15)' : 'var(--bg-dark)',
+                              color: isSelected ? '#22c55e' : 'var(--text-secondary)',
+                              fontSize: '11px',
+                              fontWeight: isSelected ? 800 : 600,
+                              cursor: 'pointer',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            {labelMap[p]}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Custom Days Input if Custom chosen */}
+                  {selectedPeriod === 'custom' && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Renew every:</span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={customDaysInput}
+                        onChange={(e) => setCustomDaysInput(e.target.value.replace(/[^0-9]/g, ''))}
+                        placeholder="7"
+                        style={{
+                          width: '50px',
+                          background: 'var(--bg-dark)',
+                          border: '1px solid var(--primary)',
+                          borderRadius: '8px',
+                          padding: '4px 8px',
+                          color: 'var(--text-primary)',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          textAlign: 'center'
+                        }}
+                      />
+                      <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>days</span>
+                    </div>
+                  )}
+
+                  {/* Amount Input and Save Action */}
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <div style={{ position: 'relative', flex: 1 }}>
+                      <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '13px', fontWeight: 800, color: 'var(--text-secondary)' }}>
+                        {currencySymbol}
+                      </span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={limitInput}
+                        onChange={(e) => setLimitInput(e.target.value.replace(/[^0-9]/g, ''))}
+                        placeholder="Enter Limit Amount"
+                        style={{
+                          width: '100%',
+                          background: 'var(--bg-dark)',
+                          border: '1px solid var(--primary)',
+                          borderRadius: '10px',
+                          padding: '8px 10px 8px 28px',
+                          color: 'var(--text-primary)',
+                          outline: 'none',
+                          fontSize: '14px',
+                          fontWeight: 700,
+                          boxSizing: 'border-box'
+                        }}
+                        autoFocus
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleSave(cat.id)}
+                      style={{
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        border: 'none',
+                        borderRadius: '10px',
+                        padding: '9px 16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        color: '#fff',
+                        fontSize: '12px',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)',
+                        flexShrink: 0
+                      }}
+                    >
+                      <Check size={15} /> Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingCategory(null)}
+                      style={{
+                        background: 'transparent',
+                        border: '1px solid var(--border-input)',
+                        borderRadius: '10px',
+                        padding: '9px 12px',
+                        color: 'var(--text-secondary)',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        flexShrink: 0
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Progress Bar & Renewal Cycle Info */}
+              {limit > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '2px' }}>
+                  <div style={{ 
+                    height: '6px', 
+                    width: '100%', 
+                    background: 'rgba(255,255,255,0.06)', 
+                    borderRadius: '4px', 
+                    overflow: 'hidden',
+                    position: 'relative'
+                  }}>
+                    <div style={{
+                      height: '100%',
+                      width: `${Math.min(100, (spent / limit) * 100)}%`,
+                      background: isOver 
+                        ? 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)' 
+                        : 'linear-gradient(90deg, #22c55e 0%, #10b981 100%)',
+                      borderRadius: '4px',
+                      transition: 'width 0.4s ease'
+                    }} />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                    <span>
+                      {isOver ? (
+                        <strong style={{ color: '#ef4444' }}>Exceeded by {formatCurrency(spent - limit, currencySymbol)}</strong>
+                      ) : (
+                        <span>Remaining: <strong style={{ color: '#22c55e' }}>{formatCurrency(limit - spent, currencySymbol)}</strong></span>
+                      )}
+                    </span>
+                    <span style={{ fontSize: '10.5px', color: 'var(--text-secondary)', opacity: 0.85 }}>
+                      🔄 Renews in {windowInfo.daysLeft} {windowInfo.daysLeft === 1 ? 'day' : 'days'} ({windowInfo.label})
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}

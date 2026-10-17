@@ -3550,7 +3550,12 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     }
   };
 
-  const handleSaveBudget = async (category: CategoryType, limitInActiveCurrency: number) => {
+  const handleSaveBudget = async (
+    category: CategoryType, 
+    limitInActiveCurrency: number,
+    period: BudgetPeriod = 'monthly',
+    customDays?: number
+  ) => {
     if (isSubscriptionExpired()) {
       setIsSubBlocker(true);
       setIsSubModalOpen(true);
@@ -3594,19 +3599,32 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     // Convert active currency limit to Base USD for storage
     const currentRate = rates[currency] || 1;
     const baseUSDLimit = limitInActiveCurrency / currentRate;
+    const todayStr = new Date().toISOString().split('T')[0];
 
     try {
       // 1. Update local state & localStorage first
       const exists = budgets.some(b => b.category === category);
       let updated: CategoryBudget[];
       if (exists) {
-        updated = budgets.map(b => b.category === category ? { ...b, limit: baseUSDLimit } : b);
+        updated = budgets.map(b => b.category === category ? { 
+          ...b, 
+          limit: baseUSDLimit,
+          period,
+          customDays: period === 'custom' ? customDays : undefined,
+          startDate: b.startDate || todayStr
+        } : b);
       } else {
-        updated = [...budgets, { category, limit: baseUSDLimit }];
+        updated = [...budgets, { 
+          category, 
+          limit: baseUSDLimit,
+          period,
+          customDays: period === 'custom' ? customDays : undefined,
+          startDate: todayStr
+        }];
       }
       setBudgets(updated);
       localStorage.setItem(`zb_budgets_${currentProfileId}`, JSON.stringify(updated));
-      triggerToast(`Budget limit updated for ${category.toUpperCase()}!`, 'success');
+      triggerToast(`Budget limit updated for ${category.toUpperCase()} (${period.toUpperCase()})!`, 'success');
 
       // 2. Perform background database synchronization
       try {
@@ -4453,20 +4471,25 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         zIndex: 99,
         transition: 'all 0.2s ease'
       }}>
-        {/* Branding Logo: Logo Icon image */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+        {/* Branding Logo: ONLY the Logo Icon as requested */}
+        <div 
+          onClick={() => setActiveView('dashboard')}
+          style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', flexShrink: 0 }}
+        >
           <img 
             src="/icon.png" 
             alt="ZenBudget" 
-            style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'contain' }}
+            style={{ 
+              width: '36px', 
+              height: '36px', 
+              borderRadius: '10px', 
+              objectFit: 'contain',
+              boxShadow: '0 2px 8px rgba(34, 197, 94, 0.25)'
+            }}
             onError={(e) => {
               (e.currentTarget as HTMLElement).style.display = 'none';
             }}
           />
-          <span style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '-0.03em', fontFamily: "'Manrope', sans-serif" }}>
-            <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
-          </span>
-          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#22c55e', boxShadow: '0 0 8px #22c55e', flexShrink: 0 }} />
         </div>
 
         {/* Status Actions (No Upgrade button to prevent scaring new users) */}
@@ -4554,54 +4577,76 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             )}
           </button>
 
-          {/* Rightmost User Profile Avatar */}
+          {/* Rightmost User Profile Avatar: Fully circular, obvious profile look with ring badge */}
           <button
             onClick={() => setActiveView('profile')}
             title="My Profile"
             style={{
               background: 'transparent',
               border: 'none',
-              padding: 0,
+              padding: '2px',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              marginLeft: '2px'
+              marginLeft: '4px',
+              position: 'relative'
             }}
           >
-            {userAvatar && !userAvatar.includes('ui-avatars.com') ? (
-              <img
-                src={userAvatar}
-                alt={userName || "Profile"}
-                referrerPolicy="no-referrer"
-                crossOrigin="anonymous"
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '12px',
-                  objectFit: 'cover',
-                  border: '1.5px solid #22c55e',
-                  boxShadow: '0 2px 8px rgba(34,197,94,0.25)'
-                }}
-              />
-            ) : (
-              <div style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)',
-                color: '#ffffff',
-                fontWeight: 800,
-                fontSize: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '1.5px solid #22c55e',
-                boxShadow: '0 2px 8px rgba(34,197,94,0.25)'
-              }}>
-                {userName ? userName.trim().slice(0, 2).toUpperCase() : '👤'}
-              </div>
-            )}
+            <div style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '50%',
+              padding: '2px',
+              background: 'linear-gradient(135deg, #22c55e 0%, #06b6d4 100%)',
+              boxShadow: '0 2px 10px rgba(34, 197, 94, 0.35)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              {userAvatar && !userAvatar.includes('ui-avatars.com') ? (
+                <img
+                  src={userAvatar}
+                  alt={userName || "Profile"}
+                  referrerPolicy="no-referrer"
+                  crossOrigin="anonymous"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    background: 'var(--bg-card)'
+                  }}
+                />
+              ) : (
+                <div style={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%',
+                  background: 'var(--bg-card)',
+                  color: '#22c55e',
+                  fontWeight: 800,
+                  fontSize: '13px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  {userName ? userName.trim().slice(0, 2).toUpperCase() : <User size={18} color="#22c55e" />}
+                </div>
+              )}
+            </div>
+            {/* Subtle Online / Active Status indicator */}
+            <span style={{
+              position: 'absolute',
+              bottom: '1px',
+              right: '1px',
+              width: '10px',
+              height: '10px',
+              borderRadius: '50%',
+              backgroundColor: '#22c55e',
+              border: '2px solid var(--bg-card)',
+              boxShadow: '0 0 6px rgba(34,197,94,0.6)'
+            }} />
           </button>
         </div>
       </header>

@@ -66,9 +66,14 @@ export interface SavingsGoal {
   color: string;
 }
 
+export type BudgetPeriod = 'monthly' | 'daily' | 'weekly' | 'custom';
+
 export interface CategoryBudget {
   category: CategoryType;
   limit: number;
+  period?: BudgetPeriod;
+  customDays?: number;
+  startDate?: string; // YYYY-MM-DD when budget period started or set
 }
 
 export const normalizeMood = (mood?: string, _type: 'income' | 'expense' | 'transfer' = 'expense'): string => {
