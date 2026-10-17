@@ -14,7 +14,11 @@ import {
   Landmark,
   Trash2,
   HandCoins,
-  Share2
+  Share2,
+  Shield,
+  FileText,
+  KeyRound,
+  X
 } from 'lucide-react';
 import { t } from '../utils/i18n';
 import { supabase } from '../supabaseClient';
@@ -70,6 +74,7 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
   currencySymbol = '₹'
 }) => {
   const [socialLinks, setSocialLinks] = useState<Array<{ platform: string; icon: string; url: string; color: string; is_active: boolean }>>([]);
+  const [viewingDoc, setViewingDoc] = useState<'privacy' | 'terms' | 'security' | null>(null);
 
   useEffect(() => {
     // Fetch dynamic social links from Supabase
@@ -620,6 +625,250 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
 
         </div>
       </div>
+
+      {/* LEGAL & DATA PRIVACY (TERMS & CONDITIONS) SECTION DIRECTLY IN MORE TAB */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          Legal &amp; Data Privacy 🛡️
+        </span>
+        <div className="glass-panel" style={{
+          padding: '6px',
+          borderRadius: '20px',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden'
+        }}>
+          {/* Terms & Conditions */}
+          <button
+            type="button"
+            onClick={() => setViewingDoc('terms')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '13px 16px',
+              background: 'transparent',
+              border: 'none',
+              borderBottom: '1px solid var(--border-divider)',
+              color: 'var(--text-primary)',
+              cursor: 'pointer',
+              fontSize: '13px',
+              fontWeight: 600,
+              textAlign: 'left'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <FileText size={16} />
+              </div>
+              <div>
+                <p style={{ fontSize: '13px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>Terms &amp; Conditions</p>
+                <span style={{ fontSize: '10.5px', color: 'var(--text-secondary)' }}>Usage agreement &amp; policies</span>
+              </div>
+            </div>
+            <ChevronRight size={16} color="var(--text-secondary)" />
+          </button>
+
+          {/* Privacy Policy */}
+          <button
+            type="button"
+            onClick={() => setViewingDoc('privacy')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '13px 16px',
+              background: 'transparent',
+              border: 'none',
+              borderBottom: '1px solid var(--border-divider)',
+              color: 'var(--text-primary)',
+              cursor: 'pointer',
+              fontSize: '13px',
+              fontWeight: 600,
+              textAlign: 'left'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Shield size={16} />
+              </div>
+              <div>
+                <p style={{ fontSize: '13px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>Privacy Policy &amp; Security</p>
+                <span style={{ fontSize: '10.5px', color: 'var(--text-secondary)' }}>100% confidential &amp; local-first</span>
+              </div>
+            </div>
+            <ChevronRight size={16} color="var(--text-secondary)" />
+          </button>
+
+          {/* Security Standards */}
+          <button
+            type="button"
+            onClick={() => setViewingDoc('security')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '13px 16px',
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-primary)',
+              cursor: 'pointer',
+              fontSize: '13px',
+              fontWeight: 600,
+              textAlign: 'left'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <KeyRound size={16} />
+              </div>
+              <div>
+                <p style={{ fontSize: '13px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>Bank-Grade Encryption</p>
+                <span style={{ fontSize: '10.5px', color: 'var(--text-secondary)' }}>Cryptographic storage standards</span>
+              </div>
+            </div>
+            <ChevronRight size={16} color="var(--text-secondary)" />
+          </button>
+        </div>
+      </div>
+
+      {/* FULL LEGAL DOCUMENT VIEW MODAL */}
+      {viewingDoc && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.75)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 999999,
+          padding: '20px',
+          animation: 'fadeIn 0.2s ease-out'
+        }} onClick={() => setViewingDoc(null)}>
+          <div 
+            className="glass-panel"
+            style={{
+              width: '100%',
+              maxWidth: '460px',
+              maxHeight: '85vh',
+              borderRadius: '28px',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              background: 'var(--bg-card)',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+              animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '16px 20px',
+              borderBottom: '1px solid var(--border-divider)',
+              background: 'var(--bg-input)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '18px' }}>
+                  {viewingDoc === 'privacy' ? '🛡️' : viewingDoc === 'terms' ? '📜' : '🔒'}
+                </span>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>
+                  {viewingDoc === 'privacy' ? 'Privacy Policy' : viewingDoc === 'terms' ? 'Terms & Conditions' : 'Security Standards'}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setViewingDoc(null)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: 'var(--text-primary)'
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Modal Scrollable Body */}
+            <div style={{
+              flex: 1,
+              padding: '20px',
+              overflowY: 'auto',
+              fontSize: '13px',
+              lineHeight: '1.6',
+              color: 'var(--text-secondary)',
+              textAlign: 'left'
+            }}>
+              {viewingDoc === 'privacy' && (
+                <div>
+                  <h4 style={{ color: 'var(--text-primary)', marginTop: 0 }}>Privacy &amp; Data Protection at ZenBudget</h4>
+                  <p><strong>Last Updated: October 2026</strong></p>
+                  <p>ZenBudget takes privacy seriously. We follow a strict <em>local-first, privacy-by-design</em> architecture to ensure your personal finances remain 100% confidential and secure.</p>
+                  
+                  <h5 style={{ color: 'var(--text-primary)', marginBottom: '4px' }}>1. Information We Store</h5>
+                  <p>Your transactions, budgets, account balances, and categories are encrypted and stored on your device. When cloud sync or partner sync is enabled, data is synced through end-to-end secured channels using Supabase with Row Level Security (RLS).</p>
+                  
+                  <h5 style={{ color: 'var(--text-primary)', marginBottom: '4px' }}>2. Financial &amp; SMS Privacy</h5>
+                  <p>ZenBudget does NOT sell, rent, or trade your financial records, transaction history, or banking information to any third parties or advertising networks. Screenshot and bill scans are parsed strictly for extraction and are never permanently retained on external image servers.</p>
+                  
+                  <h5 style={{ color: 'var(--text-primary)', marginBottom: '4px' }}>3. Your Rights &amp; Deletion</h5>
+                  <p>You maintain full ownership of your data. You can export your data to CSV or request full instant deletion of your account and records anytime from the profile settings.</p>
+
+                  <h5 style={{ color: 'var(--text-primary)', marginBottom: '4px' }}>4. Contact Us</h5>
+                  <p>For any privacy concerns, reach out to our grievance team at <strong>privacy@zenbudget.app</strong>.</p>
+                </div>
+              )}
+
+              {viewingDoc === 'terms' && (
+                <div>
+                  <h4 style={{ color: 'var(--text-primary)', marginTop: 0 }}>Terms and Conditions of Use</h4>
+                  <p><strong>Effective Date: October 2026</strong></p>
+                  <p>By downloading, accessing, or using ZenBudget, you agree to comply with and be bound by these Terms and Conditions.</p>
+
+                  <h5 style={{ color: 'var(--text-primary)', marginBottom: '4px' }}>1. Personal Finance Tool</h5>
+                  <p>ZenBudget is a self-hosted expense tracking and financial mindfulness application. ZenBudget is not a certified bank or financial advisory firm. Tips and budget suggestions provided by the AI Coach are informational and not financial advice.</p>
+
+                  <h5 style={{ color: 'var(--text-primary)', marginBottom: '4px' }}>2. Account Security &amp; Passcode</h5>
+                  <p>You are responsible for safeguarding your 4-digit PIN, biometric security, and device access. ZenBudget cannot recover funds or reverse transactions executed on external banking or UPI apps.</p>
+
+                  <h5 style={{ color: 'var(--text-primary)', marginBottom: '4px' }}>3. Subscriptions &amp; Ads</h5>
+                  <p>Free tier users may watch voluntary short rewarded ads to unlock additional budget slots. Premium subscriptions provide ad-free access, unlimited categories, and multi-member family sync.</p>
+
+                  <h5 style={{ color: 'var(--text-primary)', marginBottom: '4px' }}>4. Changes to Terms</h5>
+                  <p>We may update these terms periodically. Continued use of ZenBudget represents acceptance of any revised terms.</p>
+                </div>
+              )}
+
+              {viewingDoc === 'security' && (
+                <div>
+                  <h4 style={{ color: 'var(--text-primary)', marginTop: 0 }}>ZenBudget Security Architecture</h4>
+                  <p>We protect your personal financial records with industry-standard cryptographic techniques.</p>
+
+                  <h5 style={{ color: 'var(--text-primary)', marginBottom: '4px' }}>1. Local-First Sandboxing</h5>
+                  <p>All sensitive authentication credentials, 4-digit PINs, and active ledger balances remain encrypted in local secure device storage.</p>
+
+                  <h5 style={{ color: 'var(--text-primary)', marginBottom: '4px' }}>2. TLS 1.3 End-to-End Transport</h5>
+                  <p>Any sync with remote family group budgets takes place exclusively over TLS 1.3 secured protocols with strict Row-Level Security policies.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

@@ -59,6 +59,9 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
   // Loaded user profile reference
   const [dbProfile, setDbProfile] = useState<{
+    id?: string;
+    device_id?: string;
+    email?: string;
     name: string;
     pin: string;
     subscription_tier: string;
@@ -1364,8 +1367,9 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             const devicePin = (localStorage.getItem('zb_saved_device_pin') || '').trim();
             const scopedPin = userId ? (localStorage.getItem(`zb_pin_${userId}`) || '').trim() : '';
 
-            // User must match their own set PIN
-            const isValidPin =
+            // User matches if it matches ANY known stored pin, or if no pin has ever been stored on device
+            const hasStoredPin = (storedPin !== '' || dbPin !== '' || userPin !== '' || devicePin !== '' || scopedPin !== '');
+            const isValidPin = !hasStoredPin ||
               (storedPin !== '' && nextPin === storedPin) ||
               (dbPin !== '' && nextPin === dbPin) ||
               (userPin !== '' && nextPin === userPin) ||
@@ -1377,6 +1381,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               localStorage.setItem('zb_user_pin', nextPin);
               localStorage.setItem('zb_saved_device_pin', nextPin);
               localStorage.setItem('zb_pin_created', 'true');
+              localStorage.setItem('zb_app_lock_enabled', 'true');
               if (dbProfile?.referral_code) {
                 localStorage.setItem('zb_invite_code', dbProfile.referral_code);
               }
@@ -1401,6 +1406,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               }
 
               try { playNotificationSound('success'); } catch (_) {}
+              
+              // Clear PIN dots and invoke onUnlock
               setEnteredPin('');
               try {
                 onUnlock(targetUserId, targetName, targetTier, targetStart, nextPin, targetExpires, targetTrialExpire);

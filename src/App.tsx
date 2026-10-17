@@ -23,6 +23,7 @@ import { AdminDashboard } from './components/AdminDashboard';
 import { ScannerModal } from './components/ScannerModal';
 import { SharedPaymentProcessingModal } from './components/SharedPaymentProcessingModal';
 import { NotificationsModal } from './components/NotificationsModal';
+import { NotificationsView } from './components/NotificationsView';
 import { HelpModal } from './components/HelpModal';
 import { LockScreen } from './components/LockScreen';
 import { Onboarding } from './components/Onboarding';
@@ -214,7 +215,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   const [budgets, setBudgets] = useState<CategoryBudget[]>([]);
   const [goals, setGoals] = useState<SavingsGoal[]>([]);
   
-  const [activeView, setActiveView] = useState<'dashboard' | 'transactions' | 'budgets' | 'analytics' | 'profile' | 'forest' | 'wishlist' | 'simulator' | 'more' | 'shared_budget' | 'referral' | 'loans' | 'bank_sync' | 'follow_us' | 'bank_importer'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'transactions' | 'budgets' | 'analytics' | 'profile' | 'forest' | 'wishlist' | 'simulator' | 'more' | 'shared_budget' | 'referral' | 'loans' | 'bank_sync' | 'follow_us' | 'bank_importer' | 'notifications'>('dashboard');
   const [simulatorTab, setSimulatorTab] = useState<'compound' | 'fdrd' | 'tax'>('compound');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
@@ -4547,7 +4548,10 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
           {/* Notifications Button */}
           <button 
-            onClick={() => setIsNotificationsOpen(true)} 
+            onClick={() => {
+              handleMarkAllNotificationsRead();
+              setActiveView('notifications');
+            }} 
             title="Notifications"
             style={{
               background: theme === 'light' ? '#FFFFFF' : 'var(--bg-input)',
@@ -5057,6 +5061,19 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             onSaveTransaction={handleSaveTransaction}
             onNavigateToLedger={() => setActiveView('transactions')}
             triggerToast={triggerToast}
+          />
+        )}
+        {activeView === 'notifications' && (
+          <NotificationsView
+            key={langKey}
+            notificationsList={notifications}
+            onBack={() => setActiveView('dashboard')}
+            onMarkAllRead={handleMarkAllNotificationsRead}
+            onClearAll={() => {
+              setNotifications([]);
+              localStorage.setItem('zb_notifications', '[]');
+              triggerToast('Notifications cleared', 'success');
+            }}
           />
         )}
       </main>
