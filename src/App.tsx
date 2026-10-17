@@ -2482,19 +2482,25 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
               localStorage.setItem('zb_user_email', userEmail);
             }
             
-            const googleAvatar = authUserData.user.user_metadata?.avatar_url || authUserData.user.user_metadata?.picture || authUserData.user.user_metadata?.photo_url;
+            const googleAvatar = authUserData.user.user_metadata?.avatar_url || authUserData.user.user_metadata?.picture || authUserData.user.user_metadata?.photo_url || authUserData.user.user_metadata?.avatar;
             if (googleAvatar) {
               localStorage.setItem('zb_google_avatar', googleAvatar);
             }
             
-            if (profData.avatar_url) {
+            if (profData.avatar_url && !profData.avatar_url.includes('ui-avatars.com') && !profData.avatar_url.startsWith('data:image/svg')) {
               setUserAvatar(profData.avatar_url);
               localStorage.setItem('zb_user_avatar', profData.avatar_url);
             } else if (googleAvatar) {
-              if (!localStorage.getItem('zb_user_avatar') || localStorage.getItem('zb_user_avatar')?.includes('ui-avatars.com')) {
-                setUserAvatar(googleAvatar);
-                localStorage.setItem('zb_user_avatar', googleAvatar);
-              }
+              setUserAvatar(googleAvatar);
+              localStorage.setItem('zb_user_avatar', googleAvatar);
+              (async () => {
+                try {
+                  await supabase.from('profiles').update({ avatar_url: googleAvatar }).eq('id', currentProfileId);
+                } catch (_) {}
+              })();
+            } else if (profData.avatar_url) {
+              setUserAvatar(profData.avatar_url);
+              localStorage.setItem('zb_user_avatar', profData.avatar_url);
             }
           } else {
              if (profData.avatar_url) {

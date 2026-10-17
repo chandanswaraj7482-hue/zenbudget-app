@@ -478,19 +478,23 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         localStorage.setItem('zb_profile_id', targetProfileId);
 
         // Sync database avatar to localstorage
-        if (userProf.avatar_url) {
+        const googleAvatar = localStorage.getItem('zb_google_avatar') || (userProf?.raw_user_meta_data?.avatar_url || userProf?.raw_user_meta_data?.picture);
+        if (googleAvatar) {
+          localStorage.setItem('zb_google_avatar', googleAvatar);
+        }
+
+        if (userProf.avatar_url && !userProf.avatar_url.includes('ui-avatars.com')) {
           localStorage.setItem('zb_user_avatar', userProf.avatar_url);
+        } else if (googleAvatar) {
+          localStorage.setItem('zb_user_avatar', googleAvatar);
+          (async () => {
+            try {
+              await supabase.from('profiles').update({ avatar_url: googleAvatar }).eq('id', targetProfileId);
+            } catch (_) {}
+          })();
         } else {
           const existingAvatar = localStorage.getItem('zb_user_avatar');
-          const googleAvatar = localStorage.getItem('zb_google_avatar');
-          if (!existingAvatar && googleAvatar) {
-            localStorage.setItem('zb_user_avatar', googleAvatar);
-            (async () => {
-              try {
-                await supabase.from('profiles').update({ avatar_url: googleAvatar }).eq('id', targetProfileId);
-              } catch (_) {}
-            })();
-          } else if (!existingAvatar) {
+          if (!existingAvatar || existingAvatar.includes('ui-avatars.com')) {
             const initAvatar = getInitialsAvatar(getInitialsName(userProf.name, userProf.email || storedEmail));
             localStorage.setItem('zb_user_avatar', initAvatar);
           }

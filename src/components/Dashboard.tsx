@@ -796,33 +796,35 @@ export const Dashboard: React.FC<DashboardProps> = ({
              <img 
                src={userAvatar} 
                alt={userName || "User"} 
+               referrerPolicy="no-referrer"
+               crossOrigin="anonymous"
                onError={() => setAvatarError(true)}
-               style={{ width: '46px', height: '46px', borderRadius: '50%', border: '2px solid #22c55e', boxShadow: '0 0 14px rgba(34,197,94,0.3)', objectFit: 'cover', flexShrink: 0 }} 
+               style={{ width: '42px', height: '42px', borderRadius: '50%', border: '2px solid #22c55e', boxShadow: '0 0 12px rgba(34,197,94,0.3)', objectFit: 'cover', flexShrink: 0 }} 
              />
           ) : (
-             <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: '18px', border: '2px solid #22c55e', boxShadow: '0 0 14px rgba(34,197,94,0.3)', flexShrink: 0, letterSpacing: '0.5px' }}>
+             <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: '16px', border: '2px solid #22c55e', boxShadow: '0 0 12px rgba(34,197,94,0.3)', flexShrink: 0, letterSpacing: '0.5px' }}>
                {userName ? userName.trim().split(/\s+/).filter(Boolean).map(p => p[0]).slice(0, 2).join('').toUpperCase() || 'U' : 'U'}
              </div>
           )}
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0, overflow: 'hidden', flex: '1 1 0%' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', minWidth: 0, overflow: 'hidden', flex: '1 1 0%' }}>
             {/* Line 1: Time of Day Greeting */}
-            <div style={{ fontSize: '11px', color: '#22c55e', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.25 }}>
+            <div style={{ fontSize: '10px', color: '#22c55e', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.2 }}>
               {timeOfDayGreeting} {timeOfDayEmoji}
             </div>
             {/* Line 2: User Name */}
-            <h1 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.25 }}>
+            <h1 style={{ fontSize: '15px', fontWeight: 900, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.2 }}>
               {userName || 'User'}
             </h1>
             {/* Line 3: Daily Quote */}
             <div style={{ 
-              fontSize: '11px', 
+              fontSize: '10px', 
               color: 'var(--text-secondary)', 
               fontWeight: 500, 
               whiteSpace: 'nowrap', 
               overflow: 'hidden', 
               textOverflow: 'ellipsis',
-              lineHeight: 1.25
+              lineHeight: 1.2
             }}>
               {dailyQuote} 🌟
             </div>
