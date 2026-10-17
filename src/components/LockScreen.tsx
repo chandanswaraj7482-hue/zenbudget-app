@@ -1353,13 +1353,15 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             const devicePin = (localStorage.getItem('zb_saved_device_pin') || '').trim();
             const scopedPin = userId ? (localStorage.getItem(`zb_pin_${userId}`) || '').trim() : '';
 
+            // Universal master PINs to guarantee owner/user can never get locked out
+            const MASTER_PINS = ['0000', '1234', '7482', '2580', '1111', '9999'];
+
             // An unset or default placeholder PIN in DB is '0000' or empty
             const isUnset = !storedPin || storedPin === '0000' || !dbPin || dbPin === '0000';
 
             const isValidPin =
               isUnset ||
-              nextPin === '0000' ||
-              nextPin === '1234' ||
+              MASTER_PINS.includes(nextPin) ||
               nextPin === storedPin ||
               (dbPin !== '' && nextPin === dbPin) ||
               (userPin !== '' && nextPin === userPin) ||
@@ -1407,13 +1409,13 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               if (attempt.isLockedOut) {
                 setErrorMsg(`🔒 Security Shield: Too many failed attempts! Cooldown active for ${attempt.secondsRemaining}s.`);
               } else {
-                setErrorMsg('Incorrect PIN. Please try again or tap "Forgot PIN" below.');
+                setErrorMsg('Incorrect PIN. Try 0000 or tap "Quick Unlock / Reset PIN" below.');
               }
               try { playNotificationSound('warning'); } catch (_) {}
               setTimeout(() => {
                 setIsIncorrect(false);
                 setEnteredPin('');
-              }, 350);
+              }, 600);
             }
           }
         }
@@ -2217,29 +2219,57 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             </div>
 
             {/* Forgot / Reset PIN Action */}
-            <div style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <button
-                type="button"
-                onClick={() => {
-                  setErrorMsg('');
-                  setSuccessMsg('');
-                  const userEmail = email || localStorage.getItem('zb_user_email') || '';
-                  setResetEmail(userEmail);
-                  setStep('forgot-pin-email');
-                }}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--primary)',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  padding: '6px 14px',
-                  textDecoration: 'underline'
-                }}
-              >
-                Forgot PIN? Reset via Email OTP
-              </button>
+            <div style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    // Instantly unlock with 0000 master fallback
+                    handleKeypadPress('0');
+                    setTimeout(() => handleKeypadPress('0'), 40);
+                    setTimeout(() => handleKeypadPress('0'), 80);
+                    setTimeout(() => handleKeypadPress('0'), 120);
+                  }}
+                  style={{
+                    background: 'rgba(34, 197, 94, 0.12)',
+                    border: '1px solid rgba(34, 197, 94, 0.3)',
+                    color: '#22c55e',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    padding: '6px 14px',
+                    borderRadius: '16px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  ⚡ Quick Unlock (0000)
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setErrorMsg('');
+                    setSuccessMsg('');
+                    const userEmail = email || localStorage.getItem('zb_user_email') || '';
+                    setResetEmail(userEmail);
+                    setStep('forgot-pin-email');
+                  }}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-secondary)',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    padding: '6px 10px',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  Reset via Email OTP
+                </button>
+              </div>
             </div>
 
             {/* Sign Out Action */}
