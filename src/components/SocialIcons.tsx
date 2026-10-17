@@ -122,5 +122,23 @@ export const renderSocialIcon = (platform: string, size = 20, overrideColor?: st
   if (p === 'x' || p.includes('twitter')) {
     return <XIcon size={size} color={overrideColor || '#ffffff'} />;
   }
-  return <span style={{ fontSize: `${size}px` }}>🌐</span>;
+  if (p.includes('telegram')) {
+    return <span style={{ fontSize: `${size}px`, lineHeight: 1 }}>✈️</span>;
+  }
+  if (p.includes('discord')) {
+    return <span style={{ fontSize: `${size}px`, lineHeight: 1 }}>👾</span>;
+  }
+  if (p.includes('github')) {
+    return <span style={{ fontSize: `${size}px`, lineHeight: 1 }}>🐙</span>;
+  }
+  if (p.includes('reddit')) {
+    return <span style={{ fontSize: `${size}px`, lineHeight: 1 }}>🤖</span>;
+  }
+  if (p.includes('threads')) {
+    return <span style={{ fontSize: `${size}px`, lineHeight: 1 }}>🧵</span>;
+  }
+  if (p.includes('whatsapp')) {
+    return <span style={{ fontSize: `${size}px`, lineHeight: 1 }}>💬</span>;
+  }
+  return <span style={{ fontSize: `${size}px`, lineHeight: 1 }}>🔗</span>;
 };

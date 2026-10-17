@@ -29,7 +29,8 @@ import {
   MessageSquare,
   ThumbsUp,
   ThumbsDown,
-  Sparkles
+  Sparkles,
+  Plus
 } from 'lucide-react';
 import { AdminGeoMap } from './AdminGeoMap';
 import { 
@@ -423,6 +424,9 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
   ]);
   const [isSavingSocial, setIsSavingSocial] = useState(false);
   const [socialSavedNotice, setSocialSavedNotice] = useState(false);
+  const [showAddSocialModal, setShowAddSocialModal] = useState(false);
+  const [newSocialPlatform, setNewSocialPlatform] = useState('');
+  const [newSocialUrl, setNewSocialUrl] = useState('');
 
   useEffect(() => {
     fetchRemoteLandingAssets().then(data => setLandingAssets(data));
@@ -3845,32 +3849,58 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                         <Share2 size={20} color="#a855f7" /> Something Labs — Official Social Links CMS
                       </h4>
                       <p style={{ fontSize: '0.825rem', color: '#94a3b8', margin: '4px 0 0 0' }}>
-                        Live cloud sync for Web, iOS & Android APK. Updates reflect instantly across all apps without rebuilding!
+                        Add any custom social channel (Telegram, Discord, GitHub, Reddit, Threads, etc.) or update official links. Reflects live across Web, iOS & Android!
                       </p>
                     </div>
 
-                    <button
-                      onClick={handleSaveSocialLinks}
-                      disabled={isSavingSocial}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        padding: '10px 22px',
-                        borderRadius: '12px',
-                        background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
-                        border: 'none',
-                        color: '#fff',
-                        fontWeight: 800,
-                        fontSize: '0.85rem',
-                        cursor: isSavingSocial ? 'not-allowed' : 'pointer',
-                        boxShadow: '0 4px 16px rgba(168, 85, 247, 0.4)',
-                        opacity: isSavingSocial ? 0.7 : 1
-                      }}
-                    >
-                      {isSavingSocial ? <RefreshCw size={16} className="animate-spin" /> : <Check size={16} />}
-                      {isSavingSocial ? 'Saving to Cloud...' : 'Save Live Changes'}
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                      <button
+                        onClick={() => {
+                          setNewSocialPlatform('');
+                          setNewSocialUrl('');
+                          setShowAddSocialModal(true);
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '10px 18px',
+                          borderRadius: '12px',
+                          background: 'rgba(168, 85, 247, 0.15)',
+                          border: '1px solid rgba(168, 85, 247, 0.35)',
+                          color: '#c084fc',
+                          fontWeight: 700,
+                          fontSize: '0.85rem',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Plus size={16} />
+                        <span>Add Custom Social Link</span>
+                      </button>
+
+                      <button
+                        onClick={handleSaveSocialLinks}
+                        disabled={isSavingSocial}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 22px',
+                          borderRadius: '12px',
+                          background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
+                          border: 'none',
+                          color: '#fff',
+                          fontWeight: 800,
+                          fontSize: '0.85rem',
+                          cursor: isSavingSocial ? 'not-allowed' : 'pointer',
+                          boxShadow: '0 4px 16px rgba(168, 85, 247, 0.4)',
+                          opacity: isSavingSocial ? 0.7 : 1
+                        }}
+                      >
+                        {isSavingSocial ? <RefreshCw size={16} className="animate-spin" /> : <Check size={16} />}
+                        {isSavingSocial ? 'Saving to Cloud...' : 'Save Live Changes'}
+                      </button>
+                    </div>
                   </div>
 
                   {socialSavedNotice && (
@@ -3882,7 +3912,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
                     {socialLinks.map((link, idx) => (
                       <div
-                        key={link.platform}
+                        key={link.platform + '_' + idx}
                         style={{
                           padding: '1.25rem',
                           backgroundColor: 'rgba(30, 41, 59, 0.65)',
@@ -3890,7 +3920,8 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                           borderRadius: '16px',
                           display: 'flex',
                           flexDirection: 'column',
-                          gap: '12px'
+                          gap: '12px',
+                          position: 'relative'
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -3903,19 +3934,45 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                               <span style={{ fontSize: '0.75rem', color: '#a855f7', fontWeight: 700 }}>Something Labs</span>
                             </div>
                           </div>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#94a3b8', cursor: 'pointer' }}>
-                            <input
-                              type="checkbox"
-                              checked={link.is_active !== false}
-                              onChange={(e) => {
-                                const updated = [...socialLinks];
-                                updated[idx].is_active = e.target.checked;
-                                setSocialLinks(updated);
+                          
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#94a3b8', cursor: 'pointer' }}>
+                              <input
+                                type="checkbox"
+                                checked={link.is_active !== false}
+                                onChange={(e) => {
+                                  const updated = [...socialLinks];
+                                  updated[idx].is_active = e.target.checked;
+                                  setSocialLinks(updated);
+                                }}
+                                style={{ cursor: 'pointer' }}
+                              />
+                              Active
+                            </label>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (window.confirm(`Remove ${link.platform} link?`)) {
+                                  const updated = socialLinks.filter((_, i) => i !== idx);
+                                  setSocialLinks(updated);
+                                }
                               }}
-                              style={{ cursor: 'pointer' }}
-                            />
-                            Active
-                          </label>
+                              title="Delete Link"
+                              style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: '#ef4444',
+                                cursor: 'pointer',
+                                padding: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                opacity: 0.7
+                              }}
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
                         </div>
 
                         <div>
@@ -3925,7 +3982,7 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                           <input
                             type="text"
                             value={link.url || ''}
-                            placeholder={link.platform === 'LinkedIn' ? 'e.g. https://linkedin.com/company/somethinglabs' : `https://${link.platform.toLowerCase()}.com/...`}
+                            placeholder={link.platform === 'LinkedIn' ? 'e.g. https://linkedin.com/company/somethinglabs' : `https://${link.platform.toLowerCase().replace(/[^a-z0-9]/g, '')}.com/...`}
                             onChange={(e) => {
                               const updated = [...socialLinks];
                               updated[idx].url = e.target.value;
@@ -3947,6 +4004,90 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                       </div>
                     ))}
                   </div>
+
+                  {/* Add Custom Social Modal */}
+                  {showAddSocialModal && (
+                    <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+                      <div style={{ width: '100%', maxWidth: '420px', backgroundColor: '#0f172a', border: '1px solid rgba(168,85,247,0.3)', borderRadius: '24px', padding: '1.75rem', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', color: '#fff' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                          <h4 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <Plus size={18} color="#a855f7" /> Add Custom Social Link
+                          </h4>
+                          <button onClick={() => setShowAddSocialModal(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                            <X size={18} />
+                          </button>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                          <div>
+                            <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '6px' }}>
+                              Platform / Name (e.g. Telegram, Discord, Threads, GitHub):
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Telegram"
+                              value={newSocialPlatform}
+                              onChange={(e) => setNewSocialPlatform(e.target.value)}
+                              style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box' }}
+                            />
+                          </div>
+
+                          <div>
+                            <label style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700, display: 'block', marginBottom: '6px' }}>
+                              Channel / Profile URL:
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="https://t.me/somethinglabs"
+                              value={newSocialUrl}
+                              onChange={(e) => setNewSocialUrl(e.target.value)}
+                              style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box' }}
+                            />
+                          </div>
+
+                          <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                            <button
+                              type="button"
+                              onClick={() => setShowAddSocialModal(false)}
+                              style={{ flex: 1, padding: '10px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: 'none', color: '#94a3b8', fontWeight: 700, cursor: 'pointer' }}
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="button"
+                              disabled={!newSocialPlatform.trim()}
+                              onClick={() => {
+                                if (!newSocialPlatform.trim()) return;
+                                const newLink = {
+                                  platform: newSocialPlatform.trim(),
+                                  icon: '🔗',
+                                  url: newSocialUrl.trim(),
+                                  is_active: true
+                                };
+                                setSocialLinks([...socialLinks, newLink]);
+                                setShowAddSocialModal(false);
+                                setNewSocialPlatform('');
+                                setNewSocialUrl('');
+                              }}
+                              style={{
+                                flex: 1,
+                                padding: '10px',
+                                borderRadius: '10px',
+                                background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
+                                border: 'none',
+                                color: '#fff',
+                                fontWeight: 800,
+                                cursor: !newSocialPlatform.trim() ? 'not-allowed' : 'pointer',
+                                opacity: !newSocialPlatform.trim() ? 0.6 : 1
+                              }}
+                            >
+                              Add Link
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
