@@ -128,19 +128,22 @@ export const parsePaymentScreenshot = async (
       const base64Data = base64DataUrl.split(',')[1] || base64DataUrl;
       const mimeType = base64DataUrl.includes('image/png') ? 'image/png' : 'image/jpeg';
 
-const prompt = `You are a strict data extraction AI analyzing a mobile payment receipt/screenshot. 
-CRITICAL RULE: DO NOT MAKE UP OR HALLUCINATE ANY DATA. If a value is not clearly visible in the image, return an empty string "" (or null for numbers).
+const prompt = `You are an expert financial OCR assistant analyzing a mobile payment receipt, netbanking confirmation, bank transfer slip, or UPI screenshot.
+Analyze the image carefully to extract transaction details.
+Supported sources: Any Netbanking receipt (SBI, HDFC, ICICI, Axis, PNB, etc.), NEFT, RTGS, IMPS, UPI (GPay, PhonePe, Paytm, CRED), Credit/Debit Card payment confirmation, or bank debit/credit advice.
+
 Extract the following information in strict valid JSON format:
 {
-  "isReceipt": boolean (Return true ONLY if the image is clearly a payment receipt, bank screenshot, or UPI transfer. Return false if it is a random photo, scenery, selfie, etc.),
-  "amount": number (extract ONLY the exact amount paid/received. If not found, return null),
-  "merchantName": string (extract ONLY the exact payee or sender name. If not found, return ""),
-  "type": "expense" | "income" (CRITICAL: return "income" ONLY if the image explicitly shows money received, credited, cashback, or refund. Return "expense" if it shows money paid, debited, sent, or a payment to a merchant. If unsure, return "expense"),
-  "category": string (choose best from: "Food", "Groceries", "Transport", "Shopping", "Bills", "Salary", "Cashback", "Entertainment", "Health", "Investment", "General"),
-  "upiRef": string (extract the exact 12-digit UTR/UPI reference if visible, else ""),
-  "appSource": string ("gpay" | "phonepe" | "paytm" | "bank" | "general")
+  "isReceipt": true,
+  "amount": number (extract the exact numeric transaction amount paid or transferred. Remove commas or currency symbols like ₹, Rs, INR. E.g. 1500.50),
+  "merchantName": string (extract the beneficiary name, merchant, payee, account holder or receiver name. If net banking or bank transfer, extract the beneficiary name or bank name),
+  "type": "expense" | "income" (return "income" ONLY if money was credited/received/refunded. Otherwise return "expense"),
+  "category": string (choose best from: "Food", "Groceries", "Transport", "Shopping", "Bills", "Salary", "Investment", "Entertainment", "Health", "General"),
+  "upiRef": string (extract UTR, Transaction ID, Reference Number, or IMPS/NEFT ref number if visible, else ""),
+  "appSource": string ("bank" | "netbanking" | "gpay" | "phonepe" | "paytm" | "cred" | "general")
 }
-Return ONLY pure JSON without markdown code blocks.`;
+
+If amount is visible anywhere (e.g. ₹ 500, Rs. 1,200, Amount Transferred: 5000), set "isReceipt": true and extract it. Return ONLY pure JSON without markdown code blocks.`;
 
       onProgress?.('extracting', 80, 'Auto-detecting Income vs Expense, Merchant & Category...');
 
@@ -184,31 +187,56 @@ Return ONLY pure JSON without markdown code blocks.`;
         });
       }
 
-      const responseText = response.text?.replace(/```json|```/g, '').trim();
-      if (responseText) {
-        const parsed = JSON.parse(responseText);
-        
-        const parsedAmt = parsed.amount ? parseFloat(parsed.amount) : 0;
-        if (parsed.isReceipt === false || !parsed.amount || isNaN(parsedAmt) || parsedAmt <= 0) {
-          throw new Error("INVALID_RECEIPT");
+      const rawText = response.text || '';
+      const cleanJson = rawText.replace(/```json|```/gi, '').trim();
+      
+      // Try parsing JSON or extract JSON block using regex if there's any surrounding text
+      let parsed: any = null;
+      try {
+        parsed = JSON.parse(cleanJson);
+      } catch (_) {
+        const jsonMatch = cleanJson.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try { parsed = JSON.parse(jsonMatch[0]); } catch (e) {}
+        }
+      }
+
+      if (parsed) {
+        let parsedAmt = 0;
+        if (typeof parsed.amount === 'number') {
+          parsedAmt = parsed.amount;
+        } else if (typeof parsed.amount === 'string') {
+          parsedAmt = parseFloat(parsed.amount.replace(/[^0-9.]/g, ''));
         }
 
-        onProgress?.('ready', 100, 'Payment verified & categorized successfully!');
-        
-        const isIncome = parsed.type === 'income' || parsed.category === 'Salary' || parsed.category === 'Cashback';
+        // If amount was not in JSON, try regex on the raw response text
+        if (isNaN(parsedAmt) || parsedAmt <= 0) {
+          const amtMatch = rawText.match(/(?:amount|total|rs\.?|₹|inr)[\s:]*([0-9,]+(?:\.[0-9]{1,2})?)/i);
+          if (amtMatch) {
+            parsedAmt = parseFloat(amtMatch[1].replace(/,/g, ''));
+          }
+        }
 
-        return {
-          amount: String(Math.abs(parsedAmt)),
-          merchantName: parsed.merchantName ? parsed.merchantName.trim() : (isIncome ? 'Payment Inflow' : 'Payment Outflow'),
-          category: parsed.category || (isIncome ? 'Income' : 'General'),
-          type: isIncome ? 'income' : 'expense',
-          note: `Auto-scanned from ${String(parsed.appSource || 'UPI').toUpperCase()} Receipt`,
-          date: today,
-          upiRef: parsed.upiRef || '',
-          appSource: (parsed.appSource as any) || 'screenshot',
-          rawImagePreview: base64DataUrl
-        };
+        if (parsedAmt > 0) {
+          onProgress?.('ready', 100, 'Payment verified & categorized successfully!');
+          
+          const isIncome = parsed.type === 'income' || parsed.category === 'Salary' || parsed.category === 'Cashback';
+          const src = String(parsed.appSource || 'netbanking').toUpperCase();
+
+          return {
+            amount: String(Math.abs(parsedAmt)),
+            merchantName: parsed.merchantName ? parsed.merchantName.trim() : (isIncome ? 'Payment Inflow' : 'Net Banking Payee'),
+            category: parsed.category || (isIncome ? 'Income' : 'Bills'),
+            type: isIncome ? 'income' : 'expense',
+            note: `Auto-scanned from ${src} Receipt`,
+            date: today,
+            upiRef: parsed.upiRef || '',
+            appSource: (parsed.appSource as any) || 'bank',
+            rawImagePreview: base64DataUrl
+          };
+        }
       }
+      throw new Error("INVALID_RECEIPT");
     } catch (err: any) {
       console.warn('ZenBudget Vision parse error:', err);
       throw new Error("INVALID_RECEIPT");
