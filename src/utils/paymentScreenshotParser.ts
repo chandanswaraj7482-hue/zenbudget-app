@@ -236,13 +236,46 @@ If amount is visible anywhere (e.g. ₹ 500, Rs. 1,200, Amount Transferred: 5000
           };
         }
       }
-      throw new Error("INVALID_RECEIPT");
+      
+      // Fallback: If AI returned something without clear amount or parsing failed
+      console.warn('ZenBudget Vision parse returned without amount, using graceful fallback');
+      return {
+        amount: '',
+        merchantName: 'Net Banking / UPI Transfer',
+        category: 'General',
+        type: 'expense',
+        note: 'Payment screenshot attached (enter amount to save)',
+        date: today,
+        upiRef: '',
+        appSource: 'bank',
+        rawImagePreview: base64DataUrl
+      };
     } catch (err: any) {
-      console.warn('ZenBudget Vision parse error:', err);
-      throw new Error("INVALID_RECEIPT");
+      console.warn('ZenBudget Vision parse error (fallback active):', err);
+      return {
+        amount: '',
+        merchantName: 'Net Banking / UPI Transfer',
+        category: 'General',
+        type: 'expense',
+        note: 'Payment screenshot attached (enter amount to save)',
+        date: today,
+        upiRef: '',
+        appSource: 'bank',
+        rawImagePreview: base64DataUrl
+      };
     }
   }
 
-  // If no API key or image unreadable, throw INVALID_RECEIPT error so UI shows error state
-  throw new Error("INVALID_RECEIPT");
+  // Fallback when offline or no API key available
+  return {
+    amount: '',
+    merchantName: 'Payment Receipt',
+    category: 'General',
+    type: 'expense',
+    note: 'Payment screenshot attached',
+    date: today,
+    upiRef: '',
+    appSource: 'bank',
+    rawImagePreview: base64DataUrl
+  };
 };

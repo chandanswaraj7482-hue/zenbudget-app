@@ -2117,7 +2117,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                 </button>
               ))}
 
-              {/* Left Keypad Column: Biometrics button (Always available for instant fingerprint/face unlock) */}
+              {/* Left Keypad Column: Empty spacer or subtle biometric trigger */}
               <button
                 type="button"
                 onClick={() => triggerBiometricUnlock()}
@@ -2131,21 +2131,18 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                   maxHeight: '60px',
                   padding: 0,
                   borderRadius: '50%',
-                  border: '1px solid rgba(34, 197, 94, 0.4)',
-                  background: 'rgba(34, 197, 94, 0.14)',
-                  color: '#22c55e',
+                  border: 'none',
+                  background: 'transparent',
+                  color: 'rgba(255, 255, 255, 0.4)',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 0 16px rgba(34, 197, 94, 0.3)',
                   transition: 'all 0.15s ease',
                   margin: '0 auto'
                 }}
-                onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.35)'}
-                onMouseUp={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.14)'}
               >
-                <Fingerprint size={26} />
+                <Fingerprint size={22} style={{ opacity: 0.5 }} />
               </button>
 
               {/* Center Column: 0 */}
@@ -2219,33 +2216,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               </button>
             </div>
 
-            {/* Direct Biometric Prompt Button */}
-            <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-              <button
-                type="button"
-                onClick={() => triggerBiometricUnlock()}
-                style={{
-                  background: 'rgba(34, 197, 94, 0.1)',
-                  border: '1px solid rgba(34, 197, 94, 0.3)',
-                  borderRadius: '24px',
-                  color: '#22c55e',
-                  fontSize: '12.5px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  padding: '7px 18px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <Fingerprint size={16} />
-                <span>Tap for Fingerprint / Face ID</span>
-              </button>
-            </div>
-
             {/* Forgot / Reset PIN Action */}
-            <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <button
                 type="button"
                 onClick={() => {
