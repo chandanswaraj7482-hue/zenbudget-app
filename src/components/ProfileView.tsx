@@ -225,25 +225,26 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '80px', animation: 'fadeIn 0.3s ease-out' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '100px' }} className="animate-fade-in">
       
       {/* Title Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         {onBack && (
           <button 
             onClick={onBack}
+            aria-label="Back"
             style={{
-              background: 'var(--bg-input)',
-              border: '1px solid var(--border-input)',
-              borderRadius: '12px',
-              width: '36px',
-              height: '36px',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-card)',
+              borderRadius: '14px',
+              width: '40px',
+              height: '40px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: 'var(--text-primary)',
               cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+              boxShadow: 'var(--shadow-sm)',
               transition: 'all 0.2s ease'
             }}
           >
@@ -251,11 +252,11 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           </button>
         )}
         <div style={{ textAlign: 'left' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', fontFamily: "'Manrope', sans-serif", margin: 0 }}>
-            Profile &amp; Preferences
+          <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em', margin: 0 }}>
+            Profile &amp; Settings
           </h2>
-          <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
-            Username, avatar, passcode, currency &amp; language settings.
+          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '3px 0 0 0', fontWeight: 500 }}>
+            Manage identity, currency, language &amp; security
           </p>
         </div>
       </div>

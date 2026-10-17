@@ -383,44 +383,85 @@ export const Transactions: React.FC<TransactionsProps> = ({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '140px' }} className="animate-fade-in">
-      <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em', margin: 0 }}>
-        {t('transactions_title')}
-      </h2>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', paddingBottom: '140px' }} className="animate-fade-in">
+      {/* Page Title & Subtitle */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em', margin: 0 }}>
+            {t('transactions_title')}
+          </h2>
+          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '3px 0 0 0', fontWeight: 500 }}>
+            All your entries & real-time spending insights
+          </p>
+        </div>
+        <div style={{
+          background: 'rgba(16, 185, 129, 0.12)',
+          border: '1px solid rgba(16, 185, 129, 0.3)',
+          borderRadius: '14px',
+          padding: '6px 12px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          color: '#34d399',
+          fontSize: '12px',
+          fontWeight: 800
+        }}>
+          <span>{filteredTransactions.length}</span>
+          <span style={{ fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Logs</span>
+        </div>
+      </div>
 
-      {/* 🪄 AI INSIGHTS CARD */}
+      {/* 🪄 AI INSIGHTS CARD - MODERN FINTECH REDESIGN */}
       <div 
+        className="glass-panel"
         style={{
-          background: 'var(--bg-card, #18181b)',
-          border: '1px solid var(--border-card, rgba(255, 255, 255, 0.08))',
-          borderRadius: '20px',
+          background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(16, 185, 129, 0.06) 100%)',
+          border: '1px solid rgba(245, 158, 11, 0.25)',
+          borderRadius: '24px',
           padding: '18px 20px',
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)',
-          position: 'relative'
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
+          position: 'relative',
+          overflow: 'hidden'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-          <Sparkles size={14} style={{ color: '#eab308' }} />
-          <span 
-            style={{ 
-              fontSize: '11px', 
-              fontWeight: 800, 
-              letterSpacing: '0.08em', 
-              color: '#eab308', 
-              textTransform: 'uppercase' 
-            }}
-          >
-            AI INSIGHTS
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{
+              width: '28px',
+              height: '28px',
+              borderRadius: '9px',
+              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 8px rgba(245, 158, 11, 0.3)'
+            }}>
+              <Sparkles size={14} color="#ffffff" />
+            </div>
+            <span 
+              style={{ 
+                fontSize: '11px', 
+                fontWeight: 900, 
+                letterSpacing: '0.08em', 
+                color: '#fbbf24', 
+                textTransform: 'uppercase' 
+              }}
+            >
+              AI CASHFLOW PULSE
+            </span>
+          </div>
+          <span style={{ fontSize: '10.5px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+            Day {currentDay} of {daysInMonth}
           </span>
         </div>
 
         <p 
           style={{ 
-            fontSize: '13.5px', 
-            color: 'var(--text-primary, #e4e4e7)', 
+            fontSize: '13px', 
+            color: 'var(--text-primary)', 
             lineHeight: '1.55', 
             fontWeight: 500, 
             margin: 0 
@@ -428,31 +469,36 @@ export const Transactions: React.FC<TransactionsProps> = ({
         >
           {totalSpentSoFar > 0 ? (
             <>
-              You've spent <strong style={{ color: 'var(--text-primary, #fff)' }}>{currencySymbol}{totalSpentSoFar.toLocaleString()}</strong> so far — around <strong style={{ color: 'var(--text-primary, #fff)' }}>{currencySymbol}{dailyAvg.toLocaleString()}/day (This Month)</strong> across {currentDay} of {daysInMonth} days. On this pace you're heading toward about <strong style={{ color: 'var(--text-primary, #fff)' }}>{currencySymbol}{projectedMonthEnd.toLocaleString()}</strong> by month-end.
+              You've spent <strong style={{ color: '#ffffff', fontWeight: 800 }}>{currencySymbol}{totalSpentSoFar.toLocaleString()}</strong> so far — around <strong style={{ color: '#34d399', fontWeight: 800 }}>{currencySymbol}{dailyAvg.toLocaleString()}/day</strong>. Projected month-end burn: <strong style={{ color: '#fbbf24', fontWeight: 800 }}>{currencySymbol}{projectedMonthEnd.toLocaleString()}</strong>.
             </>
           ) : (
             <>
-              You've spent <strong style={{ color: 'var(--text-primary, #fff)' }}>{currencySymbol}0</strong> so far across {currentDay} of {daysInMonth} days. On this pace you're heading toward about <strong style={{ color: 'var(--text-primary, #fff)' }}>{currencySymbol}0</strong> by month-end.
+              You've spent <strong style={{ color: '#34d399', fontWeight: 800 }}>{currencySymbol}0</strong> so far this month. On this track, your projected month-end burn is minimal.
             </>
           )}
         </p>
 
         <div 
           style={{
-            background: '#b45309',
-            borderRadius: '12px',
+            background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.25) 100%)',
+            border: '1px solid rgba(245, 158, 11, 0.35)',
+            borderRadius: '14px',
             padding: '10px 14px',
-            color: '#ffffff',
-            fontSize: '12.5px',
+            color: '#fbbf24',
+            fontSize: '12px',
             fontWeight: 700,
-            lineHeight: '1.4'
+            lineHeight: '1.4',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}
         >
-          {pillText}
+          <span>💡</span>
+          <span>{pillText}</span>
         </div>
       </div>
 
-      {/* Search Bar */}
+      {/* Search Bar - Sleek Glass */}
       <div style={{ position: 'relative' }}>
         <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
         <input
@@ -460,17 +506,14 @@ export const Transactions: React.FC<TransactionsProps> = ({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t('search_placeholder')}
+          className="glass-input"
           style={{
             width: '100%',
-            padding: '13px 18px 13px 46px',
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-card)',
-            borderRadius: '16px',
-            color: 'var(--text-primary)',
+            padding: '14px 18px 14px 46px',
+            borderRadius: '18px',
             fontSize: '13.5px',
-            outline: 'none',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-            transition: 'all 0.15s ease'
+            fontWeight: 600,
+            boxShadow: 'var(--shadow-sm)'
           }}
         />
       </div>
@@ -478,7 +521,7 @@ export const Transactions: React.FC<TransactionsProps> = ({
       {/* Filters Drawer/Row */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {/* Type selector */}
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', background: 'var(--bg-input)', padding: '4px', borderRadius: '16px', border: '1px solid var(--border-input)' }}>
           {[{id:'all',label:t('all')},{id:'income',label:t('income')},{id:'expense',label:t('expenses')}].map((item) => (
             <button
               key={item.id}
@@ -487,13 +530,15 @@ export const Transactions: React.FC<TransactionsProps> = ({
                 flex: 1,
                 padding: '9px 12px',
                 borderRadius: '12px',
-                fontSize: '13px',
+                fontSize: '12.5px',
                 fontWeight: 800,
-                border: selectedType === item.id ? 'none' : '1px solid var(--border-card)',
-                background: selectedType === item.id ? 'var(--primary)' : 'var(--bg-card)',
+                border: 'none',
+                background: selectedType === item.id 
+                  ? (item.id === 'income' ? 'var(--success)' : item.id === 'expense' ? 'var(--danger)' : 'var(--primary)')
+                  : 'transparent',
                 color: selectedType === item.id ? '#ffffff' : 'var(--text-secondary)',
                 cursor: 'pointer',
-                boxShadow: selectedType === item.id ? '0 2px 8px rgba(16, 185, 129, 0.25)' : 'none',
+                boxShadow: selectedType === item.id ? '0 4px 12px rgba(0,0,0,0.25)' : 'none',
                 transition: 'all 0.15s ease'
               }}
             >
@@ -518,14 +563,14 @@ export const Transactions: React.FC<TransactionsProps> = ({
               style={{
                 padding: '7px 14px',
                 borderRadius: '12px',
-                border: selectedCategory === cat.id ? 'none' : '1px solid var(--border-card)',
+                border: selectedCategory === cat.id ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border-card)',
                 fontSize: '12px',
                 fontWeight: 700,
                 cursor: 'pointer',
                 flexShrink: 0,
-                backgroundColor: selectedCategory === cat.id ? 'var(--primary)' : 'var(--bg-card)',
-                color: selectedCategory === cat.id ? '#ffffff' : 'var(--text-secondary)',
-                boxShadow: selectedCategory === cat.id ? '0 2px 8px rgba(16, 185, 129, 0.25)' : 'none',
+                backgroundColor: selectedCategory === cat.id ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-card)',
+                color: selectedCategory === cat.id ? '#34d399' : 'var(--text-secondary)',
+                boxShadow: selectedCategory === cat.id ? '0 2px 8px rgba(16, 185, 129, 0.2)' : 'none',
                 transition: 'all 0.15s ease'
               }}
             >
@@ -535,7 +580,7 @@ export const Transactions: React.FC<TransactionsProps> = ({
         </div>
 
         {/* Sort Row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12.5px' }}>
           <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>
             {t('showing_items').replace('{{count}}', String(filteredTransactions.length))}
           </span>
@@ -545,11 +590,11 @@ export const Transactions: React.FC<TransactionsProps> = ({
             gap: '6px',
             background: 'var(--bg-card)',
             border: '1px solid var(--border-card)',
-            padding: '5px 12px',
+            padding: '6px 12px',
             borderRadius: '12px',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.02)'
+            boxShadow: 'var(--shadow-sm)'
           }}>
-            <ArrowUpDown size={14} color="var(--primary)" />
+            <ArrowUpDown size={13} color="var(--primary)" />
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}

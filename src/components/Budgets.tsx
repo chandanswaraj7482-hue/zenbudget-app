@@ -248,38 +248,41 @@ export const Budgets: React.FC<BudgetsProps> = ({
     .reduce((sum, t) => sum + t.amount, 0);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '30px', maxWidth: '100%', overflowX: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '30px', maxWidth: '100%', overflowX: 'hidden' }} className="animate-fade-in">
       
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '22px' }}>🎯</span> {t('my_budgets', { defaultValue: 'My Budgets' })}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ fontSize: '24px', fontWeight: 900, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '-0.02em' }}>
+            <span>🎯</span> {t('my_budgets', { defaultValue: 'Budgets' })}
           </h2>
-          <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('budget_desc', { defaultValue: 'Set category monthly spending caps' })}</span>
+          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '3px 0 0 0', fontWeight: 500 }}>
+            {t('budget_desc', { defaultValue: 'Smart category caps to keep spending disciplined' })}
+          </p>
         </div>
         <button
           onClick={() => setIsManageOpen(!isManageOpen)}
           style={{
-            background: isManageOpen ? 'var(--primary)' : 'rgba(16, 185, 129, 0.1)',
+            background: isManageOpen ? 'var(--primary)' : 'rgba(16, 185, 129, 0.12)',
             color: isManageOpen ? '#fff' : 'var(--primary)',
-            border: 'none',
-            padding: '8px 12px',
-            borderRadius: '10px',
+            border: '1px solid rgba(16, 185, 129, 0.3)',
+            padding: '8px 14px',
+            borderRadius: '14px',
             fontWeight: 800,
             fontSize: '12px',
             cursor: 'pointer',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s ease',
+            boxShadow: 'var(--shadow-sm)'
           }}
         >
-          {isManageOpen ? 'Done' : 'Manage Categories'}
+          {isManageOpen ? 'Done' : 'Categories ⚙️'}
         </button>
       </div>
 
       {/* Free Tier Limits vs Pro Status Banner */}
       <div style={{
-        padding: '12px 16px',
-        borderRadius: '16px',
+        padding: '14px 18px',
+        borderRadius: '20px',
         background: isPremiumUser 
           ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%)'
           : 'linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(239, 68, 68, 0.08) 100%)',
@@ -290,26 +293,27 @@ export const Budgets: React.FC<BudgetsProps> = ({
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: '10px'
+        gap: '10px',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.2)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {isPremiumUser ? (
-            <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#10b981', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Crown size={16} />
+            <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)' }}>
+              <Crown size={18} />
             </div>
           ) : (
-            <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#f59e0b', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Lock size={16} />
+            <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(245, 158, 11, 0.3)' }}>
+              <Lock size={18} />
             </div>
           )}
           <div>
             <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)' }}>
-              {isPremiumUser ? '⭐ ZenBudget Pro Active' : `Free Tier: ${activeLimitCount}/${maxAllowedSlots} Limits Used`}
+              {isPremiumUser ? '⭐ ZenBudget Pro Active' : `Budget Slots: ${activeLimitCount}/${maxAllowedSlots} In Use`}
             </div>
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
               {isPremiumUser 
-                ? 'Unlimited category limits & 100% Ad-Free experience' 
-                : (isLimitCapped ? 'Limit cap reached! Watch ad for +1 slot or go Pro' : `Free tier allows 2 limits. ${maxAllowedSlots - activeLimitCount} left.`)}
+                ? 'Unlimited category limits & real-time auto notifications' 
+                : (isLimitCapped ? 'Slot cap reached! Watch quick ad for +1 free slot' : `Free tier allows 2 limits. ${maxAllowedSlots - activeLimitCount} left.`)}
             </div>
           </div>
         </div>
