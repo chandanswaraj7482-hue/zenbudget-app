@@ -5051,26 +5051,24 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         )}
       </main>
 
-      {/* Floating Modern Glass Island Navigation Bar (Ultra-Premium Fintech UI) */}
+      {/* Bottom Attached Modern Navigation Bar (Clean & Native Edge-to-Edge) */}
       <nav style={{
         position: 'fixed',
-        bottom: '12px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: 'calc(100% - 20px)',
-        maxWidth: '460px',
-        background: theme === 'light' ? 'rgba(255, 255, 255, 0.95)' : 'rgba(11, 15, 25, 0.92)',
-        border: theme === 'light' ? '1.5px solid rgba(0,0,0,0.06)' : '1px solid rgba(255, 255, 255, 0.12)',
-        borderRadius: '30px',
-        backdropFilter: 'blur(30px) saturate(200%)',
-        WebkitBackdropFilter: 'blur(30px) saturate(200%)',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        width: '100%',
+        background: theme === 'light' ? 'rgba(255, 255, 255, 0.96)' : 'rgba(11, 15, 25, 0.95)',
+        borderTop: theme === 'light' ? '1px solid rgba(0,0,0,0.08)' : '1px solid rgba(255, 255, 255, 0.1)',
+        backdropFilter: 'blur(24px) saturate(200%)',
+        WebkitBackdropFilter: 'blur(24px) saturate(200%)',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '6px 10px calc(env(safe-area-inset-bottom) + 6px) 10px',
+        justifyContent: 'space-around',
+        padding: '6px 12px calc(env(safe-area-inset-bottom) + 8px) 12px',
         boxShadow: theme === 'light' 
-          ? '0 16px 40px -8px rgba(15, 23, 42, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.04)' 
-          : '0 20px 50px -10px rgba(0, 0, 0, 0.8), 0 0 24px rgba(34, 197, 94, 0.15)',
+          ? '0 -4px 20px rgba(0, 0, 0, 0.06)' 
+          : '0 -8px 28px rgba(0, 0, 0, 0.55)',
         zIndex: 999,
         transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
       }}>
