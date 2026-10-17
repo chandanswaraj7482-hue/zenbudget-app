@@ -4443,7 +4443,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center',
-        padding: '12px 18px', 
+        padding: '10px 18px', 
         background: 'var(--bg-card)', 
         borderBottom: '1px solid var(--border-card)',
         backdropFilter: 'blur(12px)',
@@ -4453,15 +4453,23 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         zIndex: 99,
         transition: 'all 0.2s ease'
       }}>
-        {/* Branding Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+        {/* Branding Logo: Logo Icon image */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+          <img 
+            src="/icon.png" 
+            alt="ZenBudget" 
+            style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'contain' }}
+            onError={(e) => {
+              (e.currentTarget as HTMLElement).style.display = 'none';
+            }}
+          />
           <span style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '-0.03em', fontFamily: "'Manrope', sans-serif" }}>
             <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
           </span>
           <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#22c55e', boxShadow: '0 0 8px #22c55e', flexShrink: 0 }} />
         </div>
 
-        {/* Status Actions */}
+        {/* Status Actions (No Upgrade button to prevent scaring new users) */}
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           
           {/* Scanner Button */}
@@ -4546,50 +4554,55 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             )}
           </button>
 
-          {/* Premium / Upgrade Status Badge */}
-          {isPremiumUser ? (
-            <div style={{
-              height: '34px',
-              padding: '0 12px',
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, rgba(236,72,153,0.15) 0%, rgba(99,102,241,0.15) 100%)',
-              border: '1px solid rgba(236,72,153,0.3)',
-              color: 'var(--secondary)',
-              fontSize: '11px',
-              fontWeight: 800,
+          {/* Rightmost User Profile Avatar */}
+          <button
+            onClick={() => setActiveView('profile')}
+            title="My Profile"
+            style={{
+              background: 'transparent',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '4px',
-              boxShadow: '0 2px 6px rgba(236,72,153,0.08)'
-            }}>
-              <Sparkles size={12} /> PRO
-            </div>
-          ) : (
-            <button
-              onClick={() => {
-                setIsSubBlocker(false);
-                setIsSubModalOpen(true);
-              }}
-              style={{
-                height: '34px',
-                padding: '0 12px',
+              justifyContent: 'center',
+              marginLeft: '2px'
+            }}
+          >
+            {userAvatar && !userAvatar.includes('ui-avatars.com') ? (
+              <img
+                src={userAvatar}
+                alt={userName || "Profile"}
+                referrerPolicy="no-referrer"
+                crossOrigin="anonymous"
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '12px',
+                  objectFit: 'cover',
+                  border: '1.5px solid #22c55e',
+                  boxShadow: '0 2px 8px rgba(34,197,94,0.25)'
+                }}
+              />
+            ) : (
+              <div style={{
+                width: '36px',
+                height: '36px',
                 borderRadius: '12px',
-                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%)',
-                border: '1px solid rgba(245, 158, 11, 0.35)',
-                color: '#f59e0b',
-                fontSize: '11px',
+                background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)',
+                color: '#ffffff',
                 fontWeight: 800,
-                cursor: 'pointer',
+                fontSize: '14px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '5px',
-                boxShadow: '0 2px 6px rgba(245,158,11,0.1)',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <span>👑 Upgrade</span>
-            </button>
-          )}
+                justifyContent: 'center',
+                border: '1.5px solid #22c55e',
+                boxShadow: '0 2px 8px rgba(34,197,94,0.25)'
+              }}>
+                {userName ? userName.trim().slice(0, 2).toUpperCase() : '👤'}
+              </div>
+            )}
+          </button>
         </div>
       </header>
 

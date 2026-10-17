@@ -1,5 +1,4 @@
 import React, { useState, useRef } from 'react';
-import { CoinCatcherGame } from './CoinCatcherGame';
 import { 
   ChevronLeft, UploadCloud, FileText, CheckCircle2, AlertCircle, 
   Sparkles, ShieldCheck, ArrowRight, Landmark, Lock, 
@@ -842,19 +841,13 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
                 <span style={{ fontSize: '26px' }}>🎮</span>
                 <div>
                   <h4 style={{ margin: 0, fontSize: '13px', fontWeight: 800, color: '#34d399' }}>
-                    Play Zen Coin Catcher while your statement parses!
+                    Analyzing statement transactions...
                   </h4>
                   <p style={{ margin: '2px 0 0 0', fontSize: '11px', color: '#94a3b8' }}>
-                    Chrome Dino style! Catch SIP coins, dodge credit card traps & share your score with friends.
+                    Zen AI is extracting dates, merchants, and debit/credit amounts accurately.
                   </p>
                 </div>
               </div>
-              <CoinCatcherGame
-                currencySymbol={currencySymbol}
-                userReferralCode={userReferralCode}
-                defaultExpanded={true}
-                title="🎮 Dino Mode: Play While Parsing"
-              />
             </div>
           </div>
         )}
@@ -1273,9 +1266,6 @@ export const BankStatementImporter: React.FC<BankStatementImporterProps> = ({
             </div>
           </div>
         )}
-
-        {/* Financial Mini Game - Chrome Dino Style */}
-        <CoinCatcherGame currencySymbol={currencySymbol} userReferralCode={userReferralCode} />
 
         {/* Rewarded Ad Unlock Modal for Bank Statements */}
         {showAdModal && (

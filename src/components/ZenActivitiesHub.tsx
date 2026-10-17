@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Gamepad2, 
   Brain, 
   Sparkles, 
   ArrowRight, 
@@ -18,14 +17,13 @@ import {
   BookmarkCheck,
   Video
 } from 'lucide-react';
-import { CoinCatcherGame } from './CoinCatcherGame';
 import { playCelebrationSound, playNotificationSound } from '../utils/audio';
 import { admobService } from '../services/admobService';
 
 interface ZenActivitiesHubProps {
   currencySymbol?: string;
   userReferralCode?: string;
-  defaultTab?: 'game' | 'quiz' | 'afford';
+  defaultTab?: 'quiz' | 'afford';
 }
 
 // 8 Curated Rapid Money IQ Quiz Questions
@@ -115,10 +113,10 @@ const QUIZ_QUESTIONS = [
 export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
   currencySymbol = '₹',
   userReferralCode = '',
-  defaultTab = 'game'
+  defaultTab = 'quiz'
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState<'game' | 'quiz' | 'afford'>(defaultTab);
+  const [activeTab, setActiveTab] = useState<'quiz' | 'afford'>('quiz');
 
   // Quiz State
   const [quizIndex, setQuizIndex] = useState(0);
@@ -464,10 +462,10 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
             boxSizing: 'border-box',
             transition: 'max-width 0.3s ease'
           }}>
-            {/* 3 Activity Tabs Selector */}
+            {/* 2 Activity Tabs Selector (Game removed for lightweight high performance) */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
+              gridTemplateColumns: 'repeat(2, 1fr)',
               padding: '6px',
               gap: '6px',
               background: 'var(--bg-card, rgba(30, 41, 59, 0.6))',
@@ -475,31 +473,7 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
               border: '1px solid var(--border-input, rgba(255,255,255,0.08))',
               marginBottom: '16px'
             }}>
-        {/* Tab 1: Arcade Game */}
-        <button
-          onClick={() => setActiveTab('game')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            padding: '10px 6px',
-            borderRadius: '14px',
-            border: 'none',
-            background: activeTab === 'game' ? '#10b981' : 'transparent',
-            color: activeTab === 'game' ? '#ffffff' : 'var(--text-secondary)',
-            fontWeight: 800,
-            fontSize: '12px',
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-            boxShadow: activeTab === 'game' ? '0 4px 14px rgba(16, 185, 129, 0.35)' : 'none'
-          }}
-        >
-          <Gamepad2 size={16} />
-          <span>1. Arcade</span>
-        </button>
-
-        {/* Tab 2: Money IQ Quiz */}
+        {/* Tab 1: Money IQ Quiz */}
         <button
           onClick={() => setActiveTab('quiz')}
           style={{
@@ -520,7 +494,7 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
           }}
         >
           <Brain size={16} />
-          <span>2. IQ Quiz</span>
+          <span>🧠 60s Money Quiz</span>
         </button>
 
         {/* Tab 3: "Can I Afford It?" Impulse Checker */}
@@ -547,20 +521,6 @@ export const ZenActivitiesHub: React.FC<ZenActivitiesHubProps> = ({
           <span>3. Afford It?</span>
         </button>
       </div>
-
-      {/* =================================================================== */}
-      {/* ACTIVITY 1: COIN CATCHER GAME                                       */}
-      {/* =================================================================== */}
-      {activeTab === 'game' && (
-        <div style={{ padding: '4px' }}>
-          <CoinCatcherGame
-            currencySymbol={currencySymbol}
-            userReferralCode={userReferralCode}
-            defaultExpanded={true}
-            title="🎮 Zen Coin Catcher Arcade"
-          />
-        </div>
-      )}
 
       {/* =================================================================== */}
       {/* ACTIVITY 2: 60-SECOND MONEY IQ QUIZ                                 */}
