@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar } from 'lucide-react';
+import { Calendar, ArrowLeft } from 'lucide-react';
 import { t } from '../utils/i18n';
 import type { Transaction, CategoryType, Account } from '../types';
 import { ZenDatePickerModal } from './ZenDatePickerModal';
@@ -13,9 +13,10 @@ interface AnalyticsProps {
   currentProfileId: string;
   familyMembers?: any[];
   isPremium?: boolean;
+  onBack?: () => void;
 }
 
-export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currencySymbol, accounts = [], currentProfileId, familyMembers = [], isPremium = false }) => {
+export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currencySymbol, accounts = [], currentProfileId, familyMembers = [], isPremium = false, onBack }) => {
   const [timeframe, setTimeframe] = useState<'month' | 'all'>('month');
   const [userFilter, setUserFilter] = useState<string>('me');
   const [moodTimeframe, setMoodTimeframe] = useState<MoodTimeframe>('7d');
@@ -753,9 +754,33 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
       {/* Header + Timeframe Toggle */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em', margin: 0 }}>
-            {t('analytics_title')}
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                aria-label="Back to Dashboard"
+                style={{
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border-card)',
+                  color: 'var(--text-primary)',
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  boxShadow: 'var(--shadow-sm)'
+                }}
+              >
+                <ArrowLeft size={18} />
+              </button>
+            )}
+            <h2 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em', margin: 0 }}>
+              {t('analytics_title')}
+            </h2>
+          </div>
           {isPremium && familyMembers && familyMembers.length > 0 && (
             <select
               value={userFilter}

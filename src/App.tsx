@@ -4803,6 +4803,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             onDeleteAccount={handleDeleteBankAccount}
             onSaveTransaction={handleSaveTransaction}
             onScanReceiptClick={() => setShowReceiptSourceModal(true)}
+            onOpenAnalytics={() => setActiveView('analytics')}
             familyMembers={familyMembers}
             partnerName={partnerName || undefined}
             partnerId={partnerId || undefined}
@@ -4854,7 +4855,16 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           />
         )}
         {activeView === 'analytics' && (
-          <Analytics key={langKey} transactions={convertedTransactions} currencySymbol={currencySymbol} accounts={accounts} currentProfileId={currentProfileId} familyMembers={familyMembers} isPremium={isPremiumUser} />
+          <Analytics 
+            key={langKey} 
+            transactions={convertedTransactions} 
+            currencySymbol={currencySymbol} 
+            accounts={accounts} 
+            currentProfileId={currentProfileId} 
+            familyMembers={familyMembers} 
+            isPremium={isPremiumUser} 
+            onBack={() => setActiveView('dashboard')}
+          />
         )}
         {activeView === 'profile' && (
           <ProfileView 
