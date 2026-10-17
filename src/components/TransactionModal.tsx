@@ -590,21 +590,29 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         className="glass-panel"
         style={{
           width: '100%',
-          maxWidth: '380px',
-          padding: '24px',
-          borderRadius: '28px',
+          maxWidth: '430px',
+          padding: '24px 22px',
+          borderRadius: '32px',
           position: 'relative',
           animation: 'slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-          maxHeight: 'calc(100vh - 32px)',
-          overflowY: 'auto'
+          maxHeight: 'calc(100vh - 36px)',
+          overflowY: 'auto',
+          border: '1.5px solid var(--border-card-active, rgba(255, 255, 255, 0.1))',
+          background: 'var(--bg-card, rgba(15, 23, 42, 0.94))',
+          boxShadow: '0 24px 60px rgba(0, 0, 0, 0.65)'
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h3 style={{ fontSize: '18px', fontWeight: 800 }}>
-            {editingTransaction ? (type === 'expense' ? 'Edit Expense' : 'Edit Income') : 'New Transaction'}
-          </h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+          <div>
+            <h3 style={{ fontSize: '19px', fontWeight: 900, letterSpacing: '-0.02em', margin: 0, color: 'var(--text-primary)' }}>
+              {editingTransaction ? (type === 'expense' ? 'Edit Expense' : 'Edit Income') : 'Record Transaction'}
+            </h3>
+            <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
+              Track personal spends, cash flows &amp; bills
+            </p>
+          </div>
           <button 
             onClick={onClose}
             style={{
@@ -1000,7 +1008,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
           {/* Amount Input */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               Amount
             </label>
             <div style={{
@@ -1008,15 +1016,16 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               alignItems: 'center',
               gap: '12px',
               background: 'var(--bg-input)',
-              borderRadius: '16px',
-              padding: '12px 18px',
-              border: '1px solid var(--border-input)'
+              borderRadius: '20px',
+              padding: '14px 20px',
+              border: '1.5px solid var(--border-input)',
+              boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)'
             }}>
               <span style={{ 
-                fontSize: '26px', 
+                fontSize: '32px', 
                 fontWeight: 900,
                 color: type === 'expense' ? 'var(--danger)' : 'var(--success)',
-                minWidth: '20px'
+                minWidth: '24px'
               }}>
                 {currencySymbol}
               </span>
@@ -1037,12 +1046,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   flex: 1,
                   background: 'transparent',
                   border: 'none',
-                  fontSize: '26px',
+                  fontSize: '32px',
                   fontWeight: 900,
                   color: type === 'expense' ? 'var(--danger)' : 'var(--success)',
                   outline: 'none',
-                  padding: '2px 4px',
-                  fontFamily: "'Manrope', sans-serif"
+                  padding: '0',
+                  fontFamily: "'Manrope', -apple-system, sans-serif"
                 }}
               />
             </div>
@@ -1050,7 +1059,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
           {/* Title Field */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               {type === 'income' ? 'Income Source' : 'Expense Description'}
             </label>
             <div style={{
@@ -1058,9 +1067,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               alignItems: 'center',
               gap: '12px',
               background: 'var(--bg-input)',
-              borderRadius: '16px',
-              padding: '12px 18px',
-              border: '1px solid var(--border-input)'
+              borderRadius: '18px',
+              padding: '14px 18px',
+              border: '1.5px solid var(--border-input)'
             }}>
               <input
                 type="text"
@@ -1077,7 +1086,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   fontWeight: 600,
                   color: 'var(--text-primary)',
                   outline: 'none',
-                  padding: '2px 4px'
+                  padding: '0'
                 }}
               />
             </div>
@@ -1086,9 +1095,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           {/* Category Field (only if type is expense) */}
           {type === 'expense' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <label style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Category
-              </label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  Category
+                </label>
+                <span style={{ fontSize: '11px', color: '#22c55e', fontWeight: 700 }}>
+                  Selected: {CATEGORIES.find(c => c.id === category)?.label || 'Food'}
+                </span>
+              </div>
               <div style={{
                 display: 'grid', 
                 gridTemplateColumns: 'repeat(5, 1fr)', 
@@ -1108,33 +1122,34 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         justifyContent: 'center',
                         gap: '6px',
                         padding: '10px 4px',
-                        borderRadius: '14px',
-                        border: isSelected ? '2px solid var(--primary)' : '1px solid var(--border-input)',
+                        borderRadius: '16px',
+                        border: isSelected ? '2px solid #22c55e' : '1px solid var(--border-input)',
                         cursor: 'pointer',
-                        transition: 'all 0.15s ease',
-                        background: isSelected ? 'rgba(34, 197, 94, 0.14)' : 'var(--bg-input)',
-                        boxShadow: isSelected ? '0 4px 12px rgba(34, 197, 94, 0.2)' : 'none'
+                        transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                        background: isSelected ? 'rgba(34, 197, 94, 0.16)' : 'var(--bg-input)',
+                        boxShadow: isSelected ? '0 4px 16px rgba(34, 197, 94, 0.28)' : 'none',
+                        transform: isSelected ? 'scale(1.03)' : 'scale(1)'
                       }}
                     >
                       <div style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '10px',
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '12px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        backgroundColor: isSelected ? 'var(--primary)' : 'rgba(255,255,255,0.06)',
+                        backgroundColor: isSelected ? '#22c55e' : 'rgba(255,255,255,0.06)',
                         color: isSelected ? '#ffffff' : 'var(--text-secondary)',
-                        transition: 'all 0.15s ease'
+                        transition: 'all 0.18s ease'
                       }}>
                         {cat.icon}
                       </div>
                       <span style={{ 
                         fontSize: '11px', 
-                        fontWeight: 700, 
+                        fontWeight: isSelected ? 800 : 600, 
                         textAlign: 'center', 
                         lineHeight: '1.2',
-                        color: isSelected ? 'var(--primary)' : 'var(--text-primary)'
+                        color: isSelected ? '#22c55e' : 'var(--text-primary)'
                       }}>
                         {cat.label}
                       </span>
