@@ -2076,7 +2076,12 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((num) => (
                 <button
                   key={num}
-                  onClick={() => handleKeypadPress(num)}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleKeypadPress(num);
+                  }}
                   style={{
                     height: '60px',
                     width: '60px',
@@ -2142,7 +2147,12 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
               {/* Center Column: 0 */}
               <button
-                onClick={() => handleKeypadPress('0')}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleKeypadPress('0');
+                }}
                 style={{
                   height: '60px',
                   width: '60px',
@@ -2173,7 +2183,12 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
               {/* Right Column: Delete Backspace */}
               <button
-                onClick={handleBackspace}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleBackspace();
+                }}
                 style={{
                   height: '60px',
                   width: '60px',
@@ -2230,6 +2245,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             {/* Sign Out Action */}
             <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
               <button
+                type="button"
                 onClick={() => setShowSignOutConfirm(true)}
                 style={{
                   background: 'rgba(239, 68, 68, 0.1)',

@@ -1154,7 +1154,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       });
     }
 
-    // Web / PWA visibility change auto-lock (asks for PIN on returning to tab)
+    // Web / PWA visibility change auto-lock (only auto-lock if hidden for at least 5 minutes)
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         sessionStorage.setItem('zb_bg_time', Date.now().toString());
@@ -1164,7 +1164,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         sessionStorage.removeItem('zb_was_backgrounded');
         if (bgTimeStr) {
           const bgTime = parseInt(bgTimeStr, 10);
-          if (!isNaN(bgTime) && Date.now() - bgTime >= 3000) {
+          // Only re-lock if hidden for more than 5 minutes (300,000ms), NOT 3 seconds!
+          if (!isNaN(bgTime) && Date.now() - bgTime >= 5 * 60 * 1000) {
             sessionStorage.removeItem('zb_session_authenticated');
             sessionStorage.removeItem('zb_last_active_time');
             setIsLocked(true);
