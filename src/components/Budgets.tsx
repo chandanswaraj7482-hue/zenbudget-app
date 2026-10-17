@@ -689,8 +689,9 @@ export const Budgets: React.FC<BudgetsProps> = ({
                         <span>Remaining: <strong style={{ color: '#22c55e' }}>{formatCurrency(limit - spent, currencySymbol)}</strong></span>
                       )}
                     </span>
-                    <span style={{ fontSize: '10.5px', color: 'var(--text-secondary)', opacity: 0.85 }}>
-                      🔄 Renews in {windowInfo.daysLeft} {windowInfo.daysLeft === 1 ? 'day' : 'days'} ({windowInfo.label})
+                    <span style={{ fontSize: '11px', color: '#10b981', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span>🔄 Renews in {windowInfo.daysLeft} {windowInfo.daysLeft === 1 ? 'day' : 'days'}</span>
+                      <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>• ({bgt?.period === 'daily' ? 'Per Day' : bgt?.period === 'weekly' ? 'Weekly' : bgt?.period === 'custom' ? `${bgt.customDays || 7}D Custom` : 'Per Month'})</span>
                     </span>
                   </div>
                 </div>
