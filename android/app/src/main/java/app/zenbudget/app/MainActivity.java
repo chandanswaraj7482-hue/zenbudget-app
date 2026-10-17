@@ -61,6 +61,9 @@ public class MainActivity extends BridgeActivity {
     private void registerTorchBridge() {
         if (getBridge() != null && getBridge().getWebView() != null) {
             WebView webView = getBridge().getWebView();
+            try {
+                webView.setBackgroundColor(android.graphics.Color.parseColor("#060910"));
+            } catch (Exception ignored) {}
             webView.addJavascriptInterface(torchBridge, "AndroidNativeTorch");
             try {
                 WebView.setWebContentsDebuggingEnabled(false);

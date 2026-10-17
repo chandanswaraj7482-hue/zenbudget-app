@@ -819,12 +819,12 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
   }, [step]);
 
   useEffect(() => {
-    // Only auto-trigger native biometrics on real mobile devices if the user explicitly enabled it
-    if (step === 'unlock' && !biometricTriggered.current && localStorage.getItem('zb_biometrics_enabled') === 'true' && Capacitor.isNativePlatform()) {
+    // Auto-trigger native biometrics on unlock screen unless explicitly disabled
+    if (step === 'unlock' && !biometricTriggered.current && localStorage.getItem('zb_biometrics_enabled') !== 'false' && Capacitor.isNativePlatform()) {
       biometricTriggered.current = true;
       const timer = setTimeout(() => {
         triggerBiometricUnlock();
-      }, 300);
+      }, 350);
       return () => clearTimeout(timer);
     }
   }, [step, biometricsAvailable, dbProfile]);
@@ -2110,39 +2110,36 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                 </button>
               ))}
 
-              {/* Left Keypad Column: Biometrics button */}
-              {localStorage.getItem('zb_biometrics_enabled') !== 'false' ? (
-                <button
-                  type="button"
-                  onClick={() => triggerBiometricUnlock()}
-                  style={{
-                    height: '60px',
-                    width: '60px',
-                    minWidth: '60px',
-                    maxWidth: '60px',
-                    minHeight: '60px',
-                    maxHeight: '60px',
-                    padding: 0,
-                    borderRadius: '50%',
-                    border: '1px solid rgba(34, 197, 94, 0.3)',
-                    background: 'rgba(34, 197, 94, 0.12)',
-                    color: '#22c55e',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 0 16px rgba(34, 197, 94, 0.25)',
-                    transition: 'all 0.15s ease',
-                    margin: '0 auto'
-                  }}
-                  onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.3)'}
-                  onMouseUp={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.12)'}
-                >
-                  <Fingerprint size={24} />
-                </button>
-              ) : (
-                <div style={{ width: '60px', height: '60px', margin: '0 auto' }} />
-              )}
+              {/* Left Keypad Column: Biometrics button (Always available for instant fingerprint/face unlock) */}
+              <button
+                type="button"
+                onClick={() => triggerBiometricUnlock()}
+                title="Unlock with Fingerprint or Face ID"
+                style={{
+                  height: '60px',
+                  width: '60px',
+                  minWidth: '60px',
+                  maxWidth: '60px',
+                  minHeight: '60px',
+                  maxHeight: '60px',
+                  padding: 0,
+                  borderRadius: '50%',
+                  border: '1px solid rgba(34, 197, 94, 0.4)',
+                  background: 'rgba(34, 197, 94, 0.14)',
+                  color: '#22c55e',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 0 16px rgba(34, 197, 94, 0.3)',
+                  transition: 'all 0.15s ease',
+                  margin: '0 auto'
+                }}
+                onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.35)'}
+                onMouseUp={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.14)'}
+              >
+                <Fingerprint size={26} />
+              </button>
 
               {/* Center Column: 0 */}
               <button
@@ -2215,8 +2212,33 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               </button>
             </div>
 
+            {/* Direct Biometric Prompt Button */}
+            <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={() => triggerBiometricUnlock()}
+                style={{
+                  background: 'rgba(34, 197, 94, 0.1)',
+                  border: '1px solid rgba(34, 197, 94, 0.3)',
+                  borderRadius: '24px',
+                  color: '#22c55e',
+                  fontSize: '12.5px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  padding: '7px 18px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Fingerprint size={16} />
+                <span>Tap for Fingerprint / Face ID</span>
+              </button>
+            </div>
+
             {/* Forgot / Reset PIN Action */}
-            <div style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <button
                 type="button"
                 onClick={() => {
@@ -2229,11 +2251,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                 style={{
                   background: 'transparent',
                   border: 'none',
-                  color: 'var(--primary)',
-                  fontSize: '13px',
-                  fontWeight: 700,
+                  color: 'var(--text-secondary)',
+                  fontSize: '12.5px',
+                  fontWeight: 600,
                   cursor: 'pointer',
-                  padding: '6px 14px',
+                  padding: '4px 14px',
                   textDecoration: 'underline'
                 }}
               >
@@ -2729,7 +2751,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                 <button
                   type="button"
                   onClick={() => {
-                    localStorage.setItem('zb_biometrics_enabled', 'false');
+                    // Do not permanently disable biometrics on 'skip' — allow user to still use fingerprint button
                     setShowBiometricPrompt(false);
                     if (pendingUnlockData) {
                       onUnlock(

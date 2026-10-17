@@ -2222,7 +2222,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     };
 
     syncAdminProfile();
-    const interval = setInterval(syncAdminProfile, 4000);
+    // 20s background poll fallback while Supabase realtime channel handles immediate updates
+    const interval = setInterval(syncAdminProfile, 20000);
 
     const channel = supabase
       .channel(`admin_sync_${currentProfileId}`)
