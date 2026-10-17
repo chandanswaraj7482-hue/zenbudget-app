@@ -5051,37 +5051,37 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         )}
       </main>
 
-      {/* Floating Modern Glass Island Navigation Bar */}
+      {/* Floating Modern Glass Island Navigation Bar (Ultra-Premium Fintech UI) */}
       <nav style={{
         position: 'fixed',
         bottom: '12px',
         left: '50%',
         transform: 'translateX(-50%)',
-        width: 'calc(100% - 24px)',
-        maxWidth: '480px',
-        background: theme === 'light' ? 'rgba(255, 255, 255, 0.92)' : 'rgba(15, 23, 42, 0.88)',
-        border: theme === 'light' ? '1px solid rgba(0,0,0,0.08)' : '1px solid rgba(255, 255, 255, 0.12)',
-        borderRadius: '26px',
-        backdropFilter: 'blur(24px) saturate(190%)',
-        WebkitBackdropFilter: 'blur(24px) saturate(190%)',
+        width: 'calc(100% - 20px)',
+        maxWidth: '460px',
+        background: theme === 'light' ? 'rgba(255, 255, 255, 0.95)' : 'rgba(11, 15, 25, 0.92)',
+        border: theme === 'light' ? '1.5px solid rgba(0,0,0,0.06)' : '1px solid rgba(255, 255, 255, 0.12)',
+        borderRadius: '30px',
+        backdropFilter: 'blur(30px) saturate(200%)',
+        WebkitBackdropFilter: 'blur(30px) saturate(200%)',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-around',
-        padding: '6px 8px calc(env(safe-area-inset-bottom) + 6px) 8px',
+        justifyContent: 'space-between',
+        padding: '6px 10px calc(env(safe-area-inset-bottom) + 6px) 10px',
         boxShadow: theme === 'light' 
-          ? '0 12px 36px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0,0,0,0.04)' 
-          : '0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(34, 197, 94, 0.12)',
+          ? '0 16px 40px -8px rgba(15, 23, 42, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.04)' 
+          : '0 20px 50px -10px rgba(0, 0, 0, 0.8), 0 0 24px rgba(34, 197, 94, 0.15)',
         zIndex: 999,
-        transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
+        transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
       }}>
         {/* 1. Home / Dashboard */}
         <button
           onClick={() => handleNavClick('dashboard')}
           style={{
-            background: activeView === 'dashboard' ? 'rgba(34, 197, 94, 0.15)' : 'transparent',
-            border: activeView === 'dashboard' ? '1px solid rgba(34, 197, 94, 0.35)' : '1px solid transparent',
-            borderRadius: '18px',
-            padding: '7px 12px',
+            background: activeView === 'dashboard' ? 'rgba(34, 197, 94, 0.14)' : 'transparent',
+            border: activeView === 'dashboard' ? '1px solid rgba(34, 197, 94, 0.32)' : '1px solid transparent',
+            borderRadius: '20px',
+            padding: '8px 10px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -5090,22 +5090,37 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             cursor: 'pointer',
             fontSize: '11px',
             fontWeight: activeView === 'dashboard' ? 800 : 600,
-            transition: 'all 0.2s ease',
-            flex: 1
+            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+            flex: 1,
+            position: 'relative',
+            minWidth: 0
           }}
         >
-          <LayoutDashboard size={20} strokeWidth={activeView === 'dashboard' ? 2.6 : 2} style={{ color: activeView === 'dashboard' ? '#22c55e' : undefined }} />
-          <span>{t('dashboard', { defaultValue: 'Home' })}</span>
+          {activeView === 'dashboard' && (
+            <span style={{
+              position: 'absolute',
+              top: '-1px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '16px',
+              height: '3px',
+              borderRadius: '2px',
+              background: '#22c55e',
+              boxShadow: '0 0 8px #22c55e'
+            }} />
+          )}
+          <LayoutDashboard size={21} strokeWidth={activeView === 'dashboard' ? 2.6 : 2} style={{ color: activeView === 'dashboard' ? '#22c55e' : undefined }} />
+          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{t('dashboard', { defaultValue: 'Home' })}</span>
         </button>
 
         {/* 2. Ledger / Transactions */}
         <button
           onClick={() => handleNavClick('transactions')}
           style={{
-            background: activeView === 'transactions' ? 'rgba(34, 197, 94, 0.15)' : 'transparent',
-            border: activeView === 'transactions' ? '1px solid rgba(34, 197, 94, 0.35)' : '1px solid transparent',
-            borderRadius: '18px',
-            padding: '7px 12px',
+            background: activeView === 'transactions' ? 'rgba(34, 197, 94, 0.14)' : 'transparent',
+            border: activeView === 'transactions' ? '1px solid rgba(34, 197, 94, 0.32)' : '1px solid transparent',
+            borderRadius: '20px',
+            padding: '8px 10px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -5114,52 +5129,67 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             cursor: 'pointer',
             fontSize: '11px',
             fontWeight: activeView === 'transactions' ? 800 : 600,
-            transition: 'all 0.2s ease',
-            flex: 1
+            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+            flex: 1,
+            position: 'relative',
+            minWidth: 0
           }}
         >
-          <Receipt size={20} strokeWidth={activeView === 'transactions' ? 2.6 : 2} style={{ color: activeView === 'transactions' ? '#22c55e' : undefined }} />
-          <span>{t('ledger', { defaultValue: 'Ledger' })}</span>
+          {activeView === 'transactions' && (
+            <span style={{
+              position: 'absolute',
+              top: '-1px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '16px',
+              height: '3px',
+              borderRadius: '2px',
+              background: '#22c55e',
+              boxShadow: '0 0 8px #22c55e'
+            }} />
+          )}
+          <Receipt size={21} strokeWidth={activeView === 'transactions' ? 2.6 : 2} style={{ color: activeView === 'transactions' ? '#22c55e' : undefined }} />
+          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{t('ledger', { defaultValue: 'Ledger' })}</span>
         </button>
 
-        {/* Center Quick Action Floating Add Button */}
-        <button
-          onClick={() => {
-            if (checkExpiredGuard('log new transactions')) return;
-            setEditingTransaction(null);
-            setIsModalOpen(true);
-          }}
-          title="Add Transaction"
-          style={{
-            background: 'linear-gradient(135deg, #22c55e 0%, #10b981 50%, #06b6d4 100%)',
-            border: 'none',
-            borderRadius: '50%',
-            width: '46px',
-            height: '46px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#ffffff',
-            boxShadow: '0 6px 18px rgba(34, 197, 94, 0.5), 0 0 12px rgba(6, 182, 212, 0.3)',
-            cursor: 'pointer',
-            margin: '0 4px',
-            flexShrink: 0,
-            transition: 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)'
-          }}
-          onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.92)')}
-          onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-        >
-          <Plus size={24} strokeWidth={3} />
-        </button>
+        {/* Center Quick Action Floating Add Button (Hero Centerpiece) */}
+        <div style={{ position: 'relative', padding: '0 4px', flexShrink: 0 }}>
+          <button
+            onClick={() => {
+              if (checkExpiredGuard('log new transactions')) return;
+              setEditingTransaction(null);
+              setIsModalOpen(true);
+            }}
+            title="Add Transaction"
+            style={{
+              background: 'linear-gradient(135deg, #22c55e 0%, #10b981 45%, #06b6d4 100%)',
+              border: '3px solid var(--bg-card, #0f172a)',
+              borderRadius: '50%',
+              width: '50px',
+              height: '50px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#ffffff',
+              boxShadow: '0 8px 24px rgba(34, 197, 94, 0.55), 0 0 16px rgba(6, 182, 212, 0.35)',
+              cursor: 'pointer',
+              transition: 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease'
+            }}
+            onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.90)')}
+            onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+          >
+            <Plus size={26} strokeWidth={3.2} />
+          </button>
+        </div>
 
         {/* 3. Budget Limits */}
         <button
           onClick={() => handleNavClick('budgets')}
           style={{
-            background: activeView === 'budgets' ? 'rgba(34, 197, 94, 0.15)' : 'transparent',
-            border: activeView === 'budgets' ? '1px solid rgba(34, 197, 94, 0.35)' : '1px solid transparent',
-            borderRadius: '18px',
-            padding: '7px 12px',
+            background: activeView === 'budgets' ? 'rgba(34, 197, 94, 0.14)' : 'transparent',
+            border: activeView === 'budgets' ? '1px solid rgba(34, 197, 94, 0.32)' : '1px solid transparent',
+            borderRadius: '20px',
+            padding: '8px 10px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -5168,22 +5198,37 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             cursor: 'pointer',
             fontSize: '11px',
             fontWeight: activeView === 'budgets' ? 800 : 600,
-            transition: 'all 0.2s ease',
-            flex: 1
+            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+            flex: 1,
+            position: 'relative',
+            minWidth: 0
           }}
         >
-          <PiggyBank size={20} strokeWidth={activeView === 'budgets' ? 2.6 : 2} style={{ color: activeView === 'budgets' ? '#22c55e' : undefined }} />
-          <span>{t('limits', { defaultValue: 'Limits' })}</span>
+          {activeView === 'budgets' && (
+            <span style={{
+              position: 'absolute',
+              top: '-1px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '16px',
+              height: '3px',
+              borderRadius: '2px',
+              background: '#22c55e',
+              boxShadow: '0 0 8px #22c55e'
+            }} />
+          )}
+          <PiggyBank size={21} strokeWidth={activeView === 'budgets' ? 2.6 : 2} style={{ color: activeView === 'budgets' ? '#22c55e' : undefined }} />
+          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{t('limits', { defaultValue: 'Limits' })}</span>
         </button>
 
         {/* 4. More & Tools Hub */}
         <button
           onClick={() => handleNavClick('more')}
           style={{
-            background: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 'rgba(34, 197, 94, 0.15)' : 'transparent',
-            border: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? '1px solid rgba(34, 197, 94, 0.35)' : '1px solid transparent',
-            borderRadius: '18px',
-            padding: '7px 12px',
+            background: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 'rgba(34, 197, 94, 0.14)' : 'transparent',
+            border: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? '1px solid rgba(34, 197, 94, 0.32)' : '1px solid transparent',
+            borderRadius: '20px',
+            padding: '8px 10px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -5192,12 +5237,27 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             cursor: 'pointer',
             fontSize: '11px',
             fontWeight: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 800 : 600,
-            transition: 'all 0.2s ease',
-            flex: 1
+            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+            flex: 1,
+            position: 'relative',
+            minWidth: 0
           }}
         >
-          <Grid size={20} strokeWidth={['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 2.6 : 2} style={{ color: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? '#22c55e' : undefined }} />
-          <span>{t('more', { defaultValue: 'More' })}</span>
+          {['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) && (
+            <span style={{
+              position: 'absolute',
+              top: '-1px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '16px',
+              height: '3px',
+              borderRadius: '2px',
+              background: '#22c55e',
+              boxShadow: '0 0 8px #22c55e'
+            }} />
+          )}
+          <Grid size={21} strokeWidth={['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 2.6 : 2} style={{ color: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? '#22c55e' : undefined }} />
+          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{t('more', { defaultValue: 'More' })}</span>
         </button>
       </nav>
 
