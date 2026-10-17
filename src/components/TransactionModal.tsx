@@ -1055,6 +1055,58 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 }}
               />
             </div>
+            {/* Quick Amount Suggestion Chips for Fast Entry */}
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '2px' }}>
+              {[100, 200, 500, 1000, 2000].map(val => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => {
+                    const curr = parseFloat(amount) || 0;
+                    setAmount((curr + val).toString());
+                  }}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid var(--border-input)',
+                    borderRadius: '12px',
+                    padding: '6px 10px',
+                    color: 'var(--text-secondary)',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.borderColor = 'var(--primary)';
+                    (e.currentTarget as HTMLElement).style.color = 'var(--primary)';
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-input)';
+                    (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)';
+                  }}
+                >
+                  +{currencySymbol}{val}
+                </button>
+              ))}
+              <button
+                key="clear"
+                type="button"
+                onClick={() => setAmount('')}
+                style={{
+                  background: 'rgba(239, 68, 68, 0.08)',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  borderRadius: '12px',
+                  padding: '6px 10px',
+                  color: '#f87171',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  marginLeft: 'auto'
+                }}
+              >
+                Clear
+              </button>
+            </div>
           </div>
 
           {/* Title Field */}
