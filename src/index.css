@@ -1381,3 +1381,20 @@ body:has(#root.landing-root) {
     opacity: 0;
   }
 }
+
+/* Responsive Navbar Branding: Show full text on wider screens, icon-only on compact mobile screens */
+.nav-brand-text {
+  display: inline-block;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-family: 'Manrope', -apple-system, sans-serif;
+  margin-left: 8px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+@media (max-width: 480px) {
+  .nav-brand-text {
+    display: none !important;
+  }
+}

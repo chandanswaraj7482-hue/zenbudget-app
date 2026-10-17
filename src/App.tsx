@@ -4471,7 +4471,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         zIndex: 99,
         transition: 'all 0.2s ease'
       }}>
-        {/* Branding Logo: ONLY the Logo Icon as requested */}
+        {/* Responsive Branding Logo: Icon + Text on Web/Tablet, Icon-Only on Mobile APK */}
         <div 
           onClick={() => setActiveView('dashboard')}
           style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', flexShrink: 0 }}
@@ -4490,6 +4490,9 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
               (e.currentTarget as HTMLElement).style.display = 'none';
             }}
           />
+          <span className="nav-brand-text">
+            <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
+          </span>
         </div>
 
         {/* Status Actions (No Upgrade button to prevent scaring new users) */}
