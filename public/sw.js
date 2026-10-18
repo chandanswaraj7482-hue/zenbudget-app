@@ -12,8 +12,8 @@ self.addEventListener('push', function(event) {
   const title = data.title || 'ZenBudget';
   const options = {
     body: data.body || 'You have a new notification.',
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
+    icon: '/icon.png',
+    badge: '/icon.png',
     data: data.url || '/',
     vibrate: [200, 100, 200]
   };

@@ -744,6 +744,12 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       if (Capacitor.isNativePlatform()) {
         // Native biometric via Capacitor plugin
         const { NativeBiometric } = await import('@capgo/capacitor-native-biometric');
+        const checkResult = await NativeBiometric.isAvailable().catch(() => ({ isAvailable: true }));
+        if (checkResult && checkResult.isAvailable === false) {
+          setErrorMsg('Biometric authentication is not configured on this device. Please use your PIN.');
+          return;
+        }
+
         await NativeBiometric.verifyIdentity({
           reason: "Unlock ZenBudget",
           title: "Biometric Unlock",
@@ -752,6 +758,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         });
       } else {
         // Web/PWA biometric via WebAuthn
+        if (!window.isSecureContext && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+          setErrorMsg('Biometric unlock requires a secure HTTPS connection. Please enter your PIN.');
+          return;
+        }
+
         const storedCredId = localStorage.getItem('zb_webauthn_cred_id');
 
         if (storedCredId) {
@@ -807,6 +818,12 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         localStorage.setItem('zb_invite_code', activeProfile.referral_code);
       }
       playNotificationSound('success');
+      sessionStorage.setItem('zb_session_authenticated', 'true');
+      sessionStorage.setItem('zb_last_active_time', Date.now().toString());
+      sessionStorage.setItem('zb_last_unlock_time', Date.now().toString());
+      sessionStorage.removeItem('zb_bg_time');
+      sessionStorage.removeItem('zb_was_backgrounded');
+      
       const effectiveUserId = userId || localStorage.getItem('zb_profile_id') || 'local';
       onUnlock(
         effectiveUserId,
@@ -819,6 +836,9 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       );
     } catch (err: any) {
       console.warn('LockScreen: Biometric unlock failed or cancelled:', err);
+      if (err?.name === 'NotAllowedError') {
+        setErrorMsg('Biometric authentication cancelled. Enter your 4-digit PIN.');
+      }
     }
   }
 

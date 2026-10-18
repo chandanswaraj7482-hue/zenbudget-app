@@ -1129,7 +1129,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       }
     }, 10000); // Check every 10 seconds
 
-    // Capacitor Native app background / resume auto-lock (asks for PIN on resume)
+    // Capacitor Native app background / resume auto-lock (asks for PIN on resume if left backgrounded)
     let appStateHandle: any = null;
     if (Capacitor.isNativePlatform()) {
       CapApp.addListener('appStateChange', (state) => {
@@ -1139,9 +1139,15 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           const bgTimeStr = sessionStorage.getItem('zb_bg_time');
           sessionStorage.removeItem('zb_bg_time');
           sessionStorage.removeItem('zb_was_backgrounded');
-          if (bgTimeStr) {
+          
+          // Check if user recently unlocked within 30s (e.g. from biometric modal or camera dialog)
+          const lastUnlockTime = parseInt(sessionStorage.getItem('zb_last_unlock_time') || '0', 10);
+          const isJustUnlocked = Date.now() - lastUnlockTime < 30000;
+
+          if (bgTimeStr && !isJustUnlocked) {
             const bgTime = parseInt(bgTimeStr, 10);
-            if (!isNaN(bgTime) && Date.now() - bgTime >= 3000) {
+            // Require at least 60 seconds in the background before re-locking, avoiding re-lock on OS dialogs
+            if (!isNaN(bgTime) && Date.now() - bgTime >= 60000) {
               sessionStorage.removeItem('zb_session_authenticated');
               sessionStorage.removeItem('zb_last_active_time');
               setIsLocked(true);
@@ -4346,11 +4352,13 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         sessionStorage.removeItem('zb_was_backgrounded');
         sessionStorage.setItem('zb_session_authenticated', 'true');
         sessionStorage.setItem('zb_last_active_time', Date.now().toString());
+        sessionStorage.setItem('zb_last_unlock_time', Date.now().toString());
         setIsLocked(false);
         setIsAppLoading(false);
         fetchDataFromSupabase().catch(() => {});
       } catch (unlockErr) {
         console.error('App: onUnlock error:', unlockErr);
+        sessionStorage.setItem('zb_last_unlock_time', Date.now().toString());
         setIsLocked(false);
         setIsAppLoading(false);
       }
