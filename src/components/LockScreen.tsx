@@ -2136,8 +2136,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                 </button>
               ))}
 
-              {/* Left Keypad Column: Empty spacer */}
-              <div
+              {/* Left Keypad Column: Biometric Quick Unlock (Fingerprint / Face ID) */}
+              <button
+                type="button"
+                onClick={() => triggerBiometricUnlock()}
+                title="Unlock with Fingerprint or Face ID"
                 style={{
                   height: '60px',
                   width: '60px',
@@ -2145,9 +2148,24 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                   maxWidth: '60px',
                   minHeight: '60px',
                   maxHeight: '60px',
+                  padding: 0,
+                  borderRadius: '50%',
+                  border: '1px solid rgba(34, 197, 94, 0.25)',
+                  background: 'rgba(34, 197, 94, 0.1)',
+                  color: '#22c55e',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 4px 14px rgba(34, 197, 94, 0.2)',
+                  transition: 'all 0.15s ease-out',
                   margin: '0 auto'
                 }}
-              />
+                onMouseDown={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.3)'}
+                onMouseUp={(e) => e.currentTarget.style.background = 'rgba(34, 197, 94, 0.1)'}
+              >
+                <Fingerprint size={26} color="#22c55e" />
+              </button>
 
               {/* Center Column: 0 */}
               <button

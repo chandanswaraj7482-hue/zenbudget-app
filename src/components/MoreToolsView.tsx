@@ -564,72 +564,11 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
             </div>
             <ChevronRight size={18} color="#94a3b8" style={{ flexShrink: 0 }} />
           </button>
-
-          {/* Logout */}
-          <button
-            onClick={onLogout}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '14px',
-              borderRadius: '14px',
-              border: '1px solid rgba(239, 68, 68, 0.25)',
-              background: 'rgba(239, 68, 68, 0.05)',
-              cursor: 'pointer',
-              color: 'var(--text-primary)',
-              textAlign: 'left',
-              marginTop: '4px'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <LogOut size={20} />
-              </div>
-              <div>
-                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--danger)' }}>{t('logout')}</p>
-                <span style={{ fontSize: '11px', color: 'rgba(239, 68, 68, 0.7)' }}>{t('logout_sub')}</span>
-              </div>
-            </div>
-            <ChevronRight size={18} color="#ef4444" />
-          </button>
-
-          {/* Delete Account */}
-          {onDeleteAccount && (
-            <button
-              onClick={onDeleteAccount}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '14px',
-                borderRadius: '14px',
-                border: '1px solid rgba(220, 38, 38, 0.4)',
-                background: 'rgba(220, 38, 38, 0.1)',
-                cursor: 'pointer',
-                color: 'var(--text-primary)',
-                textAlign: 'left',
-                marginTop: '4px'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(220, 38, 38, 0.2)', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Trash2 size={20} />
-                </div>
-                <div>
-                  <p style={{ fontSize: '14px', fontWeight: 800, margin: 0, color: '#dc2626' }}>Delete Account</p>
-                  <span style={{ fontSize: '11px', color: 'rgba(220, 38, 38, 0.8)' }}>Permanently erase all data</span>
-                </div>
-              </div>
-              <ChevronRight size={18} color="#dc2626" />
-            </button>
-          )}
-
         </div>
       </div>
 
-      {/* LEGAL & DATA PRIVACY (TERMS & CONDITIONS) SECTION DIRECTLY IN MORE TAB */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      {/* LEGAL & DATA PRIVACY (TERMS & CONDITIONS) SECTION DIRECTLY IN MORE TAB - PLACED ABOVE LOGOUT/DELETE */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
         <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           Legal &amp; Data Privacy 🛡️
         </span>
@@ -734,6 +673,72 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
         </div>
       </div>
 
+      {/* DANGER ZONE (LOGOUT & DELETE ACCOUNT) */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          Account Actions ⚙️
+        </span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {/* Logout */}
+          <button
+            onClick={onLogout}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '14px',
+              borderRadius: '14px',
+              border: '1px solid rgba(239, 68, 68, 0.25)',
+              background: 'rgba(239, 68, 68, 0.05)',
+              cursor: 'pointer',
+              color: 'var(--text-primary)',
+              textAlign: 'left'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <LogOut size={20} />
+              </div>
+              <div>
+                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--danger)' }}>{t('logout')}</p>
+                <span style={{ fontSize: '11px', color: 'rgba(239, 68, 68, 0.7)' }}>{t('logout_sub')}</span>
+              </div>
+            </div>
+            <ChevronRight size={18} color="#ef4444" />
+          </button>
+
+          {/* Delete Account */}
+          {onDeleteAccount && (
+            <button
+              onClick={onDeleteAccount}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '14px',
+                borderRadius: '14px',
+                border: '1px solid rgba(220, 38, 38, 0.4)',
+                background: 'rgba(220, 38, 38, 0.1)',
+                cursor: 'pointer',
+                color: 'var(--text-primary)',
+                textAlign: 'left'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(220, 38, 38, 0.2)', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Trash2 size={20} />
+                </div>
+                <div>
+                  <p style={{ fontSize: '14px', fontWeight: 800, margin: 0, color: '#dc2626' }}>Delete Account</p>
+                  <span style={{ fontSize: '11px', color: 'rgba(220, 38, 38, 0.8)' }}>Permanently erase all data</span>
+                </div>
+              </div>
+              <ChevronRight size={18} color="#dc2626" />
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* FULL LEGAL DOCUMENT VIEW MODAL */}
       {viewingDoc && (
         <div style={{
@@ -831,7 +836,7 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
                   <p>You maintain full ownership of your data. You can export your data to CSV or request full instant deletion of your account and records anytime from the profile settings.</p>
 
                   <h5 style={{ color: 'var(--text-primary)', marginBottom: '4px' }}>4. Contact Us</h5>
-                  <p>For any privacy concerns, reach out to our grievance team at <strong>privacy@zenbudget.app</strong>.</p>
+                  <p>For any privacy concerns, reach out to our grievance team at <strong style={{ color: '#22c55e' }}>hello.zenbudget@zohomail.in</strong>.</p>
                 </div>
               )}
 

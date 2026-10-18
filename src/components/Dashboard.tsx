@@ -694,67 +694,61 @@ export const Dashboard: React.FC<DashboardProps> = ({
     const appUrl = `https://zenbudget-tracker.vercel.app/?code=${inviteCode}`;
     const text = `🔥 I saved ${currencySymbol}${totalSaved.toLocaleString()} this month on ZenBudget! Top 12% saver.\n\n🌿 Track your money with AI insights! Join using my link:\n👉 ${appUrl}\n\n📦 Download Android App (.apk):\nhttps://zenbudget-tracker.vercel.app/zenbudget.apk`;
     
-    // 1. Generate High-End Canvas Story Card Image
-    const blob = await generateShareCardBlob();
-    if (blob) {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'ZenBudget_Savings_Card.png';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }
-
-    // 2. Try Native Web Share API with image file if supported
-    if (navigator.share && blob) {
-      try {
-        const file = new File([blob], 'ZenBudget_Savings_Card.png', { type: 'image/png' });
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({ title: 'My ZenBudget Savings Card', text: text, files: [file] });
-          setShowShareModal(false);
-          return;
-        }
-      } catch (err) {
-        console.warn('Native share failed or cancelled', err);
-      }
-    }
-
-    // 3. Fallback clipboard & direct platform app launch
     try {
+      // 1. Generate High-End Canvas Story Card Image
+      const blob = await generateShareCardBlob();
       if (blob) {
-        const clipboardItem = new ClipboardItem({
-          [blob.type]: blob,
-          'text/plain': new Blob([text], { type: 'text/plain' })
-        });
-        await navigator.clipboard.write([clipboardItem]);
-      } else {
-        await navigator.clipboard.writeText(text);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'ZenBudget_Savings_Card.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
       }
-    } catch (e) {
-      console.warn('Rich clipboard failed, trying text only', e);
+
+      // 2. Try Native Web Share API if supported
+      if (navigator.share) {
+        try {
+          if (blob && navigator.canShare && navigator.canShare({ files: [new File([blob], 'ZenBudget_Savings_Card.png', { type: 'image/png' })] })) {
+            const file = new File([blob], 'ZenBudget_Savings_Card.png', { type: 'image/png' });
+            await navigator.share({ title: 'ZenBudget Savings Card', text, files: [file] });
+            setShowShareModal(false);
+            return;
+          } else {
+            await navigator.share({ title: 'ZenBudget Savings Card', text, url: appUrl });
+            setShowShareModal(false);
+            return;
+          }
+        } catch (shareErr: any) {
+          if (shareErr.name === 'AbortError') return;
+          console.warn('Native share error:', shareErr);
+        }
+      }
+
+      // 3. Fallback: Copy to clipboard
       try {
         await navigator.clipboard.writeText(text);
       } catch (_) {}
-    }
 
-    const targetName = platform === 'whatsapp' ? 'WhatsApp' : platform === 'instagram' ? 'Instagram' : 'Facebook';
-    const notice = document.createElement('div');
-    notice.innerHTML = `🖼️ <b>Card copied to clipboard!</b><br/><span style="font-size:11px">Hit <b>Paste (Ctrl+V / Cmd+V)</b> in ${targetName} to attach it!</span>`;
-    notice.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#22c55e;color:#fff;padding:12px 20px;border-radius:16px;font-size:13px;font-weight:700;z-index:99999;box-shadow:0 10px 25px rgba(0,0,0,0.5);text-align:center;line-height:1.4;';
-    document.body.appendChild(notice);
-    setTimeout(() => { try { document.body.removeChild(notice); } catch(_) {} }, 4500);
+      const targetName = platform === 'whatsapp' ? 'WhatsApp' : platform === 'instagram' ? 'Instagram' : 'Facebook';
+      const notice = document.createElement('div');
+      notice.innerHTML = `🖼️ <b>Card image downloaded!</b><br/><span style="font-size:11px">Text copied to clipboard. Share in ${targetName}!</span>`;
+      notice.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:12px 20px;border-radius:16px;font-size:13px;font-weight:700;z-index:99999;box-shadow:0 10px 25px rgba(0,0,0,0.5);text-align:center;line-height:1.4;';
+      document.body.appendChild(notice);
+      setTimeout(() => { try { document.body.removeChild(notice); } catch(_) {} }, 4000);
 
-    const encodedText = encodeURIComponent(text);
-    if (platform === 'whatsapp') {
-      window.location.href = `whatsapp://send?text=${encodedText}`;
-      setTimeout(() => { window.open(`https://api.whatsapp.com/send?text=${encodedText}`, '_blank'); }, 1000);
-    } else if (platform === 'instagram') {
-      window.location.href = 'instagram://camera';
-      setTimeout(() => { window.open('https://instagram.com', '_blank'); }, 1000);
-    } else {
-      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(appUrl)}`, '_blank');
+      const encodedText = encodeURIComponent(text);
+      if (platform === 'whatsapp') {
+        window.open(`https://api.whatsapp.com/send?text=${encodedText}`, '_blank');
+      } else if (platform === 'instagram') {
+        window.open('https://instagram.com', '_blank');
+      } else {
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(appUrl)}`, '_blank');
+      }
+    } catch (cardErr) {
+      console.error('handleCardShare error:', cardErr);
     }
     setShowShareModal(false);
   };
