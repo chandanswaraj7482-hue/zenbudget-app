@@ -15,7 +15,8 @@ import {
   User,
   ArrowRight,
   Image as ImageIcon,
-  Camera
+  Camera,
+  X
 } from 'lucide-react';
 import { triggerSparklesExplosion } from './utils/audio';
 import { MoreToolsView } from './components/MoreToolsView';
