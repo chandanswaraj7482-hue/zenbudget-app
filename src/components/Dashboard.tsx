@@ -1124,76 +1124,47 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </button>
         </div>
 
-        {/* ── OVERALL STATS & COMPREHENSIVE CASHFLOW SHAPE CARD ── */}
+        {/* ── OVERALL STATS & ANALYTICS SHAPE CARD ── */}
         {onOpenAnalytics && (
           <div
             onClick={onOpenAnalytics}
             style={{
               marginTop: '14px',
-              background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              borderRadius: '22px',
-              padding: '14px 16px',
+              background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.9) 100%)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '20px',
+              padding: '14px 18px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
+              gap: '12px',
               cursor: 'pointer',
               transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.28)',
-              position: 'relative',
-              overflow: 'hidden'
+              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.25)'
             }}
           >
-            {/* Ambient subtle glow */}
-            <div style={{
-              position: 'absolute',
-              top: '-20px',
-              right: '-20px',
-              width: '80px',
-              height: '80px',
-              background: 'radial-gradient(circle, rgba(245, 158, 11, 0.25) 0%, transparent 70%)',
-              pointerEvents: 'none'
-            }} />
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
               <div style={{
-                width: '42px',
-                height: '42px',
-                borderRadius: '14px',
+                width: '40px',
+                height: '40px',
+                borderRadius: '13px',
                 background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: '#ffffff',
-                boxShadow: '0 4px 14px rgba(245, 158, 11, 0.4)',
+                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.35)',
                 flexShrink: 0
               }}>
-                <BarChart3 size={21} />
+                <BarChart3 size={20} />
               </div>
 
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '13.5px', fontWeight: 800, color: '#ffffff' }}>
-                    Overall Stats & Analytics
-                  </span>
-                  <span style={{
-                    fontSize: '10px',
-                    fontWeight: 800,
-                    padding: '2px 8px',
-                    borderRadius: '8px',
-                    background: (income - expenses) >= 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(244, 63, 94, 0.2)',
-                    color: (income - expenses) >= 0 ? '#34d399' : '#fb7185',
-                    border: (income - expenses) >= 0 ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(244, 63, 94, 0.35)'
-                  }}>
-                    {(income - expenses) >= 0
-                      ? `+${formatCurrency(income - expenses, currencySymbol, 0)} Saved`
-                      : `${formatCurrency(income - expenses, currencySymbol, 0)} Deficit`}
-                  </span>
-                </div>
-                <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block', marginTop: '3px' }}>
-                  {income > 0 
-                    ? `${Math.round(Math.max(0, (income - expenses) / income * 100))}% savings rate · Tap to see full category details` 
-                    : 'Tap to view category reports, ledger & cashflow details'}
+              <div style={{ minWidth: 0 }}>
+                <span style={{ fontSize: '13.5px', fontWeight: 800, color: '#ffffff', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  Financial Analytics
+                </span>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  View category reports & cashflow
                 </span>
               </div>
             </div>
@@ -1204,8 +1175,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
               gap: '4px',
               padding: '6px 12px',
               borderRadius: '12px',
-              background: 'rgba(245, 158, 11, 0.15)',
-              border: '1px solid rgba(245, 158, 11, 0.3)',
+              background: 'rgba(245, 158, 11, 0.12)',
+              border: '1px solid rgba(245, 158, 11, 0.25)',
               color: '#fbbf24',
               fontSize: '11.5px',
               fontWeight: 800,
@@ -1749,97 +1720,63 @@ export const Dashboard: React.FC<DashboardProps> = ({
               tabIndex={0}
               className="glass-panel" 
               style={{ 
-                padding: '16px 18px', 
+                padding: '16px 20px', 
                 display: 'flex', 
-                flexDirection: 'column', 
-                gap: '12px', 
-                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 182, 212, 0.05) 50%, rgba(15, 23, 42, 0.6) 100%)', 
-                border: '1px solid rgba(16, 185, 129, 0.35)',
-                borderRadius: '20px',
-                boxShadow: '0 8px 28px -6px rgba(16, 185, 129, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.12)',
+                alignItems: 'center', 
+                justifyContent: 'space-between',
+                gap: '14px', 
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0.75) 100%)', 
+                border: '1px solid rgba(16, 185, 129, 0.25)',
+                borderRadius: '24px',
+                boxShadow: '0 8px 24px -6px rgba(0, 0, 0, 0.35)',
                 cursor: onUpgradeClick ? 'pointer' : 'default',
-                transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                backdropFilter: 'blur(16px)',
-                WebkitBackdropFilter: 'blur(16px)'
+                transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ 
-                    width: '40px', 
-                    height: '40px', 
-                    borderRadius: '13px', 
-                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(6, 182, 212, 0.15))',
-                    border: '1px solid rgba(16, 185, 129, 0.45)',
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
-                    flexShrink: 0
-                  }}>
-                    <Sparkles size={20} style={{ color: '#10b981', filter: 'drop-shadow(0 0 6px rgba(16, 185, 129, 0.6))' }} />
-                  </div>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ 
-                        fontSize: '11px', 
-                        fontWeight: 800, 
-                        color: '#10b981', 
-                        textTransform: 'uppercase', 
-                        letterSpacing: '0.08em' 
-                      }}>
-                        FREE FOREVER PLAN
-                      </span>
-                      <span style={{ 
-                        display: 'inline-block', 
-                        width: '6px', 
-                        height: '6px', 
-                        borderRadius: '50%', 
-                        background: '#10b981', 
-                        boxShadow: '0 0 8px #10b981' 
-                      }} />
-                    </div>
-                    <p style={{ 
-                      fontSize: '14px', 
-                      fontWeight: 700, 
-                      color: '#ffffff', 
-                      margin: '2px 0 0 0',
-                      letterSpacing: '-0.01em'
-                    }}>
-                      Lifetime Free Access • Unlimited Days
-                    </p>
-                  </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
+                <div style={{ 
+                  width: '42px', 
+                  height: '42px', 
+                  borderRadius: '14px', 
+                  background: 'rgba(16, 185, 129, 0.15)',
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <Sparkles size={20} style={{ color: '#10b981' }} />
                 </div>
-
-                <div 
-                  style={{
-                    background: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
-                    color: '#ffffff',
-                    padding: '8px 14px',
-                    borderRadius: '999px',
-                    fontSize: '12px',
-                    fontWeight: 800,
-                    boxShadow: '0 4px 14px rgba(16, 185, 129, 0.4)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    flexShrink: 0,
-                    letterSpacing: '0.02em',
-                    transition: 'transform 0.15s ease'
-                  }}
-                >
-                  Upgrade Pro ⚡
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      FREE FOREVER
+                    </span>
+                    <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 6px #10b981' }} />
+                  </div>
+                  <h4 style={{ fontSize: '13.5px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.9)', margin: 0, letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    Lifetime Free Access
+                  </h4>
                 </div>
               </div>
 
-              {/* Status Footer */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '6px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                <span style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.65)', fontWeight: 500 }}>
-                  10 Free Daily Logs • Budgets & Reports Active
-                </span>
-                <span style={{ fontSize: '11px', color: '#10b981', fontWeight: 700 }}>
-                  Active Forever
-                </span>
+              <div 
+                style={{
+                  background: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
+                  color: '#ffffff',
+                  padding: '9px 16px',
+                  borderRadius: '999px',
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  flexShrink: 0,
+                  letterSpacing: '0.02em'
+                }}
+              >
+                Upgrade Pro ⚡
               </div>
             </div>
           );
