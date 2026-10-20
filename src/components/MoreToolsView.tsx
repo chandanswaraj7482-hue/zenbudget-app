@@ -115,18 +115,19 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
           {t('money_tools')}
         </h3>
 
-        <div className="fintech-card" style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <div className="fintech-card" style={{ padding: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {/* Loans & Udhaar Tracker */}
           {onNavigateToLoans && (
             <button
               onClick={onNavigateToLoans}
+              className="tap-bounce"
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '12px 14px',
-                borderRadius: '16px',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
+                padding: '13px 15px',
+                borderRadius: '18px',
+                border: '1px solid rgba(255, 255, 255, 0.06)',
                 background: 'rgba(255, 255, 255, 0.03)',
                 cursor: 'pointer',
                 color: 'var(--text-primary)',
@@ -135,12 +136,12 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '13px', background: 'rgba(245, 158, 11, 0.16)', border: '1px solid rgba(245, 158, 11, 0.3)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(245, 158, 11, 0.15)' }}>
+                <div style={{ width: '42px', height: '42px', borderRadius: '14px', background: 'rgba(245, 158, 11, 0.16)', border: '1px solid rgba(245, 158, 11, 0.3)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(245, 158, 11, 0.15)', flexShrink: 0 }}>
                   <HandCoins size={20} />
                 </div>
                 <div>
-                  <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>{t('loans_udhaar')}</p>
-                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('loans_sub')}</span>
+                  <p style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{t('loans_udhaar')}</p>
+                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block', marginTop: '2px' }}>{t('loans_sub')}</span>
                 </div>
               </div>
               <ChevronRight size={18} color="#94a3b8" />
@@ -150,13 +151,14 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
           {/* Impulse Blocker */}
           <button
             onClick={onNavigateToImpulseBlocker}
+            className="tap-bounce"
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '12px 14px',
-              borderRadius: '16px',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
+              padding: '13px 15px',
+              borderRadius: '18px',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
               background: 'rgba(255, 255, 255, 0.03)',
               cursor: 'pointer',
               color: 'var(--text-primary)',
@@ -165,12 +167,12 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '13px', background: 'rgba(245, 158, 11, 0.16)', border: '1px solid rgba(245, 158, 11, 0.3)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(245, 158, 11, 0.15)' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '14px', background: 'rgba(245, 158, 11, 0.16)', border: '1px solid rgba(245, 158, 11, 0.3)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(245, 158, 11, 0.15)', flexShrink: 0 }}>
                 <Hourglass size={20} />
               </div>
               <div>
-                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>{t('impulse_blocker')}</p>
-                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('impulse_blocker_sub')}</span>
+                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{t('impulse_blocker')}</p>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block', marginTop: '2px' }}>{t('impulse_blocker_sub')}</span>
               </div>
             </div>
             <ChevronRight size={18} color="#94a3b8" />
@@ -179,13 +181,14 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
           {/* Wealth & Financial Calculators */}
           <button
             onClick={onNavigateToSimulator}
+            className="tap-bounce"
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '12px 14px',
-              borderRadius: '16px',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
+              padding: '13px 15px',
+              borderRadius: '18px',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
               background: 'rgba(255, 255, 255, 0.03)',
               cursor: 'pointer',
               color: 'var(--text-primary)',
@@ -194,12 +197,12 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '13px', background: 'rgba(16, 185, 129, 0.16)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.15)' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '14px', background: 'rgba(16, 185, 129, 0.16)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.15)', flexShrink: 0 }}>
                 <TrendingUp size={20} />
               </div>
               <div>
-                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>{t('compound_simulator')}</p>
-                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>SIP, FD/RD & Tax Calculator</span>
+                <p style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{t('compound_simulator')}</p>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block', marginTop: '2px' }}>SIP, FD/RD & Tax Calculator</span>
               </div>
             </div>
             <ChevronRight size={18} color="#94a3b8" />
@@ -208,13 +211,14 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
           {/* Shared Budget */}
           <button
             onClick={onNavigateToSharedBudget}
+            className="tap-bounce"
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '12px 14px',
-              borderRadius: '16px',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
+              padding: '13px 15px',
+              borderRadius: '18px',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
               background: 'rgba(255, 255, 255, 0.03)',
               cursor: 'pointer',
               color: 'var(--text-primary)',
@@ -223,12 +227,12 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '13px', background: 'rgba(139, 92, 246, 0.16)', border: '1px solid rgba(139, 92, 246, 0.3)', color: '#a78bfa', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(139, 92, 246, 0.15)' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '14px', background: 'rgba(139, 92, 246, 0.16)', border: '1px solid rgba(139, 92, 246, 0.3)', color: '#a78bfa', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(139, 92, 246, 0.15)', flexShrink: 0 }}>
                 <Users size={20} />
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <p style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>{t('shared_budget')}</p>
+                  <p style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{t('shared_budget')}</p>
                   <span className="fintech-badge" style={{
                     background: 'rgba(139, 92, 246, 0.18)',
                     borderColor: 'rgba(139, 92, 246, 0.35)',
@@ -239,7 +243,7 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
                     👑 PRO
                   </span>
                 </div>
-                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('shared_budget_sub')}</span>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block', marginTop: '2px' }}>{t('shared_budget_sub')}</span>
               </div>
             </div>
             <ChevronRight size={18} color="#94a3b8" />

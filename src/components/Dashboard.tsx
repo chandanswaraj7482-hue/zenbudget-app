@@ -2480,44 +2480,66 @@ export const Dashboard: React.FC<DashboardProps> = ({
               return (
                 <div
                   key={t.id}
-                  className="glass-panel glass-panel-hover"
+                  className="glass-panel glass-panel-hover tap-bounce"
                   onClick={() => onEditTransaction(t)}
                   style={{
-                    padding: '14px 16px',
+                    padding: '13px 16px',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    borderRadius: '20px',
+                    background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.85) 0%, rgba(10, 15, 29, 0.92) 100%)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.25)'
                   }}
                 >
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', minWidth: 0 }}>
                     <div style={{
-                      width: '38px',
-                      height: '38px',
-                      borderRadius: '12px',
-                      backgroundColor: t.type === 'income' ? 'var(--success-glow)' : meta.bg,
-                      color: t.type === 'income' ? 'var(--success)' : meta.color,
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '14px',
+                      backgroundColor: t.type === 'income' ? 'rgba(16, 185, 129, 0.16)' : meta.bg,
+                      color: t.type === 'income' ? '#10b981' : meta.color,
+                      border: `1px solid ${t.type === 'income' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center'
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      boxShadow: t.type === 'income' ? '0 4px 12px rgba(16, 185, 129, 0.2)' : 'none'
                     }}>
                       {getCategoryIcon(t.category, t.type)}
                     </div>
-                    <div>
-                      <h4 style={{ fontSize: '14px', fontWeight: 600 }}>{t.title}</h4>
-                      <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                    <div style={{ minWidth: 0 }}>
+                      <h4 style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {t.title}
+                      </h4>
+                      <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block', marginTop: '2px', fontWeight: 500 }}>
                         {new Date(t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </span>
                     </div>
                   </div>
 
-                  <span style={{
-                    fontSize: '15px',
-                    fontWeight: 700,
-                    color: t.type === 'income' ? 'var(--success)' : 'var(--text-primary)'
+                  <div style={{
+                    padding: '4px 10px',
+                    borderRadius: '12px',
+                    background: t.type === 'income' ? 'rgba(16, 185, 129, 0.14)' : 'rgba(244, 63, 94, 0.12)',
+                    border: `1px solid ${t.type === 'income' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(244, 63, 94, 0.25)'}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    flexShrink: 0,
+                    marginLeft: '10px'
                   }}>
-                    {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount, currencySymbol)}
-                  </span>
+                    <span style={{
+                      fontSize: '14px',
+                      fontWeight: 800,
+                      color: t.type === 'income' ? '#34d399' : '#fb7185',
+                      letterSpacing: '-0.01em',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount, currencySymbol)}
+                    </span>
+                  </div>
                 </div>
               );
             })}

@@ -171,14 +171,24 @@ const SwipeableTransactionItem = ({ t, meta, isMenuOpen, currencySymbol, formatC
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-            <span style={{ 
-              fontSize: '15px', 
-              fontWeight: 800, 
-              color: t.type === 'income' ? '#10b981' : 'var(--text-primary)',
-              whiteSpace: 'nowrap'
+            <div style={{
+              padding: '4px 10px',
+              borderRadius: '12px',
+              background: t.type === 'income' ? 'rgba(16, 185, 129, 0.14)' : 'rgba(244, 63, 94, 0.12)',
+              border: `1px solid ${t.type === 'income' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(244, 63, 94, 0.25)'}`,
+              display: 'flex',
+              alignItems: 'center'
             }}>
-              {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount, currencySymbol)}
-            </span>
+              <span style={{ 
+                fontSize: '14.5px', 
+                fontWeight: 800, 
+                color: t.type === 'income' ? '#34d399' : '#fb7185',
+                whiteSpace: 'nowrap',
+                letterSpacing: '-0.01em'
+              }}>
+                {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount, currencySymbol)}
+              </span>
+            </div>
             
             <button
               onClick={() => setActiveTxMenu(isMenuOpen ? null : t.id)}
@@ -516,37 +526,66 @@ export const Transactions: React.FC<TransactionsProps> = ({
           className="glass-input"
           style={{
             width: '100%',
-            padding: '14px 18px 14px 46px',
-            borderRadius: '18px',
+            padding: '14px 44px 14px 46px',
+            borderRadius: '20px',
             fontSize: '13.5px',
             fontWeight: 600,
-            boxShadow: 'var(--shadow-sm)'
+            background: 'rgba(255, 255, 255, 0.04)',
+            border: '1px solid rgba(255, 255, 255, 0.09)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)'
           }}
         />
+        {search && (
+          <button
+            onClick={() => setSearch('')}
+            style={{
+              position: 'absolute',
+              right: '14px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'rgba(255, 255, 255, 0.12)',
+              border: 'none',
+              borderRadius: '50%',
+              width: '22px',
+              height: '22px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--text-secondary)',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: 800
+            }}
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       {/* Filters Drawer/Row */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {/* Type selector */}
-        <div style={{ display: 'flex', gap: '8px', background: 'var(--bg-input)', padding: '4px', borderRadius: '16px', border: '1px solid var(--border-input)' }}>
-          {[{id:'all',label:t('all')},{id:'income',label:t('income')},{id:'expense',label:t('expenses')}].map((item) => (
+        <div className="segmented-control-bar">
+          {[
+            { id: 'all', label: t('all') },
+            { id: 'income', label: `+ ${t('income')}` },
+            { id: 'expense', label: `- ${t('expenses')}` }
+          ].map((item) => (
             <button
               key={item.id}
               onClick={() => setSelectedType(item.id as any)}
+              className={`segmented-pill-item ${selectedType === item.id ? 'active' : ''}`}
               style={{
-                flex: 1,
-                padding: '9px 12px',
-                borderRadius: '12px',
-                fontSize: '12.5px',
-                fontWeight: 800,
-                border: 'none',
                 background: selectedType === item.id 
-                  ? (item.id === 'income' ? 'var(--success)' : item.id === 'expense' ? 'var(--danger)' : 'var(--primary)')
+                  ? (item.id === 'income' ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.2))' : item.id === 'expense' ? 'linear-gradient(135deg, rgba(244, 63, 94, 0.25), rgba(225, 29, 72, 0.2))' : 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.15))')
                   : 'transparent',
-                color: selectedType === item.id ? '#ffffff' : 'var(--text-secondary)',
-                cursor: 'pointer',
-                boxShadow: selectedType === item.id ? '0 4px 12px rgba(0,0,0,0.25)' : 'none',
-                transition: 'all 0.15s ease'
+                border: selectedType === item.id
+                  ? (item.id === 'income' ? '1px solid rgba(16, 185, 129, 0.4)' : item.id === 'expense' ? '1px solid rgba(244, 63, 94, 0.4)' : '1px solid rgba(16, 185, 129, 0.35)')
+                  : '1px solid transparent',
+                color: selectedType === item.id
+                  ? (item.id === 'income' ? '#34d399' : item.id === 'expense' ? '#fb7185' : '#ffffff')
+                  : 'var(--text-secondary)',
+                fontWeight: 800
               }}
             >
               {item.label}
@@ -563,27 +602,36 @@ export const Transactions: React.FC<TransactionsProps> = ({
           scrollSnapType: 'x mandatory',
           scrollbarWidth: 'none'
         }}>
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              style={{
-                padding: '7px 14px',
-                borderRadius: '12px',
-                border: selectedCategory === cat.id ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border-card)',
-                fontSize: '12px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                flexShrink: 0,
-                backgroundColor: selectedCategory === cat.id ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-card)',
-                color: selectedCategory === cat.id ? '#34d399' : 'var(--text-secondary)',
-                boxShadow: selectedCategory === cat.id ? '0 2px 8px rgba(16, 185, 129, 0.2)' : 'none',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              {cat.label}
-            </button>
-          ))}
+          {CATEGORIES.map((cat) => {
+            const isSelected = selectedCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                style={{
+                  padding: '7px 14px',
+                  borderRadius: '999px',
+                  border: isSelected ? '1px solid rgba(16, 185, 129, 0.45)' : '1px solid rgba(255, 255, 255, 0.08)',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                  backgroundColor: isSelected ? 'rgba(16, 185, 129, 0.16)' : 'rgba(255, 255, 255, 0.04)',
+                  color: isSelected ? '#34d399' : 'var(--text-secondary)',
+                  boxShadow: isSelected ? '0 2px 10px rgba(16, 185, 129, 0.25)' : 'none',
+                  transition: 'all 0.18s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px'
+                }}
+              >
+                {cat.id !== 'all' && (
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: cat.color }} />
+                )}
+                <span>{cat.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Sort Row */}
@@ -652,16 +700,43 @@ export const Transactions: React.FC<TransactionsProps> = ({
           {sortedDates.map((dateStr) => (
             <div key={dateStr} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {/* Date Header */}
-              <h3 style={{ 
-                fontSize: '12px', 
-                fontWeight: 700, 
-                color: 'var(--text-secondary)', 
-                textTransform: 'uppercase', 
-                letterSpacing: '0.08em',
-                paddingLeft: '4px' 
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'space-between',
+                padding: '4px 6px 0 6px' 
               }}>
-                {getFriendlyDate(dateStr)}
-              </h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                  <span style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    background: '#10b981',
+                    boxShadow: '0 0 8px rgba(16, 185, 129, 0.7)'
+                  }} />
+                  <h3 style={{ 
+                    fontSize: '12px', 
+                    fontWeight: 800, 
+                    color: 'var(--text-primary)', 
+                    textTransform: 'uppercase', 
+                    letterSpacing: '0.06em',
+                    margin: 0
+                  }}>
+                    {getFriendlyDate(dateStr)}
+                  </h3>
+                </div>
+                <span style={{ 
+                  fontSize: '11px', 
+                  fontWeight: 700, 
+                  color: 'var(--text-secondary)',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  padding: '2px 8px',
+                  borderRadius: '999px',
+                  border: '1px solid rgba(255, 255, 255, 0.06)'
+                }}>
+                  {grouped[dateStr].length} {grouped[dateStr].length === 1 ? 'item' : 'items'}
+                </span>
+              </div>
 
               {/* Transactions in Date Group */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

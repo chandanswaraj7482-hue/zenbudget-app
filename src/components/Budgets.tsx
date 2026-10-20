@@ -319,48 +319,50 @@ export const Budgets: React.FC<BudgetsProps> = ({
         </div>
 
         {!isPremiumUser && (
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <button
               onClick={() => { setPendingCategory(null); setAdModalOpen(true); }}
-              className="hover-lift"
+              className="tap-bounce"
               style={{
                 background: 'rgba(245, 158, 11, 0.15)',
                 color: '#f59e0b',
                 border: '1px solid rgba(245, 158, 11, 0.3)',
-                padding: '6px 12px',
-                borderRadius: '8px',
-                fontSize: '11px',
+                padding: '7px 14px',
+                borderRadius: '999px',
+                fontSize: '11.5px',
                 fontWeight: 800,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '5px'
+                gap: '5px',
+                transition: 'all 0.18s ease'
               }}
             >
-              <Tv size={12} />
+              <Tv size={13} />
               <span>+1 Slot (Watch Ad)</span>
             </button>
             {onOpenSubscriptionModal && (
               <button
                 onClick={onOpenSubscriptionModal}
-                className="hover-lift"
+                className="tap-bounce"
                 style={{
                   background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                   color: '#fff',
                   border: 'none',
-                  padding: '6px 12px',
-                  borderRadius: '8px',
-                  fontSize: '11px',
+                  padding: '7px 14px',
+                  borderRadius: '999px',
+                  fontSize: '11.5px',
                   fontWeight: 800,
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '4px',
-                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
+                  boxShadow: '0 4px 14px rgba(16, 185, 129, 0.4)',
+                  transition: 'all 0.18s ease'
                 }}
               >
-                <Crown size={12} />
-                <span>Go Pro</span>
+                <Crown size={13} />
+                <span>Go Pro ⚡</span>
               </button>
             )}
           </div>
@@ -499,17 +501,18 @@ export const Budgets: React.FC<BudgetsProps> = ({
                 {!isEditing && (
                   <button
                     onClick={() => handleEditClick(cat.id, limit)}
+                    className="tap-bounce"
                     style={{
-                      background: limit > 0 ? 'var(--bg-dark)' : 'rgba(16, 185, 129, 0.1)',
-                      border: limit > 0 ? '1px solid var(--border-card)' : '1px solid rgba(16, 185, 129, 0.3)',
-                      borderRadius: '10px',
-                      padding: '6px 12px',
+                      background: limit > 0 ? 'rgba(255, 255, 255, 0.06)' : 'rgba(16, 185, 129, 0.14)',
+                      border: limit > 0 ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(16, 185, 129, 0.35)',
+                      borderRadius: '999px',
+                      padding: '7px 14px',
                       fontSize: '12px',
                       fontWeight: 800,
                       cursor: 'pointer',
-                      color: limit > 0 ? 'var(--text-primary)' : 'var(--primary)',
-                      boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
-                      transition: 'all 0.15s ease',
+                      color: limit > 0 ? '#ffffff' : '#34d399',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                      transition: 'all 0.18s ease',
                       whiteSpace: 'nowrap',
                       flexShrink: 0
                     }}
@@ -663,10 +666,10 @@ export const Budgets: React.FC<BudgetsProps> = ({
               {limit > 0 && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '2px' }}>
                   <div style={{ 
-                    height: '6px', 
+                    height: '8px', 
                     width: '100%', 
                     background: 'rgba(255,255,255,0.06)', 
-                    borderRadius: '4px', 
+                    borderRadius: '999px', 
                     overflow: 'hidden',
                     position: 'relative'
                   }}>
@@ -674,10 +677,13 @@ export const Budgets: React.FC<BudgetsProps> = ({
                       height: '100%',
                       width: `${Math.min(100, (spent / limit) * 100)}%`,
                       background: isOver 
-                        ? 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)' 
-                        : 'linear-gradient(90deg, #22c55e 0%, #10b981 100%)',
-                      borderRadius: '4px',
-                      transition: 'width 0.4s ease'
+                        ? 'linear-gradient(90deg, #f43f5e 0%, #e11d48 100%)' 
+                        : (spent / limit) > 0.8 
+                        ? 'linear-gradient(90deg, #f59e0b 0%, #d97706 100%)'
+                        : 'linear-gradient(90deg, #10b981 0%, #06b6d4 100%)',
+                      borderRadius: '999px',
+                      transition: 'width 0.4s ease',
+                      boxShadow: isOver ? '0 0 10px rgba(244, 63, 94, 0.5)' : '0 0 10px rgba(16, 185, 129, 0.35)'
                     }} />
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-secondary)' }}>

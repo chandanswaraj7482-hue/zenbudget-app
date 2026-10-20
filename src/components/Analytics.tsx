@@ -807,74 +807,70 @@ export const Analytics: React.FC<AnalyticsProps> = ({ transactions = [], currenc
           )}
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <div style={{ display: 'flex', background: 'var(--bg-dark)', border: '1px solid var(--border-card)', padding: '3px', borderRadius: '12px' }}>
-          <button 
-            onClick={() => setTimeframe('month')}
-            style={{
-              padding: '6px 14px',
-              borderRadius: '9px',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '12px',
-              fontWeight: 800,
-              backgroundColor: timeframe === 'month' ? 'var(--primary)' : 'transparent',
-              color: timeframe === 'month' ? '#ffffff' : 'var(--text-secondary)',
-              boxShadow: timeframe === 'month' ? '0 2px 8px rgba(16, 185, 129, 0.25)' : 'none',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            This Month
-          </button>
-          <button 
-            onClick={() => setTimeframe('all')}
-            style={{
-              padding: '6px 14px',
-              borderRadius: '9px',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '12px',
-              fontWeight: 800,
-              backgroundColor: timeframe === 'all' ? 'var(--primary)' : 'transparent',
-              color: timeframe === 'all' ? '#ffffff' : 'var(--text-secondary)',
-              boxShadow: timeframe === 'all' ? '0 2px 8px rgba(16, 185, 129, 0.25)' : 'none',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            All Time
-          </button>
-        </div>
+          <div className="segmented-control-bar" style={{ borderRadius: '999px', padding: '3px' }}>
+            <button 
+              onClick={() => setTimeframe('month')}
+              className={`segmented-pill-item ${timeframe === 'month' ? 'active' : ''}`}
+              style={{
+                padding: '6px 16px',
+                borderRadius: '999px',
+                fontSize: '12px',
+                fontWeight: 800,
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.18s ease'
+              }}
+            >
+              This Month
+            </button>
+            <button 
+              onClick={() => setTimeframe('all')}
+              className={`segmented-pill-item ${timeframe === 'all' ? 'active' : ''}`}
+              style={{
+                padding: '6px 16px',
+                borderRadius: '999px',
+                fontSize: '12px',
+                fontWeight: 800,
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.18s ease'
+              }}
+            >
+              All Time
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Money Streak */}
-      <div className="glass-panel" style={{
-        background: 'var(--bg-card)',
-        borderRadius: '24px',
+      <div className="fintech-card tap-bounce" style={{
+        background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(217, 119, 6, 0.05) 50%, rgba(15, 23, 42, 0.9) 100%)',
+        borderRadius: '26px',
         padding: '22px 24px',
-        border: '1px solid var(--border-card)',
+        border: '1px solid rgba(245, 158, 11, 0.28)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        boxShadow: 'var(--glow-shadow)'
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)'
       }}>
         <div>
-          <span style={{ fontSize: '12px', color: '#d97706', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          <span style={{ fontSize: '11px', color: '#fbbf24', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             Money Streak 🔥
           </span>
-          <p style={{ fontSize: '34px', fontWeight: 900, color: 'var(--text-primary)', margin: '4px 0 2px', fontFamily: "'Manrope', sans-serif", letterSpacing: '-0.02em' }}>
+          <p style={{ fontSize: '34px', fontWeight: 900, color: '#ffffff', margin: '4px 0 2px', fontFamily: "'Manrope', sans-serif", letterSpacing: '-0.02em' }}>
             {streak} Days
           </p>
-          <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+          <span style={{ fontSize: '12.5px', color: 'var(--text-secondary)', fontWeight: 500 }}>
             Consecutive days under budget
           </span>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ display: 'flex', gap: '2px', justifyContent: 'flex-end', marginBottom: '4px' }}>
+          <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end', marginBottom: '6px' }}>
             {['🔥','🔥','🔥'].map((f, i) => (
-              <span key={i} style={{ fontSize: '24px', opacity: streak >= (i + 1) * 3 ? 1 : 0.25 }}>{f}</span>
+              <span key={i} style={{ fontSize: '24px', filter: streak >= (i + 1) * 3 ? 'drop-shadow(0 0 8px rgba(245, 158, 11, 0.6))' : 'grayscale(1)', opacity: streak >= (i + 1) * 3 ? 1 : 0.3 }}>{f}</span>
             ))}
           </div>
-          <span style={{ fontSize: '12px', color: '#d97706', fontWeight: 800 }}>
+          <span style={{ fontSize: '11px', color: '#fbbf24', fontWeight: 800, background: 'rgba(245, 158, 11, 0.15)', padding: '3px 8px', borderRadius: '999px', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
             {streak >= 7 ? '7 Day Goal Hit! 🏆' : streak >= 3 ? 'Keep it up! ⚡' : 'Build your streak! 🌱'}
           </span>
         </div>
