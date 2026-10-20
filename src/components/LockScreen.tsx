@@ -1557,6 +1557,32 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               gap: '0px'
             }}
           >
+            {/* ── Back to Homepage (Web Browser) ── */}
+            {onBackToLanding && !Capacitor.isNativePlatform() && (
+              <button
+                type="button"
+                onClick={onBackToLanding}
+                style={{
+                  alignSelf: 'flex-start',
+                  marginBottom: '16px',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '20px',
+                  padding: '6px 14px',
+                  color: '#94a3b8',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                ← Back to Homepage
+              </button>
+            )}
+
             {/* ── Logo & Branding ── */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '28px' }}>
               <div style={{
@@ -1994,6 +2020,32 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               gap: '0px'
             }}
           >
+            {/* ── Back to Homepage (Web Browser) ── */}
+            {onBackToLanding && !Capacitor.isNativePlatform() && (
+              <button
+                type="button"
+                onClick={onBackToLanding}
+                style={{
+                  alignSelf: 'flex-start',
+                  marginBottom: '14px',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '20px',
+                  padding: '6px 14px',
+                  color: '#94a3b8',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                ← Back to Homepage
+              </button>
+            )}
+
             {/* ── Logo & Branding ── */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '8px' }}>
               <div style={{
@@ -2256,39 +2308,6 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
             {/* Forgot / Reset PIN Action */}
             <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <button
-                type="button"
-                onClick={() => {
-                  setErrorMsg('');
-                  localStorage.removeItem('zb_pin_fail_count');
-                  resetPinSecurityStatus();
-                  const targetName = dbProfile?.name || localStorage.getItem('zb_user_name') || username || 'Chandan Swaraj';
-                  const targetUserId = (dbProfile && dbProfile.id) ? dbProfile.id : (userId || localStorage.getItem('zb_profile_id') || 'local');
-                  const targetTier = dbProfile?.subscription_tier || localStorage.getItem('zb_subscription_tier') || 'trial';
-                  const targetStart = dbProfile?.trial_start_date || localStorage.getItem('zb_trial_start_date') || new Date().toISOString();
-                  const targetExpires = dbProfile?.premium_expires_at || localStorage.getItem('zb_premium_expires_at') || null;
-                  const targetTrialExpire = dbProfile?.trial_expire_date || null;
-                  const defaultPin = (localStorage.getItem('zb_user_pin') || dbProfile?.pin || '0000').toString();
-                  sessionStorage.setItem('zb_session_authenticated', 'true');
-                  onUnlock(targetUserId, targetName, targetTier, targetStart, defaultPin, targetExpires, targetTrialExpire);
-                }}
-                style={{
-                  background: 'rgba(34, 197, 94, 0.12)',
-                  border: '1px solid rgba(34, 197, 94, 0.3)',
-                  borderRadius: '20px',
-                  color: '#22c55e',
-                  fontSize: '12.5px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  padding: '8px 18px',
-                  marginBottom: '10px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <span>⚡ Quick Unlock as {dbProfile?.name || username || 'Chandan Swaraj'}</span>
-              </button>
 
               <button
                 type="button"

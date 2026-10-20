@@ -31,23 +31,48 @@ export default function Root() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  const isLandingDomain = (
-    hostname.includes('zenbudget-tracker-app') ||
-    currentPath.startsWith('/landing') ||
-    (typeof window !== 'undefined' && window.location.hash.startsWith('#landing'))
+  const hasAppHashOrParam = typeof window !== 'undefined' && (
+    window.location.hash.startsWith('#app') ||
+    window.location.search.includes('mode=app') ||
+    window.location.search.includes('source=app') ||
+    currentPath === '/app' ||
+    currentPath.startsWith('/app/')
   );
 
-  // If native app or installed PWA, always default to the full Web App ('app')
-  const initialMode = (isNative || isInstalledPwa)
+  // If native app or installed PWA, or explicitly requested via #app/query, open 'app'.
+  // For all other web visits (including search engine crawlers like Googlebot on https://zenbudget-tracker.vercel.app/),
+  // default to the high-ranking, rich SEO LandingPage!
+  const initialMode: 'landing' | 'app' = (isNative || isInstalledPwa || hasAppHashOrParam)
     ? 'app'
-    : (isLandingDomain ? 'landing' : 'app');
+    : 'landing';
 
   const [activeMode, setActiveMode] = React.useState<'landing' | 'app'>(initialMode);
 
+  // Synchronize browser hash changes (Back/Forward navigation, explicit #app links)
+  React.useEffect(() => {
+    const handleHashChange = () => {
+      if (typeof window === 'undefined') return;
+      const hash = window.location.hash;
+      if (hash.startsWith('#app')) {
+        setActiveMode('app');
+      } else if (hash.startsWith('#landing') || hash === '' || hash === '#') {
+        if (!isNative && !isInstalledPwa && !window.location.pathname.startsWith('/app')) {
+          setActiveMode('landing');
+        }
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [isNative, isInstalledPwa]);
+
   const handleOpenWebApp = () => {
-    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/blog')) {
-      window.history.pushState({}, '', '/');
-      setCurrentPath('/');
+    if (typeof window !== 'undefined') {
+      if (window.location.pathname.startsWith('/blog')) {
+        window.history.pushState({}, '', '/#app');
+        setCurrentPath('/');
+      } else {
+        window.location.hash = 'app';
+      }
     }
     setActiveMode('app');
   };
@@ -57,6 +82,10 @@ export default function Root() {
       if (window.location.pathname.startsWith('/blog')) {
         window.history.pushState({}, '', '/');
         setCurrentPath('/');
+      } else {
+        if (window.location.hash.startsWith('#app')) {
+          window.history.pushState(null, '', window.location.pathname);
+        }
       }
     }
     setActiveMode('landing');
