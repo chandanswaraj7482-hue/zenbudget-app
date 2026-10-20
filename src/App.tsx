@@ -4516,6 +4516,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
               setIsScannerOpen(true);
             }}
             title="Scan & Pay"
+            className="tap-bounce"
             style={{
               background: theme === 'light' ? '#FFFFFF' : 'var(--bg-input)',
               border: theme === 'light' ? '1px solid rgba(0,0,0,0.1)' : '1px solid var(--border-input)',
@@ -4538,6 +4539,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           <button
             onClick={() => setShowReceiptSourceModal(true)}
             title="Scan Receipt / Bill (Camera & Gallery)"
+            className="tap-bounce"
             style={{
               background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(6, 182, 212, 0.14) 100%)',
               border: '1px solid rgba(16, 185, 129, 0.35)',
@@ -4563,6 +4565,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
               setActiveView('notifications');
             }} 
             title="Notifications"
+            className="tap-bounce"
             style={{
               background: theme === 'light' ? '#FFFFFF' : 'var(--bg-input)',
               border: theme === 'light' ? '1px solid rgba(0,0,0,0.1)' : '1px solid var(--border-input)',
@@ -4598,6 +4601,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           <button
             onClick={() => setActiveView('profile')}
             title="My Profile"
+            className="tap-bounce"
             style={{
               background: 'transparent',
               border: 'none',
@@ -5117,6 +5121,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         {/* 1. Home / Dashboard */}
         <button
           onClick={() => handleNavClick('dashboard')}
+          className="tap-bounce"
           style={{
             background: activeView === 'dashboard' ? 'rgba(16, 185, 129, 0.16)' : 'transparent',
             border: activeView === 'dashboard' ? '1px solid rgba(16, 185, 129, 0.36)' : '1px solid transparent',
@@ -5156,6 +5161,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         {/* 2. Ledger / Transactions */}
         <button
           onClick={() => handleNavClick('transactions')}
+          className="tap-bounce"
           style={{
             background: activeView === 'transactions' ? 'rgba(16, 185, 129, 0.16)' : 'transparent',
             border: activeView === 'transactions' ? '1px solid rgba(16, 185, 129, 0.36)' : '1px solid transparent',
@@ -5201,6 +5207,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
               setIsModalOpen(true);
             }}
             title="Add Transaction"
+            className="tap-bounce"
             style={{
               background: 'linear-gradient(135deg, #10b981 0%, #059669 45%, #06b6d4 100%)',
               border: '3px solid var(--bg-card, #0f172a)',
@@ -5215,8 +5222,6 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
               cursor: 'pointer',
               transition: 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease'
             }}
-            onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.90)')}
-            onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
           >
             <Plus size={24} strokeWidth={3} />
           </button>
@@ -5225,6 +5230,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         {/* 3. Budget Limits */}
         <button
           onClick={() => handleNavClick('budgets')}
+          className="tap-bounce"
           style={{
             background: activeView === 'budgets' ? 'rgba(16, 185, 129, 0.16)' : 'transparent',
             border: activeView === 'budgets' ? '1px solid rgba(16, 185, 129, 0.36)' : '1px solid transparent',
@@ -5264,6 +5270,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         {/* 4. More & Tools Hub */}
         <button
           onClick={() => handleNavClick('more')}
+          className="tap-bounce"
           style={{
             background: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 'rgba(16, 185, 129, 0.16)' : 'transparent',
             border: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? '1px solid rgba(16, 185, 129, 0.36)' : '1px solid transparent',

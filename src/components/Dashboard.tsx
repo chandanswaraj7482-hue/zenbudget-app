@@ -934,6 +934,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', borderTop: '1px solid var(--border-divider)', paddingTop: '16px' }}>
           <div 
             onClick={onOpenAnalytics}
+            className="tap-bounce hover-lift"
             style={{ 
               display: 'flex', 
               gap: '10px', 
@@ -960,6 +961,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           <div 
             onClick={onOpenAnalytics}
+            className="tap-bounce hover-lift"
             style={{ 
               display: 'flex', 
               gap: '10px', 
@@ -1011,6 +1013,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <button
             type="button"
             onClick={onAddTransactionClick}
+            className="tap-bounce hover-lift"
             style={{
               aspectRatio: '1 / 1',
               width: '100%',
@@ -1040,6 +1043,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <button
               type="button"
               onClick={onScanReceiptClick}
+              className="tap-bounce hover-lift"
               style={{
                 aspectRatio: '1 / 1',
                 width: '100%',
@@ -1070,6 +1074,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <button
               type="button"
               onClick={onOpenAI}
+              className="tap-bounce hover-lift"
               style={{
                 aspectRatio: '1 / 1',
                 width: '100%',
@@ -1099,6 +1104,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <button
             type="button"
             onClick={onAddAccountClick}
+            className="tap-bounce hover-lift"
             style={{
               aspectRatio: '1 / 1',
               width: '100%',
