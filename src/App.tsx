@@ -4673,7 +4673,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       </header>
 
       {/* Main View Area */}
-      <main ref={mainScrollRef} className="scroll-container" style={{ padding: '20px 20px calc(110px + env(safe-area-inset-bottom)) 20px', minHeight: 'calc(100vh - 70px)' }}>
+      <main ref={mainScrollRef} className="scroll-container" style={{ padding: '16px clamp(12px, 3.8vw, 20px) calc(110px + env(safe-area-inset-bottom)) clamp(12px, 3.8vw, 20px)', minHeight: 'calc(100vh - 70px)' }}>
         {/* Smart AI Insights Banner (Natural scroll flow inside main) */}
         {(() => {
           const h = new Date().getHours();

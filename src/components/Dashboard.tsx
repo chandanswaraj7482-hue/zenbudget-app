@@ -29,7 +29,9 @@ import {
   BookOpen,
   BarChart3,
   Camera,
-  Bot
+  Bot,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import type { Transaction, SavingsGoal, CategoryBudget, Account } from '../types';
 import { t } from '../utils/i18n';
@@ -187,6 +189,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 }) => {
   const [selectedDashboardView, setSelectedDashboardView] = useState<'combined' | 'personal' | string>('combined');
   const [avatarError, setAvatarError] = useState(false);
+  const [isBalanceHidden, setIsBalanceHidden] = useState(() => localStorage.getItem('zb_hide_balance') === 'true');
 
   const [dateRangeFilter, setDateRangeFilter] = useState<'this_month' | 'last_month' | 'last_3_months' | 'custom'>('this_month');
   const [showPartnerBalanceModal, setShowPartnerBalanceModal] = useState(false);
@@ -901,14 +904,38 @@ export const Dashboard: React.FC<DashboardProps> = ({
               ● Live
             </span>
           </div>
-          <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>
-            All Wallets
-          </span>
+          <button
+            type="button"
+            className="tap-bounce"
+            onClick={() => setIsBalanceHidden(prev => {
+              const next = !prev;
+              localStorage.setItem('zb_hide_balance', String(next));
+              return next;
+            })}
+            title={isBalanceHidden ? "Show balance" : "Hide balance"}
+            style={{
+              background: 'rgba(255, 255, 255, 0.06)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              borderRadius: '999px',
+              padding: '3px 10px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              color: 'var(--text-secondary)',
+              fontSize: '11px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.18s ease'
+            }}
+          >
+            {isBalanceHidden ? <EyeOff size={13} /> : <Eye size={13} />}
+            <span>{isBalanceHidden ? 'Hidden' : 'Hide'}</span>
+          </button>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', margin: '10px 0 14px 0', color: 'var(--text-primary)', minWidth: 0, maxWidth: '100%' }}>
-          <span style={{ fontSize: 'clamp(34px, 8.8vw, 46px)', fontWeight: 900, letterSpacing: '-0.025em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#ffffff' }}>
-            {formatCurrency(totalBalance, currencySymbol, 0)}
+          <span style={{ fontSize: 'clamp(32px, 8.5vw, 44px)', fontWeight: 900, letterSpacing: '-0.025em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#ffffff' }}>
+            {isBalanceHidden ? '••••••••' : formatCurrency(totalBalance, currencySymbol, 0)}
           </span>
         </div>
 
