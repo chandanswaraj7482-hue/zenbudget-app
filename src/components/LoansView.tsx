@@ -291,47 +291,47 @@ export const LoansView: React.FC<LoansViewProps> = ({
 
       {/* Summary Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-        <div className="glass-panel" style={{ padding: '16px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-          <span style={{ fontSize: '11px', color: '#f87171', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            {t('borrowed_loans')}
-          </span>
-          <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#ef4444', margin: '4px 0 0 0' }}>
+        <div className="fintech-card" style={{ padding: '16px', background: 'linear-gradient(145deg, rgba(239, 68, 68, 0.12) 0%, rgba(255, 255, 255, 0.02) 100%)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '11px', color: '#f87171', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              {t('borrowed_loans')}
+            </span>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#ef4444', boxShadow: '0 0 8px #ef4444' }} />
+          </div>
+          <h3 style={{ fontSize: '22px', fontWeight: 900, color: '#ef4444', margin: '6px 0 0 0', letterSpacing: '-0.02em' }}>
             {formatCurrency(totalBorrowed, currencySymbol)}
           </h3>
-          <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', marginTop: '2px', fontWeight: 600 }}>
-            Total Taken (Remaining: {formatCurrency(borrowedLoans.reduce((sum, l) => sum + (l.totalAmount - l.paidAmount), 0), currencySymbol)})
+          <div style={{ fontSize: '10.5px', color: 'rgba(255, 255, 255, 0.6)', marginTop: '4px', fontWeight: 600 }}>
+            Remaining: <strong style={{ color: '#fff' }}>{formatCurrency(borrowedLoans.reduce((sum, l) => sum + (l.totalAmount - l.paidAmount), 0), currencySymbol)}</strong>
           </div>
         </div>
 
-        <div className="glass-panel" style={{ padding: '16px', background: 'rgba(34, 197, 94, 0.08)', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
-          <span style={{ fontSize: '11px', color: '#4ade80', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            {t('lent_loans')}
-          </span>
-          <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#22c55e', margin: '4px 0 0 0' }}>
+        <div className="fintech-card" style={{ padding: '16px', background: 'linear-gradient(145deg, rgba(34, 197, 94, 0.12) 0%, rgba(255, 255, 255, 0.02) 100%)', border: '1px solid rgba(34, 197, 94, 0.25)', borderRadius: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '11px', color: '#4ade80', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              {t('lent_loans')}
+            </span>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#22c55e', boxShadow: '0 0 8px #22c55e' }} />
+          </div>
+          <h3 style={{ fontSize: '22px', fontWeight: 900, color: '#22c55e', margin: '6px 0 0 0', letterSpacing: '-0.02em' }}>
             {formatCurrency(totalLent, currencySymbol)}
           </h3>
-          <div style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', marginTop: '2px', fontWeight: 600 }}>
-            Total Given (Remaining: {formatCurrency(lentLoans.reduce((sum, l) => sum + (l.totalAmount - l.paidAmount), 0), currencySymbol)})
+          <div style={{ fontSize: '10.5px', color: 'rgba(255, 255, 255, 0.6)', marginTop: '4px', fontWeight: 600 }}>
+            Remaining: <strong style={{ color: '#fff' }}>{formatCurrency(lentLoans.reduce((sum, l) => sum + (l.totalAmount - l.paidAmount), 0), currencySymbol)}</strong>
           </div>
         </div>
       </div>
 
       {/* Tabs Pill */}
-      <div style={{ display: 'flex', background: 'var(--bg-input)', padding: '4px', borderRadius: '14px', border: '1px solid var(--border-input)' }}>
+      <div className="segmented-control-bar">
         <button
           type="button"
           onClick={() => setActiveTab('borrowed')}
+          className={`segmented-pill-item tap-bounce ${activeTab === 'borrowed' ? 'active' : ''}`}
           style={{
-            flex: 1,
-            padding: '10px',
-            borderRadius: '10px',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: '13px',
-            fontWeight: 800,
             background: activeTab === 'borrowed' ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' : 'transparent',
             color: activeTab === 'borrowed' ? '#ffffff' : 'var(--text-secondary)',
-            transition: 'all 0.2s ease'
+            boxShadow: activeTab === 'borrowed' ? '0 4px 14px rgba(239, 68, 68, 0.35)' : 'none'
           }}
         >
           {t('borrowed_loans')}
@@ -339,17 +339,11 @@ export const LoansView: React.FC<LoansViewProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('lent')}
+          className={`segmented-pill-item tap-bounce ${activeTab === 'lent' ? 'active' : ''}`}
           style={{
-            flex: 1,
-            padding: '10px',
-            borderRadius: '10px',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: '13px',
-            fontWeight: 800,
             background: activeTab === 'lent' ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'transparent',
             color: activeTab === 'lent' ? '#ffffff' : 'var(--text-secondary)',
-            transition: 'all 0.2s ease'
+            boxShadow: activeTab === 'lent' ? '0 4px 14px rgba(34, 197, 94, 0.35)' : 'none'
           }}
         >
           {t('lent_loans')}
@@ -378,26 +372,26 @@ export const LoansView: React.FC<LoansViewProps> = ({
             const overdueDays = diffMs > 0 ? Math.floor(diffMs / (1000 * 60 * 60 * 24)) : 0;
 
             return (
-              <div key={loan.id} className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div key={loan.id} className="fintech-card" style={{ padding: '18px', borderRadius: '22px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                           <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>{loan.personName}</span>
                           {isCompleted ? (
-                            <span style={{ fontSize: '10px', background: 'rgba(34, 197, 94, 0.15)', color: '#22c55e', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>
-                              Completed
+                            <span style={{ fontSize: '10px', background: 'rgba(34, 197, 94, 0.15)', color: '#22c55e', padding: '3px 10px', borderRadius: '999px', fontWeight: 800, border: '1px solid rgba(34, 197, 94, 0.3)' }}>
+                              ✓ Completed
                             </span>
                           ) : overdueDays > 0 ? (
-                            <span style={{ fontSize: '10px', background: 'rgba(239, 68, 68, 0.25)', color: '#f87171', padding: '2px 8px', borderRadius: '12px', fontWeight: 800, border: '1px solid rgba(239, 68, 68, 0.4)' }}>
+                            <span style={{ fontSize: '10px', background: 'rgba(239, 68, 68, 0.25)', color: '#f87171', padding: '3px 10px', borderRadius: '999px', fontWeight: 800, border: '1px solid rgba(239, 68, 68, 0.4)' }}>
                               ⚠️ {overdueDays} {overdueDays === 1 ? 'Day Late' : 'Days Late'}!
                             </span>
                           ) : (
-                            <span style={{ fontSize: '10px', background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>
+                            <span style={{ fontSize: '10px', background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', padding: '3px 10px', borderRadius: '999px', fontWeight: 800, border: '1px solid rgba(239, 68, 68, 0.25)' }}>
                               Active ({loan.frequency === 'custom' ? (loan.customFrequencyText || 'Custom') : t(loan.frequency)})
                             </span>
                           )}
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', fontSize: '12px', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px', fontSize: '12px', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
                           <span><Calendar size={12} style={{ display: 'inline', marginRight: '4px' }} /> {t('due_date')}: {loan.dueDate}</span>
                           <span>• Principal: {formatCurrency(loan.principalAmount || loan.totalAmount, currencySymbol)}</span>
                           {loan.interestRate ? (
@@ -409,7 +403,7 @@ export const LoansView: React.FC<LoansViewProps> = ({
                       </div>
 
                   <div style={{ textAlign: 'right' }}>
-                    <span style={{ fontSize: '18px', fontWeight: 800, color: activeTab === 'borrowed' ? '#ef4444' : '#22c55e' }}>
+                    <span style={{ fontSize: '19px', fontWeight: 900, color: activeTab === 'borrowed' ? '#ef4444' : '#22c55e', letterSpacing: '-0.02em' }}>
                       {formatCurrency(remaining, currencySymbol)}
                     </span>
                     <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 700 }}>
@@ -431,25 +425,33 @@ export const LoansView: React.FC<LoansViewProps> = ({
 
                 {/* Progress bar */}
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                    <span>Paid: {formatCurrency(loan.paidAmount, currencySymbol)}</span>
-                    <span>{progress}%</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '5px' }}>
+                    <span>Paid: <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(loan.paidAmount, currencySymbol)}</strong></span>
+                    <span style={{ fontWeight: 800, color: activeTab === 'borrowed' ? '#ef4444' : '#22c55e' }}>{progress}%</span>
                   </div>
-                  <div style={{ width: '100%', height: '6px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '3px', overflow: 'hidden' }}>
-                    <div style={{ width: `${progress}%`, height: '100%', background: activeTab === 'borrowed' ? '#ef4444' : '#22c55e', transition: 'width 0.3s ease' }} />
+                  <div style={{ width: '100%', height: '8px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '999px', overflow: 'hidden' }}>
+                    <div style={{
+                      width: `${progress}%`,
+                      height: '100%',
+                      background: activeTab === 'borrowed' ? 'linear-gradient(90deg, #ef4444, #f87171)' : 'linear-gradient(90deg, #10b981, #34d399)',
+                      boxShadow: activeTab === 'borrowed' ? '0 0 10px rgba(239, 68, 68, 0.4)' : '0 0 10px rgba(16, 185, 129, 0.4)',
+                      borderRadius: '999px',
+                      transition: 'width 0.4s ease'
+                    }} />
                   </div>
                 </div>
 
                 {!isCompleted && (
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '4px' }}>
                     <button
+                      className="tap-bounce"
                       onClick={() => {
                         setRepayModalLoan(loan);
                         setRepayAmount(remaining.toString());
                       }}
                       style={{
-                        padding: '10px',
-                        borderRadius: '10px',
+                        padding: '11px',
+                        borderRadius: '14px',
                         border: '1px solid var(--border-button)',
                         background: 'rgba(255, 255, 255, 0.05)',
                         color: 'var(--text-primary)',
@@ -467,13 +469,14 @@ export const LoansView: React.FC<LoansViewProps> = ({
 
                     {activeTab === 'borrowed' ? (
                       <button
+                        className="tap-bounce"
                         onClick={() => {
                           setRepayModalLoan(loan);
                           setRepayAmount(remaining.toString());
                         }}
                         style={{
-                          padding: '10px',
-                          borderRadius: '10px',
+                          padding: '11px',
+                          borderRadius: '14px',
                           border: 'none',
                           background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                           color: '#fff',
@@ -491,13 +494,14 @@ export const LoansView: React.FC<LoansViewProps> = ({
                       </button>
                     ) : (
                       <button
+                        className="tap-bounce"
                         onClick={() => {
                           setRepayModalLoan(loan);
                           setRepayAmount(remaining.toString());
                         }}
                         style={{
-                          padding: '10px',
-                          borderRadius: '10px',
+                          padding: '11px',
+                          borderRadius: '14px',
                           border: 'none',
                           background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
                           color: '#fff',

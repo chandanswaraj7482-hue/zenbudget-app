@@ -162,6 +162,7 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
                 <button
                   key={c}
                   type="button"
+                  className="tap-bounce"
                   onClick={() => setColor(c)}
                   style={{
                     width: '32px',
@@ -191,6 +192,7 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
                   }}
                 />
                 <div
+                  className="tap-bounce"
                   style={{
                     width: '32px',
                     height: '32px',
@@ -213,8 +215,8 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
 
           <button
             type="submit"
-            className="glass-button active"
-            style={{ padding: '14px', borderRadius: '18px', marginTop: '10px', fontSize: '14px', fontWeight: 800, width: '100%' }}
+            className="glass-button active tap-bounce hover-lift"
+            style={{ padding: '15px', borderRadius: '18px', marginTop: '10px', fontSize: '14px', fontWeight: 800, width: '100%', boxShadow: '0 4px 16px rgba(34, 197, 94, 0.3)' }}
           >
             Save Account
           </button>

@@ -752,28 +752,15 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
           {/* Income/Expense/Transfer Selector: Show toggle ONLY when creating NEW transaction */}
           {!editingTransaction ? (
-            <div style={{ 
-              display: 'flex', 
-              background: 'var(--bg-input)', 
-              padding: '4px', 
-              borderRadius: '16px',
-              border: '1px solid var(--border-input)'
-            }}>
+            <div className="segmented-control-bar" style={{ marginBottom: '4px' }}>
               <button
                 type="button"
                 onClick={() => setType('expense')}
+                className={`segmented-pill-item tap-bounce ${type === 'expense' ? 'active' : ''}`}
                 style={{
-                  flex: 1,
-                  padding: '10px',
-                  borderRadius: '12px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontWeight: 700,
-                  fontSize: '13px',
-                  transition: 'var(--transition-smooth)',
                   backgroundColor: type === 'expense' ? 'var(--danger)' : 'transparent',
                   color: type === 'expense' ? '#fff' : 'var(--text-secondary)',
-                  boxShadow: type === 'expense' ? '0 4px 12px rgba(244, 63, 94, 0.3)' : 'none'
+                  boxShadow: type === 'expense' ? '0 4px 14px rgba(244, 63, 94, 0.35)' : 'none'
                 }}
               >
                 Expense
@@ -781,18 +768,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               <button
                 type="button"
                 onClick={() => setType('income')}
+                className={`segmented-pill-item tap-bounce ${type === 'income' ? 'active' : ''}`}
                 style={{
-                  flex: 1,
-                  padding: '10px',
-                  borderRadius: '12px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontWeight: 700,
-                  fontSize: '13px',
-                  transition: 'var(--transition-smooth)',
                   backgroundColor: type === 'income' ? 'var(--success)' : 'transparent',
                   color: type === 'income' ? '#fff' : 'var(--text-secondary)',
-                  boxShadow: type === 'income' ? '0 4px 12px rgba(16, 185, 129, 0.3)' : 'none'
+                  boxShadow: type === 'income' ? '0 4px 14px rgba(16, 185, 129, 0.35)' : 'none'
                 }}
               >
                 Income
@@ -800,18 +780,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               <button
                 type="button"
                 onClick={() => setType('transfer')}
+                className={`segmented-pill-item tap-bounce ${type === 'transfer' ? 'active' : ''}`}
                 style={{
-                  flex: 1,
-                  padding: '10px',
-                  borderRadius: '12px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontWeight: 700,
-                  fontSize: '13px',
-                  transition: 'var(--transition-smooth)',
                   backgroundColor: type === 'transfer' ? '#818cf8' : 'transparent',
                   color: type === 'transfer' ? '#fff' : 'var(--text-secondary)',
-                  boxShadow: type === 'transfer' ? '0 4px 12px rgba(129, 140, 248, 0.3)' : 'none'
+                  boxShadow: type === 'transfer' ? '0 4px 14px rgba(129, 140, 248, 0.35)' : 'none'
                 }}
               >
                 Transfer ⇆
@@ -1008,24 +981,30 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
           {/* Amount Input */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Amount
-            </label>
-            <div style={{
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                Amount
+              </label>
+              <span style={{ fontSize: '11px', color: type === 'expense' ? '#f43f5e' : '#10b981', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {type === 'expense' ? '● Expense Debit' : '● Income Credit'}
+              </span>
+            </div>
+            <div className="fintech-card" style={{
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
-              background: 'var(--bg-input)',
-              borderRadius: '20px',
-              padding: '14px 20px',
-              border: '1.5px solid var(--border-input)',
-              boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)'
+              borderRadius: '22px',
+              padding: '16px 20px',
+              border: `1.5px solid ${type === 'expense' ? 'rgba(244, 63, 94, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`,
+              background: type === 'expense' ? 'linear-gradient(180deg, rgba(244, 63, 94, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)' : 'linear-gradient(180deg, rgba(16, 185, 129, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%)',
+              boxShadow: type === 'expense' ? '0 8px 24px rgba(244, 63, 94, 0.12)' : '0 8px 24px rgba(16, 185, 129, 0.12)'
             }}>
               <span style={{ 
-                fontSize: '32px', 
+                fontSize: '34px', 
                 fontWeight: 900,
                 color: type === 'expense' ? 'var(--danger)' : 'var(--success)',
-                minWidth: '24px'
+                minWidth: '24px',
+                letterSpacing: '-0.02em'
               }}>
                 {currencySymbol}
               </span>
@@ -1046,7 +1025,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   flex: 1,
                   background: 'transparent',
                   border: 'none',
-                  fontSize: '32px',
+                  fontSize: '34px',
                   fontWeight: 900,
                   color: type === 'expense' ? 'var(--danger)' : 'var(--success)',
                   outline: 'none',
@@ -1056,20 +1035,21 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               />
             </div>
             {/* Quick Amount Suggestion Chips for Fast Entry */}
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '2px' }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
               {[100, 200, 500, 1000, 2000].map(val => (
                 <button
                   key={val}
                   type="button"
+                  className="tap-bounce"
                   onClick={() => {
                     const curr = parseFloat(amount) || 0;
                     setAmount((curr + val).toString());
                   }}
                   style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
+                    background: 'rgba(255, 255, 255, 0.04)',
                     border: '1px solid var(--border-input)',
-                    borderRadius: '12px',
-                    padding: '6px 10px',
+                    borderRadius: '999px',
+                    padding: '6px 12px',
                     color: 'var(--text-secondary)',
                     fontSize: '11px',
                     fontWeight: 700,
@@ -1091,12 +1071,13 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               <button
                 key="clear"
                 type="button"
+                className="tap-bounce"
                 onClick={() => setAmount('')}
                 style={{
                   background: 'rgba(239, 68, 68, 0.08)',
-                  border: '1px solid rgba(239, 68, 68, 0.2)',
-                  borderRadius: '12px',
-                  padding: '6px 10px',
+                  border: '1px solid rgba(239, 68, 68, 0.25)',
+                  borderRadius: '999px',
+                  padding: '6px 12px',
                   color: '#f87171',
                   fontSize: '11px',
                   fontWeight: 700,
@@ -1166,6 +1147,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     <button
                       key={cat.id}
                       type="button"
+                      className="tap-bounce"
                       onClick={() => setCategory(cat.id)}
                       style={{
                         display: 'flex',
@@ -1174,12 +1156,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         justifyContent: 'center',
                         gap: '6px',
                         padding: '10px 4px',
-                        borderRadius: '16px',
+                        borderRadius: '18px',
                         border: isSelected ? '2px solid #22c55e' : '1px solid var(--border-input)',
                         cursor: 'pointer',
                         transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
                         background: isSelected ? 'rgba(34, 197, 94, 0.16)' : 'var(--bg-input)',
-                        boxShadow: isSelected ? '0 4px 16px rgba(34, 197, 94, 0.28)' : 'none',
+                        boxShadow: isSelected ? '0 6px 18px rgba(34, 197, 94, 0.28)' : 'none',
                         transform: isSelected ? 'scale(1.03)' : 'scale(1)'
                       }}
                     >
@@ -1408,10 +1390,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
           <button
             type="submit"
+            className="tap-bounce hover-lift"
             style={{
               width: '100%',
               padding: '16px',
-              borderRadius: '16px',
+              borderRadius: '18px',
               fontSize: '14px',
               fontWeight: 800,
               background: 'linear-gradient(to right, var(--primary), var(--secondary))',
@@ -1429,6 +1412,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           {!editingTransaction && type === 'expense' && (
             <button
               type="button"
+              className="tap-bounce hover-lift"
               onClick={() => {
                 const parsedAmount = parseFloat(amount);
                 if (isNaN(parsedAmount) || parsedAmount <= 0) {
@@ -1457,7 +1441,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               style={{
                 width: '100%',
                 padding: '16px',
-                borderRadius: '16px',
+                borderRadius: '18px',
                 fontSize: '14px',
                 fontWeight: 900,
                 background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',

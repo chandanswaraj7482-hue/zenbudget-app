@@ -261,7 +261,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       </div>
 
       {/* Main Settings Card */}
-      <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div className="fintech-card" style={{ padding: '24px', borderRadius: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {errorMsg && <p style={{ color: 'var(--danger)', fontSize: '13px', fontWeight: 600, margin: 0 }}>{errorMsg}</p>}
           {successMsg && <p style={{ color: 'var(--success)', fontSize: '13px', fontWeight: 600, margin: 0 }}>{successMsg}</p>}
@@ -518,75 +518,51 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               App Theme Mode (Auto / Dark / Light)
             </label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+            <div className="segmented-control-bar">
               <button
                 type="button"
+                className={`segmented-pill-item tap-bounce ${themeMode === 'system' ? 'active' : ''}`}
                 onClick={() => {
                   setThemeMode('system');
                   if (onToggleTheme) onToggleTheme('system');
                 }}
                 style={{
-                  padding: '10px 6px',
-                  borderRadius: '14px',
-                  border: themeMode === 'system' ? '2px solid var(--primary)' : '1px solid var(--border-input)',
-                  background: themeMode === 'system' ? 'rgba(34,197,94,0.15)' : 'var(--bg-input)',
-                  color: 'var(--text-primary)',
-                  fontWeight: 700,
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '5px'
+                  background: themeMode === 'system' ? 'var(--primary)' : 'transparent',
+                  color: themeMode === 'system' ? '#ffffff' : 'var(--text-secondary)',
+                  boxShadow: themeMode === 'system' ? '0 4px 14px rgba(34, 197, 94, 0.35)' : 'none'
                 }}
               >
-                <Smartphone size={15} /> Auto (Device)
+                <Smartphone size={14} /> Auto
               </button>
               <button
                 type="button"
+                className={`segmented-pill-item tap-bounce ${themeMode === 'dark' ? 'active' : ''}`}
                 onClick={() => {
                   setThemeMode('dark');
                   if (onToggleTheme) onToggleTheme('dark');
                 }}
                 style={{
-                  padding: '10px 6px',
-                  borderRadius: '14px',
-                  border: themeMode === 'dark' ? '2px solid var(--primary)' : '1px solid var(--border-input)',
-                  background: themeMode === 'dark' ? 'rgba(34,197,94,0.15)' : 'var(--bg-input)',
-                  color: 'var(--text-primary)',
-                  fontWeight: 700,
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '5px'
+                  background: themeMode === 'dark' ? 'var(--primary)' : 'transparent',
+                  color: themeMode === 'dark' ? '#ffffff' : 'var(--text-secondary)',
+                  boxShadow: themeMode === 'dark' ? '0 4px 14px rgba(34, 197, 94, 0.35)' : 'none'
                 }}
               >
-                <Moon size={15} /> Dark Mode
+                <Moon size={14} /> Dark
               </button>
               <button
                 type="button"
+                className={`segmented-pill-item tap-bounce ${themeMode === 'light' ? 'active' : ''}`}
                 onClick={() => {
                   setThemeMode('light');
                   if (onToggleTheme) onToggleTheme('light');
                 }}
                 style={{
-                  padding: '10px 6px',
-                  borderRadius: '14px',
-                  border: themeMode === 'light' ? '2px solid var(--primary)' : '1px solid var(--border-input)',
-                  background: themeMode === 'light' ? 'rgba(34,197,94,0.15)' : 'var(--bg-input)',
-                  color: 'var(--text-primary)',
-                  fontWeight: 700,
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '5px'
+                  background: themeMode === 'light' ? 'var(--primary)' : 'transparent',
+                  color: themeMode === 'light' ? '#ffffff' : 'var(--text-secondary)',
+                  boxShadow: themeMode === 'light' ? '0 4px 14px rgba(34, 197, 94, 0.35)' : 'none'
                 }}
               >
-                <Sun size={15} /> Light Mode
+                <Sun size={14} /> Light
               </button>
             </div>
           </div>
@@ -717,8 +693,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           <button
             type="submit"
             disabled={isSaving}
-            className="glass-button active"
-            style={{ width: '100%', padding: '14px', borderRadius: '16px', fontWeight: 700, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: 'none', cursor: 'pointer', background: 'linear-gradient(to right, var(--primary), var(--secondary))', color: '#fff' }}
+            className="tap-bounce hover-lift"
+            style={{ width: '100%', padding: '15px', borderRadius: '18px', fontWeight: 800, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: 'none', cursor: 'pointer', background: 'linear-gradient(to right, var(--primary), var(--secondary))', color: '#fff', boxShadow: '0 4px 16px rgba(34, 197, 94, 0.3)' }}
           >
             {isSaving ? 'Saving Changes...' : (
               <>
@@ -732,11 +708,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             <button
               type="button"
               onClick={onLogout}
+              className="tap-bounce"
               style={{
                 width: '100%',
                 marginTop: '12px',
-                padding: '13px',
-                borderRadius: '16px',
+                padding: '14px',
+                borderRadius: '18px',
                 fontWeight: 700,
                 fontSize: '13px',
                 display: 'flex',

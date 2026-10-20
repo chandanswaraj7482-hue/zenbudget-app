@@ -890,21 +890,35 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               {/* MONTHLY PLAN */}
               <div 
                 onClick={() => setBillingCycle('monthly')}
+                className="tap-bounce"
                 style={{
-                  padding: '14px',
-                  borderRadius: '16px',
+                  padding: '16px',
+                  borderRadius: '20px',
                   border: billingCycle === 'monthly' ? '2px solid #818cf8' : '1px solid var(--border-input)',
-                  background: billingCycle === 'monthly' ? 'rgba(99, 102, 241, 0.12)' : 'var(--bg-input)',
+                  background: billingCycle === 'monthly' ? 'linear-gradient(145deg, rgba(99, 102, 241, 0.16) 0%, rgba(255, 255, 255, 0.02) 100%)' : 'var(--bg-input)',
+                  boxShadow: billingCycle === 'monthly' ? '0 8px 24px rgba(99, 102, 241, 0.2)' : 'none',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
+                  gap: '12px',
                   transition: 'all 0.2s ease'
                 }}
               >
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--text-primary)' }}>Monthly</div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>100% Ad-Free, cancel anytime</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '50%',
+                    border: billingCycle === 'monthly' ? '5px solid #818cf8' : '2px solid var(--border-input)',
+                    backgroundColor: '#fff',
+                    flexShrink: 0,
+                    transition: 'all 0.2s ease'
+                  }} />
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: '15px', color: 'var(--text-primary)' }}>Monthly</div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>100% Ad-Free, cancel anytime</div>
+                  </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   {getPlanPriceDisplay('monthly')}
@@ -914,15 +928,18 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               {/* YEARLY PLAN */}
               <div 
                 onClick={() => setBillingCycle('yearly')}
+                className="tap-bounce"
                 style={{
-                  padding: '14px',
-                  borderRadius: '16px',
+                  padding: '16px',
+                  borderRadius: '20px',
                   border: billingCycle === 'yearly' ? '2px solid #10b981' : '1px solid var(--border-input)',
-                  background: billingCycle === 'yearly' ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-input)',
+                  background: billingCycle === 'yearly' ? 'linear-gradient(145deg, rgba(16, 185, 129, 0.16) 0%, rgba(255, 255, 255, 0.02) 100%)' : 'var(--bg-input)',
+                  boxShadow: billingCycle === 'yearly' ? '0 8px 24px rgba(16, 185, 129, 0.25)' : 'none',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
+                  gap: '12px',
                   position: 'relative',
                   transition: 'all 0.2s ease'
                 }}
@@ -934,20 +951,31 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                   color: '#ffffff',
                   fontSize: '9px',
-                  fontWeight: 800,
-                  padding: '3px 9px',
-                  borderRadius: '10px',
+                  fontWeight: 900,
+                  padding: '3px 10px',
+                  borderRadius: '999px',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  boxShadow: '0 2px 8px rgba(16, 185, 129, 0.4)'
+                  letterSpacing: '0.06em',
+                  boxShadow: '0 2px 10px rgba(16, 185, 129, 0.45)'
                 }}>
-                  🎁 BEST VALUE · +1 MONTH FREE!
+                  🎁 BEST VALUE · +1 MO FREE!
                 </div>
-                <div>
-                  <div style={{ fontWeight: 800, fontSize: '14px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    Yearly <span style={{ fontSize: '10px', background: 'rgba(16, 185, 129, 0.18)', color: '#34d399', padding: '1px 6px', borderRadius: '6px', fontWeight: 800 }}>12 + 1 Mo Free</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '50%',
+                    border: billingCycle === 'yearly' ? '5px solid #10b981' : '2px solid var(--border-input)',
+                    backgroundColor: '#fff',
+                    flexShrink: 0,
+                    transition: 'all 0.2s ease'
+                  }} />
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: '15px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      Yearly <span style={{ fontSize: '10px', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', padding: '2px 8px', borderRadius: '999px', fontWeight: 800 }}>12 + 1 Mo</span>
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#10b981', fontWeight: 700 }}>13 Months Total Access (Includes 1 Mo Bonus!)</div>
                   </div>
-                  <div style={{ fontSize: '12px', color: '#10b981', fontWeight: 600 }}>13 Months Total Access (Includes 1 Mo Bonus!)</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   {getPlanPriceDisplay('yearly')}
@@ -958,15 +986,18 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               {isLifetimeAvailable && (
                 <div 
                   onClick={() => setBillingCycle('lifetime')}
+                  className="tap-bounce"
                   style={{
-                    padding: '14px',
-                    borderRadius: '16px',
+                    padding: '16px',
+                    borderRadius: '20px',
                     border: billingCycle === 'lifetime' ? '2px solid #f59e0b' : '1px solid rgba(245, 158, 11, 0.25)',
-                    background: billingCycle === 'lifetime' ? 'rgba(245, 158, 11, 0.15)' : 'var(--bg-input)',
+                    background: billingCycle === 'lifetime' ? 'linear-gradient(145deg, rgba(245, 158, 11, 0.18) 0%, rgba(255, 255, 255, 0.02) 100%)' : 'var(--bg-input)',
+                    boxShadow: billingCycle === 'lifetime' ? '0 8px 24px rgba(245, 158, 11, 0.25)' : 'none',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
+                    gap: '12px',
                     position: 'relative',
                     transition: 'all 0.2s ease'
                   }}
@@ -978,18 +1009,30 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                     background: '#f59e0b',
                     color: '#ffffff',
                     fontSize: '9px',
-                    fontWeight: 800,
-                    padding: '2px 8px',
-                    borderRadius: '10px',
+                    fontWeight: 900,
+                    padding: '3px 10px',
+                    borderRadius: '999px',
                     textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
+                    letterSpacing: '0.06em',
+                    boxShadow: '0 2px 10px rgba(245, 158, 11, 0.45)'
                   }}>
-                    FOUNDING MEMBER
+                    👑 FOUNDING MEMBER
                   </div>
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: '14px', color: '#d97706' }}>Lifetime</div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                      Limited to first 100 ({lifetimeClaimedCount}/100 claimed)
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '50%',
+                      border: billingCycle === 'lifetime' ? '5px solid #f59e0b' : '2px solid var(--border-input)',
+                      backgroundColor: '#fff',
+                      flexShrink: 0,
+                      transition: 'all 0.2s ease'
+                    }} />
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: '15px', color: '#d97706' }}>Lifetime Access</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                        Limited to first 100 ({lifetimeClaimedCount}/100 claimed)
+                      </div>
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
@@ -1127,9 +1170,10 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               <button
                 type="button"
                 onClick={handleWebPayment}
+                className="tap-bounce hover-lift"
                 style={{
                   padding: '16px',
-                  borderRadius: '16px',
+                  borderRadius: '18px',
                   border: 'none',
                   background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                   color: '#fff',
@@ -1143,7 +1187,6 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   gap: '10px',
                   transition: 'all 0.2s ease'
                 }}
-                className="hover-lift"
               >
                 <Zap size={18} />
                 <span>
