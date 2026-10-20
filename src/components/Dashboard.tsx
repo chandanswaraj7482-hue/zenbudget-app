@@ -952,10 +952,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
             <div>
               <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>{t('income')}</span>
-              <p style={{ fontSize: '14.5px', fontWeight: 800, color: '#10b981', margin: 0 }}>
+              <p style={{ fontSize: '15px', fontWeight: 800, color: '#10b981', margin: 0, marginTop: '2px' }}>
                 +{formatCurrency(income, currencySymbol, 0)}
               </p>
-              <span style={{ fontSize: '9.5px', color: '#10b981', display: 'flex', alignItems: 'center', gap: '3px', marginTop: '2px', fontWeight: 700 }}>Tap for details →</span>
             </div>
           </div>
 
@@ -979,10 +978,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
             <div>
               <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>{t('expenses')}</span>
-              <p style={{ fontSize: '14.5px', fontWeight: 800, color: '#f43f5e', margin: 0 }}>
+              <p style={{ fontSize: '15px', fontWeight: 800, color: '#f43f5e', margin: 0, marginTop: '2px' }}>
                 -{formatCurrency(expenses, currencySymbol, 0)}
               </p>
-              <span style={{ fontSize: '9.5px', color: '#f43f5e', display: 'flex', alignItems: 'center', gap: '3px', marginTop: '2px', fontWeight: 700 }}>Tap for details →</span>
             </div>
           </div>
         </div>
@@ -1000,137 +998,224 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         )}
 
-        {/* ── USER FRIENDLY QUICK ACTIONS BAR (WITH STATS & ANALYTICS) ── */}
+        {/* ── USER FRIENDLY QUICK ACTIONS BAR (SQUARE TILES) ── */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(5, 1fr)',
-          gap: '8px',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: '10px',
           marginTop: '16px',
           paddingTop: '16px',
           borderTop: '1px solid var(--border-divider)'
         }}>
+          {/* 1. Add Transaction */}
           <button
             type="button"
             onClick={onAddTransactionClick}
             style={{
+              aspectRatio: '1 / 1',
+              width: '100%',
               background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.16) 0%, rgba(16, 185, 129, 0.05) 100%)',
               border: '1px solid rgba(16, 185, 129, 0.32)',
-              borderRadius: '18px',
-              padding: '10px 4px',
+              borderRadius: '20px',
+              padding: '6px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: '6px',
               color: '#10b981',
               cursor: 'pointer',
-              transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
+              transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.1)'
             }}
           >
-            <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)' }}>
-              <Plus size={18} strokeWidth={2.8} />
+            <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)' }}>
+              <Plus size={20} strokeWidth={2.8} />
             </div>
-            <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#ffffff' }}>Add</span>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#ffffff' }}>Add</span>
           </button>
 
-          {/* Direct Stats & Analytics Button */}
-          {onOpenAnalytics && (
-            <button
-              type="button"
-              onClick={onOpenAnalytics}
-              style={{
-                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, rgba(245, 158, 11, 0.05) 100%)',
-                border: '1px solid rgba(245, 158, 11, 0.32)',
-                borderRadius: '18px',
-                padding: '10px 4px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '6px',
-                color: '#fbbf24',
-                cursor: 'pointer',
-                transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
-              }}
-            >
-              <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(245, 158, 11, 0.4)' }}>
-                <BarChart3 size={17} />
-              </div>
-              <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#ffffff' }}>Stats</span>
-            </button>
-          )}
-
+          {/* 2. Scan Bill / OCR */}
           {onScanReceiptClick && (
             <button
               type="button"
               onClick={onScanReceiptClick}
               style={{
+                aspectRatio: '1 / 1',
+                width: '100%',
                 background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.16) 0%, rgba(6, 182, 212, 0.05) 100%)',
                 border: '1px solid rgba(6, 182, 212, 0.32)',
-                borderRadius: '18px',
-                padding: '10px 4px',
+                borderRadius: '20px',
+                padding: '6px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
+                justifyContent: 'center',
                 gap: '6px',
                 color: '#22d3ee',
                 cursor: 'pointer',
-                transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
+                transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                boxShadow: '0 4px 12px rgba(6, 182, 212, 0.1)'
               }}
             >
-              <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(6, 182, 212, 0.4)' }}>
-                <Camera size={17} />
+              <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(6, 182, 212, 0.35)' }}>
+                <Camera size={19} />
               </div>
-              <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#ffffff' }}>Scan Bill</span>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: '#ffffff' }}>Scan Bill</span>
             </button>
           )}
 
+          {/* 3. AI Coach */}
           {onOpenAI && (
             <button
               type="button"
               onClick={onOpenAI}
               style={{
+                aspectRatio: '1 / 1',
+                width: '100%',
                 background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.16) 0%, rgba(168, 85, 247, 0.05) 100%)',
                 border: '1px solid rgba(168, 85, 247, 0.32)',
-                borderRadius: '18px',
-                padding: '10px 4px',
+                borderRadius: '20px',
+                padding: '6px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
+                justifyContent: 'center',
                 gap: '6px',
                 color: '#c084fc',
                 cursor: 'pointer',
-                transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
+                transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                boxShadow: '0 4px 12px rgba(168, 85, 247, 0.1)'
               }}
             >
-              <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(168, 85, 247, 0.4)' }}>
-                <Bot size={17} />
+              <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(168, 85, 247, 0.35)' }}>
+                <Bot size={19} />
               </div>
-              <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#ffffff' }}>AI Coach</span>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: '#ffffff' }}>AI Coach</span>
             </button>
           )}
 
+          {/* 4. Accounts & Wallets */}
           <button
             type="button"
             onClick={onAddAccountClick}
             style={{
-              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%)',
-              border: '1px solid rgba(255, 255, 255, 0.14)',
-              borderRadius: '18px',
-              padding: '10px 4px',
+              aspectRatio: '1 / 1',
+              width: '100%',
+              background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.16) 0%, rgba(59, 130, 246, 0.05) 100%)',
+              border: '1px solid rgba(59, 130, 246, 0.32)',
+              borderRadius: '20px',
+              padding: '6px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: '6px',
-              color: '#cbd5e1',
+              color: '#60a5fa',
               cursor: 'pointer',
-              transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
+              transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+              boxShadow: '0 4px 12px rgba(59, 130, 246, 0.1)'
             }}
           >
-            <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.14)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)' }}>
-              <Wallet size={17} />
+            <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(59, 130, 246, 0.35)' }}>
+              <Wallet size={19} />
             </div>
-            <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#ffffff' }}>+ Wallet</span>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#ffffff' }}>+ Wallet</span>
           </button>
         </div>
+
+        {/* ── OVERALL STATS & COMPREHENSIVE CASHFLOW SHAPE CARD ── */}
+        {onOpenAnalytics && (
+          <div
+            onClick={onOpenAnalytics}
+            style={{
+              marginTop: '14px',
+              background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              borderRadius: '22px',
+              padding: '14px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.28)',
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Ambient subtle glow */}
+            <div style={{
+              position: 'absolute',
+              top: '-20px',
+              right: '-20px',
+              width: '80px',
+              height: '80px',
+              background: 'radial-gradient(circle, rgba(245, 158, 11, 0.25) 0%, transparent 70%)',
+              pointerEvents: 'none'
+            }} />
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '14px',
+                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ffffff',
+                boxShadow: '0 4px 14px rgba(245, 158, 11, 0.4)',
+                flexShrink: 0
+              }}>
+                <BarChart3 size={21} />
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '13.5px', fontWeight: 800, color: '#ffffff' }}>
+                    Overall Stats & Analytics
+                  </span>
+                  <span style={{
+                    fontSize: '10px',
+                    fontWeight: 800,
+                    padding: '2px 8px',
+                    borderRadius: '8px',
+                    background: (income - expenses) >= 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(244, 63, 94, 0.2)',
+                    color: (income - expenses) >= 0 ? '#34d399' : '#fb7185',
+                    border: (income - expenses) >= 0 ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(244, 63, 94, 0.35)'
+                  }}>
+                    {(income - expenses) >= 0
+                      ? `+${formatCurrency(income - expenses, currencySymbol, 0)} Saved`
+                      : `${formatCurrency(income - expenses, currencySymbol, 0)} Deficit`}
+                  </span>
+                </div>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block', marginTop: '3px' }}>
+                  {income > 0 
+                    ? `${Math.round(Math.max(0, (income - expenses) / income * 100))}% savings rate · Tap to see full category details` 
+                    : 'Tap to view category reports, ledger & cashflow details'}
+                </span>
+              </div>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '6px 12px',
+              borderRadius: '12px',
+              background: 'rgba(245, 158, 11, 0.15)',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+              color: '#fbbf24',
+              fontSize: '11.5px',
+              fontWeight: 800,
+              flexShrink: 0
+            }}>
+              <span>Details</span>
+              <ChevronRight size={14} />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ─── My Accounts in Wallet Section ─── */}

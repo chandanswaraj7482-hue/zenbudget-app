@@ -5091,23 +5091,26 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       {/* Bottom Attached Modern Navigation Bar (Pinned to Phone Frame) */}
       <nav style={{
         position: 'fixed',
-        bottom: '10px',
+        bottom: 0,
         left: '50%',
         transform: 'translateX(-50%)',
-        width: 'calc(100% - 24px)',
-        maxWidth: '500px',
-        background: theme === 'light' ? 'rgba(255, 255, 255, 0.94)' : 'rgba(13, 19, 33, 0.92)',
-        border: theme === 'light' ? '1px solid rgba(0, 0, 0, 0.08)' : '1px solid rgba(255, 255, 255, 0.1)',
-        borderRadius: '28px',
+        width: '100%',
+        maxWidth: '480px',
+        background: theme === 'light' ? 'rgba(255, 255, 255, 0.96)' : 'rgba(13, 19, 33, 0.96)',
+        borderTop: theme === 'light' ? '1px solid rgba(0, 0, 0, 0.08)' : '1px solid rgba(255, 255, 255, 0.1)',
+        borderLeft: 'none',
+        borderRight: 'none',
+        borderBottom: 'none',
+        borderRadius: '24px 24px 0 0',
         backdropFilter: 'blur(28px) saturate(190%)',
         WebkitBackdropFilter: 'blur(28px) saturate(190%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-around',
-        padding: '6px 10px calc(env(safe-area-inset-bottom) + 6px) 10px',
+        padding: '7px 8px calc(env(safe-area-inset-bottom, 0px) + 8px) 8px',
         boxShadow: theme === 'light' 
-          ? '0 12px 36px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)' 
-          : '0 16px 45px rgba(0, 0, 0, 0.75), 0 0 20px rgba(16, 185, 129, 0.08)',
+          ? '0 -6px 20px rgba(0, 0, 0, 0.06)' 
+          : '0 -8px 25px rgba(0, 0, 0, 0.65), 0 -2px 10px rgba(16, 185, 129, 0.05)',
         zIndex: 999,
         transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
       }}>
