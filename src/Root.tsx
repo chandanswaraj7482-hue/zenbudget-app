@@ -31,12 +31,23 @@ export default function Root() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  // Auto-normalize encoded %23app in URL to clean /#app
+  React.useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.pathname.includes('%23app')) {
+      window.history.replaceState(null, '', '/#app');
+      setCurrentPath('/');
+    }
+  }, []);
+
   const hasAppHashOrParam = typeof window !== 'undefined' && (
     window.location.hash.startsWith('#app') ||
+    window.location.hash.includes('%23app') ||
+    window.location.pathname.includes('%23app') ||
     window.location.search.includes('mode=app') ||
     window.location.search.includes('source=app') ||
     currentPath === '/app' ||
-    currentPath.startsWith('/app/')
+    currentPath.startsWith('/app/') ||
+    currentPath.includes('%23app')
   );
 
   // If native app or installed PWA, or explicitly requested via #app/query, open 'app'.

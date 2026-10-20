@@ -916,14 +916,10 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         if (error) throw error;
         if (data.user) {
           setUserId(data.user.id);
-          const existingPin = localStorage.getItem(`zb_pin_${data.user.id}`) || localStorage.getItem(`zb_pin_${cleanEmail}`) || localStorage.getItem('zb_saved_device_pin') || localStorage.getItem('zb_user_pin');
-          if (existingPin && existingPin !== '0000' && existingPin.length >= 4) {
-            localStorage.setItem('zb_user_pin', existingPin);
-            localStorage.setItem('zb_pin_created', 'true');
-            setStep('unlock');
-          } else {
-            setStep('onboard-pin');
-          }
+          localStorage.removeItem('zb_pin_created');
+          setPin('');
+          setConfirmPin('');
+          setStep('onboard-pin');
         }
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
@@ -1775,6 +1771,38 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                   authMode === 'login' ? '🔓 Login to ZenBudget' : '🚀 Create Account'
                 )}
               </button>
+
+              {/* Direct 4-digit PIN setup button for new users / guest mode */}
+              <div style={{ marginTop: '14px', textAlign: 'center', width: '100%' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setErrorMsg('');
+                    setUserId('local');
+                    setUsername('User');
+                    localStorage.removeItem('zb_pin_created');
+                    setPin('');
+                    setConfirmPin('');
+                    setStep('onboard-pin');
+                  }}
+                  style={{
+                    background: 'rgba(34, 197, 94, 0.08)',
+                    border: '1px solid rgba(34, 197, 94, 0.25)',
+                    borderRadius: '12px',
+                    padding: '8px 16px',
+                    color: '#22c55e',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <span>⚡ New User? Set 4-digit PIN directly</span>
+                </button>
+              </div>
             </form>
 
             {/* ── Footer: Security Notice ── */}

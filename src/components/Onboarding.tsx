@@ -18,7 +18,7 @@ const goalsList = [
 ];
 
 export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymbol }) => {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
   const [dob, setDob] = useState<string>('');
   const [monthlySalary, setMonthlySalary] = useState<string>('');
   
@@ -32,7 +32,12 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymb
   };
 
   const handleNext = () => {
-    if (step === 1 && selectedGoal) {
+    if (step === 0) {
+      if (!monthlySalary || Number(monthlySalary) <= 0) {
+        return;
+      }
+      setStep(1);
+    } else if (step === 1 && selectedGoal) {
       if (selectedGoal.id === 'other' && !customGoalName.trim()) {
         return;
       }
@@ -84,7 +89,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymb
       {/* Progress Bar */}
       <div style={{ width: '100%', height: '4px', background: 'var(--border-input)', borderRadius: '2px', marginTop: '40px' }}>
         <div style={{
-          width: `${(step / 4) * 100}%`,
+          width: `${((step + 1) / 5) * 100}%`,
           height: '100%',
           background: 'linear-gradient(to right, var(--primary), var(--secondary))',
           borderRadius: '2px',
@@ -354,7 +359,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymb
 
         <button
           onClick={handleNext}
-          disabled={(step === 1 && !selectedGoal) || (step === 1 && selectedGoal?.id === 'other' && !customGoalName.trim()) || (step === 2 && (!amount || Number(amount) <= 0))}
+          disabled={(step === 0 && (!monthlySalary || Number(monthlySalary) <= 0 || !dob)) || (step === 1 && !selectedGoal) || (step === 1 && selectedGoal?.id === 'other' && !customGoalName.trim()) || (step === 2 && (!amount || Number(amount) <= 0))}
           style={{
             background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)',
             border: 'none',
@@ -367,7 +372,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currencySymb
             alignItems: 'center',
             gap: '8px',
             cursor: 'pointer',
-            opacity: ((step === 1 && !selectedGoal) || (step === 1 && selectedGoal?.id === 'other' && !customGoalName.trim()) || (step === 2 && (!amount || Number(amount) <= 0))) ? 0.5 : 1,
+            opacity: ((step === 0 && (!monthlySalary || Number(monthlySalary) <= 0 || !dob)) || (step === 1 && !selectedGoal) || (step === 1 && selectedGoal?.id === 'other' && !customGoalName.trim()) || (step === 2 && (!amount || Number(amount) <= 0))) ? 0.5 : 1,
             boxShadow: '0 8px 25px var(--primary-glow)',
             transition: 'all 0.2s'
           }}

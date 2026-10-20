@@ -4327,7 +4327,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         }
 
         const effectiveId = validProfileId;
-        if (!localStorage.getItem(`zb_onboarded_${effectiveId}`) && !localStorage.getItem('zb_onboarded_global')) {
+        const hasSalary = !!(localStorage.getItem(`zb_monthly_salary_${effectiveId}`) || localStorage.getItem('zb_monthly_salary'));
+        if (!hasSalary || !localStorage.getItem(`zb_onboarded_${effectiveId}`)) {
           setShowOnboarding(true);
         } else {
           const todayStr = new Date().toISOString().split('T')[0];

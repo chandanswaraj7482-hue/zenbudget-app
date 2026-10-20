@@ -823,6 +823,70 @@ export function resolveUserFinancialQuery(
     }
   }
 
+  // ─── 1.5. HIGHEST EXPENSE CATEGORY QUERY ("highest expense category", "sabse zyada kharcha kahan hua", "top spend") ───
+  if (
+    qLower.includes('highest') || qLower.includes('top expense') || qLower.includes('top category') ||
+    qLower.includes('top spend') || qLower.includes('sabse zyada') || qLower.includes('sabse jyada') ||
+    qLower.includes('max expense') || qLower.includes('maximum kharcha') || qLower.includes('bada kharcha') ||
+    qLower.includes('where did i spend most') || qLower.includes('most spent')
+  ) {
+    updatedState.lastSubject = 'highest_category';
+    const topCat = (ctx.topExpenseCategory || (ctx.topCategories.length > 0 ? ctx.topCategories[0].category : null));
+    const topCatAmt = Number(ctx.topCategorySpend) || (ctx.topCategories.length > 0 ? ctx.topCategories[0].amount : 0);
+    const totalExp = Number(ctx.totalExpense) || Number(ctx.monthTotalExpenses) || 0;
+    const pct = totalExp > 0 ? Math.round((topCatAmt / totalExp) * 100) : 0;
+
+    if (topCat && topCatAmt > 0) {
+      const responseText = isFormalEnglish
+        ? `📊 **Highest Expense Category Analysis**:\n\n• Top Category: **${topCat.toUpperCase()}**\n• Amount Spent: **${currencySymbol}${topCatAmt.toLocaleString()}**\n• Share of Total Spending: **${pct}%** (Total Spent: ${currencySymbol}${totalExp.toLocaleString()})\n\n💡 **Zen Advice**: ${topCat.toUpperCase()} is your single biggest money drain this month! Setting a 15% budget limit on ${topCat.toUpperCase()} in the "Limits" tab will save you approx **${currencySymbol}${Math.round(topCatAmt * 0.15).toLocaleString()}** extra every month! 🌿`
+        : `📊 **Sabse Zyada Kharcha Analysis**:\n\n• Top Category: **${topCat.toUpperCase()}**\n• Total Spent: **${currencySymbol}${topCatAmt.toLocaleString()}**\n• Total Monthly Spending Ka: **${pct}%** (Total Kharcha: ${currencySymbol}${totalExp.toLocaleString()})\n\n💡 **Zen Action Tip**: Iss month aapka sabse bada kharcha **${topCat.toUpperCase()}** category me ho raha hai! Agar aap "Limits" tab me ispar 15% limit set kar doge, toh easily **${currencySymbol}${Math.round(topCatAmt * 0.15).toLocaleString()}** extra har mahine bacha loge! 🎯`;
+      return { responseText, updatedState };
+    } else {
+      const responseText = isFormalEnglish
+        ? `📊 **Highest Expense Category**:\n\nYou haven't logged any expenses yet this month! As soon as you add an expense using the **'+' button** or scan a bank statement/receipt, I will immediately analyze your top spending categories and leaks! 💡✨`
+        : `📊 **Highest Expense Category**:\n\nIss month abhi tak koi kharcha log nahi hua hai! Jaise hi aap **'+' button** dabakar pehla kharcha add karoge ya passbook scan karoge, main turant aapka top category break-down nikal kar dikha dunga! 💡✨`;
+      return { responseText, updatedState };
+    }
+  }
+
+  // ─── 1.6. 50/30/20 BUDGET RULE QUERY ───
+  if (qLower.includes('50/30/20') || qLower.includes('50 30 20') || (qLower.includes('rule') && qLower.includes('budget'))) {
+    updatedState.lastSubject = '50_30_20';
+    const income = ctx.totalIncome > 0 ? ctx.totalIncome : (ctx.totalExpense > 0 ? ctx.totalExpense : 50000);
+    const needs = Math.round(income * 0.5);
+    const wants = Math.round(income * 0.3);
+    const savings = Math.round(income * 0.2);
+
+    const responseText = isFormalEnglish
+      ? `💡 **The Golden 50/30/20 Budgeting Rule** (Tailored for Income: ${currencySymbol}${income.toLocaleString()}):\n\n• **50% Needs (Essential)**: **${currencySymbol}${needs.toLocaleString()}** (Rent, groceries, utilities, EMIs, health)\n• **30% Wants (Lifestyle)**: **${currencySymbol}${wants.toLocaleString()}** (Dining out, movies, shopping, weekend trips)\n• **20% Savings (Wealth)**: **${currencySymbol}${savings.toLocaleString()}** (SIP, emergency fund, investments)\n\n📌 **Your Current Reality**: You spent ${currencySymbol}${ctx.totalExpense.toLocaleString()} this month with a savings rate of ${ctx.savingsRatePercent || 0}%. Use the "Limits" tab to lock your categories into this golden ratio! 🌿`
+      : `💡 **The Golden 50/30/20 Budget Rule** (Aapki income: ${currencySymbol}${income.toLocaleString()} ke hisab se):\n\n• **50% Zaroorat (Needs)**: **${currencySymbol}${needs.toLocaleString()}** (Kiraya, rashan, bills, EMIs)\n• **30% Khwahish (Wants)**: **${currencySymbol}${wants.toLocaleString()}** (Bahar ka khana, shopping, movies)\n• **20% Bachat (Savings)**: **${currencySymbol}${savings.toLocaleString()}** (SIP, emergency fund, investment)\n\n📌 **Zen Tip**: Is rule ko follow karne se month-end me kabhi paise ki kami nahi hoti! "Limits" tab me jakar apne budget ko iss ratio me set karein! 🚀`;
+    return { responseText, updatedState };
+  }
+
+  // ─── 1.7. EMERGENCY FUND ROADMAP QUERY ───
+  if (qLower.includes('emergency') || qLower.includes('emergency fund') || qLower.includes('emergency plan')) {
+    updatedState.lastSubject = 'emergency_fund';
+    const monthlyNeed = ctx.totalExpense > 0 ? ctx.totalExpense : 25000;
+    const target3Mo = monthlyNeed * 3;
+    const target6Mo = monthlyNeed * 6;
+    const fundedPct = Math.min(100, Math.round((ctx.totalAccBal / target3Mo) * 100));
+
+    const responseText = isFormalEnglish
+      ? `🛡️ **Emergency Fund Roadmap**:\n\n• Monthly Essential Velocity: **${currencySymbol}${monthlyNeed.toLocaleString()}**\n• 3-Month Minimum Target: **${currencySymbol}${target3Mo.toLocaleString()}**\n• 6-Month Gold Standard: **${currencySymbol}${target6Mo.toLocaleString()}**\n• Your Current Wallet Balance: **${currencySymbol}${ctx.totalAccBal.toLocaleString()}** (${fundedPct}% of 3-Mo target)\n\n💡 **Zen Advice**: Keep this money in a separate high-yield liquid bank account or sweep-in FD. Never touch it for lifestyle or impulse buys! 🌿`
+      : `🛡️ **Emergency Fund Plan**:\n\n• Monthly Kharcha: **${currencySymbol}${monthlyNeed.toLocaleString()}**\n• 3-Mahine ka Minimum Target: **${currencySymbol}${target3Mo.toLocaleString()}**\n• 6-Mahine ka Safe Target: **${currencySymbol}${target6Mo.toLocaleString()}**\n• Current Wallet Balance: **${currencySymbol}${ctx.totalAccBal.toLocaleString()}** (${fundedPct}% funded)\n\n💡 **Zen Tip**: Emergency fund ko alag high-interest savings account me rakhein. Job loss ya medical emergency me yehi aapki sabse badi dhaal banta hai! 🌿`;
+    return { responseText, updatedState };
+  }
+
+  // ─── 1.8. HOW TO SAVE EXTRA QUERY ("save ₹5,000 extra", "how to save", "bachat kaise karein") ───
+  if (qLower.includes('save') && (qLower.includes('how') || qLower.includes('kaise') || qLower.includes('5000') || qLower.includes('extra') || qLower.includes('tip') || qLower.includes('bachaye'))) {
+    updatedState.lastSubject = 'saving_tips';
+    const topCat = (ctx.topExpenseCategory || 'Shopping').toUpperCase();
+    const responseText = isFormalEnglish
+      ? `🎯 **How to Save ${currencySymbol}5,000 Extra Every Month**:\n\n1️⃣ **Pay Yourself First**: Transfer 20% of your income into an investment account right on payday.\n2️⃣ **Tame ${topCat}**: Set a strict category limit on ${topCat} to curb impulse treats.\n3️⃣ **Use the 48-Hour Buffer**: For any non-essential purchase above ₹1,000, wait 48 hours in the ZenBudget Wishlist.\n4️⃣ **Track Daily**: Log every single UPI payment in Quick Capture.\n\nFollowing these 4 rules consistently compounds into ₹60,000+ extra savings in a year! 🚀`
+      : `🎯 **Har Mahine ${currencySymbol}5,000 Extra Bachane ke 4 Master Steps**:\n\n1️⃣ **Pehle Apne Liye Bachao**: Salary aate hi 20% alag savings/SIP account me transfer kar do.\n2️⃣ **${topCat} Par Control**: Apni sabse badi spending category (${topCat}) par monthly limit set karo.\n3️⃣ **48-Hour Buffer Rule**: ₹1,000 se upar ki kisi bhi cheez ko lene se pehle 48 ghante ka wait karo.\n4️⃣ **Roz Quick Capture**: Har chhote UPI payment ka record rakho taaki paisa kahan ja raha hai pata chale.\n\nYeh aadat saal me ₹60,000+ ki extra bachat kara degi! 🚀`;
+    return { responseText, updatedState };
+  }
+
   // ─── 2. MULTI-TURN CATEGORY FOLLOW-UP ("iss month food kitna गया?", "last month?", "difference kitna?") ───
   
   // Category detection from prompt or memory

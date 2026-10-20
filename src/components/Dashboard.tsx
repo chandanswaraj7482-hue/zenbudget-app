@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ArrowUpRight,
   ArrowDownRight,
@@ -195,6 +196,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [showMonthlyLetter, setShowMonthlyLetter] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+
+  const renderPortal = (children: React.ReactNode) => {
+    if (typeof document === 'undefined') return null;
+    return createPortal(children, document.body);
+  };
   const [activeGoalInput, setActiveGoalInput] = useState<string | null>(null);
   const [contributionAmount, setContributionAmount] = useState<string>('');
   const [showAddGoalModal, setShowAddGoalModal] = useState(false);
@@ -949,6 +955,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <p style={{ fontSize: '14.5px', fontWeight: 800, color: '#10b981', margin: 0 }}>
                 +{formatCurrency(income, currencySymbol, 0)}
               </p>
+              <span style={{ fontSize: '9.5px', color: '#10b981', display: 'flex', alignItems: 'center', gap: '3px', marginTop: '2px', fontWeight: 700 }}>Tap for details →</span>
             </div>
           </div>
 
@@ -975,6 +982,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <p style={{ fontSize: '14.5px', fontWeight: 800, color: '#f43f5e', margin: 0 }}>
                 -{formatCurrency(expenses, currencySymbol, 0)}
               </p>
+              <span style={{ fontSize: '9.5px', color: '#f43f5e', display: 'flex', alignItems: 'center', gap: '3px', marginTop: '2px', fontWeight: 700 }}>Tap for details →</span>
             </div>
           </div>
         </div>
@@ -2497,19 +2505,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
 
       {/* Share Modal */}
-      {showShareModal && (
+      {showShareModal && renderPortal(
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(8px)',
+          backgroundColor: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(10px)',
           display: 'flex', justifyContent: 'center', alignItems: 'center',
-          zIndex: 2000, padding: '20px'
+          zIndex: 99999, padding: '20px'
         }} onClick={() => setShowShareModal(false)}>
           <div
             style={{
               width: '100%', maxWidth: '340px', padding: '0', borderRadius: '28px',
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-card)', position: 'relative',
-              textAlign: 'center', color: 'var(--text-primary)', boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+              background: 'var(--bg-card, #0f172a)',
+              border: '1px solid var(--border-card, rgba(255,255,255,0.15))', position: 'relative',
+              textAlign: 'center', color: 'var(--text-primary)', boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
               overflow: 'hidden'
             }}
             onClick={e => e.stopPropagation()}
@@ -2550,12 +2558,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
       )}
 
       {/* Referral Invite Modal */}
-      {showInviteModal && (
+      {showInviteModal && renderPortal(
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(8px)',
+          backgroundColor: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(10px)',
           display: 'flex', justifyContent: 'center', alignItems: 'center',
-          zIndex: 2000, padding: '16px'
+          zIndex: 99999, padding: '16px'
         }} onClick={() => setShowInviteModal(false)}>
           <div
             className="glass-panel animate-slide-up"
@@ -2772,12 +2780,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
           }
         });
 
-        return (
+        return renderPortal(
           <div style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(10px)',
             display: 'flex', justifyContent: 'center', alignItems: 'center',
-            zIndex: 2000, padding: '20px'
+            zIndex: 99999, padding: '20px'
           }} onClick={() => setShowMonthlyLetter(false)}>
             <div
               className="glass-panel animate-slide-up"
@@ -2841,12 +2849,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
         );
       })()}
       {/* Edit Challenge Modal */}
-      {editingChallengeId !== null && (
+      {editingChallengeId !== null && renderPortal(
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(8px)',
           display: 'flex', justifyContent: 'center', alignItems: 'center',
-          zIndex: 2000, padding: '20px'
+          zIndex: 99999, padding: '20px'
         }} onClick={() => setEditingChallengeId(null)}>
           <div
             style={{
@@ -3136,15 +3144,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
       {/* Add Goal Modal */}
-      {showAddGoalModal && (
+      {showAddGoalModal && renderPortal(
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(8px)',
           display: 'flex', justifyContent: 'center', alignItems: 'center',
-          zIndex: 2000, padding: '20px'
+          zIndex: 99999, padding: '20px'
         }} onClick={() => setShowAddGoalModal(false)}>
           <div
             className="glass-panel animate-slide-up"
@@ -3257,15 +3266,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
       {/* Edit Goal Modal */}
-      {editingGoalId && (
+      {editingGoalId && renderPortal(
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(8px)',
           display: 'flex', justifyContent: 'center', alignItems: 'center',
-          zIndex: 2000, padding: '20px'
+          zIndex: 99999, padding: '20px'
         }} onClick={() => setEditingGoalId(null)}>
           <div
             className="glass-panel animate-slide-up"
@@ -3390,12 +3400,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Badge Information & How to Unlock / Claim Modal */}
-      {activeBadgeModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }} onClick={() => setActiveBadgeModal(null)}>
+      {activeBadgeModal && renderPortal(
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '20px' }} onClick={() => setActiveBadgeModal(null)}>
           <div style={{ background: 'var(--bg-card)', border: activeBadgeModal.canClaim ? '1px solid rgba(234,179,8,0.8)' : activeBadgeModal.cycle > 0 ? '1px solid rgba(34,197,94,0.4)' : '1px solid var(--border-card)', borderRadius: '24px', padding: '24px', maxWidth: '340px', width: '100%', textAlign: 'center', boxShadow: '0 20px 40px rgba(0,0,0,0.6)' }} onClick={e => e.stopPropagation()}>
             <div style={{ fontSize: '54px', marginBottom: '10px' }}>{activeBadgeModal.icon}</div>
             <div style={{ display: 'inline-block', fontSize: '10px', fontWeight: 800, padding: '2px 8px', borderRadius: '6px', background: 'rgba(34,197,94,0.15)', color: '#4ade80', marginBottom: '6px', border: '1px solid rgba(34,197,94,0.3)' }}>
@@ -3434,11 +3445,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </button>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
       {/* All Accounts & Wallets See All Modal */}
-      {showAllAccountsModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }} onClick={() => setShowAllAccountsModal(false)}>
+      {showAllAccountsModal && renderPortal(
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: '20px' }} onClick={() => setShowAllAccountsModal(false)}>
           <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-card)', borderRadius: '24px', padding: '24px', maxWidth: '440px', width: '100%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 20px 40px rgba(0,0,0,0.6)' }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -3513,11 +3525,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
               })}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* 👥 Partner & Family Wallet Breakdown Modal */}
-      {showPartnerBalanceModal && (
+      {showPartnerBalanceModal && renderPortal(
         <div
           style={{
             position: 'fixed',
@@ -3527,7 +3540,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 9999,
+            zIndex: 99999,
             padding: '20px'
           }}
           onClick={() => {
@@ -3838,7 +3851,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
