@@ -36,8 +36,16 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
   // Lockscreen steps: 'auth' | 'onboard-pin' | 'onboard-confirm' | 'unlock' | 'forgot-pin-email' | 'forgot-pin-otp'
   const [step, setStep] = useState<'auth' | 'onboard-pin' | 'onboard-confirm' | 'unlock' | 'forgot-pin-email' | 'forgot-pin-otp'>(() => {
     try {
-      const hasSession = localStorage.getItem('zb_local_session_profile') || localStorage.getItem('zb_profile_id') || localStorage.getItem('zb_user_pin');
-      return hasSession ? 'unlock' : 'auth';
+      const isPinCreated = localStorage.getItem('zb_pin_created') === 'true';
+      const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem('zb_saved_device_pin');
+      if (localPin && localPin.length >= 4 && (localPin !== '0000' || isPinCreated)) {
+        return 'unlock';
+      }
+      const hasSession = localStorage.getItem('zb_local_session_profile') || localStorage.getItem('zb_profile_id');
+      if (hasSession) {
+        return isPinCreated ? 'unlock' : 'onboard-pin';
+      }
+      return 'auth';
     } catch (_) {
       return 'auth';
     }
@@ -516,22 +524,29 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         localStorage.removeItem('zb_oauth_just_completed');
         localStorage.removeItem('zb_oauth_in_progress');
 
-        // Check PIN: An existing user has their PIN saved or in DB.
-        // We ALWAYS direct existing users to 'unlock' to enter their PIN.
+        // Check PIN: An existing user has their custom PIN saved or in DB.
         const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem(`zb_pin_${targetProfileId}`) || localStorage.getItem('zb_saved_device_pin');
         const dbPin = userProf.pin;
         const effectivePin = (localPin && localPin.length >= 4)
           ? localPin
           : (dbPin && dbPin.length >= 4 ? dbPin : null);
 
-        if (effectivePin) {
+        const isPinCreated = localStorage.getItem('zb_pin_created') === 'true';
+        const hasValidCustomPin = effectivePin && effectivePin.length >= 4 && (effectivePin !== '0000' || isPinCreated);
+
+        if (hasValidCustomPin) {
           localStorage.setItem('zb_user_pin', effectivePin);
           localStorage.setItem('zb_saved_device_pin', effectivePin);
           localStorage.setItem(`zb_pin_${targetProfileId}`, effectivePin);
+          localStorage.setItem('zb_pin_created', 'true');
+          setStep('unlock');
+        } else {
+          // Brand new user or no PIN created yet: automatically take them to create 4-digit PIN!
+          localStorage.removeItem('zb_pin_created');
+          setPin('');
+          setConfirmPin('');
+          setStep('onboard-pin');
         }
-        localStorage.setItem('zb_pin_created', 'true');
-        // Existing user always enters PIN to unlock!
-        setStep('unlock');
       } else {
         // No DB profile found (user deleted account or fresh start)
         const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem(`zb_pin_${uid}`) || localStorage.getItem('zb_saved_device_pin');
@@ -583,11 +598,12 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       } else {
         const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem('zb_saved_device_pin');
         const localProfileId = localStorage.getItem('zb_profile_id');
-        if (localPin && localPin.length >= 4) {
+        const isPinCreated = localStorage.getItem('zb_pin_created') === 'true';
+        if (localPin && localPin.length >= 4 && (localPin !== '0000' || isPinCreated)) {
           setStep('unlock');
         } else if (localProfileId) {
           setUserId(localProfileId);
-          setStep('unlock');
+          setStep(isPinCreated ? 'unlock' : 'onboard-pin');
         } else {
           setStep('auth');
         }
@@ -697,11 +713,12 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           // No cached session — but check if user is already signed in or created a profile
           const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem('zb_saved_device_pin');
           const localProfileId = localStorage.getItem('zb_profile_id');
-          if (localPin && localPin.length >= 4) {
+          const isPinCreated = localStorage.getItem('zb_pin_created') === 'true';
+          if (localPin && localPin.length >= 4 && (localPin !== '0000' || isPinCreated)) {
             setStep('unlock');
           } else if (localProfileId) {
             setUserId(localProfileId);
-            setStep('unlock');
+            setStep(isPinCreated ? 'unlock' : 'onboard-pin');
           } else {
             setStep('auth');
           }
@@ -1771,38 +1788,6 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                   authMode === 'login' ? '🔓 Login to ZenBudget' : '🚀 Create Account'
                 )}
               </button>
-
-              {/* Direct 4-digit PIN setup button for new users / guest mode */}
-              <div style={{ marginTop: '14px', textAlign: 'center', width: '100%' }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setErrorMsg('');
-                    setUserId('local');
-                    setUsername('User');
-                    localStorage.removeItem('zb_pin_created');
-                    setPin('');
-                    setConfirmPin('');
-                    setStep('onboard-pin');
-                  }}
-                  style={{
-                    background: 'rgba(34, 197, 94, 0.08)',
-                    border: '1px solid rgba(34, 197, 94, 0.25)',
-                    borderRadius: '12px',
-                    padding: '8px 16px',
-                    color: '#22c55e',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <span>⚡ New User? Set 4-digit PIN directly</span>
-                </button>
-              </div>
             </form>
 
             {/* ── Footer: Security Notice ── */}
