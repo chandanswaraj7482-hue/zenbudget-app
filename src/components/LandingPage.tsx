@@ -2276,9 +2276,12 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           <ul style={{ display: 'flex', alignItems: 'center', gap: '2px', listStyle: 'none' }} className="desktop-only">
             {[
               { label: 'Features', id: 'features', key: 'features', hasDropdown: true },
-              { label: 'Inside App', id: 'inside-app', key: 'inside app', hasDropdown: true },
+              { label: 'Conditions', id: 'conditions', key: 'conditions', hasDropdown: true },
               { label: 'About', id: 'about', key: 'about', hasDropdown: false },
+              { label: 'Inside App', id: 'inside-app', key: 'inside app', hasDropdown: true },
+              { label: 'Quiz', id: 'quiz', key: 'quiz', hasDropdown: false, badge: 'FREE' },
               { label: 'Pricing', id: 'pricing', key: 'pricing', hasDropdown: false },
+              { label: 'Stories', id: 'community', key: 'stories', hasDropdown: false },
               { label: 'Blog', id: 'blog', key: 'blog', hasDropdown: false }
             ].map(link => (
               <li 
@@ -4161,235 +4164,255 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
         <main style={{ width: '100%', flex: '1 0 auto' }}>
 
 
-      {/* ═══════════════ LIGHTWEIGHT, ULTRA-CLEAN HERO SECTION ═══════════════ */}
-      <div className="landing-hero-container" style={{ padding: 'clamp(90px, 12vh, 120px) 24px clamp(40px, 6vh, 60px) 24px', maxWidth: '1320px', margin: '0 auto', position: 'relative' }}>
-        
-        {/* Subtle Ambient Glow (Zero CPU/GPU Lag) */}
-        <div style={{
-          position: 'absolute',
-          top: '10%',
-          right: '5%',
-          width: '550px',
-          height: '550px',
-          background: isDark 
-            ? 'radial-gradient(circle, rgba(16, 185, 129, 0.14) 0%, rgba(99, 102, 241, 0.06) 45%, transparent 70%)'
-            : 'radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(99, 102, 241, 0.05) 50%, transparent 70%)',
-          filter: 'blur(80px)',
-          pointerEvents: 'none',
-          zIndex: 0
-        }} />
-
-        <div style={{ position: 'relative', zIndex: 10, display: 'grid', gridTemplateColumns: '1.15fr 0.85fr', gap: '48px', alignItems: 'center' }} className="grid-hero">
+      {/* ═══════════════ HERO SECTION (INNERHEAL STYLE ANIMATED BACKGROUND) ═══════════════ */}
+      <div className="landing-hero-container">
+        <section style={{ borderRadius: '2.5rem', border: isDark ? `1px solid ${t.border}` : '1px solid rgba(16,185,129,0.2)', position: 'relative', paddingTop: '42px', paddingBottom: '32px', background: isDark ? 'linear-gradient(180deg, #111812 0%, #162018 100%)' : 'linear-gradient(180deg, #ffffff 0%, #f0fdf4 40%, #ecfdf5 100%)', boxShadow: isDark ? '0 20px 50px rgba(0,0,0,0.5)' : '0 24px 60px -15px rgba(16,185,129,0.15), 0 1px 3px rgba(0,0,0,0.04)' }}>
           
-          {/* Left Column: Headline, Tagline, CTAs */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          {/* Glowing Animated Background Canvas (InnerHeal Mesh & Aura) */}
+          <div style={{ position: 'absolute', inset: 0, zIndex: 0, overflow: 'hidden', borderRadius: '2.5rem', pointerEvents: 'none' }}>
             
-            {/* Brand Hero Pill (Clean & Lightweight) */}
-            <div className="hero-animate" style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '9px',
-              marginBottom: '20px',
-              background: isDark ? 'rgba(16, 185, 129, 0.12)' : 'rgba(16, 185, 129, 0.08)',
-              border: isDark ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(16, 185, 129, 0.22)',
-              padding: '6px 16px',
-              borderRadius: '100px',
-              maxWidth: '100%',
-              width: 'fit-content',
-              boxShadow: '0 2px 12px rgba(16, 185, 129, 0.1)'
-            }}>
-              <Sparkles size={13} color="#10b981" />
-              <span style={{
-                fontSize: '12.5px',
-                fontWeight: 700,
-                letterSpacing: '0.02em',
-                color: isDark ? '#6ee7b7' : '#059669'
-              }}>
-                "We don't chase trends. We build what's next."
-              </span>
+            {/* Primary Glowing Organic Light Beam behind phone mockups */}
+            <div className="innerheal-rotate" style={{ position: 'absolute', top: '-25%', right: '-10%', width: '75%', height: '120%', background: isDark ? 'radial-gradient(circle, rgba(163,230,53,0.22) 0%, rgba(16,185,129,0.28) 40%, rgba(5,150,105,0.05) 70%, transparent 85%)' : 'radial-gradient(circle, rgba(52,211,153,0.25) 0%, rgba(16,185,129,0.15) 45%, transparent 75%)', filter: 'blur(80px)', opacity: 0.9 }}></div>
+            
+            {/* Secondary Ambient Left Blob */}
+            <div className="innerheal-glow" style={{ position: 'absolute', top: '10%', left: '-15%', width: '60%', height: '90%', background: isDark ? 'radial-gradient(circle, rgba(16,185,129,0.18) 0%, rgba(59,130,246,0.12) 50%, transparent 80%)' : 'radial-gradient(circle, rgba(167,243,208,0.4) 0%, transparent 75%)', filter: 'blur(75px)' }}></div>
+            
+            {/* Third Deep Accent Aura */}
+            <div style={{ position: 'absolute', bottom: '-20%', left: '30%', width: '50%', height: '60%', background: isDark ? 'radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(192,132,252,0.15) 0%, transparent 70%)', filter: 'blur(90px)', animation: 'mesh1 18s ease-in-out infinite alternate' }}></div>
+
+            {/* Floating Sparkle Particles */}
+            <div style={{ position: 'absolute', inset: 0 }}>
+              {[...Array(8)].map((_, i) => (
+                <div key={i} style={{
+                  position: 'absolute',
+                  top: `${15 + i * 11}%`,
+                  left: `${10 + i * 11}%`,
+                  width: `${10 + (i % 3) * 6}px`,
+                  height: `${10 + (i % 3) * 6}px`,
+                  borderRadius: '50%',
+                  background: i % 2 === 0 ? 'rgba(163, 230, 53, 0.6)' : 'rgba(16, 185, 129, 0.5)',
+                  animation: `floatParticle ${7 + i * 2}s infinite ease-in-out`,
+                  animationDelay: `${i * 1.2}s`,
+                  filter: 'blur(2px)'
+                }}></div>
+              ))}
             </div>
-
-            {/* Main Hero Title with Typing Animation */}
-            <h1 className="hero-animate hero-title" style={{ fontSize: 'clamp(2.3rem, 4.8vw, 3.6rem)', fontWeight: 900, lineHeight: 1.14, letterSpacing: '-0.03em', marginBottom: '18px', color: isDark ? '#ffffff' : '#0f172a' }}>
-              <span style={{ color: isDark ? '#ffffff' : '#0f172a' }}>Stop Wondering Where<br />Your Money{' '}</span>
-              <span style={{ color: isDark ? '#f87171' : '#e11d48', display: 'inline-flex', alignItems: 'center', fontWeight: 900, textShadow: isDark ? '0 0 24px rgba(248,113,113,0.45)' : 'none' }}>
-                <span>{typedText}</span>
-                <span className="typewriter-cursor"></span>
-              </span>
-            </h1>
-
-            <p className="hero-animate" style={{ fontSize: 'clamp(15px, 1.8vw, 17.5px)', fontWeight: 400, lineHeight: 1.6, color: isDark ? 'rgba(255,255,255,0.72)' : '#475569', maxWidth: '520px', marginBottom: '30px' }}>
-              Identify hidden leaks, crush impulse spending, and build wealth on autopilot. Trusted by <strong style={{ color: isDark ? '#ffffff' : '#0f172a', fontWeight: 700 }}>4,200+ smart earners</strong>.
-            </p>
-
-            {/* Clean CTAs */}
-            <div className="hero-animate" style={{ display: 'flex', gap: '14px', marginBottom: '32px', flexWrap: 'wrap', alignItems: 'center' }}>
-              <button 
-                onClick={onOpenWebApp} 
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '10px', 
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
-                  color: '#ffffff', 
-                  padding: '13px 26px', 
-                  borderRadius: '100px', 
-                  border: 'none', 
-                  cursor: 'pointer', 
-                  transition: 'all 0.25s ease', 
-                  boxShadow: '0 8px 24px rgba(16, 185, 129, 0.4)',
-                  fontSize: '15px',
-                  fontWeight: 800
-                }} 
-                className="hover-lift"
-              >
-                <span>Launch Web App</span>
-                <ArrowRight size={16} />
-              </button>
-
-              <a
-                href={DISTRIBUTION_CONFIG.PLAY_STORE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  background: isDark ? 'rgba(255, 255, 255, 0.08)' : '#ffffff',
-                  color: isDark ? '#ffffff' : '#0f172a',
-                  border: isDark ? '1px solid rgba(255, 255, 255, 0.16)' : '1px solid rgba(0, 0, 0, 0.1)',
-                  padding: '13px 24px',
-                  borderRadius: '100px',
-                  textDecoration: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.25s ease',
-                  fontSize: '14.5px',
-                  fontWeight: 700
-                }}
-                className="hover-lift"
-              >
-                <GooglePlayIcon size={18} />
-                <span>Get on Google Play</span>
-              </a>
-            </div>
-
-            {/* Bottom Highlights Bar */}
-            <div className="hero-animate" style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'center', paddingTop: '8px', borderTop: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '13px', fontWeight: 600, color: isDark ? 'rgba(255,255,255,0.7)' : '#64748b' }}>
-                <Brain size={15} color="#10b981" /> 20+ Auto Categories
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '13px', fontWeight: 600, color: isDark ? 'rgba(255,255,255,0.7)' : '#64748b' }}>
-                <Shield size={15} color="#10b981" /> 100% Private
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '13px', fontWeight: 600, color: isDark ? 'rgba(255,255,255,0.7)' : '#64748b' }}>
-                <Users size={15} color="#10b981" /> <AnimatedCounter end={4200} duration={2000} />+ Users
-              </div>
-            </div>
-
           </div>
 
-          {/* Right Column: Sleek Single Flagship App Preview */}
-          <div className="hero-animate desktop-only" style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
-            
-            {/* Top Floating Calm Pill */}
-            <div style={{
-              position: 'absolute',
-              top: '-14px',
-              right: '20px',
-              zIndex: 30,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              borderRadius: '100px',
-              background: isDark ? 'rgba(24, 30, 42, 0.92)' : '#ffffff',
-              border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(0,0,0,0.08)',
-              boxShadow: '0 12px 30px rgba(0,0,0,0.25)',
-              padding: '8px 16px',
-              backdropFilter: 'blur(16px)'
-            }}>
-              <Sparkles size={14} color="#10b981" />
-              <span style={{ fontSize: '12px', fontWeight: 800, color: isDark ? '#ffffff' : '#0f172a' }}>⚡ Zero Impulse Leaks</span>
-            </div>
-
-            {/* Single Clean Sleek Phone Frame */}
-            <div style={{
-              width: '320px',
-              borderRadius: '36px',
-              border: isDark ? '2px solid rgba(255, 255, 255, 0.14)' : '2px solid rgba(0, 0, 0, 0.08)',
-              background: isDark ? 'linear-gradient(180deg, #131924 0%, #0c1017 100%)' : 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
-              boxShadow: isDark ? '0 25px 60px rgba(0,0,0,0.7), 0 0 30px rgba(16, 185, 129, 0.12)' : '0 25px 60px rgba(0,0,0,0.12)',
-              padding: '24px 20px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '14px',
-              position: 'relative'
-            }}>
+          <div style={{ position: 'relative', zIndex: 10, maxWidth: '1440px', margin: '0 auto', padding: '24px 40px' }} className="mobile-padding">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px', alignItems: 'center' }} className="grid-hero">
               
-              {/* Phone Header */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '11px', fontWeight: 900 }}>ZB</div>
-                  <span style={{ fontSize: '13px', fontWeight: 800, color: isDark ? '#ffffff' : '#0f172a' }}>ZenBudget</span>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                
+                {/* Brand Hero Pill (Clean & Lightweight) */}
+                <div className="hero-animate" style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '9px',
+                  marginBottom: '20px',
+                  background: isDark ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(99, 102, 241, 0.14) 100%)' : 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(99, 102, 241, 0.08) 100%)',
+                  border: isDark ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(16, 185, 129, 0.28)',
+                  padding: '7px 18px',
+                  borderRadius: '100px',
+                  maxWidth: '100%',
+                  width: 'fit-content',
+                  boxShadow: '0 4px 18px rgba(16, 185, 129, 0.12)'
+                }}>
+                  <Sparkles size={14} color="#10b981" />
+                  <span style={{
+                    fontSize: '13px',
+                    fontWeight: 800,
+                    letterSpacing: '0.02em',
+                    background: 'linear-gradient(135deg, #34d399 0%, #a78bfa 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent'
+                  }}>
+                    "We don't chase trends. We build what's next."
+                  </span>
                 </div>
-                <span style={{ fontSize: '10px', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '3px 8px', borderRadius: '100px', fontWeight: 800 }}>PRO ACTIVE</span>
+
+                {/* Main Hero Title with Typing Animation */}
+                <h1 className="hero-animate hero-title" style={{ fontSize: 'clamp(2.4rem, 5vw, 3.8rem)', fontWeight: 900, lineHeight: 1.15, letterSpacing: '-0.03em', marginBottom: '18px', color: isDark ? '#ffffff' : '#0f172a' }}>
+                  <span style={{ color: isDark ? '#ffffff' : '#0f172a' }}>Stop Wondering Where<br />Your Money{' '}</span>
+                  <span style={{ color: isDark ? '#f87171' : '#e11d48', display: 'inline-flex', alignItems: 'center', fontWeight: 900, textShadow: isDark ? '0 0 24px rgba(248,113,113,0.55)' : 'none' }}>
+                    <span>{typedText}</span>
+                    <span className="typewriter-cursor"></span>
+                  </span>
+                </h1>
+
+                <p className="hero-animate" style={{ fontSize: 'clamp(15px, 2vw, 18px)', fontWeight: 500, lineHeight: 1.6, color: isDark ? 'rgba(255,255,255,0.72)' : '#475569', maxWidth: '520px', marginBottom: '32px' }}>
+                  Identify hidden leaks, crush impulse spending, and build wealth on autopilot. Join <strong style={{ color: isDark ? '#ffffff' : '#0f172a' }}>4,200+ users</strong> who saved an average of ₹8,400 in their first 30 days.
+                </p>
+
+                <div className="hero-animate" style={{ display: 'flex', gap: '16px', marginBottom: '36px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  {deviceOS === 'ios' && (
+                    <button onClick={() => setShowIosGuideModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', padding: '14px 28px', borderRadius: '100px', border: 'none', cursor: 'pointer', transition: 'all 0.25s ease', boxShadow: '0 12px 28px rgba(16,185,129,0.4)' }} className="hover-lift">
+                      <Smartphone size={20} color="#ffffff" />
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', opacity: 0.85, letterSpacing: '0.08em' }}>Safari PWA</span>
+                        <span style={{ fontSize: '16px', fontWeight: 800 }}>Add to Home Screen</span>
+                      </div>
+                    </button>
+                  )}
+
+                  {deviceOS !== 'ios' && (
+                    <a
+                      href={DISTRIBUTION_CONFIG.PLAY_STORE_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        color: '#ffffff',
+                        padding: '14px 28px',
+                        borderRadius: '100px',
+                        textDecoration: 'none',
+                        cursor: 'pointer',
+                        transition: 'all 0.25s ease',
+                        boxShadow: '0 12px 28px rgba(16,185,129,0.4)'
+                      }}
+                      className="hover-lift"
+                    >
+                      <GooglePlayIcon size={22} />
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.08em' }}>Google Play Store</span>
+                        <span style={{ fontSize: '16px', fontWeight: 800 }}>Get on Google Play</span>
+                      </div>
+                    </a>
+                  )}
+
+                  {/* Primary Action: Open Web App */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                    <button onClick={onOpenWebApp} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'linear-gradient(135deg, #10b981 0%, #047857 100%)', color: '#ffffff', padding: '14px 28px', borderRadius: '100px', border: 'none', cursor: 'pointer', transition: 'all 0.25s ease', boxShadow: '0 12px 30px rgba(16, 185, 129, 0.45), 0 2px 8px rgba(0,0,0,0.1)' }} className="glow-btn hover-lift">
+                      <Lock size={20} color="#ffffff" />
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
+                        <span style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', opacity: 0.9, letterSpacing: '0.08em' }}>⚡ 100% Free Access</span>
+                        <span style={{ fontSize: '16px', fontWeight: 900 }}>Start My Financial Detox</span>
+                      </div>
+                      <span style={{ background: 'rgba(0,0,0,0.25)', padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: '4px' }}>
+                        <ArrowRight size={15} color="#ffffff" />
+                      </span>
+                    </button>
+                  </div>
+
+                </div>
+
+                {/* Bottom Highlights Bar (InnerHeal Style stats) */}
+                <div className="hero-animate" style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13.5px', fontWeight: 700, color: isDark ? 'rgba(255,255,255,0.75)' : '#475569' }}>
+                    <Brain size={16} color="#10b981" /> 20+ Auto Categories
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13.5px', fontWeight: 700, color: isDark ? 'rgba(255,255,255,0.75)' : '#475569' }}>
+                    <Shield size={16} color="#059669" /> 100% Private
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13.5px', fontWeight: 700, color: isDark ? 'rgba(255,255,255,0.75)' : '#475569' }}>
+                    <Users size={16} color="#2563eb" /> <AnimatedCounter end={4200} duration={2000} />+ Users
+                  </div>
+                </div>
+
               </div>
 
-              {/* Net Worth Card */}
-              <div style={{
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                borderRadius: '20px',
-                padding: '18px',
-                color: '#ffffff',
-                boxShadow: '0 8px 24px rgba(16, 185, 129, 0.35)'
-              }}>
-                <div style={{ fontSize: '10.5px', opacity: 0.88, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>NET WORTH SCORE</div>
-                <div style={{ fontSize: '26px', fontWeight: 900, margin: '4px 0 10px', letterSpacing: '-0.02em' }}>₹{realUserData.balance.toLocaleString()}</div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', background: 'rgba(0,0,0,0.2)', padding: '5px 12px', borderRadius: '100px', fontWeight: 700 }}>
-                  <span>Monthly Budget</span>
-                  <span style={{ color: '#a7f3d0' }}>₹32,000 Left</span>
+              {/* Hero Right Mockup Graphics - InnerHeal Inspired Dual Phones Overflowing Card Edge */}
+              <div className="hero-animate hero-mockup-scale desktop-only" style={{ position: 'relative', width: '100%', minHeight: '400px', height: '560px', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', overflow: 'visible' }}>
+                
+                {/* Floating Pill 1 (Top Right above phone 1): Feeling Financially Secure */}
+                <div className="floating-pill-reverse" style={{ position: 'absolute', top: '15px', right: '160px', zIndex: 38, display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '100px', background: '#ffffff', boxShadow: '0 16px 40px rgba(0,0,0,0.22)', padding: '10px 18px', color: '#111827', whiteSpace: 'nowrap' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#fce7f3', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Heart size={16} color="#ec4899" fill="#ec4899" />
+                  </div>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#111827' }}>Feeling financially calm</span>
                 </div>
-              </div>
 
-              {/* Budget Health Progress Card */}
-              <div style={{
-                background: isDark ? 'rgba(255, 255, 255, 0.04)' : '#f1f5f9',
-                border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.05)',
-                borderRadius: '16px',
-                padding: '14px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', fontWeight: 700, color: isDark ? '#ffffff' : '#0f172a' }}>
-                  <span>Budget Health</span>
-                  <span style={{ color: '#10b981' }}>64% Calm</span>
+                {/* Floating Pill 2 (Top Right above phone 2): Savings Up 32% */}
+                <div className="floating-pill" style={{ position: 'absolute', top: '80px', right: '-10px', zIndex: 38, display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '100px', background: '#ffffff', boxShadow: '0 16px 40px rgba(0,0,0,0.22)', padding: '10px 18px', whiteSpace: 'nowrap' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#f3e8ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <TrendingUp size={16} color="#7c3aed" />
+                  </div>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#7c3aed' }}>Savings up 32%</span>
                 </div>
-                <div style={{ width: '100%', height: '6px', background: isDark ? 'rgba(255, 255, 255, 0.1)' : '#e2e8f0', borderRadius: '100px', overflow: 'hidden' }}>
-                  <div style={{ width: '64%', height: '100%', background: 'linear-gradient(90deg, #10b981 0%, #34d399 100%)', borderRadius: '100px' }} />
-                </div>
-              </div>
 
-              {/* AI Insight Pill */}
-              <div style={{
-                background: isDark ? 'rgba(99, 102, 241, 0.12)' : 'rgba(99, 102, 241, 0.08)',
-                border: isDark ? '1px solid rgba(99, 102, 241, 0.28)' : '1px solid rgba(99, 102, 241, 0.2)',
-                borderRadius: '16px',
-                padding: '12px 14px',
-                display: 'flex',
-                gap: '10px',
-                alignItems: 'center'
-              }}>
-                <Brain size={18} color="#818cf8" style={{ flexShrink: 0 }} />
-                <div style={{ fontSize: '11.5px', color: isDark ? '#c7d2fe' : '#4338ca', fontWeight: 700, lineHeight: 1.35 }}>
-                  AI Coach: Saved ₹1,200 on dining this week!
+                {/* Floating Pill 3 (Bottom Right attached to phone 2): Financial Journey */}
+                <div className="badge-floating" style={{ position: 'absolute', bottom: '45px', right: '-5px', zIndex: 38, display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '100px', background: '#dcfce7', boxShadow: '0 16px 40px rgba(0,0,0,0.22)', border: '1px solid #86efac', padding: '10px 18px', whiteSpace: 'nowrap' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#166534' }}>✨ Zen Wealth Journey</span>
                 </div>
+
+                {/* Main Foreground Mobile Mockup (iPhone Frame 1 - Popping Out Bottom Edge) */}
+                <div style={{ width: '255px', height: '495px', overflow: 'hidden', borderRadius: '2.8rem', border: '8px solid #1c1c1e', boxShadow: '0 30px 70px rgba(0,0,0,0.45)', background: isDark ? '#121613' : '#f8fafc', position: 'relative', zIndex: 25, transform: 'rotate(-3deg) translateY(32px)', marginBottom: '-30px' }}>
+                  {/* Dynamic Island Notch */}
+                  <div style={{ position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)', zIndex: 40, height: '18px', width: '65px', borderRadius: '100px', background: '#1c1c1e' }}></div>
+                  
+                  <div style={{ padding: '40px 16px 16px', display: 'flex', flexDirection: 'column', gap: '12px', height: '100%' }}>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <div style={{ width: '26px', height: '26px', borderRadius: '8px', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '11px', fontWeight: 900 }}>ZB</div>
+                        <span style={{ fontSize: '14px', fontWeight: 800 }}>{realUserData.userName}'s Zen</span>
+                      </div>
+                      <span style={{ fontSize: '10px', background: '#84cc16', color: '#111827', padding: '3px 8px', borderRadius: '100px', fontWeight: 900 }}>PRO</span>
+                    </div>
+
+                    <div style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', borderRadius: '18px', padding: '16px', color: '#fff', boxShadow: '0 8px 20px rgba(16,185,129,0.25)' }}>
+                      <div style={{ fontSize: '10px', opacity: 0.85, fontWeight: 700, letterSpacing: '0.05em' }}>NET WORTH SCORE</div>
+                      <div style={{ fontSize: '22px', fontWeight: 900, margin: '2px 0 8px' }}>₹{realUserData.balance.toLocaleString()}</div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', background: 'rgba(0,0,0,0.2)', padding: '4px 10px', borderRadius: '100px', fontWeight: 700 }}>
+                        <span>Monthly Target</span>
+                        <span>₹32,000 Left</span>
+                      </div>
+                    </div>
+
+                    <div style={{ background: t.cardBg, border: `1px solid ${t.border}`, borderRadius: '14px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 700 }}>
+                        <span>Monthly Budget Used</span>
+                        <span style={{ color: '#10b981' }}>64% Healthy</span>
+                      </div>
+                      <div style={{ width: '100%', height: '6px', background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : '#e5e7eb', borderRadius: '100px', overflow: 'hidden' }}>
+                        <div style={{ width: '64%', height: '100%', background: '#10b981', borderRadius: '100px' }}></div>
+                      </div>
+                    </div>
+
+                    <div style={{ background: isDark ? 'rgba(139,92,246,0.15)' : '#f3e8ff', border: `1px solid ${isDark ? 'rgba(139,92,246,0.3)' : '#ddd6fe'}`, borderRadius: '14px', padding: '12px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <Brain size={18} color="#8b5cf6" />
+                      <div style={{ fontSize: '11px', color: isDark ? '#ddd6fe' : '#5b21b6', fontWeight: 700, lineHeight: 1.3 }}>
+                        AI Coach: Saved ₹1,200 on dining this week!
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* Secondary Overlapping Background Mobile Mockup (iPhone Frame 2 - Popping Out Bottom Edge) */}
+                <div style={{ width: '235px', height: '460px', overflow: 'hidden', borderRadius: '2.6rem', border: '8px solid #1c1c1e', boxShadow: '0 20px 50px rgba(0,0,0,0.3)', background: isDark ? '#18201a' : '#f0fdf4', position: 'absolute', right: '15px', zIndex: 15, transform: 'rotate(6deg) scale(0.96) translateY(32px)', opacity: 0.95, marginBottom: '-30px' }}>
+                  {/* Dynamic Island Notch */}
+                  <div style={{ position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)', zIndex: 40, height: '16px', width: '60px', borderRadius: '100px', background: '#1c1c1e' }}></div>
+                  
+                  <div style={{ padding: '38px 14px 14px', display: 'flex', flexDirection: 'column', gap: '10px', height: '100%' }}>
+                    <div style={{ fontSize: '13px', fontWeight: 800, color: t.text, marginBottom: '2px' }}>Together Savings Feed</div>
+                    {[
+                      { name: 'Rohan V.', goal: '52-Wk Challenge', streak: '🔥 14d', amount: '₹10,000' },
+                      { name: 'Priya M.', goal: 'No Impulse Streak', streak: '🔥 21d', amount: '₹7,500' },
+                      { name: 'Ananya S.', goal: 'Emergency Fund', streak: '🔥 8d', amount: '₹15,000' }
+                    ].map((card, i) => (
+                      <div key={i} style={{ background: isDark ? '#121613' : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '12px', padding: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <div style={{ fontSize: '11px', fontWeight: 800 }}>{card.name}</div>
+                          <div style={{ fontSize: '9.5px', color: t.textMuted }}>{card.goal}</div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '10px', fontWeight: 800, color: '#f59e0b' }}>{card.streak}</div>
+                          <div style={{ fontSize: '10px', fontWeight: 800, color: '#10b981' }}>{card.amount}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
               </div>
 
             </div>
-
           </div>
-
-        </div>
+        </section>
       </div>
 
 
@@ -4397,101 +4420,94 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
 
       {/* ═══════════════ STAT COUNTER BANNER ═══════════════ */}
-      <section style={{ padding: '0 24px', maxWidth: '1320px', margin: 'clamp(32px, 6vw, 48px) auto clamp(48px, 8vw, 72px)' }}>
-        <div className="scroll-fade-up hover-lift" style={{ 
-          background: isDark ? 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)' : '#ffffff', 
-          borderRadius: '20px', 
-          padding: 'clamp(28px, 4vw, 40px) clamp(20px, 3vw, 32px)', 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-          gap: '24px', 
-          boxShadow: isDark ? '0 16px 36px rgba(0,0,0,0.4)' : '0 10px 30px rgba(0,0,0,0.04)', 
-          border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)' 
-        }}>
+      <section style={{ padding: '0 24px', maxWidth: '1440px', margin: 'clamp(40px, 8vw, 60px) auto clamp(60px, 12vw, 100px)' }}>
+        <div className="scroll-fade-up hover-lift" style={{ background: 'linear-gradient(105deg, #1c1e1a 0%, #1c1e1a 45%, #6a8844 80%, #303d21 100%)', borderRadius: '2.5rem', padding: 'clamp(32px, 6vw, 60px) clamp(24px, 5vw, 40px)', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around', gap: 'clamp(24px, 5vw, 40px)', boxShadow: '0 20px 40px rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.08)' }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'clamp(32px, 6vw, 42px)', fontWeight: 900, color: isDark ? '#ffffff' : '#0f172a', letterSpacing: '-0.02em', marginBottom: '6px' }}><AnimatedCounter end={4200} duration={2500} />+</div>
-            <div style={{ fontSize: '14px', fontWeight: 700, color: '#10b981' }}>Active Savers</div>
-            <div style={{ fontSize: '12px', color: t.textMuted, marginTop: '2px' }}>securing their future today</div>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={4200} duration={2500} />+</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Members</div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.65)', marginTop: '4px' }}>securing their future today</div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'clamp(32px, 6vw, 42px)', fontWeight: 900, color: isDark ? '#ffffff' : '#0f172a', letterSpacing: '-0.02em', marginBottom: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>₹<AnimatedCounter end={2.4} decimals={1} duration={2500} />Cr+</div>
-            <div style={{ fontSize: '14px', fontWeight: 700, color: '#10b981' }}>Debt Cleared</div>
-            <div style={{ fontSize: '12px', color: t.textMuted, marginTop: '2px' }}>by our community</div>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>₹<AnimatedCounter end={2.4} decimals={1} duration={2500} />Cr+</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Debt Paid Off</div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.65)', marginTop: '4px' }}>by our community</div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'clamp(32px, 6vw, 42px)', fontWeight: 900, color: isDark ? '#ffffff' : '#0f172a', letterSpacing: '-0.02em', marginBottom: '6px' }}><AnimatedCounter end={14} duration={2500} /> Days</div>
-            <div style={{ fontSize: '14px', fontWeight: 700, color: '#10b981' }}>Average Time</div>
-            <div style={{ fontSize: '12px', color: t.textMuted, marginTop: '2px' }}>to spot invisible leaks</div>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={14} duration={2500} /> Days</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Average Time</div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.65)', marginTop: '4px' }}>to spot invisible leaks</div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'clamp(32px, 6vw, 42px)', fontWeight: 900, color: isDark ? '#ffffff' : '#0f172a', letterSpacing: '-0.02em', marginBottom: '6px' }}><AnimatedCounter end={95} duration={2500} />%</div>
-            <div style={{ fontSize: '14px', fontWeight: 700, color: '#10b981' }}>Members Save Money</div>
-            <div style={{ fontSize: '12px', color: t.textMuted, marginTop: '2px' }}>in their first 30 days</div>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={95} duration={2500} />%</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Users Save Money</div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.65)', marginTop: '4px' }}>in their very first month</div>
           </div>
         </div>
       </section>
 
       {/* ═══════════════ HOW ZENBUDGET WORKS ═══════════════ */}
-      <section style={{ padding: '32px 24px 64px', maxWidth: '1320px', margin: '0 auto', overflow: 'hidden' }}>
-        <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <span style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#10b981', marginBottom: '12px', display: 'block' }}>The 3-Step Process</span>
-          <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 2.8rem)', lineHeight: 1.15, fontWeight: 900, letterSpacing: '-0.02em', color: t.text }}>How We Plug The Leaks</h2>
-          <p style={{ color: t.textSub, fontSize: '16px', marginTop: '12px', maxWidth: '540px', margin: '12px auto 0' }}>Stop treating symptoms and cure the root cause of your financial anxiety.</p>
+      <section style={{ padding: '40px 24px 80px', maxWidth: '1440px', margin: '0 auto', overflow: 'hidden' }}>
+        <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '64px' }}>
+          <span style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#D58B6D', marginBottom: '16px', display: 'block' }}>The 3-Step Process</span>
+          <h2 style={{ fontSize: 'clamp(24px, 4vw, 3.4rem)', lineHeight: 1.1, fontWeight: 800, letterSpacing: '-0.02em', color: t.text }}>How We Plug The Leaks</h2>
+          <p style={{ color: t.textSub, fontSize: '18px', marginTop: '16px', maxWidth: '580px', margin: '16px auto 0' }}>Stop treating symptoms and cure the root cause of your financial anxiety.</p>
         </div>
 
-        <div className="scroll-fade-up" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+        <div className="scroll-fade-up" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px', maxWidth: '1200px', margin: '0 auto' }}>
           
-          <div className="hover-lift" style={{ background: isDark ? 'rgba(255, 255, 255, 0.03)' : '#ffffff', border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '20px', padding: '32px 26px', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: '12px', fontWeight: 800, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '14px' }}>Step 01</div>
-            <h3 style={{ fontSize: '20px', fontWeight: 800, marginBottom: '12px', color: t.text }}>Diagnose the Leak</h3>
-            <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '14.5px', marginBottom: '24px' }}>Take our quick assessment. The AI instantly pinpoints exactly where your money vanishes before month-end.</p>
-            <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: '#10b981', fontSize: '13.5px', fontWeight: 700, cursor: 'pointer' }} onClick={() => startFreshQuiz()}>Diagnose My Finances <ArrowRight size={14} /></div>
+          <div className="hover-lift" style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.03)` : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '40px 32px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: '13px', fontWeight: 800, color: '#D58B6D', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Step 01</div>
+            <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '16px', color: t.text }}>Diagnose the Leak</h3>
+            <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '16px', marginBottom: '32px' }}>Take our deep-dive psychological assessment. The AI instantly finds exactly where your money is vanishing—before the month ends.</p>
+            <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: '#D58B6D', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }} onClick={() => startFreshQuiz()}>Diagnose My Finances <ArrowRight size={14} /></div>
           </div>
 
-          <div className="hover-lift" style={{ background: isDark ? 'rgba(255, 255, 255, 0.03)' : '#ffffff', border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '20px', padding: '32px 26px', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: '12px', fontWeight: 800, color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '14px' }}>Step 02</div>
-            <h3 style={{ fontSize: '20px', fontWeight: 800, marginBottom: '12px', color: t.text }}>The 30-Day Detox</h3>
-            <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '14.5px', marginBottom: '24px' }}>Follow your AI-tailored plan to crush impulse purchases. Smart notifications keep you mindful and calm.</p>
-            <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: '#3b82f6', fontSize: '13.5px', fontWeight: 700, cursor: 'pointer' }} onClick={() => navigateToPage('analytics')}>View Dashboard <ArrowRight size={14} /></div>
+          <div className="hover-lift" style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.03)` : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '40px 32px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: '13px', fontWeight: 800, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Step 02</div>
+            <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '16px', color: t.text }}>The 30-Day Detox</h3>
+            <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '16px', marginBottom: '32px' }}>Follow your AI-tailored plan to crush impulse spending. No more manual entry—AI quick-captures everything while coaching you.</p>
+            <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: '#10b981', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }} onClick={() => navigateToPage('analytics')}>View Dashboard <ArrowRight size={14} /></div>
           </div>
 
-          <div className="hover-lift" style={{ background: isDark ? 'rgba(255, 255, 255, 0.03)' : '#ffffff', border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '20px', padding: '32px 26px', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: '12px', fontWeight: 800, color: '#8b5cf6', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '14px' }}>Step 03</div>
-            <h3 style={{ fontSize: '20px', fontWeight: 800, marginBottom: '12px', color: t.text }}>Autopilot Wealth</h3>
-            <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '14.5px', marginBottom: '24px' }}>Give every single rupee a job. Watch debt shrink and savings snowball without restrictive budgeting anxiety.</p>
-            <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: '#8b5cf6', fontSize: '13.5px', fontWeight: 700, cursor: 'pointer' }} onClick={() => navigateToPage('savings-goals')}>Start Growing <ArrowRight size={14} /></div>
+          <div className="hover-lift" style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.03)` : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '2rem', padding: '40px 32px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: '13px', fontWeight: 800, color: '#8b5cf6', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Step 03</div>
+            <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '16px', color: t.text }}>Autopilot Wealth</h3>
+            <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '16px', marginBottom: '32px' }}>Give every single rupee a job. Watch your debt shrink and your savings snowball so you never feel guilty spending again.</p>
+            <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: '#8b5cf6', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }} onClick={() => navigateToPage('savings-goals')}>Start Growing <ArrowRight size={14} /></div>
           </div>
 
         </div>
       </section>
 
-      {/* ═══════════════ YOUR TOOLKIT ACCORDION ═══════════════ */}
-      <section id="toolkit" style={{ padding: '32px 24px 64px', maxWidth: '1320px', margin: '0 auto', overflow: 'hidden' }}>
-        <div className="scroll-fade-up toolkit-grid" style={{ display: 'grid', gridTemplateColumns: '5fr 7fr', gap: '44px', alignItems: 'center' }}>
+      {/* ═══════════════ BENTO GRID FEATURES ═══════════════ */}
+{/* ═══════════════ YOUR TOOLKIT ACCORDION ═══════════════ */}
+      <section id="toolkit" style={{ padding: '40px 24px 80px', maxWidth: '1440px', margin: '0 auto', overflow: 'hidden' }}>
+        <div className="scroll-fade-up toolkit-grid" style={{ display: 'grid', gridTemplateColumns: '5fr 7fr', gap: '56px', alignItems: 'center' }}>
           
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#10b981', marginBottom: '12px', display: 'block' }}>Your Toolkit</span>
-            <h2 style={{ fontSize: 'clamp(22px, 3vw, 2.5rem)', lineHeight: 1.15, fontWeight: 900, letterSpacing: '-0.02em', marginBottom: '24px', color: t.text }}>Build a Wealthier Life with Proven Tools</h2>
+            <span style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#D58B6D', marginBottom: '16px', display: 'block' }}>Your Toolkit</span>
+            <h2 style={{ fontSize: 'clamp(24px, 3vw, 2.8rem)', lineHeight: 1.1, fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '28px', color: t.text }}>Build a Wealthier Life with Proven Tools</h2>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {toolkitItems.map((item, i) => (
                 <div key={i} onClick={() => setActiveToolkit(i)} style={{
-                  borderRadius: '16px', overflow: 'hidden', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', cursor: 'pointer',
-                  background: i === activeToolkit ? '#10b981' : (isDark ? 'rgba(255, 255, 255, 0.03)' : '#ffffff'),
+                  borderRadius: '2rem', overflow: 'hidden', transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)', cursor: 'pointer',
+                  background: i === activeToolkit ? '#10b981' : (isDark ? '#161d18' : '#ffffff'),
                   color: i === activeToolkit ? '#ffffff' : t.text,
-                  border: i === activeToolkit ? '1px solid #10b981' : (isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.06)'),
-                  boxShadow: i === activeToolkit ? '0 12px 28px rgba(16,185,129,0.25)' : 'none',
+                  border: i === activeToolkit ? '1px solid #10b981' : `1px solid ${t.border}`,
+                  boxShadow: i === activeToolkit ? '0 16px 36px rgba(16,185,129,0.25)' : 'none',
+                  transform: i === activeToolkit ? 'scale(1.02)' : 'scale(1)',
                 }}>
-                  <div style={{ padding: '16px 22px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontSize: '11px', fontWeight: 800, padding: '3px 9px', borderRadius: '100px', background: i === activeToolkit ? 'rgba(255,255,255,0.2)' : (isDark ? 'rgba(255,255,255,0.08)' : '#f3f4f6'), color: i === activeToolkit ? '#ffffff' : t.textMuted }}>{item.badge}</span>
-                      <h3 style={{ fontSize: '16px', fontWeight: 800 }}>{item.title}</h3>
+                  <div style={{ padding: '20px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 800, padding: '4px 10px', borderRadius: '100px', background: i === activeToolkit ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.2)` : (isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : '#f3f4f6'), color: i === activeToolkit ? '#ffffff' : t.textMuted }}>{item.badge}</span>
+                      <h3 style={{ fontSize: '17px', fontWeight: 800 }}>{item.title}</h3>
                     </div>
-                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginLeft: '12px', background: i === activeToolkit ? 'rgba(255,255,255,0.2)' : (isDark ? 'rgba(255,255,255,0.06)' : '#f3f4f6'), color: i === activeToolkit ? '#ffffff' : t.text }}>
-                      {i === activeToolkit ? <ArrowUpRight size={15} /> : <ChevronDown size={15} />}
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginLeft: '12px', background: i === activeToolkit ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.2)` : (isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.06)` : '#f3f4f6'), color: i === activeToolkit ? '#ffffff' : t.text }}>
+                      {i === activeToolkit ? <ArrowUpRight size={16} /> : <ChevronDown size={16} />}
                     </div>
                   </div>
-                  <div style={{ padding: i === activeToolkit ? '0 22px 20px' : '0 22px', maxHeight: i === activeToolkit ? '180px' : '0', overflow: 'hidden', opacity: i === activeToolkit ? 1 : 0, transition: 'all 0.3s ease-in-out', fontSize: '14px', lineHeight: 1.55, color: i === activeToolkit ? 'rgba(255,255,255,0.92)' : 'transparent' }}>
+                  <div style={{ padding: i === activeToolkit ? '0 28px 28px' : '0 28px', maxHeight: i === activeToolkit ? '200px' : '0', overflow: 'hidden', opacity: i === activeToolkit ? 1 : 0, transition: 'all 0.4s ease-in-out', fontSize: '15px', lineHeight: 1.6, color: i === activeToolkit ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.9)` : 'transparent' }}>
                     {item.desc}
                   </div>
                 </div>
@@ -4499,19 +4515,19 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
             </div>
           </div>
 
-          <div style={{ borderRadius: '24px', overflow: 'hidden', position: 'relative', background: '#090d14', minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0,0,0,0.08)', boxShadow: '0 20px 40px rgba(0,0,0,0.15)' }}>
+          <div style={{ borderRadius: '2.5rem', overflow: 'hidden', position: 'relative', background: '#111827', minHeight: '440px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${t.border}`, boxShadow: '0 20px 40px rgba(0,0,0,0.15)' }}>
             <img 
               src={toolkitItems[activeToolkit].image} 
               alt={toolkitItems[activeToolkit].title} 
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85, transition: 'opacity 0.5s' }} 
             />
-            <div style={{ position: 'absolute', inset: 0, background: isDark ? 'linear-gradient(to top, rgba(0,0,0,0.88), rgba(0,0,0,0.25), transparent)' : 'linear-gradient(to top, rgba(255,255,255,0.92), rgba(255,255,255,0.2), transparent)' }}></div>
+            <div style={{ position: 'absolute', inset: 0, background: isDark ? 'linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.2), transparent)' : 'linear-gradient(to top, rgba(255,255,255,0.9), rgba(255,255,255,0.2), transparent)' }}></div>
             
-            <div style={{ position: 'absolute', bottom: '24px', left: '24px', right: '24px', zIndex: 20 }}>
-              <div style={{ background: isDark ? 'rgba(15, 23, 42, 0.75)' : 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.08)', borderRadius: '18px', padding: '20px', color: isDark ? '#fff' : '#0f172a', boxShadow: '0 16px 36px rgba(0,0,0,0.15)' }}>
-                <span style={{ fontSize: '10.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#10b981', marginBottom: '4px', display: 'block' }}>{toolkitItems[activeToolkit].badge}</span>
-                <h4 style={{ fontSize: '18px', fontWeight: 800, marginBottom: '6px' }}>{toolkitItems[activeToolkit].title}</h4>
-                <p style={{ fontSize: '13px', color: isDark ? 'rgba(255,255,255,0.78)' : '#475569', lineHeight: 1.5, margin: 0 }}>{toolkitItems[activeToolkit].desc}</p>
+            <div style={{ position: 'absolute', bottom: '32px', left: '32px', right: '32px', zIndex: 20 }}>
+              <div style={{ background: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.25)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)', border: `1px solid rgba(255,255,255,0.4)`, borderRadius: '20px', padding: '24px', color: isDark ? '#fff' : '#111827', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
+                <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', color: isDark ? '#a7f3d0' : '#047857', marginBottom: '6px', display: 'block' }}>{toolkitItems[activeToolkit].badge}</span>
+                <h4 style={{ fontSize: '20px', fontWeight: 800, marginBottom: '8px' }}>{toolkitItems[activeToolkit].title}</h4>
+                <p style={{ fontSize: '13.5px', color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(17,24,39,0.8)', lineHeight: 1.5, margin: 0 }}>{toolkitItems[activeToolkit].desc}</p>
               </div>
             </div>
           </div>
@@ -4519,57 +4535,57 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
         </div>
       </section>
 
-      {/* ═══════════════ PLATFORM FEATURES BENTO GRID ═══════════════ */}
-      <section id="features" style={{ padding: '32px 24px 64px', maxWidth: '1320px', margin: '0 auto', overflow: 'hidden' }}>
-        <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <span style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#10b981', marginBottom: '12px', display: 'block' }}>Platform Features</span>
-          <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 2.8rem)', lineHeight: 1.15, fontWeight: 900, letterSpacing: '-0.02em', color: t.text }}>Everything you need to master your money</h2>
-          <p style={{ color: t.textSub, fontSize: '16px', marginTop: '12px', maxWidth: '540px', margin: '12px auto 0' }}>Your AI financial coach, expense tracker, zero-based budget planner, and insights hub — all in one private space.</p>
+      
+      <section id="features" style={{ padding: '40px 24px 80px', maxWidth: '1440px', margin: '0 auto', overflow: 'hidden' }}>
+        <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '64px' }}>
+          <span style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#D58B6D', marginBottom: '16px', display: 'block' }}>Platform Features</span>
+          <h2 style={{ fontSize: 'clamp(24px, 4vw, 3.4rem)', lineHeight: 1.1, fontWeight: 800, letterSpacing: '-0.02em', color: t.text }}>Everything you need to master your money</h2>
+          <p style={{ color: t.textSub, fontSize: '18px', marginTop: '16px', maxWidth: '580px', margin: '16px auto 0' }}>Your AI financial coach, expense tracker, zero-based budget planner, and insights hub — all in one private space.</p>
         </div>
 
-        <div className="scroll-fade-up bento-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '18px', maxWidth: '1200px', margin: '0 auto' }}>
+        <div className="scroll-fade-up bento-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', maxWidth: '1200px', margin: '0 auto' }}>
           
-          <div onClick={() => selectFeatureTab(0)} className={`hover-lift bento-span2 ${mobileFeatureSlide !== 0 ? 'bento-card-mobile-hide' : ''}`} style={{ gridColumn: 'span 2', background: isDark ? 'linear-gradient(145deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%)' : '#ffffff', border: isDark ? '1px solid rgba(16, 185, 129, 0.22)' : '1px solid rgba(0,0,0,0.06)', borderRadius: '20px', padding: '32px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '250px', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ background: isDark ? 'rgba(16, 185, 129, 0.12)' : '#ecfdf5', border: '1px solid rgba(16, 185, 129, 0.25)', width: '48px', height: '48px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: '#10b981' }}>
-              <MessageCircleHeart size={24} />
+          <div onClick={() => selectFeatureTab(0)} className={`hover-lift bento-span2 ${mobileFeatureSlide !== 0 ? 'bento-card-mobile-hide' : ''}`} style={{ gridColumn: 'span 2', background: isDark ? 'linear-gradient(135deg, #162419, #1c2e20)' : 'linear-gradient(135deg, #e8f5e9, #f1f8e9)', border: `1px solid ${isDark ? '#2a4a2e' : '#c8e6c9'}`, borderRadius: '2.5rem', padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '280px', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : '#ffffff', border: `1px solid ${isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.2)` : '#c8e6c9'}`, width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', color: '#10b981' }}>
+              <MessageCircleHeart size={26} />
             </div>
             <div style={{ position: 'relative', zIndex: 10 }}>
-              <h3 style={{ fontSize: '21px', fontWeight: 800, marginBottom: '10px' }}>AI-Powered Financial Coach</h3>
-              <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '15px', maxWidth: '520px' }}>Feeling overwhelmed by expenses? Chat with our compassionate AI 24/7 to reflect, plan budgets, and curb impulse purchases before they happen.</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#10b981', fontSize: '13.5px', fontWeight: 800, marginTop: '14px' }}>View Interactive Demo <ArrowRight size={14} /></div>
+              <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '12px' }}>AI-Powered Financial Coach</h3>
+              <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '16px', maxWidth: '520px' }}>Feeling overwhelmed by expenses? Chat with our compassionate AI 24/7 to reflect, plan budgets, and curb impulse purchases before they happen.</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#10b981', fontSize: '14px', fontWeight: 800, marginTop: '16px' }}>View Interactive Demo <ArrowRight size={14} /></div>
             </div>
           </div>
 
-          <div onClick={() => selectFeatureTab(2)} className={`hover-lift ${mobileFeatureSlide !== 1 ? 'bento-card-mobile-hide' : ''}`} style={{ background: isDark ? 'rgba(255, 255, 255, 0.03)' : '#ffffff', borderRadius: '20px', padding: '32px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '250px', cursor: 'pointer', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)' }}>
-            <div style={{ background: isDark ? 'rgba(59, 130, 246, 0.12)' : '#eff6ff', width: '48px', height: '48px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.25)' }}>
-              <ChartLine size={24} />
+          <div onClick={() => selectFeatureTab(2)} className={`hover-lift ${mobileFeatureSlide !== 1 ? 'bento-card-mobile-hide' : ''}`} style={{ background: 'linear-gradient(135deg, #233127 0%, #152219 100%)', borderRadius: '2.5rem', padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '280px', cursor: 'pointer', border: `1px solid rgba(255,255,255,0.1)` }}>
+            <div style={{ background: 'rgba(0,0,0,0.1)', width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', color: '#10b981', border: `1px solid rgba(255,255,255,0.1)` }}>
+              <ChartLine size={26} />
             </div>
             <div>
-              <h3 style={{ fontSize: '21px', fontWeight: 800, marginBottom: '10px', color: t.text }}>Expense Analytics</h3>
-              <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '14.5px' }}>Track spending trends over time. Recognize waste, cancel unwanted subscriptions, and gain clarity.</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#3b82f6', fontSize: '13.5px', fontWeight: 800, marginTop: '14px' }}>View Analytics Screen <ArrowRight size={14} /></div>
+              <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '12px', color: '#ffffff' }}>Expense Analytics</h3>
+              <p style={{ color: '#d1d5db', lineHeight: 1.6, fontSize: '16px' }}>Track spending trends over time. Recognize waste, cancel unwanted subscriptions, and gain clarity.</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#10b981', fontSize: '14px', fontWeight: 800, marginTop: '16px' }}>View Analytics Screen <ArrowRight size={14} /></div>
             </div>
           </div>
 
-          <div onClick={() => selectFeatureTab(3)} className={`hover-lift ${mobileFeatureSlide !== 2 ? 'bento-card-mobile-hide' : ''}`} style={{ background: isDark ? 'rgba(255, 255, 255, 0.03)' : '#ffffff', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)', borderRadius: '20px', padding: '32px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '250px', cursor: 'pointer' }}>
-            <div style={{ background: isDark ? 'rgba(236, 72, 153, 0.12)' : '#fdf2f8', border: '1px solid rgba(236, 72, 153, 0.25)', width: '48px', height: '48px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: '#ec4899' }}>
-              <BookHeart size={24} />
+          <div onClick={() => selectFeatureTab(3)} className={`hover-lift ${mobileFeatureSlide !== 2 ? 'bento-card-mobile-hide' : ''}`} style={{ background: isDark ? 'linear-gradient(135deg, #2a1820, #2e1c26)' : 'linear-gradient(135deg, #fce4ec, #fdf2f5)', border: `1px solid ${isDark ? '#4a2a36' : '#f8bbd0'}`, borderRadius: '2.5rem', padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '280px', cursor: 'pointer' }}>
+            <div style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : '#ffffff', border: `1px solid ${isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.2)` : '#f8bbd0'}`, width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', color: '#D58B6D' }}>
+              <BookHeart size={26} />
             </div>
             <div>
-              <h3 style={{ fontSize: '21px', fontWeight: 800, marginBottom: '10px', color: t.text }}>Smart Budget Plans</h3>
-              <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '14.5px' }}>Build self-awareness with zero-based budget prompts designed for lasting financial peace of mind.</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ec4899', fontSize: '13.5px', fontWeight: 800, marginTop: '14px' }}>View Envelope Planner <ArrowRight size={14} /></div>
+              <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '12px' }}>Smart Budget Plans</h3>
+              <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '16px' }}>Build self-awareness with zero-based budget prompts designed for lasting financial peace of mind.</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#D58B6D', fontSize: '14px', fontWeight: 800, marginTop: '16px' }}>View Envelope Planner <ArrowRight size={14} /></div>
             </div>
           </div>
 
-          <div onClick={() => selectFeatureTab(4)} className={`hover-lift bento-span2 ${mobileFeatureSlide !== 3 ? 'bento-card-mobile-hide' : ''}`} style={{ gridColumn: 'span 2', background: isDark ? 'linear-gradient(145deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.02) 100%)' : '#ffffff', border: isDark ? '1px solid rgba(99, 102, 241, 0.22)' : '1px solid rgba(0,0,0,0.06)', borderRadius: '20px', padding: '32px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '250px', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ background: isDark ? 'rgba(99, 102, 241, 0.12)' : '#eef2ff', border: '1px solid rgba(99, 102, 241, 0.25)', width: '48px', height: '48px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: '#6366f1' }}>
-              <Target size={24} />
+          <div onClick={() => selectFeatureTab(4)} className={`hover-lift bento-span2 ${mobileFeatureSlide !== 3 ? 'bento-card-mobile-hide' : ''}`} style={{ gridColumn: 'span 2', background: isDark ? 'linear-gradient(135deg, #1e1a2e, #251f38)' : 'linear-gradient(135deg, #ede7f6, #f3effe)', border: `1px solid ${isDark ? '#3a3060' : '#d1c4e9'}`, borderRadius: '2.5rem', padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '280px', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ background: isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.1)` : '#ffffff', border: `1px solid ${isDark ? `rgba(${isDark ? 255 : 0},${isDark ? 255 : 0},${isDark ? 255 : 0},0.2)` : '#d1c4e9'}`, width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', color: '#8680C3' }}>
+              <Target size={26} />
             </div>
             <div style={{ position: 'relative', zIndex: 10 }}>
-              <h3 style={{ fontSize: '21px', fontWeight: 800, marginBottom: '10px' }}>Goal-Oriented Wealth Tracking</h3>
-              <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '15px', maxWidth: '520px' }}>Visualize emergency funds, vacations, or debt payoff milestones with automated savings rules.</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#6366f1', fontSize: '13.5px', fontWeight: 800, marginTop: '14px' }}>View Savings Goals Demo <ArrowRight size={14} /></div>
+              <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '12px' }}>Goal-Oriented Wealth Tracking</h3>
+              <p style={{ color: t.textSub, lineHeight: 1.6, fontSize: '16px', maxWidth: '520px' }}>Visualize emergency funds, vacations, or debt payoff milestones with automated savings rules.</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#8680C3', fontSize: '14px', fontWeight: 800, marginTop: '16px' }}>View Savings Goals Demo <ArrowRight size={14} /></div>
             </div>
           </div>
 
@@ -4590,31 +4606,32 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       </section>
 
       {/* ═══════════════ INSIDE THE APP (INTERACTIVE IMAGE / SCREEN SHOWCASE) ═══════════════ */}
-      <section id="inside-app" style={{ padding: '32px 24px 64px', maxWidth: '1320px', margin: '0 auto', overflow: 'hidden' }}>
-        <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <span style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#10b981', marginBottom: '12px', display: 'block' }}>Interactive Feature Showcase</span>
-          <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 2.8rem)', lineHeight: 1.15, fontWeight: 900, letterSpacing: '-0.02em', color: t.text }}>See ZenBudget in Action</h2>
-          <p style={{ color: t.textSub, fontSize: '16px', marginTop: '12px', maxWidth: '540px', margin: '12px auto 0' }}>Click any tab below to inspect the live interface mockups and feature details.</p>
+      <section id="inside-app" style={{ padding: '40px 24px 80px', maxWidth: '1440px', margin: '0 auto', overflow: 'hidden' }}>
+        <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <span style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#D58B6D', marginBottom: '16px', display: 'block' }}>Interactive Feature Showcase</span>
+          <h2 style={{ fontSize: 'clamp(24px, 4vw, 3.4rem)', lineHeight: 1.1, fontWeight: 800, letterSpacing: '-0.02em', color: t.text }}>See ZenBudget in Action</h2>
+          <p style={{ color: t.textSub, fontSize: '18px', marginTop: '16px', maxWidth: '580px', margin: '16px auto 0' }}>Click any tab below to inspect the live interface mockups and feature details.</p>
         </div>
 
-        <div className="scroll-fade-up inside-tabs-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '40px', flexWrap: 'wrap' }}>
+        <div className="scroll-fade-up inside-tabs-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '48px', flexWrap: 'wrap' }}>
           {insideTabs.map((tab, i) => (
             <button key={i} onClick={() => setActiveInsideTab(i)} className="inside-tab-btn" style={{
-              display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '100px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', border: i === activeInsideTab ? 'none' : (isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.06)'), transition: 'all 0.25s',
-              background: i === activeInsideTab ? '#10b981' : (isDark ? 'rgba(255, 255, 255, 0.03)' : '#ffffff'),
+              display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 22px', borderRadius: '100px', fontSize: '14.5px', fontWeight: 700, cursor: 'pointer', border: i === activeInsideTab ? 'none' : `1px solid ${t.border}`, transition: 'all 0.3s',
+              background: i === activeInsideTab ? '#10b981' : (isDark ? '#161d18' : '#ffffff'),
               color: i === activeInsideTab ? '#ffffff' : t.textSub,
-              boxShadow: i === activeInsideTab ? '0 8px 20px rgba(16,185,129,0.3)' : 'none'
+              transform: i === activeInsideTab ? 'scale(1.04)' : 'scale(1)',
+              boxShadow: i === activeInsideTab ? '0 10px 24px rgba(16,185,129,0.3)' : 'none'
             }}>{tab.icon} {tab.label}</button>
           ))}
         </div>
 
-        <div className="inside-row" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '48px', animation: 'heroUp 0.5s cubic-bezier(0.16,1,0.3,1) both' }} key={activeInsideTab}>
+        <div className="inside-row" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '64px', animation: 'heroUp 0.5s cubic-bezier(0.16,1,0.3,1) both' }} key={activeInsideTab}>
           
           <div style={{ flex: 1, width: '100%' }}>
-            <div style={{ background: isDark ? 'rgba(255, 255, 255, 0.02)' : '#ffffff', border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '24px', padding: '28px', boxShadow: isDark ? '0 16px 36px rgba(0,0,0,0.3)' : '0 10px 30px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '460px' }}>
+            <div style={{ background: isDark ? '#161d18' : '#ffffff', border: `1px solid ${t.border}`, borderRadius: '2.5rem', padding: '36px', boxShadow: '0 20px 40px rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '480px' }}>
               
               {insideTabs[activeInsideTab].mockupType === 'chat' && (
-                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#090d14' : '#f9fafb', border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.08)', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 16px 36px rgba(0,0,0,0.2)', display: 'flex', flexDirection: 'column', height: '420px' }}>
+                <div style={{ width: '100%', maxWidth: '420px', background: isDark ? '#0d130f' : '#f9fafb', border: `1px solid ${t.border}`, borderRadius: '2rem', overflow: 'hidden', boxShadow: '0 16px 36px rgba(0,0,0,0.12)', display: 'flex', flexDirection: 'column', height: '420px' }}>
                   <div style={{ height: '56px', background: '#10b981', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', fontWeight: 800, fontSize: '15px', flexShrink: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <Brain size={22} />
@@ -5179,64 +5196,64 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
 
       {/* ═══════════════ MEMBER STORIES & REVIEWS ═══════════════ */}
-      <section id="community" style={{ padding: '48px 24px 64px', maxWidth: '1320px', margin: '0 auto', overflow: 'hidden' }}>
-        <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <span style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#10b981', marginBottom: '12px', display: 'block' }}>Member Experiences</span>
-          <h2 style={{ fontSize: 'clamp(24px, 3.5vw, 2.8rem)', fontWeight: 900, letterSpacing: '-0.02em', lineHeight: 1.15, color: t.text }}>Real Stories From Real Savers</h2>
+      <section id="community" style={{ padding: '80px 24px', maxWidth: '1440px', margin: '0 auto', overflow: 'hidden' }}>
+        <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '64px' }}>
+          <span style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#D58B6D', marginBottom: '16px', display: 'block' }}>Member Experiences</span>
+          <h2 style={{ fontSize: 'clamp(28px, 4vw, 3.4rem)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.1, color: t.text }}>Financial Experiences<br />Shared By Our Users</h2>
         </div>
 
-        <div className="scroll-fade-up" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+        <div className="scroll-fade-up" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' }}>
           
-          <div className="hover-lift" style={{ background: isDark ? 'rgba(255, 255, 255, 0.03)' : '#ffffff', border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '20px', padding: '30px 26px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div className="hover-lift" style={{ background: isDark ? 'linear-gradient(135deg, #162419, #1c2e20)' : 'linear-gradient(135deg, #e8f5e9, #f4faf0)', border: `1px solid ${isDark ? '#2a4a2e' : '#c8e6c9'}`, borderRadius: '2.5rem', padding: '36px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
-              <div style={{ display: 'flex', gap: '4px', color: '#f59e0b', marginBottom: '20px' }}>
-                {[1,2,3,4,5].map(s => <Star key={s} size={15} fill="#f59e0b" color="#f59e0b" />)}
+              <div style={{ display: 'flex', gap: '4px', color: '#f59e0b', marginBottom: '24px' }}>
+                {[1,2,3,4,5].map(s => <Star key={s} size={16} fill="#f59e0b" color="#f59e0b" />)}
               </div>
-              <p style={{ fontSize: '15px', fontWeight: 600, lineHeight: 1.6, marginBottom: '28px', color: t.text }}>
-                "ZenBudget's AI categorization feels remarkably human. It helped me step back during impulse spending and <strong style={{ color: '#10b981' }}>ground my financial goals.</strong>"
+              <p style={{ fontSize: '17px', fontWeight: 700, lineHeight: 1.6, marginBottom: '32px', color: t.text }}>
+                "ZenBudget's AI categorization feels remarkably human. It helped me step back during impulse spending and <strong style={{ borderBottom: '3px solid #10b981' }}>ground my financial goals.</strong>"
               </p>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <img src="/profile-sarah.jpg" alt="Sarah" style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <img src="/profile-sarah.jpg" alt="Sarah" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
               <div>
-                <p style={{ fontSize: '14.5px', fontWeight: 800, margin: 0, color: t.text }}>Sarah Mitchell</p>
-                <p style={{ fontSize: '12px', fontWeight: 600, color: t.textMuted, margin: 0 }}>Working Professional</p>
+                <p style={{ fontSize: '15px', fontWeight: 800, margin: 0, color: t.text }}>Sarah Mitchell</p>
+                <p style={{ fontSize: '13px', fontWeight: 600, color: t.textMuted, margin: 0 }}>Working Professional</p>
               </div>
             </div>
           </div>
 
-          <div className="hover-lift" style={{ background: isDark ? 'rgba(255, 255, 255, 0.03)' : '#ffffff', border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '20px', padding: '30px 26px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div className="hover-lift" style={{ background: isDark ? 'linear-gradient(135deg, #1e1a2e, #251f38)' : 'linear-gradient(135deg, #ede7f6, #f5f0fe)', border: `1px solid ${isDark ? '#3a3060' : '#d1c4e9'}`, borderRadius: '2.5rem', padding: '36px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
-              <div style={{ display: 'flex', gap: '4px', color: '#f59e0b', marginBottom: '20px' }}>
-                {[1,2,3,4,5].map(s => <Star key={s} size={15} fill="#f59e0b" color="#f59e0b" />)}
+              <div style={{ display: 'flex', gap: '4px', color: '#f59e0b', marginBottom: '24px' }}>
+                {[1,2,3,4,5].map(s => <Star key={s} size={16} fill="#f59e0b" color="#f59e0b" />)}
               </div>
-              <p style={{ fontSize: '15px', fontWeight: 600, lineHeight: 1.6, marginBottom: '28px', color: t.text }}>
-                "Seeing my spending trends tracked over weeks <strong style={{ color: '#3b82f6' }}>opened my eyes</strong>. I finally understand my budget leaks thanks to this app."
+              <p style={{ fontSize: '17px', fontWeight: 700, lineHeight: 1.6, marginBottom: '32px', color: t.text }}>
+                "Seeing my spending trends tracked over weeks <strong style={{ borderBottom: '3px solid #8b5cf6' }}>opened my eyes</strong>. I finally understand my budget leaks thanks to this app."
               </p>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <img src="/profile-daniel.jpg" alt="Daniel" style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <img src="/profile-daniel.jpg" alt="Daniel" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
               <div>
-                <p style={{ fontSize: '14.5px', fontWeight: 800, margin: 0, color: t.text }}>Daniel Roberts</p>
-                <p style={{ fontSize: '12px', fontWeight: 600, color: t.textMuted, margin: 0 }}>University Student</p>
+                <p style={{ fontSize: '15px', fontWeight: 800, margin: 0, color: t.text }}>Daniel Roberts</p>
+                <p style={{ fontSize: '13px', fontWeight: 600, color: t.textMuted, margin: 0 }}>University Student</p>
               </div>
             </div>
           </div>
 
-          <div className="hover-lift" style={{ background: isDark ? 'rgba(255, 255, 255, 0.03)' : '#ffffff', border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '20px', padding: '30px 26px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div className="hover-lift" style={{ background: isDark ? 'linear-gradient(135deg, #2a1820, #2e1c26)' : 'linear-gradient(135deg, #fce4ec, #fdf5f7)', border: `1px solid ${isDark ? '#4a2a36' : '#f8bbd0'}`, borderRadius: '2.5rem', padding: '36px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
-              <div style={{ display: 'flex', gap: '4px', color: '#f59e0b', marginBottom: '20px' }}>
-                {[1,2,3,4,5].map(s => <Star key={s} size={15} fill="#f59e0b" color="#f59e0b" />)}
+              <div style={{ display: 'flex', gap: '4px', color: '#f59e0b', marginBottom: '24px' }}>
+                {[1,2,3,4,5].map(s => <Star key={s} size={16} fill="#f59e0b" color="#f59e0b" />)}
               </div>
-              <p style={{ fontSize: '15px', fontWeight: 600, lineHeight: 1.6, marginBottom: '28px', color: t.text }}>
-                "The collaborative family budget challenges gave me a <strong style={{ color: '#ec4899' }}>sense of control</strong> I was missing for years."
+              <p style={{ fontSize: '17px', fontWeight: 700, lineHeight: 1.6, marginBottom: '32px', color: t.text }}>
+                "The collaborative family budget challenges gave me a <strong style={{ borderBottom: '3px solid #f43f5e' }}>sense of control</strong> I was missing for years."
               </p>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=150&auto=format&fit=crop" alt="Emily" style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=150&auto=format&fit=crop" alt="Emily" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
               <div>
-                <p style={{ fontSize: '14.5px', fontWeight: 800, margin: 0, color: t.text }}>Emily Chen</p>
-                <p style={{ fontSize: '12px', fontWeight: 600, color: t.textMuted, margin: 0 }}>Creative Director</p>
+                <p style={{ fontSize: '15px', fontWeight: 800, margin: 0, color: t.text }}>Emily Chen</p>
+                <p style={{ fontSize: '13px', fontWeight: 600, color: t.textMuted, margin: 0 }}>Creative Director</p>
               </div>
             </div>
           </div>
@@ -5249,8 +5266,8 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
         <div style={{
           background: 'linear-gradient(135deg, #064e3b 0%, #022c22 45%, #065f46 100%)',
           border: '1px solid rgba(52, 211, 153, 0.35)',
-          borderRadius: '24px',
-          padding: 'clamp(32px, 5vw, 48px)',
+          borderRadius: '2.5rem',
+          padding: '48px 48px',
           position: 'relative',
           overflow: 'hidden',
           display: 'flex',
@@ -5258,7 +5275,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
           alignItems: 'center',
           justify: 'space-between',
           gap: '36px',
-          boxShadow: '0 24px 50px -15px rgba(6, 78, 59, 0.5), inset 0 1px 1px rgba(255,255,255,0.2)'
+          boxShadow: '0 30px 60px -15px rgba(6, 78, 59, 0.6), inset 0 1px 1px rgba(255,255,255,0.2)'
         }} className="mobile-padding dark-mode-context">
           
           {/* Glowing Ambient Mesh Light */}
