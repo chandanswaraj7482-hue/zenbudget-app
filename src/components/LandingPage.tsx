@@ -2343,30 +2343,58 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               {isDark ? <Sun size={17} color="#fbbf24" /> : <Moon size={17} color="#1e293b" />}
             </button>
 
-            <button 
-              onClick={handleDownloadAction} 
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', padding: '9px 18px', borderRadius: '100px', fontSize: '13px', fontWeight: 800, border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 14px rgba(16,185,129,0.35)' }} 
+            {/* Google Play Store Download CTA Button */}
+            <a 
+              href={DISTRIBUTION_CONFIG.PLAY_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: '#ffffff',
+                padding: '9px 18px',
+                borderRadius: '100px',
+                fontSize: '13px',
+                fontWeight: 800,
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                boxShadow: '0 4px 14px rgba(16,185,129,0.35)',
+                textDecoration: 'none',
+                whiteSpace: 'nowrap'
+              }} 
               className="hover-lift"
+              title="Download ZenBudget on Google Play Store"
             >
-              {deviceOS === 'ios' ? (
-                <>
-                  <Smartphone size={16} color="#ffffff" />
-                  <span>Install on iOS</span>
-                  <ArrowRight size={15} color="#fff" />
-                </>
-              ) : deviceOS === 'android' ? (
-                <>
-                  <Download size={16} color="#ffffff" />
-                  <span>Download APK</span>
-                  <ArrowRight size={15} color="#fff" />
-                </>
-              ) : (
-                <>
-                  <Sparkles size={16} color="#ffffff" />
-                  <span>Launch Web App</span>
-                  <ArrowRight size={15} color="#fff" />
-                </>
-              )}
+              <GooglePlayIcon size={17} />
+              <span>Get on Google Play</span>
+            </a>
+
+            {/* Desktop Web App Launch Button */}
+            <button 
+              onClick={onOpenWebApp} 
+              className="hover-lift desktop-only"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
+                color: isDark ? '#ffffff' : '#0f172a',
+                padding: '8px 14px',
+                borderRadius: '100px',
+                fontSize: '12px',
+                fontWeight: 700,
+                border: isDark ? '1px solid rgba(255, 255, 255, 0.14)' : '1px solid rgba(0, 0, 0, 0.1)',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                whiteSpace: 'nowrap'
+              }}
+              title="Launch Web App Version"
+            >
+              <span>Web App</span>
+              <ArrowRight size={13} color={isDark ? '#34d399' : '#059669'} />
             </button>
 
             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{ background: 'transparent', border: 'none', color: t.text, cursor: 'pointer', padding: '6px' }} className="mobile-show">
