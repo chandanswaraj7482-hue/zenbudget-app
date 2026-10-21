@@ -5029,29 +5029,26 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         )}
       </main>
 
-      {/* Bottom Attached Modern Navigation Bar (Pinned to Phone Frame) */}
+      {/* ── LUXURY FLOATING FROSTED GLASS DOCK (iOS 18 / Dynamic Island Inspired) ── */}
       <nav style={{
         position: 'fixed',
-        bottom: 0,
+        bottom: 'clamp(12px, 2.5vh, 18px)',
         left: '50%',
         transform: 'translateX(-50%)',
-        width: '100%',
-        maxWidth: '480px',
-        background: theme === 'light' ? 'rgba(255, 255, 255, 0.96)' : 'rgba(13, 19, 33, 0.96)',
-        borderTop: theme === 'light' ? '1px solid rgba(0, 0, 0, 0.08)' : '1px solid rgba(255, 255, 255, 0.1)',
-        borderLeft: 'none',
-        borderRight: 'none',
-        borderBottom: 'none',
-        borderRadius: '24px 24px 0 0',
-        backdropFilter: 'blur(28px) saturate(190%)',
-        WebkitBackdropFilter: 'blur(28px) saturate(190%)',
+        width: 'calc(100% - 24px)',
+        maxWidth: '430px',
+        background: theme === 'light' ? 'rgba(255, 255, 255, 0.88)' : 'rgba(11, 17, 28, 0.88)',
+        border: theme === 'light' ? '1.5px solid rgba(0, 0, 0, 0.08)' : '1.5px solid rgba(255, 255, 255, 0.12)',
+        borderRadius: '30px',
+        backdropFilter: 'blur(32px) saturate(210%)',
+        WebkitBackdropFilter: 'blur(32px) saturate(210%)',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-around',
-        padding: '7px 8px calc(env(safe-area-inset-bottom, 0px) + 8px) 8px',
+        justifyContent: 'space-between',
+        padding: '6px 8px',
         boxShadow: theme === 'light' 
-          ? '0 -6px 20px rgba(0, 0, 0, 0.06)' 
-          : '0 -8px 25px rgba(0, 0, 0, 0.65), 0 -2px 10px rgba(16, 185, 129, 0.05)',
+          ? '0 12px 35px rgba(0, 0, 0, 0.12), 0 2px 10px rgba(0, 0, 0, 0.04)' 
+          : '0 20px 50px rgba(0, 0, 0, 0.65), 0 0 25px rgba(16, 185, 129, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.12)',
         zIndex: 999,
         transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
       }}>
@@ -5060,38 +5057,39 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           onClick={() => handleNavClick('dashboard')}
           className="tap-bounce"
           style={{
-            background: activeView === 'dashboard' ? 'rgba(16, 185, 129, 0.16)' : 'transparent',
-            border: activeView === 'dashboard' ? '1px solid rgba(16, 185, 129, 0.36)' : '1px solid transparent',
+            background: activeView === 'dashboard' ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.1) 100%)' : 'transparent',
+            border: activeView === 'dashboard' ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid transparent',
             borderRadius: '22px',
-            padding: '7px 8px',
+            padding: '7px 8px 6px 8px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '3px',
-            color: activeView === 'dashboard' ? '#10b981' : 'var(--text-muted)',
+            gap: '2px',
+            color: activeView === 'dashboard' ? '#34d399' : 'var(--text-muted)',
             cursor: 'pointer',
-            fontSize: '11px',
+            fontSize: '10.5px',
             fontWeight: activeView === 'dashboard' ? 800 : 600,
-            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+            transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
             flex: 1,
             position: 'relative',
-            minWidth: 0
+            minWidth: 0,
+            boxShadow: activeView === 'dashboard' ? '0 0 16px rgba(16, 185, 129, 0.25)' : 'none'
           }}
         >
           {activeView === 'dashboard' && (
             <span style={{
               position: 'absolute',
-              top: '-2px',
+              bottom: '2px',
               left: '50%',
               transform: 'translateX(-50%)',
-              width: '18px',
-              height: '3px',
+              width: '12px',
+              height: '2.5px',
               borderRadius: '99px',
-              background: '#10b981',
-              boxShadow: '0 0 10px #10b981'
+              background: '#34d399',
+              boxShadow: '0 0 8px #34d399'
             }} />
           )}
-          <LayoutDashboard size={20} strokeWidth={activeView === 'dashboard' ? 2.6 : 2} style={{ color: activeView === 'dashboard' ? '#10b981' : undefined }} />
+          <LayoutDashboard size={19} strokeWidth={activeView === 'dashboard' ? 2.6 : 2} style={{ color: activeView === 'dashboard' ? '#34d399' : undefined }} />
           <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{t('dashboard', { defaultValue: 'Home' })}</span>
         </button>
 
@@ -5100,38 +5098,39 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           onClick={() => handleNavClick('transactions')}
           className="tap-bounce"
           style={{
-            background: activeView === 'transactions' ? 'rgba(16, 185, 129, 0.16)' : 'transparent',
-            border: activeView === 'transactions' ? '1px solid rgba(16, 185, 129, 0.36)' : '1px solid transparent',
+            background: activeView === 'transactions' ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.1) 100%)' : 'transparent',
+            border: activeView === 'transactions' ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid transparent',
             borderRadius: '22px',
-            padding: '7px 8px',
+            padding: '7px 8px 6px 8px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '3px',
-            color: activeView === 'transactions' ? '#10b981' : 'var(--text-muted)',
+            gap: '2px',
+            color: activeView === 'transactions' ? '#34d399' : 'var(--text-muted)',
             cursor: 'pointer',
-            fontSize: '11px',
+            fontSize: '10.5px',
             fontWeight: activeView === 'transactions' ? 800 : 600,
-            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+            transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
             flex: 1,
             position: 'relative',
-            minWidth: 0
+            minWidth: 0,
+            boxShadow: activeView === 'transactions' ? '0 0 16px rgba(16, 185, 129, 0.25)' : 'none'
           }}
         >
           {activeView === 'transactions' && (
             <span style={{
               position: 'absolute',
-              top: '-2px',
+              bottom: '2px',
               left: '50%',
               transform: 'translateX(-50%)',
-              width: '18px',
-              height: '3px',
+              width: '12px',
+              height: '2.5px',
               borderRadius: '99px',
-              background: '#10b981',
-              boxShadow: '0 0 10px #10b981'
+              background: '#34d399',
+              boxShadow: '0 0 8px #34d399'
             }} />
           )}
-          <Receipt size={20} strokeWidth={activeView === 'transactions' ? 2.6 : 2} style={{ color: activeView === 'transactions' ? '#10b981' : undefined }} />
+          <Receipt size={19} strokeWidth={activeView === 'transactions' ? 2.6 : 2} style={{ color: activeView === 'transactions' ? '#34d399' : undefined }} />
           <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{t('ledger', { defaultValue: 'Ledger' })}</span>
         </button>
 
@@ -5145,18 +5144,18 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
               setIsModalOpen(true);
             }}
             title="Add Transaction"
-            className="tap-bounce"
+            className="tap-bounce hover-lift"
             style={{
               background: 'linear-gradient(135deg, #10b981 0%, #059669 45%, #06b6d4 100%)',
-              border: '3px solid var(--bg-card, #0f172a)',
+              border: '3px solid rgba(11, 17, 28, 0.95)',
               borderRadius: '50%',
-              width: '48px',
-              height: '48px',
+              width: '50px',
+              height: '50px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: '#ffffff',
-              boxShadow: '0 8px 24px rgba(16, 185, 129, 0.55), 0 0 16px rgba(6, 182, 212, 0.35)',
+              boxShadow: '0 10px 28px rgba(16, 185, 129, 0.55), 0 0 18px rgba(6, 182, 212, 0.35)',
               cursor: 'pointer',
               transition: 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease'
             }}
@@ -5170,38 +5169,39 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           onClick={() => handleNavClick('budgets')}
           className="tap-bounce"
           style={{
-            background: activeView === 'budgets' ? 'rgba(16, 185, 129, 0.16)' : 'transparent',
-            border: activeView === 'budgets' ? '1px solid rgba(16, 185, 129, 0.36)' : '1px solid transparent',
+            background: activeView === 'budgets' ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.1) 100%)' : 'transparent',
+            border: activeView === 'budgets' ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid transparent',
             borderRadius: '22px',
-            padding: '7px 8px',
+            padding: '7px 8px 6px 8px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '3px',
-            color: activeView === 'budgets' ? '#10b981' : 'var(--text-muted)',
+            gap: '2px',
+            color: activeView === 'budgets' ? '#34d399' : 'var(--text-muted)',
             cursor: 'pointer',
-            fontSize: '11px',
+            fontSize: '10.5px',
             fontWeight: activeView === 'budgets' ? 800 : 600,
-            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+            transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
             flex: 1,
             position: 'relative',
-            minWidth: 0
+            minWidth: 0,
+            boxShadow: activeView === 'budgets' ? '0 0 16px rgba(16, 185, 129, 0.25)' : 'none'
           }}
         >
           {activeView === 'budgets' && (
             <span style={{
               position: 'absolute',
-              top: '-2px',
+              bottom: '2px',
               left: '50%',
               transform: 'translateX(-50%)',
-              width: '18px',
-              height: '3px',
+              width: '12px',
+              height: '2.5px',
               borderRadius: '99px',
-              background: '#10b981',
-              boxShadow: '0 0 10px #10b981'
+              background: '#34d399',
+              boxShadow: '0 0 8px #34d399'
             }} />
           )}
-          <PiggyBank size={20} strokeWidth={activeView === 'budgets' ? 2.6 : 2} style={{ color: activeView === 'budgets' ? '#10b981' : undefined }} />
+          <PiggyBank size={19} strokeWidth={activeView === 'budgets' ? 2.6 : 2} style={{ color: activeView === 'budgets' ? '#34d399' : undefined }} />
           <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{t('limits', { defaultValue: 'Limits' })}</span>
         </button>
 
@@ -5210,38 +5210,39 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           onClick={() => handleNavClick('more')}
           className="tap-bounce"
           style={{
-            background: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 'rgba(16, 185, 129, 0.16)' : 'transparent',
-            border: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? '1px solid rgba(16, 185, 129, 0.36)' : '1px solid transparent',
+            background: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.1) 100%)' : 'transparent',
+            border: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid transparent',
             borderRadius: '22px',
-            padding: '7px 8px',
+            padding: '7px 8px 6px 8px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '3px',
-            color: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? '#10b981' : 'var(--text-muted)',
+            gap: '2px',
+            color: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? '#34d399' : 'var(--text-muted)',
             cursor: 'pointer',
-            fontSize: '11px',
+            fontSize: '10.5px',
             fontWeight: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 800 : 600,
-            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+            transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
             flex: 1,
             position: 'relative',
-            minWidth: 0
+            minWidth: 0,
+            boxShadow: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? '0 0 16px rgba(16, 185, 129, 0.25)' : 'none'
           }}
         >
           {['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) && (
             <span style={{
               position: 'absolute',
-              top: '-2px',
+              bottom: '2px',
               left: '50%',
               transform: 'translateX(-50%)',
-              width: '18px',
-              height: '3px',
+              width: '12px',
+              height: '2.5px',
               borderRadius: '99px',
-              background: '#10b981',
-              boxShadow: '0 0 10px #10b981'
+              background: '#34d399',
+              boxShadow: '0 0 8px #34d399'
             }} />
           )}
-          <Sparkles size={20} strokeWidth={['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 2.6 : 2} style={{ color: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? '#10b981' : undefined }} />
+          <Sparkles size={19} strokeWidth={['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 2.6 : 2} style={{ color: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? '#34d399' : undefined }} />
           <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{t('more', { defaultValue: 'More' })}</span>
         </button>
       </nav>

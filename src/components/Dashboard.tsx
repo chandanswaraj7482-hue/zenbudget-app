@@ -2653,45 +2653,97 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {transactions.length === 0 && (
         <div className="glass-panel" style={{
           padding: '24px 20px',
-          textAlign: 'center',
-          background: 'linear-gradient(135deg, rgba(20,20,33,0.7) 0%, rgba(34,197,94,0.08) 100%)',
-          border: '1px dashed rgba(34,197,94,0.3)',
-          borderRadius: '24px',
+          background: 'linear-gradient(135deg, rgba(20, 24, 38, 0.95) 0%, rgba(16, 185, 129, 0.1) 100%)',
+          border: '1.5px solid rgba(16, 185, 129, 0.25)',
+          borderRadius: '26px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '12px'
+          textAlign: 'center',
+          gap: '14px',
+          boxShadow: '0 12px 30px rgba(0, 0, 0, 0.35)'
         }}>
-          <div style={{ width: '52px', height: '52px', borderRadius: '50%', backgroundColor: 'rgba(34,197,94,0.18)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '50px', height: '50px', borderRadius: '50%', backgroundColor: 'rgba(16, 185, 129, 0.18)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 16px rgba(16, 185, 129, 0.25)' }}>
             <Sparkles size={24} />
           </div>
           <div>
-            <h4 style={{ fontSize: '17px', fontWeight: 800, color: '#ffffff' }}>No Transactions Logged Yet</h4>
-            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: '1.4', maxWidth: '320px' }}>
-              Keep 100% control of your money! Tap below to record your first income or expense in seconds.
+            <h4 style={{ fontSize: '17px', fontWeight: 900, color: '#ffffff', margin: 0, letterSpacing: '-0.01em' }}>Welcome to ZenBudget! ✨</h4>
+            <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: '1.4', maxWidth: '320px' }}>
+              Your private money ledger is ready. Tap any sample to log your first transaction in 1 second:
             </p>
           </div>
+
+          {/* Quick 1-Tap Starter Pills for New Users */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', width: '100%', maxWidth: '340px' }}>
+            {[
+              { title: 'Chai / Coffee ☕', amount: 30, type: 'expense' as const, cat: 'food' },
+              { title: 'Food / Swiggy 🍔', amount: 250, type: 'expense' as const, cat: 'food' },
+              { title: 'Groceries 🛒', amount: 500, type: 'expense' as const, cat: 'groceries' },
+              { title: 'Starting Salary 💼', amount: 35000, type: 'income' as const, cat: 'salary' }
+            ].map((sample, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => {
+                  triggerHaptic('success');
+                  if (onSaveTransaction) {
+                    onSaveTransaction({
+                      title: sample.title,
+                      amount: sample.amount,
+                      type: sample.type,
+                      category: sample.cat,
+                      date: new Date().toISOString(),
+                      account_id: 'cash'
+                    });
+                  } else {
+                    onAddTransactionClick();
+                  }
+                }}
+                className="tap-bounce hover-lift"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '14px',
+                  padding: '9px 10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer',
+                  color: '#ffffff',
+                  fontSize: '11.5px',
+                  fontWeight: 700
+                }}
+              >
+                <span>{sample.title}</span>
+                <span style={{ color: sample.type === 'income' ? '#34d399' : '#f87171', fontWeight: 800 }}>
+                  {formatCurrency(sample.amount, currencySymbol, 0)}
+                </span>
+              </button>
+            ))}
+          </div>
+
           <button
             type="button"
             onClick={onAddTransactionClick}
+            className="tap-bounce hover-lift"
             style={{
               marginTop: '4px',
-              background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
               color: '#ffffff',
               border: 'none',
               borderRadius: '16px',
-              padding: '10px 20px',
+              padding: '11px 24px',
               fontSize: '13px',
               fontWeight: 800,
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
               cursor: 'pointer',
-              boxShadow: '0 4px 15px rgba(34,197,94,0.35)'
+              boxShadow: '0 6px 18px rgba(16, 185, 129, 0.4)'
             }}
           >
-            <Plus size={16} />
-            <span>Add Your First Entry</span>
+            <Plus size={16} strokeWidth={2.8} />
+            <span>+ Add Custom Entry</span>
           </button>
         </div>
       )}
