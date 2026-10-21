@@ -48,20 +48,6 @@ export default function Root() {
     currentPath === '/admin.html'
   );
 
-  // 2. https://zenbudget-tracker-app.vercel.app/ -> Dedicated Landing Page
-  const isDedicatedLandingDomain = typeof window !== 'undefined' && (
-    hostname.includes('zenbudget-tracker-app')
-  );
-
-  // 3. https://zenbudget-tracker.vercel.app/ -> Dedicated Web App (Web APK)
-  const isDedicatedWebAppDomain = typeof window !== 'undefined' && (
-    hostname.includes('zenbudget-tracker.vercel.app') ||
-    hostname === 'localhost' ||
-    hostname === '127.0.0.1' ||
-    isNative ||
-    isInstalledPwa
-  );
-
   const hasAppHashOrParam = typeof window !== 'undefined' && (
     window.location.hash.startsWith('#app') ||
     window.location.hash.includes('%23app') ||
@@ -73,12 +59,14 @@ export default function Root() {
     currentPath.includes('%23app')
   );
 
-  // Determine initial mode based on domain:
+  // Determine initial mode:
+  // - Native app or standalone installed PWA opens 'app' directly
+  // - Explicit /app, #app, or ?mode=app opens 'app'
+  // - By default, web browser visitors on zenbudget-tracker.vercel.app see the rich SEO Landing Page!
   const getInitialMode = (): 'landing' | 'app' | 'admin' => {
     if (isAdminDomain) return 'admin';
-    if (isDedicatedWebAppDomain) return 'app'; // zenbudget-tracker.vercel.app opens Web App directly!
-    if (isDedicatedLandingDomain) return hasAppHashOrParam ? 'app' : 'landing'; // zenbudget-tracker-app.vercel.app opens Landing Page!
-    return (isNative || isInstalledPwa || hasAppHashOrParam) ? 'app' : 'landing';
+    if (isNative || isInstalledPwa || hasAppHashOrParam) return 'app';
+    return 'landing';
   };
 
   const [activeMode, setActiveMode] = React.useState<'landing' | 'app' | 'admin'>(getInitialMode);
@@ -92,27 +80,18 @@ export default function Root() {
         setActiveMode('admin');
       } else if (hash.startsWith('#app')) {
         setActiveMode('app');
-      } else if (hash.startsWith('#landing')) {
-        setActiveMode('landing');
-      } else if (hash === '' || hash === '#') {
-        if (isDedicatedWebAppDomain) {
-          setActiveMode('app');
-        } else if (isDedicatedLandingDomain) {
+      } else if (hash.startsWith('#landing') || hash === '' || hash === '#') {
+        if (!isNative && !isInstalledPwa && !window.location.pathname.startsWith('/app')) {
           setActiveMode('landing');
         }
       }
     };
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [isNative, isInstalledPwa, isAdminDomain, isDedicatedWebAppDomain, isDedicatedLandingDomain]);
+  }, [isNative, isInstalledPwa, isAdminDomain]);
 
   const handleOpenWebApp = () => {
     if (typeof window !== 'undefined') {
-      // If user is on landing domain, navigate to the main Web App domain!
-      if (hostname.includes('zenbudget-tracker-app')) {
-        window.location.href = 'https://zenbudget-tracker.vercel.app/';
-        return;
-      }
       if (window.location.pathname.startsWith('/blog')) {
         window.history.pushState({}, '', '/#app');
         setCurrentPath('/');
@@ -125,10 +104,6 @@ export default function Root() {
 
   const handleBackToLanding = () => {
     if (typeof window !== 'undefined') {
-      if (hostname.includes('zenbudget-tracker.vercel.app')) {
-        window.location.href = 'https://zenbudget-tracker-app.vercel.app/';
-        return;
-      }
       if (window.location.pathname.startsWith('/blog')) {
         window.history.pushState({}, '', '/');
         setCurrentPath('/');

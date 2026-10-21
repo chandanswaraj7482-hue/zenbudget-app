@@ -1548,13 +1548,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       minHeight: '100%',
       height: '100%',
       width: '100%',
-      padding: step === 'auth' ? '0' : '24px 24px 80px 24px',
+      padding: '24px 20px 80px 20px',
       overflowY: 'auto',
       WebkitOverflowScrolling: 'touch',
       boxSizing: 'border-box',
-      background: step === 'auth'
-        ? 'radial-gradient(ellipse at 50% 20%, #0d3822 0%, #061e12 50%, #010804 100%)'
-        : 'transparent',
+      background: 'transparent',
       animation: 'fadeIn 0.35s ease-out'
     }}>
       <div style={{
@@ -1563,548 +1561,58 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
-        margin: step === 'auth' ? '0' : 'auto 0',
-        minHeight: step === 'auth' ? '100%' : 'max-content',
-        height: step === 'auth' ? '100%' : 'auto',
-        gap: step === 'auth' ? '0' : '20px'
+        margin: 'auto 0',
+        minHeight: 'max-content',
+        gap: '20px'
       }}>
         {/* STEP: Sign In / Sign Up Auth Screen */}
-        {step === 'auth' && !showAuthForm && (
-          <div className="zb-auth-wrapper">
-            {/* Ambient emerald radial glow behind content */}
-            <div className="zb-auth-ambient-glow-1" />
-            <div className="zb-auth-ambient-glow-2" />
-
-            <div className="zb-auth-split-grid">
-              {/* ── Left Showcase (Desktop Only >= 960px) ── */}
-              <div className="zb-auth-desktop-hero">
-                <div className="zb-auth-pill-tag">
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 10px #34d399' }} />
-                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#e2e8f0', letterSpacing: '0.12em' }}>
-                    ZENBUDGET OS • PRIVATE WEALTH
-                  </span>
-                </div>
-
-                <h1 className="zb-auth-hero-title">
-                  Smart Money.<br />
-                  Quiet Wealth.<br />
-                  <span style={{
-                    background: 'linear-gradient(135deg, #34d399 0%, #6ee7b7 50%, #a7f3d0 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent'
-                  }}>
-                    Total Peace.
-                  </span>
-                </h1>
-
-                <p className="zb-auth-hero-subtitle">
-                  India's premier privacy-first financial command center. Automated multi-bank synchronization, AI intelligence, and encrypted family vaults — with 100% zero third-party tracking.
-                </p>
-
-                {/* 3D Holographic Platinum Card Preview (Phone 2 Inspiration) */}
-                <div className="zb-holographic-card">
-                  <div className="zb-card-foil-sheen" />
-
-                  {/* Top Row: Chip, Contactless, Badge */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px', position: 'relative', zIndex: 2 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{
-                        width: '38px', height: '28px', borderRadius: '5px',
-                        background: 'linear-gradient(135deg, #eab308 0%, #ca8a04 50%, #fef08a 100%)',
-                        border: '1px solid #a16207', boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
-                        position: 'relative', overflow: 'hidden'
-                      }}>
-                        <div style={{ position: 'absolute', top: '8px', left: 0, right: 0, height: '1px', background: 'rgba(0,0,0,0.35)' }} />
-                        <div style={{ position: 'absolute', top: '18px', left: 0, right: 0, height: '1px', background: 'rgba(0,0,0,0.35)' }} />
-                        <div style={{ position: 'absolute', top: 0, bottom: 0, left: '18px', width: '1px', background: 'rgba(0,0,0,0.35)' }} />
-                      </div>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.75)" strokeWidth="2.2" strokeLinecap="round">
-                        <path d="M8.5 16.5a5 5 0 0 1 0-9" />
-                        <path d="M12 19a8.5 8.5 0 0 0 0-14" />
-                        <path d="M15.5 21.5a12 12 0 0 0 0-19" />
-                      </svg>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <img src="/favicon.png?v=10" alt="ZenBudget" style={{ width: '20px', height: '20px', borderRadius: '5px' }} />
-                      <span style={{ fontSize: '13px', fontWeight: 800, color: '#f1f5f9', letterSpacing: '0.04em' }}>
-                        ZEN<span style={{ color: '#34d399' }}>ELITE</span>
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Balance / Savings Stat */}
-                  <div style={{ marginBottom: '24px', position: 'relative', zIndex: 2 }}>
-                    <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.6)', fontWeight: 700, marginBottom: '4px' }}>
-                      Total Managed Wealth
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
-                      <span style={{ fontSize: '30px', fontWeight: 850, color: '#ffffff', letterSpacing: '-0.03em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                        ₹8,42,950
-                      </span>
-                      <span style={{
-                        fontSize: '11px', fontWeight: 800, color: '#34d399',
-                        background: 'rgba(52, 211, 153, 0.16)', padding: '3px 8px', borderRadius: '6px',
-                        border: '1px solid rgba(52, 211, 153, 0.3)'
-                      }}>
-                        +₹24,800 saved ↗
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Card Bottom */}
-                  <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', position: 'relative', zIndex: 2 }}>
-                    <div>
-                      <div style={{ fontSize: '14px', fontWeight: 700, color: '#e2e8f0', letterSpacing: '0.18em', fontFamily: 'monospace', marginBottom: '3px' }}>
-                        •••• •••• •••• 9102
-                      </div>
-                      <div style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                        ZEN PRIVATE CLIENT
-                      </div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>EXP</div>
-                      <div style={{ fontSize: '12px', fontWeight: 800, color: '#ffffff', letterSpacing: '0.05em' }}>10/29</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Trust Proof Badges */}
-                <div className="zb-trust-proof-row">
-                  <div className="zb-trust-item">
-                    <ShieldCheck size={14} color="#34d399" />
-                    <span>256-Bit Bank Grade AES</span>
-                  </div>
-                  <div className="zb-trust-item">
-                    <Zap size={14} color="#34d399" />
-                    <span>Real-Time SMS & AA Sync</span>
-                  </div>
-                  <div className="zb-trust-item">
-                    <Users size={14} color="#34d399" />
-                    <span>Couple & Family Vaults</span>
-                  </div>
-                  <div className="zb-trust-item">
-                    <Lock size={14} color="#34d399" />
-                    <span>Zero Ad Tracking</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* ── Right Column: Phone Showcase ── */}
-              <div className="zb-auth-phone-column">
-                <div className="zb-auth-desktop-card">
-                  {/* Top Bar Header */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    width: '100%',
-                    zIndex: 2
-                  }}>
-                    {onBackToLanding && !Capacitor.isNativePlatform() ? (
-                      <button
-                        type="button"
-                        onClick={onBackToLanding}
-                        style={{
-                          background: 'rgba(255, 255, 255, 0.08)',
-                          border: '1px solid rgba(255, 255, 255, 0.15)',
-                          borderRadius: '20px',
-                          padding: '7px 14px',
-                          color: '#e2e8f0',
-                          fontSize: '12px',
-                          fontWeight: 700,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          cursor: 'pointer',
-                          backdropFilter: 'blur(10px)',
-                          transition: 'all 0.2s ease'
-                        }}
-                      >
-                        ← HOME
-                      </button>
-                    ) : (
-                      <div style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        background: 'rgba(255, 255, 255, 0.08)',
-                        border: '1px solid rgba(255, 255, 255, 0.12)',
-                        borderRadius: '20px',
-                        padding: '6px 14px',
-                        backdropFilter: 'blur(10px)'
-                      }}>
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px #34d399' }} />
-                        <span style={{ fontSize: '11px', fontWeight: 800, color: '#f1f5f9', letterSpacing: '0.12em' }}>HOME</span>
-                      </div>
-                    )}
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <img src="/favicon.png?v=10" alt="ZenBudget" style={{ width: '22px', height: '22px', borderRadius: '6px' }} />
-                      <span style={{ fontSize: '13px', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>
-                        <span style={{ color: '#34d399' }}>Zen</span>Budget
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Main Typography & Value Prop */}
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-start',
-                    textAlign: 'left',
-                    marginTop: 'auto',
-                    marginBottom: '32px',
-                    zIndex: 2
-                  }}>
-                    <h1 style={{
-                      fontSize: 'clamp(34px, 8vw, 42px)',
-                      fontWeight: 800,
-                      lineHeight: 1.1,
-                      letterSpacing: '-0.035em',
-                      color: '#ffffff',
-                      margin: '0 0 14px 0',
-                      fontFamily: "'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif"
-                    }}>
-                      Smart Money.<br />
-                      Quiet Wealth.<br />
-                      <span style={{ color: '#34d399' }}>Total Peace.</span>
-                    </h1>
-
-                    <p style={{
-                      fontSize: '14px',
-                      lineHeight: 1.45,
-                      color: 'rgba(255, 255, 255, 0.72)',
-                      margin: '0 0 20px 0',
-                      fontWeight: 500,
-                      maxWidth: '290px'
-                    }}>
-                      Fast, private & automated banking intelligence built for modern India.
-                    </p>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{
-                        width: '24px',
-                        height: '6px',
-                        borderRadius: '3px',
-                        background: '#34d399',
-                        boxShadow: '0 0 8px rgba(52, 211, 153, 0.6)'
-                      }} />
-                      <span style={{
-                        width: '6px',
-                        height: '6px',
-                        borderRadius: '3px',
-                        background: 'rgba(255, 255, 255, 0.35)'
-                      }} />
-                      <span style={{
-                        width: '6px',
-                        height: '6px',
-                        borderRadius: '3px',
-                        background: 'rgba(255, 255, 255, 0.35)'
-                      }} />
-                    </div>
-                  </div>
-
-                  {/* Action Buttons Stack */}
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px',
-                    width: '100%',
-                    zIndex: 2
-                  }}>
-                    <button
-                      type="button"
-                      id="btn-showcase-signin"
-                      onClick={() => {
-                        setAuthMode('login');
-                        setShowAuthForm(true);
-                        setErrorMsg('');
-                      }}
-                      style={{
-                        width: '100%',
-                        padding: '16px 24px',
-                        borderRadius: '9999px',
-                        border: 'none',
-                        background: '#ffffff',
-                        color: '#0a0a0a',
-                        fontSize: '16px',
-                        fontWeight: 800,
-                        cursor: 'pointer',
-                        letterSpacing: '-0.01em',
-                        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.45)',
-                        transition: 'all 0.2s ease',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      Sign In
-                    </button>
-
-                    <button
-                      type="button"
-                      id="btn-showcase-register"
-                      onClick={() => {
-                        setAuthMode('signup');
-                        setShowAuthForm(true);
-                        setErrorMsg('');
-                      }}
-                      style={{
-                        width: '100%',
-                        padding: '16px 24px',
-                        borderRadius: '9999px',
-                        border: '1.5px solid rgba(255, 255, 255, 0.75)',
-                        background: 'rgba(255, 255, 255, 0.06)',
-                        color: '#ffffff',
-                        fontSize: '16px',
-                        fontWeight: 800,
-                        cursor: 'pointer',
-                        letterSpacing: '-0.01em',
-                        backdropFilter: 'blur(10px)',
-                        transition: 'all 0.2s ease',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      Register
-                    </button>
-
-                    {(localStorage.getItem('zb_user_pin') || localStorage.getItem('zb_saved_device_pin')) && (
-                      <button
-                        type="button"
-                        onClick={() => setStep('unlock')}
-                        style={{
-                          marginTop: '4px',
-                          background: 'transparent',
-                          border: 'none',
-                          color: '#34d399',
-                          fontSize: '13px',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          padding: '6px',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '6px'
-                        }}
-                      >
-                        ⚡ Unlock with Passcode / PIN
-                      </button>
-                    )}
-
-                    <p style={{
-                      fontSize: '11px',
-                      lineHeight: 1.4,
-                      color: 'rgba(255, 255, 255, 0.45)',
-                      textAlign: 'center',
-                      margin: '10px 0 0 0',
-                      fontWeight: 500
-                    }}>
-                      By continuing you agree to{' '}
-                      <a href="/terms.html" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255, 255, 255, 0.75)', textDecoration: 'underline' }}>
-                        Terms of Service
-                      </a>{' '}
-                      &{' '}
-                      <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255, 255, 255, 0.75)', textDecoration: 'underline' }}>
-                        Privacy Policy
-                      </a>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* STEP: Sign In / Sign Up Credentials Form Modal */}
-        {step === 'auth' && showAuthForm && (
-          <div className="zb-auth-wrapper">
-            {/* Ambient emerald radial glow behind content */}
-            <div className="zb-auth-ambient-glow-1" />
-            <div className="zb-auth-ambient-glow-2" />
-
-            <div className="zb-auth-split-grid">
-              {/* ── Left Showcase (Desktop Only >= 960px) ── */}
-              <div className="zb-auth-desktop-hero">
-                <div className="zb-auth-pill-tag">
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 10px #34d399' }} />
-                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#e2e8f0', letterSpacing: '0.12em' }}>
-                    ZENBUDGET OS • PRIVATE WEALTH
-                  </span>
-                </div>
-
-                <h1 className="zb-auth-hero-title">
-                  Smart Money.<br />
-                  Quiet Wealth.<br />
-                  <span style={{
-                    background: 'linear-gradient(135deg, #34d399 0%, #6ee7b7 50%, #a7f3d0 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent'
-                  }}>
-                    Total Peace.
-                  </span>
-                </h1>
-
-                <p className="zb-auth-hero-subtitle">
-                  India's premier privacy-first financial command center. Automated multi-bank synchronization, AI intelligence, and encrypted family vaults — with 100% zero third-party tracking.
-                </p>
-
-                {/* 3D Holographic Platinum Card Preview (Phone 2 Inspiration) */}
-                <div className="zb-holographic-card">
-                  <div className="zb-card-foil-sheen" />
-
-                  {/* Top Row: Chip, Contactless, Badge */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px', position: 'relative', zIndex: 2 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{
-                        width: '38px', height: '28px', borderRadius: '5px',
-                        background: 'linear-gradient(135deg, #eab308 0%, #ca8a04 50%, #fef08a 100%)',
-                        border: '1px solid #a16207', boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
-                        position: 'relative', overflow: 'hidden'
-                      }}>
-                        <div style={{ position: 'absolute', top: '8px', left: 0, right: 0, height: '1px', background: 'rgba(0,0,0,0.35)' }} />
-                        <div style={{ position: 'absolute', top: '18px', left: 0, right: 0, height: '1px', background: 'rgba(0,0,0,0.35)' }} />
-                        <div style={{ position: 'absolute', top: 0, bottom: 0, left: '18px', width: '1px', background: 'rgba(0,0,0,0.35)' }} />
-                      </div>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.75)" strokeWidth="2.2" strokeLinecap="round">
-                        <path d="M8.5 16.5a5 5 0 0 1 0-9" />
-                        <path d="M12 19a8.5 8.5 0 0 0 0-14" />
-                        <path d="M15.5 21.5a12 12 0 0 0 0-19" />
-                      </svg>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <img src="/favicon.png?v=10" alt="ZenBudget" style={{ width: '20px', height: '20px', borderRadius: '5px' }} />
-                      <span style={{ fontSize: '13px', fontWeight: 800, color: '#f1f5f9', letterSpacing: '0.04em' }}>
-                        ZEN<span style={{ color: '#34d399' }}>ELITE</span>
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Balance / Savings Stat */}
-                  <div style={{ marginBottom: '24px', position: 'relative', zIndex: 2 }}>
-                    <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.6)', fontWeight: 700, marginBottom: '4px' }}>
-                      Total Managed Wealth
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
-                      <span style={{ fontSize: '30px', fontWeight: 850, color: '#ffffff', letterSpacing: '-0.03em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                        ₹8,42,950
-                      </span>
-                      <span style={{
-                        fontSize: '11px', fontWeight: 800, color: '#34d399',
-                        background: 'rgba(52, 211, 153, 0.16)', padding: '3px 8px', borderRadius: '6px',
-                        border: '1px solid rgba(52, 211, 153, 0.3)'
-                      }}>
-                        +₹24,800 saved ↗
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Card Bottom */}
-                  <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', position: 'relative', zIndex: 2 }}>
-                    <div>
-                      <div style={{ fontSize: '14px', fontWeight: 700, color: '#e2e8f0', letterSpacing: '0.18em', fontFamily: 'monospace', marginBottom: '3px' }}>
-                        •••• •••• •••• 9102
-                      </div>
-                      <div style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                        ZEN PRIVATE CLIENT
-                      </div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>EXP</div>
-                      <div style={{ fontSize: '12px', fontWeight: 800, color: '#ffffff', letterSpacing: '0.05em' }}>10/29</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Trust Proof Badges */}
-                <div className="zb-trust-proof-row">
-                  <div className="zb-trust-item">
-                    <ShieldCheck size={14} color="#34d399" />
-                    <span>256-Bit Bank Grade AES</span>
-                  </div>
-                  <div className="zb-trust-item">
-                    <Zap size={14} color="#34d399" />
-                    <span>Real-Time SMS & AA Sync</span>
-                  </div>
-                  <div className="zb-trust-item">
-                    <Users size={14} color="#34d399" />
-                    <span>Couple & Family Vaults</span>
-                  </div>
-                  <div className="zb-trust-item">
-                    <Lock size={14} color="#34d399" />
-                    <span>Zero Ad Tracking</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* ── Right Column: Form Modal ── */}
-              <div className="zb-auth-phone-column">
-                <div
+        {step === 'auth' && (
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '430px',
+              padding: '28px 24px 24px',
+              borderRadius: '28px',
+              background: 'rgba(8, 28, 18, 0.94)',
+              border: '1px solid rgba(52, 211, 153, 0.28)',
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.75), 0 0 35px rgba(16, 185, 129, 0.12)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0px',
+              animation: 'fadeIn 0.25s ease-out',
+              margin: 'auto 0'
+            }}
+          >
+            {/* ── Top Navigation Row ── */}
+            {onBackToLanding && !Capacitor.isNativePlatform() && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+                <button
+                  type="button"
+                  onClick={onBackToLanding}
                   style={{
-                    width: '100%',
-                    maxWidth: '440px',
-                    padding: '28px 24px 24px',
-                    borderRadius: '32px',
-                    background: 'rgba(8, 28, 18, 0.92)',
-                    border: '1px solid rgba(52, 211, 153, 0.28)',
-                    boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(16, 185, 129, 0.15)',
-                    backdropFilter: 'blur(24px)',
-                    WebkitBackdropFilter: 'blur(24px)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0px',
-                    animation: 'fadeIn 0.25s ease-out',
-                    margin: 'auto 0'
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(255, 255, 255, 0.14)',
+                    borderRadius: '20px',
+                    padding: '6px 14px',
+                    color: '#e2e8f0',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
                   }}
                 >
-            {/* ── Top Navigation Row ── */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <button
-                type="button"
-                onClick={() => setShowAuthForm(false)}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: '20px',
-                  padding: '6px 14px',
-                  color: '#e2e8f0',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <ArrowLeft size={14} /> Back
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowAuthForm(false)}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '32px',
-                  height: '32px',
-                  color: '#e2e8f0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <X size={16} />
-              </button>
-            </div>
+                  <ArrowLeft size={14} /> Back to Homepage
+                </button>
+              </div>
+            )}
 
             {/* ── Logo & Branding ── */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '22px' }}>
               <div style={{
                 width: '64px', height: '64px', borderRadius: '20px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -2117,14 +1625,14 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                 <span style={{ color: '#34d399' }}>Zen</span><span style={{ color: '#ffffff' }}>Budget</span>
               </h1>
               <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(255, 255, 255, 0.65)', margin: 0, fontWeight: 700 }}>
-                {authMode === 'login' ? 'Welcome Back' : 'Create Your Free Account'}
+                {authMode === 'login' ? 'Welcome Back • Sign In' : 'Create Your Free Account'}
               </p>
             </div>
 
             {/* ── Login / Sign Up Tab ── */}
             <div style={{
               display: 'flex', background: 'rgba(255, 255, 255, 0.06)', padding: '4px',
-              borderRadius: '9999px', border: '1px solid rgba(255, 255, 255, 0.1)', marginBottom: '22px'
+              borderRadius: '9999px', border: '1px solid rgba(255, 255, 255, 0.1)', marginBottom: '20px'
             }}>
               <button type="button" onClick={() => { setAuthMode('login'); setErrorMsg(''); }} style={{
                 flex: 1, padding: '10px', borderRadius: '9999px', border: 'none', cursor: 'pointer',
@@ -2233,7 +1741,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                   try {
                     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: window.location.origin });
                     if (error) throw error;
-                    setSuccessMsg(`Reset link sent to ${email.trim()}!`);
+                    setSuccessMsg();
                     setErrorMsg('');
                   } catch (err: any) {
                     setErrorMsg(err.message || 'Failed to send reset link.');
@@ -2298,6 +1806,32 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               </button>
             </form>
 
+            {/* Shortcut PIN button if device has PIN saved */}
+            {(localStorage.getItem('zb_user_pin') || localStorage.getItem('zb_saved_device_pin')) && (
+              <button
+                type="button"
+                onClick={() => setStep('unlock')}
+                style={{
+                  marginTop: '12px',
+                  background: 'rgba(52, 211, 153, 0.12)',
+                  border: '1px solid rgba(52, 211, 153, 0.28)',
+                  borderRadius: '14px',
+                  color: '#34d399',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  padding: '10px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                ⚡ Unlock with Passcode / PIN
+              </button>
+            )}
+
             {/* ── Footer: Security Notice ── */}
             <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', width: '100%', boxSizing: 'border-box' }}>
               <span style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', fontWeight: 600, letterSpacing: '0.03em' }}>
@@ -2305,11 +1839,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               </span>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  )}
-
+        )}
 
         {/* STEP: Onboarding PIN Setup (Choose & Confirm) */}
         {(step === 'onboard-pin' || step === 'onboard-confirm') && (

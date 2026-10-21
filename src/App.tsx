@@ -4290,24 +4290,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   if (isLocked) {
     const isMobileNative = Capacitor.isNativePlatform() || (typeof window !== 'undefined' && window.innerWidth <= 540);
     return (
-      <div style={{
-        width: '100vw',
-        minHeight: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        background: 'radial-gradient(ellipse at 50% 20%, #0d3822 0%, #06190f 50%, #010603 100%)',
-        overflowX: 'hidden'
-      }}>
-        <div style={{
-          margin: '0 auto',
-          maxWidth: isMobileNative ? '100%' : '1320px',
-          width: '100%',
-          position: 'relative',
-          minHeight: '100vh',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}>
+      <div style={{ width: '100vw', minHeight: '100vh', display: 'flex', justifyContent: 'center', background: 'var(--bg-base)' }}>
+        <div className="app-main-wrapper" style={{ margin: '0 auto', maxWidth: isMobileNative ? '100%' : '520px', width: '100%', position: 'relative', minHeight: '100vh', background: 'var(--bg-base)', boxShadow: isMobileNative ? 'none' : '0 0 20px rgba(0,0,0,0.4)' }}>
           <LockScreen onBackToLanding={onBackToLanding} onUnlock={(profileId, name, tier, trialStart, pin, premiumExpires, trialExpire, isNewUser) => {
       try {
         const validProfileId = profileId || localStorage.getItem('zb_profile_id') || 'local';
