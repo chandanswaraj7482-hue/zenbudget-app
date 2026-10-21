@@ -32,7 +32,8 @@ import {
   Bot,
   Eye,
   EyeOff,
-  ArrowRight
+  ArrowRight,
+  ArrowLeftRight
 } from 'lucide-react';
 import type { Transaction, SavingsGoal, CategoryBudget, Account } from '../types';
 import { t } from '../utils/i18n';
@@ -177,7 +178,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   premiumExpiresAt,
   onAddAccountClick,
   onOpenBankSync: _onOpenBankSync,
-  onOpenTransfer: _onOpenTransfer,
+  onOpenTransfer,
   onOpenAI,
   onOpenLoans: _onOpenLoans,
   onOpenProfile,
@@ -1132,131 +1133,211 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* ── USER FRIENDLY QUICK ACTIONS BAR (SQUARE TILES) ── */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '10px',
-          marginTop: '16px',
-          paddingTop: '16px',
+          gridTemplateColumns: 'repeat(6, 1fr)',
+          gap: '6px',
+          marginTop: '14px',
+          paddingTop: '14px',
           borderTop: '1px solid var(--border-divider)'
         }}>
           {/* 1. Add Transaction */}
           <button
             type="button"
-            onClick={onAddTransactionClick}
+            onClick={() => {
+              triggerHaptic('medium');
+              onAddTransactionClick();
+            }}
             className="tap-bounce hover-lift"
             style={{
-              aspectRatio: '1 / 1',
               width: '100%',
               background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.16) 0%, rgba(16, 185, 129, 0.05) 100%)',
               border: '1px solid rgba(16, 185, 129, 0.32)',
-              borderRadius: '20px',
-              padding: '6px',
+              borderRadius: '16px',
+              padding: '8px 2px 7px 2px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '6px',
+              gap: '4px',
               color: '#10b981',
               cursor: 'pointer',
               transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
-              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.1)'
+              boxShadow: '0 4px 10px rgba(16, 185, 129, 0.1)',
+              minWidth: 0
             }}
           >
-            <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)' }}>
-              <Plus size={20} strokeWidth={2.8} />
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 3px 10px rgba(16, 185, 129, 0.35)', flexShrink: 0 }}>
+              <Plus size={17} strokeWidth={2.8} />
             </div>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: '#ffffff' }}>Add</span>
+            <span style={{ fontSize: '10px', fontWeight: 700, color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>Add</span>
           </button>
 
           {/* 2. Scan Bill / OCR */}
           {onScanReceiptClick && (
             <button
               type="button"
-              onClick={onScanReceiptClick}
+              onClick={() => {
+                triggerHaptic('medium');
+                onScanReceiptClick();
+              }}
               className="tap-bounce hover-lift"
               style={{
-                aspectRatio: '1 / 1',
                 width: '100%',
                 background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.16) 0%, rgba(6, 182, 212, 0.05) 100%)',
                 border: '1px solid rgba(6, 182, 212, 0.32)',
-                borderRadius: '20px',
-                padding: '6px',
+                borderRadius: '16px',
+                padding: '8px 2px 7px 2px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '6px',
+                gap: '4px',
                 color: '#22d3ee',
                 cursor: 'pointer',
                 transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
-                boxShadow: '0 4px 12px rgba(6, 182, 212, 0.1)'
+                boxShadow: '0 4px 10px rgba(6, 182, 212, 0.1)',
+                minWidth: 0
               }}
             >
-              <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(6, 182, 212, 0.35)' }}>
-                <Camera size={19} />
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 3px 10px rgba(6, 182, 212, 0.35)', flexShrink: 0 }}>
+                <Camera size={16} />
               </div>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: '#ffffff' }}>Scan Bill</span>
+              <span style={{ fontSize: '10px', fontWeight: 700, color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>Scan</span>
             </button>
           )}
 
-          {/* 3. AI Coach */}
-          {onOpenAI && (
+          {/* 3. Transfer Money */}
+          {onOpenTransfer && (
             <button
               type="button"
-              onClick={onOpenAI}
+              onClick={() => {
+                triggerHaptic('medium');
+                onOpenTransfer();
+              }}
               className="tap-bounce hover-lift"
               style={{
-                aspectRatio: '1 / 1',
                 width: '100%',
-                background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.16) 0%, rgba(168, 85, 247, 0.05) 100%)',
-                border: '1px solid rgba(168, 85, 247, 0.32)',
-                borderRadius: '20px',
-                padding: '6px',
+                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.16) 0%, rgba(99, 102, 241, 0.05) 100%)',
+                border: '1px solid rgba(99, 102, 241, 0.32)',
+                borderRadius: '16px',
+                padding: '8px 2px 7px 2px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '6px',
-                color: '#c084fc',
+                gap: '4px',
+                color: '#818cf8',
                 cursor: 'pointer',
                 transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
-                boxShadow: '0 4px 12px rgba(168, 85, 247, 0.1)'
+                boxShadow: '0 4px 10px rgba(99, 102, 241, 0.1)',
+                minWidth: 0
               }}
             >
-              <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(168, 85, 247, 0.35)' }}>
-                <Bot size={19} />
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 3px 10px rgba(99, 102, 241, 0.35)', flexShrink: 0 }}>
+                <ArrowLeftRight size={16} />
               </div>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: '#ffffff' }}>AI Coach</span>
+              <span style={{ fontSize: '10px', fontWeight: 700, color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>Transfer</span>
             </button>
           )}
 
-          {/* 4. Accounts & Wallets */}
+          {/* 4. AI Coach */}
+          {onOpenAI && (
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('medium');
+                onOpenAI();
+              }}
+              className="tap-bounce hover-lift"
+              style={{
+                width: '100%',
+                background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.16) 0%, rgba(168, 85, 247, 0.05) 100%)',
+                border: '1px solid rgba(168, 85, 247, 0.32)',
+                borderRadius: '16px',
+                padding: '8px 2px 7px 2px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '4px',
+                color: '#c084fc',
+                cursor: 'pointer',
+                transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                boxShadow: '0 4px 10px rgba(168, 85, 247, 0.1)',
+                minWidth: 0
+              }}
+            >
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 3px 10px rgba(168, 85, 247, 0.35)', flexShrink: 0 }}>
+                <Bot size={16} />
+              </div>
+              <span style={{ fontSize: '10px', fontWeight: 700, color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>AI Coach</span>
+            </button>
+          )}
+
+          {/* 5. Accounts & Wallets */}
           <button
             type="button"
-            onClick={onAddAccountClick}
+            onClick={() => {
+              triggerHaptic('medium');
+              onAddAccountClick?.();
+            }}
             className="tap-bounce hover-lift"
             style={{
-              aspectRatio: '1 / 1',
               width: '100%',
               background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.16) 0%, rgba(59, 130, 246, 0.05) 100%)',
               border: '1px solid rgba(59, 130, 246, 0.32)',
-              borderRadius: '20px',
-              padding: '6px',
+              borderRadius: '16px',
+              padding: '8px 2px 7px 2px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '6px',
+              gap: '4px',
               color: '#60a5fa',
               cursor: 'pointer',
               transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
-              boxShadow: '0 4px 12px rgba(59, 130, 246, 0.1)'
+              boxShadow: '0 4px 10px rgba(59, 130, 246, 0.1)',
+              minWidth: 0
             }}
           >
-            <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(59, 130, 246, 0.35)' }}>
-              <Wallet size={19} />
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 3px 10px rgba(59, 130, 246, 0.35)', flexShrink: 0 }}>
+              <Wallet size={16} />
             </div>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: '#ffffff' }}>+ Wallet</span>
+            <span style={{ fontSize: '10px', fontWeight: 700, color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>+ Wallet</span>
           </button>
+
+          {/* 6. Analytics & Reports */}
+          {onOpenAnalytics && (
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('medium');
+                onOpenAnalytics();
+              }}
+              className="tap-bounce hover-lift"
+              style={{
+                width: '100%',
+                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, rgba(245, 158, 11, 0.05) 100%)',
+                border: '1px solid rgba(245, 158, 11, 0.32)',
+                borderRadius: '16px',
+                padding: '8px 2px 7px 2px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '4px',
+                color: '#fbbf24',
+                cursor: 'pointer',
+                transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                boxShadow: '0 4px 10px rgba(245, 158, 11, 0.1)',
+                minWidth: 0
+              }}
+            >
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 3px 10px rgba(245, 158, 11, 0.35)', flexShrink: 0 }}>
+                <BarChart3 size={16} />
+              </div>
+              <span style={{ fontSize: '10px', fontWeight: 700, color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>Analytics</span>
+            </button>
+          )}
         </div>
 
         {/* ── OVERALL STATS & ANALYTICS SHAPE CARD ── */}
