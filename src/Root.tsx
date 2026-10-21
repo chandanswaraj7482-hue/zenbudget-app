@@ -3,6 +3,7 @@ import App from './App';
 import LandingPage from './components/LandingPage';
 import { BlogView } from './components/BlogView';
 import { BlogPostView } from './components/BlogPostView';
+import AdminApp from './AdminApp';
 import { Capacitor } from '@capacitor/core';
 
 export default function Root() {
@@ -39,6 +40,28 @@ export default function Root() {
     }
   }, []);
 
+  // Dedicated Domain Identification:
+  // 1. https://admin-portal-zenbudget.vercel.app/ -> Dedicated Admin Portal
+  const isAdminDomain = typeof window !== 'undefined' && (
+    hostname.includes('admin-portal') ||
+    currentPath === '/admin' ||
+    currentPath === '/admin.html'
+  );
+
+  // 2. https://zenbudget-tracker-app.vercel.app/ -> Dedicated Landing Page
+  const isDedicatedLandingDomain = typeof window !== 'undefined' && (
+    hostname.includes('zenbudget-tracker-app')
+  );
+
+  // 3. https://zenbudget-tracker.vercel.app/ -> Dedicated Web App (Web APK)
+  const isDedicatedWebAppDomain = typeof window !== 'undefined' && (
+    hostname.includes('zenbudget-tracker.vercel.app') ||
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    isNative ||
+    isInstalledPwa
+  );
+
   const hasAppHashOrParam = typeof window !== 'undefined' && (
     window.location.hash.startsWith('#app') ||
     window.location.hash.includes('%23app') ||
@@ -50,34 +73,46 @@ export default function Root() {
     currentPath.includes('%23app')
   );
 
-  // If native app or installed PWA, or explicitly requested via #app/query, open 'app'.
-  // For all other web visits (including search engine crawlers like Googlebot on https://zenbudget-tracker.vercel.app/),
-  // default to the high-ranking, rich SEO LandingPage!
-  const initialMode: 'landing' | 'app' = (isNative || isInstalledPwa || hasAppHashOrParam)
-    ? 'app'
-    : 'landing';
+  // Determine initial mode based on domain:
+  const getInitialMode = (): 'landing' | 'app' | 'admin' => {
+    if (isAdminDomain) return 'admin';
+    if (isDedicatedWebAppDomain) return 'app'; // zenbudget-tracker.vercel.app opens Web App directly!
+    if (isDedicatedLandingDomain) return hasAppHashOrParam ? 'app' : 'landing'; // zenbudget-tracker-app.vercel.app opens Landing Page!
+    return (isNative || isInstalledPwa || hasAppHashOrParam) ? 'app' : 'landing';
+  };
 
-  const [activeMode, setActiveMode] = React.useState<'landing' | 'app'>(initialMode);
+  const [activeMode, setActiveMode] = React.useState<'landing' | 'app' | 'admin'>(getInitialMode);
 
   // Synchronize browser hash changes (Back/Forward navigation, explicit #app links)
   React.useEffect(() => {
     const handleHashChange = () => {
       if (typeof window === 'undefined') return;
       const hash = window.location.hash;
-      if (hash.startsWith('#app')) {
+      if (isAdminDomain) {
+        setActiveMode('admin');
+      } else if (hash.startsWith('#app')) {
         setActiveMode('app');
-      } else if (hash.startsWith('#landing') || hash === '' || hash === '#') {
-        if (!isNative && !isInstalledPwa && !window.location.pathname.startsWith('/app')) {
+      } else if (hash.startsWith('#landing')) {
+        setActiveMode('landing');
+      } else if (hash === '' || hash === '#') {
+        if (isDedicatedWebAppDomain) {
+          setActiveMode('app');
+        } else if (isDedicatedLandingDomain) {
           setActiveMode('landing');
         }
       }
     };
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [isNative, isInstalledPwa]);
+  }, [isNative, isInstalledPwa, isAdminDomain, isDedicatedWebAppDomain, isDedicatedLandingDomain]);
 
   const handleOpenWebApp = () => {
     if (typeof window !== 'undefined') {
+      // If user is on landing domain, navigate to the main Web App domain!
+      if (hostname.includes('zenbudget-tracker-app')) {
+        window.location.href = 'https://zenbudget-tracker.vercel.app/';
+        return;
+      }
       if (window.location.pathname.startsWith('/blog')) {
         window.history.pushState({}, '', '/#app');
         setCurrentPath('/');
@@ -90,19 +125,26 @@ export default function Root() {
 
   const handleBackToLanding = () => {
     if (typeof window !== 'undefined') {
+      if (hostname.includes('zenbudget-tracker.vercel.app')) {
+        window.location.href = 'https://zenbudget-tracker-app.vercel.app/';
+        return;
+      }
       if (window.location.pathname.startsWith('/blog')) {
         window.history.pushState({}, '', '/');
         setCurrentPath('/');
       } else {
-        if (window.location.hash.startsWith('#app')) {
-          window.history.pushState(null, '', window.location.pathname);
-        }
+        window.location.hash = 'landing';
       }
     }
     setActiveMode('landing');
   };
 
-  // Dedicated Blog routing
+  // 1. Dedicated Admin Portal
+  if (activeMode === 'admin' || isAdminDomain) {
+    return <AdminApp />;
+  }
+
+  // 2. Dedicated Blog routing
   const normalizedPath = currentPath.replace(/\/+$/, '') || '/';
   if (normalizedPath === '/blog') {
     return <BlogView onBackToLanding={handleBackToLanding} onOpenWebApp={handleOpenWebApp} />;
@@ -112,11 +154,11 @@ export default function Root() {
     return <BlogPostView slug={slug} onBackToLanding={handleBackToLanding} onOpenWebApp={handleOpenWebApp} />;
   }
 
-  // If mode is landing, show LandingPage
+  // 3. If mode is landing, show LandingPage
   if (activeMode === 'landing') {
     return <LandingPage onOpenWebApp={handleOpenWebApp} />;
   }
 
-  // Otherwise, render full App directly
+  // 4. Otherwise, render full App directly (Web APK / Web App)
   return <App onBackToLanding={handleBackToLanding} />;
 }

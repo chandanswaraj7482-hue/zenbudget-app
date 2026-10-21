@@ -4942,7 +4942,6 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
               setActiveView('bank_importer');
             }}
             currencySymbol={currencySymbol}
-            onOpenAdminPanel={() => setIsAdminModalOpen(true)}
           />
         )}
         {activeView === 'shared_budget' && (
