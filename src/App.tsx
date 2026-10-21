@@ -3734,16 +3734,6 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   };
 
   const handleDeleteGoal = (goalId: string) => {
-    const tier = subscriptionTier || localStorage.getItem('zb_subscription_tier') || 'trial';
-    const isPro = ['premium', 'premium_monthly', 'premium_yearly', 'premium_lifetime'].includes(tier) || localStorage.getItem('admin_overridden') === 'true';
-
-    if (!isPro) {
-      triggerToast('🔒 Deleting savings goals is a Premium feature. Upgrade to Pro!', 'warning');
-      setIsSubBlocker(false);
-      setIsSubModalOpen(true);
-      return;
-    }
-
     const goalToDelete = goals.find(g => g.id === goalId);
     if (!goalToDelete) return;
 
@@ -4298,7 +4288,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     return (
       <div style={{ width: '100vw', minHeight: '100vh', display: 'flex', justifyContent: 'center', background: 'var(--bg-base)' }}>
         <div className="app-main-wrapper" style={{ margin: '0 auto', maxWidth: isMobileNative ? '100%' : '520px', width: '100%', position: 'relative', minHeight: '100vh', background: 'var(--bg-base)', boxShadow: isMobileNative ? 'none' : '0 0 20px rgba(0,0,0,0.4)' }}>
-          <LockScreen onBackToLanding={onBackToLanding} onUnlock={(profileId, name, tier, trialStart, pin, premiumExpires, trialExpire) => {
+          <LockScreen onBackToLanding={onBackToLanding} onUnlock={(profileId, name, tier, trialStart, pin, premiumExpires, trialExpire, isNewUser) => {
       try {
         const validProfileId = profileId || localStorage.getItem('zb_profile_id') || 'local';
         const validName = name || localStorage.getItem('zb_user_name') || 'User';
@@ -4339,10 +4329,13 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         }
 
         const effectiveId = validProfileId;
-        const hasSalary = !!(localStorage.getItem(`zb_monthly_salary_${effectiveId}`) || localStorage.getItem('zb_monthly_salary'));
-        if (!hasSalary || !localStorage.getItem(`zb_onboarded_${effectiveId}`)) {
+        const isAlreadyOnboarded = localStorage.getItem(`zb_onboarded_${effectiveId}`) === 'true' || localStorage.getItem('zb_onboarded_global') === 'true';
+
+        // ONLY prompt onboarding if explicitly creating a new profile AND not already onboarded
+        if (isNewUser && !isAlreadyOnboarded) {
           setShowOnboarding(true);
         } else {
+          setShowOnboarding(false);
           const todayStr = new Date().toISOString().split('T')[0];
           const hour = new Date().getHours();
           
@@ -4396,14 +4389,11 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
                 const updatedGoals = [goal];
                 setGoals(updatedGoals);
                 localStorage.setItem(`zb_goals_${effectiveId}`, JSON.stringify(updatedGoals));
-              } else {
-                setGoals([]);
-                localStorage.setItem(`zb_goals_${effectiveId}`, JSON.stringify([]));
               }
               if (dob) {
                 localStorage.setItem(`zb_dob_${effectiveId}`, dob);
               }
-              if (monthlySalary !== undefined) {
+              if (monthlySalary !== undefined && monthlySalary > 0) {
                 localStorage.setItem(`zb_monthly_salary_${effectiveId}`, monthlySalary.toString());
               }
               
@@ -4420,6 +4410,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
               localStorage.setItem(`zb_onboarded_${effectiveId}`, 'true');
               localStorage.setItem('zb_onboarded_global', 'true');
+              sessionStorage.setItem('zb_session_authenticated', 'true');
+              setIsLocked(false);
               setShowOnboarding(false);
             }} 
           />

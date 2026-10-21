@@ -10,7 +10,16 @@ import { DISTRIBUTION_CONFIG } from '../config/buildConfig';
 import { getPinSecurityStatus, recordFailedPinAttempt, resetPinSecurityStatus } from '../utils/securityGuard';
 
 interface LockScreenProps {
-  onUnlock: (userId: string, username: string, tier: string, trialStart: string, pin: string, premiumExpiresAt: string | null, trialExpireDate?: string | null) => void;
+  onUnlock: (
+    userId: string, 
+    username: string, 
+    tier: string, 
+    trialStart: string, 
+    pin: string, 
+    premiumExpiresAt: string | null, 
+    trialExpireDate?: string | null,
+    isNewUser?: boolean
+  ) => void;
   onBackToLanding?: () => void;
 }
 
@@ -1350,7 +1359,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         newProfile.trial_start_date,
         pin,
         restoredExpiry,
-        null
+        null,
+        true
       );
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to create profile. Try again.');

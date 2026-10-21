@@ -808,23 +808,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingBottom: '120px' }} className="animate-fade-in dashboard-layout-container">
 
-      {/* ── FROZEN / STICKY HEADER (Morning Brief + User Greeting + Add Button) ── */}
+      {/* ── USER GREETING HEADER (Morning Brief + User Greeting + Add Button) ── */}
       <div 
-        className="sticky-frozen-header"
+        className="user-greeting-header"
         style={{
-          position: 'sticky',
-          top: '-16px',
-          zIndex: 45,
-          background: 'rgba(11, 15, 25, 0.95)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          margin: '-16px -16px 2px -16px',
-          padding: '14px 16px 10px 16px',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
           display: 'flex',
           flexDirection: 'column',
-          gap: '8px'
+          gap: '8px',
+          paddingBottom: '4px'
         }}
       >
         {/* Morning / Evening AI Brief Banner */}
@@ -1356,39 +1347,37 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <span style={{ fontSize: '10px', fontWeight: 700, color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>+ Wallet</span>
           </button>
 
-          {/* 6. Analytics & Reports */}
-          {onOpenAnalytics && (
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('medium');
-                onOpenAnalytics();
-              }}
-              className="tap-bounce hover-lift"
-              style={{
-                width: '100%',
-                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, rgba(245, 158, 11, 0.05) 100%)',
-                border: '1px solid rgba(245, 158, 11, 0.32)',
-                borderRadius: '16px',
-                padding: '8px 2px 7px 2px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '4px',
-                color: '#fbbf24',
-                cursor: 'pointer',
-                transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
-                boxShadow: '0 4px 10px rgba(245, 158, 11, 0.1)',
-                minWidth: 0
-              }}
-            >
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 3px 10px rgba(245, 158, 11, 0.35)', flexShrink: 0 }}>
-                <BarChart3 size={16} />
-              </div>
-              <span style={{ fontSize: '10px', fontWeight: 700, color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>Analytics</span>
-            </button>
-          )}
+          {/* 6. Ledger & Transaction History */}
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('medium');
+              onViewAllTransactionsClick();
+            }}
+            className="tap-bounce hover-lift"
+            style={{
+              width: '100%',
+              background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, rgba(245, 158, 11, 0.05) 100%)',
+              border: '1px solid rgba(245, 158, 11, 0.32)',
+              borderRadius: '16px',
+              padding: '8px 2px 7px 2px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '4px',
+              color: '#fbbf24',
+              cursor: 'pointer',
+              transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+              boxShadow: '0 4px 10px rgba(245, 158, 11, 0.1)',
+              minWidth: 0
+            }}
+          >
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 3px 10px rgba(245, 158, 11, 0.35)', flexShrink: 0 }}>
+              <FileText size={16} />
+            </div>
+            <span style={{ fontSize: '10px', fontWeight: 700, color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>History</span>
+          </button>
         </div>
 
         {/* ── OVERALL STATS & ANALYTICS SHAPE CARD ── */}
@@ -2641,6 +2630,26 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       >
                         <Pencil size={12} />
                       </button>
+                      {onDeleteGoal && (
+                        <button
+                          type="button"
+                          onClick={() => onDeleteGoal(g.id)}
+                          title="Delete goal"
+                          style={{
+                            background: 'rgba(239,68,68,0.1)',
+                            border: '1px solid rgba(239,68,68,0.25)',
+                            borderRadius: '10px',
+                            padding: '6px 8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            color: '#ef4444'
+                          }}
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
