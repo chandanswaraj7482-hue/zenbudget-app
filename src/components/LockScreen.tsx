@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Delete, AlertCircle, CheckCircle, Mail, KeyRound, Loader2, LogOut, ArrowLeft, User, Download, Fingerprint, X, Gift, Eye, EyeOff, Globe, Zap, ShieldCheck } from 'lucide-react';
+import { Delete, AlertCircle, CheckCircle, Mail, KeyRound, Loader2, LogOut, ArrowLeft, User, Download, Fingerprint, X, Gift, Eye, EyeOff, Globe, Zap, ShieldCheck, Sparkles } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { playNotificationSound } from '../utils/audio';
 import { Capacitor } from '@capacitor/core';
@@ -34,6 +34,7 @@ const getInitialsName = (userName: string, userEmail: string) => {
 
 export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLanding }) => {
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [showAuthForm, setShowAuthForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [email, setEmail] = useState('');
@@ -1547,11 +1548,13 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       minHeight: '100%',
       height: '100%',
       width: '100%',
-      padding: '24px 24px 80px 24px',
+      padding: step === 'auth' && !showAuthForm ? '0' : '24px 24px 80px 24px',
       overflowY: 'auto',
       WebkitOverflowScrolling: 'touch',
       boxSizing: 'border-box',
-      background: 'transparent',
+      background: step === 'auth'
+        ? 'radial-gradient(ellipse at 50% 20%, #0d3822 0%, #061e12 50%, #010804 100%)'
+        : 'transparent',
       animation: 'fadeIn 0.35s ease-out'
     }}>
       <div style={{
@@ -1560,41 +1563,299 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
-        margin: 'auto 0',
-        minHeight: 'max-content',
-        gap: '20px'
+        margin: step === 'auth' && !showAuthForm ? '0' : 'auto 0',
+        minHeight: step === 'auth' && !showAuthForm ? '100%' : 'max-content',
+        height: step === 'auth' && !showAuthForm ? '100%' : 'auto',
+        gap: step === 'auth' && !showAuthForm ? '0' : '20px'
       }}>
         {/* STEP: Sign In / Sign Up Auth Screen */}
-        {step === 'auth' && (
+        {step === 'auth' && !showAuthForm && (
+          <div style={{
+            width: '100%',
+            maxWidth: '440px',
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            padding: 'calc(env(safe-area-inset-top, 0px) + 24px) 24px calc(env(safe-area-inset-bottom, 0px) + 32px) 24px',
+            boxSizing: 'border-box',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            {/* Ambient emerald radial glow behind content */}
+            <div style={{
+              position: 'absolute',
+              top: '18%',
+              left: '10%',
+              width: '320px',
+              height: '320px',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(16, 185, 129, 0.24) 0%, rgba(5, 46, 22, 0) 70%)',
+              pointerEvents: 'none',
+              filter: 'blur(35px)'
+            }} />
+
+            {/* ── Top Bar Header ── */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: '100%',
+              zIndex: 2
+            }}>
+              {onBackToLanding && !Capacitor.isNativePlatform() ? (
+                <button
+                  type="button"
+                  onClick={onBackToLanding}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    borderRadius: '20px',
+                    padding: '7px 14px',
+                    color: '#e2e8f0',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                    backdropFilter: 'blur(10px)',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  ← HOME
+                </button>
+              ) : (
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  borderRadius: '20px',
+                  padding: '6px 14px',
+                  backdropFilter: 'blur(10px)'
+                }}>
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px #34d399' }} />
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#f1f5f9', letterSpacing: '0.12em' }}>HOME</span>
+                </div>
+              )}
+
+              {/* Subtle ZenBudget logo pill on right */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <img src="/favicon.png?v=10" alt="ZenBudget" style={{ width: '22px', height: '22px', borderRadius: '6px' }} />
+                <span style={{ fontSize: '13px', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>
+                  <span style={{ color: '#34d399' }}>Zen</span>Budget
+                </span>
+              </div>
+            </div>
+
+            {/* ── Main Typography & Value Prop (Left Aligned matching Phone Mockup) ── */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              textAlign: 'left',
+              marginTop: 'auto',
+              marginBottom: '36px',
+              zIndex: 2
+            }}>
+              <h1 style={{
+                fontSize: 'clamp(36px, 9vw, 44px)',
+                fontWeight: 800,
+                lineHeight: 1.1,
+                letterSpacing: '-0.035em',
+                color: '#ffffff',
+                margin: '0 0 16px 0',
+                fontFamily: "'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif"
+              }}>
+                Make Online<br />
+                Banking<br />
+                <span style={{ color: '#ffffff' }}>More Human</span>
+              </h1>
+
+              <p style={{
+                fontSize: '14px',
+                lineHeight: 1.45,
+                color: 'rgba(255, 255, 255, 0.72)',
+                margin: '0 0 22px 0',
+                fontWeight: 500,
+                maxWidth: '280px'
+              }}>
+                simple, fast & reliable mobile banking app
+              </p>
+
+              {/* 3 dots indicator matching mockup */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{
+                  width: '24px',
+                  height: '6px',
+                  borderRadius: '3px',
+                  background: '#34d399',
+                  boxShadow: '0 0 8px rgba(52, 211, 153, 0.6)'
+                }} />
+                <span style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '3px',
+                  background: 'rgba(255, 255, 255, 0.35)'
+                }} />
+                <span style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '3px',
+                  background: 'rgba(255, 255, 255, 0.35)'
+                }} />
+              </div>
+            </div>
+
+            {/* ── Action Buttons Stack (Pinned towards bottom) ── */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              width: '100%',
+              zIndex: 2
+            }}>
+              {/* Top Button: Solid Pure White Pill */}
+              <button
+                type="button"
+                id="btn-showcase-signin"
+                onClick={() => {
+                  setAuthMode('login');
+                  setShowAuthForm(true);
+                  setErrorMsg('');
+                }}
+                style={{
+                  width: '100%',
+                  padding: '16px 24px',
+                  borderRadius: '9999px',
+                  border: 'none',
+                  background: '#ffffff',
+                  color: '#0a0a0a',
+                  fontSize: '16px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  letterSpacing: '-0.01em',
+                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.45)',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                Sign In
+              </button>
+
+              {/* Bottom Button: Glass Dark Pill with Crisp White Border */}
+              <button
+                type="button"
+                id="btn-showcase-register"
+                onClick={() => {
+                  setAuthMode('signup');
+                  setShowAuthForm(true);
+                  setErrorMsg('');
+                }}
+                style={{
+                  width: '100%',
+                  padding: '16px 24px',
+                  borderRadius: '9999px',
+                  border: '1.5px solid rgba(255, 255, 255, 0.75)',
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  color: '#ffffff',
+                  fontSize: '16px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  letterSpacing: '-0.01em',
+                  backdropFilter: 'blur(10px)',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                Register
+              </button>
+
+              {/* Unlock with Passcode / PIN shortcut if user previously had PIN */}
+              {(localStorage.getItem('zb_user_pin') || localStorage.getItem('zb_saved_device_pin')) && (
+                <button
+                  type="button"
+                  onClick={() => setStep('unlock')}
+                  style={{
+                    marginTop: '4px',
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#34d399',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    padding: '6px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  ⚡ Unlock with Passcode / PIN
+                </button>
+              )}
+
+              {/* Disclaimer / Legal Text */}
+              <p style={{
+                fontSize: '11px',
+                lineHeight: 1.4,
+                color: 'rgba(255, 255, 255, 0.45)',
+                textAlign: 'center',
+                margin: '10px 0 0 0',
+                fontWeight: 500
+              }}>
+                By continuing you agree to{' '}
+                <a href="/terms.html" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255, 255, 255, 0.75)', textDecoration: 'underline' }}>
+                  Terms of Service
+                </a>{' '}
+                &{' '}
+                <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255, 255, 255, 0.75)', textDecoration: 'underline' }}>
+                  Privacy Policy
+                </a>
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* STEP: Sign In / Sign Up Credentials Form Modal */}
+        {step === 'auth' && showAuthForm && (
           <div
-            className="glass-panel"
             style={{
               width: '100%',
               maxWidth: '420px',
-              padding: '32px 24px 24px',
+              padding: '28px 24px 24px',
               borderRadius: '28px',
-              border: Capacitor.isNativePlatform() ? 'none' : '1px solid rgba(255,255,255,0.08)',
-              boxShadow: Capacitor.isNativePlatform() ? 'none' : '0 20px 60px rgba(0,0,0,0.5)',
+              background: 'rgba(8, 28, 18, 0.88)',
+              border: '1px solid rgba(52, 211, 153, 0.25)',
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
               display: 'flex',
               flexDirection: 'column',
-              gap: '0px'
+              gap: '0px',
+              animation: 'fadeIn 0.25s ease-out',
+              margin: '20px 0'
             }}
           >
-            {/* ── Back to Homepage (Web Browser) ── */}
-            {onBackToLanding && !Capacitor.isNativePlatform() && (
+            {/* ── Top Navigation Row ── */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
               <button
                 type="button"
-                onClick={onBackToLanding}
+                onClick={() => setShowAuthForm(false)}
                 style={{
-                  alignSelf: 'flex-start',
-                  marginBottom: '16px',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
                   borderRadius: '20px',
                   padding: '6px 14px',
-                  color: '#94a3b8',
+                  color: '#e2e8f0',
                   fontSize: '12px',
-                  fontWeight: 600,
+                  fontWeight: 700,
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
@@ -1602,56 +1863,76 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                   transition: 'all 0.2s ease'
                 }}
               >
-                ← Back to Homepage
+                <ArrowLeft size={14} /> Back
               </button>
-            )}
+              <button
+                type="button"
+                onClick={() => setShowAuthForm(false)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  color: '#e2e8f0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
 
             {/* ── Logo & Branding ── */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '28px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '24px' }}>
               <div style={{
-                width: '72px', height: '72px', borderRadius: '22px',
+                width: '64px', height: '64px', borderRadius: '20px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                marginBottom: '14px', overflow: 'hidden'
+                marginBottom: '12px', overflow: 'hidden',
+                boxShadow: '0 8px 24px rgba(52, 211, 153, 0.25)'
               }}>
                 <img src="/favicon.png?v=10" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
-              <h1 style={{ fontSize: '30px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
-                <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
+              <h1 style={{ fontSize: '26px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
+                <span style={{ color: '#34d399' }}>Zen</span><span style={{ color: '#ffffff' }}>Budget</span>
               </h1>
-              <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', margin: 0, fontWeight: 700 }}>
-                Calm Your Money
+              <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(255, 255, 255, 0.65)', margin: 0, fontWeight: 700 }}>
+                {authMode === 'login' ? 'Welcome Back' : 'Create Your Free Account'}
               </p>
             </div>
 
             {/* ── Login / Sign Up Tab ── */}
             <div style={{
-              display: 'flex', background: 'var(--bg-input)', padding: '4px',
-              borderRadius: '14px', border: '1px solid var(--border-input)', marginBottom: '24px'
+              display: 'flex', background: 'rgba(255, 255, 255, 0.06)', padding: '4px',
+              borderRadius: '9999px', border: '1px solid rgba(255, 255, 255, 0.1)', marginBottom: '22px'
             }}>
               <button type="button" onClick={() => { setAuthMode('login'); setErrorMsg(''); }} style={{
-                flex: 1, padding: '10px', borderRadius: '10px', border: 'none', cursor: 'pointer',
+                flex: 1, padding: '10px', borderRadius: '9999px', border: 'none', cursor: 'pointer',
                 fontSize: '13px', fontWeight: 800,
-                background: authMode === 'login' ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'transparent',
-                color: authMode === 'login' ? '#ffffff' : 'var(--text-secondary)',
-                boxShadow: authMode === 'login' ? '0 4px 12px rgba(34,197,94,0.35)' : 'none',
+                background: authMode === 'login' ? '#ffffff' : 'transparent',
+                color: authMode === 'login' ? '#0a0a0a' : 'rgba(255, 255, 255, 0.7)',
+                boxShadow: authMode === 'login' ? '0 4px 12px rgba(0,0,0,0.3)' : 'none',
                 transition: 'all 0.2s ease'
-              }}>Login</button>
+              }}>Sign In</button>
               <button type="button" onClick={() => { setAuthMode('signup'); setErrorMsg(''); }} style={{
-                flex: 1, padding: '10px', borderRadius: '10px', border: 'none', cursor: 'pointer',
+                flex: 1, padding: '10px', borderRadius: '9999px', border: 'none', cursor: 'pointer',
                 fontSize: '13px', fontWeight: 800,
-                background: authMode === 'signup' ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'transparent',
-                color: authMode === 'signup' ? '#ffffff' : 'var(--text-secondary)',
-                boxShadow: authMode === 'signup' ? '0 4px 12px rgba(34,197,94,0.35)' : 'none',
+                background: authMode === 'signup' ? '#ffffff' : 'transparent',
+                color: authMode === 'signup' ? '#0a0a0a' : 'rgba(255, 255, 255, 0.7)',
+                boxShadow: authMode === 'signup' ? '0 4px 12px rgba(0,0,0,0.3)' : 'none',
                 transition: 'all 0.2s ease'
-              }}>Sign Up</button>
+              }}>Register</button>
             </div>
 
             {/* ── Social Login Buttons ── */}
             <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
               <button type="button" onClick={() => handleSocialLogin('google')} style={{
                 flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
-                padding: '11px 8px', borderRadius: '12px', border: '1px solid var(--border-input)',
-                background: 'var(--bg-input)', color: 'var(--text-primary)',
+                padding: '11px 8px', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.12)',
+                background: 'rgba(255, 255, 255, 0.05)', color: '#ffffff',
                 fontSize: '12px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s ease'
               }}>
                 <svg viewBox="0 0 24 24" width="15" height="15"><path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.62 14.98 1 12 1 7.35 1 3.37 3.65 1.42 7.54l3.86 3C6.26 7.56 8.9 5.04 12 5.04z" /><path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.44h6.44c-.28 1.48-1.12 2.74-2.38 3.58l3.69 2.87c2.16-1.99 3.74-4.92 3.74-8.55z" /><path fill="#FBBC05" d="M5.28 14.54c-.24-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29L1.42 6.96C.52 8.76 0 10.78 0 12.92s.52 4.16 1.42 5.96l3.86-3.34z" /><path fill="#34A853" d="M12 22.88c3.24 0 5.97-1.07 7.96-2.91l-3.69-2.87c-1.02.68-2.33 1.09-4.27 1.09-3.1 0-5.74-2.52-6.68-5.5l-3.86 3C3.37 20.23 7.35 22.88 12 22.88z" /></svg>
@@ -1659,8 +1940,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               </button>
               <button type="button" onClick={() => handleSocialLogin('apple')} style={{
                 flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
-                padding: '11px 8px', borderRadius: '12px', border: '1px solid var(--border-input)',
-                background: 'var(--bg-input)', color: 'var(--text-primary)',
+                padding: '11px 8px', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.12)',
+                background: 'rgba(255, 255, 255, 0.05)', color: '#ffffff',
                 fontSize: '12px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s ease'
               }}>
                 <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.21.67-2.93 1.49-.62.69-1.16 1.84-1.01 2.96 1.12.09 2.27-.58 2.95-1.39" /></svg>
@@ -1670,9 +1951,9 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
             {/* ── Divider ── */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-              <div style={{ flex: 1, height: '1px', background: 'var(--border-input)' }} />
-              <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>OR WITH EMAIL</span>
-              <div style={{ flex: 1, height: '1px', background: 'var(--border-input)' }} />
+              <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }} />
+              <span style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', fontWeight: 700, letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>OR WITH EMAIL</span>
+              <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }} />
             </div>
 
             {/* ── Form ── */}
@@ -1681,33 +1962,33 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               {authMode === 'signup' && (
                 <>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Full Name</label>
+                    <label style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255, 255, 255, 0.7)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Full Name</label>
                     <div style={{ position: 'relative' }}>
-                      <User size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-                      <input type="text" required value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Your full name" className="glass-input" style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px' }} />
+                      <User size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255, 255, 255, 0.45)' }} />
+                      <input type="text" required value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Your full name" className="glass-input" style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.12)', color: '#ffffff' }} />
                     </div>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Referral Code <span style={{ color: 'var(--text-muted)', textTransform: 'none', fontWeight: 600 }}>(optional)</span></label>
+                    <label style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255, 255, 255, 0.7)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Referral Code <span style={{ color: 'rgba(255, 255, 255, 0.4)', textTransform: 'none', fontWeight: 600 }}>(optional)</span></label>
                     <div style={{ position: 'relative' }}>
-                      <Gift size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-                      <input type="text" value={referralCodeInput} onChange={(e) => setReferralCodeInput(e.target.value.toUpperCase())} placeholder="ZB-XXXX-XXXX" className="glass-input" style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px', textTransform: 'uppercase' }} />
+                      <Gift size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255, 255, 255, 0.45)' }} />
+                      <input type="text" value={referralCodeInput} onChange={(e) => setReferralCodeInput(e.target.value.toUpperCase())} placeholder="ZB-XXXX-XXXX" className="glass-input" style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px', textTransform: 'uppercase', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.12)', color: '#ffffff' }} />
                     </div>
                   </div>
                 </>
               )}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Email Address</label>
+                <label style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255, 255, 255, 0.7)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Email Address</label>
                 <div style={{ position: 'relative' }}>
-                  <Mail size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-                  <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@email.com" className="glass-input" style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px' }} />
+                  <Mail size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255, 255, 255, 0.45)' }} />
+                  <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@email.com" className="glass-input" style={{ paddingLeft: '38px', fontSize: '13px', padding: '11px 14px 11px 38px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.12)', color: '#ffffff' }} />
                 </div>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Password</label>
+                  <label style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255, 255, 255, 0.7)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Password</label>
                   {authMode === 'signup' && password.length > 0 && (
                     <span style={{ fontSize: '10px', fontWeight: 800, color: getPasswordStrength(password).color }}>
                       {getPasswordStrength(password).label}
@@ -1715,9 +1996,9 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                   )}
                 </div>
                 <div style={{ position: 'relative' }}>
-                  <KeyRound size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-                  <input type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="glass-input" style={{ paddingLeft: '38px', paddingRight: '40px', fontSize: '13px', padding: '11px 40px 11px 38px', width: '100%', boxSizing: 'border-box' }} />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', padding: 0 }}>
+                  <KeyRound size={14} style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255, 255, 255, 0.45)' }} />
+                  <input type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="glass-input" style={{ paddingLeft: '38px', paddingRight: '40px', fontSize: '13px', padding: '11px 40px 11px 38px', width: '100%', boxSizing: 'border-box', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.12)', color: '#ffffff' }} />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'rgba(255, 255, 255, 0.45)', cursor: 'pointer', display: 'flex', padding: 0 }}>
                     {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
                 </div>
@@ -1725,8 +2006,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
               {/* Remember Me & Forgot Password */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600 }}>
-                  <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '13px', height: '13px', margin: 0 }} />
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255, 255, 255, 0.75)', cursor: 'pointer', fontWeight: 600 }}>
+                  <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} style={{ accentColor: '#34d399', cursor: 'pointer', width: '13px', height: '13px', margin: 0 }} />
                   Remember Me
                 </label>
                 <button type="button" onClick={async () => {
@@ -1740,7 +2021,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                   } catch (err: any) {
                     setErrorMsg(err.message || 'Failed to send reset link.');
                   } finally { setIsLoading(false); }
-                }} style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: '11px' }}>
+                }} style={{ background: 'none', border: 'none', color: '#34d399', fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: '11px' }}>
                   Forgot Password?
                 </button>
               </div>
@@ -1752,8 +2033,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                 gap: '8px',
                 padding: '8px 10px',
                 borderRadius: '10px',
-                background: 'var(--bg-input)',
-                border: '1px solid var(--border-input)',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
                 marginTop: '4px'
               }}>
                 <input
@@ -1761,31 +2042,31 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                   id="termsCheck"
                   checked={agreedTerms}
                   onChange={(e) => setAgreedTerms(e.target.checked)}
-                  style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '15px', height: '15px', flexShrink: 0 }}
+                  style={{ accentColor: '#34d399', cursor: 'pointer', width: '15px', height: '15px', flexShrink: 0 }}
                 />
-                <label htmlFor="termsCheck" style={{ fontSize: '11px', color: 'var(--text-secondary)', cursor: 'pointer', lineHeight: 1.3, fontWeight: 600 }}>
-                  I agree to the <a href="/terms.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', fontWeight: 800, textDecoration: 'none' }}>Terms of Service</a> & <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', fontWeight: 800, textDecoration: 'none' }}>Privacy Policy</a>
+                <label htmlFor="termsCheck" style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.75)', cursor: 'pointer', lineHeight: 1.3, fontWeight: 600 }}>
+                  I agree to the <a href="/terms.html" target="_blank" rel="noopener noreferrer" style={{ color: '#34d399', fontWeight: 800, textDecoration: 'none' }}>Terms of Service</a> & <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style={{ color: '#34d399', fontWeight: 800, textDecoration: 'none' }}>Privacy Policy</a>
                 </label>
               </div>
 
               {successMsg && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#16a34a', fontSize: '12px', fontWeight: 700, background: 'rgba(34,197,94,0.12)', padding: '10px 14px', borderRadius: '12px', border: '1px solid rgba(34,197,94,0.3)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#34d399', fontSize: '12px', fontWeight: 700, background: 'rgba(52, 211, 153, 0.15)', padding: '10px 14px', borderRadius: '12px', border: '1px solid rgba(52, 211, 153, 0.35)' }}>
                   <CheckCircle size={15} style={{ flexShrink: 0 }} /> <span>{successMsg}</span>
                 </div>
               )}
               {errorMsg && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--danger)', fontSize: '11px', background: 'var(--danger-glow)', padding: '9px 12px', borderRadius: '10px', border: '1px solid rgba(244,63,94,0.2)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#f87171', fontSize: '11px', background: 'rgba(239, 68, 68, 0.15)', padding: '9px 12px', borderRadius: '10px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
                   <AlertCircle size={14} style={{ flexShrink: 0 }} /> <span>{errorMsg}</span>
                 </div>
               )}
 
               {/* Submit Button */}
               <button type="submit" disabled={isLoading} style={{
-                padding: '13px', borderRadius: '14px', fontSize: '14px', fontWeight: 800, marginTop: '4px',
-                background: 'linear-gradient(135deg, #22c55e 0%, #06b6d4 100%)',
-                color: '#ffffff', border: 'none',
-                boxShadow: '0 6px 20px rgba(34, 197, 94, 0.35)',
-                cursor: isLoading ? 'not-allowed' : 'pointer', transition: 'all 0.2s ease', letterSpacing: '0.01em',
+                padding: '14px', borderRadius: '9999px', fontSize: '15px', fontWeight: 800, marginTop: '6px',
+                background: '#ffffff',
+                color: '#0a0a0a', border: 'none',
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+                cursor: isLoading ? 'not-allowed' : 'pointer', transition: 'all 0.2s ease', letterSpacing: '-0.01em',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                 opacity: isLoading ? 0.75 : 1
               }}>
@@ -1795,14 +2076,14 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
                     <span>{authMode === 'login' ? 'Signing In...' : 'Creating Account...'}</span>
                   </>
                 ) : (
-                  authMode === 'login' ? '🔓 Login to ZenBudget' : '🚀 Create Account'
+                  authMode === 'login' ? 'Sign In to ZenBudget' : 'Create Account'
                 )}
               </button>
             </form>
 
             {/* ── Footer: Security Notice ── */}
-            <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-input)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', width: '100%', boxSizing: 'border-box' }}>
-              <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: '0.03em' }}>
+            <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', width: '100%', boxSizing: 'border-box' }}>
+              <span style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', fontWeight: 600, letterSpacing: '0.03em' }}>
                 🔒 256-bit Encrypted • Privacy First
               </span>
             </div>
