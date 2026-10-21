@@ -47,6 +47,7 @@ interface MoreToolsViewProps {
   isPremiumUser?: boolean;
   onNavigateToBankImporter?: () => void;
   currencySymbol?: string;
+  onOpenAdminPanel?: () => void;
 }
 
 export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
@@ -71,7 +72,8 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
   onNavigateToFollowUs,
   isPremiumUser = false,
   onNavigateToBankImporter,
-  currencySymbol = '₹'
+  currencySymbol = '₹',
+  onOpenAdminPanel
 }) => {
   const [socialLinks, setSocialLinks] = useState<Array<{ platform: string; icon: string; url: string; color: string; is_active: boolean }>>([]);
   const [viewingDoc, setViewingDoc] = useState<'privacy' | 'terms' | 'security' | null>(null);
@@ -568,6 +570,55 @@ export const MoreToolsView: React.FC<MoreToolsViewProps> = ({
             </div>
             <ChevronRight size={18} color="#94a3b8" style={{ flexShrink: 0 }} />
           </button>
+
+          {/* Master Admin Control Panel Button */}
+          {onOpenAdminPanel && (
+            <button
+              onClick={onOpenAdminPanel}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '13px 14px',
+                borderRadius: '14px',
+                border: '1px solid rgba(99, 102, 241, 0.35)',
+                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(79, 70, 229, 0.05) 100%)',
+                cursor: 'pointer',
+                color: 'var(--text-primary)',
+                textAlign: 'left',
+                gap: '10px',
+                width: '100%',
+                boxShadow: '0 4px 14px rgba(99, 102, 241, 0.12)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: '1 1 0%' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(99, 102, 241, 0.25)', color: '#818cf8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Shield size={20} />
+                </div>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                    <p style={{ fontSize: '13.5px', fontWeight: 800, margin: 0, color: '#c7d2fe', whiteSpace: 'nowrap' }}>Admin Control Panel 🛡️</p>
+                    <span style={{
+                      fontSize: '9px',
+                      fontWeight: 800,
+                      padding: '2px 6px',
+                      borderRadius: '6px',
+                      background: 'rgba(99, 102, 241, 0.25)',
+                      color: '#a5b4fc',
+                      border: '1px solid rgba(99, 102, 241, 0.4)',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      MASTER
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '10.5px', color: '#94a3b8', display: 'block', marginTop: '2px' }}>
+                    Manage dynamic prices, broadcasts, coupons, users & AI coach
+                  </span>
+                </div>
+              </div>
+              <ChevronRight size={18} color="#a5b4fc" style={{ flexShrink: 0 }} />
+            </button>
+          )}
         </div>
       </div>
 

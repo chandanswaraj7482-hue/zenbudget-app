@@ -27,6 +27,7 @@ import { SharedPaymentProcessingModal } from './components/SharedPaymentProcessi
 import { NotificationsModal } from './components/NotificationsModal';
 import { NotificationsView } from './components/NotificationsView';
 import { HelpModal } from './components/HelpModal';
+import { SplashScreen } from './components/SplashScreen';
 import { LockScreen } from './components/LockScreen';
 import { Onboarding } from './components/Onboarding';
 import { MorningBrief } from './components/MorningBrief';
@@ -1521,6 +1522,15 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
     if (!currentProfileId) return;
     setNotifications(prev => {
       const updated = prev.map(n => ({ ...n, unread: false }));
+      localStorage.setItem(`zb_notifications_${currentProfileId}`, JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const handleToggleNotificationRead = (id: string) => {
+    if (!currentProfileId) return;
+    setNotifications(prev => {
+      const updated = prev.map(n => n.id === id ? { ...n, unread: !n.unread } : n);
       localStorage.setItem(`zb_notifications_${currentProfileId}`, JSON.stringify(updated));
       return updated;
     });
@@ -4437,6 +4447,9 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         position: 'relative'
       }}
     >
+      {/* Startup Animated Luxury Splash Screen */}
+      <SplashScreen minDurationMs={1200} />
+
       {/* Sticky Trial Expired Banner */}
       {isSubscriptionExpired() && (
         <div 
@@ -4562,10 +4575,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
           {/* Notifications Button */}
           <button 
-            onClick={() => {
-              handleMarkAllNotificationsRead();
-              setActiveView('notifications');
-            }} 
+            onClick={() => setActiveView('notifications')} 
             title="Notifications"
             className="tap-bounce"
             style={{
@@ -4940,6 +4950,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
               setActiveView('bank_importer');
             }}
             currencySymbol={currencySymbol}
+            onOpenAdminPanel={() => setIsAdminModalOpen(true)}
           />
         )}
         {activeView === 'shared_budget' && (
@@ -5017,6 +5028,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             notificationsList={notifications}
             onBack={() => setActiveView('dashboard')}
             onMarkAllRead={handleMarkAllNotificationsRead}
+            onToggleRead={handleToggleNotificationRead}
             onClearAll={() => {
               setNotifications([]);
               localStorage.setItem('zb_notifications', '[]');
@@ -5830,7 +5842,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
               fontWeight: 700,
               color: isPremiumUser ? '#22c55e' : '#f59e0b'
             }}>
-              <span>{isPremiumUser ? '👑 PRO VIP: Unlimited Scans' : `📸 Free Daily Scans: ${getGalleryDailyLimitState().usedScans}/${getGalleryDailyLimitState().maxAllowed}`}</span>
+              <span>{isPremiumUser ? '👑 PRO VIP: Unlimited Scans' : `📸 Free Daily Scans (No Ads Needed): ${getGalleryDailyLimitState().usedScans}/${getGalleryDailyLimitState().maxAllowed} Used`}</span>
               <span style={{ fontSize: '11px', opacity: 0.9 }}>AI Vision ⚡</span>
             </div>
 

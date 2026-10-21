@@ -29,13 +29,15 @@ interface NotificationsViewProps {
   onBack: () => void;
   onMarkAllRead?: () => void;
   onClearAll?: () => void;
+  onToggleRead?: (id: string) => void;
 }
 
 export const NotificationsView: React.FC<NotificationsViewProps> = ({
   notificationsList = [],
   onBack,
   onMarkAllRead,
-  onClearAll
+  onClearAll,
+  onToggleRead
 }) => {
   const [filter, setFilter] = useState<'all' | 'unread' | 'activity'>('all');
   const [now, setNow] = useState(new Date());
@@ -45,12 +47,9 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
     if ('Notification' in window) {
       setPermission(Notification.permission);
     }
-    if (onMarkAllRead) {
-      onMarkAllRead();
-    }
     const interval = setInterval(() => setNow(new Date()), 10000);
     return () => clearInterval(interval);
-  }, [onMarkAllRead]);
+  }, []);
 
   const requestPermission = async () => {
     if ('Notification' in window) {
@@ -156,28 +155,53 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
           </div>
         </div>
 
-        {notificationsList.length > 0 && onClearAll && (
-          <button
-            type="button"
-            onClick={onClearAll}
-            title="Clear all"
-            style={{
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.25)',
-              color: '#ef4444',
-              padding: '8px 12px',
-              borderRadius: '12px',
-              fontSize: '12px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            <Trash2 size={14} /> Clear
-          </button>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {notificationsList.some(n => n.unread) && onMarkAllRead && (
+            <button
+              type="button"
+              onClick={onMarkAllRead}
+              title="Mark all as read"
+              style={{
+                background: 'rgba(16, 185, 129, 0.12)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                color: '#10b981',
+                padding: '8px 12px',
+                borderRadius: '12px',
+                fontSize: '12px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <CheckCheck size={14} /> Mark Read
+            </button>
+          )}
+
+          {notificationsList.length > 0 && onClearAll && (
+            <button
+              type="button"
+              onClick={onClearAll}
+              title="Clear all"
+              style={{
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.25)',
+                color: '#ef4444',
+                padding: '8px 12px',
+                borderRadius: '12px',
+                fontSize: '12px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <Trash2 size={14} /> Clear
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Push Notification Banner */}
@@ -292,6 +316,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
           {filteredNotifications.map(n => (
             <div
               key={n.id}
+              onClick={() => onToggleRead?.(n.id)}
               className="glass-panel"
               style={{
                 padding: '16px 18px',
@@ -303,8 +328,10 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({
                 alignItems: 'flex-start',
                 transition: 'all 0.15s ease',
                 position: 'relative',
+                cursor: n.unread ? 'pointer' : 'default',
                 boxShadow: n.unread ? '0 4px 16px rgba(16, 185, 129, 0.15)' : 'var(--shadow-sm)'
               }}
+              title={n.unread ? "Click to mark as read" : undefined}
             >
               {getNotificationIcon(n.type)}
               <div style={{ flex: 1, minWidth: 0 }}>

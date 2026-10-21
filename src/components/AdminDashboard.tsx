@@ -1186,24 +1186,48 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            style={{
-              background: 'rgba(255, 255, 255, 0.08)',
-              border: 'none',
-              color: '#94a3b8',
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.2s'
-            }}
-          >
-            <X size={20} />
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <a
+              href="/admin.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                borderRadius: '10px',
+                backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                border: '1px solid rgba(99, 102, 241, 0.35)',
+                color: '#a5b4fc',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                textDecoration: 'none',
+                cursor: 'pointer'
+              }}
+              title="Open Admin in full desktop page"
+            >
+              🖥️ Full Desktop Tab
+            </a>
+            <button
+              onClick={onClose}
+              style={{
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: 'none',
+                color: '#94a3b8',
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         {/* Security Gate / Lock Screen */}
@@ -1258,6 +1282,27 @@ const DEFAULT_FALLBACK_PROFILES: ProfileRecord[] = [
                 }}
               />
               
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setAdminKeyInput('zenadmin2026')}
+                  style={{
+                    background: 'rgba(99, 102, 241, 0.15)',
+                    border: '1px dashed rgba(99, 102, 241, 0.45)',
+                    color: '#a5b4fc',
+                    borderRadius: '8px',
+                    padding: '6px 12px',
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  🔑 Fill Master Key: <strong style={{ color: '#fff' }}>zenadmin2026</strong>
+                </button>
+              </div>
+
               {authError && (
                 <div style={{ color: '#f87171', fontSize: '0.85rem', marginBottom: '1rem' }}>
                   {authError}

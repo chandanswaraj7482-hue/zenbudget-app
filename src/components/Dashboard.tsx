@@ -1060,6 +1060,53 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         )}
 
+        {/* Starting Balance Helper Banner when 0 accounts added */}
+        {displayAccounts.length === 0 && (
+          <div style={{
+            margin: '4px 0 14px 0',
+            padding: '10px 14px',
+            background: 'rgba(59, 130, 246, 0.1)',
+            border: '1px solid rgba(59, 130, 246, 0.28)',
+            borderRadius: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '10px',
+            flexWrap: 'wrap'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px', flex: 1 }}>
+              <span style={{ fontSize: '16px' }}>💡</span>
+              <div style={{ fontSize: '11px', lineHeight: 1.35 }}>
+                <span style={{ color: '#93c5fd', fontWeight: 700 }}>Starting Balance Not Configured</span>
+                <span style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '10.5px' }}>
+                  Balance reflects net test transactions. Tap to add your actual Bank or Cash wallet!
+                </span>
+              </div>
+            </div>
+            {onAddAccountClick && (
+              <button
+                type="button"
+                onClick={onAddAccountClick}
+                className="tap-bounce hover-lift"
+                style={{
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '6px 14px',
+                  borderRadius: '10px',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  boxShadow: '0 2px 8px rgba(37, 99, 235, 0.35)'
+                }}
+              >
+                + Set Starting Balance
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Income / Expense Grid (Clickable to open Detailed Stats & Analytics) */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', borderTop: '1px solid var(--border-divider)', paddingTop: '16px' }}>
           <div 
@@ -1082,7 +1129,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <ArrowUpRight size={19} />
             </div>
             <div>
-              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>{t('income')}</span>
+              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                {new Date().toLocaleString('default', { month: 'short' })} {t('income')}
+              </span>
               <p style={{ fontSize: '15px', fontWeight: 800, color: '#10b981', margin: 0, marginTop: '2px' }}>
                 +{formatCurrency(income, currencySymbol, 0)}
               </p>
@@ -1109,7 +1158,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <ArrowDownRight size={19} />
             </div>
             <div>
-              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>{t('expenses')}</span>
+              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                {new Date().toLocaleString('default', { month: 'short' })} {t('expenses')}
+              </span>
               <p style={{ fontSize: '15px', fontWeight: 800, color: '#f43f5e', margin: 0, marginTop: '2px' }}>
                 -{formatCurrency(expenses, currencySymbol, 0)}
               </p>
