@@ -16,7 +16,11 @@ import {
   ArrowRight,
   Image as ImageIcon,
   Camera,
-  X
+  X,
+  Home,
+  Zap,
+  Wallet,
+  SlidersHorizontal
 } from 'lucide-react';
 import { triggerSparklesExplosion } from './utils/audio';
 import { triggerHaptic } from './utils/haptics';
@@ -5029,232 +5033,162 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         )}
       </main>
 
-      {/* ── LUXURY DOCKED BOTTOM NAVIGATION (ATTACHED TO BOTTOM EDGE WITH SAFE AREA) ── */}
+      {/* ── MINIMALIST FLOATING OBSIDIAN CAPSULE DOCK (MATCHING DESIGN REFERENCE MOCKUP) ── */}
       <nav style={{
         position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        width: '100%',
-        background: theme === 'light' ? 'rgba(255, 255, 255, 0.94)' : 'rgba(11, 17, 28, 0.94)',
-        borderTop: theme === 'light' ? '1.5px solid rgba(0, 0, 0, 0.08)' : '1.5px solid rgba(255, 255, 255, 0.12)',
-        borderLeft: 'none',
-        borderRight: 'none',
-        borderBottom: 'none',
-        borderRadius: '24px 24px 0 0',
-        backdropFilter: 'blur(32px) saturate(210%)',
-        WebkitBackdropFilter: 'blur(32px) saturate(210%)',
+        bottom: 'calc(16px + env(safe-area-inset-bottom, 8px))',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 999,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '6px 12px calc(8px + env(safe-area-inset-bottom, 12px)) 12px',
-        boxShadow: theme === 'light' 
-          ? '0 -6px 24px rgba(0, 0, 0, 0.06)' 
-          : '0 -8px 36px rgba(0, 0, 0, 0.65), 0 -1px 20px rgba(16, 185, 129, 0.08)',
-        zIndex: 999,
-        transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+        pointerEvents: 'none'
       }}>
         <div style={{
+          pointerEvents: 'auto',
+          background: 'rgba(12, 18, 14, 0.95)',
+          border: '1px solid rgba(255, 255, 255, 0.14)',
+          borderRadius: '9999px',
+          backdropFilter: 'blur(24px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+          boxShadow: '0 12px 35px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12)',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          width: '100%',
-          maxWidth: '440px',
-          gap: '4px'
+          gap: '6px',
+          padding: '6px 10px',
+          height: '52px',
+          boxSizing: 'border-box'
         }}>
-        {/* 1. Home / Dashboard */}
-        <button
-          onClick={() => handleNavClick('dashboard')}
-          className="tap-bounce"
-          style={{
-            background: activeView === 'dashboard' ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.1) 100%)' : 'transparent',
-            border: activeView === 'dashboard' ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid transparent',
-            borderRadius: '22px',
-            padding: '7px 8px 6px 8px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '2px',
-            color: activeView === 'dashboard' ? '#34d399' : 'var(--text-muted)',
-            cursor: 'pointer',
-            fontSize: '10.5px',
-            fontWeight: activeView === 'dashboard' ? 800 : 600,
-            transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
-            flex: 1,
-            position: 'relative',
-            minWidth: 0,
-            boxShadow: activeView === 'dashboard' ? '0 0 16px rgba(16, 185, 129, 0.25)' : 'none'
-          }}
-        >
-          {activeView === 'dashboard' && (
-            <span style={{
-              position: 'absolute',
-              bottom: '2px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: '12px',
-              height: '2.5px',
-              borderRadius: '99px',
-              background: '#34d399',
-              boxShadow: '0 0 8px #34d399'
-            }} />
-          )}
-          <LayoutDashboard size={19} strokeWidth={activeView === 'dashboard' ? 2.6 : 2} style={{ color: activeView === 'dashboard' ? '#34d399' : undefined }} />
-          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{t('dashboard', { defaultValue: 'Home' })}</span>
-        </button>
-
-        {/* 2. Ledger / Transactions */}
-        <button
-          onClick={() => handleNavClick('transactions')}
-          className="tap-bounce"
-          style={{
-            background: activeView === 'transactions' ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.1) 100%)' : 'transparent',
-            border: activeView === 'transactions' ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid transparent',
-            borderRadius: '22px',
-            padding: '7px 8px 6px 8px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '2px',
-            color: activeView === 'transactions' ? '#34d399' : 'var(--text-muted)',
-            cursor: 'pointer',
-            fontSize: '10.5px',
-            fontWeight: activeView === 'transactions' ? 800 : 600,
-            transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
-            flex: 1,
-            position: 'relative',
-            minWidth: 0,
-            boxShadow: activeView === 'transactions' ? '0 0 16px rgba(16, 185, 129, 0.25)' : 'none'
-          }}
-        >
-          {activeView === 'transactions' && (
-            <span style={{
-              position: 'absolute',
-              bottom: '2px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: '12px',
-              height: '2.5px',
-              borderRadius: '99px',
-              background: '#34d399',
-              boxShadow: '0 0 8px #34d399'
-            }} />
-          )}
-          <Receipt size={19} strokeWidth={activeView === 'transactions' ? 2.6 : 2} style={{ color: activeView === 'transactions' ? '#34d399' : undefined }} />
-          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{t('ledger', { defaultValue: 'Ledger' })}</span>
-        </button>
-
-        {/* Center Quick Action Floating Add Button (Hero Centerpiece) */}
-        <div style={{ position: 'relative', padding: '0 4px', flexShrink: 0 }}>
+          {/* 1. Home / Dashboard */}
           <button
-            onClick={() => {
-              triggerHaptic('medium');
-              if (checkExpiredGuard('log new transactions')) return;
-              setEditingTransaction(null);
-              setIsModalOpen(true);
-            }}
-            title="Add Transaction"
-            className="tap-bounce hover-lift"
+            type="button"
+            onClick={() => handleNavClick('dashboard')}
+            title="Home"
+            aria-label="Home"
+            className="tap-bounce"
             style={{
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 45%, #06b6d4 100%)',
-              border: '3px solid rgba(11, 17, 28, 0.95)',
-              borderRadius: '50%',
-              width: '50px',
-              height: '50px',
+              width: '40px',
+              height: '40px',
+              borderRadius: '12px',
+              border: 'none',
+              background: activeView === 'dashboard' ? 'rgba(52, 211, 153, 0.22)' : 'transparent',
+              color: activeView === 'dashboard' ? '#34d399' : 'rgba(255, 255, 255, 0.45)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#ffffff',
-              boxShadow: '0 10px 28px rgba(16, 185, 129, 0.55), 0 0 18px rgba(6, 182, 212, 0.35)',
               cursor: 'pointer',
-              transition: 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease'
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              padding: 0,
+              boxShadow: activeView === 'dashboard' ? '0 0 12px rgba(52, 211, 153, 0.35)' : 'none'
             }}
           >
-            <Plus size={24} strokeWidth={3} />
+            <Home size={19} strokeWidth={activeView === 'dashboard' ? 2.5 : 1.9} />
           </button>
-        </div>
 
-        {/* 3. Budget Limits */}
-        <button
-          onClick={() => handleNavClick('budgets')}
-          className="tap-bounce"
-          style={{
-            background: activeView === 'budgets' ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.1) 100%)' : 'transparent',
-            border: activeView === 'budgets' ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid transparent',
-            borderRadius: '22px',
-            padding: '7px 8px 6px 8px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '2px',
-            color: activeView === 'budgets' ? '#34d399' : 'var(--text-muted)',
-            cursor: 'pointer',
-            fontSize: '10.5px',
-            fontWeight: activeView === 'budgets' ? 800 : 600,
-            transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
-            flex: 1,
-            position: 'relative',
-            minWidth: 0,
-            boxShadow: activeView === 'budgets' ? '0 0 16px rgba(16, 185, 129, 0.25)' : 'none'
-          }}
-        >
-          {activeView === 'budgets' && (
-            <span style={{
-              position: 'absolute',
-              bottom: '2px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: '12px',
-              height: '2.5px',
-              borderRadius: '99px',
-              background: '#34d399',
-              boxShadow: '0 0 8px #34d399'
-            }} />
-          )}
-          <PiggyBank size={19} strokeWidth={activeView === 'budgets' ? 2.6 : 2} style={{ color: activeView === 'budgets' ? '#34d399' : undefined }} />
-          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{t('limits', { defaultValue: 'Limits' })}</span>
-        </button>
+          {/* 2. Transfer / Transactions / Lightning */}
+          <button
+            type="button"
+            onClick={() => handleNavClick('transactions')}
+            title="Transactions"
+            aria-label="Transactions"
+            className="tap-bounce"
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '12px',
+              border: 'none',
+              background: activeView === 'transactions' ? 'rgba(52, 211, 153, 0.22)' : 'transparent',
+              color: activeView === 'transactions' ? '#34d399' : 'rgba(255, 255, 255, 0.45)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              padding: 0,
+              boxShadow: activeView === 'transactions' ? '0 0 12px rgba(52, 211, 153, 0.35)' : 'none'
+            }}
+          >
+            <Zap size={19} strokeWidth={activeView === 'transactions' ? 2.5 : 1.9} />
+          </button>
 
-        {/* 4. More & Tools Hub */}
-        <button
-          onClick={() => handleNavClick('more')}
-          className="tap-bounce"
-          style={{
-            background: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.1) 100%)' : 'transparent',
-            border: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid transparent',
-            borderRadius: '22px',
-            padding: '7px 8px 6px 8px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '2px',
-            color: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? '#34d399' : 'var(--text-muted)',
-            cursor: 'pointer',
-            fontSize: '10.5px',
-            fontWeight: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 800 : 600,
-            transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
-            flex: 1,
-            position: 'relative',
-            minWidth: 0,
-            boxShadow: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? '0 0 16px rgba(16, 185, 129, 0.25)' : 'none'
-          }}
-        >
-          {['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) && (
-            <span style={{
-              position: 'absolute',
-              bottom: '2px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: '12px',
-              height: '2.5px',
-              borderRadius: '99px',
-              background: '#34d399',
-              boxShadow: '0 0 8px #34d399'
-            }} />
-          )}
-          <Sparkles size={19} strokeWidth={['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 2.6 : 2} style={{ color: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? '#34d399' : undefined }} />
-          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{t('more', { defaultValue: 'More' })}</span>
-        </button>
+          {/* 3. Analytics / Insights */}
+          <button
+            type="button"
+            onClick={() => handleNavClick('analytics')}
+            title="Insights"
+            aria-label="Insights"
+            className="tap-bounce"
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '12px',
+              border: 'none',
+              background: activeView === 'analytics' ? 'rgba(52, 211, 153, 0.22)' : 'transparent',
+              color: activeView === 'analytics' ? '#34d399' : 'rgba(255, 255, 255, 0.45)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              padding: 0,
+              boxShadow: activeView === 'analytics' ? '0 0 12px rgba(52, 211, 153, 0.35)' : 'none'
+            }}
+          >
+            <BarChart3 size={19} strokeWidth={activeView === 'analytics' ? 2.5 : 1.9} />
+          </button>
+
+          {/* 4. Limits / Budgets */}
+          <button
+            type="button"
+            onClick={() => handleNavClick('budgets')}
+            title="Budgets"
+            aria-label="Budgets"
+            className="tap-bounce"
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '12px',
+              border: 'none',
+              background: activeView === 'budgets' ? 'rgba(52, 211, 153, 0.22)' : 'transparent',
+              color: activeView === 'budgets' ? '#34d399' : 'rgba(255, 255, 255, 0.45)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              padding: 0,
+              boxShadow: activeView === 'budgets' ? '0 0 12px rgba(52, 211, 153, 0.35)' : 'none'
+            }}
+          >
+            <SlidersHorizontal size={19} strokeWidth={activeView === 'budgets' ? 2.5 : 1.9} />
+          </button>
+
+          {/* 5. Wallet / More Tools */}
+          <button
+            type="button"
+            onClick={() => handleNavClick('more')}
+            title="Wallet & Hub"
+            aria-label="Wallet & Hub"
+            className="tap-bounce"
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '12px',
+              border: 'none',
+              background: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer', 'follow_us', 'notifications'].includes(activeView) ? 'rgba(52, 211, 153, 0.22)' : 'transparent',
+              color: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer', 'follow_us', 'notifications'].includes(activeView) ? '#34d399' : 'rgba(255, 255, 255, 0.45)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              padding: 0,
+              boxShadow: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer', 'follow_us', 'notifications'].includes(activeView) ? '0 0 12px rgba(52, 211, 153, 0.35)' : 'none'
+            }}
+          >
+            <Wallet size={19} strokeWidth={['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer', 'follow_us', 'notifications'].includes(activeView) ? 2.5 : 1.9} />
+          </button>
         </div>
       </nav>
 
