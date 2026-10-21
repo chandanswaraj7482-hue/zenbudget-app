@@ -56,5 +56,6 @@ zenbudget_decoded/
 *.sql
 *.aab
 playstore_release/
+release_builds/
 .env*
 .env

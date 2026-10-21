@@ -808,86 +808,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingBottom: '120px' }} className="animate-fade-in dashboard-layout-container">
 
-      {/* ── FROZEN STICKY MORNING / EVENING AI BRIEF ONLY ── */}
-      {showAiBrief && (
-        <div
-          className="sticky-ai-brief-bar"
-          style={{
-            position: 'sticky',
-            top: '-16px',
-            zIndex: 40,
-            background: 'rgba(11, 15, 25, 0.92)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            margin: '-16px -16px 4px -16px',
-            padding: '10px 16px 8px 16px',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.06)'
-          }}
-        >
-          <div 
-            className="animate-fade-in"
-            style={{
-              padding: '8px 12px',
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.14) 0%, rgba(5, 150, 105, 0.07) 100%)',
-              border: '1px solid rgba(16, 185, 129, 0.28)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px'
-            }}
-          >
-            <div 
-              onClick={() => isMorning ? onOpenMorningBrief?.() : onOpenEveningReflection?.()}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, cursor: 'pointer', minWidth: 0 }}
-            >
-              <div style={{ padding: '5px', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '8px', color: 'var(--primary)', flexShrink: 0 }}>
-                <Sparkles size={15} />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ margin: 0, fontSize: '12px', fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {isMorning ? 'Tap for Morning Brief ☀️' : 'Tap for Evening Reflection 🌙'}
-                </p>
-                <p style={{ margin: 0, fontSize: '10px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {isMorning ? 'Start your day with smart budget insights' : 'Review your daily spending patterns'}
-                </p>
-              </div>
-              <ArrowRight size={13} color="var(--primary)" style={{ flexShrink: 0 }} />
-            </div>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                localStorage.setItem(dismissKey, 'true');
-                setIsAiBriefDismissed(true);
-                triggerHaptic('light');
-              }}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-secondary)',
-                cursor: 'pointer',
-                padding: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: '50%',
-                flexShrink: 0
-              }}
-              title="Dismiss"
-            >
-              <X size={13} />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── USER GREETING ROW (Naturally scrolling, lightweight) ── */}
+      {/* ── USER GREETING & AI BRIEF HEADER ── */}
       <div 
         className="user-greeting-header"
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '6px',
+          gap: '10px',
           paddingBottom: '2px'
         }}
       >
@@ -964,7 +891,66 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </button>
           </div>
         </div>
+
+        {/* In-flow Morning / Evening AI Brief Pill */}
+        {showAiBrief && (
+          <div 
+            className="animate-fade-in"
+            style={{
+              padding: '8px 12px',
+              borderRadius: '14px',
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.14) 0%, rgba(5, 150, 105, 0.07) 100%)',
+              border: '1px solid rgba(16, 185, 129, 0.28)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}
+          >
+            <div 
+              onClick={() => isMorning ? onOpenMorningBrief?.() : onOpenEveningReflection?.()}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, cursor: 'pointer', minWidth: 0 }}
+            >
+              <div style={{ padding: '5px', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '8px', color: 'var(--primary)', flexShrink: 0 }}>
+                <Sparkles size={15} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ margin: 0, fontSize: '12px', fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {isMorning ? 'Tap for Morning Brief ☀️' : 'Tap for Evening Reflection 🌙'}
+                </p>
+                <p style={{ margin: 0, fontSize: '10px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {isMorning ? 'Start your day with smart budget insights' : 'Review your daily spending patterns'}
+                </p>
+              </div>
+              <ArrowRight size={13} color="var(--primary)" style={{ flexShrink: 0 }} />
+            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                localStorage.setItem(dismissKey, 'true');
+                setIsAiBriefDismissed(true);
+                triggerHaptic('light');
+              }}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '50%',
+                flexShrink: 0
+              }}
+              title="Dismiss"
+            >
+              <X size={13} />
+            </button>
+          </div>
+        )}
       </div>
+
 
       {/* Main Glass Balance Card - Ultra-Modern Fintech Card with Dynamic Glow */}
       <div className="fintech-card" style={{
@@ -2649,104 +2635,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         )}
       </div>
 
-      {/* Empty State visual recommendations for new user */}
-      {transactions.length === 0 && (
-        <div className="glass-panel" style={{
-          padding: '24px 20px',
-          background: 'linear-gradient(135deg, rgba(20, 24, 38, 0.95) 0%, rgba(16, 185, 129, 0.1) 100%)',
-          border: '1.5px solid rgba(16, 185, 129, 0.25)',
-          borderRadius: '26px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
-          gap: '14px',
-          boxShadow: '0 12px 30px rgba(0, 0, 0, 0.35)'
-        }}>
-          <div style={{ width: '50px', height: '50px', borderRadius: '50%', backgroundColor: 'rgba(16, 185, 129, 0.18)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 16px rgba(16, 185, 129, 0.25)' }}>
-            <Sparkles size={24} />
-          </div>
-          <div>
-            <h4 style={{ fontSize: '17px', fontWeight: 900, color: '#ffffff', margin: 0, letterSpacing: '-0.01em' }}>Welcome to ZenBudget! ✨</h4>
-            <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: '1.4', maxWidth: '320px' }}>
-              Your private money ledger is ready. Tap any sample to log your first transaction in 1 second:
-            </p>
-          </div>
 
-          {/* Quick 1-Tap Starter Pills for New Users */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', width: '100%', maxWidth: '340px' }}>
-            {[
-              { title: 'Chai / Coffee ☕', amount: 30, type: 'expense' as const, cat: 'food' },
-              { title: 'Food / Swiggy 🍔', amount: 250, type: 'expense' as const, cat: 'food' },
-              { title: 'Groceries 🛒', amount: 500, type: 'expense' as const, cat: 'groceries' },
-              { title: 'Starting Salary 💼', amount: 35000, type: 'income' as const, cat: 'salary' }
-            ].map((sample, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => {
-                  triggerHaptic('success');
-                  if (onSaveTransaction) {
-                    onSaveTransaction({
-                      title: sample.title,
-                      amount: sample.amount,
-                      type: sample.type,
-                      category: sample.cat,
-                      date: new Date().toISOString(),
-                      account_id: 'cash'
-                    });
-                  } else {
-                    onAddTransactionClick();
-                  }
-                }}
-                className="tap-bounce hover-lift"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '14px',
-                  padding: '9px 10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                  color: '#ffffff',
-                  fontSize: '11.5px',
-                  fontWeight: 700
-                }}
-              >
-                <span>{sample.title}</span>
-                <span style={{ color: sample.type === 'income' ? '#34d399' : '#f87171', fontWeight: 800 }}>
-                  {formatCurrency(sample.amount, currencySymbol, 0)}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={onAddTransactionClick}
-            className="tap-bounce hover-lift"
-            style={{
-              marginTop: '4px',
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '16px',
-              padding: '11px 24px',
-              fontSize: '13px',
-              fontWeight: 800,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              cursor: 'pointer',
-              boxShadow: '0 6px 18px rgba(16, 185, 129, 0.4)'
-            }}
-          >
-            <Plus size={16} strokeWidth={2.8} />
-            <span>+ Add Custom Entry</span>
-          </button>
-        </div>
-      )}
 
       {/* Recent Transactions List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

@@ -4204,42 +4204,25 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 
-                {/* User Avatar Stack & Ratings */}
-                <div className="hero-animate" style={{ display: 'flex', alignItems: 'center', background: isDark ? 'rgba(255,255,255,0.12)' : '#ffffff', backdropFilter: 'blur(12px)', border: isDark ? '1px solid rgba(255,255,255,0.18)' : '1px solid rgba(16,185,129,0.22)', padding: '6px 16px', borderRadius: '100px', marginBottom: '20px', boxShadow: isDark ? '0 4px 14px rgba(0,0,0,0.15)' : '0 4px 16px rgba(16,185,129,0.1)' }}>
-                  <div style={{ display: 'flex', marginRight: '10px' }}>
-                    {[
-                      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop',
-                      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=100&auto=format&fit=crop',
-                      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop'
-                    ].map((src, i) => (
-                      <img key={i} src={src} alt="User avatar" style={{ width: '26px', height: '26px', borderRadius: '50%', border: `2px solid ${isDark ? t.cardBg : '#ffffff'}`, marginLeft: i > 0 ? '-8px' : 0, zIndex: 3 - i, objectFit: 'cover' }} />
-                    ))}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Star size={14} fill="#84cc16" color="#84cc16" />
-                    <span style={{ fontSize: '13px', fontWeight: 800, color: isDark ? '#ffffff' : '#0f172a' }}>Trusted by <span style={{ color: '#10b981' }}>4,200+</span> active users</span>
-                  </div>
-                </div>
-
-                {/* Brand Tagline Badge */}
+                {/* Brand Hero Pill (Clean & Lightweight) */}
                 <div className="hero-animate" style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '12px',
-                  background: isDark ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(99, 102, 241, 0.14) 100%)' : 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(99, 102, 241, 0.08) 100%)',
-                  border: isDark ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid rgba(16, 185, 129, 0.3)',
+                  gap: '9px',
+                  marginBottom: '20px',
+                  background: isDark ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(99, 102, 241, 0.14) 100%)' : 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(99, 102, 241, 0.08) 100%)',
+                  border: isDark ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(16, 185, 129, 0.28)',
                   padding: '7px 18px',
                   borderRadius: '100px',
                   maxWidth: '100%',
                   width: 'fit-content',
-                  boxShadow: '0 4px 18px rgba(16, 185, 129, 0.15)'
+                  boxShadow: '0 4px 18px rgba(16, 185, 129, 0.12)'
                 }}>
-                  <Sparkles size={13} color="#10b981" />
+                  <Sparkles size={14} color="#10b981" />
                   <span style={{
-                    fontSize: '12.5px',
+                    fontSize: '13px',
                     fontWeight: 800,
-                    letterSpacing: '0.03em',
+                    letterSpacing: '0.02em',
                     background: 'linear-gradient(135deg, #34d399 0%, #a78bfa 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent'
@@ -4248,17 +4231,8 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   </span>
                 </div>
 
-                {/* Sub-badge pill */}
-                <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '16px', background: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(16,185,129,0.12)', border: isDark ? '1px solid rgba(255,255,255,0.22)' : '1px solid rgba(16,185,129,0.28)', padding: '6px 14px', borderRadius: '100px', maxWidth: '100%', width: 'fit-content' }}>
-                  <div style={{ width: '22px', height: '22px', background: '#10b981', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Sparkles size={12} color="white" />
-                  </div>
-                  <span style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: isDark ? '#a7f3d0' : '#047857', whiteSpace: 'nowrap' }}>ZENBUDGET TRACKER · #1 AI EXPENSE MANAGER</span>
-                </div>
-
                 {/* Main Hero Title with Typing Animation */}
-                <h1 className="hero-animate hero-title" style={{ fontSize: 'clamp(2.4rem, 5vw, 3.8rem)', fontWeight: 900, lineHeight: 1.12, letterSpacing: '-0.03em', marginBottom: '20px', color: isDark ? '#ffffff' : '#0f172a' }}>
-                  <span style={{ display: 'block', fontSize: 'clamp(14px, 2vw, 18px)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.14em', color: isDark ? '#10b981' : '#059669', marginBottom: '10px' }}>ZenBudget Tracker</span>
+                <h1 className="hero-animate hero-title" style={{ fontSize: 'clamp(2.4rem, 5vw, 3.8rem)', fontWeight: 900, lineHeight: 1.15, letterSpacing: '-0.03em', marginBottom: '18px', color: isDark ? '#ffffff' : '#0f172a' }}>
                   <span style={{ color: isDark ? '#ffffff' : '#0f172a' }}>Stop Wondering Where<br />Your Money{' '}</span>
                   <span style={{ color: isDark ? '#f87171' : '#e11d48', display: 'inline-flex', alignItems: 'center', fontWeight: 900, textShadow: isDark ? '0 0 24px rgba(248,113,113,0.55)' : 'none' }}>
                     <span>{typedText}</span>
@@ -4266,10 +4240,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   </span>
                 </h1>
 
-                <p className="hero-animate" style={{ fontSize: 'clamp(16px, 2vw, 19px)', fontWeight: 500, lineHeight: 1.6, color: isDark ? 'rgba(255,255,255,0.75)' : '#475569', maxWidth: '540px', marginBottom: '32px' }}>
-                  <strong style={{ color: '#10b981', display: 'block', marginBottom: '8px', fontSize: '15.5px', letterSpacing: '0.02em' }}>
-                    We don't chase trends. We build what's next.
-                  </strong>
+                <p className="hero-animate" style={{ fontSize: 'clamp(15px, 2vw, 18px)', fontWeight: 500, lineHeight: 1.6, color: isDark ? 'rgba(255,255,255,0.72)' : '#475569', maxWidth: '520px', marginBottom: '32px' }}>
                   Identify hidden leaks, crush impulse spending, and build wealth on autopilot. Join <strong style={{ color: isDark ? '#ffffff' : '#0f172a' }}>4,200+ users</strong> who saved an average of ₹8,400 in their first 30 days.
                 </p>
 

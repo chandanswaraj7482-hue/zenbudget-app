@@ -5029,29 +5029,39 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         )}
       </main>
 
-      {/* ── LUXURY FLOATING FROSTED GLASS DOCK (iOS 18 / Dynamic Island Inspired) ── */}
+      {/* ── LUXURY DOCKED BOTTOM NAVIGATION (ATTACHED TO BOTTOM EDGE WITH SAFE AREA) ── */}
       <nav style={{
         position: 'fixed',
-        bottom: 'clamp(12px, 2.5vh, 18px)',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: 'calc(100% - 24px)',
-        maxWidth: '430px',
-        background: theme === 'light' ? 'rgba(255, 255, 255, 0.88)' : 'rgba(11, 17, 28, 0.88)',
-        border: theme === 'light' ? '1.5px solid rgba(0, 0, 0, 0.08)' : '1.5px solid rgba(255, 255, 255, 0.12)',
-        borderRadius: '30px',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        width: '100%',
+        background: theme === 'light' ? 'rgba(255, 255, 255, 0.94)' : 'rgba(11, 17, 28, 0.94)',
+        borderTop: theme === 'light' ? '1.5px solid rgba(0, 0, 0, 0.08)' : '1.5px solid rgba(255, 255, 255, 0.12)',
+        borderLeft: 'none',
+        borderRight: 'none',
+        borderBottom: 'none',
+        borderRadius: '24px 24px 0 0',
         backdropFilter: 'blur(32px) saturate(210%)',
         WebkitBackdropFilter: 'blur(32px) saturate(210%)',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '6px 8px',
+        justifyContent: 'center',
+        padding: '6px 12px calc(8px + env(safe-area-inset-bottom, 12px)) 12px',
         boxShadow: theme === 'light' 
-          ? '0 12px 35px rgba(0, 0, 0, 0.12), 0 2px 10px rgba(0, 0, 0, 0.04)' 
-          : '0 20px 50px rgba(0, 0, 0, 0.65), 0 0 25px rgba(16, 185, 129, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.12)',
+          ? '0 -6px 24px rgba(0, 0, 0, 0.06)' 
+          : '0 -8px 36px rgba(0, 0, 0, 0.65), 0 -1px 20px rgba(16, 185, 129, 0.08)',
         zIndex: 999,
         transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
       }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          maxWidth: '440px',
+          gap: '4px'
+        }}>
         {/* 1. Home / Dashboard */}
         <button
           onClick={() => handleNavClick('dashboard')}
@@ -5245,6 +5255,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
           <Sparkles size={19} strokeWidth={['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? 2.6 : 2} style={{ color: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer'].includes(activeView) ? '#34d399' : undefined }} />
           <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{t('more', { defaultValue: 'More' })}</span>
         </button>
+        </div>
       </nav>
 
       {/* Transaction Modal Drawer */}
