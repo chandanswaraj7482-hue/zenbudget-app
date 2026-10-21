@@ -31,7 +31,8 @@ import {
   Camera,
   Bot,
   Eye,
-  EyeOff
+  EyeOff,
+  ArrowRight
 } from 'lucide-react';
 import type { Transaction, SavingsGoal, CategoryBudget, Account } from '../types';
 import { t } from '../utils/i18n';
@@ -39,6 +40,7 @@ import { ZenPet } from './ZenPet';
 import { PremiumHub } from './PremiumHub';
 import { QuickCaptureCard } from './QuickCaptureCard';
 import { formatCurrency } from '../utils/formatCurrency';
+import { triggerHaptic } from '../utils/haptics';
 import confetti from 'canvas-confetti';
 import { playBadgeClaimFanfare } from '../utils/audio';
 
@@ -79,6 +81,8 @@ interface DashboardProps {
   familyMembers?: { id: string; name: string; couple_code?: string }[];
   partnerName?: string;
   partnerId?: string;
+  onOpenMorningBrief?: () => void;
+  onOpenEveningReflection?: () => void;
 }
 
 const DAILY_COACH_TIPS = [
@@ -185,7 +189,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   familyMembers = [],
   partnerName: _partnerName,
   partnerId,
-  language = 'en'
+  language = 'en',
+  onOpenMorningBrief,
+  onOpenEveningReflection
 }) => {
   const [selectedDashboardView, setSelectedDashboardView] = useState<'combined' | 'personal' | string>('combined');
   const [avatarError, setAvatarError] = useState(false);
@@ -790,77 +796,167 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const budgetLeft = Math.max(0, monthlySalary - expenses);
   const budgetPercent = monthlySalary > 0 ? Math.min(100, Math.round((expenses / monthlySalary) * 100)) : 0;
   const showBudgetBar = monthlySalary > 0;
+  const isMorning = currentHour >= 5 && currentHour < 12;
+  const isEvening = currentHour >= 18;
+  const dismissKey = `zb_dismiss_ai_brief_${new Date().toISOString().split('T')[0]}_${isMorning ? 'm' : 'e'}`;
+  const [isAiBriefDismissed, setIsAiBriefDismissed] = useState(() => {
+    return typeof window !== 'undefined' && localStorage.getItem(dismissKey) === 'true';
+  });
+  const showAiBrief = (isMorning || isEvening) && !isAiBriefDismissed;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingBottom: '120px' }} className="animate-fade-in dashboard-layout-container">
 
-      {/* Aesthetic Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginTop: '4px', marginBottom: '2px', flexWrap: 'nowrap', width: '100%' }}>
-        <div onClick={onOpenProfile} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
-          {/* Avatar with glow */}
-          {userAvatar && !avatarError && !userAvatar.includes('ui-avatars.com') ? (
-             <img 
-               src={userAvatar} 
-               alt={userName || "User"} 
-               referrerPolicy="no-referrer"
-               crossOrigin="anonymous"
-               onError={() => setAvatarError(true)}
-               style={{ width: '42px', height: '42px', borderRadius: '50%', border: '2px solid #22c55e', boxShadow: '0 0 12px rgba(34,197,94,0.3)', objectFit: 'cover', flexShrink: 0 }} 
-             />
-          ) : (
-             <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: '16px', border: '2px solid #22c55e', boxShadow: '0 0 12px rgba(34,197,94,0.3)', flexShrink: 0, letterSpacing: '0.5px' }}>
-               {userName ? userName.trim().split(/\s+/).filter(Boolean).map(p => p[0]).slice(0, 2).join('').toUpperCase() || 'U' : 'U'}
-             </div>
-          )}
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', minWidth: 0, overflow: 'hidden', flex: '1 1 0%' }}>
-            {/* Line 1: Time of Day Greeting */}
-            <div style={{ fontSize: '10px', color: '#22c55e', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.2 }}>
-              {timeOfDayGreeting} {timeOfDayEmoji}
-            </div>
-            {/* Line 2: User Name */}
-            <h1 style={{ fontSize: '15px', fontWeight: 900, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.2 }}>
-              {userName || 'User'}
-            </h1>
-            {/* Line 3: Daily Quote */}
-            <div style={{ 
-              fontSize: '10px', 
-              color: 'var(--text-secondary)', 
-              fontWeight: 500, 
-              whiteSpace: 'nowrap', 
-              overflow: 'hidden', 
-              textOverflow: 'ellipsis',
-              lineHeight: 1.2
-            }}>
-              {dailyQuote} 🌟
-            </div>
-          </div>
-        </div>
-        
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-          <button
-            onClick={onAddTransactionClick}
+      {/* ── FROZEN / STICKY HEADER (Morning Brief + User Greeting + Add Button) ── */}
+      <div 
+        className="sticky-frozen-header"
+        style={{
+          position: 'sticky',
+          top: '-16px',
+          zIndex: 45,
+          background: 'rgba(11, 15, 25, 0.95)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          margin: '-16px -16px 2px -16px',
+          padding: '14px 16px 10px 16px',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px'
+        }}
+      >
+        {/* Morning / Evening AI Brief Banner */}
+        {showAiBrief && (
+          <div 
+            className="animate-fade-in"
             style={{
-              flexShrink: 0,
-              padding: '8px 14px',
+              padding: '9px 12px',
               borderRadius: '14px',
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-              color: '#ffffff',
-              fontSize: '12.5px',
-              fontWeight: 800,
-              border: 'none',
-              cursor: 'pointer',
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.14) 0%, rgba(5, 150, 105, 0.07) 100%)',
+              border: '1px solid rgba(16, 185, 129, 0.28)',
               display: 'flex',
               alignItems: 'center',
-              gap: '5px',
-              boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
-              whiteSpace: 'nowrap',
-              transition: 'all 0.15s ease'
+              gap: '10px',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.1)'
             }}
           >
-            <Plus size={16} strokeWidth={2.8} />
-            <span>{t('add_new')}</span>
-          </button>
+            <div 
+              onClick={() => isMorning ? onOpenMorningBrief?.() : onOpenEveningReflection?.()}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, cursor: 'pointer', minWidth: 0 }}
+            >
+              <div style={{ padding: '5px', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '8px', color: 'var(--primary)', flexShrink: 0 }}>
+                <Sparkles size={15} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ margin: 0, fontSize: '12.5px', fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {isMorning ? 'Tap for Morning Brief ☀️' : 'Tap for Evening Reflection 🌙'}
+                </p>
+                <p style={{ margin: 0, fontSize: '10.5px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {isMorning ? 'Start your day with smart budget insights' : 'Review your daily spending patterns'}
+                </p>
+              </div>
+              <ArrowRight size={13} color="var(--primary)" style={{ flexShrink: 0 }} />
+            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                localStorage.setItem(dismissKey, 'true');
+                setIsAiBriefDismissed(true);
+                triggerHaptic('light');
+              }}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '50%',
+                flexShrink: 0
+              }}
+              title="Dismiss"
+            >
+              <X size={13} />
+            </button>
+          </div>
+        )}
+
+        {/* User Greeting row + Add Button */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'nowrap', width: '100%' }}>
+          <div onClick={onOpenProfile} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
+            {/* Avatar with glow */}
+            {userAvatar && !avatarError && !userAvatar.includes('ui-avatars.com') ? (
+              <img 
+                src={userAvatar} 
+                alt={userName || "User"} 
+                referrerPolicy="no-referrer"
+                crossOrigin="anonymous"
+                onError={() => setAvatarError(true)}
+                style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #22c55e', boxShadow: '0 0 10px rgba(34,197,94,0.3)', objectFit: 'cover', flexShrink: 0 }} 
+              />
+            ) : (
+              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: '15px', border: '2px solid #22c55e', boxShadow: '0 0 10px rgba(34,197,94,0.3)', flexShrink: 0, letterSpacing: '0.5px' }}>
+                {userName ? userName.trim().split(/\s+/).filter(Boolean).map(p => p[0]).slice(0, 2).join('').toUpperCase() || 'U' : 'U'}
+              </div>
+            )}
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', minWidth: 0, overflow: 'hidden', flex: '1 1 0%' }}>
+              {/* Line 1: Time of Day Greeting */}
+              <div style={{ fontSize: '10px', color: '#22c55e', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.2 }}>
+                {timeOfDayGreeting} {timeOfDayEmoji}
+              </div>
+              {/* Line 2: User Name */}
+              <h1 style={{ fontSize: '15px', fontWeight: 900, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.2 }}>
+                {userName || 'User'}
+              </h1>
+              {/* Line 3: Daily Quote */}
+              <div style={{ 
+                fontSize: '10px', 
+                color: 'var(--text-secondary)', 
+                fontWeight: 500, 
+                whiteSpace: 'nowrap', 
+                overflow: 'hidden', 
+                textOverflow: 'ellipsis',
+                lineHeight: 1.2
+              }}>
+                {dailyQuote} 🌟
+              </div>
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+            <button
+              onClick={() => {
+                triggerHaptic('medium');
+                onAddTransactionClick();
+              }}
+              className="tap-bounce hover-lift"
+              style={{
+                flexShrink: 0,
+                padding: '8px 14px',
+                borderRadius: '14px',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: '#ffffff',
+                fontSize: '12.5px',
+                fontWeight: 800,
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <Plus size={16} strokeWidth={2.8} />
+              <span>Add</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -904,39 +1000,45 @@ export const Dashboard: React.FC<DashboardProps> = ({
               ● Live
             </span>
           </div>
-          <button
-            type="button"
-            className="tap-bounce"
-            onClick={() => setIsBalanceHidden(prev => {
-              const next = !prev;
-              localStorage.setItem('zb_hide_balance', String(next));
-              return next;
-            })}
-            title={isBalanceHidden ? "Show balance" : "Hide balance"}
-            style={{
-              background: 'rgba(255, 255, 255, 0.06)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              borderRadius: '999px',
-              padding: '3px 10px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px',
-              color: 'var(--text-secondary)',
-              fontSize: '11px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              transition: 'all 0.18s ease'
-            }}
-          >
-            {isBalanceHidden ? <EyeOff size={13} /> : <Eye size={13} />}
-            <span>{isBalanceHidden ? 'Hidden' : 'Hide'}</span>
-          </button>
+          <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+            All Wallets
+          </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', margin: '10px 0 14px 0', color: 'var(--text-primary)', minWidth: 0, maxWidth: '100%' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '10px 0 14px 0', color: 'var(--text-primary)', minWidth: 0, maxWidth: '100%' }}>
           <span style={{ fontSize: 'clamp(32px, 8.5vw, 44px)', fontWeight: 900, letterSpacing: '-0.025em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#ffffff' }}>
             {isBalanceHidden ? '••••••••' : formatCurrency(totalBalance, currencySymbol, 0)}
           </span>
+          <button
+            type="button"
+            className="tap-bounce hover-lift"
+            onClick={() => {
+              triggerHaptic('light');
+              setIsBalanceHidden(prev => {
+                const next = !prev;
+                localStorage.setItem('zb_hide_balance', String(next));
+                return next;
+              });
+            }}
+            title={isBalanceHidden ? "Show balance" : "Hide balance"}
+            style={{
+              background: 'rgba(255, 255, 255, 0.08)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              borderRadius: '50%',
+              width: '34px',
+              height: '34px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: isBalanceHidden ? '#34d399' : 'var(--text-secondary)',
+              cursor: 'pointer',
+              flexShrink: 0,
+              transition: 'all 0.18s ease',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+            }}
+          >
+            {isBalanceHidden ? <EyeOff size={17} /> : <Eye size={17} />}
+          </button>
         </div>
 
         {/* Sub-wallets breakdown row (Only rendered when partner/family is connected) */}

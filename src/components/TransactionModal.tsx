@@ -28,6 +28,7 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
 import { admobService } from '../services/admobService';
 import { checkImpulseLock, type ImpulseLockCheckResult } from './WishlistBlocker';
+import { triggerHaptic } from '../utils/haptics';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -1042,6 +1043,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   type="button"
                   className="tap-bounce"
                   onClick={() => {
+                    triggerHaptic('light');
                     const curr = parseFloat(amount) || 0;
                     setAmount((curr + val).toString());
                   }}
@@ -1072,7 +1074,10 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 key="clear"
                 type="button"
                 className="tap-bounce"
-                onClick={() => setAmount('')}
+                onClick={() => {
+                  triggerHaptic('light');
+                  setAmount('');
+                }}
                 style={{
                   background: 'rgba(239, 68, 68, 0.08)',
                   border: '1px solid rgba(239, 68, 68, 0.25)',
@@ -1122,6 +1127,73 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   padding: '0'
                 }}
               />
+            </div>
+
+            {/* Quick 1-Tap Presets for New Users */}
+            <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px', scrollbarWidth: 'none' }}>
+              {type === 'expense' ? [
+                { label: '🍔 Food / Swiggy', title: 'Food & Dining', cat: 'food' },
+                { label: '🛒 Grocery', title: 'Grocery Shopping', cat: 'food' },
+                { label: '☕ Chai / Snacks', title: 'Tea & Snacks', cat: 'food' },
+                { label: '⛽ Petrol', title: 'Fuel / Petrol', cat: 'travel' },
+                { label: '⚡ Recharge / Bill', title: 'Utility Bill', cat: 'bills' },
+                { label: '🛍️ Shopping', title: 'Shopping', cat: 'shopping' },
+                { label: '💊 Pharmacy', title: 'Medicines', cat: 'health' }
+              ].map((p) => (
+                <button
+                  key={p.label}
+                  type="button"
+                  className="tap-bounce"
+                  onClick={() => {
+                    setTitle(p.title);
+                    setCategory(p.cat as any);
+                    triggerHaptic('light');
+                  }}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '999px',
+                    padding: '5px 11px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    color: 'var(--text-secondary)',
+                    whiteSpace: 'nowrap',
+                    cursor: 'pointer',
+                    flexShrink: 0
+                  }}
+                >
+                  {p.label}
+                </button>
+              )) : [
+                { label: '💼 Monthly Salary', title: 'Monthly Salary' },
+                { label: '💻 Freelance', title: 'Freelance Project' },
+                { label: '🎁 Gift / Cash', title: 'Cash Gift' },
+                { label: '📈 Dividend / Return', title: 'Investment Return' }
+              ].map((p) => (
+                <button
+                  key={p.label}
+                  type="button"
+                  className="tap-bounce"
+                  onClick={() => {
+                    setTitle(p.title);
+                    triggerHaptic('light');
+                  }}
+                  style={{
+                    background: 'rgba(16, 185, 129, 0.1)',
+                    border: '1px solid rgba(16, 185, 129, 0.28)',
+                    borderRadius: '999px',
+                    padding: '5px 11px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    color: '#34d399',
+                    whiteSpace: 'nowrap',
+                    cursor: 'pointer',
+                    flexShrink: 0
+                  }}
+                >
+                  {p.label}
+                </button>
+              ))}
             </div>
           </div>
 

@@ -19,6 +19,7 @@ import {
   X
 } from 'lucide-react';
 import { triggerSparklesExplosion } from './utils/audio';
+import { triggerHaptic } from './utils/haptics';
 import { MoreToolsView } from './components/MoreToolsView';
 import { AdminDashboard } from './components/AdminDashboard';
 import { ScannerModal } from './components/ScannerModal';
@@ -1742,6 +1743,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
   };
 
   const handleNavClick = (view: 'dashboard' | 'transactions' | 'budgets' | 'analytics' | 'more') => {
+    triggerHaptic('light');
     setActiveView(view);
   };
 
@@ -4674,76 +4676,6 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
       {/* Main View Area */}
       <main ref={mainScrollRef} className="scroll-container" style={{ padding: '16px clamp(12px, 3.8vw, 20px) calc(110px + env(safe-area-inset-bottom)) clamp(12px, 3.8vw, 20px)', minHeight: 'calc(100vh - 70px)' }}>
-        {/* Smart AI Insights Banner (Natural scroll flow inside main) */}
-        {(() => {
-          const h = new Date().getHours();
-          const isMorning = h >= 5 && h < 12;
-          const isEvening = h >= 18;
-          const dismissKey = `zb_dismiss_ai_brief_${new Date().toISOString().split('T')[0]}_${isMorning ? 'm' : 'e'}`;
-          const isDismissed = typeof window !== 'undefined' && localStorage.getItem(dismissKey) === 'true';
-
-          if ((isMorning || isEvening) && !isDismissed && activeView === 'dashboard') {
-            return (
-              <div 
-                className="animate-fade-in"
-                style={{
-                  margin: '0 0 16px 0',
-                  padding: '11px 14px',
-                  borderRadius: '16px',
-                  background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.06) 100%)',
-                  border: '1px solid rgba(16, 185, 129, 0.25)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  boxShadow: '0 4px 14px rgba(0,0,0,0.1)'
-                }}
-              >
-                <div 
-                  onClick={() => isMorning ? setShowMorningBrief(true) : setShowEveningReflection(true)}
-                  style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, cursor: 'pointer', minWidth: 0 }}
-                >
-                  <div style={{ padding: '6px', background: 'rgba(16, 185, 129, 0.18)', borderRadius: '10px', color: 'var(--primary)', flexShrink: 0 }}>
-                    <Sparkles size={16} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ margin: 0, fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {isMorning ? 'Tap for Morning Brief ☀️' : 'Tap for Evening Reflection 🌙'}
-                    </p>
-                    <p style={{ margin: 0, fontSize: '11px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {isMorning ? 'Start your day with smart budget insights' : 'Review your daily spending patterns'}
-                    </p>
-                  </div>
-                  <ArrowRight size={14} color="var(--primary)" style={{ flexShrink: 0 }} />
-                </div>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    localStorage.setItem(dismissKey, 'true');
-                    setLangKey(prev => prev + 1);
-                  }}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    padding: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '50%',
-                    flexShrink: 0
-                  }}
-                  title="Dismiss"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-            );
-          }
-          return null;
-        })()}
-
         {activeView === 'dashboard' && (
           <Dashboard 
             key={langKey}
@@ -4755,6 +4687,8 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             budgets={convertedBudgets}
             goals={convertedGoals}
             currencySymbol={currencySymbol}
+            onOpenMorningBrief={() => setShowMorningBrief(true)}
+            onOpenEveningReflection={() => setShowEveningReflection(true)}
             onAddTransactionClick={() => {
               if (checkExpiredGuard('log new transactions')) return;
               if (!isPremiumUser) {
@@ -5202,6 +5136,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         <div style={{ position: 'relative', padding: '0 4px', flexShrink: 0 }}>
           <button
             onClick={() => {
+              triggerHaptic('medium');
               if (checkExpiredGuard('log new transactions')) return;
               setEditingTransaction(null);
               setIsModalOpen(true);
