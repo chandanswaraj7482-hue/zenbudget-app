@@ -808,29 +808,32 @@ export const Dashboard: React.FC<DashboardProps> = ({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingBottom: '120px' }} className="animate-fade-in dashboard-layout-container">
 
-      {/* ── USER GREETING HEADER (Morning Brief + User Greeting + Add Button) ── */}
-      <div 
-        className="user-greeting-header"
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px',
-          paddingBottom: '4px'
-        }}
-      >
-        {/* Morning / Evening AI Brief Banner */}
-        {showAiBrief && (
+      {/* ── FROZEN STICKY MORNING / EVENING AI BRIEF ONLY ── */}
+      {showAiBrief && (
+        <div
+          className="sticky-ai-brief-bar"
+          style={{
+            position: 'sticky',
+            top: '-16px',
+            zIndex: 40,
+            background: 'rgba(11, 15, 25, 0.92)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            margin: '-16px -16px 4px -16px',
+            padding: '10px 16px 8px 16px',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.06)'
+          }}
+        >
           <div 
             className="animate-fade-in"
             style={{
-              padding: '9px 12px',
-              borderRadius: '14px',
+              padding: '8px 12px',
+              borderRadius: '12px',
               background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.14) 0%, rgba(5, 150, 105, 0.07) 100%)',
               border: '1px solid rgba(16, 185, 129, 0.28)',
               display: 'flex',
               alignItems: 'center',
-              gap: '10px',
-              boxShadow: '0 4px 14px rgba(0,0,0,0.1)'
+              gap: '10px'
             }}
           >
             <div 
@@ -841,10 +844,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <Sparkles size={15} />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ margin: 0, fontSize: '12.5px', fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <p style={{ margin: 0, fontSize: '12px', fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {isMorning ? 'Tap for Morning Brief ☀️' : 'Tap for Evening Reflection 🌙'}
                 </p>
-                <p style={{ margin: 0, fontSize: '10.5px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <p style={{ margin: 0, fontSize: '10px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {isMorning ? 'Start your day with smart budget insights' : 'Review your daily spending patterns'}
                 </p>
               </div>
@@ -875,8 +878,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <X size={13} />
             </button>
           </div>
-        )}
+        </div>
+      )}
 
+      {/* ── USER GREETING ROW (Naturally scrolling, lightweight) ── */}
+      <div 
+        className="user-greeting-header"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '6px',
+          paddingBottom: '2px'
+        }}
+      >
         {/* User Greeting row + Add Button */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'nowrap', width: '100%' }}>
           <div onClick={onOpenProfile} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
@@ -1051,52 +1065,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         )}
 
-        {/* Starting Balance Helper Banner when 0 accounts added */}
-        {displayAccounts.length === 0 && (
-          <div style={{
-            margin: '4px 0 14px 0',
-            padding: '10px 14px',
-            background: 'rgba(59, 130, 246, 0.1)',
-            border: '1px solid rgba(59, 130, 246, 0.28)',
-            borderRadius: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '10px',
-            flexWrap: 'wrap'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '180px', flex: 1 }}>
-              <span style={{ fontSize: '16px' }}>💡</span>
-              <div style={{ fontSize: '11px', lineHeight: 1.35 }}>
-                <span style={{ color: '#93c5fd', fontWeight: 700 }}>Starting Balance Not Configured</span>
-                <span style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '10.5px' }}>
-                  Balance reflects net test transactions. Tap to add your actual Bank or Cash wallet!
-                </span>
-              </div>
-            </div>
-            {onAddAccountClick && (
-              <button
-                type="button"
-                onClick={onAddAccountClick}
-                className="tap-bounce hover-lift"
-                style={{
-                  background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                  color: '#ffffff',
-                  border: 'none',
-                  padding: '6px 14px',
-                  borderRadius: '10px',
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  boxShadow: '0 2px 8px rgba(37, 99, 235, 0.35)'
-                }}
-              >
-                + Set Starting Balance
-              </button>
-            )}
-          </div>
-        )}
 
         {/* Income / Expense Grid (Clickable to open Detailed Stats & Analytics) */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', borderTop: '1px solid var(--border-divider)', paddingTop: '16px' }}>

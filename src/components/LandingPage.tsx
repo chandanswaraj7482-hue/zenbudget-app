@@ -4221,6 +4221,33 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                   </div>
                 </div>
 
+                {/* Brand Tagline Badge */}
+                <div className="hero-animate" style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginBottom: '12px',
+                  background: isDark ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(99, 102, 241, 0.14) 100%)' : 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(99, 102, 241, 0.08) 100%)',
+                  border: isDark ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid rgba(16, 185, 129, 0.3)',
+                  padding: '7px 18px',
+                  borderRadius: '100px',
+                  maxWidth: '100%',
+                  width: 'fit-content',
+                  boxShadow: '0 4px 18px rgba(16, 185, 129, 0.15)'
+                }}>
+                  <Sparkles size={13} color="#10b981" />
+                  <span style={{
+                    fontSize: '12.5px',
+                    fontWeight: 800,
+                    letterSpacing: '0.03em',
+                    background: 'linear-gradient(135deg, #34d399 0%, #a78bfa 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent'
+                  }}>
+                    "We don't chase trends. We build what's next."
+                  </span>
+                </div>
+
                 {/* Sub-badge pill */}
                 <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '16px', background: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(16,185,129,0.12)', border: isDark ? '1px solid rgba(255,255,255,0.22)' : '1px solid rgba(16,185,129,0.28)', padding: '6px 14px', borderRadius: '100px', maxWidth: '100%', width: 'fit-content' }}>
                   <div style={{ width: '22px', height: '22px', background: '#10b981', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -4240,6 +4267,9 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 </h1>
 
                 <p className="hero-animate" style={{ fontSize: 'clamp(16px, 2vw, 19px)', fontWeight: 500, lineHeight: 1.6, color: isDark ? 'rgba(255,255,255,0.75)' : '#475569', maxWidth: '540px', marginBottom: '32px' }}>
+                  <strong style={{ color: '#10b981', display: 'block', marginBottom: '8px', fontSize: '15.5px', letterSpacing: '0.02em' }}>
+                    We don't chase trends. We build what's next.
+                  </strong>
                   Identify hidden leaks, crush impulse spending, and build wealth on autopilot. Join <strong style={{ color: isDark ? '#ffffff' : '#0f172a' }}>4,200+ users</strong> who saved an average of ₹8,400 in their first 30 days.
                 </p>
 
@@ -5729,6 +5759,11 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               <span>Something Labs</span>
               <ArrowUpRight size={13} />
             </a>
+          </div>
+          <div style={{ marginTop: '8px', marginBottom: '8px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 800, color: '#10b981', fontStyle: 'italic', letterSpacing: '0.02em' }}>
+              “We don't chase trends. We build what's next.”
+            </span>
           </div>
           <span style={{ fontSize: '12.5px', color: t.textMuted, fontWeight: 700 }}>© 2026 ZenBudget by Something Labs. All Rights Reserved.</span>
         </div>
