@@ -10,7 +10,13 @@ import {
   Phone,
   KeyRound,
   Zap,
-  Building2
+  Building2,
+  TrendingUp,
+  Sparkles,
+  X,
+  ChevronRight,
+  Percent,
+  Shield
 } from 'lucide-react';
 import type { Account } from '../types';
 
@@ -48,6 +54,7 @@ const NETBANKING_APPS: Record<string, { id: string; name: string; type: string; 
 
 export const BankSyncView: React.FC<BankSyncViewProps> = ({ onBack, accounts, onAddAccount, currencySymbol = '₹' }) => {
   const [activeTab, setActiveTab] = useState<'aa_sync' | 'app_connect' | 'linked_banks'>('aa_sync');
+  const [showGrowDetails, setShowGrowDetails] = useState(false);
   
   // Account Aggregator (AA) Real Bank Sync states
   const [mobileNum, setMobileNum] = useState('');
@@ -180,6 +187,132 @@ export const BankSyncView: React.FC<BankSyncViewProps> = ({ onBack, accounts, on
           {toastMsg}
         </div>
       )}
+
+      {/* ── Flagship Emerald Hero Showcase (Mockup: "Grow Your Profit With Us 92% ↗") ── */}
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        borderRadius: '28px',
+        padding: '28px 22px 24px 22px',
+        background: 'radial-gradient(circle at 75% 35%, #0f4027 0%, #061e12 55%, #010603 100%)',
+        border: '1px solid rgba(52, 211, 153, 0.3)',
+        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        boxSizing: 'border-box'
+      }}>
+        {/* Ambient neon emerald glow orb */}
+        <div style={{
+          position: 'absolute',
+          top: '20%',
+          right: '-10%',
+          width: '240px',
+          height: '240px',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(16, 185, 129, 0.35) 0%, rgba(5, 46, 22, 0) 70%)',
+          pointerEvents: 'none',
+          filter: 'blur(30px)'
+        }} />
+
+        {/* Top Mini Header / Live Net Banking Pulse */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', zIndex: 2 }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: 'rgba(255, 255, 255, 0.08)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            borderRadius: '9999px',
+            padding: '4px 12px',
+            backdropFilter: 'blur(8px)'
+          }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px #34d399' }} />
+            <span style={{ fontSize: '11px', fontWeight: 800, color: '#f1f5f9', letterSpacing: '0.08em' }}>NET BANKING INTELLIGENCE</span>
+          </div>
+
+          <span style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.5)' }}>
+            ⚡ 256-Bit Encrypted
+          </span>
+        </div>
+
+        {/* Headline matching mockup */}
+        <h2 style={{
+          fontSize: 'clamp(28px, 7vw, 36px)',
+          fontWeight: 800,
+          lineHeight: 1.15,
+          letterSpacing: '-0.03em',
+          color: '#ffffff',
+          margin: '0 0 14px 0',
+          fontFamily: "'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif",
+          zIndex: 2
+        }}>
+          Grow Your Profit<br />
+          With Us
+        </h2>
+
+        {/* Big 92% Stat with glowing arrow */}
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', margin: '0 0 16px 0', zIndex: 2 }}>
+          <span style={{
+            fontSize: 'clamp(54px, 14vw, 74px)',
+            fontWeight: 900,
+            lineHeight: 1,
+            letterSpacing: '-0.04em',
+            color: '#ffffff',
+            fontFamily: "'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif"
+          }}>
+            92%
+          </span>
+          <span style={{
+            fontSize: 'clamp(42px, 11vw, 58px)',
+            fontWeight: 800,
+            lineHeight: 1,
+            color: '#34d399',
+            filter: 'drop-shadow(0 0 12px rgba(52, 211, 153, 0.75))',
+            transform: 'translateY(-4px)'
+          }}>
+            ↗
+          </span>
+        </div>
+
+        {/* Description text matching mockup */}
+        <p style={{
+          fontSize: '13px',
+          lineHeight: 1.5,
+          color: 'rgba(255, 255, 255, 0.76)',
+          margin: '0 0 22px 0',
+          fontWeight: 500,
+          maxWidth: '360px',
+          zIndex: 2
+        }}>
+          With our proven track record and real-time net banking sync, we are committed to helping you achieve your financial goals. Experience the power of growth with us and take your profit to new heights.
+        </p>
+
+        {/* Bottom Learn More Button (Outlined Pill) */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', zIndex: 2 }}>
+          <button
+            type="button"
+            onClick={() => setShowGrowDetails(true)}
+            style={{
+              background: 'rgba(255, 255, 255, 0.08)',
+              border: '1.5px solid rgba(255, 255, 255, 0.65)',
+              borderRadius: '9999px',
+              padding: '11px 26px',
+              color: '#ffffff',
+              fontSize: '13px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              backdropFilter: 'blur(10px)',
+              transition: 'all 0.2s ease',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            Learn more...
+          </button>
+        </div>
+      </div>
 
       {/* Navigation Tabs */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', background: 'rgba(255, 255, 255, 0.04)', padding: '6px', borderRadius: '18px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
@@ -600,6 +733,147 @@ export const BankSyncView: React.FC<BankSyncViewProps> = ({ onBack, accounts, on
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── Modal for "Grow Your Profit With Us" Breakdown ── */}
+      {showGrowDetails && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.75)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px',
+          zIndex: 3000,
+          animation: 'fadeIn 0.25s ease-out'
+        }} onClick={() => setShowGrowDetails(false)}>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: '440px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              borderRadius: '28px',
+              padding: '28px 24px',
+              background: 'radial-gradient(circle at 80% 20%, #0e3b24 0%, #061e12 60%, #010603 100%)',
+              border: '1px solid rgba(52, 211, 153, 0.35)',
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px',
+              position: 'relative'
+            }}
+          >
+            {/* Top Close Button */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(52, 211, 153, 0.15)', border: '1px solid rgba(52, 211, 153, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#34d399' }}>
+                  <TrendingUp size={18} />
+                </div>
+                <span style={{ fontSize: '13px', fontWeight: 800, color: '#34d399', letterSpacing: '0.04em' }}>PROFIT & WEALTH BLUEPRINT</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowGrowDetails(false)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Headline and 92% badge */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '8px' }}>
+                <span style={{ fontSize: '52px', fontWeight: 900, color: '#ffffff', lineHeight: 1, letterSpacing: '-0.03em' }}>92%</span>
+                <span style={{ fontSize: '42px', fontWeight: 800, color: '#34d399', lineHeight: 1 }}>↗</span>
+              </div>
+              <h3 style={{ fontSize: '22px', fontWeight: 800, color: '#ffffff', margin: '0 0 6px 0', lineHeight: 1.2 }}>
+                How Net Banking Sync Multiplies Your Profit
+              </h3>
+              <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.7)', margin: 0, lineHeight: 1.5 }}>
+                Connecting your bank account with ZenBudget unlocks automated AI intelligence that actively protects your capital and grows your profits.
+              </p>
+            </div>
+
+            {/* 3 Pillars of Net Banking Growth */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ padding: '14px', borderRadius: '16px', background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(52, 211, 153, 0.2)', color: '#34d399', fontSize: '11px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>1</span>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#ffffff' }}>Zero Hidden Bank Fees Leakage</span>
+                </div>
+                <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.65)', margin: 0, lineHeight: 1.45 }}>
+                  Real-time SMS & AA detection immediately alerts you of hidden maintenance charges, SMS fees, and negative balance penalties before they accumulate.
+                </p>
+              </div>
+
+              <div style={{ padding: '14px', borderRadius: '16px', background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(52, 211, 153, 0.2)', color: '#34d399', fontSize: '11px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>2</span>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#ffffff' }}>Idle Cash Interest Optimizer</span>
+                </div>
+                <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.65)', margin: 0, lineHeight: 1.45 }}>
+                  Identifies surplus balance sitting in 2.7% savings accounts and calculates the exact profit if swept into 7.8% liquid / auto-sweep funds.
+                </p>
+              </div>
+
+              <div style={{ padding: '14px', borderRadius: '16px', background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'rgba(52, 211, 153, 0.2)', color: '#34d399', fontSize: '11px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>3</span>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#ffffff' }}>Real-Time Cash Flow Mastery</span>
+                </div>
+                <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.65)', margin: 0, lineHeight: 1.45 }}>
+                  Every transaction from your linked phone number syncs automatically, categorizing recurring EMI, utility, and investment inflows with zero manual entry.
+                </p>
+              </div>
+            </div>
+
+            {/* Quick Action Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowGrowDetails(false);
+                setActiveTab('aa_sync');
+              }}
+              style={{
+                width: '100%',
+                padding: '15px',
+                borderRadius: '9999px',
+                border: 'none',
+                background: '#ffffff',
+                color: '#0a0a0a',
+                fontSize: '15px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px'
+              }}
+            >
+              ⚡ Link Bank via Phone Number
+            </button>
+          </div>
         </div>
       )}
     </div>
