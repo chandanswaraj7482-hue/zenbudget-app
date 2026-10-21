@@ -412,11 +412,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
     return txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear;
   });
 
-  const income = currentMonthTransactions
+  const [cashflowPeriod, setCashflowPeriod] = useState<'month' | 'all'>('month');
+
+  const periodTransactions = cashflowPeriod === 'month' 
+    ? currentMonthTransactions 
+    : displayTransactions;
+
+  const income = periodTransactions
     .filter(t => t.type === 'income')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const expenses = currentMonthTransactions
+  const expenses = periodTransactions
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0);
 
@@ -1052,8 +1058,72 @@ export const Dashboard: React.FC<DashboardProps> = ({
         )}
 
 
+        {/* Income / Expense Header with Period Toggle Pill */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderTop: '1px solid var(--border-divider)',
+          paddingTop: '16px',
+          marginBottom: '10px'
+        }}>
+          <span style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-secondary)', fontWeight: 800 }}>
+            CASHFLOW SUMMARY
+          </span>
+          <div style={{
+            display: 'inline-flex',
+            background: 'rgba(255, 255, 255, 0.06)',
+            borderRadius: '9999px',
+            padding: '2px',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                triggerHaptic('light');
+                setCashflowPeriod('month');
+              }}
+              style={{
+                padding: '3px 10px',
+                borderRadius: '9999px',
+                border: 'none',
+                background: cashflowPeriod === 'month' ? '#10b981' : 'transparent',
+                color: cashflowPeriod === 'month' ? '#ffffff' : 'rgba(255, 255, 255, 0.6)',
+                fontSize: '10px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              {new Date().toLocaleString('default', { month: 'short' })}
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                triggerHaptic('light');
+                setCashflowPeriod('all');
+              }}
+              style={{
+                padding: '3px 10px',
+                borderRadius: '9999px',
+                border: 'none',
+                background: cashflowPeriod === 'all' ? '#10b981' : 'transparent',
+                color: cashflowPeriod === 'all' ? '#ffffff' : 'rgba(255, 255, 255, 0.6)',
+                fontSize: '10px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              All Time
+            </button>
+          </div>
+        </div>
+
         {/* Income / Expense Grid (Clickable to open Detailed Stats & Analytics) */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', borderTop: '1px solid var(--border-divider)', paddingTop: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           <div 
             onClick={onOpenAnalytics}
             className="tap-bounce hover-lift"
@@ -1075,7 +1145,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
             <div>
               <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                {new Date().toLocaleString('default', { month: 'short' })} {t('income')}
+                {cashflowPeriod === 'month' ? new Date().toLocaleString('default', { month: 'short' }) : 'All'} {t('income')}
               </span>
               <p style={{ fontSize: '15px', fontWeight: 800, color: '#10b981', margin: 0, marginTop: '2px' }}>
                 +{formatCurrency(income, currencySymbol, 0)}
@@ -1104,7 +1174,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
             <div>
               <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                {new Date().toLocaleString('default', { month: 'short' })} {t('expenses')}
+                {cashflowPeriod === 'month' ? new Date().toLocaleString('default', { month: 'short' }) : 'All'} {t('expenses')}
               </span>
               <p style={{ fontSize: '15px', fontWeight: 800, color: '#f43f5e', margin: 0, marginTop: '2px' }}>
                 -{formatCurrency(expenses, currencySymbol, 0)}

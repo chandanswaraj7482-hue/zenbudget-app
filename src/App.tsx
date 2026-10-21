@@ -4697,7 +4697,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       </header>
 
       {/* Main View Area */}
-      <main ref={mainScrollRef} className="scroll-container" style={{ padding: '16px clamp(12px, 3.8vw, 20px) calc(110px + env(safe-area-inset-bottom)) clamp(12px, 3.8vw, 20px)', minHeight: 'calc(100vh - 70px)' }}>
+      <main ref={mainScrollRef} className="scroll-container" style={{ padding: '16px clamp(12px, 3.8vw, 20px) calc(130px + env(safe-area-inset-bottom)) clamp(12px, 3.8vw, 20px)', minHeight: 'calc(100vh - 70px)' }}>
         {activeView === 'dashboard' && (
           <Dashboard 
             key={langKey}
@@ -5049,7 +5049,7 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         )}
       </main>
 
-      {/* ── MINIMALIST FLOATING OBSIDIAN CAPSULE DOCK (MATCHING DESIGN REFERENCE MOCKUP) ── */}
+      {/* ── FLAGSHIP DYNAMIC MORPHING OBSIDIAN CAPSULE DOCK ── */}
       <nav style={{
         position: 'fixed',
         bottom: 'calc(16px + env(safe-area-inset-bottom, 8px))',
@@ -5059,22 +5059,25 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        pointerEvents: 'none'
+        pointerEvents: 'none',
+        width: 'max-content',
+        maxWidth: 'calc(100% - 28px)'
       }}>
         <div style={{
           pointerEvents: 'auto',
-          background: 'rgba(12, 18, 14, 0.95)',
-          border: '1px solid rgba(255, 255, 255, 0.14)',
+          background: theme === 'light' ? 'rgba(255, 255, 255, 0.94)' : 'rgba(9, 18, 13, 0.92)',
+          border: '1px solid rgba(52, 211, 153, 0.28)',
           borderRadius: '9999px',
-          backdropFilter: 'blur(24px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-          boxShadow: '0 12px 35px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12)',
+          backdropFilter: 'blur(30px) saturate(200%)',
+          WebkitBackdropFilter: 'blur(30px) saturate(200%)',
+          boxShadow: '0 16px 45px rgba(0, 0, 0, 0.72), 0 0 24px rgba(16, 185, 129, 0.16), inset 0 1px 1px rgba(255, 255, 255, 0.18)',
           display: 'flex',
           alignItems: 'center',
-          gap: '6px',
-          padding: '6px 10px',
-          height: '52px',
-          boxSizing: 'border-box'
+          gap: '5px',
+          padding: '6px 8px',
+          height: '56px',
+          boxSizing: 'border-box',
+          transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
         }}>
           {/* 1. Home / Dashboard */}
           <button
@@ -5082,50 +5085,64 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             onClick={() => handleNavClick('dashboard')}
             title="Home"
             aria-label="Home"
-            className="tap-bounce"
+            className="tap-bounce hover-lift"
             style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '12px',
-              border: 'none',
-              background: activeView === 'dashboard' ? 'rgba(52, 211, 153, 0.22)' : 'transparent',
-              color: activeView === 'dashboard' ? '#34d399' : 'rgba(255, 255, 255, 0.45)',
+              height: '44px',
+              padding: activeView === 'dashboard' ? '0 14px' : '0',
+              width: activeView === 'dashboard' ? 'auto' : '40px',
+              borderRadius: '9999px',
+              border: activeView === 'dashboard' ? '1px solid rgba(52, 211, 153, 0.45)' : '1px solid transparent',
+              background: activeView === 'dashboard' ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.28) 0%, rgba(5, 150, 105, 0.14) 100%)' : 'transparent',
+              color: activeView === 'dashboard' ? '#34d399' : (theme === 'light' ? 'rgba(15, 23, 42, 0.65)' : 'rgba(255, 255, 255, 0.65)'),
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              gap: '6px',
               cursor: 'pointer',
-              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-              padding: 0,
-              boxShadow: activeView === 'dashboard' ? '0 0 12px rgba(52, 211, 153, 0.35)' : 'none'
+              transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+              boxShadow: activeView === 'dashboard' ? '0 0 16px rgba(52, 211, 153, 0.32)' : 'none',
+              flexShrink: 0
             }}
           >
-            <Home size={19} strokeWidth={activeView === 'dashboard' ? 2.5 : 1.9} />
+            <Home size={18} strokeWidth={activeView === 'dashboard' ? 2.5 : 1.9} />
+            {activeView === 'dashboard' && (
+              <span style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
+                Home
+              </span>
+            )}
           </button>
 
-          {/* 2. Transfer / Transactions / Lightning */}
+          {/* 2. Transfer / Transactions / Ledger */}
           <button
             type="button"
             onClick={() => handleNavClick('transactions')}
             title="Transactions"
             aria-label="Transactions"
-            className="tap-bounce"
+            className="tap-bounce hover-lift"
             style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '12px',
-              border: 'none',
-              background: activeView === 'transactions' ? 'rgba(52, 211, 153, 0.22)' : 'transparent',
-              color: activeView === 'transactions' ? '#34d399' : 'rgba(255, 255, 255, 0.45)',
+              height: '44px',
+              padding: activeView === 'transactions' ? '0 14px' : '0',
+              width: activeView === 'transactions' ? 'auto' : '40px',
+              borderRadius: '9999px',
+              border: activeView === 'transactions' ? '1px solid rgba(52, 211, 153, 0.45)' : '1px solid transparent',
+              background: activeView === 'transactions' ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.28) 0%, rgba(5, 150, 105, 0.14) 100%)' : 'transparent',
+              color: activeView === 'transactions' ? '#34d399' : (theme === 'light' ? 'rgba(15, 23, 42, 0.65)' : 'rgba(255, 255, 255, 0.65)'),
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              gap: '6px',
               cursor: 'pointer',
-              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-              padding: 0,
-              boxShadow: activeView === 'transactions' ? '0 0 12px rgba(52, 211, 153, 0.35)' : 'none'
+              transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+              boxShadow: activeView === 'transactions' ? '0 0 16px rgba(52, 211, 153, 0.32)' : 'none',
+              flexShrink: 0
             }}
           >
-            <Zap size={19} strokeWidth={activeView === 'transactions' ? 2.5 : 1.9} />
+            <Zap size={18} strokeWidth={activeView === 'transactions' ? 2.5 : 1.9} />
+            {activeView === 'transactions' && (
+              <span style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
+                Ledger
+              </span>
+            )}
           </button>
 
           {/* 3. Analytics / Insights */}
@@ -5134,24 +5151,31 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             onClick={() => handleNavClick('analytics')}
             title="Insights"
             aria-label="Insights"
-            className="tap-bounce"
+            className="tap-bounce hover-lift"
             style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '12px',
-              border: 'none',
-              background: activeView === 'analytics' ? 'rgba(52, 211, 153, 0.22)' : 'transparent',
-              color: activeView === 'analytics' ? '#34d399' : 'rgba(255, 255, 255, 0.45)',
+              height: '44px',
+              padding: activeView === 'analytics' ? '0 14px' : '0',
+              width: activeView === 'analytics' ? 'auto' : '40px',
+              borderRadius: '9999px',
+              border: activeView === 'analytics' ? '1px solid rgba(52, 211, 153, 0.45)' : '1px solid transparent',
+              background: activeView === 'analytics' ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.28) 0%, rgba(5, 150, 105, 0.14) 100%)' : 'transparent',
+              color: activeView === 'analytics' ? '#34d399' : (theme === 'light' ? 'rgba(15, 23, 42, 0.65)' : 'rgba(255, 255, 255, 0.65)'),
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              gap: '6px',
               cursor: 'pointer',
-              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-              padding: 0,
-              boxShadow: activeView === 'analytics' ? '0 0 12px rgba(52, 211, 153, 0.35)' : 'none'
+              transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+              boxShadow: activeView === 'analytics' ? '0 0 16px rgba(52, 211, 153, 0.32)' : 'none',
+              flexShrink: 0
             }}
           >
-            <BarChart3 size={19} strokeWidth={activeView === 'analytics' ? 2.5 : 1.9} />
+            <BarChart3 size={18} strokeWidth={activeView === 'analytics' ? 2.5 : 1.9} />
+            {activeView === 'analytics' && (
+              <span style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
+                Insights
+              </span>
+            )}
           </button>
 
           {/* 4. Limits / Budgets */}
@@ -5160,51 +5184,70 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             onClick={() => handleNavClick('budgets')}
             title="Budgets"
             aria-label="Budgets"
-            className="tap-bounce"
+            className="tap-bounce hover-lift"
             style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '12px',
-              border: 'none',
-              background: activeView === 'budgets' ? 'rgba(52, 211, 153, 0.22)' : 'transparent',
-              color: activeView === 'budgets' ? '#34d399' : 'rgba(255, 255, 255, 0.45)',
+              height: '44px',
+              padding: activeView === 'budgets' ? '0 14px' : '0',
+              width: activeView === 'budgets' ? 'auto' : '40px',
+              borderRadius: '9999px',
+              border: activeView === 'budgets' ? '1px solid rgba(52, 211, 153, 0.45)' : '1px solid transparent',
+              background: activeView === 'budgets' ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.28) 0%, rgba(5, 150, 105, 0.14) 100%)' : 'transparent',
+              color: activeView === 'budgets' ? '#34d399' : (theme === 'light' ? 'rgba(15, 23, 42, 0.65)' : 'rgba(255, 255, 255, 0.65)'),
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              gap: '6px',
               cursor: 'pointer',
-              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-              padding: 0,
-              boxShadow: activeView === 'budgets' ? '0 0 12px rgba(52, 211, 153, 0.35)' : 'none'
+              transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+              boxShadow: activeView === 'budgets' ? '0 0 16px rgba(52, 211, 153, 0.32)' : 'none',
+              flexShrink: 0
             }}
           >
-            <SlidersHorizontal size={19} strokeWidth={activeView === 'budgets' ? 2.5 : 1.9} />
+            <SlidersHorizontal size={18} strokeWidth={activeView === 'budgets' ? 2.5 : 1.9} />
+            {activeView === 'budgets' && (
+              <span style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
+                Budgets
+              </span>
+            )}
           </button>
 
           {/* 5. Wallet / More Tools */}
-          <button
-            type="button"
-            onClick={() => handleNavClick('more')}
-            title="Wallet & Hub"
-            aria-label="Wallet & Hub"
-            className="tap-bounce"
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '12px',
-              border: 'none',
-              background: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer', 'follow_us', 'notifications'].includes(activeView) ? 'rgba(52, 211, 153, 0.22)' : 'transparent',
-              color: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer', 'follow_us', 'notifications'].includes(activeView) ? '#34d399' : 'rgba(255, 255, 255, 0.45)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-              padding: 0,
-              boxShadow: ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer', 'follow_us', 'notifications'].includes(activeView) ? '0 0 12px rgba(52, 211, 153, 0.35)' : 'none'
-            }}
-          >
-            <Wallet size={19} strokeWidth={['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer', 'follow_us', 'notifications'].includes(activeView) ? 2.5 : 1.9} />
-          </button>
+          {(() => {
+            const isMoreActive = ['more', 'profile', 'wishlist', 'simulator', 'loans', 'bank_sync', 'shared_budget', 'bank_importer', 'follow_us', 'notifications'].includes(activeView);
+            return (
+              <button
+                type="button"
+                onClick={() => handleNavClick('more')}
+                title="Wallet & Hub"
+                aria-label="Wallet & Hub"
+                className="tap-bounce hover-lift"
+                style={{
+                  height: '44px',
+                  padding: isMoreActive ? '0 14px' : '0',
+                  width: isMoreActive ? 'auto' : '40px',
+                  borderRadius: '9999px',
+                  border: isMoreActive ? '1px solid rgba(52, 211, 153, 0.45)' : '1px solid transparent',
+                  background: isMoreActive ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.28) 0%, rgba(5, 150, 105, 0.14) 100%)' : 'transparent',
+                  color: isMoreActive ? '#34d399' : (theme === 'light' ? 'rgba(15, 23, 42, 0.65)' : 'rgba(255, 255, 255, 0.65)'),
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  cursor: 'pointer',
+                  transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+                  boxShadow: isMoreActive ? '0 0 16px rgba(52, 211, 153, 0.32)' : 'none',
+                  flexShrink: 0
+                }}
+              >
+                <Wallet size={18} strokeWidth={isMoreActive ? 2.5 : 1.9} />
+                {isMoreActive && (
+                  <span style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
+                    Vault
+                  </span>
+                )}
+              </button>
+            );
+          })()}
         </div>
       </nav>
 
