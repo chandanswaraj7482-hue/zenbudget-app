@@ -1416,24 +1416,30 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{t('my_accounts')}</span>
           </h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button
-              onClick={() => setShowAllAccountsModal(true)}
-              style={{
-                background: 'rgba(34,197,94,0.1)',
-                border: '1px solid rgba(34,197,94,0.25)',
-                borderRadius: '20px',
-                padding: '5px 14px',
-                color: 'var(--primary)',
-                fontSize: '12px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
-            >
-              {t('see_all')} ({myAccounts.length}) <ChevronRight size={13} />
-            </button>
+            {myAccounts.length > 3 && (
+              <button
+                onClick={() => {
+                  triggerHaptic('light');
+                  setShowAllAccountsModal(true);
+                }}
+                className="tap-bounce hover-lift"
+                style={{
+                  background: 'rgba(34,197,94,0.1)',
+                  border: '1px solid rgba(34,197,94,0.25)',
+                  borderRadius: '20px',
+                  padding: '5px 14px',
+                  color: 'var(--primary)',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                {t('see_all')} ({myAccounts.length}) <ChevronRight size={13} />
+              </button>
+            )}
             <button
               onClick={onAddAccountClick}
               style={{
@@ -1455,7 +1461,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px' }}>
-          {myAccounts.map((acc, index) => {
+          {myAccounts.slice(0, 3).map((acc, index) => {
             const defaultColors = ['#0284c7', '#ea580c', '#7c3aed', '#22c55e', '#06b6d4', '#ec4899', '#f59e0b'];
             const cardBg = acc.color || defaultColors[index % defaultColors.length];
             return (
@@ -3684,7 +3690,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Wallet size={20} style={{ color: 'var(--primary)' }} />
-                <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>All Accounts & Wallets ({accounts.length})</h3>
+                <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>All Accounts &amp; Wallets ({myAccounts.length})</h3>
               </div>
               <button onClick={() => setShowAllAccountsModal(false)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%', width: '30px', height: '30px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                 <X size={16} />
@@ -3696,7 +3702,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div>
                 <span style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '0.05em' }}>Total Wallet Balance</span>
                 <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--primary)', marginTop: '2px' }}>
-                  {formatCurrency(accounts.reduce((sum, a) => sum + (a.balance || 0), 0), currencySymbol)}
+                  {formatCurrency(myAccounts.reduce((sum, a) => sum + (a.balance || 0), 0), currencySymbol)}
                 </div>
               </div>
               <button
@@ -3709,7 +3715,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             {/* Account List */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {accounts.map((acc, index) => {
+              {myAccounts.map((acc, index) => {
                 const defaultColors = ['#0284c7', '#ea580c', '#7c3aed', '#22c55e', '#06b6d4', '#ec4899', '#f59e0b'];
                 const cardBg = acc.color || defaultColors[index % defaultColors.length];
                 return (
