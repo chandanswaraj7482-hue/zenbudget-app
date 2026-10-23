@@ -1586,6 +1586,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
     return enteredPin.length;
   };
 
+  const isShowcaseWelcome = step === 'auth' && !showAuthForm;
+
   return (
     <div style={{
       display: 'flex',
@@ -1594,7 +1596,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       minHeight: '100%',
       height: '100%',
       width: '100%',
-      padding: '24px 20px 80px 20px',
+      padding: isShowcaseWelcome ? '0' : '24px 20px 80px 20px',
       overflowY: 'auto',
       WebkitOverflowScrolling: 'touch',
       boxSizing: 'border-box',
@@ -1608,31 +1610,26 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         justifyContent: 'center',
         width: '100%',
         margin: 'auto 0',
-        minHeight: 'max-content',
-        gap: '20px'
+        minHeight: isShowcaseWelcome ? '100vh' : 'max-content',
+        height: isShowcaseWelcome ? '100%' : undefined,
+        gap: isShowcaseWelcome ? '0' : '20px'
       }}>
-        {/* STEP: Sign In / Sign Up Auth Screen */}
+        {/* STEP: Sign In / Sign Up Auth Screen (Native Full-Screen, No Mockup Card) */}
         {step === 'auth' && !showAuthForm && (
           <div
             style={{
               width: '100%',
-              maxWidth: '390px',
-              minHeight: '620px',
-              borderRadius: '38px',
-              background: 'radial-gradient(130% 90% at 50% 0%, #0d3826 0%, #061912 40%, #030806 100%)',
-              border: '1.5px solid rgba(52, 211, 153, 0.32)',
-              boxShadow: '0 30px 80px rgba(0, 0, 0, 0.85), 0 0 50px rgba(16, 185, 129, 0.16)',
-              backdropFilter: 'blur(24px)',
-              WebkitBackdropFilter: 'blur(24px)',
+              maxWidth: '480px',
+              minHeight: '100vh',
+              background: 'radial-gradient(130% 90% at 50% 0%, #0c2b1d 0%, #061610 45%, #040907 100%)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              padding: '18px 22px 24px',
+              padding: 'calc(env(safe-area-inset-top, 0px) + 24px) 24px calc(env(safe-area-inset-bottom, 0px) + 28px)',
               position: 'relative',
-              overflow: 'hidden',
               boxSizing: 'border-box',
               animation: 'fadeIn 0.3s ease-out',
-              margin: 'auto 0'
+              margin: '0 auto'
             }}
           >
             {/* Top Brand & Back Row */}
@@ -1640,7 +1637,6 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              paddingTop: 'calc(env(safe-area-inset-top, 0px) + 6px)',
               paddingBottom: '8px'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
