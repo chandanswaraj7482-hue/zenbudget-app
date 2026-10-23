@@ -4348,12 +4348,12 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               {/* Hero Right Mockup Graphics - InnerHeal Inspired Dual Phones Overflowing Card Edge */}
               <div className="hero-animate hero-mockup-scale desktop-only" style={{ position: 'relative', width: '100%', minHeight: '400px', height: '560px', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', overflow: 'visible' }}>
                 
-                {/* Floating Pill 1 (Top Right above phone 1): Feeling Financially Secure */}
-                <div className="floating-pill-reverse" style={{ position: 'absolute', top: '15px', right: '160px', zIndex: 38, display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '100px', background: '#ffffff', boxShadow: '0 16px 40px rgba(0,0,0,0.22)', padding: '10px 18px', color: '#111827', whiteSpace: 'nowrap' }}>
+                {/* Floating Pill 1 (Left Side of Phone Mockup): Feeling Financially Calm */}
+                <div className="floating-pill-reverse" style={{ position: 'absolute', top: '140px', left: '-25px', zIndex: 38, display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '100px', background: isDark ? '#1a231d' : '#ffffff', border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.08)', boxShadow: '0 16px 40px rgba(0,0,0,0.22)', padding: '10px 18px', color: isDark ? '#ffffff' : '#111827', whiteSpace: 'nowrap' }}>
                   <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#fce7f3', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <Heart size={16} color="#ec4899" fill="#ec4899" />
                   </div>
-                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#111827' }}>Feeling financially calm</span>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: isDark ? '#ffffff' : '#111827' }}>Feeling financially calm</span>
                 </div>
 
                 {/* Floating Pill 2 (Top Right above phone 2): Savings Up 32% */}
