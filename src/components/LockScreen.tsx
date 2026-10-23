@@ -1611,75 +1611,41 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               margin: 'auto 0'
             }}
           >
-            {/* Top Phone Mockup Status Bar */}
-            <div>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '4px 6px 14px',
-                color: 'rgba(255, 255, 255, 0.75)',
-                fontSize: '11px',
-                fontWeight: 700,
-                letterSpacing: '0.02em'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span>10:10</span>
-                  <span style={{ fontSize: '10px' }}>🔔</span>
-                </div>
-
-                {/* Dynamic Island pill */}
-                <div style={{
-                  width: '84px',
-                  height: '20px',
-                  borderRadius: '999px',
-                  background: '#000000',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'flex-end',
-                  paddingRight: '6px'
-                }}>
-                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 6px #10b981' }} />
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <span style={{ fontSize: '10px' }}>5G</span>
-                  <span>📶</span>
-                  <span>🔋</span>
-                </div>
+            {/* Top Brand & Back Row */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingTop: 'calc(env(safe-area-inset-top, 0px) + 6px)',
+              paddingBottom: '8px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <ZenBudgetLogo size={34} />
+                <span style={{ fontSize: '15px', fontWeight: 900, letterSpacing: '0.04em', textTransform: 'uppercase', color: '#ffffff' }}>
+                  Zen<span style={{ color: '#34d399' }}>Budget</span>
+                </span>
               </div>
-
-              {/* Top Brand & Back Row */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <ZenBudgetLogo size={32} />
-                  <span style={{ fontSize: '12px', fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#e2e8f0' }}>
-                    HOME
-                  </span>
-                </div>
-                {onBackToLanding && !Capacitor.isNativePlatform() && (
-                  <button
-                    type="button"
-                    onClick={onBackToLanding}
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.08)',
-                      border: '1px solid rgba(255, 255, 255, 0.14)',
-                      borderRadius: '20px',
-                      padding: '4px 10px',
-                      color: 'rgba(255, 255, 255, 0.8)',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                  >
-                    <ArrowLeft size={12} /> Web
-                  </button>
-                )}
-              </div>
+              {onBackToLanding && !Capacitor.isNativePlatform() && (
+                <button
+                  type="button"
+                  onClick={onBackToLanding}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(255, 255, 255, 0.14)',
+                    borderRadius: '20px',
+                    padding: '5px 12px',
+                    color: 'rgba(255, 255, 255, 0.85)',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px'
+                  }}
+                >
+                  <ArrowLeft size={13} /> Web
+                </button>
+              )}
             </div>
 
             {/* Middle: Giant Bold Typography & Subtitle (matching user's phone mockup on left) */}
