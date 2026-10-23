@@ -814,7 +814,71 @@ export const Dashboard: React.FC<DashboardProps> = ({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingBottom: '120px' }} className="animate-fade-in dashboard-layout-container">
 
-      {/* ── USER GREETING & AI BRIEF HEADER ── */}
+      {/* ── STICKY / FROZEN AI BRIEF PILL (Stays locked at top when scrolling down) ── */}
+      {showAiBrief && (
+        <div 
+          className="animate-fade-in"
+          style={{
+            position: 'sticky',
+            top: '-8px',
+            zIndex: 80,
+            padding: '9px 14px',
+            borderRadius: '16px',
+            background: 'linear-gradient(135deg, rgba(8, 38, 26, 0.96) 0%, rgba(4, 22, 15, 0.96) 100%)',
+            border: '1.5px solid rgba(52, 211, 153, 0.45)',
+            backdropFilter: 'blur(28px)',
+            WebkitBackdropFilter: 'blur(28px)',
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.65), 0 0 20px rgba(16, 185, 129, 0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px'
+          }}
+        >
+          <div 
+            onClick={() => isMorning ? onOpenMorningBrief?.() : onOpenEveningReflection?.()}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, cursor: 'pointer', minWidth: 0 }}
+          >
+            <div style={{ padding: '6px', background: 'rgba(16, 185, 129, 0.25)', borderRadius: '10px', color: 'var(--primary)', flexShrink: 0 }}>
+              <Sparkles size={16} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ margin: 0, fontSize: '12.5px', fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {isMorning ? 'Tap for Morning Brief ☀️' : 'Tap for Evening Reflection 🌙'}
+              </p>
+              <p style={{ margin: 0, fontSize: '10.5px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {isMorning ? 'Start your day with smart budget insights' : 'Review your daily spending patterns'}
+              </p>
+            </div>
+            <ArrowRight size={14} color="var(--primary)" style={{ flexShrink: 0 }} />
+          </div>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              localStorage.setItem(dismissKey, 'true');
+              setIsAiBriefDismissed(true);
+              triggerHaptic('light');
+            }}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-secondary)',
+              cursor: 'pointer',
+              padding: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '50%',
+              flexShrink: 0
+            }}
+            title="Dismiss"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
+      {/* ── USER GREETING HEADER ── */}
       <div 
         className="user-greeting-header"
         style={{
@@ -897,70 +961,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </button>
           </div>
         </div>
-
-        {/* In-flow Morning / Evening AI Brief Pill (Sticky / Frozen at top) */}
-        {showAiBrief && (
-          <div 
-            className="animate-fade-in"
-            style={{
-              position: 'sticky',
-              top: 'calc(env(safe-area-inset-top, 0px) + 8px)',
-              zIndex: 40,
-              padding: '8px 12px',
-              borderRadius: '14px',
-              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.28) 0%, rgba(5, 150, 105, 0.2) 100%)',
-              border: '1px solid rgba(16, 185, 129, 0.42)',
-              backdropFilter: 'blur(24px)',
-              WebkitBackdropFilter: 'blur(24px)',
-              boxShadow: '0 8px 25px rgba(0, 0, 0, 0.45)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px'
-            }}
-          >
-            <div 
-              onClick={() => isMorning ? onOpenMorningBrief?.() : onOpenEveningReflection?.()}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, cursor: 'pointer', minWidth: 0 }}
-            >
-              <div style={{ padding: '5px', background: 'rgba(16, 185, 129, 0.2)', borderRadius: '8px', color: 'var(--primary)', flexShrink: 0 }}>
-                <Sparkles size={15} />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ margin: 0, fontSize: '12px', fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {isMorning ? 'Tap for Morning Brief ☀️' : 'Tap for Evening Reflection 🌙'}
-                </p>
-                <p style={{ margin: 0, fontSize: '10px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {isMorning ? 'Start your day with smart budget insights' : 'Review your daily spending patterns'}
-                </p>
-              </div>
-              <ArrowRight size={13} color="var(--primary)" style={{ flexShrink: 0 }} />
-            </div>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                localStorage.setItem(dismissKey, 'true');
-                setIsAiBriefDismissed(true);
-                triggerHaptic('light');
-              }}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-secondary)',
-                cursor: 'pointer',
-                padding: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: '50%',
-                flexShrink: 0
-              }}
-              title="Dismiss"
-            >
-              <X size={13} />
-            </button>
-          </div>
-        )}
       </div>
 
 
