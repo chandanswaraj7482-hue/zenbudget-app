@@ -4452,26 +4452,47 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
 
       {/* ═══════════════ STAT COUNTER BANNER ═══════════════ */}
       <section style={{ padding: '0 24px', maxWidth: '1440px', margin: 'clamp(40px, 8vw, 60px) auto clamp(60px, 12vw, 100px)' }}>
-        <div className="scroll-fade-up hover-lift" style={{ background: 'linear-gradient(105deg, #1c1e1a 0%, #1c1e1a 45%, #6a8844 80%, #303d21 100%)', borderRadius: '2.5rem', padding: 'clamp(32px, 6vw, 60px) clamp(24px, 5vw, 40px)', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around', gap: 'clamp(24px, 5vw, 40px)', boxShadow: '0 20px 40px rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div 
+          className="scroll-fade-up hover-lift" 
+          style={{ 
+            background: isDark ? 'linear-gradient(145deg, #121914 0%, #0c140e 100%)' : '#ffffff', 
+            borderRadius: '2.5rem', 
+            padding: 'clamp(36px, 6vw, 56px) clamp(24px, 5vw, 40px)', 
+            display: 'flex', 
+            flexWrap: 'wrap', 
+            justifyContent: 'space-around', 
+            gap: 'clamp(24px, 5vw, 40px)', 
+            boxShadow: isDark ? '0 24px 60px rgba(0,0,0,0.5)' : '0 20px 45px -10px rgba(16,185,129,0.14), 0 4px 16px rgba(0,0,0,0.04)', 
+            border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(16,185,129,0.22)' 
+          }}
+        >
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={4200} duration={2500} />+</div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Members</div>
-            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.65)', marginTop: '4px' }}>securing their future today</div>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: isDark ? '#ffffff' : '#0f172a', letterSpacing: '-0.02em', marginBottom: '8px' }}>
+              <AnimatedCounter end={4200} duration={2500} />+
+            </div>
+            <div style={{ fontSize: '15px', fontWeight: 800, color: isDark ? '#34d399' : '#059669' }}>Members</div>
+            <div style={{ fontSize: '13px', color: isDark ? 'rgba(255,255,255,0.7)' : '#64748b', marginTop: '4px', fontWeight: 500 }}>securing their future today</div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>₹<AnimatedCounter end={2.4} decimals={1} duration={2500} />Cr+</div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Debt Paid Off</div>
-            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.65)', marginTop: '4px' }}>by our community</div>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: isDark ? '#ffffff' : '#0f172a', letterSpacing: '-0.02em', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+              ₹<AnimatedCounter end={2.4} decimals={1} duration={2500} />Cr+
+            </div>
+            <div style={{ fontSize: '15px', fontWeight: 800, color: isDark ? '#34d399' : '#059669' }}>Debt Paid Off</div>
+            <div style={{ fontSize: '13px', color: isDark ? 'rgba(255,255,255,0.7)' : '#64748b', marginTop: '4px', fontWeight: 500 }}>by our community</div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={14} duration={2500} /> Days</div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Average Time</div>
-            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.65)', marginTop: '4px' }}>to spot invisible leaks</div>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: isDark ? '#ffffff' : '#0f172a', letterSpacing: '-0.02em', marginBottom: '8px' }}>
+              <AnimatedCounter end={14} duration={2500} /> Days
+            </div>
+            <div style={{ fontSize: '15px', fontWeight: 800, color: isDark ? '#34d399' : '#059669' }}>Average Time</div>
+            <div style={{ fontSize: '13px', color: isDark ? 'rgba(255,255,255,0.7)' : '#64748b', marginTop: '4px', fontWeight: 500 }}>to spot invisible leaks</div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', marginBottom: '8px' }}><AnimatedCounter end={95} duration={2500} />%</div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: '#cbe0a3' }}>Users Save Money</div>
-            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.65)', marginTop: '4px' }}>in their very first month</div>
+            <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 900, color: isDark ? '#ffffff' : '#0f172a', letterSpacing: '-0.02em', marginBottom: '8px' }}>
+              <AnimatedCounter end={95} duration={2500} />%
+            </div>
+            <div style={{ fontSize: '15px', fontWeight: 800, color: isDark ? '#34d399' : '#059669' }}>Users Save Money</div>
+            <div style={{ fontSize: '13px', color: isDark ? 'rgba(255,255,255,0.7)' : '#64748b', marginTop: '4px', fontWeight: 500 }}>in their very first month</div>
           </div>
         </div>
       </section>
