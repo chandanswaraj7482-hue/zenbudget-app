@@ -755,7 +755,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
     }
   }
 
-  async function triggerBiometricUnlock(overrideProfile?: typeof dbProfile) {
+  async function triggerBiometricUnlock(overrideProfile?: typeof dbProfile, isAutoTrigger = false) {
     try {
       const fallbackProfile = {
         name: username || localStorage.getItem('zb_user_name') || 'User',
@@ -770,11 +770,13 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       if (!activeProfile) return;
 
       if (Capacitor.isNativePlatform()) {
-        // Native biometric via Capacitor plugin
+        // Native biometric via Capacitor plugin (Android & iOS)
         const { NativeBiometric } = await import('@capgo/capacitor-native-biometric');
         const checkResult = await NativeBiometric.isAvailable().catch(() => ({ isAvailable: true }));
         if (checkResult && checkResult.isAvailable === false) {
-          setErrorMsg('Biometric authentication is not configured on this device. Please use your PIN.');
+          if (!isAutoTrigger) {
+            setErrorMsg('Biometric authentication is not configured on this device. Please use your PIN.');
+          }
           return;
         }
 
@@ -787,7 +789,9 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       } else {
         // Web/PWA biometric via WebAuthn
         if (!window.isSecureContext && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-          setErrorMsg('Biometric unlock requires a secure HTTPS connection. Please enter your PIN.');
+          if (!isAutoTrigger) {
+            setErrorMsg('Biometric unlock requires a secure HTTPS connection. Please enter your PIN.');
+          }
           return;
         }
 
@@ -810,7 +814,9 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
             }
           });
         } else {
-          // First time: Register a new biometric credential
+          // First time on Web: Only trigger credential creation if user explicitly tapped the fingerprint button
+          if (isAutoTrigger) return;
+
           const credential = await navigator.credentials.create({
             publicKey: {
               challenge: typeof crypto !== 'undefined' ? crypto.getRandomValues(new Uint8Array(32)) : new Uint8Array(32),
@@ -864,7 +870,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       );
     } catch (err: any) {
       console.warn('LockScreen: Biometric unlock failed or cancelled:', err);
-      if (err?.name === 'NotAllowedError') {
+      if (!isAutoTrigger && err?.name === 'NotAllowedError') {
         setErrorMsg('Biometric authentication cancelled. Enter your 4-digit PIN.');
       }
     }
@@ -877,13 +883,18 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
   }, [step]);
 
   useEffect(() => {
-    // Auto-trigger native biometrics instantly when entering the 'unlock' PIN screen
-    if (step === 'unlock' && !biometricTriggered.current && localStorage.getItem('zb_biometrics_enabled') !== 'false' && Capacitor.isNativePlatform()) {
-      biometricTriggered.current = true;
-      const timer = setTimeout(() => {
-        triggerBiometricUnlock();
-      }, 200);
-      return () => clearTimeout(timer);
+    // Auto-trigger biometric prompt instantly when entering the 'unlock' PIN screen
+    if (step === 'unlock' && !biometricTriggered.current && localStorage.getItem('zb_biometrics_enabled') !== 'false') {
+      const isNative = Capacitor.isNativePlatform();
+      const hasWebCred = Boolean(localStorage.getItem('zb_webauthn_cred_id'));
+
+      if (isNative || hasWebCred) {
+        biometricTriggered.current = true;
+        const timer = setTimeout(() => {
+          triggerBiometricUnlock(undefined, true);
+        }, 300);
+        return () => clearTimeout(timer);
+      }
     }
   }, [step, dbProfile]);
 
