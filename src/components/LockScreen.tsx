@@ -8,6 +8,7 @@ import { getInitialsAvatar } from '../utils/avatar';
 import { GooglePlayIcon } from './GooglePlayBadge';
 import { DISTRIBUTION_CONFIG } from '../config/buildConfig';
 import { getPinSecurityStatus, recordFailedPinAttempt, resetPinSecurityStatus } from '../utils/securityGuard';
+import { ZenBudgetLogo } from './ZenBudgetLogo';
 
 interface LockScreenProps {
   onUnlock: (
@@ -1233,7 +1234,8 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           dbProfile.trial_start_date || new Date().toISOString(),
           pin,
           dbProfile.premium_expires_at || null,
-          dbProfile.trial_expire_date || null
+          dbProfile.trial_expire_date || null,
+          true
         );
         return;
       }
@@ -1613,14 +1615,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
             {/* ── Logo & Branding ── */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '22px' }}>
-              <div style={{
-                width: '64px', height: '64px', borderRadius: '20px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                marginBottom: '12px', overflow: 'hidden',
-                boxShadow: '0 8px 24px rgba(52, 211, 153, 0.25)'
-              }}>
-                <img src="/favicon.png?v=10" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
+              <ZenBudgetLogo size={64} style={{ marginBottom: '12px' }} />
               <h1 style={{ fontSize: '26px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
                 <span style={{ color: '#34d399' }}>Zen</span><span style={{ color: '#ffffff' }}>Budget</span>
               </h1>
@@ -1859,13 +1854,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
           >
             {/* ── Logo & Branding ── */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '20px' }}>
-              <div style={{
-                width: '72px', height: '72px', borderRadius: '22px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                marginBottom: '14px', overflow: 'hidden'
-              }}>
-                <img src="/favicon.png?v=10" alt="ZenBudget" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
+              <ZenBudgetLogo size={72} style={{ marginBottom: '14px' }} />
               <h2 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 4px 0', fontFamily: "'Manrope', sans-serif" }}>
                 {step === 'onboard-pin' ? 'Create PIN' : 'Confirm PIN'}
               </h2>
@@ -2102,24 +2091,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
             {/* ── Logo & Branding ── */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '8px' }}>
-              <div style={{
-                width: '72px', height: '72px', borderRadius: '22px',
-                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%)',
-                border: '1px solid rgba(34, 197, 94, 0.25)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 8px 32px rgba(34, 197, 94, 0.2)',
-                marginBottom: '14px', overflow: 'hidden'
-              }}>
-                <img
-                  src="/favicon.png"
-                  alt="ZenBudget Logo"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
-                  }}
-                />
-              </div>
+              <ZenBudgetLogo size={72} style={{ marginBottom: '14px' }} />
               <h2 style={{ fontSize: '30px', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px 0', lineHeight: 1, fontFamily: "'Manrope', sans-serif" }}>
                 <span style={{ color: '#22c55e' }}>Zen</span><span style={{ color: 'var(--text-primary)' }}>Budget</span>
               </h2>

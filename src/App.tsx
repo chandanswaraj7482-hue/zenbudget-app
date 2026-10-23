@@ -4334,9 +4334,10 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
 
         const effectiveId = validProfileId;
         const isAlreadyOnboarded = localStorage.getItem(`zb_onboarded_${effectiveId}`) === 'true' || localStorage.getItem('zb_onboarded_global') === 'true';
+        const hasSalary = Boolean(localStorage.getItem(`zb_monthly_salary_${effectiveId}`) && Number(localStorage.getItem(`zb_monthly_salary_${effectiveId}`)) > 0);
 
-        // ONLY prompt onboarding if explicitly creating a new profile AND not already onboarded
-        if (isNewUser && !isAlreadyOnboarded) {
+        // Prompt 1-time onboarding (Salary, Age, Budget Goal) for new users OR profiles without onboarding
+        if ((isNewUser && !isAlreadyOnboarded) || (!isAlreadyOnboarded && !hasSalary)) {
           setShowOnboarding(true);
         } else {
           setShowOnboarding(false);
