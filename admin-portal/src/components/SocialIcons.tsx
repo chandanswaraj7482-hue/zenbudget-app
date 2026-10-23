@@ -46,7 +46,7 @@ export const InstagramIcon: React.FC<IconProps> = ({ size = 20, style, className
     className={className}
   >
     <defs>
-      <linearGradient id="zen-ig-gradient-admin" x1="0%" y1="100%" x2="100%" y2="0%">
+      <linearGradient id="zen-ig-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
         <stop offset="0%" stopColor="#f09433" />
         <stop offset="25%" stopColor="#e6683c" />
         <stop offset="50%" stopColor="#dc2743" />
@@ -54,9 +54,9 @@ export const InstagramIcon: React.FC<IconProps> = ({ size = 20, style, className
         <stop offset="100%" stopColor="#bc1888" />
       </linearGradient>
     </defs>
-    <rect x="2" y="2" width="20" height="20" rx="5.5" stroke="url(#zen-ig-gradient-admin)" strokeWidth="2.2" />
-    <circle cx="12" cy="12" r="4.2" stroke="url(#zen-ig-gradient-admin)" strokeWidth="2.2" />
-    <circle cx="17.6" cy="6.4" r="1.3" fill="url(#zen-ig-gradient-admin)" />
+    <rect x="2" y="2" width="20" height="20" rx="5.5" stroke="url(#zen-ig-gradient)" strokeWidth="2.2" />
+    <circle cx="12" cy="12" r="4.2" stroke="url(#zen-ig-gradient)" strokeWidth="2.2" />
+    <circle cx="17.6" cy="6.4" r="1.3" fill="url(#zen-ig-gradient)" />
   </svg>
 );
 
@@ -122,5 +122,23 @@ export const renderSocialIcon = (platform: string, size = 20, overrideColor?: st
   if (p === 'x' || p.includes('twitter')) {
     return <XIcon size={size} color={overrideColor || '#ffffff'} />;
   }
-  return <span style={{ fontSize: `${size}px` }}>🌐</span>;
+  if (p.includes('telegram')) {
+    return <span style={{ fontSize: `${size}px`, lineHeight: 1 }}>✈️</span>;
+  }
+  if (p.includes('discord')) {
+    return <span style={{ fontSize: `${size}px`, lineHeight: 1 }}>👾</span>;
+  }
+  if (p.includes('github')) {
+    return <span style={{ fontSize: `${size}px`, lineHeight: 1 }}>🐙</span>;
+  }
+  if (p.includes('reddit')) {
+    return <span style={{ fontSize: `${size}px`, lineHeight: 1 }}>🤖</span>;
+  }
+  if (p.includes('threads')) {
+    return <span style={{ fontSize: `${size}px`, lineHeight: 1 }}>🧵</span>;
+  }
+  if (p.includes('whatsapp')) {
+    return <span style={{ fontSize: `${size}px`, lineHeight: 1 }}>💬</span>;
+  }
+  return <span style={{ fontSize: `${size}px`, lineHeight: 1 }}>🔗</span>;
 };
