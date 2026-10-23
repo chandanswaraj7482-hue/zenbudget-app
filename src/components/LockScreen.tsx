@@ -36,6 +36,7 @@ const getInitialsName = (userName: string, userEmail: string) => {
 export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLanding }) => {
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [showAuthForm, setShowAuthForm] = useState(false);
+  const [welcomeSlide, setWelcomeSlide] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [email, setEmail] = useState('');
@@ -135,6 +136,14 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
   }, []);
 
   // Physical keyboard support for PIN entry
+  useEffect(() => {
+    if (step !== 'auth' || showAuthForm) return;
+    const timer = setInterval(() => {
+      setWelcomeSlide(prev => (prev + 1) % 3);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [step, showAuthForm]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (step === 'auth') return;
@@ -1579,7 +1588,266 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
         gap: '20px'
       }}>
         {/* STEP: Sign In / Sign Up Auth Screen */}
-        {step === 'auth' && (
+        {step === 'auth' && !showAuthForm && (
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '390px',
+              minHeight: '620px',
+              borderRadius: '38px',
+              background: 'radial-gradient(130% 90% at 50% 0%, #0d3826 0%, #061912 40%, #030806 100%)',
+              border: '1.5px solid rgba(52, 211, 153, 0.32)',
+              boxShadow: '0 30px 80px rgba(0, 0, 0, 0.85), 0 0 50px rgba(16, 185, 129, 0.16)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              padding: '18px 22px 24px',
+              position: 'relative',
+              overflow: 'hidden',
+              boxSizing: 'border-box',
+              animation: 'fadeIn 0.3s ease-out',
+              margin: 'auto 0'
+            }}
+          >
+            {/* Top Phone Mockup Status Bar */}
+            <div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '4px 6px 14px',
+                color: 'rgba(255, 255, 255, 0.75)',
+                fontSize: '11px',
+                fontWeight: 700,
+                letterSpacing: '0.02em'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>10:10</span>
+                  <span style={{ fontSize: '10px' }}>🔔</span>
+                </div>
+
+                {/* Dynamic Island pill */}
+                <div style={{
+                  width: '84px',
+                  height: '20px',
+                  borderRadius: '999px',
+                  background: '#000000',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-end',
+                  paddingRight: '6px'
+                }}>
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 6px #10b981' }} />
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <span style={{ fontSize: '10px' }}>5G</span>
+                  <span>📶</span>
+                  <span>🔋</span>
+                </div>
+              </div>
+
+              {/* Top Brand & Back Row */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ZenBudgetLogo size={32} />
+                  <span style={{ fontSize: '12px', fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#e2e8f0' }}>
+                    HOME
+                  </span>
+                </div>
+                {onBackToLanding && !Capacitor.isNativePlatform() && (
+                  <button
+                    type="button"
+                    onClick={onBackToLanding}
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.08)',
+                      border: '1px solid rgba(255, 255, 255, 0.14)',
+                      borderRadius: '20px',
+                      padding: '4px 10px',
+                      color: 'rgba(255, 255, 255, 0.8)',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <ArrowLeft size={12} /> Web
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Middle: Giant Bold Typography & Subtitle (matching user's phone mockup on left) */}
+            <div style={{ margin: '36px 0 24px', textAlign: 'left', padding: '0 4px' }}>
+              <div style={{
+                fontSize: '34px',
+                fontWeight: 800,
+                lineHeight: 1.12,
+                letterSpacing: '-0.035em',
+                color: '#ffffff',
+                fontFamily: "'Manrope', sans-serif",
+                marginBottom: '16px',
+                minHeight: '115px'
+              }}>
+                {welcomeSlide === 0 && (
+                  <>
+                    Make Money<br />
+                    Management<br />
+                    <span style={{ color: '#34d399' }}>More Calm</span>
+                  </>
+                )}
+                {welcomeSlide === 1 && (
+                  <>
+                    Daily Safe-Spend<br />
+                    Limit In<br />
+                    <span style={{ color: '#34d399' }}>1 Second</span>
+                  </>
+                )}
+                {welcomeSlide === 2 && (
+                  <>
+                    Instant Bank &amp;<br />
+                    UPI Statement<br />
+                    <span style={{ color: '#34d399' }}>Smart OCR</span>
+                  </>
+                )}
+              </div>
+
+              <p style={{
+                fontSize: '13px',
+                color: 'rgba(255, 255, 255, 0.72)',
+                lineHeight: 1.5,
+                margin: 0,
+                minHeight: '40px',
+                fontWeight: 500
+              }}>
+                {welcomeSlide === 0 && 'simple, fast & reliable personal finance & budget companion'}
+                {welcomeSlide === 1 && 'automatic daily allowance stops end-of-month panic before it happens'}
+                {welcomeSlide === 2 && 'track every rupee with 100% private zero-knowledge encryption'}
+              </p>
+
+              {/* Three Dots Carousel Indicator */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '22px' }}>
+                {[0, 1, 2].map((idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setWelcomeSlide(idx)}
+                    style={{
+                      width: welcomeSlide === idx ? '22px' : '7px',
+                      height: '7px',
+                      borderRadius: '100px',
+                      background: welcomeSlide === idx ? '#34d399' : 'rgba(255, 255, 255, 0.25)',
+                      boxShadow: welcomeSlide === idx ? '0 0 10px rgba(52, 211, 153, 0.7)' : 'none',
+                      border: 'none',
+                      padding: 0,
+                      cursor: 'pointer',
+                      transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+                    }}
+                    title={`Slide ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Bottom Actions Row: Solid White Pill & Outlined Glass Pill */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '11px', width: '100%' }}>
+              {/* Button 1: Solid White Pill (Sign In) */}
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode('login');
+                  setShowAuthForm(true);
+                  setErrorMsg('');
+                }}
+                style={{
+                  width: '100%',
+                  background: '#ffffff',
+                  color: '#0a0a0a',
+                  border: 'none',
+                  borderRadius: '9999px',
+                  padding: '15px 20px',
+                  fontSize: '15px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  boxShadow: '0 8px 24px rgba(255, 255, 255, 0.15)',
+                  transition: 'all 0.2s ease',
+                  letterSpacing: '-0.01em'
+                }}
+                onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.98)')}
+                onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+              >
+                Sign In
+              </button>
+
+              {/* Button 2: Outlined Glass Pill (Register) */}
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode('signup');
+                  setShowAuthForm(true);
+                  setErrorMsg('');
+                }}
+                style={{
+                  width: '100%',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  color: '#ffffff',
+                  border: '1px solid rgba(255, 255, 255, 0.24)',
+                  borderRadius: '9999px',
+                  padding: '14px 20px',
+                  fontSize: '15px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  letterSpacing: '-0.01em'
+                }}
+                onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.98)')}
+                onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+              >
+                Register
+              </button>
+
+              {/* Quick Google Login */}
+              <button
+                type="button"
+                onClick={() => handleSocialLogin('google')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  padding: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                <svg viewBox="0 0 24 24" width="14" height="14"><path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.62 14.98 1 12 1 7.35 1 3.37 3.65 1.42 7.54l3.86 3C6.26 7.56 8.9 5.04 12 5.04z" /><path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.44h6.44c-.28 1.48-1.12 2.74-2.38 3.58l3.69 2.87c2.16-1.99 3.74-4.92 3.74-8.55z" /><path fill="#FBBC05" d="M5.28 14.54c-.24-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29L1.42 6.96C.52 8.76 0 10.78 0 12.92s.52 4.16 1.42 5.96l3.86-3.34z" /><path fill="#34A853" d="M12 22.88c3.24 0 5.97-1.07 7.96-2.91l-3.69-2.87c-1.02.68-2.33 1.09-4.27 1.09-3.1 0-5.74-2.52-6.68-5.5l-3.86 3C3.37 20.23 7.35 22.88 12 22.88z" /></svg>
+                Or continue with Google
+              </button>
+
+              {/* Legal disclaimer */}
+              <div style={{ textAlign: 'center', marginTop: '2px' }}>
+                <span style={{ fontSize: '10.5px', color: 'rgba(255, 255, 255, 0.45)', lineHeight: 1.3 }}>
+                  By continuing, you agree to our{' '}
+                  <a href="/terms.html" target="_blank" rel="noreferrer" style={{ color: '#34d399', textDecoration: 'none' }}>Terms of Service</a>
+                  {' '}&amp;{' '}
+                  <a href="/privacy.html" target="_blank" rel="noreferrer" style={{ color: '#34d399', textDecoration: 'none' }}>Privacy Policy</a>
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* STEP: Sign In / Sign Up Form Screen (when user clicks Sign In or Register) */}
+        {step === 'auth' && showAuthForm && (
           <div
             style={{
               width: '100%',
@@ -1598,31 +1866,46 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
               margin: 'auto 0'
             }}
           >
-            {/* ── Top Navigation Row ── */}
-            {onBackToLanding && !Capacitor.isNativePlatform() && (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+            {/* ── Top Navigation Row: Back to Showcase Screen ── */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+              <button
+                type="button"
+                onClick={() => { setShowAuthForm(false); setErrorMsg(''); }}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.14)',
+                  borderRadius: '20px',
+                  padding: '6px 14px',
+                  color: '#e2e8f0',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <ArrowLeft size={14} /> Back
+              </button>
+
+              {onBackToLanding && !Capacitor.isNativePlatform() && (
                 <button
                   type="button"
                   onClick={onBackToLanding}
                   style={{
-                    background: 'rgba(255, 255, 255, 0.08)',
-                    border: '1px solid rgba(255, 255, 255, 0.14)',
-                    borderRadius: '20px',
-                    padding: '6px 14px',
-                    color: '#e2e8f0',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    cursor: 'pointer'
                   }}
                 >
-                  <ArrowLeft size={14} /> Back to Homepage
+                  Homepage
                 </button>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* ── Logo & Branding ── */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '22px' }}>
