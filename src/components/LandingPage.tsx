@@ -5592,29 +5592,6 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               >
                 <TikTokIcon size={20} color={isDark ? '#00f2fe' : '#111827'} />
               </a>
-              <a
-                href="https://twitter.com/ZenBudgetApp"
-                target="_blank"
-                rel="noopener noreferrer"
-                title="X / Twitter (@ZenBudgetApp)"
-                style={{
-                  width: '42px',
-                  height: '42px',
-                  borderRadius: '12px',
-                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#ffffff',
-                  border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid rgba(0, 0, 0, 0.08)',
-                  boxShadow: isDark ? '0 4px 14px rgba(0, 0, 0, 0.3)' : '0 2px 10px rgba(0, 0, 0, 0.05)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: isDark ? '#ffffff' : '#111827',
-                  textDecoration: 'none',
-                  transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease'
-                }}
-                className="hover-lift"
-              >
-                <XIcon size={18} color={isDark ? '#ffffff' : '#111827'} />
-              </a>
             </div>
           </div>
 
