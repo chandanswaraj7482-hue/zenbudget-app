@@ -3946,23 +3946,32 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
       const keysToWipe: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && (k.startsWith('zb_transactions') || k.startsWith('zb_accounts') || k.startsWith('zb_budgets') || k.startsWith('zb_goals') || k.startsWith('zb_debts') || k.startsWith('zb_loans') || k === 'zb_local_session_profile' || k === 'zb_profile_id' || k === 'zb_user_name' || k === 'zb_user_avatar')) {
+        if (k && (
+          k.startsWith('zb_') ||
+          k.startsWith('sb-') ||
+          k.includes('supabase') ||
+          k === 'has_scan_pay_access'
+        )) {
+          // Keep persistent theme & language preferences
+          if (k === 'zb_theme' || k === 'zb_language') continue;
           keysToWipe.push(k);
         }
       }
       keysToWipe.forEach(k => {
         try { localStorage.removeItem(k); } catch (_) {}
       });
-      sessionStorage.removeItem('zb_session_authenticated');
-      sessionStorage.removeItem('zb_last_active_time');
-      sessionStorage.removeItem('zb_bg_time');
+      sessionStorage.clear();
+      localStorage.setItem('zb_explicit_signed_out', 'true');
       setIsLocked(true);
       setCurrentProfileId('');
       setUserName('');
+      setUserPin('0000');
       setTransactions([]);
       setBudgets([]);
       setGoals([]);
       setAccounts([]);
+      setLoans([]);
+      setDebts([]);
     } catch (err) {
       console.error('Logout error:', err);
     }

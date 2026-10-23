@@ -48,6 +48,9 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
   // Lockscreen steps: 'auth' | 'onboard-pin' | 'onboard-confirm' | 'unlock' | 'forgot-pin-email' | 'forgot-pin-otp'
   const [step, setStep] = useState<'auth' | 'onboard-pin' | 'onboard-confirm' | 'unlock' | 'forgot-pin-email' | 'forgot-pin-otp'>(() => {
     try {
+      if (localStorage.getItem('zb_explicit_signed_out') === 'true') {
+        return 'auth';
+      }
       const isPinCreated = localStorage.getItem('zb_pin_created') === 'true';
       const localPin = localStorage.getItem('zb_user_pin') || localStorage.getItem('zb_saved_device_pin');
       if (localPin && localPin.length >= 4 && (localPin !== '0000' || isPinCreated)) {
@@ -387,6 +390,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
 
   async function fetchUserProfile(uid: string) {
     try {
+      localStorage.removeItem('zb_explicit_signed_out');
       console.log("LockScreen: fetchUserProfile() starting for uid", uid);
       let userProf: any = null;
 
@@ -636,6 +640,14 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       let session: any = null;
       const href = typeof window !== 'undefined' ? window.location.href : '';
       const isOAuthRedirect = href.includes('access_token=') || href.includes('code=');
+
+      if (localStorage.getItem('zb_explicit_signed_out') === 'true' && !isOAuthRedirect) {
+        clearTimeout(safetyTimer);
+        setStep('auth');
+        setShowAuthForm(false);
+        setIsLoading(false);
+        return;
+      }
 
       // Check for OAuth error returned from provider in URL
       if (href.includes('error=') || href.includes('error_description=')) {
@@ -1539,18 +1551,30 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock, onBackToLandin
       const keysToWipe: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && (k.startsWith('zb_transactions') || k.startsWith('zb_accounts') || k.startsWith('zb_budgets') || k.startsWith('zb_goals') || k.startsWith('zb_debts') || k.startsWith('zb_loans') || k === 'zb_local_session_profile' || k === 'zb_profile_id' || k === 'zb_user_name' || k === 'zb_user_avatar' || k === 'zb_user_email' || k === 'zb_google_avatar')) {
+        if (k && (
+          k.startsWith('zb_') ||
+          k.startsWith('sb-') ||
+          k.includes('supabase') ||
+          k === 'has_scan_pay_access'
+        )) {
+          if (k === 'zb_theme' || k === 'zb_language') continue;
           keysToWipe.push(k);
         }
       }
       keysToWipe.forEach(k => {
         try { localStorage.removeItem(k); } catch (_) { }
       });
+      sessionStorage.clear();
+      localStorage.setItem('zb_explicit_signed_out', 'true');
       setUserId('');
       setUsername('');
       setDbProfile(null);
       setEmail('');
       setPassword('');
+      setPin('');
+      setConfirmPin('');
+      setEnteredPin('');
+      setShowAuthForm(false);
       setStep('auth');
       setIsLoading(false);
     }
