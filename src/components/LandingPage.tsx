@@ -2372,31 +2372,6 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               <span>Get on Google Play</span>
             </a>
 
-            {/* Desktop Web App Launch Button */}
-            <button 
-              onClick={onOpenWebApp} 
-              className="hover-lift desktop-only"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                background: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
-                color: isDark ? '#ffffff' : '#0f172a',
-                padding: '8px 14px',
-                borderRadius: '100px',
-                fontSize: '12px',
-                fontWeight: 700,
-                border: isDark ? '1px solid rgba(255, 255, 255, 0.14)' : '1px solid rgba(0, 0, 0, 0.1)',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                whiteSpace: 'nowrap'
-              }}
-              title="Launch Web App Version"
-            >
-              <span>Web App</span>
-              <ArrowRight size={13} color={isDark ? '#34d399' : '#059669'} />
-            </button>
-
             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{ background: 'transparent', border: 'none', color: t.text, cursor: 'pointer', padding: '6px' }} className="mobile-show">
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>

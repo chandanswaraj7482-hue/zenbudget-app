@@ -898,15 +898,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
 
-        {/* In-flow Morning / Evening AI Brief Pill */}
+        {/* In-flow Morning / Evening AI Brief Pill (Sticky / Frozen at top) */}
         {showAiBrief && (
           <div 
             className="animate-fade-in"
             style={{
+              position: 'sticky',
+              top: 'calc(env(safe-area-inset-top, 0px) + 8px)',
+              zIndex: 40,
               padding: '8px 12px',
               borderRadius: '14px',
-              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.14) 0%, rgba(5, 150, 105, 0.07) 100%)',
-              border: '1px solid rgba(16, 185, 129, 0.28)',
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.28) 0%, rgba(5, 150, 105, 0.2) 100%)',
+              border: '1px solid rgba(16, 185, 129, 0.42)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              boxShadow: '0 8px 25px rgba(0, 0, 0, 0.45)',
               display: 'flex',
               alignItems: 'center',
               gap: '10px'

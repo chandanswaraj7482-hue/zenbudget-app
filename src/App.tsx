@@ -5129,6 +5129,36 @@ const App: React.FC<AppProps> = ({ onBackToLanding }) => {
             )}
           </button>
 
+          {/* Quick Add Transaction Center Action Button */}
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('medium');
+              setIsModalOpen(true);
+            }}
+            title="Add Transaction"
+            aria-label="Add Transaction"
+            className="tap-bounce hover-lift"
+            style={{
+              height: '42px',
+              width: '42px',
+              borderRadius: '50%',
+              border: 'none',
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              boxShadow: '0 4px 16px rgba(16, 185, 129, 0.45)',
+              flexShrink: 0,
+              margin: '0 3px',
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+            }}
+          >
+            <Plus size={22} strokeWidth={2.8} />
+          </button>
+
           {/* 3. Analytics / Insights */}
           <button
             type="button"

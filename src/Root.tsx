@@ -48,6 +48,20 @@ export default function Root() {
     currentPath === '/admin.html'
   );
 
+  // 2. https://zenbudget-tracker-app.vercel.app/ -> Dedicated Landing Page
+  const isDedicatedLandingDomain = typeof window !== 'undefined' && (
+    hostname.includes('zenbudget-tracker-app')
+  );
+
+  // 3. https://zenbudget-tracker.vercel.app/ -> Dedicated Web APK (Web App)
+  const isDedicatedWebAppDomain = typeof window !== 'undefined' && (
+    hostname.includes('zenbudget-tracker.vercel.app') ||
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    isNative ||
+    isInstalledPwa
+  );
+
   const hasAppHashOrParam = typeof window !== 'undefined' && (
     window.location.hash.startsWith('#app') ||
     window.location.hash.includes('%23app') ||
@@ -59,14 +73,23 @@ export default function Root() {
     currentPath.includes('%23app')
   );
 
-  // Determine initial mode:
-  // - Native app or standalone installed PWA opens 'app' directly
-  // - Explicit /app, #app, or ?mode=app opens 'app'
-  // - By default, web browser visitors on zenbudget-tracker.vercel.app see the rich SEO Landing Page!
+  // Determine initial mode based on domain:
+  // - https://zenbudget-tracker.vercel.app/ -> Dedicated Web APK (ALWAYS App Mode)
+  // - https://zenbudget-tracker-app.vercel.app/ -> Dedicated Landing Page
+  // - https://admin-portal-zenbudget.vercel.app/ -> Dedicated Admin Portal
   const getInitialMode = (): 'landing' | 'app' | 'admin' => {
     if (isAdminDomain) return 'admin';
+    if (isDedicatedLandingDomain) {
+      return hasAppHashOrParam ? 'app' : 'landing';
+    }
+    if (hostname.includes('zenbudget-tracker.vercel.app')) {
+      return 'app'; // Strict Web APK link!
+    }
+    if (isDedicatedWebAppDomain) {
+      return 'app';
+    }
     if (isNative || isInstalledPwa || hasAppHashOrParam) return 'app';
-    return 'landing';
+    return 'app';
   };
 
   const [activeMode, setActiveMode] = React.useState<'landing' | 'app' | 'admin'>(getInitialMode);
@@ -78,20 +101,36 @@ export default function Root() {
       const hash = window.location.hash;
       if (isAdminDomain) {
         setActiveMode('admin');
+      } else if (hostname.includes('zenbudget-tracker.vercel.app')) {
+        setActiveMode('app'); // Web APK domain stays in App!
+      } else if (isDedicatedLandingDomain) {
+        if (hash.startsWith('#app')) {
+          setActiveMode('app');
+        } else {
+          setActiveMode('landing');
+        }
       } else if (hash.startsWith('#app')) {
         setActiveMode('app');
-      } else if (hash.startsWith('#landing') || hash === '' || hash === '#') {
-        if (!isNative && !isInstalledPwa && !window.location.pathname.startsWith('/app')) {
+      } else if (hash.startsWith('#landing')) {
+        setActiveMode('landing');
+      } else if (hash === '' || hash === '#') {
+        if (isDedicatedLandingDomain) {
           setActiveMode('landing');
+        } else {
+          setActiveMode('app');
         }
       }
     };
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [isNative, isInstalledPwa, isAdminDomain]);
+  }, [isNative, isInstalledPwa, isAdminDomain, isDedicatedLandingDomain, isDedicatedWebAppDomain, hostname]);
 
   const handleOpenWebApp = () => {
     if (typeof window !== 'undefined') {
+      if (hostname.includes('zenbudget-tracker-app')) {
+        window.location.href = 'https://zenbudget-tracker.vercel.app/';
+        return;
+      }
       if (window.location.pathname.startsWith('/blog')) {
         window.history.pushState({}, '', '/#app');
         setCurrentPath('/');
@@ -104,6 +143,10 @@ export default function Root() {
 
   const handleBackToLanding = () => {
     if (typeof window !== 'undefined') {
+      if (hostname.includes('zenbudget-tracker.vercel.app')) {
+        window.location.href = 'https://zenbudget-tracker-app.vercel.app/';
+        return;
+      }
       if (window.location.pathname.startsWith('/blog')) {
         window.history.pushState({}, '', '/');
         setCurrentPath('/');
