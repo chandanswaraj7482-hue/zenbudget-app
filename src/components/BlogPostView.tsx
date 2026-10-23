@@ -151,21 +151,38 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
     }
   };
 
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark-mode-context', 'dark');
+      document.documentElement.classList.remove('light-theme');
+      document.body.classList.add('dark-mode-context', 'dark');
+      document.body.classList.remove('light-theme');
+    } else {
+      document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.remove('dark-mode-context', 'dark');
+      document.body.classList.add('light-theme');
+      document.body.classList.remove('dark-mode-context', 'dark');
+    }
+  }, [isDark]);
+
   if (!post) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        backgroundColor: '#070a0f',
-        color: '#ffffff',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px',
-        textAlign: 'center',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Manrope", sans-serif',
-        width: '100%'
-      }}>
+      <div 
+        className={`blog-container blog-page ${isDark ? 'dark-mode-context dark' : 'light-theme'}`}
+        style={{
+          minHeight: '100vh',
+          backgroundColor: '#070a0f',
+          color: '#ffffff',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '24px',
+          textAlign: 'center',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Manrope", sans-serif',
+          width: '100%'
+        }}
+      >
         <style>{`
           html, body, #root {
             overflow-y: auto !important;
@@ -216,17 +233,20 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: t.bg,
-      color: t.text,
-      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Manrope", sans-serif',
-      position: 'relative',
-      overflowX: 'hidden',
-      paddingBottom: '100px',
-      width: '100%',
-      transition: 'background-color 0.25s ease, color 0.25s ease'
-    }}>
+    <div 
+      className={`blog-container blog-page ${isDark ? 'dark-mode-context dark' : 'light-theme'}`}
+      style={{
+        minHeight: '100vh',
+        backgroundColor: t.bg,
+        color: t.text,
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Manrope", sans-serif',
+        position: 'relative',
+        overflowX: 'hidden',
+        paddingBottom: '100px',
+        width: '100%',
+        transition: 'background-color 0.25s ease, color 0.25s ease'
+      }}
+    >
       <style>{`
         html, body {
           overflow-y: auto !important;

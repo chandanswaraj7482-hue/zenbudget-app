@@ -217,54 +217,54 @@ body.light-theme .app-main-wrapper {
   font-weight: 800 !important;
 }
 
-/* Apple Typography in Light Mode (Excludes dark context, landing hero & story modals) */
-.light-theme h1:not(.story-modal-overlay *):not(.dark-mode-context *):not(.hero-title):not(.hero-title *):not(.landing-container *):not(.landing-page *),
-.light-theme h2:not(.story-modal-overlay *):not(.dark-mode-context *):not(.hero-title):not(.hero-title *):not(.landing-container *):not(.landing-page *),
-.light-theme h3:not(.story-modal-overlay *):not(.dark-mode-context *):not(.hero-title):not(.hero-title *):not(.landing-container *):not(.landing-page *),
-.light-theme h4:not(.story-modal-overlay *):not(.dark-mode-context *):not(.hero-title):not(.hero-title *):not(.landing-container *):not(.landing-page *),
-.light-theme h5:not(.story-modal-overlay *):not(.dark-mode-context *):not(.hero-title):not(.hero-title *):not(.landing-container *):not(.landing-page *),
-.light-theme h6:not(.story-modal-overlay *):not(.dark-mode-context *):not(.hero-title):not(.hero-title *):not(.landing-container *):not(.landing-page *) {
+/* Apple Typography in Light Mode (Excludes dark context, landing hero, story modals & blog pages) */
+.light-theme h1:not(.story-modal-overlay *):not(.dark-mode-context *):not(.hero-title):not(.hero-title *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme h2:not(.story-modal-overlay *):not(.dark-mode-context *):not(.hero-title):not(.hero-title *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme h3:not(.story-modal-overlay *):not(.dark-mode-context *):not(.hero-title):not(.hero-title *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme h4:not(.story-modal-overlay *):not(.dark-mode-context *):not(.hero-title):not(.hero-title *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme h5:not(.story-modal-overlay *):not(.dark-mode-context *):not(.hero-title):not(.hero-title *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme h6:not(.story-modal-overlay *):not(.dark-mode-context *):not(.hero-title):not(.hero-title *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *) {
   color: #1D1D1F !important;
   letter-spacing: -0.025em !important;
 }
 
-/* Universal White/Near-White Text Fix Across App in Light Theme (Exempting Landing Page) */
-.light-theme h1[style*="color: #fff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.hero-title *):not(.landing-container *):not(.landing-page *),
-.light-theme h1[style*="color:#fff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.hero-title *):not(.landing-container *):not(.landing-page *),
-.light-theme h2[style*="color: #fff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme h2[style*="color:#fff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme h3[style*="color: #fff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme h3[style*="color:#fff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme h4[style*="color: #fff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme h4[style*="color:#fff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme p[style*="color: #fff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme p[style*="color:#fff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme span[style*="color: #fff"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme span[style*="color:#fff"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme div[style*="color: #fff"]:not(button *):not([class*="btn"]):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme div[style*="color:#fff"]:not(button *):not([class*="btn"]):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme h1[style*="color: #ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.hero-title *):not(.landing-container *):not(.landing-page *),
-.light-theme h1[style*="color:#ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.hero-title *):not(.landing-container *):not(.landing-page *),
-.light-theme h2[style*="color: #ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme h2[style*="color:#ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme h3[style*="color: #ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme h3[style*="color:#ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme h4[style*="color: #ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme h4[style*="color:#ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme p[style*="color: #ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme p[style*="color:#ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme span[style*="color: #ffffff"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme span[style*="color:#ffffff"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme div[style*="color: #ffffff"]:not(button *):not([class*="btn"]):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme div[style*="color:#ffffff"]:not(button *):not([class*="btn"]):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme [style*="color: #f8fafc"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme [style*="color:#f8fafc"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme [style*="color: #f1f5f9"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *),
-.light-theme [style*="color:#f1f5f9"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *) {
+/* Universal White/Near-White Text Fix Across App in Light Theme (Exempting Landing Page & Blog) */
+.light-theme h1[style*="color: #fff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.hero-title *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme h1[style*="color:#fff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.hero-title *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme h2[style*="color: #fff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme h2[style*="color:#fff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme h3[style*="color: #fff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme h3[style*="color:#fff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme h4[style*="color: #fff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme h4[style*="color:#fff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme p[style*="color: #fff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme p[style*="color:#fff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme span[style*="color: #fff"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme span[style*="color:#fff"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme div[style*="color: #fff"]:not(button *):not([class*="btn"]):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme div[style*="color:#fff"]:not(button *):not([class*="btn"]):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme h1[style*="color: #ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.hero-title *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme h1[style*="color:#ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.hero-title *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme h2[style*="color: #ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme h2[style*="color:#ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme h3[style*="color: #ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme h3[style*="color:#ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme h4[style*="color: #ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme h4[style*="color:#ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme p[style*="color: #ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme p[style*="color:#ffffff"]:not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme span[style*="color: #ffffff"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme span[style*="color:#ffffff"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme div[style*="color: #ffffff"]:not(button *):not([class*="btn"]):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme div[style*="color:#ffffff"]:not(button *):not([class*="btn"]):not([style*="background: linear-gradient"]):not([style*="background: #"]):not([style*="background:#"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme [style*="color: #f8fafc"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme [style*="color:#f8fafc"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme [style*="color: #f1f5f9"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *),
+.light-theme [style*="color:#f1f5f9"]:not(button *):not([class*="badge"]):not(.story-modal-overlay *):not(.dark-mode-context *):not(.landing-container *):not(.landing-page *):not(.blog-container *):not(.blog-page *) {
   color: #1D1D1F !important;
 }
 
-/* Explicit Story Modal / Dark Overlay Protection */
+/* Explicit Story Modal / Dark Overlay / Blog Dark Mode Protection */
 .dark-mode-context h1,
 .dark-mode-context h2,
 .dark-mode-context h3,
@@ -272,12 +272,17 @@ body.light-theme .app-main-wrapper {
 .light-theme .dark-mode-context h1,
 .light-theme .dark-mode-context h2,
 .light-theme .dark-mode-context h3,
-.light-theme .dark-mode-context h4 {
-  color: #ffffff !important;
+.light-theme .dark-mode-context h4,
+.blog-container.dark-mode-context h1,
+.blog-container.dark-mode-context h2,
+.blog-container.dark-mode-context h3,
+.blog-container.dark-mode-context h4 {
+  color: #f8fafc !important;
 }
 .dark-mode-context p,
-.light-theme .dark-mode-context p {
-  color: #f1f5f9 !important;
+.light-theme .dark-mode-context p,
+.blog-container.dark-mode-context p {
+  color: #cbd5e1 !important;
 }
 
 .story-modal-overlay,
