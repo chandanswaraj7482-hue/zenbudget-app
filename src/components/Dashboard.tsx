@@ -820,7 +820,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           className="animate-fade-in"
           style={{
             position: 'sticky',
-            top: '-8px',
+            top: '0px',
             zIndex: 80,
             padding: '9px 14px',
             borderRadius: '16px',
