@@ -47,6 +47,7 @@ serviceAccountKey.json
 public/images/
 admin-portal/public/images/
 *.jpg
+!public/zen-sanctuary.jpg
 admin-portal/public/hero-mockup.png
 
 # Temporary tools & decoded binaries
