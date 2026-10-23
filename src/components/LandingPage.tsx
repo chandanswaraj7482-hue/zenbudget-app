@@ -1349,6 +1349,16 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
   const [typedText, setTypedText] = useState('');
   const [wordIndex, setWordIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 25);
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const currentWord = typewriterWords[wordIndex % typewriterWords.length];
@@ -1977,13 +1987,17 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
     .mobile-show { display: none; }
 
     .landing-nav-pill {
-      margin-top: 20px;
-      padding: 0 28px;
+      margin-top: 18px;
+      padding: 0 24px;
       width: min(1240px, calc(100% - 32px));
-      height: 64px;
+      height: 62px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .landing-nav-pill.scrolled {
+      margin-top: 10px;
     }
     .landing-hero-container {
-      padding-top: 112px;
+      padding-top: 136px;
       padding-left: 20px;
       padding-right: 20px;
       padding-bottom: 28px;
@@ -2251,25 +2265,39 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
       {/* ═══════════════ HEADER ═══════════════ */}
       <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', pointerEvents: mobileMenuOpen ? 'auto' : 'none' }}>
         <div 
-          className="landing-nav-pill"
+          className={`landing-nav-pill ${isScrolled ? 'scrolled' : ''}`}
           style={{ 
-            pointerEvents: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', transition: 'all 0.3s', 
-            background: isDark ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.45)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.06)',
+            pointerEvents: 'auto', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between', 
+            gap: '16px', 
+            transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)', 
+            background: isDark 
+              ? (isScrolled ? 'rgba(10, 16, 13, 0.95)' : 'rgba(12, 18, 15, 0.90)')
+              : (isScrolled ? 'rgba(255, 255, 255, 0.96)' : 'rgba(255, 255, 255, 0.92)'),
+            backdropFilter: 'blur(28px) saturate(190%)',
+            WebkitBackdropFilter: 'blur(28px) saturate(190%)',
+            border: isDark 
+              ? '1px solid rgba(255, 255, 255, 0.12)' 
+              : '1px solid rgba(16, 185, 129, 0.22)',
             borderRadius: '100px',
-            boxShadow: isDark ? '0 8px 30px rgba(0,0,0,0.35)' : '0 8px 24px rgba(0,0,0,0.06)'
+            boxShadow: isDark 
+              ? (isScrolled ? '0 16px 42px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.08)' : '0 10px 30px rgba(0,0,0,0.45)') 
+              : (isScrolled ? '0 14px 38px rgba(0,0,0,0.1), 0 2px 8px rgba(16,185,129,0.12)' : '0 8px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(16,185,129,0.1)'),
+            marginTop: isScrolled ? '10px' : undefined
           }}
         >
           {/* Logo */}
-          <a onClick={e => { e.preventDefault(); navigateToPage('home'); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', textDecoration: 'none' }}>
+          <a onClick={e => { e.preventDefault(); navigateToPage('home'); }} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', textDecoration: 'none', flexShrink: 0 }}>
             <img 
               src="/icon.png" 
               alt="ZenBudget Logo" 
-              style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'contain', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }} 
+              style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'contain', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }} 
             />
-            <span style={{ fontSize: '18px', fontWeight: 800, color: t.text, letterSpacing: '-0.02em' }}>ZenBudget</span>
+            <span style={{ fontSize: '18px', fontWeight: 900, color: t.text, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center' }}>
+              <span style={{ color: '#10b981' }}>Zen</span><span>Budget</span>
+            </span>
           </a>
 
           {/* Desktop Nav Links */}
