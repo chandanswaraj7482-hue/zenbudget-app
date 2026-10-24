@@ -4,6 +4,7 @@ import { blogPosts } from '../data/blogPosts';
 import type { BlogPost } from '../data/blogPosts';
 import { GooglePlayIcon } from './GooglePlayBadge';
 import { DISTRIBUTION_CONFIG } from '../config/buildConfig';
+import { updatePageSEO } from '../utils/seoHelper';
 
 interface BlogViewProps {
   onBackToLanding: () => void;
@@ -36,17 +37,56 @@ export const BlogView: React.FC<BlogViewProps> = ({ onBackToLanding, onOpenWebAp
   };
 
   useEffect(() => {
-    document.title = 'ZenBudget Blog - Personal Finance & Budgeting Insights';
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute('content', 'Master your personal finances with actionable strategies on budgeting, UPI expense control, emergency funds, and mindful money management.');
-    }
+    const cleanupSEO = updatePageSEO({
+      title: 'ZenBudget Finance Blog — Smart Budgeting, UPI Kharcha, & Wealth Guides 2026',
+      description: 'Master your personal finances with actionable strategies on budgeting, UPI expense control, emergency funds, debt snowball blueprints, and mindful money management by ZenBudget.',
+      keywords: 'personal finance blog, budget planner tips India, UPI expense tracker, emergency fund guide, 50 30 20 budget rule, save money daily, ZenBudget blog',
+      canonicalUrl: 'https://zenbudget-tracker.vercel.app/blog',
+      ogType: 'website',
+      jsonLd: [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'Blog',
+          'name': 'ZenBudget Personal Finance Blog',
+          'description': 'Master your personal finances with actionable strategies on budgeting, UPI expense control, emergency funds, and mindful money management.',
+          'url': 'https://zenbudget-tracker.vercel.app/blog',
+          'publisher': {
+            '@type': 'Organization',
+            'name': 'ZenBudget',
+            'logo': {
+              '@type': 'ImageObject',
+              'url': 'https://zenbudget-tracker.vercel.app/logo.png'
+            }
+          }
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          'itemListElement': [
+            {
+              '@type': 'ListItem',
+              'position': 1,
+              'name': 'Home',
+              'item': 'https://zenbudget-tracker.vercel.app/'
+            },
+            {
+              '@type': 'ListItem',
+              'position': 2,
+              'name': 'Finance Blog',
+              'item': 'https://zenbudget-tracker.vercel.app/blog'
+            }
+          ]
+        }
+      ]
+    });
+
     document.documentElement.classList.add('landing-active');
     document.body.classList.add('landing-active');
     document.getElementById('root')?.classList.add('landing-root');
     window.scrollTo(0, 0);
 
     return () => {
+      cleanupSEO();
       document.documentElement.classList.remove('landing-active', 'dark-mode-context', 'dark');
       document.body.classList.remove('landing-active', 'dark-mode-context', 'dark');
       document.getElementById('root')?.classList.remove('landing-root');

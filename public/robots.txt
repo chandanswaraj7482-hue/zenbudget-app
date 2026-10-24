@@ -1,6 +1,6 @@
 # ZenBudget SEO & AI Search Engine Robots.txt
 # Official Web: https://zenbudget-tracker.vercel.app
-# Last Updated: 2026-10-15
+# Last Updated: 2026-10-24
 
 User-agent: *
 Allow: /

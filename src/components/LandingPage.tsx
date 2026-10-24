@@ -3089,7 +3089,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
                 }}>
                   {/* Sanctuary Image */}
                   <div style={{ width: '100%', height: '180px', borderRadius: '16px', marginBottom: '20px', overflow: 'hidden', border: `1px solid ${t.border}` }}>
-                    <img src="/zen-sanctuary.jpg" alt="Zen Sanctuary" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src="/zen-sanctuary.jpg" alt="Zen Sanctuary — Mindful Financial Growth and Savings Pet Garden" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
 
                   {/* Floating Pill Top */}
@@ -5266,7 +5266,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <img src="/profile-sarah.jpg" alt="Sarah" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
+              <img src="/profile-sarah.jpg" alt="Sarah Mitchell — Working Professional, Verified ZenBudget User" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
               <div>
                 <p style={{ fontSize: '15px', fontWeight: 800, margin: 0, color: t.text }}>Sarah Mitchell</p>
                 <p style={{ fontSize: '13px', fontWeight: 600, color: t.textMuted, margin: 0 }}>Working Professional</p>
@@ -5284,7 +5284,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <img src="/profile-daniel.jpg" alt="Daniel" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
+              <img src="/profile-daniel.jpg" alt="Daniel Roberts — University Student, Verified ZenBudget Reviewer" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
               <div>
                 <p style={{ fontSize: '15px', fontWeight: 800, margin: 0, color: t.text }}>Daniel Roberts</p>
                 <p style={{ fontSize: '13px', fontWeight: 600, color: t.textMuted, margin: 0 }}>University Student</p>
@@ -5302,7 +5302,7 @@ export default function LandingPage({ onOpenWebApp }: LandingPageProps) {
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=150&auto=format&fit=crop" alt="Emily" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
+              <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=150&auto=format&fit=crop" alt="Emily Chen — Creative Director, Verified ZenBudget Customer" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
               <div>
                 <p style={{ fontSize: '15px', fontWeight: 800, margin: 0, color: t.text }}>Emily Chen</p>
                 <p style={{ fontSize: '13px', fontWeight: 600, color: t.textMuted, margin: 0 }}>Creative Director</p>

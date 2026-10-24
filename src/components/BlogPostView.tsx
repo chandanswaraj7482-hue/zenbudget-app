@@ -4,6 +4,7 @@ import { blogPosts } from '../data/blogPosts';
 import type { BlogPost } from '../data/blogPosts';
 import { GooglePlayIcon } from './GooglePlayBadge';
 import { DISTRIBUTION_CONFIG } from '../config/buildConfig';
+import { updatePageSEO } from '../utils/seoHelper';
 
 interface BlogPostViewProps {
   slug: string;
@@ -65,63 +66,89 @@ export const BlogPostView: React.FC<BlogPostViewProps> = ({ slug, onBackToLandin
   };
 
   useEffect(() => {
-    let scriptTag: HTMLScriptElement | null = null;
-    if (post) {
-      document.title = `${post.title} | ZenBudget Blog`;
-      const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc) {
-        metaDesc.setAttribute('content', post.excerpt);
-      }
-      const ogImage = document.querySelector('meta[property="og:image"]');
-      if (ogImage) ogImage.setAttribute('content', post.imageUrl);
-      const twImage = document.querySelector('meta[name="twitter:image"]');
-      if (twImage) twImage.setAttribute('content', post.imageUrl);
+    let cleanupSEO: (() => void) | null = null;
 
-      // Inject Article Schema with ImageObject for Google Rich Snippets & Image SEO
-      scriptTag = document.createElement('script');
-      scriptTag.type = 'application/ld+json';
-      scriptTag.text = JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'BlogPosting',
-        'headline': post.title,
-        'description': post.excerpt,
-        'image': [post.imageUrl],
-        'datePublished': post.date,
-        'author': {
-          '@type': 'Person',
-          'name': post.author,
-          'jobTitle': post.authorRole
+    if (post) {
+      const canonical = `https://zenbudget-tracker.vercel.app/blog/${post.slug}`;
+      cleanupSEO = updatePageSEO({
+        title: `${post.title} | ZenBudget Finance Blog`,
+        description: post.excerpt,
+        keywords: `${post.category}, personal finance India, daily budget, expense tracker, ZenBudget blog, ${post.title}`,
+        canonicalUrl: canonical,
+        ogImage: post.imageUrl,
+        ogType: 'article',
+        articleMeta: {
+          publishedTime: post.date,
+          author: post.author,
+          section: post.category,
+          tags: [post.category, 'Personal Finance', 'Budgeting', 'Money Management']
         },
-        'publisher': {
-          '@type': 'Organization',
-          'name': 'ZenBudget',
-          'logo': {
-            '@type': 'ImageObject',
-            'url': 'https://zenbudget-tracker.vercel.app/logo.png'
+        jsonLd: [
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BlogPosting',
+            'headline': post.title,
+            'description': post.excerpt,
+            'image': [post.imageUrl],
+            'datePublished': post.date,
+            'dateModified': post.date,
+            'author': {
+              '@type': 'Person',
+              'name': post.author,
+              'jobTitle': post.authorRole
+            },
+            'publisher': {
+              '@type': 'Organization',
+              'name': 'ZenBudget',
+              'logo': {
+                '@type': 'ImageObject',
+                'url': 'https://zenbudget-tracker.vercel.app/logo.png'
+              }
+            },
+            'mainEntityOfPage': {
+              '@type': 'WebPage',
+              '@id': canonical
+            }
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            'itemListElement': [
+              {
+                '@type': 'ListItem',
+                'position': 1,
+                'name': 'Home',
+                'item': 'https://zenbudget-tracker.vercel.app/'
+              },
+              {
+                '@type': 'ListItem',
+                'position': 2,
+                'name': 'Finance Blog',
+                'item': 'https://zenbudget-tracker.vercel.app/blog'
+              },
+              {
+                '@type': 'ListItem',
+                'position': 3,
+                'name': post.title,
+                'item': canonical
+              }
+            ]
           }
-        },
-        'mainEntityOfPage': {
-          '@type': 'WebPage',
-          '@id': window.location.href
-        }
+        ]
       });
-      document.head.appendChild(scriptTag);
     } else {
-      document.title = 'Post Not Found | ZenBudget Blog';
+      document.title = 'Article Not Found | ZenBudget Blog';
     }
+
     document.documentElement.classList.add('landing-active');
     document.body.classList.add('landing-active');
     document.getElementById('root')?.classList.add('landing-root');
     window.scrollTo(0, 0);
 
     return () => {
-      if (scriptTag && scriptTag.parentNode) {
-        scriptTag.parentNode.removeChild(scriptTag);
+      if (cleanupSEO) {
+        cleanupSEO();
       }
-      const ogImage = document.querySelector('meta[property="og:image"]');
-      if (ogImage) ogImage.setAttribute('content', 'https://zenbudget-tracker.vercel.app/zen_website.png');
-      const twImage = document.querySelector('meta[name="twitter:image"]');
-      if (twImage) twImage.setAttribute('content', 'https://zenbudget-tracker.vercel.app/zen_website.png');
       document.documentElement.classList.remove('landing-active');
       document.body.classList.remove('landing-active');
       document.getElementById('root')?.classList.remove('landing-root');
