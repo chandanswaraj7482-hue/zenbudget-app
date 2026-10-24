@@ -55,7 +55,7 @@ Whether you want to track daily UPI spending, analyze bank expenses, set envelop
 • Export your transactions to CSV / Excel anytime with one click.
 
 A Product by Something Labs Tech.
-Support & Feedback: hello.zenbudget@zohomail.in
+Support & Feedback: somethinglabs@zohomail.in
 Website: https://zenbudget-tracker.vercel.app
 ```
 
