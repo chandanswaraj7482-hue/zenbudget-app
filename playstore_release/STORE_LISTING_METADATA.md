@@ -111,15 +111,33 @@ https://zenbudget-tracker.vercel.app/privacy.html
 
 ---
 
-## 4. Production Release
-* **App Bundle (AAB)**: `playstore_release/zenbudget-v2.5.1-PLAYSTORE.aab`
+## 4. Production Release (v2.7.0 - Play Store Ready)
+* **App Bundle (AAB)**: `playstore_release/zenbudget-v2.7.0-PLAYSTORE.aab`
 * **Package Name**: `app.zenbudget.app`
-* **Version Code**: `12`
-* **Release Notes (English)**:
+* **Version Code**: `24`
+* **Version Name**: `2.7.0`
+* **Target SDK**: `36` (Android 15/16 Ready - Exceeds Google minimum requirement of 34+)
+* **Min SDK**: `24` (Supports Android 7.0 to Android 15+)
+* **Signing Keystore**: `android/release.keystore` (Alias: `zenbudget`, Pass: `zenbudget123`)
+* **Release Notes (English - Ready to copy into Play Console)**:
 ```text
-Welcome to ZenBudget 2.5.1!
-• Added AI Receipt Scanner with fast OCR
+Welcome to ZenBudget 2.7.0!
+• AI Bank Statement & Passbook Scanner (PDF & image OCR)
+• Dynamic Daily Safe Spending Limit calculator
 • Couple & Family shared budget synchronization
-• Safe daily spending limit calculator
-• Enhanced dark mode and battery optimization
+• 48-Hour Impulse Purchase Blocker
+• ZenBot AI Money Coach & Spending Analytics
+• Advanced performance & battery optimizations
+• Enhanced high-contrast dark mode UI
 ```
+
+---
+
+## 5. Play Store Console Upload Steps (Quick Checklist)
+1. Go to **Google Play Console** -> Select **ZenBudget**.
+2. Navigate to **Release** -> **Production** (or **Internal testing** / **Closed testing**).
+3. Click **Create new release**.
+4. Upload `playstore_release/zenbudget-v2.7.0-PLAYSTORE.aab`.
+5. Enter Release name: `2.7.0 (24)`.
+6. Paste the Release notes above.
+7. Click **Save** -> **Review release** -> **Start rollout to Production**!
